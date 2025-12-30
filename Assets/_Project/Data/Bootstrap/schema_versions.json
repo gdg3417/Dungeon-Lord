@@ -1,0 +1,11 @@
+{
+  "schema": "schema_versions",
+  "schemaVersion": 1,
+  "content": {
+    "content_bootstrap": 1,
+    "string_table": 1
+  },
+  "save": {
+    "save_data": 1
+  }
+}

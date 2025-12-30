@@ -1,0 +1,22 @@
+{
+  "schema": "content_bootstrap",
+  "schemaVersion": 1,
+  "contentVersion": "0.0.1",
+  "minAppVersion": "0.0.1",
+  "tickSeconds": 10,
+  "timeRules": {
+    "allowOfflineProgression": true,
+    "maxOfflineSeconds": 86400,
+    "detectClockSkewSeconds": 300
+  },
+  "featureFlags": {
+    "enableDevPanel": true,
+    "enableTelemetry": false,
+    "enableOfflineRestrictions": false
+  },
+  "tables": {
+    "stringTable": {
+      "path": "Localization/string_table_en"
+    }
+  }
+}

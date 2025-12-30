@@ -1,0 +1,27 @@
+{
+  "schema": "string_table",
+  "schemaVersion": 1,
+  "language": "en",
+  "entries": [
+    {
+      "key": "ui.loading.boot",
+      "text": "Waking the dungeon core. Restoring your last known state."
+    },
+    {
+      "key": "ui.banner.offline",
+      "text": "You are offline. You can still manage your dungeon, but some actions require a connection."
+    },
+    {
+      "key": "ui.banner.integrity",
+      "text": "Time or save data looks inconsistent. Some offline rewards may be paused until you reconnect."
+    },
+    {
+      "key": "ui.banner.save_recovered",
+      "text": "We hit a problem loading your dungeon. A safe backup was used so you can keep playing."
+    },
+    {
+      "key": "ui.home.stub",
+      "text": "Home (Stub)"
+    }
+  ]
+}

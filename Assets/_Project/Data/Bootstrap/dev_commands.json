@@ -1,0 +1,21 @@
+{
+  "schema": "dev_commands",
+  "schemaVersion": 1,
+  "commands": [
+    {
+      "id": "save.now",
+      "labelKey": "dev.save_now",
+      "enabled": true
+    },
+    {
+      "id": "save.delete",
+      "labelKey": "dev.delete_save",
+      "enabled": true
+    },
+    {
+      "id": "time.add_1_hour",
+      "labelKey": "dev.add_1_hour",
+      "enabled": false
+    }
+  ]
+}

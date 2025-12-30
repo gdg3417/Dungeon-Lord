@@ -1,0 +1,21 @@
+{
+  "schema": "build_config",
+  "schemaVersion": 1,
+  "environment": "dev",
+  "logging": {
+    "logLevel": "info",
+    "includeTimestamps": true,
+    "writeToFile": false
+  },
+  "save": {
+    "slot": "primary",
+    "fileName": "save_primary.json",
+    "useAtomicWrites": true,
+    "keepBackups": 2
+  },
+  "ui": {
+    "showBuildInfo": true,
+    "showState": true,
+    "bannerTimeoutSeconds": 0
+  }
+}
