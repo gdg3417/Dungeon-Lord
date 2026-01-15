@@ -1,0 +1,299 @@
+{
+  "Families": [
+    {
+      "family_id": "fam_goblinoid",
+      "display_name_key": "monster_family.goblinoid.name",
+      "description_key": "monster_family.goblinoid.desc",
+      "baseline_species_ids": "sp_goblin",
+      "identity_tags": "tag_family_goblinoid",
+      "version_introduced": "1",
+      "notes": "MVP family"
+    },
+    {
+      "family_id": "fam_undead",
+      "display_name_key": "monster_family.undead.name",
+      "description_key": "monster_family.undead.desc",
+      "baseline_species_ids": "sp_skeleton",
+      "identity_tags": "tag_family_undead",
+      "version_introduced": "1",
+      "notes": "MVP family"
+    },
+    {
+      "family_id": "baseline_species_ids can be a comma separated list for future 2 starter species families.",
+      "display_name_key": null,
+      "description_key": null,
+      "baseline_species_ids": null,
+      "identity_tags": null,
+      "version_introduced": null,
+      "notes": null
+    }
+  ],
+  "Species": [
+    {
+      "species_id": "sp_goblin",
+      "family_id": "fam_goblinoid",
+      "display_name_key": "monster_species.goblin.name",
+      "role_hint": "damage",
+      "base_stat_profile_id": "stat_goblin_base",
+      "ai_profile_id": "ai_melee_basic",
+      "upkeep_profile_id": "upk_light_1",
+      "tags": "tag_species_goblin,tag_role_damage",
+      "version_introduced": "1",
+      "notes": "Baseline goblinoid"
+    },
+    {
+      "species_id": "sp_hobgoblin",
+      "family_id": "fam_goblinoid",
+      "display_name_key": "monster_species.hobgoblin.name",
+      "role_hint": "defense",
+      "base_stat_profile_id": "stat_hobgoblin_base",
+      "ai_profile_id": "ai_melee_basic",
+      "upkeep_profile_id": "upk_medium_1",
+      "tags": "tag_species_hobgoblin,tag_role_defense",
+      "version_introduced": "1",
+      "notes": "Optional MVP species"
+    },
+    {
+      "species_id": "sp_skeleton",
+      "family_id": "fam_undead",
+      "display_name_key": "monster_species.skeleton.name",
+      "role_hint": "damage",
+      "base_stat_profile_id": "stat_skeleton_base",
+      "ai_profile_id": "ai_melee_basic",
+      "upkeep_profile_id": "upk_light_1",
+      "tags": "tag_species_skeleton,tag_role_damage",
+      "version_introduced": "1",
+      "notes": "Baseline undead"
+    },
+    {
+      "species_id": "sp_zombie",
+      "family_id": "fam_undead",
+      "display_name_key": "monster_species.zombie.name",
+      "role_hint": "defense",
+      "base_stat_profile_id": "stat_zombie_base",
+      "ai_profile_id": "ai_melee_slow",
+      "upkeep_profile_id": "upk_medium_1",
+      "tags": "tag_species_zombie,tag_role_defense",
+      "version_introduced": "1",
+      "notes": "Optional MVP species"
+    },
+    {
+      "species_id": "role_hint is a UI hint only. Real behavior is from ai_profile_id.",
+      "family_id": null,
+      "display_name_key": null,
+      "role_hint": null,
+      "base_stat_profile_id": null,
+      "ai_profile_id": null,
+      "upkeep_profile_id": null,
+      "tags": null,
+      "version_introduced": null,
+      "notes": null
+    }
+  ],
+  "Evolutions": [
+    {
+      "evolution_id": "ev_goblin_warrior",
+      "species_id": "sp_goblin",
+      "display_name_key": "monster_evolution.goblin_warrior.name",
+      "evolution_role": "defense",
+      "stat_modifier_profile_id": "mod_goblin_warrior",
+      "ai_profile_id": "ai_melee_tank",
+      "upkeep_modifier_profile_id": "upk_mod_plus_20pct",
+      "tags": "tag_evo,tag_role_defense",
+      "version_introduced": "1",
+      "notes": "Tradeoff: higher upkeep"
+    },
+    {
+      "evolution_id": "ev_goblin_archer",
+      "species_id": "sp_goblin",
+      "display_name_key": "monster_evolution.goblin_archer.name",
+      "evolution_role": "damage_ranged",
+      "stat_modifier_profile_id": "mod_goblin_archer",
+      "ai_profile_id": "ai_ranged_basic",
+      "upkeep_modifier_profile_id": "upk_mod_plus_15pct",
+      "tags": "tag_evo,tag_role_damage",
+      "version_introduced": "1",
+      "notes": "Tradeoff: lower health"
+    },
+    {
+      "evolution_id": "ev_goblin_shaman",
+      "species_id": "sp_goblin",
+      "display_name_key": "monster_evolution.goblin_shaman.name",
+      "evolution_role": "support",
+      "stat_modifier_profile_id": "mod_goblin_shaman",
+      "ai_profile_id": "ai_support_basic",
+      "upkeep_modifier_profile_id": "upk_mod_plus_25pct",
+      "tags": "tag_evo,tag_role_support",
+      "version_introduced": "1",
+      "notes": "Tradeoff: higher upkeep"
+    },
+    {
+      "evolution_id": "ev_skeleton_warrior",
+      "species_id": "sp_skeleton",
+      "display_name_key": "monster_evolution.skeleton_warrior.name",
+      "evolution_role": "defense",
+      "stat_modifier_profile_id": "mod_skeleton_warrior",
+      "ai_profile_id": "ai_melee_tank",
+      "upkeep_modifier_profile_id": "upk_mod_plus_20pct",
+      "tags": "tag_evo,tag_role_defense",
+      "version_introduced": "1",
+      "notes": "Tradeoff: higher upkeep"
+    },
+    {
+      "evolution_id": "ev_skeleton_archer",
+      "species_id": "sp_skeleton",
+      "display_name_key": "monster_evolution.skeleton_archer.name",
+      "evolution_role": "damage_ranged",
+      "stat_modifier_profile_id": "mod_skeleton_archer",
+      "ai_profile_id": "ai_ranged_basic",
+      "upkeep_modifier_profile_id": "upk_mod_plus_15pct",
+      "tags": "tag_evo,tag_role_damage",
+      "version_introduced": "1",
+      "notes": "Tradeoff: lower health"
+    },
+    {
+      "evolution_id": "Evolutions are permissions only. Applying an evolution is a separate in game action with its own cost.",
+      "species_id": null,
+      "display_name_key": null,
+      "evolution_role": null,
+      "stat_modifier_profile_id": null,
+      "ai_profile_id": null,
+      "upkeep_modifier_profile_id": null,
+      "tags": null,
+      "version_introduced": null,
+      "notes": null
+    }
+  ],
+  "StatProfiles": [
+    {
+      "stat_profile_id": "stat_goblin_base",
+      "base_health": 50,
+      "base_damage": 8,
+      "notes": "Cheap, fragile, damage leaning"
+    },
+    {
+      "stat_profile_id": "stat_hobgoblin_base",
+      "base_health": 85,
+      "base_damage": 9,
+      "notes": "Sturdier frontline"
+    },
+    {
+      "stat_profile_id": "stat_skeleton_base",
+      "base_health": 55,
+      "base_damage": 7,
+      "notes": "Consistent attacker"
+    },
+    {
+      "stat_profile_id": "stat_zombie_base",
+      "base_health": 110,
+      "base_damage": 5,
+      "notes": "Slow, tanky attrition"
+    },
+    {
+      "stat_profile_id": "Evolution Modifier Profiles",
+      "base_health": null,
+      "base_damage": null,
+      "notes": null
+    },
+    {
+      "stat_profile_id": "stat_modifier_profile_id",
+      "base_health": "health_mult",
+      "base_damage": "damage_mult",
+      "notes": "notes"
+    },
+    {
+      "stat_profile_id": "mod_goblin_warrior",
+      "base_health": 1.35,
+      "base_damage": 0.9,
+      "notes": "More health, less damage"
+    },
+    {
+      "stat_profile_id": "mod_goblin_archer",
+      "base_health": 0.8,
+      "base_damage": 1.25,
+      "notes": "Less health, more damage"
+    },
+    {
+      "stat_profile_id": "mod_goblin_shaman",
+      "base_health": 0.9,
+      "base_damage": 0.95,
+      "notes": "Slightly weaker combat, enables support kit"
+    },
+    {
+      "stat_profile_id": "mod_skeleton_warrior",
+      "base_health": 1.3,
+      "base_damage": 0.9,
+      "notes": "More health, less damage"
+    },
+    {
+      "stat_profile_id": "mod_skeleton_archer",
+      "base_health": 0.8,
+      "base_damage": 1.2,
+      "notes": "Less health, more damage"
+    }
+  ],
+  "AIProfiles": [
+    {
+      "ai_profile_id": "ai_melee_basic",
+      "behavior_role": "melee",
+      "notes": "Basic engage and attack"
+    },
+    {
+      "ai_profile_id": "ai_melee_tank",
+      "behavior_role": "tank",
+      "notes": "Prioritize holding threat and staying in front"
+    },
+    {
+      "ai_profile_id": "ai_ranged_basic",
+      "behavior_role": "ranged",
+      "notes": "Keep distance, target lowest health enemy"
+    },
+    {
+      "ai_profile_id": "ai_support_basic",
+      "behavior_role": "support",
+      "notes": "Heal or buff allies, avoid frontline"
+    },
+    {
+      "ai_profile_id": "ai_melee_slow",
+      "behavior_role": "melee_slow",
+      "notes": "Engage slowly, high stickiness"
+    }
+  ],
+  "UpkeepProfiles": [
+    {
+      "upkeep_profile_id": "upk_light_1",
+      "reserved_mana_per_monster": 5,
+      "notes": "Baseline low upkeep"
+    },
+    {
+      "upkeep_profile_id": "upk_medium_1",
+      "reserved_mana_per_monster": 9,
+      "notes": "Medium upkeep"
+    },
+    {
+      "upkeep_profile_id": "Upkeep Modifier Profiles",
+      "reserved_mana_per_monster": null,
+      "notes": null
+    },
+    {
+      "upkeep_profile_id": "upkeep_modifier_profile_id",
+      "reserved_mana_per_monster": "reserved_mana_mult",
+      "notes": "notes"
+    },
+    {
+      "upkeep_profile_id": "upk_mod_plus_15pct",
+      "reserved_mana_per_monster": 1.15,
+      "notes": "Ranged specialization upkeep"
+    },
+    {
+      "upkeep_profile_id": "upk_mod_plus_20pct",
+      "reserved_mana_per_monster": 1.2,
+      "notes": "Warrior specialization upkeep"
+    },
+    {
+      "upkeep_profile_id": "upk_mod_plus_25pct",
+      "reserved_mana_per_monster": 1.25,
+      "notes": "Shaman specialization upkeep"
+    }
+  ]
+}

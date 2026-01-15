@@ -1,0 +1,44 @@
+{
+  "ArcanologyEffects": [
+    {
+      "eff_id": "eff_ar_fundamentals",
+      "effect_type": "unlock_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_system",
+      "notes": "Enables branch"
+    },
+    {
+      "eff_id": "eff_ar_allow_steel",
+      "effect_type": "loot_max_tier",
+      "value": "steel",
+      "unit": "enum",
+      "tags": "tag_loot",
+      "notes": "Sets max tier to Steel in MVP"
+    },
+    {
+      "eff_id": "eff_ar_room_calibration_1",
+      "effect_type": "loot_table_controls_level",
+      "value": 1,
+      "unit": "int",
+      "tags": "tag_ui",
+      "notes": "Enables basic controls for roll count and tier weights"
+    },
+    {
+      "eff_id": "eff_ar_craft_reserve_eff_1",
+      "effect_type": "loot_craft_reserve_mult",
+      "value": 0.95,
+      "unit": "mult",
+      "tags": "tag_economy",
+      "notes": "Small reserve reduction"
+    },
+    {
+      "eff_id": "loot_max_tier uses an enum so expansion is additive.",
+      "effect_type": null,
+      "value": null,
+      "unit": null,
+      "tags": null,
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "ArchitectureEffects": [
+    {
+      "eff_id": "eff_ac_fundamentals",
+      "effect_type": "unlock_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_system",
+      "notes": "Enables branch"
+    },
+    {
+      "eff_id": "eff_ac_floor_2_permit",
+      "effect_type": "max_floors_set",
+      "value": 2,
+      "unit": "int",
+      "tags": "tag_expansion",
+      "notes": "Allows up to 2 floors"
+    },
+    {
+      "eff_id": "eff_ac_room_reinforce_1",
+      "effect_type": "room_threat_concentration_softcap_mult",
+      "value": 0.98,
+      "unit": "mult",
+      "tags": "tag_balance",
+      "notes": "Slight soft cap relief for safer experimentation"
+    },
+    {
+      "eff_id": "eff_ac_basic_branching",
+      "effect_type": "max_optional_branch_rooms_per_floor_set",
+      "value": 1,
+      "unit": "int",
+      "tags": "tag_flow",
+      "notes": "Enables a single optional branch room per floor"
+    },
+    {
+      "eff_id": "Values are placeholders. Tune once floor progression and upkeep curves are simulated.",
+      "effect_type": null,
+      "value": null,
+      "unit": null,
+      "tags": null,
+      "notes": null
+    }
+  ]
+}

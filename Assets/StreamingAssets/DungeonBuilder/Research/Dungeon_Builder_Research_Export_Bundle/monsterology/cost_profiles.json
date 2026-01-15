@@ -1,0 +1,32 @@
+[
+  {
+    "cost_profile_id": "cost_low",
+    "reserved_mana_cost": 10,
+    "notes": "Intro research"
+  },
+  {
+    "cost_profile_id": "cost_evo_low",
+    "reserved_mana_cost": 25,
+    "notes": "Common evolution unlock"
+  },
+  {
+    "cost_profile_id": "cost_evo_med",
+    "reserved_mana_cost": 45,
+    "notes": "Complex evolution unlock"
+  },
+  {
+    "cost_profile_id": "cost_trait_med",
+    "reserved_mana_cost": 50,
+    "notes": "Synergy trait unlock"
+  },
+  {
+    "cost_profile_id": "cost_species_med",
+    "reserved_mana_cost": 70,
+    "notes": "New species unlock"
+  },
+  {
+    "cost_profile_id": "cost_family_high",
+    "reserved_mana_cost": 140,
+    "notes": "New family unlock"
+  }
+]

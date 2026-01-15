@@ -1,0 +1,89 @@
+{
+  "generated_from": {
+    "monsterology": "Dungeon_Builder_Monsterology_Content_Workbook_MVP.xlsx",
+    "coretech": "Dungeon_Builder_CoreTech_Content_Workbook_MVP.xlsx",
+    "arcanology": "Dungeon_Builder_Arcanology_Content_Workbook_MVP.xlsx",
+    "trapcraft": "Dungeon_Builder_Trapcraft_Content_Workbook_MVP.xlsx",
+    "architecture": "Dungeon_Builder_Architecture_Content_Workbook_MVP.xlsx",
+    "diplomacy": "Dungeon_Builder_Diplomacy_Content_Workbook_MVP.xlsx"
+  },
+  "branches": {
+    "monsterology": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "Families",
+        "Species",
+        "Evolutions",
+        "StatProfiles",
+        "AIProfiles",
+        "UpkeepProfiles"
+      ]
+    },
+    "coretech": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "CoreEffects"
+      ]
+    },
+    "arcanology": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "ArcanologyEffects"
+      ]
+    },
+    "trapcraft": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "TrapcraftEffects"
+      ]
+    },
+    "architecture": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "ArchitectureEffects"
+      ]
+    },
+    "diplomacy": {
+      "files": [
+        "research_nodes.json",
+        "tables.json",
+        "cost_profiles.json",
+        "migration_map.json",
+        "lint_rules.json"
+      ],
+      "tables_in_tables_json": [
+        "DiplomacyEffects"
+      ]
+    }
+  }
+}

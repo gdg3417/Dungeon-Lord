@@ -1,0 +1,32 @@
+[
+  {
+    "rule_id": "LINT-001",
+    "severity": "FAIL",
+    "description": "Research effect_profile_id must exist in the relevant effect sheet.",
+    "example_failure": "Research node references eff_missing but sheet has no row"
+  },
+  {
+    "rule_id": "LINT-002",
+    "severity": "FAIL",
+    "description": "No circular prerequisites.",
+    "example_failure": "node_a requires node_b and node_b requires node_a"
+  },
+  {
+    "rule_id": "LINT-003",
+    "severity": "FAIL",
+    "description": "No duplicate IDs in any table.",
+    "example_failure": "Two rows use the same research_id"
+  },
+  {
+    "rule_id": "LINT-101",
+    "severity": "WARN",
+    "description": "Node should declare at least one future hook in notes.",
+    "example_failure": "Node notes empty"
+  },
+  {
+    "rule_id": "LINT-102",
+    "severity": "WARN",
+    "description": "Pure buffs should include a tradeoff tag or paired downside elsewhere.",
+    "example_failure": "Effect increases output with no cost increase"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "rule_id": "LINT-001",
+    "severity": "FAIL",
+    "description": "Research unlock_target_id must exist in the relevant table.",
+    "example_failure": "Research node unlocks sp_ghost but Species has no sp_ghost row"
+  },
+  {
+    "rule_id": "LINT-002",
+    "severity": "FAIL",
+    "description": "No circular prerequisites in ResearchNodes.",
+    "example_failure": "mon_500 requires mon_510 and mon_510 requires mon_500"
+  },
+  {
+    "rule_id": "LINT-003",
+    "severity": "FAIL",
+    "description": "Family baseline species must exist and must belong to that family.",
+    "example_failure": "fam_undead baseline includes sp_goblin"
+  },
+  {
+    "rule_id": "LINT-004",
+    "severity": "FAIL",
+    "description": "Evolution must reference an existing species.",
+    "example_failure": "ev_lich references sp_lich but Species missing sp_lich"
+  },
+  {
+    "rule_id": "LINT-005",
+    "severity": "FAIL",
+    "description": "No duplicate IDs within a table.",
+    "example_failure": "Two rows both use species_id sp_goblin"
+  },
+  {
+    "rule_id": "LINT-101",
+    "severity": "WARN",
+    "description": "Evolution should include at least one downside tag or cost increase.",
+    "example_failure": "Champion evolution with no upkeep increase"
+  }
+]

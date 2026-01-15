@@ -1,0 +1,8 @@
+[
+  {
+    "old_id": null,
+    "new_id": null,
+    "content_type": null,
+    "notes": "Add rows only when you need to rename or replace IDs post-ship. Prefer deprecation over rename."
+  }
+]
