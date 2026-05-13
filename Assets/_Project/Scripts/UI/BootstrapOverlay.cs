@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
             string pending = _root.PendingStateLine;
             string gate = _root.GateStatusLine;
             string kpi = _root.KpiLine;
+            string heat = _root.HeatLine;
             string hint = _root.DevPanelEnabled ? "F1 toggles Dev Panel" : string.Empty;
 
             string combined =
@@ -47,6 +48,7 @@ namespace DungeonBuilder.M0
                 pending + "\n" +
                 gate + "\n" +
                 kpi + "\n" +
+                heat + "\n" +
                 (string.IsNullOrEmpty(banner) ? "" : ("\nBanner:\n" + banner + "\n")) +
                 (string.IsNullOrEmpty(hint) ? "" : ("\n" + hint));
 
@@ -116,6 +118,12 @@ namespace DungeonBuilder.M0
             {
                 _root.TrackManaGenerated(10);
                 _root.SetBanner("Simulated mana tick for KPI.");
+            }
+
+            if (GUILayout.Button("Simulate +5 Heat Event"))
+            {
+                _root.ApplyHeatDelta(5d);
+                _root.SetBanner("Applied +5 heat event.");
             }
 
             GUILayout.EndArea();
