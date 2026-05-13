@@ -22,6 +22,18 @@
     {
       "key": "ui.home.stub",
       "text": "Home (Stub)"
+    },
+    {
+      "key": "gate.error.offline_required",
+      "text": "This action requires an online connection."
+    },
+    {
+      "key": "gate.error.verification_pending",
+      "text": "Action pending verification. Reconnect to continue."
+    },
+    {
+      "key": "gate.ok.allowed",
+      "text": "Action allowed."
     }
   ]
 }

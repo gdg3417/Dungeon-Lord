@@ -1,0 +1,21 @@
+{
+  "schema": "schema_bundle",
+  "schemaVersion": 1,
+  "bundle": [
+    {
+      "schemaId": "mana_modifiers",
+      "schemaVersion": 1,
+      "path": "Assets/_Project/Data/Schemas/mana_modifiers.schema.json"
+    },
+    {
+      "schemaId": "heat_modifiers",
+      "schemaVersion": 1,
+      "path": "Assets/_Project/Data/Schemas/heat_modifiers.schema.json"
+    },
+    {
+      "schemaId": "research_modifiers",
+      "schemaVersion": 1,
+      "path": "Assets/_Project/Data/Schemas/research_modifiers.schema.json"
+    }
+  ]
+}

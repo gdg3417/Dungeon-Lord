@@ -1,0 +1,13 @@
+{
+  "schema": "content_manifest",
+  "schemaVersion": 1,
+  "contentVersion": "0.0.1",
+  "minAppVersion": "0.0.1",
+  "requiredSchemas": [
+    { "schemaId": "content_bootstrap", "schemaVersion": 1 },
+    { "schemaId": "string_table", "schemaVersion": 1 },
+    { "schemaId": "mana_modifiers", "schemaVersion": 1 },
+    { "schemaId": "heat_modifiers", "schemaVersion": 1 },
+    { "schemaId": "research_modifiers", "schemaVersion": 1 }
+  ]
+}
