@@ -1,15 +1,11 @@
 using System;
-using UnityEngine;
 
 namespace DungeonBuilder.M0
 {
     public class TimeService
     {
         private readonly SimpleLogger _logger;
-        private readonly int _tickSeconds;
-        private readonly int _detectClockSkewSeconds;
-
-        private float _accum;
+        private readonly SimulationClock _clock;
         private SaveData _save;
 
         public event Action<long> OnTick;
@@ -17,8 +13,7 @@ namespace DungeonBuilder.M0
         public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds)
         {
             _logger = logger;
-            _tickSeconds = Mathf.Max(1, tickSeconds);
-            _detectClockSkewSeconds = Mathf.Max(1, detectClockSkewSeconds);
+            _clock = new SimulationClock(tickSeconds, detectClockSkewSeconds, new SystemTimeSource());
         }
 
         public void AttachSave(SaveData save)
@@ -33,13 +28,10 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            _accum += deltaTime;
-            if (_accum < _tickSeconds)
+            if (!_clock.TryConsumeTick(deltaTime))
             {
                 return;
             }
-
-            _accum -= _tickSeconds;
             _save.totalTicks += 1;
 
             OnTick?.Invoke(_save.totalTicks);
@@ -52,7 +44,7 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            _save.lastPausedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+            _save.lastPausedUtcUnix = _clock.MarkPaused();
         }
 
         public string OnResume()
@@ -62,18 +54,11 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            long now = TimeUtil.UtcNowUnixSeconds();
-            _save.lastResumedUtcUnix = now;
-
-            if (_save.lastPausedUtcUnix <= 0)
+            ClockResumeResult result = _clock.ResumeAndDetectSkew();
+            _save.lastResumedUtcUnix = result.ResumedAtUtc;
+            if (result.SkewDetected)
             {
-                return string.Empty;
-            }
-
-            long delta = now - _save.lastPausedUtcUnix;
-            if (Mathf.Abs((float)delta) >= _detectClockSkewSeconds)
-            {
-                _logger.Warn($"Time delta looks large: {delta} seconds.");
+                _logger.Warn($"Time delta looks large: {result.PauseDeltaSeconds} seconds.");
                 return "Time change detected. Some offline results may be limited.";
             }
 

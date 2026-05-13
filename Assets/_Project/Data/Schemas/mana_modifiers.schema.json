@@ -1,0 +1,27 @@
+{
+  "schema": "mana_modifiers",
+  "schemaVersion": 1,
+  "description": "Runtime table for mana formula modifiers applied by the global formula engine.",
+  "requiredFields": [
+    "id",
+    "bucket",
+    "type",
+    "value",
+    "enabled"
+  ],
+  "fields": {
+    "id": { "type": "string", "stableId": true },
+    "bucket": { "type": "enum", "values": ["Base", "Heat", "Research", "EventOrSeason", "ClampAndSoftCap", "Rounding"] },
+    "type": { "type": "enum", "values": ["AdditiveFlat", "AdditivePercent", "MultiplicativePercent", "Clamp", "SoftCap"] },
+    "value": { "type": "number" },
+    "secondaryValue": { "type": "number", "default": 0 },
+    "enabled": { "type": "bool", "default": true },
+    "tags": { "type": "string[]", "default": [] },
+    "notes": { "type": "string", "default": "" }
+  },
+  "rules": {
+    "unique": ["id"],
+    "clampRequiresSecondaryValue": true,
+    "softCapRequiresSecondaryValue": true
+  }
+}

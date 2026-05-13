@@ -6,8 +6,10 @@ namespace DungeonBuilder.M0
 {
     public class SaveService
     {
+        private const int SaveSchemaVersion = 1;
         private readonly SimpleLogger _logger;
         private readonly SaveConfig _saveConfig;
+        private readonly MigrationRunner _migrationRunner = new MigrationRunner();
 
         public string SavePath { get; private set; }
 
@@ -36,14 +38,24 @@ namespace DungeonBuilder.M0
             try
             {
                 string json = File.ReadAllText(SavePath);
-                SaveData data = JsonUtility.FromJson<SaveData>(json);
-
-                if (data == null)
+                SaveRoot root = TryParseSaveRoot(json);
+                if (root == null)
                 {
                     banner = "Save file invalid. Created a new save.";
                     ArchiveCorruptSave();
                     return CreateNew(contentVersion);
                 }
+
+                bool migrated = _migrationRunner.Run(root, SaveSchemaVersion, out string migrationError);
+                if (!migrated)
+                {
+                    _logger.Warn($"Save migration failed: {migrationError}");
+                    banner = "Save migration failed. Created a new save.";
+                    ArchiveCorruptSave();
+                    return CreateNew(contentVersion);
+                }
+
+                SaveData data = root.primary ?? new SaveData();
 
                 if (data.createdUtcUnix <= 0)
                 {
@@ -77,6 +89,12 @@ namespace DungeonBuilder.M0
             data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
 
             string json = JsonUtility.ToJson(data, true);
+            SaveRoot root = new SaveRoot
+            {
+                schemaVersion = SaveSchemaVersion,
+                primary = data
+            };
+            json = JsonUtility.ToJson(root, true);
 
             try
             {
@@ -148,6 +166,27 @@ namespace DungeonBuilder.M0
             return data;
         }
 
+        private SaveRoot TryParseSaveRoot(string json)
+        {
+            SaveRoot root = JsonUtility.FromJson<SaveRoot>(json);
+            if (root != null && root.primary != null)
+            {
+                return root;
+            }
+
+            SaveData legacy = JsonUtility.FromJson<SaveData>(json);
+            if (legacy == null)
+            {
+                return null;
+            }
+
+            return new SaveRoot
+            {
+                schemaVersion = SaveSchemaVersion,
+                primary = legacy
+            };
+        }
+
         private void ArchiveCorruptSave()
         {
             try
@@ -215,4 +254,3 @@ namespace DungeonBuilder.M0
         }
     }
 }
-

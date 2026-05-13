@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
         public TextAsset contentBootstrapJson;
         public TextAsset buildConfigJson;
         public TextAsset schemaVersionsJson;
+        public TextAsset contentManifestJson;
         public TextAsset devCommandsJson;
         public TextAsset stringTableJson;
 
@@ -20,13 +21,21 @@ namespace DungeonBuilder.M0
         public ContentService Content { get; private set; }
         public SaveService SaveService { get; private set; }
         public TimeService TimeService { get; private set; }
+        public ITelemetryService Telemetry { get; private set; }
+        public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
 
         public string BannerMessage { get; private set; } = string.Empty;
+        public string PendingStateLine { get; private set; } = "Pending: None";
+        public string GateStatusLine { get; private set; } = "Gate: unknown";
+        public string KpiLine { get; private set; } = "KPI: n/a";
 
         private AppStateMachine _sm;
+        private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
 
         public bool DevPanelEnabled { get; private set; }
+        public bool IsOnline { get; private set; } = true;
+        public bool VerificationPending { get; private set; }
 
         public string BuildLine { get; private set; } = "Build: unknown";
         public string StateLine => "State: " + (_sm != null ? _sm.CurrentStateName : "None");
@@ -103,6 +112,7 @@ namespace DungeonBuilder.M0
                 contentBootstrapJson,
                 buildConfigJson,
                 schemaVersionsJson,
+                contentManifestJson,
                 devCommandsJson,
                 stringTableJson,
                 Logger,
@@ -138,11 +148,16 @@ namespace DungeonBuilder.M0
 
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
             TimeService.AttachSave(Save);
+            TimeService.OnTick += HandleTickTelemetry;
+
+            Telemetry = new TelemetryService(Logger);
+            Kpi = new KpiService();
 
             Save.lastKnownAppState = "Boot";
             SaveService.Save(Save, SaveReason.Boot);
 
             Logger.Info("M0 init complete.");
+            RefreshDashboardState();
         }
 
         public void GoHomeStub()
@@ -154,6 +169,56 @@ namespace DungeonBuilder.M0
         {
             BannerMessage = message ?? string.Empty;
         }
+
+        public void SetOnline(bool isOnline)
+        {
+            IsOnline = isOnline;
+            RefreshDashboardState();
+        }
+
+        public void SetVerificationPending(bool pending)
+        {
+            VerificationPending = pending;
+            Telemetry?.Track("verification_pending_state_changed", $"{{\"pending\":{pending.ToString().ToLowerInvariant()}}}");
+            RefreshDashboardState();
+        }
+
+        public void RefreshDashboardState()
+        {
+            PendingStateLine = VerificationPending ? "Pending: Verification" : "Pending: None";
+
+            GateEvaluationResult result = _restrictedActionGate.Evaluate(
+                new GateEvaluationInput(RestrictedActionType.ResearchComplete, IsOnline, VerificationPending)
+            );
+
+            string gateMessage = Content != null
+                ? Content.GetString(result.MessageKey, result.MessageKey)
+                : result.MessageKey;
+
+            GateStatusLine = result.Allowed ? $"Gate: OK ({gateMessage})" : $"Gate: Blocked ({gateMessage})";
+            Kpi?.RecordGateEvaluation(result.Allowed);
+
+            KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
+            KpiLine = $"KPI: avgMana/tick={snap.AverageManaPerTick:0.00}, blockedGates={snap.BlockedGateCount}/{snap.TotalGateEvaluations}";
+        }
+
+        public void TrackResearchOutcome(string outcome)
+        {
+            string safeOutcome = string.IsNullOrEmpty(outcome) ? "unknown" : outcome;
+            Telemetry?.Track("research_outcome", $"{{\"outcome\":\"{safeOutcome}\"}}");
+        }
+
+        public void TrackManaGenerated(double generatedMana)
+        {
+            Kpi?.RecordManaTick(generatedMana);
+            Telemetry?.Track("mana_generated", $"{{\"amount\":{generatedMana:0.###}}}");
+            KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
+            KpiLine = $"KPI: avgMana/tick={snap.AverageManaPerTick:0.00}, blockedGates={snap.BlockedGateCount}/{snap.TotalGateEvaluations}";
+        }
+
+        private void HandleTickTelemetry(long tickIndex)
+        {
+            Telemetry?.Track("tick_processed", $"{{\"tick\":{tickIndex}}}");
+        }
     }
 }
-
