@@ -1,0 +1,29 @@
+{
+  "schema": "research_modifiers",
+  "schemaVersion": 1,
+  "description": "Runtime table for research-node effect profiles and formula modifiers.",
+  "requiredFields": [
+    "id",
+    "nodeId",
+    "bucket",
+    "type",
+    "value",
+    "enabled"
+  ],
+  "fields": {
+    "id": { "type": "string", "stableId": true },
+    "nodeId": { "type": "string", "stableId": true },
+    "bucket": { "type": "enum", "values": ["Base", "Heat", "Research", "EventOrSeason", "ClampAndSoftCap", "Rounding"] },
+    "type": { "type": "enum", "values": ["AdditiveFlat", "AdditivePercent", "MultiplicativePercent", "Clamp", "SoftCap"] },
+    "value": { "type": "number" },
+    "secondaryValue": { "type": "number", "default": 0 },
+    "enabled": { "type": "bool", "default": true },
+    "requiresOnlineVerification": { "type": "bool", "default": true },
+    "tags": { "type": "string[]", "default": [] },
+    "notes": { "type": "string", "default": "" }
+  },
+  "rules": {
+    "unique": ["id"],
+    "nodeIdForeignKey": "research_nodes.id"
+  }
+}

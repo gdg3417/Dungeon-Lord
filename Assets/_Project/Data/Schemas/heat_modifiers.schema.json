@@ -1,0 +1,26 @@
+{
+  "schema": "heat_modifiers",
+  "schemaVersion": 1,
+  "description": "Runtime table for heat formula modifiers and rule adjustments.",
+  "requiredFields": [
+    "id",
+    "bucket",
+    "type",
+    "value",
+    "enabled"
+  ],
+  "fields": {
+    "id": { "type": "string", "stableId": true },
+    "bucket": { "type": "enum", "values": ["Base", "Heat", "Research", "EventOrSeason", "ClampAndSoftCap", "Rounding"] },
+    "type": { "type": "enum", "values": ["AdditiveFlat", "AdditivePercent", "MultiplicativePercent", "Clamp", "SoftCap"] },
+    "value": { "type": "number" },
+    "secondaryValue": { "type": "number", "default": 0 },
+    "enabled": { "type": "bool", "default": true },
+    "sourceEvent": { "type": "string", "default": "" },
+    "notes": { "type": "string", "default": "" }
+  },
+  "rules": {
+    "unique": ["id"],
+    "offlineTierCrossingForbidden": true
+  }
+}

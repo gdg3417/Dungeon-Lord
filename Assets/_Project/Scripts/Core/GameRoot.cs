@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
         public TextAsset contentBootstrapJson;
         public TextAsset buildConfigJson;
         public TextAsset schemaVersionsJson;
+        public TextAsset contentManifestJson;
         public TextAsset devCommandsJson;
         public TextAsset stringTableJson;
 
@@ -103,6 +104,7 @@ namespace DungeonBuilder.M0
                 contentBootstrapJson,
                 buildConfigJson,
                 schemaVersionsJson,
+                contentManifestJson,
                 devCommandsJson,
                 stringTableJson,
                 Logger,
@@ -156,4 +158,3 @@ namespace DungeonBuilder.M0
         }
     }
 }
-
