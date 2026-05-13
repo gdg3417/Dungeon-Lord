@@ -1,41 +1,167 @@
-# Sprint 1 Close-out Checklist (S1-08)
+# Sprint 1 Close-out Checklist (Execution Tracker + UAT Script)
 
 Date: 2026-05-13  
-Scope: Execute Sprint 1 close-out checklist and record readiness status.
+Scope: Final evidence tracker and click-by-click UAT script required to mark Sprint 1 complete.
 
-## Checklist results
+## Completion rule
+Sprint 1 is **not closed** until every item below is marked ✅ with evidence links/log snippets.
 
-1. **Run full EditMode test suite**  
-   **Status:** ⚠️ Blocked in this environment. Unity Editor / batchmode runner is not available in the container session, so EditMode tests cannot be executed here.
+## Pre-flight (do this before running checks)
+1. Install/open the project in the agreed Unity Editor version for the branch.
+2. Confirm local branch is up to date and clean.
+3. Ensure these windows are visible: **Console**, **Project**, **Test Runner**, **Game**.
+4. Clear old console logs so results are easy to capture.
+5. Create a timestamped evidence folder (for screenshots/logs) under your team artifact location.
 
-2. **Run determinism fixture multiple times**  
-   **Status:** ⚠️ Blocked in this environment for the same reason (Unity EditMode runner unavailable).
+---
 
-3. **Validate pause/resume + offline elapsed path does not break determinism guarantees**  
-   **Status:** ⚠️ Pending runtime verification in Unity PlayMode/EditMode automation.
+## UAT-01: Run full Unity EditMode suite
 
-4. **Validate save migration roundtrip on fixture matrix**  
-   **Status:** ✅ Implemented at test level via fixture coverage in `MigrationRunnerTests` (`old schema`, `current schema`, `malformed`). Execution still pending Unity test runner availability.
+### Goal
+Prove baseline Sprint 1 EditMode tests pass in a real Unity runner.
 
-5. **Confirm debug panel displays mana/heat/tick clearly**  
-   **Status:** ✅ Implemented in code:
-   - KPI line (mana-related) already present.
-   - Heat line now displayed in overlay.
-   - tick telemetry/event wiring in place.
+### Click-by-click steps
+1. Open Unity Hub.
+2. Click **Projects**.
+3. Select this repo project and click **Open**.
+4. Wait for asset/script import to complete.
+5. In Unity top menu, click **Window** -> **General** -> **Test Runner**.
+6. In the Test Runner panel, click the **EditMode** tab.
+7. Click **Run All**.
+8. Wait for execution to finish.
+9. In Console, confirm no unexpected runtime/editor errors occurred during test run.
+10. Capture screenshot of Test Runner summary (passed/failed/skipped totals).
+11. Save/export logs to artifact folder.
 
-## Sprint 1 completion gate summary
+### Pass criteria
+- All required Sprint 1 EditMode tests pass.
+- No blocking exceptions in Console tied to Sprint 1 systems.
 
-### Completed implementation items
-- Formula engine contract coverage expanded.
-- Mana + heat deterministic simulation components implemented.
-- Tick-level replay harness added.
-- Save migration fixture coverage expanded.
-- Heat runtime config wiring added with defaults and non-fatal warnings.
+### Evidence required
+- Screenshot of Test Runner totals.
+- Full test log artifact path.
+- Timestamp and tester name.
 
-### Remaining blockers to mark Sprint 1 as complete
-1. Execute EditMode test suite in Unity runner and archive results.
-2. Execute deterministic replay test repeatedly and archive pass logs.
-3. Run targeted pause/resume skew/offline path verification (automated or scripted manual test) and document outcomes.
+---
 
-## Suggested immediate next action
-Run Unity EditMode tests in CI or on a workstation with Unity installed, then update this checklist with exact command logs and pass/fail artifacts.
+## UAT-02: Run deterministic replay test 3 consecutive times
+
+### Goal
+Prove deterministic replay stability across repeated executions.
+
+### Click-by-click steps
+1. Keep Unity open with **Window** -> **General** -> **Test Runner**.
+2. In **EditMode** list, locate the determinism test group (e.g., `SimulationDeterminismTests`).
+3. Select only the determinism test(s) for targeted reruns.
+4. Click **Run Selected** (Run #1).
+5. Record result and capture screenshot.
+6. Click **Run Selected** again (Run #2).
+7. Record result and capture screenshot.
+8. Click **Run Selected** again (Run #3).
+9. Record result and capture screenshot.
+10. Confirm all three runs passed with no divergent checkpoint assertions.
+
+### Pass criteria
+- 3/3 consecutive determinism runs pass.
+- No nondeterministic assertion drift between runs.
+
+### Evidence required
+- Three run screenshots or a combined run log showing 3 passes.
+- Notes confirming checkpoints remained identical.
+
+---
+
+## UAT-03: Validate pause/resume + offline elapsed invariants
+
+### Goal
+Verify time progression behavior does not violate determinism/offline rules.
+
+### Click-by-click steps
+1. In Unity, open the bootstrap scene used for runtime start (Project window -> locate `Bootstrap.unity` -> double-click).
+2. Click **Play**.
+3. Let simulation run briefly; note mana/heat/tick display values.
+4. Click **Pause** in the Play controls.
+5. Wait ~10–20 seconds.
+6. Click **Play** (resume).
+7. Verify values continue in expected direction with no spikes/anomalies.
+8. Stop Play mode.
+9. Re-enter Play mode and simulate an offline elapsed scenario using the project’s available debug/test path (if provided by tooling/tests).
+10. Confirm elapsed-time handling respects expected caps/guards.
+11. Capture screenshots/logs of before/after values.
+
+### Pass criteria
+- Pause/resume does not create invalid jumps or invariant breaks.
+- Offline elapsed path stays within expected caps/guardrails.
+
+### Evidence required
+- Before/after screenshots.
+- Short scenario notes (inputs, elapsed time, expected vs actual).
+
+---
+
+## UAT-04: Validate save migration fixture matrix
+
+### Goal
+Confirm migration behavior for old/current/malformed fixtures.
+
+### Click-by-click steps
+1. Open **Window** -> **General** -> **Test Runner**.
+2. In **EditMode**, locate migration tests (e.g., `MigrationRunnerTests`).
+3. Select migration fixture test group.
+4. Click **Run Selected**.
+5. Verify old-schema fixture path passes.
+6. Verify current-schema fixture path passes.
+7. Verify malformed/partial fixture path follows expected fallback behavior.
+8. Capture Test Runner result screenshot and relevant Console lines.
+
+### Pass criteria
+- All migration fixture assertions pass.
+- Fallback behavior for malformed fixture matches expected contract.
+
+### Evidence required
+- Test Runner screenshot for migration group.
+- Log snippet showing fixture cases.
+
+---
+
+## UAT-05: Validate debug visibility for verification metrics
+
+### Goal
+Ensure runtime visibility for Sprint 1 verification signals.
+
+### Click-by-click steps
+1. Open bootstrap/runtime scene.
+2. Click **Play**.
+3. Confirm on-screen/debug overlay contains at minimum:
+   - Tick/time progression indicator.
+   - Mana indicator.
+   - Heat indicator.
+   - Any pending verification status indicator available in Sprint 1 scope.
+4. Interact with minimal runtime loop long enough to observe value updates.
+5. Capture at least one clear screenshot of overlay values.
+6. Stop Play mode.
+
+### Pass criteria
+- Required indicators are visible and updating.
+
+### Evidence required
+- Screenshot(s) showing required indicators.
+- Brief note confirming observed updates.
+
+---
+
+## Closeout packet template (fill during execution)
+- Unity version:
+- Branch/commit tested:
+- Runner command(s) (if CI/batchmode used):
+- Execution date/time (UTC):
+- UAT-01 result:
+- UAT-02 result:
+- UAT-03 result:
+- UAT-04 result:
+- UAT-05 result:
+- Artifacts location(s):
+- Final signoff (name/date):
+
+## Next sprint handoff constraint
+Only begin Sprint 2 feature implementation after this file is updated with complete ✅ evidence for all five UAT checks.

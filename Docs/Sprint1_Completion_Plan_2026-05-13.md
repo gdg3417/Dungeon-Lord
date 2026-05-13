@@ -1,180 +1,137 @@
-# Sprint 1 Completion Plan (Actionable, repository-specific)
+# MVP Sprint Completion Plan (Assuming Sprint 1 Passed)
 
 Date: 2026-05-13  
-Scope: Close Sprint 1 (“Simulation Spine”) based on current repo state.
+Scope: Forward plan for Sprint 2 and Sprint 3 (plus Sprint 4 recommended) with explicit build steps per sprint.
 
-## 1) Sprint 1 exit criteria (target)
-- Deterministic tick replay passes.
-- Save load/migrate roundtrip works.
-- Formula stacking/bucket order tests are green.
-
-## 2) Current status snapshot
-### Already done
-- Formula engine exists with bucket sequencing + tests.
-- Mana system exists with deterministic tick-style input + tests.
-- Simulation clock/time service exists + tests.
-- Save root + migration runner skeleton exists + tests.
-- Content loader + manifest/schema gate checks exist.
-- Minimal debug overlay/dashboard exists.
-
-### Missing to truly close Sprint 1
-1. HeatSystem v1 implementation is not yet present (`ApplyEvent`, `Decay`, baseline bounds/rules).
-2. Deterministic replay harness that validates multi-tick reproducibility end-to-end is not yet present.
-3. Save migration roundtrip coverage needs stronger fixtures beyond skeleton behavior.
-4. Formula contract coverage should include explicit clamp/soft-cap ordering edge cases under mixed bucket stacks.
+## Planning assumption
+This plan assumes Sprint 1 has passed all required testing and signoff gates, and the team is ready to execute feature work.
 
 ---
 
-## 3) Actionable work plan (ordered)
+## Sprint 2 — Build the Playable Core Loop
 
-## Task S1-01 — Implement `HeatSystem` runtime core
-**Goal:** Land MVP Heat v1 core behavior used by simulation loop.
+### Sprint 2 objective
+Deliver the first end-to-end MVP gameplay loop: research progression, verification-safe action completion, encounter simulation, and loot outcomes.
 
-### Scope
-- Create `IHeatSystem` + `HeatSystem` in `Assets/_Project/Scripts/Economy/`.
-- Add:
-  - `ApplyEvent(HeatEventInput)` for explicit event deltas.
-  - `Decay(HeatDecayInput)` for passive decay across elapsed ticks/time.
-  - Guardrails for min bound (never below 0).
-- Keep tier transitions simple and data-driven-ready (do not add post-MVP behavior).
+### Sprint 2 build steps (in order)
 
-### Deliverables
-- New system file(s) + model types.
-- No UI dependency required in first pass.
+#### S2-01: Research domain foundation
+1. Define `ResearchQueueService` interfaces and data model.
+2. Implement single-slot state machine:
+   - `Idle`
+   - `Active`
+   - `CompletedPendingVerification`
+   - `Confirmed/Claimed`
+3. Add serialization fields needed for save/load continuity.
+4. Add deterministic unit tests for all transitions and invalid transition guards.
 
-### Acceptance
-- Deterministic same-input -> same-output behavior.
-- Lower-bound invariant enforced.
+#### S2-02: Verification intent pipeline
+1. Create `VerificationIntentService` with stable intent IDs.
+2. Implement local queue lifecycle (`queued -> sent -> confirmed/failed-retryable`).
+3. Add idempotent confirm handling (duplicate/out-of-order response safety).
+4. Integrate with `RestrictedActionGateService` so blocked actions align with pending verification state.
+5. Add replay tests for retry/reconnect scenarios.
 
----
+#### S2-03: Offline progression orchestrator
+1. Implement `OfflineProgressionOrchestrator` to centralize elapsed-time application.
+2. Apply ordered progression updates for mana, heat decay, and research elapsed state.
+3. Enforce offline caps and skew guardrails from time/integrity rules.
+4. Add tests for normal elapsed windows, cap edges, and anomaly inputs.
 
-## Task S1-02 — Add HeatSystem unit tests (EditMode)
-**Goal:** Lock Heat invariants before integrating with loop.
+#### S2-04: Encounter simulation baseline
+1. Add encounter domain contracts (spawn config, party profile, outcome payload).
+2. Implement deterministic encounter resolution (seeded/randomized via controlled input).
+3. Emit encounter results as domain events for downstream systems.
+4. Add tests for spawn-band boundaries and outcome consistency.
 
-### Test cases
-- Event delta adds/subtracts correctly.
-- Decay applies deterministically over N ticks.
-- Heat never goes negative.
-- Repeated identical input sequences are replay-stable.
+#### S2-05: Loot runtime and extraction
+1. Implement data-driven loot table resolution.
+2. Implement extraction outcomes tied to encounter result states.
+3. Convert loot results into economy-applicable values (within MVP constraints).
+4. Add edge-case tests (empty tables, capped tiers, invalid references).
 
-### Deliverables
-- `Assets/_Project/Tests/EditMode/HeatSystemTests.cs`.
+#### S2-06: UI trust and messaging
+1. Surface pending verification status for research and restricted actions.
+2. Surface core loop outputs (encounter result + loot summary) in debug/placeholder UI.
+3. Ensure all player-facing text resolves via localization keys.
+4. Add basic UI verification checklist and snapshot captures.
 
-### Acceptance
-- All new heat tests pass consistently.
+#### S2-07: Sprint 2 stabilization and signoff
+1. Execute Sprint 2 QA matrix:
+   - research transitions
+   - verification idempotency
+   - offline caps
+   - encounter determinism
+   - loot extraction rules
+2. Fix highest-risk defects first (determinism/integrity before UX polish).
+3. Publish Sprint 2 release notes + known-issues list.
 
----
-
-## Task S1-03 — Add deterministic tick replay harness test
-**Goal:** Prove Sprint 1 simulation determinism for core systems.
-
-### Scope
-- Add a test fixture that runs a fixed scripted timeline (e.g., 300 ticks) twice using identical inputs/seeds and compares outputs at each checkpoint.
-- Include mana outputs, heat outputs, and tick index snapshots.
-
-### Deliverables
-- `Assets/_Project/Tests/EditMode/SimulationDeterminismTests.cs`.
-
-### Acceptance
-- Replay run A == run B for all asserted checkpoints.
-
----
-
-## Task S1-04 — Strengthen formula contract tests
-**Goal:** Ensure global modifier behavior is locked for future systems.
-
-### Scope
-- Extend existing formula tests with combined stacks:
-  - additive + multiplicative + clamp + soft-cap + rounding.
-  - clamp-before/after cases based on bucket enum order.
-- Add explicit edge assertions for tiny/large values and sign behavior.
-
-### Deliverables
-- Update `FormulaEngineTests.cs`.
-
-### Acceptance
-- Contract tests encode expected bucket ordering unambiguously.
+### Sprint 2 completion criteria
+- End-to-end loop from research progression to encounter/loot result is playable.
+- Verification pipeline is retry-safe and idempotent.
+- Offline progression logic respects caps/guardrails.
+- Sprint 2 QA matrix passes in Unity runner.
 
 ---
 
-## Task S1-05 — Expand save migration fixture coverage
-**Goal:** Satisfy “save load/migrate roundtrip works” with robust fixtures.
+## Sprint 3 — Harden, Partition, and Scale Reliability
 
-### Scope
-- Add fixture JSONs representing at least:
-  - current schema save,
-  - one older schema save,
-  - malformed/partial save fallback path.
-- Verify `Load -> Migrate -> Save -> Reload` preserves required fields and schema version.
+### Sprint 3 objective
+Turn the playable loop into a robust MVP candidate with resilient save architecture, reconciliation safety, and production-level quality gates.
 
-### Deliverables
-- Additional tests in `MigrationRunnerTests.cs` and/or `SaveService` tests.
+### Sprint 3 build steps (in order)
 
-### Acceptance
-- Roundtrip assertions pass for old/current fixtures.
+#### S3-01: Save partition architecture
+1. Define explicit partition boundaries (core profile, progression, transient/runtime, verification queue).
+2. Refactor save root/contracts to map fields into partitions.
+3. Add migration fixtures for pre-partition -> partitioned schema evolution.
+4. Validate backward compatibility and rollback safety.
 
----
+#### S3-02: Reconciliation hardening
+1. Build reconciliation pass for queued intents after reconnect.
+2. Handle conflict classes (duplicate confirm, stale response, missing ack).
+3. Add deterministic replay tests for reconnect interruption patterns.
+4. Add operational counters/telemetry for reconciliation outcomes.
 
-## Task S1-06 — Wire Heat tick call into runtime loop (minimal)
-**Goal:** Integrate HeatSystem without expanding scope into Sprint 2 domains.
+#### S3-03: Performance and memory budgets
+1. Define target device profiles and budgets.
+2. Add deterministic stress harnesses for long offline windows and high event counts.
+3. Profile CPU/memory hotspots in simulation and save/reconcile paths.
+4. Resolve budget breaches and re-run benchmark baselines.
 
-### Scope
-- Instantiate HeatSystem in `GameRoot` composition.
-- On tick, invoke decay path and expose current heat value to debug overlay line.
-- Keep event inputs stubbed/minimal (no adventurer loop yet).
+#### S3-04: Content/data integrity gates
+1. Add automated checks for schema/manifest/version consistency.
+2. Add FK/reference integrity checks across content assets.
+3. Add migration-rule coverage checks for content ID replacements.
+4. Fail CI for content integrity violations.
 
-### Deliverables
-- Small integration edits in `GameRoot` and `BootstrapOverlay`.
+#### S3-05: Release readiness framework
+1. Establish CI gates for tests, deterministic replay, and content integrity.
+2. Define go/no-go dashboard metrics from telemetry/KPI outputs.
+3. Produce MVP release checklist with ownership and signoff workflow.
+4. Run full regression and freeze build candidates.
 
-### Acceptance
-- Play mode shows heat changing over time according to decay rules.
-
----
-
-## Task S1-07 — Minimal content contract wiring for Heat modifiers
-**Goal:** Keep Heat behavior table-driven-ready per Sprint 1 principles.
-
-### Scope
-- Ensure heat config/modifier payload can be loaded from existing schema-gated content assets (or defaults when missing).
-- Add validation fallback logging for missing keys (non-fatal).
-
-### Deliverables
-- Small updates in content model/service parsing.
-
-### Acceptance
-- Startup succeeds with clear warning if optional heat config not found.
+### Sprint 3 completion criteria
+- Save/reconciliation behavior is resilient under reconnect/failure scenarios.
+- Performance and memory budgets are met on target profile(s).
+- CI gates enforce deterministic and data integrity protections.
+- MVP candidate build passes full regression checklist.
 
 ---
 
-## Task S1-08 — Sprint 1 close-out checklist execution
-**Goal:** Final go/no-go decision for Sprint 1 completion.
+## Sprint 4 (Recommended) — MVP Vertical Slice Polish and Launch Prep
 
-### Checklist
-1. Run full EditMode test suite.
-2. Run determinism fixture multiple times.
-3. Validate pause/resume + offline elapsed path does not break determinism guarantees.
-4. Validate save migration roundtrip on fixture matrix.
-5. Confirm debug panel displays mana/heat/tick clearly.
+### Why Sprint 4 is recommended
+If Sprint 2 and Sprint 3 focus on core loop + hardening, an additional sprint reduces launch risk by concentrating on UX trust, balance, and onboarding polish.
 
-### Acceptance
-- All checklist items pass with no invariant violations.
+### Sprint 4 build steps (in order)
+1. Balance pass for mana/heat/encounter/loot loops using telemetry-backed tuning.
+2. UX polish for clarity of risk/reward, pending states, and outcome explanations.
+3. Onboarding/tutorial pass for first-session comprehension.
+4. Accessibility and readability pass (font, contrast, pacing, cognitive load).
+5. Soft-launch rehearsal checklist and release-ops dry run.
 
----
-
-## 4) Suggested implementation sequence (for immediate execution)
-1. S1-01 HeatSystem core.
-2. S1-02 Heat tests.
-3. S1-06 minimal runtime wiring.
-4. S1-03 determinism harness.
-5. S1-04 formula contract expansions.
-6. S1-05 migration fixture expansion.
-7. S1-07 content wiring.
-8. S1-08 close-out checklist + signoff note.
-
-## 5) Definition of Done for Sprint 1
-Sprint 1 is complete when:
-- HeatSystem v1 exists with passing invariants.
-- Deterministic replay test is stable.
-- Save migrate roundtrip fixture matrix is green.
-- Formula contract tests cover mixed bucket edge cases.
-- Debug view shows mana, heat, and tick-time state for verification.
+### Sprint 4 completion criteria
+- New players can complete first core loop without confusion.
+- Telemetry indicates healthy early-session progression.
+- Launch rehearsal checklist completes without blockers.
