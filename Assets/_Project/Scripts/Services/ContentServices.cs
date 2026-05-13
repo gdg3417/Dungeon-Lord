@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         public ContentManifest Manifest { get; private set; }
         public DevCommands DevCommands { get; private set; }
         public StringTable Strings { get; private set; }
+        public HeatRuntimeConfig HeatRuntime { get; private set; }
 
         private readonly Dictionary<string, string> _stringMap = new Dictionary<string, string>();
 
@@ -22,6 +23,7 @@ namespace DungeonBuilder.M0
             TextAsset contentManifestJson,
             TextAsset devCommandsJson,
             TextAsset stringTableJson,
+            TextAsset heatRuntimeJson,
             SimpleLogger logger,
             out string warningBanner
         )
@@ -34,8 +36,14 @@ namespace DungeonBuilder.M0
             Manifest = SafeParse<ContentManifest>(contentManifestJson, "content_manifest", logger, ref warningBanner);
             DevCommands = SafeParse<DevCommands>(devCommandsJson, "dev_commands", logger, ref warningBanner);
             Strings = SafeParse<StringTable>(stringTableJson, "string_table_en", logger, ref warningBanner);
+            HeatRuntime = SafeParseOptional<HeatRuntimeConfig>(heatRuntimeJson, "heat_runtime", logger, ref warningBanner);
+            if (HeatRuntime == null)
+            {
+                HeatRuntime = new HeatRuntimeConfig();
+            }
 
             ValidateManifest(logger, ref warningBanner);
+            ValidateHeatRuntime(logger, ref warningBanner);
             BuildStringMap(logger);
         }
 
@@ -104,6 +112,39 @@ namespace DungeonBuilder.M0
             }
         }
 
+
+        private T SafeParseOptional<T>(TextAsset asset, string name, SimpleLogger logger, ref string warningBanner) where T : class
+        {
+            if (asset == null)
+            {
+                AppendBanner(ref warningBanner, $"Optional JSON missing: {name}. Using defaults.");
+                logger.Warn($"Optional JSON missing: {name}. Using defaults.");
+                return null;
+            }
+
+            return SafeParse<T>(asset, name, logger, ref warningBanner);
+        }
+
+        private void ValidateHeatRuntime(SimpleLogger logger, ref string warningBanner)
+        {
+            if (HeatRuntime == null)
+            {
+                return;
+            }
+
+            if (HeatRuntime.decayPerTick < 0d)
+            {
+                AppendBanner(ref warningBanner, "Heat runtime decayPerTick was negative; clamped to 0.");
+                logger.Warn("Heat runtime decayPerTick was negative; clamped to 0.");
+                HeatRuntime.decayPerTick = 0d;
+            }
+
+            if (HeatRuntime.minHeat != 0d)
+            {
+                AppendBanner(ref warningBanner, "Heat runtime minHeat is not 0; runtime currently enforces floor at 0.");
+                logger.Warn("Heat runtime minHeat is not 0; runtime currently enforces floor at 0.");
+            }
+        }
         private T SafeParse<T>(TextAsset asset, string name, SimpleLogger logger, ref string warningBanner) where T : class
         {
             if (asset == null)

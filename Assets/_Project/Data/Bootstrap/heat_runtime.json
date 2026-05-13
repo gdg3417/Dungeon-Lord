@@ -1,0 +1,7 @@
+{
+  "schema": "heat_runtime",
+  "schemaVersion": 1,
+  "decayPerTick": 0.1,
+  "minHeat": 0,
+  "enableWarnings": true
+}

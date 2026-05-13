@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
     public class Tables
     {
         public StringTableRef stringTable;
+        public HeatRuntimeRef heatRuntime;
     }
 
     [Serializable]
@@ -47,6 +48,23 @@ namespace DungeonBuilder.M0
         public string path;
     }
 
+
+
+    [Serializable]
+    public class HeatRuntimeRef
+    {
+        public string path;
+    }
+
+    [Serializable]
+    public class HeatRuntimeConfig
+    {
+        public string schema;
+        public int schemaVersion;
+        public double decayPerTick = 0.1d;
+        public double minHeat = 0d;
+        public bool enableWarnings = true;
+    }
     [Serializable]
     public class BuildConfig
     {

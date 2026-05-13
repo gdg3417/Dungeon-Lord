@@ -1,3 +1,4 @@
+using DungeonBuilder.M0.Economy;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -13,6 +14,7 @@ namespace DungeonBuilder.M0
         public TextAsset contentManifestJson;
         public TextAsset devCommandsJson;
         public TextAsset stringTableJson;
+        public TextAsset heatRuntimeJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -29,13 +31,17 @@ namespace DungeonBuilder.M0
         public string PendingStateLine { get; private set; } = "Pending: None";
         public string GateStatusLine { get; private set; } = "Gate: unknown";
         public string KpiLine { get; private set; } = "KPI: n/a";
+        public string HeatLine { get; private set; } = "Heat: 0.00";
 
         private AppStateMachine _sm;
         private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
+        private readonly IHeatSystem _heatSystem = new HeatSystem();
 
         public bool DevPanelEnabled { get; private set; }
         public bool IsOnline { get; private set; } = true;
         public bool VerificationPending { get; private set; }
+        public double CurrentHeat { get; private set; }
+        public double HeatDecayPerTick { get; private set; } = 0.1d;
 
         public string BuildLine { get; private set; } = "Build: unknown";
         public string StateLine => "State: " + (_sm != null ? _sm.CurrentStateName : "None");
@@ -115,6 +121,7 @@ namespace DungeonBuilder.M0
                 contentManifestJson,
                 devCommandsJson,
                 stringTableJson,
+                heatRuntimeJson,
                 Logger,
                 out string contentBanner
             );
@@ -148,10 +155,16 @@ namespace DungeonBuilder.M0
 
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
             TimeService.AttachSave(Save);
+            TimeService.OnTick += HandleSimulationTick;
             TimeService.OnTick += HandleTickTelemetry;
 
             Telemetry = new TelemetryService(Logger);
             Kpi = new KpiService();
+
+            CurrentHeat = 0d;
+            HeatDecayPerTick = Content != null && Content.HeatRuntime != null
+                ? System.Math.Max(0d, Content.HeatRuntime.decayPerTick)
+                : 0.1d;
 
             Save.lastKnownAppState = "Boot";
             SaveService.Save(Save, SaveReason.Boot);
@@ -214,6 +227,32 @@ namespace DungeonBuilder.M0
             Telemetry?.Track("mana_generated", $"{{\"amount\":{generatedMana:0.###}}}");
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             KpiLine = $"KPI: avgMana/tick={snap.AverageManaPerTick:0.00}, blockedGates={snap.BlockedGateCount}/{snap.TotalGateEvaluations}";
+        }
+
+        public void ApplyHeatDelta(double delta)
+        {
+            HeatResult result = _heatSystem.ApplyEvent(new HeatEventInput(
+                Save != null ? Save.totalTicks : 0,
+                CurrentHeat,
+                delta
+            ));
+
+            CurrentHeat = result.NewHeat;
+            HeatLine = $"Heat: {CurrentHeat:0.00}";
+            Telemetry?.Track("heat_event_applied", $"{{\"delta\":{delta:0.###},\"heat\":{CurrentHeat:0.###}}}");
+        }
+
+        private void HandleSimulationTick(long tickIndex)
+        {
+            HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
+                tickIndex,
+                CurrentHeat,
+                HeatDecayPerTick,
+                1
+            ));
+
+            CurrentHeat = decayResult.NewHeat;
+            HeatLine = $"Heat: {CurrentHeat:0.00}";
         }
 
         private void HandleTickTelemetry(long tickIndex)
