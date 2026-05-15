@@ -5,6 +5,11 @@
 - Must preserve MVP constraints from locked specs and defer non-MVP systems.
 - Sprint 1 closeout evidence remains a hard prerequisite. **Needs clarification**: confirm evidence packet links before kickoff.
 
+## Test Governance References
+- Test-stage matrix: `docs/planning/test-stage-matrix.md`
+- Sprint 2 closeout checklist: `docs/planning/sprint-2-closeout-checklist.md`
+- Build promotion policy: `docs/planning/build-promotion-policy.md`
+
 ## Ticket: Mana Tick and Reserve Pressure Foundation
 
 Ticket ID: S2-T00

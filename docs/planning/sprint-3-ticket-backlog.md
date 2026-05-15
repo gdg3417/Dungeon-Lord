@@ -1,5 +1,10 @@
 # Sprint 3 Ticket Backlog (Hardening, Reconciliation, Release Reliability)
 
+## Test Governance References
+- Test-stage matrix: `docs/planning/test-stage-matrix.md`
+- Sprint 3 closeout checklist: `docs/planning/sprint-3-closeout-checklist.md`
+- Build promotion policy: `docs/planning/build-promotion-policy.md`
+
 ## Ticket: Save Partition Model and Migration Matrix
 
 Ticket ID: S3-T01
