@@ -57,7 +57,7 @@ Test Cases:
 
 Dependencies:
 - S2-T00A dungeon state baseline for floor contribution context.
-- S2-T03 heat state feed.
+- Heat state input contract or provisional MVP heat constants; full HeatSystem implementation remains S2-T03.
 
 Definition of Done:
 - Code or planning artifact change completed.
@@ -81,7 +81,7 @@ Source References:
 - docs/planning/actionable-backlog.md (Playable Core Loop Vertical Slice summary)
 - Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md
 - Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md
-- Docs/05 - Loot and Itemization Framework.md
+- Docs/05 - Loot Tables  Value  Attraction.md
 - Docs/17 - Save_State_Offline_Simulation_and_Time_Handling.md
 
 User Story:

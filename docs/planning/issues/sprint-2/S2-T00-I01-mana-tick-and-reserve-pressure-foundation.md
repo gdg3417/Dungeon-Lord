@@ -52,7 +52,7 @@ Define and validate deterministic mana tick behavior with reserve pressure guard
 
 ## Blockers
 - Sprint 1 evidence gate.
-- Heat efficiency input contract availability.
+- Heat state input contract or provisional MVP heat constants; full HeatSystem implementation remains S2-T03.
 
 ## Non-Goals
 - Late-game economy tuning passes.

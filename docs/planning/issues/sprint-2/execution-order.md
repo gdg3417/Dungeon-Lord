@@ -1,7 +1,7 @@
 # Sprint 2 Execution Order
 
 ## Parent Tickets Covered
-- S2-T00A through S2-T07 from `docs/planning/sprint-2-ticket-backlog.md`.
+- S2-T00, S2-T00A, and S2-T01 through S2-T07 from `docs/planning/sprint-2-ticket-backlog.md`.
 
 ## Sprint Readiness Gate (Must Pass Before Feature Start)
 1. Confirm Sprint 1 closeout evidence is complete for UAT-01 through UAT-05 and linked.
@@ -22,18 +22,19 @@
 
 ### Phase 2: Progression Safety and Contract Consumers
 8. S2-T01-I01 - Research State Machine and Guards.
-9. S2-T02-I01 - Verification Intent Model and Queue Lifecycle.
-10. S2-T06-I02 - Inventory Handoff and Loot Lifecycle Updates.
-11. S2-T07-I01 - Pending/Restricted State UI Bindings.
-12. S2-T04-I01 - Offline Orchestrator Order and Cap Handling.
-13. S2-T02-I02 - Idempotent Confirmation and Replay Safety Tests.
-14. S2-T07-I02 - Localization Keys and Coverage Checks.
-15. S2-T01-I02 - Research Save Fields and Migration Fixtures.
+9. S2-T01-I02 - Research Save Fields and Migration Fixtures.
+10. S2-T02-I01 - Verification Intent Model and Queue Lifecycle.
+11. S2-T06-I02 - Inventory Handoff and Loot Lifecycle Updates.
+12. S2-T07-I01 - Pending/Restricted State UI Bindings.
+13. S2-T04-I01 - Offline Orchestrator Order and Cap Handling.
+14. S2-T02-I02 - Idempotent Confirmation and Replay Safety Tests.
+15. S2-T07-I02 - Localization Keys and Coverage Checks.
 
 ## Dependency Rationale
 - Encounter contracts are sequenced before heat, loot integration, UI bindings, and offline orchestration because those systems consume encounter outputs and payload shape.
 - Layout and mana foundations are sequenced first so encounter inputs and resource outputs are stable before downstream integration.
 - Verification safety and localization remain in Sprint 2, but after deterministic loop contracts are validated.
+- Research persistence is sequenced before offline orchestration because offline research state must survive save/load boundaries.
 
 ## Sprint 2A / 2B Recommendation
 ### Sprint 2A (proof-of-loop slice)
