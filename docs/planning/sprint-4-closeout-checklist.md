@@ -4,6 +4,9 @@ Date: 2026-05-15
 Scope: Sprint 4 polish and MVP-claim governance checks.
 
 ## Checks
+- S4-UNIT-01 [Unit]: Sprint 4 implemented ticket unit evidence.
+  - Ticket alignment: S4-T01 through S4-T04 where implemented.
+  - Evidence: determinism regression logs, trigger-state tests, label/readability rule tests, override registry tests if approved.
 - S4-UAT-01 [UAT]: Telemetry-backed balance pass for first-loop pacing and clarity.
   - Ticket alignment: S4-T01.
   - Evidence: telemetry comparison packet, UAT first-loop observations, approved tuning log.
@@ -24,12 +27,13 @@ Scope: Sprint 4 polish and MVP-claim governance checks.
 Sprint 4 is not closed until all mandatory checks pass with evidence.
 
 ## Build promotion rule
-- Internal test promotion requires PASS for S4-UAT-01 through S4-UAT-03.
-- Release candidate claim requires PASS for S4-BG-01 and, if approved and implemented, S4-SIT-01.
+- Internal test promotion requires applicable Unit and SIT evidence for implemented Sprint 4 scope.
+- Release candidate claim requires PASS for S4-UAT-01 through S4-UAT-03, PASS for S4-BG-01, and PASS for S4-SIT-01 if S4-T04 is approved and implemented.
 
 ## Closeout packet template
 - Branch and commit tested:
 - Execution date and time UTC:
+- S4-UNIT-01 result:
 - S4-UAT-01 result:
 - S4-UAT-02 result:
 - S4-UAT-03 result:

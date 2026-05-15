@@ -19,13 +19,16 @@ Scope: Sprint 3 hardening closeout gates for Unit, SIT, UAT, and Build Gate gove
 - S3-UAT-01 [UAT]: Release readiness checklist and go or no-go dashboard walkthrough.
   - Ticket alignment: S3-T05.
   - Evidence: completed dashboard packet, stakeholder walkthrough notes, final decision status.
+- S3-UAT-02 [UAT]: Reconnect conflict player-state clarity.
+  - Ticket alignment: S3-T02.
+  - Evidence: scripted reconnect scenario notes, screenshots or recording, final player-facing state summary.
 
 ## Completion rule
 Sprint 3 is not closed until all checks above are PASS with evidence links.
 
 ## Build promotion rule
 - Internal test promotion requires PASS for S3-UNIT-01 and S3-SIT-01.
-- Release candidate promotion requires PASS for S3-BG-01, S3-BG-02, and S3-UAT-01.
+- Release candidate promotion requires PASS for S3-BG-01, S3-BG-02, and S3-UAT-01, plus PASS for S3-UAT-02 when S3-T02 is implemented.
 
 ## Closeout packet template
 - Branch and commit tested:
@@ -35,6 +38,7 @@ Sprint 3 is not closed until all checks above are PASS with evidence links.
 - S3-BG-01 result:
 - S3-BG-02 result:
 - S3-UAT-01 result:
+- S3-UAT-02 result:
 - Artifact locations:
 - Open risks and waivers:
 - Final signoff name and date:

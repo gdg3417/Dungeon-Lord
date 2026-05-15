@@ -25,9 +25,12 @@ Sprint 2 is not closed until every applicable check is marked PASS with linked e
 - S2-SIT-02 (Sprint 2B): Validate mana -> research -> verification queue state integration.
   - Pass criteria: queue transitions reflect expected lifecycle and blocking behavior.
   - Evidence: SIT transition logs and state snapshots.
-- S2-SIT-03 (Sprint 2A and Sprint 2B): Validate save/load persistence for layout, mana, research, and verification queue.
-  - Pass criteria: roundtrip preserves required fields and deterministic resume behavior.
-  - Evidence: persistence logs, fixture outputs, and schema comparison summary.
+- S2-SIT-03A (Sprint 2A): Validate save/load persistence for layout, mana, encounter event state, loot output, and heat state.
+  - Pass criteria: roundtrip preserves required Sprint 2A fields and deterministic resume behavior.
+  - Evidence: persistence logs, fixture outputs, schema comparison summary.
+- S2-SIT-03B (Sprint 2B): Validate save/load persistence for research lifecycle, verification queue, inventory handoff, UI trust state, and offline orchestration.
+  - Pass criteria: roundtrip preserves required Sprint 2B fields and deterministic resume behavior.
+  - Evidence: persistence logs, fixture outputs, schema comparison summary.
 
 ## UAT evidence section
 - S2-UAT-01 (Sprint 2A): Validate minimal dungeon layout and placement flow.
@@ -53,7 +56,8 @@ For each UAT check above:
 - S2-UNIT-01 result:
 - S2-SIT-01 result:
 - S2-SIT-02 result:
-- S2-SIT-03 result:
+- S2-SIT-03A result:
+- S2-SIT-03B result:
 - S2-UAT-01 result:
 - S2-UAT-02 result:
 - S2-UAT-03 result:

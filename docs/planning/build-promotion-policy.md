@@ -10,12 +10,16 @@ A branch can become a PR only when:
 3. Evidence links are attached for each completed check.
 4. Open defects are triaged with severity and disposition.
 
+For documentation-only planning PRs, Unit and SIT evidence may be marked Not Applicable when no executable code, game content, schemas, or build configuration changed. Markdown validation and human review evidence are still required.
+
 ## 2. When a PR can merge
 A PR can merge only when:
 1. Required checks in CI are green.
 2. Required governance checklist items for the active sprint are PASS.
 3. No unresolved blocker defects exist for included ticket scope.
 4. Build gate items marked blocker are all PASS.
+
+For documentation-only planning PRs, Unit and SIT evidence may be marked Not Applicable when no executable code, game content, schemas, or build configuration changed. Markdown validation and human review evidence are still required.
 
 ## 3. When a sprint can close
 A sprint can close only when:
