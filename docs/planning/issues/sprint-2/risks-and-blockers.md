@@ -9,45 +9,52 @@
 - Mitigation: Assign immediate QA/Release validation task to confirm evidence links and signoff.
 - Start status: Blocked until validated.
 
-## Clarification Risks
+## Planning and Sequencing Risks
 
-### R-02: Heat post-implementation tuning ownership clarity
-- Description: Heat behavior and locked MVP constants are sufficient for implementation; only post-implementation tuning ownership needs confirmation.
-- Impact: Low implementation risk; may affect later balance iteration workflow ownership.
-- Affected issues: S2-T03-I01, S2-T04-I01.
-- Mitigation: Assign balance owner for post-implementation tuning cadence and approvals.
-- Start status: Ready (non-blocking clarification).
+### R-02: Mana foundation coverage missing or unverified
+- Description: Mana tick, reserve pressure, and formula order requirements from Spec 01 and Spec 30 are underrepresented unless S2-T00 is executed.
+- Impact: Core loop outputs and offline reconciliation can drift from locked specs.
+- Affected issues: S2-T00-I01, S2-T04-I01, S2-T05-I02.
+- Mitigation: Execute S2-T00-I01 before encounter downstream integration and add deterministic/replay persistence tests.
+- Start status: Ready after Sprint 1 gate.
 
-### R-03: Verification retry/backoff and terminal failure policy uncertainty
+### R-03: Dungeon layout state missing or unverified
+- Description: Encounter resolver inputs are not reliable without an explicit MVP dungeon layout and placement baseline.
+- Impact: Encounter contract instability, rework risk, and save/load ambiguity.
+- Affected issues: S2-T00A-I01, S2-T05-I01, S2-T05-I02.
+- Mitigation: Freeze minimal layout contract early with immediate-save behavior and validation guards.
+- Start status: Ready after Sprint 1 gate.
+
+### R-04: Encounter-to-loot payload schema dependency
+- Description: Loot resolution and inventory handoff depend on stable encounter payload schema.
+- Impact: Integration delays and duplicate contract churn.
+- Affected issues: S2-T05-I02, S2-T06-I01, S2-T06-I02.
+- Mitigation: Freeze encounter event payload contract before full loot/inventory integration.
+- Start status: Ready with sequencing control.
+
+### R-05: Verification retry/backoff and terminal failure policy uncertainty
 - Description: Retry cadence and ownership of failure UX policy are not finalized.
 - Impact: S2-T02-I02 acceptance signoff risk; mismatch between system behavior and UX messaging.
 - Affected issues: S2-T02-I02, S2-T07-I01, S2-T07-I02.
 - Mitigation: Define temporary policy contract for Sprint 2, with explicit backlog carryover to Sprint 3 if needed.
 - Start status: Ready (non-blocking clarification).
 
-## Split-Dependency Risks
+### R-06: Mana Farm is MVP scope but intentionally delayed
+- Description: Mana Farm sub dungeon is in MVP scope, but starting it before core loop stabilization risks scope churn.
+- Impact: Capacity fragmentation and reduced chance of Sprint 2 deterministic loop closure.
+- Affected issues: Deferred MVP-MF01 placeholder and post-core-loop planning.
+- Mitigation: Keep Mana Farm as deferred MVP item gated by core loop stability evidence.
+- Start status: Deferred by sequencing policy.
 
-### R-04: Encounter/Loot split introduces integration ordering risk
-- Description: Splitting encounter contracts/events and loot/inventory handoff improves sizing but adds handoff dependency points.
-- Impact: Delay risk if payload schemas are not frozen early.
-- Affected issues: S2-T05-I01, S2-T05-I02, S2-T06-I01, S2-T06-I02.
-- Mitigation: Freeze event payload contract before full parallel work; add schema compatibility tests.
-- Start status: Ready with sequencing control.
+## Clarification Risks
 
-### R-05: UI bindings may start before stable state contracts
-- Description: UI issue depends on outputs from verification, encounter, and loot flows.
-- Impact: Rework in S2-T07-I01 if contracts change late.
-- Affected issues: S2-T07-I01.
-- Mitigation: Delay final UI wiring until event/state contract signoff; begin with placeholder adapters only.
-- Start status: Conditionally Ready.
+### R-07: Heat post-implementation tuning ownership clarity
+- Description: Heat behavior and locked MVP constants are sufficient for implementation; only post-implementation tuning ownership needs confirmation.
+- Impact: Low implementation risk; may affect later balance iteration workflow ownership.
+- Affected issues: S2-T03-I01, S2-T04-I01.
+- Mitigation: Assign balance owner for post-implementation tuning cadence and approvals.
+- Start status: Ready (non-blocking clarification).
 
-## Tickets That Should Not Start Until Clarification Resolves
-- S2-T03-I01 can proceed and complete using locked MVP constants; tuning ownership clarification is follow-up.
-- S2-T02-I02 should not be marked complete until retry/backoff policy and terminal-failure handling ownership are resolved.
-
-## Recommended Blocker Triage Order
-1. Validate Sprint 1 UAT evidence gate.
-2. Confirm post-implementation heat tuning ownership and review cadence.
-3. Resolve verification retry/backoff policy and ownership.
-4. Lock encounter-to-loot event payload schema.
-5. Start UI final wiring and localization completion.
+## Scope Statement
+- The risks above are planning and sequencing risks for locked MVP scope.
+- They are not requests to add non-MVP systems or expand feature scope.
