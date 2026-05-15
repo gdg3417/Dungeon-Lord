@@ -11,19 +11,19 @@
 
 ## Clarification Risks
 
-### R-02: Heat threshold and tuning uncertainty
-- Description: Heat behavior is defined, but final numeric thresholds/tuning authority remain unclear.
-- Impact: S2-T03-I01 completion/signoff risk; potential rework.
+### R-02: Heat post-implementation tuning ownership clarity
+- Description: Heat behavior and locked MVP constants are sufficient for implementation; only post-implementation tuning ownership needs confirmation.
+- Impact: Low implementation risk; may affect later balance iteration workflow ownership.
 - Affected issues: S2-T03-I01, S2-T04-I01.
-- Mitigation: Timebox decision meeting and lock threshold owner + interim values before coding.
-- Start status: Needs Clarification.
+- Mitigation: Assign balance owner for post-implementation tuning cadence and approvals.
+- Start status: Ready (non-blocking clarification).
 
 ### R-03: Verification retry/backoff and terminal failure policy uncertainty
 - Description: Retry cadence and ownership of failure UX policy are not finalized.
 - Impact: S2-T02-I02 acceptance signoff risk; mismatch between system behavior and UX messaging.
 - Affected issues: S2-T02-I02, S2-T07-I01, S2-T07-I02.
 - Mitigation: Define temporary policy contract for Sprint 2, with explicit backlog carryover to Sprint 3 if needed.
-- Start status: Needs Clarification.
+- Start status: Ready (non-blocking clarification).
 
 ## Split-Dependency Risks
 
@@ -42,12 +42,12 @@
 - Start status: Conditionally Ready.
 
 ## Tickets That Should Not Start Until Clarification Resolves
-- S2-T03-I01 should not be marked complete until heat threshold ownership/values are resolved.
+- S2-T03-I01 can proceed and complete using locked MVP constants; tuning ownership clarification is follow-up.
 - S2-T02-I02 should not be marked complete until retry/backoff policy and terminal-failure handling ownership are resolved.
 
 ## Recommended Blocker Triage Order
 1. Validate Sprint 1 UAT evidence gate.
-2. Resolve heat threshold/tuning authority decision.
+2. Confirm post-implementation heat tuning ownership and review cadence.
 3. Resolve verification retry/backoff policy and ownership.
 4. Lock encounter-to-loot event payload schema.
 5. Start UI final wiring and localization completion.

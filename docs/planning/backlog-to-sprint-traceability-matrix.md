@@ -8,7 +8,7 @@
 | Docs/09 - Dungeon_Progression_and_Research.md | Single-slot research progression | Research and Verification-Safe Progression | S2-T01 | Sprint 2 | Modified | State machine + persistence + pending verify path. |
 | Docs/25 - Security_Anti_cheat_and_Economy_Integrity.md | Economy-critical verification integrity | Research and Verification-Safe Progression | S2-T02, S3-T02 | Sprint 2/3 | Split | Queue in S2; reconciliation hardening in S3. |
 | Docs/34 - Backend_Services_and_API_Contract.md | Idempotent contract/replay behavior | Research and Verification-Safe Progression | S2-T02, S3-T02, S3-T05 | Sprint 2/3 | Modified | Contract handling split across implementation and release readiness. |
-| Docs/02 - Heat System v3.md | Heat gain/reduction/tier bounds | Heat and Risk-Reward Regulation | S2-T03 | Sprint 2 | Existing | Numeric thresholds still flagged Needs clarification. |
+| Docs/02 - Heat System v3.md | Heat gain/reduction/tier bounds | Heat and Risk-Reward Regulation | S2-T03 | Sprint 2 | Existing | Locked MVP constants are sufficient for implementation; later tuning authority is a non-blocking balance clarification. |
 | Docs/17 - Save_State_Offline_Simulation_and_Time_Handling.md | Offline elapsed + save integrity | Playable Core Loop / Reliability Hardening | S2-T04, S3-T01 | Sprint 2/3 | Modified | Execution split by capability phase. |
 | Docs/03,04,06,08 | Encounter and party baseline behavior | Playable Core Loop Vertical Slice | S2-T05 | Sprint 2 | Split | Kept baseline only; advanced AI deferred. |
 | Docs/05,19,23 | Loot + content integrity + inventory lifecycle | Playable Core Loop Vertical Slice | S2-T06 | Sprint 2 | Modified | Added explicit invalid-reference fail behavior. |
@@ -78,7 +78,7 @@
   - Maintain governance continuity between sprint closeout and sprint kickoff.
 
 ## Not Sprint-Ready / Needs Clarification Flags
-1. Final Heat threshold numbers and tuning authority (affects S2-T03).
+1. Heat tuning authority for post-implementation balance iteration (affects S2-T03) — non-blocking for MVP implementation.
 2. Retry/backoff + terminal-failure UX ownership for verification queue (affects S2-T02).
 3. MVP device profile list for perf gates (affects S3-T04).
 4. Approved MVP-safe override scenarios for Spec 32 subset (affects S4-T04).

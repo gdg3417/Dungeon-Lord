@@ -176,7 +176,7 @@ Definition of Done:
 - No unsupported feature expansion.
 
 Notes:
-- **Needs clarification**: final numeric thresholds if tuning not finalized.
+- Locked MVP heat constants are sufficient for implementation; later tuning authority remains a non-blocking balance clarification.
 
 ## Ticket: Offline Progression Orchestrator (Ordered Deterministic Updates)
 

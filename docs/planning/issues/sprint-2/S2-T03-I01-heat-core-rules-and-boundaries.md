@@ -5,7 +5,7 @@ Issue ID: S2-T03-I01
 Sprint: Sprint 2
 Priority: Must Have
 Type: Feature
-Status: Needs Clarification
+Status: Ready
 
 ## Goal
 Implement heat gain/reduction logic with tier/state boundary enforcement and invariant-safe clamping.
@@ -28,7 +28,7 @@ Implement heat gain/reduction logic with tier/state boundary enforcement and inv
 ## Implementation Notes
 - Keep threshold and coefficients data-driven.
 - Add guardrails for offline rebound rules.
-- Block final tuning signoff until numeric threshold authority is confirmed.
+- Implement using locked MVP constants; treat later tuning authority as balance follow-up only.
 
 ## Tests Required
 - Tier boundary crossing test.
@@ -43,7 +43,7 @@ Implement heat gain/reduction logic with tier/state boundary enforcement and inv
 - Source traceability preserved.
 
 ## Blockers
-- Final heat threshold values/tuning authority unresolved.
+- None for implementation. Locked MVP constants are sufficient; later tuning authority is a non-blocking balance clarification.
 
 ## Non-Goals
 - Late-game balancing pass.
