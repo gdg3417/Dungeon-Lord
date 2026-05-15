@@ -4,8 +4,9 @@
 
 ## Mandatory development rules
 
-Before coding, read:
-- docs/development/codex-development-rules.md
+Before coding, read the repo-root rules file:
+- docs/development/codex-development-rules.md from the repository root
+- ../docs/development/codex-development-rules.md when working from dungeon-builder/
 
 These rules control localization, data-driven tuning, feature flags, event configuration, scalable system boundaries, and test evidence requirements.
 
