@@ -174,7 +174,7 @@ Definition of Done:
 Notes:
 - Any broad redesign beyond MVP should be deferred.
 
-## Ticket: MVP-safe Event Override Hooks (Limited)
+## Ticket: MVP Test Override Hooks, Not Player-Facing Events
 
 Ticket ID: S4-T04
 Epic: MVP Vertical Slice Polish
@@ -189,18 +189,18 @@ Source References:
 
 User Story:
 As a system,
-I want limited event override hooks for approved MVP scenarios,
-so that controlled tuning/testing can occur without introducing full live-ops complexity.
+I want internal-only override hooks for controlled MVP validation scenarios,
+so that test tuning can occur without shipping player-facing event systems.
 
 Functional Requirements:
-- Implement only explicitly approved override cases tied to MVP testing/tuning.
-- Prevent unsupported broad event-system behaviors.
-- Ensure overrides are auditable and reversible.
+- Implement only explicitly approved internal test override cases tied to MVP validation and tuning.
+- Prevent unsupported broad event-system behaviors and any player-facing event activation.
+- Ensure overrides are auditable, reversible, and disabled in default player builds.
 
 Technical Requirements:
-- Scope-locked override registry.
-- Deterministic application order with formula framework compliance.
-- Override activation logging.
+- Scope-locked internal override registry.
+- Deterministic application order with formula framework compliance and offline verification safety.
+- Override activation logging with explicit test context tags.
 
 Acceptance Criteria:
 - Given an approved override case, when activated, then only scoped rule changes apply.
@@ -228,5 +228,14 @@ Definition of Done:
 - Source references preserved.
 - No unsupported feature expansion.
 
+Non-Goals:
+- Shipping live seasonal events.
+- Adding player-facing event frameworks.
+- Enabling leaderboards, event passes, or live-ops cadences.
+
 Notes:
-- Defer broad live-ops event platform behavior.
+- This ticket is for controlled testing, data-driven tuning, and safe internal override validation only.
+- It does not ship live seasonal events.
+- It does not add player-facing event systems.
+- It does not enable leaderboards, event passes, or live-ops cadence.
+- It must preserve formula order and offline verification rules.

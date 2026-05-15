@@ -359,8 +359,9 @@ Skipping Sprint 4 may ship a technically stable but confusing first-session expe
 
 ## Backlog Items Not Yet Sprint-Ready
 - Full political/economic/guild reputation depth (Spec 07): Needs clear MVP boundary and ownership.
-- Event framework broad override system (Spec 32 complete vision): Needs concrete use-cases and risk assessment.
+- Event framework broad override system (Spec 32 complete vision): Defer full player-facing event framework; keep internal override subset only.
 - External world economy full simulation depth (Spec 16 advanced behaviors): Needs balancing model + telemetry targets.
+- MVP-MF01: Mana Farm Sub Dungeon Placeholder and Scope Gate: MVP scope retained, but deferred until main dungeon core loop stability is validated.
 - Prestige/seasonal resets (Spec 22), social/competitive (Spec 24), live-ops events (Spec 13), monetization implementation (Spec 12): Deferred by MVP scope.
 
 ## Conflicts and Duplicates
@@ -378,13 +379,15 @@ Sprint goal:
 Deliver deterministic playable MVP core loop with verification-safe progression and heat regulation.
 
 Selected stories:
-1. Heat event application and tier boundaries.
-2. Single-slot research lifecycle.
-3. Verification intent queue + idempotent confirmation.
-4. Offline progression orchestrator (mana/heat/research ordering).
-5. Encounter resolver baseline (deterministic).
-6. Loot extraction mapping and inventory handoff.
-7. UI trust minimum for pending/restricted/error states.
+1. Dungeon layout and placement MVP foundation for encounter inputs.
+2. Mana tick and reserve pressure foundation.
+3. Encounter resolver baseline (deterministic contracts + event outputs).
+4. Loot table resolution and inventory handoff baseline.
+5. Heat event application and tier boundaries.
+6. Single-slot research lifecycle.
+7. Verification intent queue + idempotent confirmation.
+8. Offline progression orchestrator (mana/heat/research ordering).
+9. UI trust minimum for pending/restricted/error states.
 
 Dependencies:
 - Sprint 1 UAT closure evidence complete.

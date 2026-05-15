@@ -5,6 +5,133 @@
 - Must preserve MVP constraints from locked specs and defer non-MVP systems.
 - Sprint 1 closeout evidence remains a hard prerequisite. **Needs clarification**: confirm evidence packet links before kickoff.
 
+## Ticket: Mana Tick and Reserve Pressure Foundation
+
+Ticket ID: S2-T00
+Epic: Playable Core Loop Vertical Slice
+Feature Area: Resource Economy and Formula Framework
+Priority: Must Have
+Sprint: Sprint 2
+Status: Added
+Source References:
+- docs/planning/actionable-backlog.md (Story: Deterministic Mana Tick and Reservation Flow)
+- Docs/01 - Mana System v3.md
+- Docs/02 - Heat System v3.md
+- Docs/17 - Save_State_Offline_Simulation_and_Time_Handling.md
+- Docs/29 - Time_Model_and_Tick_Resolution.md
+- Docs/30 - Formula_Framework_and_Modifier_Stacking_Rules.md
+
+User Story:
+As a player,
+I want mana generation and reservation pressure to resolve deterministically,
+so that spending and progression decisions are predictable.
+
+Functional Requirements:
+- Calculate base mana generation each tick.
+- Include floor contribution and adventurer death mana sources.
+- Include skill spill mana hooks and elite multiplier handling where applicable.
+- Apply heat efficiency modifier in the locked formula order.
+- Maintain Total, Reserved, and Usable pools with invariant-safe updates.
+- Surface fragile state when Reserved exceeds incoming generation.
+
+Technical Requirements:
+- Deterministic equal-input behavior for repeated runs.
+- Save/load persistence for mana pools and fragile-state fields.
+- Formula framework stacking order enforcement via Spec 30.
+
+Acceptance Criteria:
+- Given fixed inputs and seed, when two tick runs execute, then Total/Reserved/Usable outputs are identical.
+- Given Reserved greater than incoming generation, when tick updates apply, then fragile state is set and usable mana never underflows below zero.
+- Given all source inputs (base, floor, death, spill, elite, heat), when tick resolves, then output matches documented stacking order.
+
+Implementation Tasks:
+- Define deterministic mana tick contract with explicit source fields.
+- Implement pool update ordering and fragile-state guard.
+- Add save/load fields and migration fixture update requirements.
+
+Test Cases:
+- Equal-input deterministic mana tick replay test.
+- Reserved pressure fragile-state boundary test.
+- Source stacking order validation test.
+- Save/load persistence round-trip test.
+
+Dependencies:
+- S2-T00A dungeon state baseline for floor contribution context.
+- S2-T03 heat state feed.
+
+Definition of Done:
+- Code or planning artifact change completed.
+- Acceptance criteria verified.
+- Tests added or updated.
+- Source references preserved.
+- No unsupported feature expansion.
+
+Notes:
+- This ticket covers foundation behavior only; advanced economy tuning remains outside Sprint 2 implementation scope.
+
+## Ticket: Dungeon Layout and Placement MVP Foundation
+
+Ticket ID: S2-T00A
+Epic: Playable Core Loop Vertical Slice
+Feature Area: Dungeon State and Encounter Inputs
+Priority: Must Have
+Sprint: Sprint 2
+Status: Added
+Source References:
+- docs/planning/actionable-backlog.md (Playable Core Loop Vertical Slice summary)
+- Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md
+- Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md
+- Docs/05 - Loot and Itemization Framework.md
+- Docs/17 - Save_State_Offline_Simulation_and_Time_Handling.md
+
+User Story:
+As a player,
+I want a minimal editable dungeon layout and placement flow,
+so that encounters consume valid dungeon state and save behavior is trustworthy.
+
+Functional Requirements:
+- Support minimal room or tile layout model required by encounter resolver.
+- Support room placement/modification within MVP limits.
+- Support monster placement only into valid rooms or tiles.
+- Provide basic dungeon state contract consumed by encounter resolver.
+- Trigger immediate save for tile placement and movement updates in edit mode.
+- Enforce MVP limits: one main dungeon and up to five floors.
+
+Technical Requirements:
+- Deterministic layout serialization for equal inputs.
+- Validation guards for invalid room/tile and placement targets.
+- Save/load compatibility for layout and monster placement fields.
+
+Acceptance Criteria:
+- Given valid edit-mode placement action, when committed, then dungeon state updates and immediate save trigger fires.
+- Given invalid placement target, when placement is attempted, then action is rejected with explicit reason and no partial state mutation.
+- Given same initial layout and same placement actions, when replayed, then resulting dungeon state is identical.
+
+Implementation Tasks:
+- Define minimum dungeon layout and placement contracts.
+- Add placement validation guards and encounter-consumable state projection.
+- Define immediate-save trigger points for edit-mode placement/movement.
+
+Test Cases:
+- Valid room/tile placement plus immediate-save trigger test.
+- Invalid placement rejection test.
+- Encounter-consumable state projection schema test.
+- Deterministic layout replay test.
+
+Dependencies:
+- Encounter contract finalization in S2-T05-I01.
+- Save/state persistence standards from Spec 17.
+
+Definition of Done:
+- Code or planning artifact change completed.
+- Acceptance criteria verified.
+- Tests added or updated.
+- Source references preserved.
+- No unsupported feature expansion.
+
+Notes:
+- No advanced editor UX polish in MVP scope.
+
 ## Ticket: Research Queue State Machine (Single Slot)
 
 Ticket ID: S2-T01
