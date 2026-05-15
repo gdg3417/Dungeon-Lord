@@ -13,6 +13,8 @@ A branch can become a PR only when:
 For documentation-only planning PRs, Unit and SIT evidence may be marked Not Applicable when no executable code, game content, schemas, or build configuration changed. Markdown validation and human review evidence are still required.
 
 ## 2. When a PR can merge
+Implementation PRs must satisfy docs/development/codex-development-rules.md before merge.
+
 A PR can merge only when:
 1. Required checks in CI are green.
 2. Required governance checklist items for the active sprint are PASS.

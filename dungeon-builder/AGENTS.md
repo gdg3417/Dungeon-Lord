@@ -2,6 +2,14 @@
 
 ## Project
 
+## Mandatory development rules
+
+Before coding, read the repo-root rules file:
+- docs/development/codex-development-rules.md from the repository root
+- ../docs/development/codex-development-rules.md when working from dungeon-builder/
+
+These rules control localization, data-driven tuning, feature flags, event configuration, scalable system boundaries, and test evidence requirements.
+
 Dungeon Builder is a Unity mobile idle dungeon management game.
 
 The player is a living dungeon core. The MVP goal is to prove that building, observing, and optimizing a dungeon ecosystem is fun.
