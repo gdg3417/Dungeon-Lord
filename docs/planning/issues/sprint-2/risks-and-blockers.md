@@ -58,3 +58,33 @@
 ## Scope Statement
 - The risks above are planning and sequencing risks for locked MVP scope.
 - They are not requests to add non-MVP systems or expand feature scope.
+
+## Test Governance Risks
+
+### R-08: Unit, SIT, and UAT evidence not yet generated
+- Description: Sprint 2 planning defines test obligations, but implementation evidence artifacts are not yet produced.
+- Impact: Closeout cannot complete and promotion claims become unverifiable.
+- Affected issues: All Sprint 2 issues and Sprint 2 closeout packet.
+- Mitigation: Generate and link evidence per `docs/planning/sprint-2-closeout-checklist.md`.
+- Start status: Open.
+
+### R-09: SIT likely required for cross-system flows
+- Description: Core loop flows cross layout, encounter, loot, heat, mana, research, and persistence boundaries.
+- Impact: Unit-only validation can miss integration defects and sequencing faults.
+- Affected issues: S2-T00A, S2-T00, S2-T01, S2-T04, S2-T05, S2-T06.
+- Mitigation: Execute SIT checks and keep integration traces in closeout packet.
+- Start status: Open.
+
+### R-10: UAT likely required for player-facing loop clarity
+- Description: Player trust depends on understandable layout, encounter outcomes, reserve pressure, pending verification messaging, and offline summaries.
+- Impact: Technical pass without usability evidence can still fail MVP acceptance.
+- Affected issues: S2-T00A, S2-T00, S2-T05, S2-T06, S2-T07, and Sprint 2B conditional checks.
+- Mitigation: Execute scripted UAT checks and capture artifacts for each required step.
+- Start status: Open.
+
+### R-11: Build promotion should be blocked by missing evidence artifacts
+- Description: Promotions without Unit, SIT, UAT, and build gate evidence introduce governance and release integrity risk.
+- Impact: Invalid branch-to-PR, merge, or RC decisions.
+- Affected issues: All sprint transitions starting with Sprint 2.
+- Mitigation: Enforce `docs/planning/build-promotion-policy.md` blocker rules.
+- Start status: Open.

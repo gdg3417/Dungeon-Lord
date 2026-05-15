@@ -92,3 +92,8 @@
 - Live-ops/world events full system (Spec 13).
 - Prestige/seasonal reset systems (Spec 22).
 - Social/competitive systems (Spec 24).
+
+## Test Governance Artifacts
+- Sprint 2 to Sprint 4 matrix: `docs/planning/test-stage-matrix.md`
+- Sprint closeout checklists: `docs/planning/sprint-2-closeout-checklist.md`, `docs/planning/sprint-3-closeout-checklist.md`, `docs/planning/sprint-4-closeout-checklist.md`
+- Build promotion policy: `docs/planning/build-promotion-policy.md`

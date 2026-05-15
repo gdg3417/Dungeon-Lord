@@ -1,5 +1,10 @@
 # Sprint 4 Ticket Backlog (Onboarding, Tuning, Accessibility, MVP-safe Hooks)
 
+## Test Governance References
+- Test-stage matrix: `docs/planning/test-stage-matrix.md`
+- Sprint 4 closeout checklist: `docs/planning/sprint-4-closeout-checklist.md`
+- Build promotion policy: `docs/planning/build-promotion-policy.md`
+
 ## Ticket: Telemetry-Driven Core Loop Balance Pass
 
 Ticket ID: S4-T01
