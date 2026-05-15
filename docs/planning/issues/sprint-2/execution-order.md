@@ -13,22 +13,22 @@
 1. Validate Sprint 1 evidence gate (planning/QA check).
 
 ### Phase 1: Foundation State and Queue
-2. S2-T02-I01 — Verification Intent Model and Queue Lifecycle.
-3. S2-T01-I01 — Research State Machine and Guards.
-4. S2-T01-I02 — Research Save Fields and Migration Fixtures.
-5. S2-T02-I02 — Idempotent Confirmation and Replay Safety Tests (starts once queue lifecycle exists).
+2. S2-T02-I01 - Verification Intent Model and Queue Lifecycle.
+3. S2-T01-I01 - Research State Machine and Guards.
+4. S2-T01-I02 - Research Save Fields and Migration Fixtures.
+5. S2-T02-I02 - Idempotent Confirmation and Replay Safety Tests (starts once queue lifecycle exists).
 
 ### Phase 2: Core Simulation Domains
-6. S2-T05-I01 — Encounter Contracts and Seeded Resolution.
-7. S2-T03-I01 — Heat Core Rules and Boundary Enforcement.
-8. S2-T06-I01 — Loot Table Resolution and Validation.
-9. S2-T05-I02 — Encounter Event Emission for Downstream Systems.
-10. S2-T06-I02 — Inventory Handoff and Loot Lifecycle Updates.
+6. S2-T05-I01 - Encounter Contracts and Seeded Resolution.
+7. S2-T03-I01 - Heat Core Rules and Boundary Enforcement.
+8. S2-T06-I01 - Loot Table Resolution and Validation.
+9. S2-T05-I02 - Encounter Event Emission for Downstream Systems.
+10. S2-T06-I02 - Inventory Handoff and Loot Lifecycle Updates.
 
 ### Phase 3: Orchestration and Player-Facing Trust Surfaces
-11. S2-T04-I01 — Offline Orchestrator Order and Cap Handling.
-12. S2-T07-I02 — Localization Keys and Coverage Checks.
-13. S2-T07-I01 — Pending/Restricted State UI Bindings.
+11. S2-T04-I01 - Offline Orchestrator Order and Cap Handling.
+12. S2-T07-I02 - Localization Keys and Coverage Checks.
+13. S2-T07-I01 - Pending/Restricted State UI Bindings.
 
 ## Parallelization Plan
 

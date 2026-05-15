@@ -31,7 +31,7 @@
   - Deferred non-MVP scope exclusions.
 - Items modified:
   - Converted S2/S3/S4 build steps into discrete ticket units with explicit invalid-state AC.
-  - Added explicit “Needs clarification” flags where execution blockers exist.
+  - Added explicit "Needs clarification" flags where execution blockers exist.
 - Items split:
   - S2-02 verification pipeline split from S3 reconciliation hardening.
   - Encounter and loot items split into separate sprint-sized tickets.
@@ -78,7 +78,7 @@
   - Maintain governance continuity between sprint closeout and sprint kickoff.
 
 ## Not Sprint-Ready / Needs Clarification Flags
-1. Heat tuning authority for post-implementation balance iteration (affects S2-T03) — non-blocking for MVP implementation.
+1. Heat tuning authority for post-implementation balance iteration (affects S2-T03) - non-blocking for MVP implementation.
 2. Retry/backoff + terminal-failure UX ownership for verification queue (affects S2-T02).
 3. MVP device profile list for perf gates (affects S3-T04).
 4. Approved MVP-safe override scenarios for Spec 32 subset (affects S4-T04).

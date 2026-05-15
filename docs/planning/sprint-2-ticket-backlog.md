@@ -235,7 +235,7 @@ Definition of Done:
 - No unsupported feature expansion.
 
 Notes:
-- Must preserve “offline heat rebound constrained within current tier” invariant.
+- Must preserve "offline heat rebound constrained within current tier" invariant.
 
 ## Ticket: Encounter Resolver Baseline (MVP Classes + Events)
 

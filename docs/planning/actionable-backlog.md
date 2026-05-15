@@ -1,26 +1,26 @@
 # Actionable Game Development Backlog
 
 ## Source Documents Reviewed
-- `README.md` — repository-level context (minimal project framing).
-- `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` — authoritative lock status, global invariants, and implementation safety constraints.
-- `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md` — normalized terminology and invariant definitions.
-- `Docs/Dungeon Builder Game Design Doc v2.md` — high-level player fantasy, loop intent, and UX direction.
-- `Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md` — MVP vertical-slice boundaries.
-- `Docs/Dungeon_Builder_Architecture_Spec_v1.md` — runtime boundaries, system integration expectations.
-- `Docs/Dungeon_Builder_CoreTech_Spec_v1.md` — core technical quality constraints and platform behavior.
-- `Docs/Dungeon_Builder_Monsterology_Spec_v1.md` — monster taxonomy/system behavior references.
-- `Docs/Dungeon_Builder_Trapcraft_Spec_v1.md` — trap and hazard behavior references for encounters.
-- `Docs/Dungeon_Builder_Arcanology_Spec_v1.md` — research/magic progression references.
-- `Docs/Dungeon_Builder_Diplomacy_Spec_v1.md` — identified as largely deferred for MVP.
-- System Specs `Docs/01` through `Docs/37` — functional and technical requirements source-of-truth for game systems and engineering guardrails.
-- `Docs/Sprint_Spec_Coverage_Matrix.md` — baseline sprint-to-spec mapping and current owner/artifact expectations.
-- `Docs/Implementation_Gap_Assessment_2026-05-13.md` — current-state implementation gaps and sequencing risks.
-- `Docs/Sprint1_Completion_Plan_2026-05-13.md` — baseline Sprint 2/3/4 execution plan.
-- `Docs/Sprint1_Closeout_Checklist_2026-05-13.md` — Sprint 1 closure gates and quality evidence requirements.
+- `README.md` - repository-level context (minimal project framing).
+- `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` - authoritative lock status, global invariants, and implementation safety constraints.
+- `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md` - normalized terminology and invariant definitions.
+- `Docs/Dungeon Builder Game Design Doc v2.md` - high-level player fantasy, loop intent, and UX direction.
+- `Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md` - MVP vertical-slice boundaries.
+- `Docs/Dungeon_Builder_Architecture_Spec_v1.md` - runtime boundaries, system integration expectations.
+- `Docs/Dungeon_Builder_CoreTech_Spec_v1.md` - core technical quality constraints and platform behavior.
+- `Docs/Dungeon_Builder_Monsterology_Spec_v1.md` - monster taxonomy/system behavior references.
+- `Docs/Dungeon_Builder_Trapcraft_Spec_v1.md` - trap and hazard behavior references for encounters.
+- `Docs/Dungeon_Builder_Arcanology_Spec_v1.md` - research/magic progression references.
+- `Docs/Dungeon_Builder_Diplomacy_Spec_v1.md` - identified as largely deferred for MVP.
+- System Specs `Docs/01` through `Docs/37` - functional and technical requirements source-of-truth for game systems and engineering guardrails.
+- `Docs/Sprint_Spec_Coverage_Matrix.md` - baseline sprint-to-spec mapping and current owner/artifact expectations.
+- `Docs/Implementation_Gap_Assessment_2026-05-13.md` - current-state implementation gaps and sequencing risks.
+- `Docs/Sprint1_Completion_Plan_2026-05-13.md` - baseline Sprint 2/3/4 execution plan.
+- `Docs/Sprint1_Closeout_Checklist_2026-05-13.md` - Sprint 1 closure gates and quality evidence requirements.
 
 ## Assumptions and Open Questions
 1. Sprint planning baseline appears to be **post-Sprint-1 closeout**, but closure evidence is external; Sprint 2 start is contingent on full UAT signoff. **Needs clarification**.
-2. Heat system numeric thresholds are marked “locked pending final numbers” in Spec 02 language; implementation framing is clear but exact tuning may still be pending. **Needs clarification**.
+2. Heat system numeric thresholds are marked "locked pending final numbers" in Spec 02 language; implementation framing is clear but exact tuning may still be pending. **Needs clarification**.
 3. Reputation/politics depth (Spec 07, Diplomacy spec) conflicts with MVP deferment guidance in sprint planning artifacts; treat as deferred except minimal hooks. **Recommended control source**: Sprint spec matrix + MVP scope docs (more recent operational planning).
 4. Event framework (Spec 32) is planned for Sprint 4, but encounter/loot balancing may need limited override hooks earlier for testability. **Needs clarification**.
 5. Backend verification contracts (Spec 34) are required for economy-critical actions, but environment assumptions for offline-first QA flows are not fully explicit. **Needs clarification**.
@@ -220,7 +220,7 @@ Notes:
 ### Epic: Research and Verification-Safe Progression
 Feature Area: Research and Progression
 Priority: Must Have
-Sprint Target: Sprint 2–3
+Sprint Target: Sprint 2-3
 Status: Existing (Modified sequencing)
 
 Summary:
@@ -311,7 +311,7 @@ Playable loop **with testable domain slices**: Heat, Research, Verification pipe
 
 Changes:
 - Add: HeatSystem implementation and tests as first Sprint 2 task.
-- Split: Broad “encounter simulation” into contract definition and deterministic resolver stories.
+- Split: Broad "encounter simulation" into contract definition and deterministic resolver stories.
 - Modify: UI work constrained to pending/restricted/loop-output transparency; no broad polish.
 - Move: Any retention/balance-only work to Sprint 4 unless required to validate MVP loop.
 
@@ -337,7 +337,7 @@ Reasoning:
 Specs 25/28/33/34/36/37 are reliability-critical for MVP candidate quality.
 
 Risks:
-If unchanged, release hardening may be incomplete despite “feature complete” claims.
+If unchanged, release hardening may be incomplete despite "feature complete" claims.
 
 ### Sprint 4 (Recommended)
 Current Purpose:
@@ -366,7 +366,7 @@ Skipping Sprint 4 may ship a technically stable but confusing first-session expe
 ## Conflicts and Duplicates
 - Conflict: Some docs include deep diplomacy/political systems while sprint matrix marks them deferred.
   - Recommendation: Sprint matrix + MVP smallest-fun doc controls for implementation now (more specific to delivery stage).
-- Conflict: Spec 02 phrasing indicates lock but “pending final numbers”; behavior is locked, tuning values potentially not.
+- Conflict: Spec 02 phrasing indicates lock but "pending final numbers"; behavior is locked, tuning values potentially not.
   - Recommendation: Implement behavior now; mark numeric tuning backlog under Sprint 4.
 - Duplicate/Overlap: Encounter, loot, and heat requirements appear across Specs 03/04/05/06/08/16 and sprint tasks.
   - Resolution: Use single domain event contract to prevent duplicate implementations.

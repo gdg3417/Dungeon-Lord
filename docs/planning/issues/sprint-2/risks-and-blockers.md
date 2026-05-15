@@ -3,7 +3,7 @@
 ## Critical Gate
 
 ### R-01: Sprint 1 closeout evidence gate (Blocker)
-- Description: Sprint 2 cannot start until `Docs/Sprint1_Closeout_Checklist_2026-05-13.md` has complete ✅ evidence for UAT-01..UAT-05.
+- Description: Sprint 2 cannot start until `Docs/Sprint1_Closeout_Checklist_2026-05-13.md` has complete [PASS] evidence for UAT-01..UAT-05.
 - Impact: All Sprint 2 issues blocked.
 - Affected issues: All S2 issues.
 - Mitigation: Assign immediate QA/Release validation task to confirm evidence links and signoff.
