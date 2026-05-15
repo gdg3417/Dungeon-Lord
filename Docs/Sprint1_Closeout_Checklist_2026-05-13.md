@@ -4,7 +4,7 @@ Date: 2026-05-13
 Scope: Final evidence tracker and click-by-click UAT script required to mark Sprint 1 complete.
 
 ## Completion rule
-Sprint 1 is **not closed** until every item below is marked ✅ with evidence links/log snippets.
+Sprint 1 is **not closed** until every item below is marked PASS with evidence links/log snippets.
 
 ## Pre-flight (do this before running checks)
 1. Install/open the project in the agreed Unity Editor version for the branch.
@@ -164,4 +164,4 @@ Ensure runtime visibility for Sprint 1 verification signals.
 - Final signoff (name/date):
 
 ## Next sprint handoff constraint
-Only begin Sprint 2 feature implementation after this file is updated with complete ✅ evidence for all five UAT checks.
+Only begin Sprint 2 feature implementation after this file is updated with complete PASS evidence for all five UAT checks.
