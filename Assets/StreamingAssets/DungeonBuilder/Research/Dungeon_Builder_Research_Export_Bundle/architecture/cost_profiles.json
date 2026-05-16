@@ -1,0 +1,27 @@
+[
+  {
+    "cost_profile_id": "cost_intro_low",
+    "reserved_mana_cost": 10,
+    "notes": "Intro node"
+  },
+  {
+    "cost_profile_id": "cost_low",
+    "reserved_mana_cost": 25,
+    "notes": "Low cost node"
+  },
+  {
+    "cost_profile_id": "cost_med",
+    "reserved_mana_cost": 60,
+    "notes": "Medium cost node"
+  },
+  {
+    "cost_profile_id": "cost_high",
+    "reserved_mana_cost": 120,
+    "notes": "High cost node"
+  },
+  {
+    "cost_profile_id": "cost_very_high",
+    "reserved_mana_cost": 200,
+    "notes": "Very high cost node"
+  }
+]

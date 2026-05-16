@@ -1,0 +1,44 @@
+{
+  "DiplomacyEffects": [
+    {
+      "eff_id": "eff_dp_fundamentals",
+      "effect_type": "unlock_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_system",
+      "notes": "Enables branch"
+    },
+    {
+      "eff_id": "eff_dp_passive_decay_1",
+      "effect_type": "heat_decay_mult",
+      "value": 1.1,
+      "unit": "mult",
+      "tags": "tag_heat",
+      "notes": "Slightly faster passive decay"
+    },
+    {
+      "eff_id": "eff_dp_guild_rapport_1",
+      "effect_type": "reputation_volatility_mult",
+      "value": 0.95,
+      "unit": "mult",
+      "tags": "tag_rep",
+      "notes": "Small volatility reduction"
+    },
+    {
+      "eff_id": "eff_dp_contract_ledger",
+      "effect_type": "contracts_ui_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_ui",
+      "notes": "Exposes contract hooks"
+    },
+    {
+      "eff_id": "Contracts are post-MVP content, but UI and data hooks can exist in MVP.",
+      "effect_type": null,
+      "value": null,
+      "unit": null,
+      "tags": null,
+      "notes": null
+    }
+  ]
+}

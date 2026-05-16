@@ -1,0 +1,44 @@
+{
+  "CoreEffects": [
+    {
+      "eff_id": "eff_ct_fundamentals",
+      "effect_type": "unlock_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_system",
+      "notes": "Enables branch"
+    },
+    {
+      "eff_id": "eff_ct_mana_reservoir_1",
+      "effect_type": "mana_capacity_mult",
+      "value": 1.2,
+      "unit": "mult",
+      "tags": "tag_capacity",
+      "notes": "Increase max mana capacity"
+    },
+    {
+      "eff_id": "eff_ct_conversion_tuning_1",
+      "effect_type": "mana_efficiency_add_pct",
+      "value": 0.03,
+      "unit": "pct",
+      "tags": "tag_efficiency",
+      "notes": "Small additive efficiency"
+    },
+    {
+      "eff_id": "eff_ct_reserve_buffer_1",
+      "effect_type": "research_pause_threshold_add",
+      "value": 0.1,
+      "unit": "pct",
+      "tags": "tag_stability",
+      "notes": "Allows research to stay active at lower usable mana ratio"
+    },
+    {
+      "eff_id": "effect_type and unit are intentionally generic for forward compatibility.",
+      "effect_type": null,
+      "value": null,
+      "unit": null,
+      "tags": null,
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "ResearchNode": [
+    "research_id",
+    "category",
+    "unlock_type",
+    "unlock_target_id",
+    "effect_profile_id",
+    "display_name_key",
+    "description_key",
+    "cost_profile_id",
+    "time_seconds",
+    "prereq_ids",
+    "ui_group",
+    "version_introduced",
+    "notes",
+    "branch"
+  ],
+  "EffectRow_Generic": [
+    "eff_id",
+    "effect_type",
+    "value",
+    "unit",
+    "tags",
+    "notes"
+  ],
+  "CostProfile": [
+    "cost_profile_id",
+    "reserved_mana_cost",
+    "notes"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "TrapcraftEffects": [
+    {
+      "eff_id": "eff_tr_fundamentals",
+      "effect_type": "unlock_flag",
+      "value": 1,
+      "unit": "bool",
+      "tags": "tag_system",
+      "notes": "Enables branch"
+    },
+    {
+      "eff_id": "eff_tr_unlock_spike",
+      "effect_type": "unlock_trap_id",
+      "value": "trap_spike",
+      "unit": "id",
+      "tags": "tag_trap",
+      "notes": "Makes spike trap available"
+    },
+    {
+      "eff_id": "eff_tr_unlock_snare",
+      "effect_type": "unlock_trap_id",
+      "value": "trap_snare",
+      "unit": "id",
+      "tags": "tag_trap",
+      "notes": "Makes snare trap available"
+    },
+    {
+      "eff_id": "eff_tr_trigger_reliability_1",
+      "effect_type": "trap_misfire_mult",
+      "value": 0.9,
+      "unit": "mult",
+      "tags": "tag_balance",
+      "notes": "Fewer misfires"
+    },
+    {
+      "eff_id": "eff_tr_coordination_1",
+      "effect_type": "room_tag_synergy_add_pct",
+      "value": 0.02,
+      "unit": "pct",
+      "tags": "tag_synergy",
+      "notes": "Small additive bonus to room threat or control score"
+    },
+    {
+      "eff_id": "unlock_trap_id is an id reference to your traps table in the main content pipeline.",
+      "effect_type": null,
+      "value": null,
+      "unit": null,
+      "tags": null,
+      "notes": null
+    }
+  ]
+}
