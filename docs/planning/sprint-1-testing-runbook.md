@@ -1,139 +1,127 @@
 # Sprint 1 Testing Runbook
 
 ## 1. Purpose
-This runbook defines how to execute Sprint 1 UAT-01 through UAT-05 on a Unity-capable machine and how to capture evidence needed for Sprint 1 closeout.
+This runbook defines how to execute Sprint 1 UAT-01 through UAT-05 on a Unity-capable machine and capture evidence for closeout.
 
-This document is execution scaffolding only. It does not mark Sprint 1 complete and does not authorize Sprint 2A start by itself.
+This runbook does not itself close Sprint 1 and does not authorize Sprint 2A start.
 
-## 2. Prerequisites
-- Access to a Unity-capable workstation with the project checked out.
-- Access to the agreed artifact storage location for screenshots and logs.
-- Access to the Sprint 1 closeout checklist and this runbook during execution.
-- Clean working tree for the branch under test.
-- Tester assigned and available for full UAT sequence.
+## 2. Environment and prerequisites
+- Unity Editor version: **6000.3.2f1**.
+- Repo checked out locally.
+- Clean working tree for branch under test.
+- Access to artifact storage for screenshots/XML/logs.
+- Tester available for full UAT sequence.
 
-## 3. Unity setup checklist
+## 3. Open project and verify Unity version
 1. Open Unity Hub.
-2. Open this repository project using the agreed Unity Editor version for the branch.
-3. Wait for import/compilation to fully finish.
-4. Open and keep visible: Console, Project, Test Runner, and Game windows.
-5. Clear Console before each UAT flow where useful to reduce noise.
-6. Create a UTC-timestamped evidence folder before first test execution.
-7. Record Unity version, branch, and commit in the evidence template before running tests.
+2. In **Projects**, add/open the repo root folder: `Dungeon-Lord`.
+3. Ensure editor selection for this project is **6000.3.2f1**.
+4. Open project and wait until import/compile fully completes.
+5. In Unity, verify **Help -> About Unity** shows `6000.3.2f1`.
+6. Open windows: **Console, Project, Hierarchy, Inspector, Game, Test Runner**.
+7. Create evidence folder (UTC timestamp) and record branch + commit + Unity version.
 
-## 4. Exact execution steps for UAT-01 through UAT-05
+## 4. Current test discovery behavior (important)
+- Source test files are located under `Assets/_Project/Tests/EditMode`.
+- In current repo behavior, Sprint 1 tests are discovered in **Test Runner PlayMode tab**.
+- If EditMode is empty, this is expected for this branch; run Sprint 1 tests from PlayMode and note that in evidence.
 
-### UAT-01: Run full Unity EditMode suite
-1. In Unity, open Window -> General -> Test Runner.
-2. Select the tab where Sprint 1 tests are listed (current repo behavior: PlayMode).
-3. Click Run All.
+## 5. UAT execution steps
+
+### UAT-01: Run full Sprint 1 suite
+1. Open **Window -> General -> Test Runner**.
+2. Select Sprint 1 test tab (**PlayMode** currently).
+3. Click **Run All**.
 4. Wait for completion.
-5. Verify no unexpected blocking errors in Console tied to Sprint 1 scope.
-6. Capture Test Runner summary screenshot.
-7. Save or export logs to evidence folder.
+5. Capture Test Runner summary screenshot.
+6. Export XML/log and store in evidence folder.
 
 Pass expectation:
-- Required Sprint 1 EditMode tests pass with no blocking Sprint 1 console exceptions.
+- All discovered Sprint 1 tests pass and no blocking Console errors.
 
-### UAT-02: Run deterministic replay test 3 consecutive times
-1. Keep Test Runner open in the tab used for Sprint 1 tests (currently PlayMode).
-2. Locate determinism tests (for example, SimulationDeterminismTests group).
-3. Select only determinism test(s).
-4. Run Selected for run 1.
-5. Capture screenshot `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.png`.
-6. Run Selected for run 2.
-7. Capture screenshot `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.png`.
-8. Run Selected for run 3.
-9. Capture screenshot `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.png`.
-10. After each run, export Test Runner XML and save as run1/run2/run3 files.
-11. Verify all 3 runs pass with no checkpoint divergence.
+### UAT-02: Determinism replay (3 consecutive runs)
+1. In Test Runner (PlayMode), search `SimulationDeterminismTests`.
+2. Select only determinism tests.
+3. Run Selected (Run 1), screenshot results.
+4. Export XML immediately with unique filename: `...run1...xml`.
+5. Repeat for Run 2 and Run 3 using unique screenshot and XML filenames.
+6. Confirm all 3 runs pass and no drift assertions appear.
 
 Pass expectation:
-- Three consecutive passes and no nondeterministic drift.
+- 3/3 consecutive determinism passes with preserved per-run evidence.
 
-### UAT-03: Validate pause/resume plus offline elapsed invariants
-1. Open bootstrap runtime scene (for example, Bootstrap.unity).
-2. Enter Play mode.
-3. Note baseline overlay values for Tick, Mana, Heat, Save, Pause, Pending, and Gate lines.
-4. Press F1 to open the Dev Panel.
-5. Click `Toggle Pause/Resume (UAT)` and verify the overlay Pause line changes to `Paused`.
-6. Wait about 10 to 20 seconds.
-7. Click `Toggle Pause/Resume (UAT)` again and verify Pause returns to `Running`.
-8. Verify Tick keeps increasing after resume without invalid spikes.
-9. Exit Play mode.
-10. Capture before and after overlay screenshots and optional warning screenshot if triggered.
-
-Pass expectation:
-- Pause/resume and offline elapsed behavior stay within expected invariants.
-
-### UAT-04: Validate save migration fixture matrix
-1. Open Window -> General -> Test Runner.
-2. In the tab used for Sprint 1 tests (currently PlayMode), locate migration fixture tests (for example, MigrationRunnerTests group).
-3. Select migration group.
-4. Click Run Selected.
-5. Verify old-schema fixture path passes.
-6. Verify current-schema fixture path passes.
-7. Verify malformed or partial fixture path follows expected fallback behavior.
-8. Capture Test Runner and relevant Console evidence.
+### UAT-03: Pause/resume invariants via Dev Panel
+1. Open scene: `Assets/_Project/Scenes/Bootstrap.unity`.
+2. In Hierarchy select `GameRoot`.
+3. In Inspector verify assigned fields:
+   - `contentBootstrapJson`, `buildConfigJson`, `schemaVersionsJson`, `contentManifestJson`, `devCommandsJson`, `stringTableJson`, `heatRuntimeJson`, `overlay`.
+4. Enter Play Mode.
+5. Confirm overlay is visible in top-left Game view.
+6. Confirm lines are present: `Build`, `State`, `Pending`, `Gate`, `KPI`, `Heat`, `Tick`, `Mana`, `Save`, `Pause`.
+7. Press **F1** to show Dev Panel.
+8. Click **Toggle Pause/Resume (UAT)** -> expect `Pause: Paused`.
+9. Wait ~10–20s.
+10. Click **Toggle Pause/Resume (UAT)** again -> expect `Pause: Running`.
+11. Confirm Tick resumes increasing; no invalid value spikes.
+12. Capture before/after screenshots.
 
 Pass expectation:
-- Migration assertions pass for old/current fixtures and malformed fallback behavior matches contract.
+- Pause line transitions correctly and runtime invariants stay intact.
 
-### UAT-05: Validate debug visibility for verification metrics
-1. Open bootstrap runtime scene.
-2. Enter Play mode.
-3. Confirm visible indicators include Tick/time progression, Mana, Heat, Save status, Pause state, and Pending verification status.
-4. Let runtime update long enough to confirm indicators are changing.
+### UAT-04: Migration matrix
+1. In Test Runner (PlayMode), locate `MigrationRunnerTests`.
+2. Run Selected on migration group.
+3. Confirm old/current/malformed fixture assertions pass.
+4. Capture screenshot and export XML/log.
+
+Pass expectation:
+- Migration tests pass for expected fixture matrix.
+
+### UAT-05: Debug visibility
+1. Open `Assets/_Project/Scenes/Bootstrap.unity` and enter Play.
+2. Confirm readable overlay and required lines: `Tick`, `Mana`, `Heat`, `Save`, `Pause`, `Pending`.
+3. Let values update naturally.
+4. Press F1 and toggle one Dev Panel action to show observable line update.
 5. Capture screenshot(s).
-6. Exit Play mode.
 
 Pass expectation:
-- Required indicators are visible and updating.
+- Required indicators are visible and update in Play Mode.
 
-## 5. Evidence capture instructions
-- Capture UTC timestamps for each UAT result entry.
-- Capture at least one screenshot per UAT item, plus additional screenshots where required by the checklist.
-- Preserve raw test logs for UAT-01, UAT-02, and UAT-04.
-- Add short notes for setup, inputs, and observed outcomes.
-- Store all artifact paths in the evidence template and closeout checklist.
+## 6. Required evidence artifacts
+- UAT-01: Run-all screenshot + XML/log.
+- UAT-02: 3 screenshots + 3 XML files (no overwrite).
+- UAT-03: Before/after overlay screenshots (+ warning screenshot if applicable).
+- UAT-04: Migration run screenshot + XML/log.
+- UAT-05: Overlay readability screenshot(s).
 
-## 6. Expected artifact naming conventions
-Use ASCII-only names and UTC timestamps:
-- `sprint1_uat-01_editmode_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-01_editmode_YYYYMMDDTHHMMSSZ.log`
-- `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.png`
+Suggested naming (UTC):
+- `sprint1_uat-01_runall_YYYYMMDDTHHMMSSZ.*`
+- `sprint1_uat-02_determinism_run{1|2|3}_YYYYMMDDTHHMMSSZ.*`
 - `sprint1_uat-03_pause-resume_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-03_offline-elapsed_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-04_migration_YYYYMMDDTHHMMSSZ.png`
-- `sprint1_uat-04_migration_YYYYMMDDTHHMMSSZ.log`
+- `sprint1_uat-04_migration_YYYYMMDDTHHMMSSZ.*`
 - `sprint1_uat-05_debug-visibility_YYYYMMDDTHHMMSSZ.png`
 
-## 7. Troubleshooting notes for common failures
-- Unity import or compile still running:
-  - Wait for full completion before starting tests.
-- Test Runner hangs or stalls:
-  - Re-open Test Runner, rerun selected scope, and capture Console output.
-- Determinism test intermittent failure:
-  - Re-run exact same selected test group and document run-to-run differences.
-- Missing debug indicators in UAT-05:
-  - Confirm correct scene and debug display path for Sprint 1 scope.
-- Console shows `[ERROR] Missing JSON asset: content_manifest`:
-  - Fail UAT and verify `Bootstrap.unity` GameRoot `contentManifestJson` reference is assigned.
-- Migration fixture failure:
-  - Confirm fixture set is current for old/current/malformed cases and capture exact failing assertion.
+## 7. PASS / PARTIAL / FAIL / BLOCKED definitions
+- **PASS**: Acceptance criteria met + evidence complete.
+- **PARTIAL**: Execution attempted, but evidence incomplete or criteria partly met.
+- **FAIL**: Criteria not met.
+- **BLOCKED**: Cannot execute due to environment/configuration problem.
 
-## 8. Pass/fail decision rules
-- PASS: All acceptance conditions for UAT-01 through UAT-05 are met and evidence is complete, readable, and linked.
-- FAIL: Any required UAT item fails, is not executed, or lacks required evidence artifacts.
-- INCOMPLETE: Execution started but evidence packet lacks required fields, links, or signoff.
+## 8. Troubleshooting and interpretation
+- `[ERROR] Missing JSON asset: content_manifest`
+  - Treat as FAIL/BLOCKED for closeout.
+  - Fix `GameRoot.contentManifestJson` assignment in `Bootstrap.unity`.
+- Overlay missing/unreadable
+  - Treat UAT-03/UAT-05 as BLOCKED.
+  - Verify `GameRoot.overlay` and `BootstrapOverlay.overlayText` assignments.
+- Tests only appear in PlayMode
+  - Expected on this branch; run there and annotate evidence.
+- No tests appear in any tab
+  - BLOCKED. Resolve compile/import errors and reopen Test Runner.
 
-A Sprint 1 closeout decision requires PASS disposition for all five UAT checks, plus linked evidence.
+## 9. Gate reminder
+Sprint 2A must not start until UAT-01..UAT-05 are PASS with linked evidence.
 
-## 9. Sprint 2A dependency gate
-Sprint 2A cannot start until Sprint 1 closeout evidence for UAT-01 through UAT-05 is complete and linked in closeout records.
-
-## 10. Required policy and checklist links
+## 10. Required links
 - Sprint 1 closeout checklist: `Docs/Sprint1_Closeout_Checklist_2026-05-13.md`
 - Build promotion policy: `docs/planning/build-promotion-policy.md`
