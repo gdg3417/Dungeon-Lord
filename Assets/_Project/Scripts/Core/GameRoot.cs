@@ -267,7 +267,8 @@ namespace DungeonBuilder.M0
             CurrentHeat = decayResult.NewHeat;
             HeatLine = $"Heat: {CurrentHeat:0.00}";
             TickLine = $"Tick: {tickIndex}";
-            ManaLine = $"Mana: {Save.currentMana:0.00}";
+            KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
+            ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";
         }
 
         private void HandleTickTelemetry(long tickIndex)
