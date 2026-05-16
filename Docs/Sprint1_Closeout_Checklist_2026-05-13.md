@@ -4,98 +4,125 @@ Date: 2026-05-13
 Scope: Final evidence tracker and click-by-click UAT script required to mark Sprint 1 complete.
 
 ## Completion rule
-Sprint 1 is **not closed** until every item below is marked PASS with evidence links/log snippets.
+Sprint 1 is **not closed** until every UAT item below is marked **PASS** with linked evidence.
 
-## Pre-flight (do this before running checks)
-1. Install/open the project in the agreed Unity Editor version for the branch.
-2. Confirm local branch is up to date and clean.
-3. Ensure these windows are visible: **Console**, **Project**, **Test Runner**, **Game**.
-4. Clear old console logs so results are easy to capture.
-5. Create a timestamped evidence folder (for screenshots/logs) under your team artifact location.
+## Status definitions (use these exact labels)
+- **PASS**: Acceptance criteria met and required evidence captured.
+- **PARTIAL**: Some steps executed, but required evidence and/or acceptance criteria incomplete.
+- **FAIL**: Steps executed and acceptance criteria not met.
+- **BLOCKED**: Could not execute due to environment/configuration issue.
 
----
-
-## UAT-01: Run full Unity EditMode suite
-
-### Goal
-Prove baseline Sprint 1 EditMode tests pass in a real Unity runner.
-
-### Click-by-click steps
-1. Open Unity Hub.
-2. Click **Projects**.
-3. Select this repo project and click **Open**.
-4. Wait for asset/script import to complete.
-5. In Unity top menu, click **Window** -> **General** -> **Test Runner**.
-6. In the Test Runner panel, click the **EditMode** tab.
-7. Click **Run All**.
-8. Wait for execution to finish.
-9. In Console, confirm no unexpected runtime/editor errors occurred during test run.
-10. Capture screenshot of Test Runner summary (passed/failed/skipped totals).
-11. Save/export logs to artifact folder.
-
-### Pass criteria
-- All required Sprint 1 EditMode tests pass.
-- No blocking exceptions in Console tied to Sprint 1 systems.
-
-### Evidence required
-- Screenshot of Test Runner totals.
-- Full test log artifact path.
-- Timestamp and tester name.
+## Unity 6000.3.2f1 pre-flight
+1. Open **Unity Hub**.
+2. In **Projects**, add/open repo root folder: `Dungeon-Lord`.
+3. In Hub, confirm this project is set to **Unity Editor 6000.3.2f1** before opening.
+4. Open project and wait for import/compile to finish (no spinner in lower-right).
+5. In Unity Editor, verify version in **Help -> About Unity** is `6000.3.2f1`.
+6. Open and keep visible: **Console**, **Project**, **Hierarchy**, **Inspector**, **Game**, **Test Runner**.
+7. Create a UTC evidence folder in your artifact location.
+8. Clear Console before each UAT flow.
 
 ---
 
-## UAT-02: Run deterministic replay test 3 consecutive times
+## UAT-01: Run full Sprint 1 test suite from Test Runner
 
 ### Goal
-Prove deterministic replay stability across repeated executions.
+Prove baseline Sprint 1 tests pass in current Unity runner configuration.
 
 ### Click-by-click steps
-1. Keep Unity open with **Window** -> **General** -> **Test Runner**.
-2. In **EditMode** list, locate the determinism test group (e.g., `SimulationDeterminismTests`).
-3. Select only the determinism test(s) for targeted reruns.
-4. Click **Run Selected** (Run #1).
-5. Record result and capture screenshot.
-6. Click **Run Selected** again (Run #2).
-7. Record result and capture screenshot.
-8. Click **Run Selected** again (Run #3).
-9. Record result and capture screenshot.
-10. Confirm all three runs passed with no divergent checkpoint assertions.
+1. Open **Window -> General -> Test Runner**.
+2. Select the tab where Sprint 1 tests are discovered. **Current repo behavior is PlayMode tab** (even though tests are stored under `Assets/_Project/Tests/EditMode`).
+3. Click **Run All**.
+4. Wait for execution to finish.
+5. In Console, confirm no blocking errors tied to Sprint 1 systems.
+6. Capture Test Runner totals screenshot.
+7. Export/save test log/XML into evidence folder.
 
 ### Pass criteria
-- 3/3 consecutive determinism runs pass.
-- No nondeterministic assertion drift between runs.
+- All Sprint 1 tests discovered in current runner tab pass.
+- No blocking runtime/editor errors.
 
 ### Evidence required
-- Three run screenshots or a combined run log showing 3 passes.
-- Notes confirming checkpoints remained identical.
+- Test Runner summary screenshot.
+- Exported XML/log path.
+- UTC timestamp + tester name.
 
 ---
 
-## UAT-03: Validate pause/resume + offline elapsed invariants
+## UAT-02: Run SimulationDeterminismTests 3 consecutive times
 
 ### Goal
-Verify time progression behavior does not violate determinism/offline rules.
+Prove deterministic replay stability across repeated runs.
 
 ### Click-by-click steps
-1. In Unity, open the bootstrap scene used for runtime start (Project window -> locate `Bootstrap.unity` -> double-click).
-2. Click **Play**.
-3. Let simulation run briefly; note mana/heat/tick display values.
-4. Click **Pause** in the Play controls.
-5. Wait ~10–20 seconds.
-6. Click **Play** (resume).
-7. Verify values continue in expected direction with no spikes/anomalies.
-8. Stop Play mode.
-9. Re-enter Play mode and simulate an offline elapsed scenario using the project’s available debug/test path (if provided by tooling/tests).
-10. Confirm elapsed-time handling respects expected caps/guards.
-11. Capture screenshots/logs of before/after values.
+1. Keep **Test Runner** open.
+2. Use the active Sprint 1 tab (currently **PlayMode**).
+3. In search/filter, enter `SimulationDeterminismTests`.
+4. Select only `SimulationDeterminismTests` group/test(s).
+5. Run #1: click **Run Selected**.
+6. Capture screenshot: `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.png`.
+7. Export XML immediately and save as: `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.xml`.
+8. Run #2: click **Run Selected** again.
+9. Capture screenshot + export XML as run2 filenames.
+10. Run #3: click **Run Selected** again.
+11. Capture screenshot + export XML as run3 filenames.
+12. Verify all three runs passed with no divergence.
 
 ### Pass criteria
-- Pause/resume does not create invalid jumps or invariant breaks.
-- Offline elapsed path stays within expected caps/guardrails.
+- 3/3 consecutive passes.
+- No nondeterministic assertion drift.
 
 ### Evidence required
-- Before/after screenshots.
-- Short scenario notes (inputs, elapsed time, expected vs actual).
+- Three run screenshots.
+- Three XML exports (one per run, unique filenames).
+
+---
+
+## UAT-03: Validate pause/resume invariants from Bootstrap scene
+
+### Goal
+Verify pause/resume path is manually testable and does not violate runtime invariants.
+
+### Click-by-click steps
+1. In Project window, open exact scene path: `Assets/_Project/Scenes/Bootstrap.unity`.
+2. In Hierarchy, select `GameRoot`.
+3. In Inspector, verify these `GameRoot` fields are assigned:
+   - `contentBootstrapJson`
+   - `buildConfigJson`
+   - `schemaVersionsJson`
+   - `contentManifestJson`
+   - `devCommandsJson`
+   - `stringTableJson`
+   - `heatRuntimeJson`
+   - `overlay` (reference to `BootstrapOverlay`)
+4. Enter Play Mode.
+5. Confirm overlay appears in the **top-left of Game view**.
+6. Confirm overlay includes lines for:
+   - `Build:`
+   - `State:`
+   - `Pending:`
+   - `Gate:`
+   - `KPI:`
+   - `Heat:`
+   - `Tick:`
+   - `Mana:`
+   - `Save:`
+   - `Pause:`
+7. Press **F1** to open Dev Panel.
+8. Click **Toggle Pause/Resume (UAT)** once; verify `Pause: Paused`.
+9. Wait 10–20 seconds.
+10. Click **Toggle Pause/Resume (UAT)** again; verify `Pause: Running`.
+11. Confirm `Tick` continues increasing after resume and no impossible Mana/Heat jump appears.
+12. Capture before/after screenshots (+ Console screenshot if warning appears).
+13. Exit Play Mode.
+
+### Pass criteria
+- Pause line transitions correctly via Dev Panel control.
+- Tick progression resumes without invariant break.
+
+### Evidence required
+- Before/after overlay screenshots.
+- Scenario notes (elapsed wait + observed values).
 
 ---
 
@@ -105,61 +132,60 @@ Verify time progression behavior does not violate determinism/offline rules.
 Confirm migration behavior for old/current/malformed fixtures.
 
 ### Click-by-click steps
-1. Open **Window** -> **General** -> **Test Runner**.
-2. In **EditMode**, locate migration tests (e.g., `MigrationRunnerTests`).
-3. Select migration fixture test group.
+1. Open **Window -> General -> Test Runner**.
+2. In active Sprint 1 tab (currently **PlayMode**), locate `MigrationRunnerTests`.
+3. Select migration test group.
 4. Click **Run Selected**.
-5. Verify old-schema fixture path passes.
-6. Verify current-schema fixture path passes.
-7. Verify malformed/partial fixture path follows expected fallback behavior.
-8. Capture Test Runner result screenshot and relevant Console lines.
+5. Verify old-schema/current-schema/malformed fixture cases follow expected assertions.
+6. Capture Test Runner result screenshot and relevant Console lines.
 
 ### Pass criteria
-- All migration fixture assertions pass.
-- Fallback behavior for malformed fixture matches expected contract.
+- All migration assertions pass.
 
 ### Evidence required
-- Test Runner screenshot for migration group.
-- Log snippet showing fixture cases.
+- Test Runner screenshot.
+- Log/XML path.
 
 ---
 
 ## UAT-05: Validate debug visibility for verification metrics
 
 ### Goal
-Ensure runtime visibility for Sprint 1 verification signals.
+Ensure Sprint 1 runtime verification signals are visible to non-developers.
 
 ### Click-by-click steps
-1. Open bootstrap/runtime scene.
-2. Click **Play**.
-3. Confirm on-screen/debug overlay contains at minimum:
-   - Tick/time progression indicator.
-   - Mana indicator.
-   - Heat indicator.
-   - Any pending verification status indicator available in Sprint 1 scope.
-4. Interact with minimal runtime loop long enough to observe value updates.
-5. Capture at least one clear screenshot of overlay values.
-6. Stop Play mode.
+1. Open `Assets/_Project/Scenes/Bootstrap.unity`.
+2. Enter Play Mode.
+3. Confirm overlay is visible/readable in top-left of Game view.
+4. Confirm required lines are visible: `Tick`, `Mana`, `Heat`, `Save`, `Pause`, `Pending`.
+5. Let runtime run long enough to observe updates.
+6. Press **F1** to open Dev Panel and toggle at least one control (recommended: `Toggle Verification Pending`) to verify line updates.
+7. Capture clear screenshot(s).
+8. Exit Play Mode.
 
 ### Pass criteria
 - Required indicators are visible and updating.
 
 ### Evidence required
-- Screenshot(s) showing required indicators.
-- Brief note confirming observed updates.
+- Screenshot(s) showing required indicators and readability.
 
 ---
+
+## Common error interpretation
+- **`[ERROR] Missing JSON asset: content_manifest`**: FAIL/BLOCKED until `GameRoot.contentManifestJson` assignment is fixed in `Bootstrap.unity`.
+- **No overlay visible**: FAIL/BLOCKED for UAT-03/UAT-05; check `GameRoot.overlay` and `BootstrapOverlay.overlayText` assignments in scene.
+- **No tests visible in EditMode tab**: Expected in current repo behavior; use **PlayMode** tab and record this in evidence notes.
+- **No Sprint 1 tests visible in either tab**: BLOCKED; reimport scripts, check compile errors, reopen Test Runner.
 
 ## Closeout packet template (fill during execution)
 - Unity version:
 - Branch/commit tested:
-- Runner command(s) (if CI/batchmode used):
 - Execution date/time (UTC):
-- UAT-01 result:
-- UAT-02 result:
-- UAT-03 result:
-- UAT-04 result:
-- UAT-05 result:
+- UAT-01 result (PASS/PARTIAL/FAIL/BLOCKED):
+- UAT-02 result (PASS/PARTIAL/FAIL/BLOCKED):
+- UAT-03 result (PASS/PARTIAL/FAIL/BLOCKED):
+- UAT-04 result (PASS/PARTIAL/FAIL/BLOCKED):
+- UAT-05 result (PASS/PARTIAL/FAIL/BLOCKED):
 - Artifacts location(s):
 - Final signoff (name/date):
 

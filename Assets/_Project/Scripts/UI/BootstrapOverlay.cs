@@ -40,6 +40,10 @@ namespace DungeonBuilder.M0
             string gate = _root.GateStatusLine;
             string kpi = _root.KpiLine;
             string heat = _root.HeatLine;
+            string tick = _root.TickLine;
+            string mana = _root.ManaLine;
+            string save = _root.SaveLine;
+            string pause = _root.PauseLine;
             string hint = _root.DevPanelEnabled ? "F1 toggles Dev Panel" : string.Empty;
 
             string combined =
@@ -49,6 +53,10 @@ namespace DungeonBuilder.M0
                 gate + "\n" +
                 kpi + "\n" +
                 heat + "\n" +
+                tick + "\n" +
+                mana + "\n" +
+                save + "\n" +
+                pause + "\n" +
                 (string.IsNullOrEmpty(banner) ? "" : ("\nBanner:\n" + banner + "\n")) +
                 (string.IsNullOrEmpty(hint) ? "" : ("\n" + hint));
 
@@ -112,6 +120,13 @@ namespace DungeonBuilder.M0
                 {
                     _root.SetBanner("Verification cleared.");
                 }
+            }
+
+            if (GUILayout.Button("Toggle Pause/Resume (UAT)"))
+            {
+                bool pause = _root.PauseLine != "Pause: Paused";
+                _root.ApplyPauseState(pause);
+                _root.SetBanner(pause ? "Paused via Dev Panel." : "Resumed via Dev Panel.");
             }
 
             if (GUILayout.Button("Simulate +10 Mana KPI"))

@@ -32,6 +32,10 @@ namespace DungeonBuilder.M0
         public string GateStatusLine { get; private set; } = "Gate: unknown";
         public string KpiLine { get; private set; } = "KPI: n/a";
         public string HeatLine { get; private set; } = "Heat: 0.00";
+        public string TickLine { get; private set; } = "Tick: 0";
+        public string ManaLine { get; private set; } = "Mana: 0.00";
+        public string SaveLine { get; private set; } = "Save: n/a";
+        public string PauseLine { get; private set; } = "Pause: Running";
 
         private AppStateMachine _sm;
         private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
@@ -87,8 +91,14 @@ namespace DungeonBuilder.M0
 
         private void OnApplicationPause(bool pause)
         {
+            ApplyPauseState(pause);
+        }
+
+        public void ApplyPauseState(bool pause)
+        {
             if (pause)
             {
+                PauseLine = "Pause: Paused";
                 if (TimeService != null)
                 {
                     TimeService.OnPause();
@@ -97,10 +107,12 @@ namespace DungeonBuilder.M0
                 if (SaveService != null && Save != null)
                 {
                     SaveService.Save(Save, SaveReason.AppPause);
+                    SaveLine = "Save: AppPause";
                 }
             }
             else
             {
+                PauseLine = "Pause: Running";
                 if (TimeService != null)
                 {
                     string banner = TimeService.OnResume();
@@ -168,6 +180,7 @@ namespace DungeonBuilder.M0
 
             Save.lastKnownAppState = "Boot";
             SaveService.Save(Save, SaveReason.Boot);
+            SaveLine = "Save: Boot";
 
             Logger.Info("M0 init complete.");
             RefreshDashboardState();
@@ -253,6 +266,8 @@ namespace DungeonBuilder.M0
 
             CurrentHeat = decayResult.NewHeat;
             HeatLine = $"Heat: {CurrentHeat:0.00}";
+            TickLine = $"Tick: {tickIndex}";
+            ManaLine = $"Mana: {Save.currentMana:0.00}";
         }
 
         private void HandleTickTelemetry(long tickIndex)
