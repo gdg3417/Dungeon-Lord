@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
     public class Tables
     {
         public StringTableRef stringTable;
+        public HeatRuntimeRef heatRuntime;
     }
 
     [Serializable]
@@ -47,6 +48,23 @@ namespace DungeonBuilder.M0
         public string path;
     }
 
+
+
+    [Serializable]
+    public class HeatRuntimeRef
+    {
+        public string path;
+    }
+
+    [Serializable]
+    public class HeatRuntimeConfig
+    {
+        public string schema;
+        public int schemaVersion;
+        public double decayPerTick = 0.1d;
+        public double minHeat = 0d;
+        public bool enableWarnings = true;
+    }
     [Serializable]
     public class BuildConfig
     {
@@ -99,12 +117,33 @@ namespace DungeonBuilder.M0
     {
         public int content_bootstrap;
         public int string_table;
+        public int mana_modifiers;
+        public int heat_modifiers;
+        public int research_modifiers;
     }
 
     [Serializable]
     public class SaveSchemaMap
     {
         public int save_data;
+    }
+
+    [Serializable]
+    public class ContentManifest
+    {
+        public string schema;
+        public int schemaVersion;
+
+        public string contentVersion;
+        public string minAppVersion;
+        public ManifestSchemaEntry[] requiredSchemas;
+    }
+
+    [Serializable]
+    public class ManifestSchemaEntry
+    {
+        public string schemaId;
+        public int schemaVersion;
     }
 
     [Serializable]

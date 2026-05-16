@@ -9,8 +9,10 @@ namespace DungeonBuilder.M0
         public ContentBootstrap Bootstrap { get; private set; }
         public BuildConfig BuildConfig { get; private set; }
         public SchemaVersions Schemas { get; private set; }
+        public ContentManifest Manifest { get; private set; }
         public DevCommands DevCommands { get; private set; }
         public StringTable Strings { get; private set; }
+        public HeatRuntimeConfig HeatRuntime { get; private set; }
 
         private readonly Dictionary<string, string> _stringMap = new Dictionary<string, string>();
 
@@ -18,8 +20,10 @@ namespace DungeonBuilder.M0
             TextAsset contentBootstrapJson,
             TextAsset buildConfigJson,
             TextAsset schemaVersionsJson,
+            TextAsset contentManifestJson,
             TextAsset devCommandsJson,
             TextAsset stringTableJson,
+            TextAsset heatRuntimeJson,
             SimpleLogger logger,
             out string warningBanner
         )
@@ -29,12 +33,118 @@ namespace DungeonBuilder.M0
             Bootstrap = SafeParse<ContentBootstrap>(contentBootstrapJson, "content_bootstrap", logger, ref warningBanner);
             BuildConfig = SafeParse<BuildConfig>(buildConfigJson, "build_config", logger, ref warningBanner);
             Schemas = SafeParse<SchemaVersions>(schemaVersionsJson, "schema_versions", logger, ref warningBanner);
+            Manifest = SafeParse<ContentManifest>(contentManifestJson, "content_manifest", logger, ref warningBanner);
             DevCommands = SafeParse<DevCommands>(devCommandsJson, "dev_commands", logger, ref warningBanner);
             Strings = SafeParse<StringTable>(stringTableJson, "string_table_en", logger, ref warningBanner);
+            HeatRuntime = SafeParseOptional<HeatRuntimeConfig>(heatRuntimeJson, "heat_runtime", logger, ref warningBanner);
+            if (HeatRuntime == null)
+            {
+                HeatRuntime = new HeatRuntimeConfig();
+            }
 
+            ValidateManifest(logger, ref warningBanner);
+            ValidateHeatRuntime(logger, ref warningBanner);
             BuildStringMap(logger);
         }
 
+        private void ValidateManifest(SimpleLogger logger, ref string warningBanner)
+        {
+            if (Manifest == null || Bootstrap == null || Schemas == null)
+            {
+                return;
+            }
+
+            if (!string.Equals(Manifest.contentVersion, Bootstrap.contentVersion, StringComparison.Ordinal))
+            {
+                AppendBanner(ref warningBanner, "Content version mismatch between manifest and bootstrap.");
+                logger.Warn("Content manifest mismatch: contentVersion differs from content_bootstrap.");
+            }
+
+            if (Manifest.requiredSchemas == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < Manifest.requiredSchemas.Length; i++)
+            {
+                ManifestSchemaEntry entry = Manifest.requiredSchemas[i];
+                if (entry == null || string.IsNullOrEmpty(entry.schemaId))
+                {
+                    continue;
+                }
+
+                bool ok = TryGetRegisteredSchemaVersion(entry.schemaId, out int registeredVersion);
+                if (!ok || registeredVersion != entry.schemaVersion)
+                {
+                    AppendBanner(ref warningBanner, $"Schema gate failed: {entry.schemaId} v{entry.schemaVersion}");
+                    logger.Warn($"Schema gate failed for {entry.schemaId}. Expected {entry.schemaVersion}, got {(ok ? registeredVersion : -1)}.");
+                }
+            }
+        }
+
+        private bool TryGetRegisteredSchemaVersion(string schemaId, out int version)
+        {
+            version = -1;
+            if (Schemas == null || Schemas.content == null)
+            {
+                return false;
+            }
+
+            switch (schemaId)
+            {
+                case "content_bootstrap":
+                    version = Schemas.content.content_bootstrap;
+                    return true;
+                case "string_table":
+                    version = Schemas.content.string_table;
+                    return true;
+                case "mana_modifiers":
+                    version = Schemas.content.mana_modifiers;
+                    return true;
+                case "heat_modifiers":
+                    version = Schemas.content.heat_modifiers;
+                    return true;
+                case "research_modifiers":
+                    version = Schemas.content.research_modifiers;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+
+        private T SafeParseOptional<T>(TextAsset asset, string name, SimpleLogger logger, ref string warningBanner) where T : class
+        {
+            if (asset == null)
+            {
+                AppendBanner(ref warningBanner, $"Optional JSON missing: {name}. Using defaults.");
+                logger.Warn($"Optional JSON missing: {name}. Using defaults.");
+                return null;
+            }
+
+            return SafeParse<T>(asset, name, logger, ref warningBanner);
+        }
+
+        private void ValidateHeatRuntime(SimpleLogger logger, ref string warningBanner)
+        {
+            if (HeatRuntime == null)
+            {
+                return;
+            }
+
+            if (HeatRuntime.decayPerTick < 0d)
+            {
+                AppendBanner(ref warningBanner, "Heat runtime decayPerTick was negative; clamped to 0.");
+                logger.Warn("Heat runtime decayPerTick was negative; clamped to 0.");
+                HeatRuntime.decayPerTick = 0d;
+            }
+
+            if (HeatRuntime.minHeat != 0d)
+            {
+                AppendBanner(ref warningBanner, "Heat runtime minHeat is not 0; runtime currently enforces floor at 0.");
+                logger.Warn("Heat runtime minHeat is not 0; runtime currently enforces floor at 0.");
+            }
+        }
         private T SafeParse<T>(TextAsset asset, string name, SimpleLogger logger, ref string warningBanner) where T : class
         {
             if (asset == null)

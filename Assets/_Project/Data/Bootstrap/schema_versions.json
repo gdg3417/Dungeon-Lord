@@ -3,7 +3,10 @@
   "schemaVersion": 1,
   "content": {
     "content_bootstrap": 1,
-    "string_table": 1
+    "string_table": 1,
+    "mana_modifiers": 1,
+    "heat_modifiers": 1,
+    "research_modifiers": 1
   },
   "save": {
     "save_data": 1

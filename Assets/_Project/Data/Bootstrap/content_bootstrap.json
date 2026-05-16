@@ -17,6 +17,9 @@
   "tables": {
     "stringTable": {
       "path": "Localization/string_table_en"
+    },
+    "heatRuntime": {
+      "path": "Bootstrap/heat_runtime"
     }
   }
 }

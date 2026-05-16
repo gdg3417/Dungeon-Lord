@@ -36,11 +36,19 @@ namespace DungeonBuilder.M0
             string banner = _root.BannerMessage;
             string build = _root.BuildLine;
             string state = _root.StateLine;
+            string pending = _root.PendingStateLine;
+            string gate = _root.GateStatusLine;
+            string kpi = _root.KpiLine;
+            string heat = _root.HeatLine;
             string hint = _root.DevPanelEnabled ? "F1 toggles Dev Panel" : string.Empty;
 
             string combined =
                 build + "\n" +
                 state + "\n" +
+                pending + "\n" +
+                gate + "\n" +
+                kpi + "\n" +
+                heat + "\n" +
                 (string.IsNullOrEmpty(banner) ? "" : ("\nBanner:\n" + banner + "\n")) +
                 (string.IsNullOrEmpty(hint) ? "" : ("\n" + hint));
 
@@ -74,8 +82,51 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(string.Empty);
             }
 
+            if (GUILayout.Button("Toggle Online/Offline"))
+            {
+                _root.SetOnline(!_root.IsOnline);
+                if (!_root.IsOnline)
+                {
+                    string msg = _root.Content != null
+                        ? _root.Content.GetString("ui.banner.offline", "Offline mode.")
+                        : "Offline mode.";
+                    _root.SetBanner(msg);
+                }
+                else
+                {
+                    _root.SetBanner("Online restored.");
+                }
+            }
+
+            if (GUILayout.Button("Toggle Verification Pending"))
+            {
+                _root.SetVerificationPending(!_root.VerificationPending);
+                if (_root.VerificationPending)
+                {
+                    string msg = _root.Content != null
+                        ? _root.Content.GetString("gate.error.verification_pending", "Verification pending.")
+                        : "Verification pending.";
+                    _root.SetBanner(msg);
+                }
+                else
+                {
+                    _root.SetBanner("Verification cleared.");
+                }
+            }
+
+            if (GUILayout.Button("Simulate +10 Mana KPI"))
+            {
+                _root.TrackManaGenerated(10);
+                _root.SetBanner("Simulated mana tick for KPI.");
+            }
+
+            if (GUILayout.Button("Simulate +5 Heat Event"))
+            {
+                _root.ApplyHeatDelta(5d);
+                _root.SetBanner("Applied +5 heat event.");
+            }
+
             GUILayout.EndArea();
         }
     }
 }
-
