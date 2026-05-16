@@ -91,6 +91,11 @@ namespace DungeonBuilder.M0
 
         private void OnApplicationPause(bool pause)
         {
+            ApplyPauseState(pause);
+        }
+
+        public void ApplyPauseState(bool pause)
+        {
             if (pause)
             {
                 PauseLine = "Pause: Paused";

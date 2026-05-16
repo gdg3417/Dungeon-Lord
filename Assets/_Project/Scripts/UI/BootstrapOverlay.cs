@@ -122,6 +122,13 @@ namespace DungeonBuilder.M0
                 }
             }
 
+            if (GUILayout.Button("Toggle Pause/Resume (UAT)"))
+            {
+                bool pause = _root.PauseLine != "Pause: Paused";
+                _root.ApplyPauseState(pause);
+                _root.SetBanner(pause ? "Paused via Dev Panel." : "Resumed via Dev Panel.");
+            }
+
             if (GUILayout.Button("Simulate +10 Mana KPI"))
             {
                 _root.TrackManaGenerated(10);

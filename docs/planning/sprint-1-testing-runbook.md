@@ -55,14 +55,13 @@ Pass expectation:
 1. Open bootstrap runtime scene (for example, Bootstrap.unity).
 2. Enter Play mode.
 3. Note baseline overlay values for Tick, Mana, Heat, Save, Pause, Pending, and Gate lines.
-4. Pause Play mode.
-5. Wait about 10 to 20 seconds.
-6. Resume Play mode.
-7. Verify Pause returns to Running and Tick keeps increasing after resume without invalid spikes.
-8. Exit Play mode.
-9. Re-enter Play mode, wait ~15 seconds while paused, then resume.
-10. Verify Pause transitions Paused -> Running and inspect banner/console for skew warning behavior only when expected.
-11. Capture before and after overlay screenshots and optional warning screenshot if triggered.
+4. Press F1 to open the Dev Panel.
+5. Click `Toggle Pause/Resume (UAT)` and verify the overlay Pause line changes to `Paused`.
+6. Wait about 10 to 20 seconds.
+7. Click `Toggle Pause/Resume (UAT)` again and verify Pause returns to `Running`.
+8. Verify Tick keeps increasing after resume without invalid spikes.
+9. Exit Play mode.
+10. Capture before and after overlay screenshots and optional warning screenshot if triggered.
 
 Pass expectation:
 - Pause/resume and offline elapsed behavior stay within expected invariants.

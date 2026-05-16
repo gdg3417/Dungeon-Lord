@@ -84,18 +84,17 @@ Verify time progression behavior does not violate determinism/offline rules.
 1. In Unity, open the bootstrap scene used for runtime start (Project window -> locate `Bootstrap.unity` -> double-click).
 2. Click **Play**.
 3. Let simulation run briefly and observe the top-left overlay lines for `Tick`, `Mana`, `Heat`, `Save`, `Pause`, and `Pending/Gate`.
-4. Click **Pause** in the Play controls.
-5. Wait ~10–20 seconds.
-6. Click **Play** (resume).
-7. Verify `Tick` keeps increasing, `Pause` returns to `Running`, and `Heat`/`Mana` do not jump to impossible values.
-8. Stop Play mode.
-9. Re-enter Play mode, then pause Unity Editor play for ~15 seconds and resume.
-10. Confirm `Pause` line changes `Paused` -> `Running` and check banner/console for skew warning only when large time change is detected.
-11. Capture before/after screenshots of overlay values and one Console screenshot if a warning banner appears.
+4. Press **F1** to open Dev Panel (if hidden).
+5. Click **Toggle Pause/Resume (UAT)** and verify overlay `Pause` shows `Paused`.
+6. Wait ~10–20 seconds.
+7. Click **Toggle Pause/Resume (UAT)** again and verify overlay `Pause` returns to `Running`.
+8. Verify `Tick` keeps increasing after resume and `Heat`/`Mana` do not jump to impossible values.
+9. Stop Play mode.
+10. Capture before/after screenshots of overlay values and one Console screenshot if a warning banner appears.
 
 ### Pass criteria
 - Pause/resume does not create invalid jumps or invariant breaks.
-- Offline elapsed path stays within expected caps/guardrails.
+- Pause/resume path stays within expected caps/guardrails.
 
 ### Evidence required
 - Before/after screenshots.
