@@ -424,9 +424,11 @@ MonoBehaviour:
   contentBootstrapJson: {fileID: 4900000, guid: eab72f4c52822d44da6762446342e419, type: 3}
   buildConfigJson: {fileID: 4900000, guid: d9b02ea1f0aeab24dae23698b794d61c, type: 3}
   schemaVersionsJson: {fileID: 4900000, guid: 669b9ec1102b17749a7038958b01e31f, type: 3}
+  contentManifestJson: {fileID: 4900000, guid: d4f4f0fe774f4ff5989b5c9f30f6d18f, type: 3}
   devCommandsJson: {fileID: 4900000, guid: 59ef010fd6a776f488cf476b9b855a67, type: 3}
   stringTableJson: {fileID: 4900000, guid: 1b3229d0ede5df14893110ee52ff2de4, type: 3}
-  overlay: {fileID: 0}
+  heatRuntimeJson: {fileID: 4900000, guid: 9e13f9f448564ed393ef7cbb7f7b9d8d, type: 3}
+  overlay: {fileID: 1944002266}
 --- !u!4 &1479508743
 Transform:
   m_ObjectHideFlags: 0
@@ -476,11 +478,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 548514527}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -224, y: -200.5}
-  m_SizeDelta: {x: 200, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 16, y: -16}
+  m_SizeDelta: {x: 980, y: 520}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1944002266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -493,7 +495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01fef301625872643bdec58cf7eb0085, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.M0.BootstrapOverlay
-  overlayText: {fileID: 0}
+  overlayText: {fileID: 1944002267}
 --- !u!114 &1944002267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -541,8 +543,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

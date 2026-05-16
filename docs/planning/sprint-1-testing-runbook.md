@@ -25,7 +25,7 @@ This document is execution scaffolding only. It does not mark Sprint 1 complete 
 
 ### UAT-01: Run full Unity EditMode suite
 1. In Unity, open Window -> General -> Test Runner.
-2. In Test Runner, select EditMode.
+2. Select the tab where Sprint 1 tests are listed (current repo behavior: PlayMode).
 3. Click Run All.
 4. Wait for completion.
 5. Verify no unexpected blocking errors in Console tied to Sprint 1 scope.
@@ -36,16 +36,17 @@ Pass expectation:
 - Required Sprint 1 EditMode tests pass with no blocking Sprint 1 console exceptions.
 
 ### UAT-02: Run deterministic replay test 3 consecutive times
-1. Keep Test Runner open in EditMode.
+1. Keep Test Runner open in the tab used for Sprint 1 tests (currently PlayMode).
 2. Locate determinism tests (for example, SimulationDeterminismTests group).
 3. Select only determinism test(s).
 4. Run Selected for run 1.
-5. Capture result evidence.
+5. Capture screenshot `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.png`.
 6. Run Selected for run 2.
-7. Capture result evidence.
+7. Capture screenshot `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.png`.
 8. Run Selected for run 3.
-9. Capture result evidence.
-10. Verify all 3 runs pass with no checkpoint divergence.
+9. Capture screenshot `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.png`.
+10. After each run, export Test Runner XML and save as run1/run2/run3 files.
+11. Verify all 3 runs pass with no checkpoint divergence.
 
 Pass expectation:
 - Three consecutive passes and no nondeterministic drift.
@@ -53,22 +54,22 @@ Pass expectation:
 ### UAT-03: Validate pause/resume plus offline elapsed invariants
 1. Open bootstrap runtime scene (for example, Bootstrap.unity).
 2. Enter Play mode.
-3. Note baseline values for visible time or tick, mana, and heat indicators.
+3. Note baseline overlay values for Tick, Mana, Heat, Save, Pause, Pending, and Gate lines.
 4. Pause Play mode.
 5. Wait about 10 to 20 seconds.
 6. Resume Play mode.
-7. Verify values continue without invalid spikes or invariant breaks.
+7. Verify Pause returns to Running and Tick keeps increasing after resume without invalid spikes.
 8. Exit Play mode.
-9. Re-enter Play mode and execute the project-approved offline elapsed debug or test path.
-10. Verify elapsed handling obeys expected caps and guardrails.
-11. Capture before and after evidence.
+9. Re-enter Play mode, wait ~15 seconds while paused, then resume.
+10. Verify Pause transitions Paused -> Running and inspect banner/console for skew warning behavior only when expected.
+11. Capture before and after overlay screenshots and optional warning screenshot if triggered.
 
 Pass expectation:
 - Pause/resume and offline elapsed behavior stay within expected invariants.
 
 ### UAT-04: Validate save migration fixture matrix
 1. Open Window -> General -> Test Runner.
-2. In EditMode, locate migration fixture tests (for example, MigrationRunnerTests group).
+2. In the tab used for Sprint 1 tests (currently PlayMode), locate migration fixture tests (for example, MigrationRunnerTests group).
 3. Select migration group.
 4. Click Run Selected.
 5. Verify old-schema fixture path passes.
@@ -82,7 +83,7 @@ Pass expectation:
 ### UAT-05: Validate debug visibility for verification metrics
 1. Open bootstrap runtime scene.
 2. Enter Play mode.
-3. Confirm visible indicators include tick or time progression, mana, heat, and pending verification status indicator if present in Sprint 1 scope.
+3. Confirm visible indicators include Tick/time progression, Mana, Heat, Save status, Pause state, and Pending verification status.
 4. Let runtime update long enough to confirm indicators are changing.
 5. Capture screenshot(s).
 6. Exit Play mode.
@@ -119,6 +120,8 @@ Use ASCII-only names and UTC timestamps:
   - Re-run exact same selected test group and document run-to-run differences.
 - Missing debug indicators in UAT-05:
   - Confirm correct scene and debug display path for Sprint 1 scope.
+- Console shows `[ERROR] Missing JSON asset: content_manifest`:
+  - Fail UAT and verify `Bootstrap.unity` GameRoot `contentManifestJson` reference is assigned.
 - Migration fixture failure:
   - Confirm fixture set is current for old/current/malformed cases and capture exact failing assertion.
 

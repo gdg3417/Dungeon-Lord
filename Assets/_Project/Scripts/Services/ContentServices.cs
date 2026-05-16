@@ -33,7 +33,7 @@ namespace DungeonBuilder.M0
             Bootstrap = SafeParse<ContentBootstrap>(contentBootstrapJson, "content_bootstrap", logger, ref warningBanner);
             BuildConfig = SafeParse<BuildConfig>(buildConfigJson, "build_config", logger, ref warningBanner);
             Schemas = SafeParse<SchemaVersions>(schemaVersionsJson, "schema_versions", logger, ref warningBanner);
-            Manifest = SafeParse<ContentManifest>(contentManifestJson, "content_manifest", logger, ref warningBanner);
+            Manifest = SafeParseOptional<ContentManifest>(contentManifestJson, "content_manifest", logger, ref warningBanner);
             DevCommands = SafeParse<DevCommands>(devCommandsJson, "dev_commands", logger, ref warningBanner);
             Strings = SafeParse<StringTable>(stringTableJson, "string_table_en", logger, ref warningBanner);
             HeatRuntime = SafeParseOptional<HeatRuntimeConfig>(heatRuntimeJson, "heat_runtime", logger, ref warningBanner);

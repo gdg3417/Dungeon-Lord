@@ -26,7 +26,7 @@ Prove baseline Sprint 1 EditMode tests pass in a real Unity runner.
 3. Select this repo project and click **Open**.
 4. Wait for asset/script import to complete.
 5. In Unity top menu, click **Window** -> **General** -> **Test Runner**.
-6. In the Test Runner panel, click the **EditMode** tab.
+6. In the Test Runner panel, open the tab where Sprint 1 tests are listed (current repo configuration: **PlayMode** tab).
 7. Click **Run All**.
 8. Wait for execution to finish.
 9. In Console, confirm no unexpected runtime/editor errors occurred during test run.
@@ -51,15 +51,19 @@ Prove deterministic replay stability across repeated executions.
 
 ### Click-by-click steps
 1. Keep Unity open with **Window** -> **General** -> **Test Runner**.
-2. In **EditMode** list, locate the determinism test group (e.g., `SimulationDeterminismTests`).
+2. In the test list tab used for Sprint 1 tests (currently **PlayMode**), locate the determinism test group (`SimulationDeterminismTests`).
 3. Select only the determinism test(s) for targeted reruns.
 4. Click **Run Selected** (Run #1).
-5. Record result and capture screenshot.
+5. Record result and capture screenshot named `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.png`.
 6. Click **Run Selected** again (Run #2).
-7. Record result and capture screenshot.
+7. Record result and capture screenshot named `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.png`.
 8. Click **Run Selected** again (Run #3).
-9. Record result and capture screenshot.
-10. Confirm all three runs passed with no divergent checkpoint assertions.
+9. Record result and capture screenshot named `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.png`.
+10. Export test results XML after each run and save as:
+    - `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.xml`
+    - `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.xml`
+    - `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.xml`
+11. Confirm all three runs passed with no divergent checkpoint assertions.
 
 ### Pass criteria
 - 3/3 consecutive determinism runs pass.
@@ -79,15 +83,15 @@ Verify time progression behavior does not violate determinism/offline rules.
 ### Click-by-click steps
 1. In Unity, open the bootstrap scene used for runtime start (Project window -> locate `Bootstrap.unity` -> double-click).
 2. Click **Play**.
-3. Let simulation run briefly; note mana/heat/tick display values.
+3. Let simulation run briefly and observe the top-left overlay lines for `Tick`, `Mana`, `Heat`, `Save`, `Pause`, and `Pending/Gate`.
 4. Click **Pause** in the Play controls.
 5. Wait ~10–20 seconds.
 6. Click **Play** (resume).
-7. Verify values continue in expected direction with no spikes/anomalies.
+7. Verify `Tick` keeps increasing, `Pause` returns to `Running`, and `Heat`/`Mana` do not jump to impossible values.
 8. Stop Play mode.
-9. Re-enter Play mode and simulate an offline elapsed scenario using the project’s available debug/test path (if provided by tooling/tests).
-10. Confirm elapsed-time handling respects expected caps/guards.
-11. Capture screenshots/logs of before/after values.
+9. Re-enter Play mode, then pause Unity Editor play for ~15 seconds and resume.
+10. Confirm `Pause` line changes `Paused` -> `Running` and check banner/console for skew warning only when large time change is detected.
+11. Capture before/after screenshots of overlay values and one Console screenshot if a warning banner appears.
 
 ### Pass criteria
 - Pause/resume does not create invalid jumps or invariant breaks.
@@ -106,7 +110,7 @@ Confirm migration behavior for old/current/malformed fixtures.
 
 ### Click-by-click steps
 1. Open **Window** -> **General** -> **Test Runner**.
-2. In **EditMode**, locate migration tests (e.g., `MigrationRunnerTests`).
+2. In the tab where Sprint 1 tests are listed (currently **PlayMode**), locate migration tests (e.g., `MigrationRunnerTests`).
 3. Select migration fixture test group.
 4. Click **Run Selected**.
 5. Verify old-schema fixture path passes.
@@ -136,7 +140,9 @@ Ensure runtime visibility for Sprint 1 verification signals.
    - Tick/time progression indicator.
    - Mana indicator.
    - Heat indicator.
-   - Any pending verification status indicator available in Sprint 1 scope.
+   - Save/load status line.
+   - Pause/resume status line.
+   - Pending verification status indicator.
 4. Interact with minimal runtime loop long enough to observe value updates.
 5. Capture at least one clear screenshot of overlay values.
 6. Stop Play mode.
@@ -147,6 +153,10 @@ Ensure runtime visibility for Sprint 1 verification signals.
 ### Evidence required
 - Screenshot(s) showing required indicators.
 - Brief note confirming observed updates.
+
+### Note on content manifest
+- `content_manifest.json` should be assigned in `GameRoot` on `Bootstrap.unity`.
+- Treat as FAIL if Console shows a red `[ERROR] Missing JSON asset: content_manifest`.
 
 ---
 
