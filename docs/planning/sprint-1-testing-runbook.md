@@ -86,6 +86,7 @@ Pass expectation:
 
 Pass expectation:
 - Required indicators are visible and update in Play Mode.
+- `Mana` line is a Sprint 1 debug proxy (current KPI average mana per tick), not persisted save mana.
 
 ## 6. Required evidence artifacts
 - UAT-01: Run-all screenshot + XML/log.
