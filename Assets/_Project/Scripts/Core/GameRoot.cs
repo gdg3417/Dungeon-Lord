@@ -41,6 +41,10 @@ namespace DungeonBuilder.M0
         public string PauseLine { get; private set; } = "Pause: Running";
 
         private AppStateMachine _sm;
+#if UNITY_EDITOR
+        private string _editorFallbackSummary = string.Empty;
+#endif
+
         private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
         private readonly IHeatSystem _heatSystem = new HeatSystem();
 
@@ -131,25 +135,48 @@ namespace DungeonBuilder.M0
         private void EnsureContentAssetsAssigned()
         {
 #if UNITY_EDITOR
-            contentBootstrapJson = contentBootstrapJson != null ? contentBootstrapJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/content_bootstrap.json");
-            buildConfigJson = buildConfigJson != null ? buildConfigJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/build_config.json");
-            schemaVersionsJson = schemaVersionsJson != null ? schemaVersionsJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/schema_versions.json");
-            contentManifestJson = contentManifestJson != null ? contentManifestJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/content_manifest.json");
-            devCommandsJson = devCommandsJson != null ? devCommandsJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/dev_commands.json");
-            stringTableJson = stringTableJson != null ? stringTableJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/string_table_en.json");
-            heatRuntimeJson = heatRuntimeJson != null ? heatRuntimeJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/heat_runtime.json");
+            System.Collections.Generic.List<string> assignedFields = new System.Collections.Generic.List<string>();
+
+            contentBootstrapJson = EnsureEditorFallbackAsset(contentBootstrapJson, "contentBootstrapJson", "Assets/_Project/Data/Bootstrap/content_bootstrap.json", assignedFields);
+            buildConfigJson = EnsureEditorFallbackAsset(buildConfigJson, "buildConfigJson", "Assets/_Project/Data/Bootstrap/build_config.json", assignedFields);
+            schemaVersionsJson = EnsureEditorFallbackAsset(schemaVersionsJson, "schemaVersionsJson", "Assets/_Project/Data/Bootstrap/schema_versions.json", assignedFields);
+            contentManifestJson = EnsureEditorFallbackAsset(contentManifestJson, "contentManifestJson", "Assets/_Project/Data/Bootstrap/content_manifest.json", assignedFields);
+            devCommandsJson = EnsureEditorFallbackAsset(devCommandsJson, "devCommandsJson", "Assets/_Project/Data/Bootstrap/dev_commands.json", assignedFields);
+            stringTableJson = EnsureEditorFallbackAsset(stringTableJson, "stringTableJson", "Assets/_Project/Data/Bootstrap/string_table_en.json", assignedFields);
+            heatRuntimeJson = EnsureEditorFallbackAsset(heatRuntimeJson, "heatRuntimeJson", "Assets/_Project/Data/Bootstrap/heat_runtime.json", assignedFields);
+
+            if (assignedFields.Count > 0)
+            {
+                _editorFallbackSummary = "Editor fallback assigned JSON fields: " + string.Join(", ", assignedFields);
+                Logger?.Warn(_editorFallbackSummary);
+            }
+            else
+            {
+                _editorFallbackSummary = string.Empty;
+            }
 #endif
         }
 
 #if UNITY_EDITOR
-        private TextAsset LoadEditorTextAsset(string path)
+        private TextAsset EnsureEditorFallbackAsset(
+            TextAsset current,
+            string fieldName,
+            string path,
+            System.Collections.Generic.List<string> assignedFields)
         {
+            if (current != null)
+            {
+                return current;
+            }
+
             TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
             if (asset == null)
             {
-                Logger?.Warn($"Editor fallback JSON asset not found at path: {path}");
+                Logger?.Warn($"Editor fallback JSON asset not found for {fieldName} at path: {path}");
+                return null;
             }
 
+            assignedFields.Add(fieldName);
             return asset;
         }
 #endif
@@ -174,6 +201,15 @@ namespace DungeonBuilder.M0
             {
                 SetBanner(contentBanner);
             }
+
+#if UNITY_EDITOR
+            if (!string.IsNullOrEmpty(_editorFallbackSummary))
+            {
+                SetBanner(string.IsNullOrEmpty(BannerMessage)
+                    ? _editorFallbackSummary
+                    : BannerMessage + "\n" + _editorFallbackSummary);
+            }
+#endif
 
             string contentVersion = Content.Bootstrap != null ? Content.Bootstrap.contentVersion : "0.0.0";
 
