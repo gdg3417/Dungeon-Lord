@@ -202,15 +202,6 @@ namespace DungeonBuilder.M0
                 SetBanner(contentBanner);
             }
 
-#if UNITY_EDITOR
-            if (!string.IsNullOrEmpty(_editorFallbackWarningLine))
-            {
-                SetBanner(string.IsNullOrEmpty(BannerMessage)
-                    ? _editorFallbackWarningLine
-                    : _editorFallbackWarningLine + "\n" + BannerMessage);
-            }
-#endif
-
             string contentVersion = Content.Bootstrap != null ? Content.Bootstrap.contentVersion : "0.0.0";
 
             string env = Content.BuildConfig != null ? Content.BuildConfig.environment : "unknown";
@@ -261,7 +252,28 @@ namespace DungeonBuilder.M0
 
         public void SetBanner(string message)
         {
-            BannerMessage = message ?? string.Empty;
+            string baseMessage = message ?? string.Empty;
+#if UNITY_EDITOR
+            if (!string.IsNullOrEmpty(_editorFallbackWarningLine))
+            {
+                if (string.IsNullOrEmpty(baseMessage))
+                {
+                    BannerMessage = _editorFallbackWarningLine;
+                    return;
+                }
+
+                if (baseMessage.StartsWith(_editorFallbackWarningLine + "\n", System.StringComparison.Ordinal) ||
+                    string.Equals(baseMessage, _editorFallbackWarningLine, System.StringComparison.Ordinal))
+                {
+                    BannerMessage = baseMessage;
+                    return;
+                }
+
+                BannerMessage = _editorFallbackWarningLine + "\n" + baseMessage;
+                return;
+            }
+#endif
+            BannerMessage = baseMessage;
         }
 
         public void SetOnline(bool isOnline)
