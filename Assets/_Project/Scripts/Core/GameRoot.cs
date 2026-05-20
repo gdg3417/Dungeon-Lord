@@ -1,5 +1,8 @@
 using DungeonBuilder.M0.Economy;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace DungeonBuilder.M0
 {
@@ -38,6 +41,10 @@ namespace DungeonBuilder.M0
         public string PauseLine { get; private set; } = "Pause: Running";
 
         private AppStateMachine _sm;
+#if UNITY_EDITOR
+        private string _editorFallbackWarningLine = string.Empty;
+#endif
+
         private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
         private readonly IHeatSystem _heatSystem = new HeatSystem();
 
@@ -124,8 +131,60 @@ namespace DungeonBuilder.M0
             }
         }
 
+
+        private void EnsureContentAssetsAssigned()
+        {
+#if UNITY_EDITOR
+            System.Collections.Generic.List<string> assignedFields = new System.Collections.Generic.List<string>();
+
+            contentBootstrapJson = EnsureEditorFallbackAsset(contentBootstrapJson, "contentBootstrapJson", "Assets/_Project/Data/Bootstrap/content_bootstrap.json", assignedFields);
+            buildConfigJson = EnsureEditorFallbackAsset(buildConfigJson, "buildConfigJson", "Assets/_Project/Data/Bootstrap/build_config.json", assignedFields);
+            schemaVersionsJson = EnsureEditorFallbackAsset(schemaVersionsJson, "schemaVersionsJson", "Assets/_Project/Data/Bootstrap/schema_versions.json", assignedFields);
+            contentManifestJson = EnsureEditorFallbackAsset(contentManifestJson, "contentManifestJson", "Assets/_Project/Data/Bootstrap/content_manifest.json", assignedFields);
+            devCommandsJson = EnsureEditorFallbackAsset(devCommandsJson, "devCommandsJson", "Assets/_Project/Data/Bootstrap/dev_commands.json", assignedFields);
+            stringTableJson = EnsureEditorFallbackAsset(stringTableJson, "stringTableJson", "Assets/_Project/Data/Bootstrap/string_table_en.json", assignedFields);
+            heatRuntimeJson = EnsureEditorFallbackAsset(heatRuntimeJson, "heatRuntimeJson", "Assets/_Project/Data/Bootstrap/heat_runtime.json", assignedFields);
+
+            if (assignedFields.Count > 0)
+            {
+                _editorFallbackWarningLine = "WARNING: Editor fallback JSON in use (fields: " + string.Join(", ", assignedFields) + ")";
+                Logger?.Warn(_editorFallbackWarningLine);
+            }
+            else
+            {
+                _editorFallbackWarningLine = string.Empty;
+            }
+#endif
+        }
+
+#if UNITY_EDITOR
+        private TextAsset EnsureEditorFallbackAsset(
+            TextAsset current,
+            string fieldName,
+            string path,
+            System.Collections.Generic.List<string> assignedFields)
+        {
+            if (current != null)
+            {
+                return current;
+            }
+
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            if (asset == null)
+            {
+                Logger?.Warn($"Editor fallback JSON asset not found for {fieldName} at path: {path}");
+                return null;
+            }
+
+            assignedFields.Add(fieldName);
+            return asset;
+        }
+#endif
+
         public void InitializeServicesAndData()
         {
+            EnsureContentAssetsAssigned();
+
             Content.LoadAll(
                 contentBootstrapJson,
                 buildConfigJson,
@@ -193,7 +252,28 @@ namespace DungeonBuilder.M0
 
         public void SetBanner(string message)
         {
-            BannerMessage = message ?? string.Empty;
+            string baseMessage = message ?? string.Empty;
+#if UNITY_EDITOR
+            if (!string.IsNullOrEmpty(_editorFallbackWarningLine))
+            {
+                if (string.IsNullOrEmpty(baseMessage))
+                {
+                    BannerMessage = _editorFallbackWarningLine;
+                    return;
+                }
+
+                if (baseMessage.StartsWith(_editorFallbackWarningLine + "\n", System.StringComparison.Ordinal) ||
+                    string.Equals(baseMessage, _editorFallbackWarningLine, System.StringComparison.Ordinal))
+                {
+                    BannerMessage = baseMessage;
+                    return;
+                }
+
+                BannerMessage = _editorFallbackWarningLine + "\n" + baseMessage;
+                return;
+            }
+#endif
+            BannerMessage = baseMessage;
         }
 
         public void SetOnline(bool isOnline)
