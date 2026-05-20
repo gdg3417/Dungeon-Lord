@@ -42,7 +42,7 @@ namespace DungeonBuilder.M0
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
-        private string _editorFallbackSummary = string.Empty;
+        private string _editorFallbackWarningLine = string.Empty;
 #endif
 
         private readonly IRestrictedActionGate _restrictedActionGate = new RestrictedActionGateService();
@@ -147,12 +147,12 @@ namespace DungeonBuilder.M0
 
             if (assignedFields.Count > 0)
             {
-                _editorFallbackSummary = "Editor fallback assigned JSON fields: " + string.Join(", ", assignedFields);
-                Logger?.Warn(_editorFallbackSummary);
+                _editorFallbackWarningLine = "WARNING: Editor fallback JSON in use (fields: " + string.Join(", ", assignedFields) + ")";
+                Logger?.Warn(_editorFallbackWarningLine);
             }
             else
             {
-                _editorFallbackSummary = string.Empty;
+                _editorFallbackWarningLine = string.Empty;
             }
 #endif
         }
@@ -203,11 +203,11 @@ namespace DungeonBuilder.M0
             }
 
 #if UNITY_EDITOR
-            if (!string.IsNullOrEmpty(_editorFallbackSummary))
+            if (!string.IsNullOrEmpty(_editorFallbackWarningLine))
             {
                 SetBanner(string.IsNullOrEmpty(BannerMessage)
-                    ? _editorFallbackSummary
-                    : BannerMessage + "\n" + _editorFallbackSummary);
+                    ? _editorFallbackWarningLine
+                    : _editorFallbackWarningLine + "\n" + BannerMessage);
             }
 #endif
 
