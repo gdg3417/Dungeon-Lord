@@ -19,6 +19,11 @@ This runbook does not itself close Sprint 1 and does not authorize Sprint 2A sta
 4. Open project and wait until import/compile fully completes.
 5. In Unity, verify **Help -> About Unity** shows `6000.3.2f1`.
 6. Open windows: **Console, Project, Hierarchy, Inspector, Game, Test Runner**.
+   - **Project** (usually bottom-left): folder/file browser for `Assets`.
+   - **Hierarchy** (usually upper-left): list of GameObjects in current scene.
+   - **Inspector** (usually right): properties for selected object.
+   - **Game** (usually center): rendered play view.
+   - **Console** (usually bottom): warnings/errors/log output.
 7. Create evidence folder (UTC timestamp) and record branch + commit + Unity version.
 
 ## 4. Current test discovery behavior (important)
@@ -51,7 +56,9 @@ Pass expectation:
 - 3/3 consecutive determinism passes with preserved per-run evidence.
 
 ### UAT-03: Pause/resume invariants via Dev Panel
-1. Open scene: `Assets/_Project/Scenes/Bootstrap.unity`.
+1. Open scene with exact folder clicks in **Project** window (bottom-left):
+   - `Assets` -> `_Project` -> `Scenes` -> double-click `Bootstrap.unity`.
+   - Do **not** run `Assets/Scenes/SampleScene.unity` for Sprint 1 UAT runtime checks.
 2. In Hierarchy select `GameRoot`.
 3. In Inspector verify assigned fields:
    - `contentBootstrapJson`, `buildConfigJson`, `schemaVersionsJson`, `contentManifestJson`, `devCommandsJson`, `stringTableJson`, `heatRuntimeJson`, `overlay`.
@@ -78,7 +85,9 @@ Pass expectation:
 - Migration tests pass for expected fixture matrix.
 
 ### UAT-05: Debug visibility
-1. Open `Assets/_Project/Scenes/Bootstrap.unity` and enter Play.
+1. In **Project** window (bottom-left), open:
+   - `Assets` -> `_Project` -> `Scenes` -> `Bootstrap.unity`.
+   - Confirm you are **not** in `Assets/Scenes/SampleScene.unity`, then enter Play.
 2. Confirm readable overlay and required lines: `Tick`, `Mana`, `Heat`, `Save`, `Pause`, `Pending`.
 3. Let values update naturally.
 4. Press F1 and toggle one Dev Panel action to show observable line update.
@@ -107,6 +116,13 @@ Suggested naming (UTC):
 - **PARTIAL**: Execution attempted, but evidence incomplete or criteria partly met.
 - **FAIL**: Criteria not met.
 - **BLOCKED**: Cannot execute due to environment/configuration problem.
+
+## 8. Scene-selection quick check (first-time Unity users)
+Before pressing Play for UAT-03/UAT-05:
+1. In **Hierarchy** (upper-left), confirm the scene title shows `Bootstrap` and objects include `GameRoot`.
+2. Click `GameRoot` in Hierarchy.
+3. In **Inspector** (right), verify script shows `DungeonBuilder.M0.GameRoot` and JSON fields are assigned.
+4. If `SampleScene` is open instead, return to **Project** (bottom-left) and re-open `Assets/_Project/Scenes/Bootstrap.unity`.
 
 ## 8. Troubleshooting and interpretation
 - `[ERROR] Missing JSON asset: content_manifest`

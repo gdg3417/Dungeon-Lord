@@ -19,6 +19,11 @@ Sprint 1 is **not closed** until every UAT item below is marked **PASS** with li
 4. Open project and wait for import/compile to finish (no spinner in lower-right).
 5. In Unity Editor, verify version in **Help -> About Unity** is `6000.3.2f1`.
 6. Open and keep visible: **Console**, **Project**, **Hierarchy**, **Inspector**, **Game**, **Test Runner**.
+   - **Project**: usually bottom-left panel (shows `Assets/` folders).
+   - **Hierarchy**: usually upper-left panel (shows objects in the open scene).
+   - **Inspector**: usually right panel (shows properties for selected object).
+   - **Game**: center panel/tab (what the player camera sees).
+   - **Console**: usually bottom panel/tab (logs and errors).
 7. Create a UTC evidence folder in your artifact location.
 8. Clear Console before each UAT flow.
 
@@ -84,7 +89,10 @@ Prove deterministic replay stability across repeated runs.
 Verify pause/resume path is manually testable and does not violate runtime invariants.
 
 ### Click-by-click steps
-1. In Project window, open exact scene path: `Assets/_Project/Scenes/Bootstrap.unity`.
+1. In **Project** window (normally bottom-left), expand folders in this exact order:
+   - `Assets` -> `_Project` -> `Scenes`
+   - Double-click `Bootstrap.unity` to open it.
+   - **Do not use** `Assets/Scenes/SampleScene.unity` for Sprint 1 UAT-03/UAT-05; use `Assets/_Project/Scenes/Bootstrap.unity`.
 2. In Hierarchy, select `GameRoot`.
 3. In Inspector, verify these `GameRoot` fields are assigned:
    - `contentBootstrapJson`
@@ -154,7 +162,9 @@ Confirm migration behavior for old/current/malformed fixtures.
 Ensure Sprint 1 runtime verification signals are visible to non-developers.
 
 ### Click-by-click steps
-1. Open `Assets/_Project/Scenes/Bootstrap.unity`.
+1. In **Project** window (bottom-left), open scene path:
+   - `Assets` -> `_Project` -> `Scenes` -> `Bootstrap.unity`
+   - **Do not use** `Assets/Scenes/SampleScene.unity` for this UAT step.
 2. Enter Play Mode.
 3. Confirm overlay is visible/readable in top-left of Game view.
 4. Confirm required lines are visible: `Tick`, `Mana`, `Heat`, `Save`, `Pause`, `Pending`.
@@ -170,6 +180,11 @@ Ensure Sprint 1 runtime verification signals are visible to non-developers.
 - Screenshot(s) showing required indicators and readability.
 
 ---
+
+## Scene selection guardrail (read before UAT-03 and UAT-05)
+- **Correct scene for Sprint 1 runtime UAT**: `Assets/_Project/Scenes/Bootstrap.unity`.
+- `Assets/Scenes/SampleScene.unity` is a default Unity sample scene and is **not** the Sprint 1 runtime verification scene.
+- If you run the wrong scene, results are invalid for closeout evidence and must be re-run in `Bootstrap.unity`.
 
 ## Common error interpretation
 - **`[ERROR] Missing JSON asset: content_manifest`**: FAIL/BLOCKED until `GameRoot.contentManifestJson` assignment is fixed in `Bootstrap.unity`.

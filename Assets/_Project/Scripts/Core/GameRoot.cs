@@ -1,5 +1,8 @@
 using DungeonBuilder.M0.Economy;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace DungeonBuilder.M0
 {
@@ -124,8 +127,37 @@ namespace DungeonBuilder.M0
             }
         }
 
+
+        private void EnsureContentAssetsAssigned()
+        {
+#if UNITY_EDITOR
+            contentBootstrapJson = contentBootstrapJson != null ? contentBootstrapJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/content_bootstrap.json");
+            buildConfigJson = buildConfigJson != null ? buildConfigJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/build_config.json");
+            schemaVersionsJson = schemaVersionsJson != null ? schemaVersionsJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/schema_versions.json");
+            contentManifestJson = contentManifestJson != null ? contentManifestJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/content_manifest.json");
+            devCommandsJson = devCommandsJson != null ? devCommandsJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/dev_commands.json");
+            stringTableJson = stringTableJson != null ? stringTableJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/string_table_en.json");
+            heatRuntimeJson = heatRuntimeJson != null ? heatRuntimeJson : LoadEditorTextAsset("Assets/_Project/Data/Bootstrap/heat_runtime.json");
+#endif
+        }
+
+#if UNITY_EDITOR
+        private TextAsset LoadEditorTextAsset(string path)
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            if (asset == null)
+            {
+                Logger?.Warn($"Editor fallback JSON asset not found at path: {path}");
+            }
+
+            return asset;
+        }
+#endif
+
         public void InitializeServicesAndData()
         {
+            EnsureContentAssetsAssigned();
+
             Content.LoadAll(
                 contentBootstrapJson,
                 buildConfigJson,
