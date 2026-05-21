@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="24" result="Passed" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.1125346">
+  <test-suite type="TestSuite" id="1042" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.112535" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1034" name="Assembly-CSharp.dll" fullname="C:/Users/gdg34/OneDrive/Documents/GitHub/Dungeon-Lord/Library/ScriptAssemblies/Assembly-CSharp.dll" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.104325" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="7876" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1035" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.102067" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1036" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.100334" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1037" name="Tests" fullname="DungeonBuilder.M0.Tests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.098741" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1038" name="EditMode" fullname="DungeonBuilder.M0.Tests.EditMode" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.097113" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1001" name="FormulaEngineTests" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.024854" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1002" name="Evaluate_AppliesBucketsInGlobalOrder" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests.Evaluate_AppliesBucketsInGlobalOrder" methodname="Evaluate_AppliesBucketsInGlobalOrder" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" seed="1447155887" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.010769" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1003" name="Evaluate_AppliesClampBeforeRounding" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests.Evaluate_AppliesClampBeforeRounding" methodname="Evaluate_AppliesClampBeforeRounding" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" seed="679960937" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.000338" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1004" name="Evaluate_MixedStackWithSoftCapClampAndRounding_UsesContractOrder" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests.Evaluate_MixedStackWithSoftCapClampAndRounding_UsesContractOrder" methodname="Evaluate_MixedStackWithSoftCapClampAndRounding_UsesContractOrder" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" seed="298381070" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.000494" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1005" name="Evaluate_WithNegativeBaseAndClamp_RespectsLowerBound" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests.Evaluate_WithNegativeBaseAndClamp_RespectsLowerBound" methodname="Evaluate_WithNegativeBaseAndClamp_RespectsLowerBound" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" seed="910094967" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.000248" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1006" name="Evaluate_WithTinyAndHugeValues_RemainsStableAndRounded" fullname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests.Evaluate_WithTinyAndHugeValues_RemainsStableAndRounded" methodname="Evaluate_WithTinyAndHugeValues_RemainsStableAndRounded" classname="DungeonBuilder.M0.Tests.EditMode.FormulaEngineTests" runstate="Runnable" seed="1092590627" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.000336" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1007" name="HeatSystemTests" fullname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" classname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.006864" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1008" name="ApplyEvent_AddsAndSubtractsDeterministically" fullname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests.ApplyEvent_AddsAndSubtractsDeterministically" methodname="ApplyEvent_AddsAndSubtractsDeterministically" classname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" runstate="Runnable" seed="371941435" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:28Z" duration="0.000973" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1010" name="ApplyEvent_AndDecay_NeverGoBelowZero" fullname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests.ApplyEvent_AndDecay_NeverGoBelowZero" methodname="ApplyEvent_AndDecay_NeverGoBelowZero" classname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" runstate="Runnable" seed="884496523" result="Passed" start-time="2026-05-21 21:21:28Z" end-time="2026-05-21 21:21:29Z" duration="0.000508" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1009" name="Decay_AppliesElapsedTicksDeterministically" fullname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests.Decay_AppliesElapsedTicksDeterministically" methodname="Decay_AppliesElapsedTicksDeterministically" classname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" runstate="Runnable" seed="1467848376" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000169" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1011" name="SameInputSequences_ProduceSameOutputs" fullname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests.SameInputSequences_ProduceSameOutputs" methodname="SameInputSequences_ProduceSameOutputs" classname="DungeonBuilder.M0.Tests.EditMode.HeatSystemTests" runstate="Runnable" seed="262174852" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.001516" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1012" name="KpiServiceTests" fullname="DungeonBuilder.M0.Tests.EditMode.KpiServiceTests" classname="DungeonBuilder.M0.Tests.EditMode.KpiServiceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.006035" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1013" name="Snapshot_ComputesAveragesAndGateCounts" fullname="DungeonBuilder.M0.Tests.EditMode.KpiServiceTests.Snapshot_ComputesAveragesAndGateCounts" methodname="Snapshot_ComputesAveragesAndGateCounts" classname="DungeonBuilder.M0.Tests.EditMode.KpiServiceTests" runstate="Runnable" seed="322575328" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000728" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1014" name="ManaSystemTests" fullname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests" classname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.006910" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1015" name="Tick_AppliesFormulaAndReturnsDeterministicResult" fullname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests.Tick_AppliesFormulaAndReturnsDeterministicResult" methodname="Tick_AppliesFormulaAndReturnsDeterministicResult" classname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests" runstate="Runnable" seed="1926460321" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000702" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1016" name="Tick_ClampsToCapacity" fullname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests.Tick_ClampsToCapacity" methodname="Tick_ClampsToCapacity" classname="DungeonBuilder.M0.Tests.EditMode.ManaSystemTests" runstate="Runnable" seed="977425691" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000285" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1017" name="MigrationRunnerTests" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.009484" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1021" name="Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" methodname="Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="1036268995" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.002922" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1022" name="Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" methodname="Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="562886607" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.001824" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1020" name="Fixture_OldSchemaRoot_MigratesAndRoundTrips" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_OldSchemaRoot_MigratesAndRoundTrips" methodname="Fixture_OldSchemaRoot_MigratesAndRoundTrips" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="1948860556" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000751" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1018" name="Run_AppliesRegisteredStepsToTargetVersion" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Run_AppliesRegisteredStepsToTargetVersion" methodname="Run_AppliesRegisteredStepsToTargetVersion" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="1536654820" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000196" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1019" name="Run_FailsWhenStepMissing" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Run_FailsWhenStepMissing" methodname="Run_FailsWhenStepMissing" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="920933414" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000478" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1023" name="RestrictedActionGateTests" fullname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests" classname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.005165" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1026" name="Evaluate_AllowsWhenOnlineAndVerified" fullname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests.Evaluate_AllowsWhenOnlineAndVerified" methodname="Evaluate_AllowsWhenOnlineAndVerified" classname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests" runstate="Runnable" seed="2090536435" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000314" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1024" name="Evaluate_BlocksWhenOffline" fullname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests.Evaluate_BlocksWhenOffline" methodname="Evaluate_BlocksWhenOffline" classname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests" runstate="Runnable" seed="737776134" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000247" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1025" name="Evaluate_BlocksWhenVerificationPending" fullname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests.Evaluate_BlocksWhenVerificationPending" methodname="Evaluate_BlocksWhenVerificationPending" classname="DungeonBuilder.M0.Tests.EditMode.RestrictedActionGateTests" runstate="Runnable" seed="380165404" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000123" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1027" name="SimulationClockTests" fullname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests" classname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.010782" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1029" name="ResumeAndDetectSkew_UsesConfiguredThreshold" fullname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests.ResumeAndDetectSkew_UsesConfiguredThreshold" methodname="ResumeAndDetectSkew_UsesConfiguredThreshold" classname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests" runstate="Runnable" seed="90080211" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000416" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1028" name="TryConsumeTick_ConsumesAtConfiguredInterval" fullname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests.TryConsumeTick_ConsumesAtConfiguredInterval" methodname="TryConsumeTick_ConsumesAtConfiguredInterval" classname="DungeonBuilder.M0.Tests.EditMode.SimulationClockTests" runstate="Runnable" seed="1183992640" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.000211" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1030" name="SimulationDeterminismTests" fullname="DungeonBuilder.M0.Tests.EditMode.SimulationDeterminismTests" classname="DungeonBuilder.M0.Tests.EditMode.SimulationDeterminismTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.016717" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1031" name="FixedTimeline_ReplaysIdenticallyAcrossRuns" fullname="DungeonBuilder.M0.Tests.EditMode.SimulationDeterminismTests.FixedTimeline_ReplaysIdenticallyAcrossRuns" methodname="FixedTimeline_ReplaysIdenticallyAcrossRuns" classname="DungeonBuilder.M0.Tests.EditMode.SimulationDeterminismTests" runstate="Runnable" seed="1238806930" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.003692" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1032" name="TelemetryServiceTests" fullname="DungeonBuilder.M0.Tests.EditMode.TelemetryServiceTests" classname="DungeonBuilder.M0.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.007381" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1033" name="Track_BuffersEvents" fullname="DungeonBuilder.M0.Tests.EditMode.TelemetryServiceTests.Track_BuffersEvents" methodname="Track_BuffersEvents" classname="DungeonBuilder.M0.Tests.EditMode.TelemetryServiceTests" runstate="Runnable" seed="447866418" result="Passed" start-time="2026-05-21 21:21:29Z" end-time="2026-05-21 21:21:29Z" duration="0.003806" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[[INFO] Telemetry buffered: tick_processed
+[INFO] Telemetry buffered: verification_pending
+Saving results to: C:/Users/gdg34/AppData/LocalLow/DefaultCompany/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
