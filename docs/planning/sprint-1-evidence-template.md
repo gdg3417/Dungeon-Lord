@@ -51,3 +51,13 @@ Use this template to record Sprint 1 closeout execution evidence for UAT-01 thro
 - Gate decision (BLOCKED or UNBLOCKED):
 - Decision rationale:
 - Linked Sprint 1 closeout evidence:
+
+## Latest known Sprint 1 export paths (2026-05-21)
+- UAT-01 run-all export:
+  - `docs/testing/evidence/sprint-1/TestResults_20260521_162303.xml`
+- UAT-02 determinism exports:
+  - `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.xml`
+  - `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.xml`
+  - `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.xml`
+- UAT-03/UAT-04/UAT-05 screenshots:
+  - Captured during UAT review; store under `docs/testing/evidence/sprint-1/` with Sprint 1 naming conventions from the runbook.

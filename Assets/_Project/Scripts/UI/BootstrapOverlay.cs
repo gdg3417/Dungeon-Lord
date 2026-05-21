@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 namespace DungeonBuilder.M0
 {
@@ -23,7 +24,7 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.F1))
+            if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
             {
                 _devPanelVisible = !_devPanelVisible;
             }
