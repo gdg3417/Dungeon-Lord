@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.0491411">
+  <test-suite type="TestSuite" id="1042" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.049141" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1034" name="Assembly-CSharp.dll" fullname="C:/Users/gdg34/OneDrive/Documents/GitHub/Dungeon-Lord/Library/ScriptAssemblies/Assembly-CSharp.dll" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.040090" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="39004" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1035" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.037643" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1036" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.035464" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1037" name="Tests" fullname="DungeonBuilder.M0.Tests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.033540" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1038" name="EditMode" fullname="DungeonBuilder.M0.Tests.EditMode" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.031777" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1017" name="MigrationRunnerTests" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.029352" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1021" name="Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" methodname="Fixture_CurrentSchemaRoot_RoundTripsWithoutMigration" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="2062743449" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.012259" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1022" name="Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" methodname="Fixture_MalformedRoot_ParseThrows_AsExpectedForFallbackHandling" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="1089696364" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.001751" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1020" name="Fixture_OldSchemaRoot_MigratesAndRoundTrips" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Fixture_OldSchemaRoot_MigratesAndRoundTrips" methodname="Fixture_OldSchemaRoot_MigratesAndRoundTrips" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="442914641" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.000714" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1018" name="Run_AppliesRegisteredStepsToTargetVersion" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Run_AppliesRegisteredStepsToTargetVersion" methodname="Run_AppliesRegisteredStepsToTargetVersion" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="576273295" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.000225" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1019" name="Run_FailsWhenStepMissing" fullname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests.Run_FailsWhenStepMissing" methodname="Run_FailsWhenStepMissing" classname="DungeonBuilder.M0.Tests.EditMode.MigrationRunnerTests" runstate="Runnable" seed="2073154489" result="Passed" start-time="2026-05-21 22:01:23Z" end-time="2026-05-21 22:01:23Z" duration="0.000536" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/DefaultCompany/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
