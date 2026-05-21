@@ -74,3 +74,14 @@ Use these exact verification labels in Sprint 1 closeout docs:
 ## Sprint 1 evidence index
 Primary evidence index for reviewers:
 - `docs/testing/evidence/sprint-1/README.md`
+
+
+## Current committed evidence snapshot (authoritative folder scan)
+- Source folder: `docs/testing/evidence/sprint-1/`
+- UAT-01: `COMMITTED`
+- UAT-02: `COMMITTED`
+- UAT-03: `MISSING` (no screenshot file committed in folder)
+- UAT-04: `MISSING` for screenshot evidence (XML export is committed)
+- UAT-05: `MISSING` (no screenshot file committed in folder)
+
+Use `docs/testing/evidence/sprint-1/README.md` as the source-of-truth ledger for exact committed file names.
