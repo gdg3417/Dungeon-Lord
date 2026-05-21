@@ -97,6 +97,16 @@ Pass expectation:
 - Required indicators are visible and update in Play Mode.
 - `Mana` line is a Sprint 1 debug proxy (current KPI average mana per tick), not persisted save mana.
 
+
+## Sprint 1 Reviewer Checklist
+1. Open `Assets/_Project/Scenes/Bootstrap.unity`.
+2. Enter Play Mode.
+3. Verify **F1** opens Dev Panel.
+4. Verify no Input System exception appears in Console.
+5. Verify Pause/Resume control updates `Pause:` and resumes `Tick:` progression.
+6. Verify overlay state lines are present (`Build`, `State`, `Pending`, `Gate`, `KPI`, `Heat`, `Tick`, `Mana`, `Save`, `Pause`).
+7. Verify evidence paths exist under `docs/testing/evidence/sprint-1/` or are explicitly marked external in the evidence index.
+
 ## 6. Required evidence artifacts
 - UAT-01: Run-all screenshot + XML/log.
 - UAT-02: 3 screenshots + 3 XML files (no overwrite).
@@ -137,7 +147,9 @@ Before pressing Play for UAT-03/UAT-05:
   - BLOCKED. Resolve compile/import errors and reopen Test Runner.
 
 ## 9. Gate reminder
-Sprint 2A must not start until UAT-01..UAT-05 are PASS with linked evidence.
+- Sprint 1 UAT status is **APPROVED** only when UAT-01 through UAT-05 are PASS with linked evidence.
+- Sprint 2A gate is **UNBLOCKED** only when Sprint 1 UAT is APPROVED.
+- Otherwise the Sprint 2A gate remains **BLOCKED**.
 
 ## 10. Required links
 - Sprint 1 closeout checklist: `Docs/Sprint1_Closeout_Checklist_2026-05-13.md`

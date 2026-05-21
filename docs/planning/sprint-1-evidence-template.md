@@ -42,7 +42,7 @@ Use this template to record Sprint 1 closeout execution evidence for UAT-01 thro
 - Status:
 
 ## Final signoff
-- Signoff result (PASS, FAIL, or INCOMPLETE):
+- Signoff result (APPROVED or BLOCKED):
 - Approver name:
 - Approver date (UTC):
 - Additional comments:
@@ -60,4 +60,17 @@ Use this template to record Sprint 1 closeout execution evidence for UAT-01 thro
   - `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.xml`
   - `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.xml`
 - UAT-03/UAT-04/UAT-05 screenshots:
-  - Captured during UAT review; store under `docs/testing/evidence/sprint-1/` with Sprint 1 naming conventions from the runbook.
+  - Expected under `docs/testing/evidence/sprint-1/` using Sprint 1 naming conventions from the runbook.
+  - If screenshots are hosted outside the repo, add direct URL(s) and owner/location details before signoff.
+
+
+## Verification wording standard (Sprint 1)
+Use these exact verification labels in Sprint 1 closeout docs:
+- UAT case IDs: `UAT-01` through `UAT-05`.
+- UAT case outcomes: `PASS`, `PARTIAL`, `FAIL`, `BLOCKED`.
+- Sprint 1 UAT approval: `APPROVED` when all five UAT cases are PASS and evidence is linked; otherwise `BLOCKED`.
+- Sprint 2A gate state: `UNBLOCKED` only when Sprint 1 UAT is APPROVED; otherwise `BLOCKED`.
+
+## Sprint 1 evidence index
+Primary evidence index for reviewers:
+- `docs/testing/evidence/sprint-1/README.md`

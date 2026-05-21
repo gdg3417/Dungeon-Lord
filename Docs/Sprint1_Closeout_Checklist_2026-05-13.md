@@ -6,6 +6,11 @@ Scope: Final evidence tracker and click-by-click UAT script required to mark Spr
 ## Completion rule
 Sprint 1 is **not closed** until every UAT item below is marked **PASS** with linked evidence.
 
+## Sprint 1 closeout status labels
+- **APPROVED**: UAT-01 through UAT-05 are PASS and evidence pointers are complete.
+- **BLOCKED**: Any required UAT is PARTIAL/FAIL/BLOCKED or required evidence is missing.
+- **UNBLOCKED**: Sprint 2A gate state only; valid only after Sprint 1 is APPROVED.
+
 ## Status definitions (use these exact labels)
 - **PASS**: Acceptance criteria met and required evidence captured.
 - **PARTIAL**: Some steps executed, but required evidence and/or acceptance criteria incomplete.
@@ -192,6 +197,15 @@ Ensure Sprint 1 runtime verification signals are visible to non-developers.
 - **No tests visible in EditMode tab**: Expected in current repo behavior; use **PlayMode** tab and record this in evidence notes.
 - **No Sprint 1 tests visible in either tab**: BLOCKED; reimport scripts, check compile errors, reopen Test Runner.
 
+## Sprint 1 Reviewer Checklist
+1. Open `Assets/_Project/Scenes/Bootstrap.unity`.
+2. Enter Play Mode.
+3. Press **F1** and verify Dev Panel visibility.
+4. Confirm no Input System exception appears in Console.
+5. Verify Pause/Resume behavior and `Pause` + `Tick` overlay updates.
+6. Verify overlay contains `Build`, `State`, `Pending`, `Gate`, `KPI`, `Heat`, `Tick`, `Mana`, `Save`, `Pause`.
+7. Verify evidence paths in `docs/testing/evidence/sprint-1/README.md` exist or are explicitly marked external.
+
 ## Closeout packet template (fill during execution)
 - Unity version:
 - Branch/commit tested:
@@ -202,6 +216,8 @@ Ensure Sprint 1 runtime verification signals are visible to non-developers.
 - UAT-04 result (PASS/PARTIAL/FAIL/BLOCKED):
 - UAT-05 result (PASS/PARTIAL/FAIL/BLOCKED):
 - Artifacts location(s):
+- Sprint 1 UAT status (APPROVED/BLOCKED):
+- Sprint 2A gate status (UNBLOCKED/BLOCKED):
 - Final signoff (name/date):
 
 ## Next sprint handoff constraint
