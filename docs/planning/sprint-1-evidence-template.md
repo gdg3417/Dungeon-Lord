@@ -10,27 +10,27 @@ Use this template to record Sprint 1 closeout execution evidence for UAT-01 thro
 - Tester name:
 
 ## UAT-01 result and evidence links
-- Result (PASS or FAIL):
+- Result (PASS, PARTIAL, FAIL, or BLOCKED):
 - Evidence links:
 - Notes:
 
 ## UAT-02 result and evidence links
-- Result (PASS or FAIL):
+- Result (PASS, PARTIAL, FAIL, or BLOCKED):
 - Evidence links:
 - Notes:
 
 ## UAT-03 result and evidence links
-- Result (PASS or FAIL):
+- Result (PASS, PARTIAL, FAIL, or BLOCKED):
 - Evidence links:
 - Notes:
 
 ## UAT-04 result and evidence links
-- Result (PASS or FAIL):
+- Result (PASS, PARTIAL, FAIL, or BLOCKED):
 - Evidence links:
 - Notes:
 
 ## UAT-05 result and evidence links
-- Result (PASS or FAIL):
+- Result (PASS, PARTIAL, FAIL, or BLOCKED):
 - Evidence links:
 - Notes:
 

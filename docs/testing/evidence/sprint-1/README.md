@@ -16,15 +16,20 @@ The following files are currently committed under `docs/testing/evidence/sprint-
 - **Sprint 2A gate**: `UNBLOCKED` only when Sprint 1 UAT is APPROVED.
 - If any required UAT evidence is missing or any UAT is not PASS, the gate is `BLOCKED`.
 
-## UAT evidence ledger (actual committed artifacts)
+## UAT evidence ledger (mapped from actual committed files)
 
-| UAT ID | Required artifact(s) | Committed file evidence | Evidence status |
+| UAT ID | Evidence files found in folder | Evidence status | UAT result |
 |---|---|---|---|
-| UAT-01 | Run-all test export (XML/log) | `docs/testing/evidence/sprint-1/TestResults_20260521_162303.xml` | `COMMITTED` |
-| UAT-02 | Determinism replay run1/run2/run3 exports | `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.xml`, `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.xml`, `docs/testing/evidence/sprint-1/sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.xml` | `COMMITTED` |
-| UAT-03 | Pause/resume overlay screenshot evidence | No matching screenshot file committed in this folder | `MISSING` |
-| UAT-04 | Migration export + migration screenshot evidence | XML committed: `docs/testing/evidence/sprint-1/sprint1_uat-04_20260521.xml`; no matching migration screenshot file committed in this folder | `MISSING` |
-| UAT-05 | Debug visibility overlay screenshot evidence | No matching screenshot file committed in this folder | `MISSING` |
+| UAT-01 | `TestResults_20260521_162303.xml` (full Sprint 1 suite, PlayMode, 24/24 passed) | `COMMITTED` | `PASS` |
+| UAT-02 | `sprint1_uat-02_determinism_run1_YYYYMMDDTHHMMSSZ.xml`, `sprint1_uat-02_determinism_run2_YYYYMMDDTHHMMSSZ.xml`, `sprint1_uat-02_determinism_run3_YYYYMMDDTHHMMSSZ.xml` (SimulationDeterminismTests passed in all three runs) | `COMMITTED` | `PASS` |
+| UAT-03 | No committed screenshot or equivalent artifact proving pause/resume overlay validation | `MISSING` | `BLOCKED` |
+| UAT-04 | `sprint1_uat-04_20260521.xml` (MigrationRunnerTests, 5/5 passed) | `COMMITTED` | `PASS` |
+| UAT-05 | No committed screenshot or equivalent artifact proving debug overlay visibility validation | `MISSING` | `BLOCKED` |
+
+## Final Sprint 1 closeout state from current committed evidence
+- Sprint 1 UAT status: `BLOCKED`.
+- Sprint 2A gate status: `BLOCKED`.
+- Reason: UAT-03 and UAT-05 evidence remains missing in committed folder contents.
 
 ## Quick reviewer instructions
 1. Validate evidence using committed files in this folder first.
