@@ -46,7 +46,9 @@ namespace DungeonBuilder.M0
             string mana = _root.ManaLine;
             string save = _root.SaveLine;
             string pause = _root.PauseLine;
-            string hint = _root.DevPanelEnabled ? "F1 toggles Dev Panel" : string.Empty;
+            string hint = _root.DevPanelEnabled
+                ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
+                : string.Empty;
             string structureState = _root.Content != null
                 ? string.Format(
                     _root.Content.GetString("ui.dev.structure_status", "ui.dev.structure_status"),
@@ -69,7 +71,9 @@ namespace DungeonBuilder.M0
                 save + "\n" +
                 pause + "\n" +
                 structureState + "\n" +
-                (string.IsNullOrEmpty(banner) ? "" : ("\nBanner:\n" + banner + "\n")) +
+                (string.IsNullOrEmpty(banner)
+                    ? ""
+                    : ("\n" + _root.Content.GetString("ui.dev.banner.heading", "ui.dev.banner.heading") + ":\n" + banner + "\n")) +
                 (string.IsNullOrEmpty(hint) ? "" : ("\n" + hint));
 
             overlayText.text = combined;
@@ -88,7 +92,7 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.save_now", "ui.dev.button.save_now")))
             {
                 _root.SaveService.Save(_root.Save, SaveReason.ManualDev);
-                _root.SetBanner("Saved (Dev).");
+                _root.SetBanner(_root.Content.GetString("ui.banner.saved_dev", "ui.banner.saved_dev"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.delete_save", "ui.dev.button.delete_save")))
@@ -114,7 +118,7 @@ namespace DungeonBuilder.M0
                 }
                 else
                 {
-                    _root.SetBanner("Online restored.");
+                    _root.SetBanner(_root.Content.GetString("ui.banner.online_restored", "ui.banner.online_restored"));
                 }
             }
 
@@ -130,7 +134,7 @@ namespace DungeonBuilder.M0
                 }
                 else
                 {
-                    _root.SetBanner("Verification cleared.");
+                    _root.SetBanner(_root.Content.GetString("ui.banner.verification_cleared", "ui.banner.verification_cleared"));
                 }
             }
 
@@ -138,19 +142,21 @@ namespace DungeonBuilder.M0
             {
                 bool pause = _root.PauseLine != "Pause: Paused";
                 _root.ApplyPauseState(pause);
-                _root.SetBanner(pause ? "Paused via Dev Panel." : "Resumed via Dev Panel.");
+                _root.SetBanner(pause
+                    ? _root.Content.GetString("ui.banner.paused_dev_panel", "ui.banner.paused_dev_panel")
+                    : _root.Content.GetString("ui.banner.resumed_dev_panel", "ui.banner.resumed_dev_panel"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_mana", "ui.dev.button.sim_mana")))
             {
                 _root.TrackManaGenerated(10);
-                _root.SetBanner("Simulated mana tick for KPI.");
+                _root.SetBanner(_root.Content.GetString("ui.banner.simulated_mana_kpi", "ui.banner.simulated_mana_kpi"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_heat", "ui.dev.button.sim_heat")))
             {
                 _root.ApplyHeatDelta(5d);
-                _root.SetBanner("Applied +5 heat event.");
+                _root.SetBanner(_root.Content.GetString("ui.banner.applied_heat_event", "ui.banner.applied_heat_event"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.select_slot", "ui.dev.button.select_slot")))

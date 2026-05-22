@@ -110,6 +110,42 @@
     {
       "key": "ui.banner.structure_sim_config_missing",
       "text": "Structure simulation config missing or invalid."
+    },
+    {
+      "key": "ui.dev.hint.toggle_panel",
+      "text": "F1 toggles Dev Panel"
+    },
+    {
+      "key": "ui.dev.banner.heading",
+      "text": "Banner"
+    },
+    {
+      "key": "ui.banner.saved_dev",
+      "text": "Saved (Dev)."
+    },
+    {
+      "key": "ui.banner.online_restored",
+      "text": "Online restored."
+    },
+    {
+      "key": "ui.banner.verification_cleared",
+      "text": "Verification cleared."
+    },
+    {
+      "key": "ui.banner.paused_dev_panel",
+      "text": "Paused via Dev Panel."
+    },
+    {
+      "key": "ui.banner.resumed_dev_panel",
+      "text": "Resumed via Dev Panel."
+    },
+    {
+      "key": "ui.banner.simulated_mana_kpi",
+      "text": "Simulated mana tick for KPI."
+    },
+    {
+      "key": "ui.banner.applied_heat_event",
+      "text": "Applied +5 heat event."
     }
   ]
 }
