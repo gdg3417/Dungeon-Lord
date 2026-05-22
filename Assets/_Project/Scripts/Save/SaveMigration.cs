@@ -1,6 +1,6 @@
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 
-namespace DungeonBuilder.M0.Save
+namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
@@ -15,14 +15,19 @@ namespace DungeonBuilder.M0.Save
                 root = new SaveRoot();
             }
 
-            if (root.Layout == null)
+            if (root.primary == null)
             {
-                root.Layout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
+                root.primary = new SaveData();
             }
 
-            if (root.SchemaVersion < LatestSchemaVersion)
+            if (root.primary.dungeonLayout == null)
             {
-                root.SchemaVersion = LatestSchemaVersion;
+                root.primary.dungeonLayout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
+            }
+
+            if (root.schemaVersion < LatestSchemaVersion)
+            {
+                root.schemaVersion = LatestSchemaVersion;
             }
 
             return root;
