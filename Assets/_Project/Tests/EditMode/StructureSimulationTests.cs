@@ -92,7 +92,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveRoot root = JsonUtility.FromJson<SaveRoot>(legacyRootJson);
             Assert.That(root, Is.Not.Null);
             Assert.That(root.primary, Is.Not.Null);
-            Assert.That(root.primary.structureRuntime, Is.Not.Null);
+            root.primary.structureRuntime = null;
 
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
 
