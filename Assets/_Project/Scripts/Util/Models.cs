@@ -1,4 +1,5 @@
 using System;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -204,6 +205,8 @@ namespace DungeonBuilder.M0
 
         public long totalTicks;
         public string lastKnownAppState = "None";
+
+        public DungeonLayoutState dungeonLayout;
 
         public string[] integrityFlags = Array.Empty<string>();
     }

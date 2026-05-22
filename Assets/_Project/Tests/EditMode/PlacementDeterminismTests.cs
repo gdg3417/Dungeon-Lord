@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
-using DungeonBuilder.M0.Save;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -35,20 +34,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var legacy = new SaveRoot
             {
-                SchemaVersion = 1,
-                Mana = 50,
-                HeatTier = 1,
-                Layout = null
+                schemaVersion = 1,
+                primary = new SaveData
+                {
+                    totalTicks = 50,
+                    dungeonLayout = null
+                }
             };
 
             var migrated = SaveMigration.MigrateToLatest(legacy);
 
-            Assert.That(migrated.SchemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
-            Assert.That(migrated.Layout, Is.Not.Null);
-            Assert.That(migrated.Layout.Slots.Count, Is.EqualTo(
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.primary.dungeonLayout, Is.Not.Null);
+            Assert.That(migrated.primary.dungeonLayout.Slots.Count, Is.EqualTo(
                 SaveMigration.DefaultFloorCount * SaveMigration.DefaultSlotsPerFloor));
-            Assert.That(migrated.Mana, Is.EqualTo(50));
-            Assert.That(migrated.HeatTier, Is.EqualTo(1));
+            Assert.That(migrated.primary.totalTicks, Is.EqualTo(50));
         }
 
         [Test]
