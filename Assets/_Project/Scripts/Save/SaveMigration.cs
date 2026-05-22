@@ -1,4 +1,5 @@
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.Structures;
 
 namespace DungeonBuilder.M0
 {
@@ -23,6 +24,11 @@ namespace DungeonBuilder.M0
             if (root.primary.dungeonLayout == null)
             {
                 root.primary.dungeonLayout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
+            }
+
+            if (root.primary.structureRuntime == null)
+            {
+                root.primary.structureRuntime = new StructureRuntimeState();
             }
 
             if (root.schemaVersion < LatestSchemaVersion)
