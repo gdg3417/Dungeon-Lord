@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="6" result="Failed(Child)" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.0648422">
+  <test-suite type="TestSuite" id="1058" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.064842" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1050" name="Assembly-CSharp.dll" fullname="C:/Users/gdg34/OneDrive/Documents/GitHub/Dungeon-Lord/Library/ScriptAssemblies/Assembly-CSharp.dll" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.056530" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="5116" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1051" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.054208" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1052" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.052271" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1053" name="Tests" fullname="DungeonBuilder.M0.Tests" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.049781" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestSuite" id="1054" name="EditMode" fullname="DungeonBuilder.M0.Tests.EditMode" runstate="Runnable" testcasecount="38" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.047467" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="TestFixture" id="1041" name="StructureSimulationTests" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.044611" total="6" passed="4" failed="2" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1043" name="HeatCrisis_Enters_At_Threshold" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.HeatCrisis_Enters_At_Threshold" methodname="HeatCrisis_Enters_At_Threshold" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="1170263802" result="Passed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.012186" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1044" name="HeatCrisis_Recovers_Below_RecoveryThreshold" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.HeatCrisis_Recovers_Below_RecoveryThreshold" methodname="HeatCrisis_Recovers_Below_RecoveryThreshold" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="164137598" result="Passed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.000475" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1045" name="SaveLoad_Preserves_Structure_And_Crisis_State" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.SaveLoad_Preserves_Structure_And_Crisis_State" methodname="SaveLoad_Preserves_Structure_And_Crisis_State" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="485499818" result="Passed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.001014" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1046" name="SaveMigration_Backfills_MissingStructureRuntime_FromLegacyRoot" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.SaveMigration_Backfills_MissingStructureRuntime_FromLegacyRoot" methodname="SaveMigration_Backfills_MissingStructureRuntime_FromLegacyRoot" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="990310581" result="Failed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.004393" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: null
+  But was:  <DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState>
+]]></message>
+                    <stack-trace><![CDATA[at DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.SaveMigration_Backfills_MissingStructureRuntime_FromLegacyRoot () [0x0002f] in C:\Users\gdg34\OneDrive\Documents\GitHub\Dungeon-Lord\Assets\_Project\Tests\EditMode\StructureSimulationTests.cs:95
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1047" name="SaveService_LoadOrCreate_Backfills_MissingStructureRuntime" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.SaveService_LoadOrCreate_Backfills_MissingStructureRuntime" methodname="SaveService_LoadOrCreate_Backfills_MissingStructureRuntime" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="1023737803" result="Failed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.012832" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: <empty>
+  But was:  "Save migration failed. Created a new save."
+]]></message>
+                    <stack-trace><![CDATA[at DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.SaveService_LoadOrCreate_Backfills_MissingStructureRuntime () [0x0004a] in C:\Users\gdg34\OneDrive\Documents\GitHub\Dungeon-Lord\Assets\_Project\Tests\EditMode\StructureSimulationTests.cs:116
+]]></stack-trace>
+                  </failure>
+                  <output><![CDATA[[WARN] Save migration failed: Missing migration step from v1.
+[WARN] Archived corrupt save to: C:\Users\gdg34\AppData\LocalLow\DefaultCompany\Dungeon Lord\save_test_12456484ae294da29bd561179045b6a2_corrupt_20260522221922.json
+]]></output>
+                </test-case>
+                <test-case id="1042" name="StructureTickOutcomes_Are_Reproducible_For_FixedTickCount" fullname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests.StructureTickOutcomes_Are_Reproducible_For_FixedTickCount" methodname="StructureTickOutcomes_Are_Reproducible_For_FixedTickCount" classname="DungeonBuilder.M0.Tests.EditMode.StructureSimulationTests" runstate="Runnable" seed="388104515" result="Passed" start-time="2026-05-22 22:19:22Z" end-time="2026-05-22 22:19:22Z" duration="0.001357" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/DefaultCompany/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
