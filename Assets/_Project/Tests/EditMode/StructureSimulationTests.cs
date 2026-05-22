@@ -83,6 +83,52 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.structureRuntime.LastProcessedTick, Is.EqualTo(42));
         }
 
+
+        [Test]
+        public void SaveMigration_Backfills_MissingStructureRuntime_FromLegacyRoot()
+        {
+            const string legacyRootJson = "{\"schemaVersion\":1,\"primary\":{\"saveVersion\":1,\"contentVersion\":\"1.0.0\",\"dungeonLayout\":{\"FloorCount\":1,\"SlotsPerFloor\":1,\"Slots\":[{\"Floor\":0,\"Index\":0,\"StructureId\":\"structure.mana_generator.basic\",\"IsUnlocked\":true,\"IsOccupied\":true}]}}}";
+
+            SaveRoot root = JsonUtility.FromJson<SaveRoot>(legacyRootJson);
+            Assert.That(root, Is.Not.Null);
+            Assert.That(root.primary, Is.Not.Null);
+            Assert.That(root.primary.structureRuntime, Is.Null);
+
+            SaveRoot migrated = SaveMigration.MigrateToLatest(root);
+
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.primary.structureRuntime, Is.Not.Null);
+        }
+
+        [Test]
+        public void SaveService_LoadOrCreate_Backfills_MissingStructureRuntime()
+        {
+            string fileName = $"save_test_{System.Guid.NewGuid():N}.json";
+            var service = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = fileName });
+
+            try
+            {
+                const string legacyRootJson = "{\"schemaVersion\":1,\"primary\":{\"saveVersion\":1,\"contentVersion\":\"1.0.0\",\"totalTicks\":7,\"dungeonLayout\":{\"FloorCount\":1,\"SlotsPerFloor\":1,\"Slots\":[{\"Floor\":0,\"Index\":0,\"StructureId\":\"structure.heat_scrubber.basic\",\"IsUnlocked\":true,\"IsOccupied\":true}]}}}";
+                System.IO.File.WriteAllText(service.SavePath, legacyRootJson);
+
+                SaveData loaded = service.LoadOrCreate("1.0.0", out string banner);
+
+                Assert.That(banner, Is.Empty);
+                Assert.That(loaded, Is.Not.Null);
+                Assert.That(loaded.dungeonLayout, Is.Not.Null);
+                Assert.That(loaded.structureRuntime, Is.Not.Null);
+                Assert.That(loaded.totalTicks, Is.EqualTo(7));
+                Assert.That(loaded.dungeonLayout.Slots[0].StructureId, Is.EqualTo(StructureSimulationPass.HeatScrubberBasicId));
+            }
+            finally
+            {
+                if (System.IO.File.Exists(service.SavePath))
+                {
+                    System.IO.File.Delete(service.SavePath);
+                }
+            }
+        }
+
         private static StructureSimulationConfig BuildTestConfig()
         {
             return new StructureSimulationConfig
