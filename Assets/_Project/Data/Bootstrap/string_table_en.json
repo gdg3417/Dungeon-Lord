@@ -146,6 +146,10 @@
     {
       "key": "ui.banner.applied_heat_event",
       "text": "Applied +5 heat event."
+    },
+    {
+      "key": "ui.banner.structure_tick_failed",
+      "text": "Structure simulation tick could not run."
     }
   ]
 }

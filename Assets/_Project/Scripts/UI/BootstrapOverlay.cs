@@ -181,8 +181,10 @@ namespace DungeonBuilder.M0
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_structure_tick", "ui.dev.button.sim_structure_tick")))
             {
-                _root.SimulateStructureTick();
-                _root.SetBanner(_root.Content.GetString("ui.banner.simulated_tick", "ui.banner.simulated_tick"));
+                bool didRun = _root.SimulateStructureTick();
+                _root.SetBanner(didRun
+                    ? _root.Content.GetString("ui.banner.simulated_tick", "ui.banner.simulated_tick")
+                    : _root.Content.GetString("ui.banner.structure_tick_failed", "ui.banner.structure_tick_failed"));
             }
 
             GUILayout.EndArea();

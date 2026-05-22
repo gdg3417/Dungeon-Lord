@@ -1,6 +1,8 @@
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.Structures;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -263,14 +265,69 @@ namespace DungeonBuilder.M0
 
         private void InitializeStructureSimulationPass()
         {
-            StructureSimulationConfig config = JsonUtility.FromJson<StructureSimulationConfig>(structureSimulationConfigJson != null ? structureSimulationConfigJson.text : string.Empty);
-            if (config == null)
+            _structureSimulationPass = null;
+            string json = structureSimulationConfigJson != null ? structureSimulationConfigJson.text : string.Empty;
+            if (!TryCreateStructureSimulationPass(_heatSystem, json, out _structureSimulationPass))
             {
                 SetBanner(Content.GetString("ui.banner.structure_sim_config_missing", "ui.banner.structure_sim_config_missing"));
-                return;
+            }
+        }
+        
+        internal static bool TryCreateStructureSimulationPass(
+            IHeatSystem heatSystem,
+            string configJson,
+            out StructureSimulationPass pass)
+        {
+            pass = null;
+
+            try
+            {
+                StructureSimulationConfig config = JsonUtility.FromJson<StructureSimulationConfig>(configJson);
+                if (!IsValidStructureSimulationConfig(config))
+                {
+                    return false;
+                }
+
+                pass = new StructureSimulationPass(heatSystem, config);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        internal static bool IsValidStructureSimulationConfig(StructureSimulationConfig config)
+        {
+            if (config == null || config.Structures == null || config.Structures.Length == 0)
+            {
+                return false;
             }
 
-            _structureSimulationPass = new StructureSimulationPass(_heatSystem, config);
+            if (config.HeatCrisisEnterThreshold <= config.HeatCrisisRecoveryThreshold)
+            {
+                return false;
+            }
+
+            var required = new HashSet<string>(StringComparer.Ordinal)
+            {
+                StructureSimulationPass.ManaGeneratorBasicId,
+                StructureSimulationPass.HeatScrubberBasicId,
+                StructureSimulationPass.RiskLabBasicId
+            };
+
+            for (int i = 0; i < config.Structures.Length; i++)
+            {
+                StructureTuningEntry entry = config.Structures[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.StructureId))
+                {
+                    return false;
+                }
+
+                required.Remove(entry.StructureId);
+            }
+
+            return required.Count == 0;
         }
 
         public void GoHomeStub()
@@ -407,11 +464,11 @@ namespace DungeonBuilder.M0
             }
         }
 
-        public void SimulateStructureTick()
+        public bool SimulateStructureTick()
         {
             if (_structureSimulationPass == null || Save?.dungeonLayout == null || Save.structureRuntime == null)
             {
-                return;
+                return false;
             }
 
             long tick = Save.totalTicks + 1;
@@ -420,6 +477,7 @@ namespace DungeonBuilder.M0
             CurrentHeat = Save.structureRuntime.Heat;
             RefreshStructureRuntimeLines();
             SaveService.Save(Save, SaveReason.ManualDev);
+            return true;
         }
 
         public string GetSelectedSlotStructureId()
