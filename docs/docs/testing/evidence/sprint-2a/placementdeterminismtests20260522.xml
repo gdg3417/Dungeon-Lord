@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="8" result="Passed" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.0494915">
+  <test-suite type="TestSuite" id="1063" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.049492" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1055" name="Assembly-CSharp.dll" fullname="C:/Users/gdg34/OneDrive/Documents/GitHub/Dungeon-Lord/Library/ScriptAssemblies/Assembly-CSharp.dll" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.040198" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="5116" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1056" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.037847" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1057" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.036053" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1058" name="Tests" fullname="DungeonBuilder.M0.Tests" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.034410" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1059" name="EditMode" fullname="DungeonBuilder.M0.Tests.EditMode" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.032750" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1023" name="PlacementDeterminismTests" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.030464" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1031" name="DungeonSlot_Does_Not_Override_GetHashCode" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.DungeonSlot_Does_Not_Override_GetHashCode" methodname="DungeonSlot_Does_Not_Override_GetHashCode" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="2079103167" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.009268" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1026" name="Legacy_Save_Gets_Empty_Layout_On_Migration_Without_Changing_Sprint1_Fields" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.Legacy_Save_Gets_Empty_Layout_On_Migration_Without_Changing_Sprint1_Fields" methodname="Legacy_Save_Gets_Empty_Layout_On_Migration_Without_Changing_Sprint1_Fields" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="373525787" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.002792" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1024" name="Placement_Order_Is_Deterministic_By_Floor_Then_Slot" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.Placement_Order_Is_Deterministic_By_Floor_Then_Slot" methodname="Placement_Order_Is_Deterministic_By_Floor_Then_Slot" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="1938225632" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.001890" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1030" name="PlaceStructure_Rejects_Empty_StructureId" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.PlaceStructure_Rejects_Empty_StructureId" methodname="PlaceStructure_Rejects_Empty_StructureId" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="1381765380" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.001805" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1029" name="PlaceStructure_Rejects_Overwrite_When_Not_Allowed" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.PlaceStructure_Rejects_Overwrite_When_Not_Allowed" methodname="PlaceStructure_Rejects_Overwrite_When_Not_Allowed" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="1440582560" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.000658" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1028" name="PlaceStructure_Rejects_Unknown_Slot" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.PlaceStructure_Rejects_Unknown_Slot" methodname="PlaceStructure_Rejects_Unknown_Slot" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="1856559937" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.000213" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1027" name="PlaceStructure_Writes_Expected_StructureId_To_Expected_Slot" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.PlaceStructure_Writes_Expected_StructureId_To_Expected_Slot" methodname="PlaceStructure_Writes_Expected_StructureId_To_Expected_Slot" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="260625584" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.000587" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1025" name="Slot_StableKey_Is_Serialization_Safe" fullname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests.Slot_StableKey_Is_Serialization_Safe" methodname="Slot_StableKey_Is_Serialization_Safe" classname="DungeonBuilder.M0.Tests.EditMode.PlacementDeterminismTests" runstate="Runnable" seed="1744324612" result="Passed" start-time="2026-05-22 22:39:18Z" end-time="2026-05-22 22:39:18Z" duration="0.000153" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/DefaultCompany/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
