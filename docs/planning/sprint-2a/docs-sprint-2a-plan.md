@@ -13,6 +13,9 @@
 5. Any feature not documented in this plan is out of scope for Sprint 2A.
 6. Procedural generation remains forbidden during Sprint 2A.
 7. Sprint gating is mandatory: Sprint 1 closeout evidence must be confirmed before Sprint 2A implementation starts.
+8. Gameplay tuning values are data-owned and must come from content/config, not runtime constants.
+9. Player-facing text is localization-owned and must come from localization/string tables.
+10. Hardcoded English strings in runtime/UI are forbidden unless they are test-only or internal non-user logs.
 
 ## Active Sprint 2A Scope
 
@@ -82,6 +85,8 @@ These items are intentionally deferred until the deterministic layout and placem
 
 ### Data Ownership
 - Structure definitions and tuning live in content assets/tables.
+- Tuning values are data-owned and consumed via injected/loaded config models.
+- Player-facing text is localization-owned; runtime/UI cannot hardcode English user-visible strings.
 - Save stores stable IDs + dynamic state only.
 - Migrations own schema transition logic; gameplay systems do not backfill legacy data.
 

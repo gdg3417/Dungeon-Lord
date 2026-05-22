@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void StructureTickOutcomes_Are_Reproducible_For_FixedTickCount()
         {
             var layout = BuildLayout();
-            var pass = new StructureSimulationPass(new HeatSystem());
+            StructureSimulationConfig config = BuildTestConfig();
+            var pass = new StructureSimulationPass(new HeatSystem(), config);
 
             var runA = RunTicks(layout, pass, 20);
             var runB = RunTicks(layout, pass, 20);
@@ -28,12 +29,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var layout = DungeonLayoutState.CreateEmpty(1, 1);
             new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.RiskLabBasicId);
 
-            var runtime = new StructureRuntimeState { Heat = 90d };
-            var pass = new StructureSimulationPass(new HeatSystem());
+            StructureSimulationConfig config = BuildTestConfig();
+            var runtime = new StructureRuntimeState { Heat = config.HeatCrisisEnterThreshold - 5d };
+            var pass = new StructureSimulationPass(new HeatSystem(), config);
 
             StructureTickResult result = pass.SimulateTick(layout, runtime, 1);
+            double expectedHeat = (config.HeatCrisisEnterThreshold - 5d) + Find(config, StructureSimulationPass.RiskLabBasicId).HeatDeltaPerTick;
 
-            Assert.That(result.Heat, Is.EqualTo(105d));
+            Assert.That(result.Heat, Is.EqualTo(expectedHeat));
             Assert.That(result.IsHeatCrisisActive, Is.True);
         }
 
@@ -43,12 +46,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var layout = DungeonLayoutState.CreateEmpty(1, 1);
             new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.HeatScrubberBasicId);
 
-            var runtime = new StructureRuntimeState { Heat = 66d, IsHeatCrisisActive = true };
-            var pass = new StructureSimulationPass(new HeatSystem());
+            StructureSimulationConfig config = BuildTestConfig();
+            var runtime = new StructureRuntimeState { Heat = config.HeatCrisisRecoveryThreshold + 1d, IsHeatCrisisActive = true };
+            var pass = new StructureSimulationPass(new HeatSystem(), config);
 
             StructureTickResult result = pass.SimulateTick(layout, runtime, 1);
+            double expectedHeat = (config.HeatCrisisRecoveryThreshold + 1d) + Find(config, StructureSimulationPass.HeatScrubberBasicId).HeatDeltaPerTick;
 
-            Assert.That(result.Heat, Is.EqualTo(58d));
+            Assert.That(result.Heat, Is.EqualTo(expectedHeat));
             Assert.That(result.IsHeatCrisisActive, Is.False);
         }
 
@@ -76,6 +81,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.structureRuntime.Heat, Is.EqualTo(102d));
             Assert.That(loaded.structureRuntime.ManaReserve, Is.EqualTo(150d));
             Assert.That(loaded.structureRuntime.LastProcessedTick, Is.EqualTo(42));
+        }
+
+        private static StructureSimulationConfig BuildTestConfig()
+        {
+            return new StructureSimulationConfig
+            {
+                HeatCrisisEnterThreshold = 100d,
+                HeatCrisisRecoveryThreshold = 65d,
+                Structures = new[]
+                {
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.ManaGeneratorBasicId, ManaDeltaPerTick = 10d, HeatDeltaPerTick = 5d },
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.HeatScrubberBasicId, ManaDeltaPerTick = 0d, HeatDeltaPerTick = -8d },
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.RiskLabBasicId, ManaDeltaPerTick = 18d, HeatDeltaPerTick = 15d }
+                }
+            };
+        }
+
+        private static StructureTuningEntry Find(StructureSimulationConfig config, string structureId)
+        {
+            for (int i = 0; i < config.Structures.Length; i++)
+            {
+                if (config.Structures[i].StructureId == structureId)
+                {
+                    return config.Structures[i];
+                }
+            }
+
+            Assert.Fail($"Missing structure tuning entry for {structureId}");
+            return null;
         }
 
         private static DungeonLayoutState BuildLayout()

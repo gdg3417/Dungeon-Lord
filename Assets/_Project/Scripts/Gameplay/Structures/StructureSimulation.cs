@@ -14,6 +14,22 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         public long LastProcessedTick;
     }
 
+    [Serializable]
+    public sealed class StructureTuningEntry
+    {
+        public string StructureId;
+        public double ManaDeltaPerTick;
+        public double HeatDeltaPerTick;
+    }
+
+    [Serializable]
+    public sealed class StructureSimulationConfig
+    {
+        public StructureTuningEntry[] Structures = Array.Empty<StructureTuningEntry>();
+        public double HeatCrisisEnterThreshold;
+        public double HeatCrisisRecoveryThreshold;
+    }
+
     public readonly struct StructureTickResult
     {
         public double ManaReserve { get; }
@@ -34,14 +50,30 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         public const string HeatScrubberBasicId = "structure.heat_scrubber.basic";
         public const string RiskLabBasicId = "structure.risk_lab.basic";
 
-        public const double HeatCrisisEnterThreshold = 100d;
-        public const double HeatCrisisRecoverThreshold = 65d;
+        private static readonly HashSet<string> AllowedStructureIds = new HashSet<string>(StringComparer.Ordinal)
+        {
+            ManaGeneratorBasicId,
+            HeatScrubberBasicId,
+            RiskLabBasicId
+        };
 
         private readonly IHeatSystem _heatSystem;
+        private readonly Dictionary<string, StructureTuningEntry> _tuningByStructureId;
+        private readonly double _heatCrisisEnterThreshold;
+        private readonly double _heatCrisisRecoveryThreshold;
 
-        public StructureSimulationPass(IHeatSystem heatSystem)
+        public StructureSimulationPass(IHeatSystem heatSystem, StructureSimulationConfig config)
         {
             _heatSystem = heatSystem ?? throw new ArgumentNullException(nameof(heatSystem));
+
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            _heatCrisisEnterThreshold = config.HeatCrisisEnterThreshold;
+            _heatCrisisRecoveryThreshold = config.HeatCrisisRecoveryThreshold;
+            _tuningByStructureId = BuildTuningMap(config.Structures);
         }
 
         public StructureTickResult SimulateTick(DungeonLayoutState layout, StructureRuntimeState runtime, long tickIndex)
@@ -56,25 +88,13 @@ namespace DungeonBuilder.M0.Gameplay.Structures
             for (int i = 0; i < orderedSlots.Count; i++)
             {
                 string structureId = orderedSlots[i].StructureId;
-                if (string.IsNullOrEmpty(structureId))
+                if (string.IsNullOrEmpty(structureId) || !_tuningByStructureId.TryGetValue(structureId, out StructureTuningEntry tuning))
                 {
                     continue;
                 }
 
-                if (string.Equals(structureId, ManaGeneratorBasicId, StringComparison.Ordinal))
-                {
-                    manaDelta += 10d;
-                    heatDelta += 5d;
-                }
-                else if (string.Equals(structureId, HeatScrubberBasicId, StringComparison.Ordinal))
-                {
-                    heatDelta -= 8d;
-                }
-                else if (string.Equals(structureId, RiskLabBasicId, StringComparison.Ordinal))
-                {
-                    manaDelta += 18d;
-                    heatDelta += 15d;
-                }
+                manaDelta += tuning.ManaDeltaPerTick;
+                heatDelta += tuning.HeatDeltaPerTick;
             }
 
             HeatResult heatResult = _heatSystem.ApplyEvent(new HeatEventInput(tickIndex, runtime.Heat, heatDelta));
@@ -83,16 +103,43 @@ namespace DungeonBuilder.M0.Gameplay.Structures
             runtime.Heat = heatResult.NewHeat;
             runtime.LastProcessedTick = tickIndex;
 
-            if (!runtime.IsHeatCrisisActive && runtime.Heat >= HeatCrisisEnterThreshold)
+            if (!runtime.IsHeatCrisisActive && runtime.Heat >= _heatCrisisEnterThreshold)
             {
                 runtime.IsHeatCrisisActive = true;
             }
-            else if (runtime.IsHeatCrisisActive && runtime.Heat <= HeatCrisisRecoverThreshold)
+            else if (runtime.IsHeatCrisisActive && runtime.Heat <= _heatCrisisRecoveryThreshold)
             {
                 runtime.IsHeatCrisisActive = false;
             }
 
             return new StructureTickResult(runtime.ManaReserve, runtime.Heat, runtime.IsHeatCrisisActive);
+        }
+
+        private static Dictionary<string, StructureTuningEntry> BuildTuningMap(StructureTuningEntry[] entries)
+        {
+            if (entries == null)
+            {
+                throw new ArgumentNullException(nameof(entries));
+            }
+
+            var map = new Dictionary<string, StructureTuningEntry>(StringComparer.Ordinal);
+            for (int i = 0; i < entries.Length; i++)
+            {
+                StructureTuningEntry entry = entries[i] ?? throw new ArgumentException("Structure tuning entry cannot be null.", nameof(entries));
+                if (string.IsNullOrWhiteSpace(entry.StructureId))
+                {
+                    throw new ArgumentException("Structure tuning entry requires a structure ID.", nameof(entries));
+                }
+
+                if (!AllowedStructureIds.Contains(entry.StructureId))
+                {
+                    throw new ArgumentException($"Structure ID is not allowed in PR-B scope: {entry.StructureId}", nameof(entries));
+                }
+
+                map[entry.StructureId] = entry;
+            }
+
+            return map;
         }
     }
 }
