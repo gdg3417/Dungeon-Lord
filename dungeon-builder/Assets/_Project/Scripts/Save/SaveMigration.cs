@@ -1,6 +1,6 @@
-using DungeonBuilder.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 
-namespace DungeonBuilder.Save
+namespace DungeonBuilder.M0.Save
 {
     public static class SaveMigration
     {

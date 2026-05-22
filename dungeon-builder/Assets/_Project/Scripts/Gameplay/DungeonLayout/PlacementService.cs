@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DungeonBuilder.DungeonLayout
+namespace DungeonBuilder.M0.Gameplay.DungeonLayout
 {
     public sealed class PlacementService
     {
@@ -13,7 +13,6 @@ namespace DungeonBuilder.DungeonLayout
                 throw new ArgumentNullException(nameof(state));
             }
 
-            // Deterministic ordering: floor ascending, slot ascending.
             return state.OrderedSlots().ToList();
         }
 
@@ -21,11 +20,17 @@ namespace DungeonBuilder.DungeonLayout
             DungeonLayoutState state,
             int floorIndex,
             int slotIndex,
-            string structureId)
+            string structureId,
+            bool allowReplace = false)
         {
             if (state == null)
             {
                 throw new ArgumentNullException(nameof(state));
+            }
+
+            if (string.IsNullOrWhiteSpace(structureId))
+            {
+                throw new ArgumentException("Structure ID is required.", nameof(structureId));
             }
 
             var targetIdx = state.Slots.FindIndex(s => s.FloorIndex == floorIndex && s.SlotIndex == slotIndex);
@@ -35,6 +40,11 @@ namespace DungeonBuilder.DungeonLayout
             }
 
             var existing = state.Slots[targetIdx];
+            if (existing.IsOccupied && !allowReplace)
+            {
+                throw new InvalidOperationException($"Slot already occupied floor={floorIndex}, slot={slotIndex}");
+            }
+
             state.Slots[targetIdx] = new DungeonSlot(existing.FloorIndex, existing.SlotIndex, structureId);
             return state;
         }

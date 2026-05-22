@@ -1,6 +1,6 @@
 using System;
 
-namespace DungeonBuilder.DungeonLayout
+namespace DungeonBuilder.M0.Gameplay.DungeonLayout
 {
     [Serializable]
     public struct DungeonSlot : IEquatable<DungeonSlot>
@@ -18,6 +18,8 @@ namespace DungeonBuilder.DungeonLayout
 
         public string StableKey => $"{FloorIndex:D2}:{SlotIndex:D3}";
 
+        public bool IsOccupied => !string.IsNullOrEmpty(StructureId);
+
         public bool Equals(DungeonSlot other)
         {
             return FloorIndex == other.FloorIndex
@@ -28,18 +30,6 @@ namespace DungeonBuilder.DungeonLayout
         public override bool Equals(object obj)
         {
             return obj is DungeonSlot other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hash = 17;
-                hash = (hash * 31) + FloorIndex;
-                hash = (hash * 31) + SlotIndex;
-                hash = (hash * 31) + (StructureId?.GetHashCode() ?? 0);
-                return hash;
-            }
         }
     }
 }

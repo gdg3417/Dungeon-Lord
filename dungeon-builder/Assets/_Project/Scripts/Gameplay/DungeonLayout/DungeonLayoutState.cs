@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DungeonBuilder.DungeonLayout
+namespace DungeonBuilder.M0.Gameplay.DungeonLayout
 {
     [Serializable]
     public sealed class DungeonLayoutState

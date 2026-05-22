@@ -1,17 +1,15 @@
 using System;
-using DungeonBuilder.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 
-namespace DungeonBuilder.Save
+namespace DungeonBuilder.M0.Save
 {
     [Serializable]
     public sealed class SaveRoot
     {
-        // Sprint 1 fields remain unchanged and optional for compatibility.
         public int SchemaVersion = 1;
         public long Mana;
         public int HeatTier;
 
-        // Sprint 2A PR-A extension.
         public DungeonLayoutState Layout;
     }
 }
