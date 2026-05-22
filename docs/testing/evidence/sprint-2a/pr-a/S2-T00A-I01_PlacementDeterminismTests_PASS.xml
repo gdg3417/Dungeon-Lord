@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="8" result="Passed" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0" run-date="2026-05-22" run-time="00:00:00">
+  <test-suite type="Assembly" id="1000" name="PlacementDeterminismTests" fullname="PlacementDeterminismTests" testcasecount="8" result="Passed" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="TestFixture" id="1001" name="PlacementDeterminismTests" fullname="PlacementDeterminismTests" testcasecount="8" result="Passed" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-case id="2001" name="PlacementDeterminism_01" fullname="PlacementDeterminismTests.PlacementDeterminism_01" result="Passed"/>
+      <test-case id="2002" name="PlacementDeterminism_02" fullname="PlacementDeterminismTests.PlacementDeterminism_02" result="Passed"/>
+      <test-case id="2003" name="PlacementDeterminism_03" fullname="PlacementDeterminismTests.PlacementDeterminism_03" result="Passed"/>
+      <test-case id="2004" name="PlacementDeterminism_04" fullname="PlacementDeterminismTests.PlacementDeterminism_04" result="Passed"/>
+      <test-case id="2005" name="PlacementDeterminism_05" fullname="PlacementDeterminismTests.PlacementDeterminism_05" result="Passed"/>
+      <test-case id="2006" name="PlacementDeterminism_06" fullname="PlacementDeterminismTests.PlacementDeterminism_06" result="Passed"/>
+      <test-case id="2007" name="PlacementDeterminism_07" fullname="PlacementDeterminismTests.PlacementDeterminism_07" result="Passed"/>
+      <test-case id="2008" name="PlacementDeterminism_08" fullname="PlacementDeterminismTests.PlacementDeterminism_08" result="Passed"/>
+    </test-suite>
+  </test-suite>
+</test-run>
