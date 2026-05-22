@@ -129,6 +129,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
+        [Test]
+        public void EndToEnd_Placement_Then_Tick_Then_SaveLoad_Preserves_Runtime()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 3);
+            var placement = new PlacementService();
+            placement.PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            placement.PlaceStructure(layout, 0, 1, StructureSimulationPass.HeatScrubberBasicId);
+            placement.PlaceStructure(layout, 0, 2, StructureSimulationPass.RiskLabBasicId);
+
+            var runtime = new StructureRuntimeState();
+            var pass = new StructureSimulationPass(new HeatSystem(), BuildTestConfig());
+            pass.SimulateTick(layout, runtime, 1);
+
+            var save = new SaveData
+            {
+                totalTicks = 1,
+                dungeonLayout = layout,
+                structureRuntime = runtime
+            };
+
+            string json = JsonUtility.ToJson(save);
+            SaveData loaded = JsonUtility.FromJson<SaveData>(json);
+
+            Assert.That(loaded.totalTicks, Is.EqualTo(1));
+            Assert.That(loaded.structureRuntime.ManaReserve, Is.EqualTo(runtime.ManaReserve));
+            Assert.That(loaded.structureRuntime.Heat, Is.EqualTo(runtime.Heat));
+            Assert.That(loaded.dungeonLayout.Slots[2].StructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
+        }
+
         private static StructureSimulationConfig BuildTestConfig()
         {
             return new StructureSimulationConfig
