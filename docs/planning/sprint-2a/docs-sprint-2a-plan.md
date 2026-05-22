@@ -51,7 +51,8 @@
 2. Use localization keys for any player-facing strings.
 3. Keep implementation temporary/debug-styled and explicitly non-polished.
 
-### Phase 5: Progression Milestone
+### Future Sprint 2A Extension (Post S2-T00A-I01 Scope)
+These items are intentionally deferred until the deterministic layout and placement foundation is stable and validated.
 1. Add first milestone: `milestone.structure_slot_4_unlock`.
 2. Unlock condition example (data-driven): survive X ticks while maintaining heat below crisis threshold and spending Y mana.
 3. Unlock effect: enable one additional slot **or** unlock `risk_lab` (pick exactly one in implementation ticket and keep scope fixed).
@@ -182,4 +183,4 @@ Sprint 2A is done when all are true:
 - ADR: progression unlock limited to exactly one additional strategic option.
 
 ## 10) Immediate Next Action
-Start with `S2-T00A-I01` implementation branch work for deterministic dungeon layout + placement foundation before structure behavior expansion.
+After Sprint 1 closeout evidence is confirmed and Sprint 2A is formally UNBLOCKED, begin `S2-T00A-I01` implementation branch work for deterministic dungeon layout and placement foundation before structure behavior expansion.
