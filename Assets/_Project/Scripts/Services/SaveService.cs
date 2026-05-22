@@ -6,7 +6,7 @@ namespace DungeonBuilder.M0
 {
     public class SaveService
     {
-        private const int SaveSchemaVersion = 1;
+        private const int SaveSchemaVersion = SaveMigration.LatestSchemaVersion;
         private readonly SimpleLogger _logger;
         private readonly SaveConfig _saveConfig;
         private readonly MigrationRunner _migrationRunner = new MigrationRunner();
@@ -55,7 +55,8 @@ namespace DungeonBuilder.M0
                     return CreateNew(contentVersion);
                 }
 
-                SaveData data = root.primary ?? new SaveData();
+                root = SaveMigration.MigrateToLatest(root);
+                SaveData data = root.primary;
 
                 if (data.createdUtcUnix <= 0)
                 {

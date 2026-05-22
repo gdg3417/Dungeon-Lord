@@ -1,4 +1,5 @@
 using System;
+using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using UnityEngine;
 
@@ -207,6 +208,7 @@ namespace DungeonBuilder.M0
         public string lastKnownAppState = "None";
 
         public DungeonLayoutState dungeonLayout;
+        public StructureRuntimeState structureRuntime = new StructureRuntimeState();
 
         public string[] integrityFlags = Array.Empty<string>();
     }
