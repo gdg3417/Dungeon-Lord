@@ -5,7 +5,16 @@
 - **Sprint Goal**: Deliver the minimum playable dungeon-management gameplay loop while preserving all Sprint 1 deterministic and infrastructure invariants.
 - **Non-goals**: Procedural generation, content scale-up, deep combat sim, production UI polish, monetization, meta progression, multiplayer/networking.
 
-## 1) Implementation Plan
+## Sprint 2A Execution Rules
+1. Work must be completed strictly in execution order; later-phase work cannot start early.
+2. PR-B cannot begin until PR-A is merged and validated.
+3. PR-C cannot begin until PR-B is merged and validated.
+4. Preserve Sprint 1 determinism, save, and migration invariants at all times.
+5. Any feature not documented in this plan is out of scope for Sprint 2A.
+6. Procedural generation remains forbidden during Sprint 2A.
+7. Sprint gating is mandatory: Sprint 1 closeout evidence must be confirmed before Sprint 2A implementation starts.
+
+## Active Sprint 2A Scope
 
 ### Phase 1: Data + Domain Foundations
 1. Add deterministic dungeon slot model (`DungeonSlotState`) with fixed-size index-based slots.
@@ -51,18 +60,13 @@
 2. Use localization keys for any player-facing strings.
 3. Keep implementation temporary/debug-styled and explicitly non-polished.
 
+## Deferred Sprint 2A Extensions
+
 ### Future Sprint 2A Extension (Post S2-T00A-I01 Scope)
 These items are intentionally deferred until the deterministic layout and placement foundation is stable and validated.
 1. Add first milestone: `milestone.structure_slot_4_unlock`.
 2. Unlock condition example (data-driven): survive X ticks while maintaining heat below crisis threshold and spending Y mana.
 3. Unlock effect: enable one additional slot **or** unlock `risk_lab` (pick exactly one in implementation ticket and keep scope fixed).
-
-### Phase 6: Tests + Evidence
-1. Add deterministic placement test.
-2. Add save/load round-trip test for slot + structure + crisis state.
-3. Add fixed-seed reproducibility test across multi-tick simulation.
-4. Add SIT flow for "place -> run -> crisis -> recover".
-5. Capture UAT checklist evidence for playable loop.
 
 ## 2) Architectural Notes
 
@@ -150,7 +154,21 @@ These items are intentionally deferred until the deterministic layout and placem
 
 > Keep each PR small, test-backed, and linked to Sprint 2 execution order.
 
-## 7) Required Tests
+## PR Dependency Contracts
+PR-A dependencies:
+- none
+
+PR-B dependencies:
+- merged PR-A
+- passing determinism tests
+- validated migration behavior
+
+PR-C dependencies:
+- merged PR-B
+- validated pressure state behavior
+- SIT pass for structure simulation
+
+## Tests
 
 ### Unit
 - Deterministic slot placement with identical command sequence yields identical state hash.
@@ -168,7 +186,7 @@ These items are intentionally deferred until the deterministic layout and placem
 - Manual scripted playthrough proving meaningful decision:
   - short-term mana gain via risk lab vs long-term stability via heat scrubber.
 
-## 8) Sprint 2A Acceptance Criteria
+## Acceptance Criteria
 Sprint 2A is done when all are true:
 1. Player can place/activate structures in deterministic slot model.
 2. At least one emergent decision exists (greed vs stability).
@@ -176,6 +194,26 @@ Sprint 2A is done when all are true:
 4. State fully survives save/load and migration from Sprint 1.
 5. Repeated fixed-input simulations are reproducible.
 6. Vertical slice is measurably more interactive and engaging than Sprint 1 infrastructure runtime.
+
+## Sprint 2A Definition of Done
+Sprint 2A is complete only when all conditions are true:
+1. All required Unit, Save/Migration, SIT, and UAT evidence checks pass.
+2. Deterministic replay/reproducibility is verified for fixed-input runs.
+3. Save migration from Sprint 1 succeeds with validated post-migration state.
+4. UAT evidence artifacts are committed according to sprint evidence workflow.
+5. PR-A, PR-B, and PR-C are all merged in required execution order.
+6. No blocked Sprint 2A dependencies remain.
+
+## Explicitly Deferred Systems
+The following systems are intentionally excluded from Sprint 2A:
+1. Procedural generation.
+2. Enemy AI expansion.
+3. Production UI polish.
+4. Multiplayer/networking.
+5. Monetization systems.
+6. Meta progression systems.
+7. Automation scripting.
+8. Large content pipelines.
 
 ## 9) Architectural Decision Record Notes (to capture during implementation)
 - ADR: deterministic slot index ordering contract.
