@@ -27,8 +27,7 @@
    - slot occupancy and structure IDs
    - per-structure activation state
    - structure cooldown/tick bookkeeping if needed
-   - progression milestone flags
-5. Add migration to safely default existing saves to empty slot layout + locked milestone state.
+5. Add migration to safely default existing saves to empty slot layout state.
 
 ### Phase 2: Deterministic Simulation Integration
 1. Register structure systems in existing simulation order under `SimulationClock`.
@@ -111,7 +110,7 @@ These items are intentionally deferred until the deterministic layout and placem
 - `Runtime/Gameplay/Pressure/`
   - `HeatCrisisService.*`
 - `Runtime/Gameplay/Progression/`
-  - `MilestoneService.*`
+  - `MilestoneService.*` (deferred post `S2-T00A-I01`)
 - `Runtime/Save/`
   - `SaveRoot` extensions for slot/structure/progression state
 - `Runtime/Save/Migrations/`
@@ -120,7 +119,7 @@ These items are intentionally deferred until the deterministic layout and placem
   - `DungeonSlicePanel.*`
 - `Content/SourceTables/`
   - `structures.csv` (or project equivalent)
-  - `milestones.csv`
+  - `milestones.csv` (deferred post `S2-T00A-I01`)
 - `Tests/Unit/Gameplay/`
   - `DungeonPlacementDeterminismTests.*`
   - `StructureSimulationDeterminismTests.*`
@@ -136,10 +135,9 @@ These items are intentionally deferred until the deterministic layout and placem
 4. Add structure definitions and deterministic simulation pass.
 5. Add crisis pressure state integration.
 6. Wire minimal overlay interaction panel.
-7. Add milestone unlock path.
-8. Add/expand telemetry events for placement, crisis enter/exit, unlock.
-9. Implement determinism + save/load + SIT tests.
-10. Run unit/SIT, collect UAT evidence, and gate against Sprint matrix.
+7. Add/expand telemetry events for placement, crisis enter/exit, and core structure actions.
+8. Implement determinism + save/load + SIT tests.
+9. Run unit/SIT, collect UAT evidence, and gate against Sprint matrix.
 
 ## 6) Suggested PR Breakdown
 1. **PR-A (Foundation)**
@@ -149,7 +147,7 @@ These items are intentionally deferred until the deterministic layout and placem
    - 3 structures + simulation integration + heat crisis.
    - Unit tests for reproducibility.
 3. **PR-C (Playable Slice UI + Progression)**
-   - Debug interaction panel + milestone unlock + SIT flow.
+   - Debug interaction panel + SIT flow.
    - UAT evidence + sprint checklist links.
 
 > Keep each PR small, test-backed, and linked to Sprint 2 execution order.
@@ -177,10 +175,10 @@ PR-C dependencies:
 
 ### Save/Migration
 - Sprint 1 save migrates to Sprint 2A schema with empty default slots.
-- Save/load round-trip preserves slot occupancy, activation, milestone, crisis counters.
+- Save/load round-trip preserves slot occupancy, activation, and crisis counters.
 
 ### SIT
-- End-to-end flow: place generator -> add risk lab -> trigger crisis -> recover with heat scrubber -> milestone unlock.
+- End-to-end flow: place generator -> add risk lab -> trigger crisis -> recover with heat scrubber.
 
 ### UAT (evidence)
 - Manual scripted playthrough proving meaningful decision:
