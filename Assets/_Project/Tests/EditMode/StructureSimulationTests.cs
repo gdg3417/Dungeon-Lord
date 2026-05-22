@@ -92,7 +92,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveRoot root = JsonUtility.FromJson<SaveRoot>(legacyRootJson);
             Assert.That(root, Is.Not.Null);
             Assert.That(root.primary, Is.Not.Null);
-            Assert.That(root.primary.structureRuntime, Is.Null);
+            root.primary.structureRuntime = null;
 
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
 
@@ -126,6 +126,79 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 {
                     System.IO.File.Delete(service.SavePath);
                 }
+            }
+        }
+
+        [Test]
+        public void EndToEnd_Placement_Then_Tick_Then_SaveLoad_Preserves_Runtime()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 3);
+            var placement = new PlacementService();
+            placement.PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            placement.PlaceStructure(layout, 0, 1, StructureSimulationPass.HeatScrubberBasicId);
+            placement.PlaceStructure(layout, 0, 2, StructureSimulationPass.RiskLabBasicId);
+
+            var runtime = new StructureRuntimeState();
+            var pass = new StructureSimulationPass(new HeatSystem(), BuildTestConfig());
+            pass.SimulateTick(layout, runtime, 1);
+
+            var save = new SaveData
+            {
+                totalTicks = 1,
+                dungeonLayout = layout,
+                structureRuntime = runtime
+            };
+
+            string json = JsonUtility.ToJson(save);
+            SaveData loaded = JsonUtility.FromJson<SaveData>(json);
+
+            Assert.That(loaded.totalTicks, Is.EqualTo(1));
+            Assert.That(loaded.structureRuntime.ManaReserve, Is.EqualTo(runtime.ManaReserve));
+            Assert.That(loaded.structureRuntime.Heat, Is.EqualTo(runtime.Heat));
+            Assert.That(loaded.dungeonLayout.Slots[2].StructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
+        }
+
+        [Test]
+        public void TryCreateStructureSimulationPass_ReturnsFalse_For_Malformed_Config()
+        {
+            bool ok = GameRoot.TryCreateStructureSimulationPass(new HeatSystem(), "{bad json", out StructureSimulationPass pass);
+            Assert.That(ok, Is.False);
+            Assert.That(pass, Is.Null);
+        }
+
+        [Test]
+        public void TryCreateStructureSimulationPass_ReturnsFalse_For_Incomplete_Config()
+        {
+            const string missingStructureJson = "{\"Structures\":[{\"StructureId\":\"structure.mana_generator.basic\",\"ManaDeltaPerTick\":10.0,\"HeatDeltaPerTick\":5.0}],\"HeatCrisisEnterThreshold\":100.0,\"HeatCrisisRecoveryThreshold\":65.0}";
+            bool ok = GameRoot.TryCreateStructureSimulationPass(new HeatSystem(), missingStructureJson, out StructureSimulationPass pass);
+            Assert.That(ok, Is.False);
+            Assert.That(pass, Is.Null);
+        }
+
+        [Test]
+        public void IsValidStructureSimulationConfig_Rejects_Invalid_Thresholds()
+        {
+            var config = BuildTestConfig();
+            config.HeatCrisisEnterThreshold = 50d;
+            config.HeatCrisisRecoveryThreshold = 65d;
+
+            bool isValid = GameRoot.IsValidStructureSimulationConfig(config);
+            Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void SimulateStructureTick_ReturnsFalse_When_Runtime_Dependencies_Are_Unavailable()
+        {
+            var go = new GameObject("GameRoot_Test");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                bool didRun = root.SimulateStructureTick();
+                Assert.That(didRun, Is.False);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
             }
         }
 

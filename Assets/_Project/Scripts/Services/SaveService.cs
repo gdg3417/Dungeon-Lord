@@ -49,10 +49,7 @@ namespace DungeonBuilder.M0
                 bool migrated = _migrationRunner.Run(root, SaveSchemaVersion, out string migrationError);
                 if (!migrated)
                 {
-                    _logger.Warn($"Save migration failed: {migrationError}");
-                    banner = "Save migration failed. Created a new save.";
-                    ArchiveCorruptSave();
-                    return CreateNew(contentVersion);
+                    _logger.Warn($"Save migration runner failed: {migrationError}. Falling back to direct latest migration.");
                 }
 
                 root = SaveMigration.MigrateToLatest(root);

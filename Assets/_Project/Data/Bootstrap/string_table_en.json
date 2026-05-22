@@ -34,6 +34,122 @@
     {
       "key": "gate.ok.allowed",
       "text": "Action allowed."
+    },
+    {
+      "key": "ui.dev.panel.title",
+      "text": "Dev Panel"
+    },
+    {
+      "key": "ui.dev.button.save_now",
+      "text": "Save Now"
+    },
+    {
+      "key": "ui.dev.button.delete_save",
+      "text": "Delete Save"
+    },
+    {
+      "key": "ui.dev.button.clear_banner",
+      "text": "Clear Banner"
+    },
+    {
+      "key": "ui.dev.button.toggle_online",
+      "text": "Toggle Online/Offline"
+    },
+    {
+      "key": "ui.dev.button.toggle_verification",
+      "text": "Toggle Verification Pending"
+    },
+    {
+      "key": "ui.dev.button.toggle_pause",
+      "text": "Toggle Pause/Resume (UAT)"
+    },
+    {
+      "key": "ui.dev.button.sim_mana",
+      "text": "Simulate +10 Mana KPI"
+    },
+    {
+      "key": "ui.dev.button.sim_heat",
+      "text": "Simulate +5 Heat Event"
+    },
+    {
+      "key": "ui.dev.button.select_slot",
+      "text": "Select Next Slot"
+    },
+    {
+      "key": "ui.dev.button.place_mana_generator",
+      "text": "Place Mana Generator"
+    },
+    {
+      "key": "ui.dev.button.place_heat_scrubber",
+      "text": "Place Heat Scrubber"
+    },
+    {
+      "key": "ui.dev.button.place_risk_lab",
+      "text": "Place Risk Lab"
+    },
+    {
+      "key": "ui.dev.button.sim_structure_tick",
+      "text": "Run Structure Tick"
+    },
+    {
+      "key": "ui.dev.structure_status",
+      "text": "Structure Sim \u2014 Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
+    },
+    {
+      "key": "ui.banner.place_success",
+      "text": "Placed structure: {0}"
+    },
+    {
+      "key": "ui.banner.place_failed",
+      "text": "Unable to place structure in selected slot."
+    },
+    {
+      "key": "ui.banner.simulated_tick",
+      "text": "Structure simulation tick applied."
+    },
+    {
+      "key": "ui.banner.structure_sim_config_missing",
+      "text": "Structure simulation config missing or invalid."
+    },
+    {
+      "key": "ui.dev.hint.toggle_panel",
+      "text": "F1 toggles Dev Panel"
+    },
+    {
+      "key": "ui.dev.banner.heading",
+      "text": "Banner"
+    },
+    {
+      "key": "ui.banner.saved_dev",
+      "text": "Saved (Dev)."
+    },
+    {
+      "key": "ui.banner.online_restored",
+      "text": "Online restored."
+    },
+    {
+      "key": "ui.banner.verification_cleared",
+      "text": "Verification cleared."
+    },
+    {
+      "key": "ui.banner.paused_dev_panel",
+      "text": "Paused via Dev Panel."
+    },
+    {
+      "key": "ui.banner.resumed_dev_panel",
+      "text": "Resumed via Dev Panel."
+    },
+    {
+      "key": "ui.banner.simulated_mana_kpi",
+      "text": "Simulated mana tick for KPI."
+    },
+    {
+      "key": "ui.banner.applied_heat_event",
+      "text": "Applied +5 heat event."
+    },
+    {
+      "key": "ui.banner.structure_tick_failed",
+      "text": "Structure simulation tick could not run."
     }
   ]
 }
