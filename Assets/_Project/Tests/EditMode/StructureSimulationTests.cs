@@ -236,6 +236,57 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
+        [Test]
+        public void NormalizeRuntimeFlags_Sets_PlacementLock_And_RiskLabPause_For_Legacy_Crisis_Save()
+        {
+            var runtime = new StructureRuntimeState
+            {
+                IsHeatCrisisActive = true,
+                PlacementLocked = false,
+                RiskLabPaused = false
+            };
+
+            var pass = new StructureSimulationPass(new HeatSystem(), BuildTestConfig());
+            pass.NormalizeRuntimeFlags(runtime);
+
+            Assert.That(runtime.PlacementLocked, Is.True);
+            Assert.That(runtime.RiskLabPaused, Is.True);
+        }
+
+        [Test]
+        public void TryPlaceSelectedStructure_BlockedByCrisis_DoesNotMutateSaveOrLayout()
+        {
+            var go = new GameObject("GameRoot_PlacementLock_Test");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SaveData save = new SaveData
+                {
+                    dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                    structureRuntime = new StructureRuntimeState
+                    {
+                        IsHeatCrisisActive = true,
+                        PlacementLocked = true
+                    }
+                };
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Save))?.SetValue(root, save);
+
+                string beforeJson = JsonUtility.ToJson(root.Save);
+                string beforeStructureId = root.GetSelectedSlotStructureId();
+
+                bool ok = root.TryPlaceSelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out string bannerKey);
+
+                Assert.That(ok, Is.False);
+                Assert.That(bannerKey, Is.EqualTo("ui.banner.place_blocked_heat_crisis"));
+                Assert.That(root.GetSelectedSlotStructureId(), Is.EqualTo(beforeStructureId));
+                Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(beforeJson));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
         private static StructureSimulationConfig BuildTestConfig()
         {
             return new StructureSimulationConfig

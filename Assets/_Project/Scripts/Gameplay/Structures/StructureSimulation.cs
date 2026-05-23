@@ -165,10 +165,20 @@ namespace DungeonBuilder.M0.Gameplay.Structures
                 }
             }
 
-            runtime.RiskLabPaused = runtime.IsHeatCrisisActive && _riskLabPausedDuringCrisis;
-            runtime.PlacementLocked = runtime.IsHeatCrisisActive && _placementBlockedDuringCrisis;
+            NormalizeRuntimeFlags(runtime);
 
             return new StructureTickResult(runtime.ManaReserve, runtime.Heat, runtime.IsHeatCrisisActive);
+        }
+
+        public void NormalizeRuntimeFlags(StructureRuntimeState runtime)
+        {
+            if (runtime == null)
+            {
+                throw new ArgumentNullException(nameof(runtime));
+            }
+
+            runtime.RiskLabPaused = runtime.IsHeatCrisisActive && _riskLabPausedDuringCrisis;
+            runtime.PlacementLocked = runtime.IsHeatCrisisActive && _placementBlockedDuringCrisis;
         }
 
         private static Dictionary<string, StructureTuningEntry> BuildTuningMap(StructureTuningEntry[] entries)

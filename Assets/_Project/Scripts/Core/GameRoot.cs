@@ -270,6 +270,12 @@ namespace DungeonBuilder.M0
             if (!TryCreateStructureSimulationPass(_heatSystem, json, out _structureSimulationPass))
             {
                 SetBanner(Content.GetString("ui.banner.structure_sim_config_missing", "ui.banner.structure_sim_config_missing"));
+                return;
+            }
+
+            if (Save?.structureRuntime != null)
+            {
+                _structureSimulationPass.NormalizeRuntimeFlags(Save.structureRuntime);
             }
         }
         
