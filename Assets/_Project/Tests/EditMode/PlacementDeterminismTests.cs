@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -101,10 +102,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void DungeonSlot_Does_Not_Override_GetHashCode()
+        public void DungeonSlot_GetHashCode_Is_Stable_For_Equal_Values()
         {
-            var method = typeof(DungeonSlot).GetMethod(nameof(GetHashCode));
-            Assert.That(method.DeclaringType, Is.EqualTo(typeof(ValueType)));
+            var a = new DungeonSlot(1, 2, StructureSimulationPass.RiskLabBasicId);
+            var b = new DungeonSlot(1, 2, StructureSimulationPass.RiskLabBasicId);
+            Assert.That(a.Equals(b), Is.True);
+            Assert.That(a.GetHashCode(), Is.EqualTo(b.GetHashCode()));
         }
     }
 }

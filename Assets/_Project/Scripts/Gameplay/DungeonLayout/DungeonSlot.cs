@@ -31,5 +31,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonLayout
         {
             return obj is DungeonSlot other && Equals(other);
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FloorIndex, SlotIndex, StructureId);
+        }
     }
 }

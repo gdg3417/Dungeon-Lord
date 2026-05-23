@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
 
         private GameRoot _root;
         private bool _devPanelVisible;
+        private Vector2 _devPanelScrollPosition;
 
         public void Bind(GameRoot root)
         {
@@ -86,8 +87,10 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            GUILayout.BeginArea(new Rect(10, 120, 360, 240), GUI.skin.box);
+            float panelHeight = Mathf.Max(240f, Screen.height - 140f);
+            GUILayout.BeginArea(new Rect(10, 120, 360, panelHeight), GUI.skin.box);
             GUILayout.Label(_root.Content.GetString("ui.dev.panel.title", "ui.dev.panel.title"));
+            _devPanelScrollPosition = GUILayout.BeginScrollView(_devPanelScrollPosition);
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.save_now", "ui.dev.button.save_now")))
             {
@@ -187,6 +190,7 @@ namespace DungeonBuilder.M0
                     : _root.Content.GetString("ui.banner.structure_tick_failed", "ui.banner.structure_tick_failed"));
             }
 
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
         }
 

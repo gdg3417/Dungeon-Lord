@@ -150,6 +150,22 @@
     {
       "key": "ui.banner.structure_tick_failed",
       "text": "Structure simulation tick could not run."
+    },
+    {
+      "key": "ui.banner.place_blocked_heat_crisis",
+      "text": "Cannot place structures during heat crisis lockout."
+    },
+    {
+      "key": "ui.banner.heat_crisis_entered",
+      "text": "Heat crisis entered. Placement locked and safety protocols engaged."
+    },
+    {
+      "key": "ui.banner.heat_crisis_recovered",
+      "text": "Heat crisis recovered. Placement lockout removed."
+    },
+    {
+      "key": "ui.banner.risk_lab_paused_heat_crisis",
+      "text": "Risk Lab paused by heat crisis safety lockout."
     }
   ]
 }

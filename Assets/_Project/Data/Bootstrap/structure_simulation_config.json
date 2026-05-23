@@ -17,5 +17,10 @@
     }
   ],
   "HeatCrisisEnterThreshold": 100.0,
-  "HeatCrisisRecoveryThreshold": 65.0
+  "HeatCrisisRecoveryThreshold": 65.0,
+  "CrisisEnterConsecutiveTicks": 3,
+  "CrisisRecoveryConsecutiveTicks": 2,
+  "CrisisManaDrainPerTick": 6.0,
+  "RiskLabPausedDuringCrisis": true,
+  "PlacementBlockedDuringCrisis": true
 }
