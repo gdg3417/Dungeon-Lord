@@ -308,6 +308,12 @@ namespace DungeonBuilder.M0
             {
                 return false;
             }
+            if (config.CrisisEnterConsecutiveTicks < 1 ||
+                config.CrisisRecoveryConsecutiveTicks < 1 ||
+                config.CrisisManaDrainPerTick < 0d)
+            {
+                return false;
+            }
 
             var required = new HashSet<string>(StringComparer.Ordinal)
             {
@@ -449,6 +455,11 @@ namespace DungeonBuilder.M0
                 bannerKey = "ui.banner.place_failed";
                 return false;
             }
+            if (Save.structureRuntime != null && Save.structureRuntime.PlacementLocked)
+            {
+                bannerKey = "ui.banner.place_blocked_heat_crisis";
+                return false;
+            }
 
             try
             {
@@ -522,6 +533,10 @@ namespace DungeonBuilder.M0
 
             CurrentHeat = decayResult.NewHeat;
             HeatLine = $"Heat: {CurrentHeat:0.00}";
+            if (Save?.structureRuntime != null)
+            {
+                Save.structureRuntime.Heat = CurrentHeat;
+            }
             TickLine = $"Tick: {tickIndex}";
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";

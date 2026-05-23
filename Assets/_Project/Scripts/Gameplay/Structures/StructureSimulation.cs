@@ -12,6 +12,10 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         public double Heat;
         public bool IsHeatCrisisActive;
         public long LastProcessedTick;
+        public int HeatCrisisEnterStreak;
+        public int HeatCrisisRecoveryStreak;
+        public bool RiskLabPaused;
+        public bool PlacementLocked;
     }
 
     [Serializable]
@@ -28,6 +32,11 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         public StructureTuningEntry[] Structures = Array.Empty<StructureTuningEntry>();
         public double HeatCrisisEnterThreshold;
         public double HeatCrisisRecoveryThreshold;
+        public int CrisisEnterConsecutiveTicks;
+        public int CrisisRecoveryConsecutiveTicks;
+        public double CrisisManaDrainPerTick;
+        public bool RiskLabPausedDuringCrisis;
+        public bool PlacementBlockedDuringCrisis;
     }
 
     public readonly struct StructureTickResult
@@ -61,6 +70,11 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         private readonly Dictionary<string, StructureTuningEntry> _tuningByStructureId;
         private readonly double _heatCrisisEnterThreshold;
         private readonly double _heatCrisisRecoveryThreshold;
+        private readonly int _crisisEnterConsecutiveTicks;
+        private readonly int _crisisRecoveryConsecutiveTicks;
+        private readonly double _crisisManaDrainPerTick;
+        private readonly bool _riskLabPausedDuringCrisis;
+        private readonly bool _placementBlockedDuringCrisis;
 
         public StructureSimulationPass(IHeatSystem heatSystem, StructureSimulationConfig config)
         {
@@ -73,6 +87,11 @@ namespace DungeonBuilder.M0.Gameplay.Structures
 
             _heatCrisisEnterThreshold = config.HeatCrisisEnterThreshold;
             _heatCrisisRecoveryThreshold = config.HeatCrisisRecoveryThreshold;
+            _crisisEnterConsecutiveTicks = config.CrisisEnterConsecutiveTicks;
+            _crisisRecoveryConsecutiveTicks = config.CrisisRecoveryConsecutiveTicks;
+            _crisisManaDrainPerTick = config.CrisisManaDrainPerTick;
+            _riskLabPausedDuringCrisis = config.RiskLabPausedDuringCrisis;
+            _placementBlockedDuringCrisis = config.PlacementBlockedDuringCrisis;
             _tuningByStructureId = BuildTuningMap(config.Structures);
         }
 
@@ -84,11 +103,16 @@ namespace DungeonBuilder.M0.Gameplay.Structures
             double manaDelta = 0d;
             double heatDelta = 0d;
 
-            IReadOnlyList<DungeonSlot> orderedSlots = new PlacementService().GetPlacementOrder(layout);
+            List<DungeonSlot> orderedSlots = new List<DungeonSlot>(layout.OrderedSlots());
             for (int i = 0; i < orderedSlots.Count; i++)
             {
                 string structureId = orderedSlots[i].StructureId;
                 if (string.IsNullOrEmpty(structureId) || !_tuningByStructureId.TryGetValue(structureId, out StructureTuningEntry tuning))
+                {
+                    continue;
+                }
+
+                if (runtime.IsHeatCrisisActive && _riskLabPausedDuringCrisis && string.Equals(structureId, RiskLabBasicId, StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -99,18 +123,50 @@ namespace DungeonBuilder.M0.Gameplay.Structures
 
             HeatResult heatResult = _heatSystem.ApplyEvent(new HeatEventInput(tickIndex, runtime.Heat, heatDelta));
 
-            runtime.ManaReserve = Math.Max(0d, runtime.ManaReserve + manaDelta);
+            double crisisManaDrain = runtime.IsHeatCrisisActive ? _crisisManaDrainPerTick : 0d;
+            runtime.ManaReserve = Math.Max(0d, runtime.ManaReserve + manaDelta - crisisManaDrain);
             runtime.Heat = heatResult.NewHeat;
             runtime.LastProcessedTick = tickIndex;
 
-            if (!runtime.IsHeatCrisisActive && runtime.Heat >= _heatCrisisEnterThreshold)
+            if (!runtime.IsHeatCrisisActive)
             {
-                runtime.IsHeatCrisisActive = true;
+                runtime.HeatCrisisRecoveryStreak = 0;
+                if (runtime.Heat >= _heatCrisisEnterThreshold)
+                {
+                    runtime.HeatCrisisEnterStreak++;
+                }
+                else
+                {
+                    runtime.HeatCrisisEnterStreak = 0;
+                }
+
+                if (runtime.HeatCrisisEnterStreak >= _crisisEnterConsecutiveTicks)
+                {
+                    runtime.IsHeatCrisisActive = true;
+                    runtime.HeatCrisisEnterStreak = 0;
+                }
             }
-            else if (runtime.IsHeatCrisisActive && runtime.Heat <= _heatCrisisRecoveryThreshold)
+            else
             {
-                runtime.IsHeatCrisisActive = false;
+                runtime.HeatCrisisEnterStreak = 0;
+                if (runtime.Heat <= _heatCrisisRecoveryThreshold)
+                {
+                    runtime.HeatCrisisRecoveryStreak++;
+                }
+                else
+                {
+                    runtime.HeatCrisisRecoveryStreak = 0;
+                }
+
+                if (runtime.HeatCrisisRecoveryStreak >= _crisisRecoveryConsecutiveTicks)
+                {
+                    runtime.IsHeatCrisisActive = false;
+                    runtime.HeatCrisisRecoveryStreak = 0;
+                }
             }
+
+            runtime.RiskLabPaused = runtime.IsHeatCrisisActive && _riskLabPausedDuringCrisis;
+            runtime.PlacementLocked = runtime.IsHeatCrisisActive && _placementBlockedDuringCrisis;
 
             return new StructureTickResult(runtime.ManaReserve, runtime.Heat, runtime.IsHeatCrisisActive);
         }

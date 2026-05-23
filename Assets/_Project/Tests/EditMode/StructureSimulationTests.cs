@@ -33,11 +33,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var runtime = new StructureRuntimeState { Heat = config.HeatCrisisEnterThreshold - 5d };
             var pass = new StructureSimulationPass(new HeatSystem(), config);
 
-            StructureTickResult result = pass.SimulateTick(layout, runtime, 1);
-            double expectedHeat = (config.HeatCrisisEnterThreshold - 5d) + Find(config, StructureSimulationPass.RiskLabBasicId).HeatDeltaPerTick;
-
-            Assert.That(result.Heat, Is.EqualTo(expectedHeat));
-            Assert.That(result.IsHeatCrisisActive, Is.True);
+            StructureTickResult first = pass.SimulateTick(layout, runtime, 1);
+            StructureTickResult second = pass.SimulateTick(layout, runtime, 2);
+            Assert.That(first.IsHeatCrisisActive, Is.False);
+            Assert.That(second.IsHeatCrisisActive, Is.False);
+            StructureTickResult third = pass.SimulateTick(layout, runtime, 3);
+            Assert.That(third.IsHeatCrisisActive, Is.True);
         }
 
         [Test]
@@ -50,11 +51,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var runtime = new StructureRuntimeState { Heat = config.HeatCrisisRecoveryThreshold + 1d, IsHeatCrisisActive = true };
             var pass = new StructureSimulationPass(new HeatSystem(), config);
 
-            StructureTickResult result = pass.SimulateTick(layout, runtime, 1);
-            double expectedHeat = (config.HeatCrisisRecoveryThreshold + 1d) + Find(config, StructureSimulationPass.HeatScrubberBasicId).HeatDeltaPerTick;
-
-            Assert.That(result.Heat, Is.EqualTo(expectedHeat));
-            Assert.That(result.IsHeatCrisisActive, Is.False);
+            StructureTickResult first = pass.SimulateTick(layout, runtime, 1);
+            Assert.That(first.IsHeatCrisisActive, Is.True);
+            StructureTickResult second = pass.SimulateTick(layout, runtime, 2);
+            Assert.That(second.IsHeatCrisisActive, Is.False);
         }
 
         [Test]
@@ -69,7 +69,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     ManaReserve = 150d,
                     Heat = 102d,
                     IsHeatCrisisActive = true,
-                    LastProcessedTick = 42
+                    LastProcessedTick = 42,
+                    HeatCrisisEnterStreak = 3,
+                    HeatCrisisRecoveryStreak = 1,
+                    PlacementLocked = true,
+                    RiskLabPaused = true
                 }
             };
 
@@ -81,6 +85,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.structureRuntime.Heat, Is.EqualTo(102d));
             Assert.That(loaded.structureRuntime.ManaReserve, Is.EqualTo(150d));
             Assert.That(loaded.structureRuntime.LastProcessedTick, Is.EqualTo(42));
+            Assert.That(loaded.structureRuntime.HeatCrisisEnterStreak, Is.EqualTo(3));
+            Assert.That(loaded.structureRuntime.HeatCrisisRecoveryStreak, Is.EqualTo(1));
+            Assert.That(loaded.structureRuntime.PlacementLocked, Is.True);
+            Assert.That(loaded.structureRuntime.RiskLabPaused, Is.True);
         }
 
 
@@ -187,6 +195,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Crisis_Mana_Drain_Clamps_To_Zero()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            var runtime = new StructureRuntimeState { ManaReserve = 2d, IsHeatCrisisActive = true };
+            var pass = new StructureSimulationPass(new HeatSystem(), BuildTestConfig());
+            pass.SimulateTick(layout, runtime, 1);
+            Assert.That(runtime.ManaReserve, Is.EqualTo(0d));
+        }
+
+        [Test]
+        public void RiskLab_Is_Paused_During_Crisis_And_Does_Not_Add_Mana_Or_Heat()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.RiskLabBasicId);
+            var runtime = new StructureRuntimeState { IsHeatCrisisActive = true, ManaReserve = 10d, Heat = 80d };
+            var pass = new StructureSimulationPass(new HeatSystem(), BuildTestConfig());
+
+            pass.SimulateTick(layout, runtime, 1);
+
+            Assert.That(runtime.RiskLabPaused, Is.True);
+            Assert.That(runtime.Heat, Is.EqualTo(80d));
+            Assert.That(runtime.ManaReserve, Is.EqualTo(4d));
+            Assert.That(runtime.PlacementLocked, Is.True);
+        }
+
+        [Test]
         public void SimulateStructureTick_ReturnsFalse_When_Runtime_Dependencies_Are_Unavailable()
         {
             var go = new GameObject("GameRoot_Test");
@@ -208,6 +242,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 HeatCrisisEnterThreshold = 100d,
                 HeatCrisisRecoveryThreshold = 65d,
+                CrisisEnterConsecutiveTicks = 3,
+                CrisisRecoveryConsecutiveTicks = 2,
+                CrisisManaDrainPerTick = 6d,
+                RiskLabPausedDuringCrisis = true,
+                PlacementBlockedDuringCrisis = true,
                 Structures = new[]
                 {
                     new StructureTuningEntry { StructureId = StructureSimulationPass.ManaGeneratorBasicId, ManaDeltaPerTick = 10d, HeatDeltaPerTick = 5d },
