@@ -3,6 +3,7 @@
   "HeatPenaltyPerPoint": 0.004,
   "ManaReserveBonusPerPoint": 0.01,
   "CrisisFailurePenalty": 0.3,
+  "SuccessThreshold": 0.5,
   "BaseScoreOnSuccess": 100,
   "ScorePerManaPoint": 2
 }

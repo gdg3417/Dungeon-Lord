@@ -180,6 +180,14 @@
       "text": "Deterministic run could not run."
     },
     {
+      "key": "ui.run.none",
+      "text": "Run: none"
+    },
+    {
+      "key": "ui.run.latest_format",
+      "text": "Run: {0} success={1} score={2} reason={3}"
+    },
+    {
       "key": "run.reason.success",
       "text": "Success"
     },

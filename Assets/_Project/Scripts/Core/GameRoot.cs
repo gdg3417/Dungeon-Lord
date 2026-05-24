@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0
         public string ManaLine { get; private set; } = "Mana: 0.00";
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
-        public string RunLine { get; private set; } = "Run: none";
+        public string RunLine { get; private set; } = "ui.run.none";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -290,18 +290,60 @@ namespace DungeonBuilder.M0
         {
             _runSimulationService = null;
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
+            if (!TryCreateRunSimulationService(json, out _runSimulationService))
+            {
+                SetBanner(Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
+            }
+        }
+
+        internal static bool TryCreateRunSimulationService(string configJson, out RunSimulationService service)
+        {
+            service = null;
+
             try
             {
-                RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(json);
-                if (config != null)
+                RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(configJson);
+                if (!IsValidRunSimulationConfig(config))
                 {
-                    _runSimulationService = new RunSimulationService(config);
+                    return false;
                 }
+
+                service = new RunSimulationService(config);
+                return true;
             }
             catch
             {
-                _runSimulationService = null;
+                return false;
             }
+        }
+
+        internal static bool IsValidRunSimulationConfig(RunSimulationConfig config)
+        {
+            if (config == null)
+            {
+                return false;
+            }
+
+            if (config.BaseSuccessChance < 0d || config.BaseSuccessChance > 1d)
+            {
+                return false;
+            }
+
+            if (config.SuccessThreshold < 0d || config.SuccessThreshold > 1d)
+            {
+                return false;
+            }
+
+            if (config.HeatPenaltyPerPoint < 0d ||
+                config.ManaReserveBonusPerPoint < 0d ||
+                config.CrisisFailurePenalty < 0d ||
+                config.BaseScoreOnSuccess < 0 ||
+                config.ScorePerManaPoint < 0)
+            {
+                return false;
+            }
+
+            return true;
         }
         
         internal static bool TryCreateStructureSimulationPass(
@@ -573,14 +615,17 @@ namespace DungeonBuilder.M0
         {
             if (Save?.runHistory?.LatestOutcome == null)
             {
-                RunLine = "Run: none";
+                RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
                 return;
             }
 
             RunOutcomeRecord outcome = Save.runHistory.LatestOutcome;
             string reason = Content != null ? Content.GetString(outcome.ReasonKey, outcome.ReasonKey) : outcome.ReasonKey;
+            string format = Content != null
+                ? Content.GetString("ui.run.latest_format", "ui.run.latest_format")
+                : "ui.run.latest_format";
             RunLine = string.Format(
-                "Run: {0} success={1} score={2} reason={3}",
+                format,
                 outcome.RunId,
                 outcome.Success,
                 outcome.Score,

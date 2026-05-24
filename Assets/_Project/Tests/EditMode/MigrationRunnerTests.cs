@@ -129,5 +129,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.Throws<System.ArgumentException>(() => JsonUtility.FromJson<SaveRoot>(malformedFixture));
         }
+        [Test]
+        public void MigrateToLatest_Backfills_RunHistory_WhenMissing()
+        {
+            var root = new SaveRoot
+            {
+                schemaVersion = 2,
+                primary = new SaveData
+                {
+                    runHistory = null,
+                    dungeonLayout = null,
+                    structureRuntime = null
+                }
+            };
+
+            SaveRoot migrated = SaveMigration.MigrateToLatest(root);
+
+            Assert.NotNull(migrated.primary.runHistory);
+            Assert.NotNull(migrated.primary.dungeonLayout);
+            Assert.NotNull(migrated.primary.structureRuntime);
+            Assert.AreEqual(SaveMigration.LatestSchemaVersion, migrated.schemaVersion);
+        }
+
     }
 }

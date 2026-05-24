@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         public double HeatPenaltyPerPoint;
         public double ManaReserveBonusPerPoint;
         public double CrisisFailurePenalty;
+        public double SuccessThreshold;
         public int BaseScoreOnSuccess;
         public int ScorePerManaPoint;
     }
