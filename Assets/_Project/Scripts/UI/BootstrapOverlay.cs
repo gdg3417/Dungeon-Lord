@@ -47,6 +47,7 @@ namespace DungeonBuilder.M0
             string mana = _root.ManaLine;
             string save = _root.SaveLine;
             string pause = _root.PauseLine;
+            string run = _root.RunLine;
             string hint = _root.DevPanelEnabled
                 ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
                 : string.Empty;
@@ -71,6 +72,7 @@ namespace DungeonBuilder.M0
                 mana + "\n" +
                 save + "\n" +
                 pause + "\n" +
+                run + "\n" +
                 structureState + "\n" +
                 (string.IsNullOrEmpty(banner)
                     ? ""
@@ -188,6 +190,14 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(didRun
                     ? _root.Content.GetString("ui.banner.simulated_tick", "ui.banner.simulated_tick")
                     : _root.Content.GetString("ui.banner.structure_tick_failed", "ui.banner.structure_tick_failed"));
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_run_once", "ui.dev.button.sim_run_once")))
+            {
+                bool didRun = _root.SimulateRunOnce();
+                _root.SetBanner(didRun
+                    ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
+                    : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             }
 
             GUILayout.EndScrollView();
