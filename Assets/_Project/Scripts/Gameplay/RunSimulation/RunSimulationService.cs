@@ -45,6 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 HeatAtStart = runtime.Heat,
                 ManaAtStart = runtime.ManaReserve,
                 CrisisActiveAtStart = runtime.IsHeatCrisisActive,
+                HasBreakdown = true,
                 BaseChance = baseChance,
                 HeatPenaltyApplied = heatPenaltyApplied,
                 ManaBonusApplied = manaBonusApplied,

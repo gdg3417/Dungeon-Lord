@@ -29,6 +29,7 @@ namespace DungeonBuilder.M0
         public double HeatAtStart;
         public double ManaAtStart;
         public bool CrisisActiveAtStart;
+        public bool HasBreakdown;
         public double BaseChance;
         public double HeatPenaltyApplied;
         public double ManaBonusApplied;

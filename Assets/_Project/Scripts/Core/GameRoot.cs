@@ -647,6 +647,12 @@ namespace DungeonBuilder.M0
                 outcome.Score,
                 reason);
 
+            if (!outcome.HasBreakdown)
+            {
+                RunBreakdownLine = string.Empty;
+                return;
+            }
+
             string breakdownFormat = Content != null
                 ? Content.GetString("ui.run.breakdown_format", "ui.run.breakdown_format")
                 : "ui.run.breakdown_format";

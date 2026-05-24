@@ -2,6 +2,7 @@ using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using System.Reflection;
 using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
@@ -38,6 +39,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.ReasonKey, Is.EqualTo(first.ReasonKey));
             Assert.That(second.FinalChance, Is.EqualTo(first.FinalChance));
             Assert.That(second.SuccessThresholdUsed, Is.EqualTo(first.SuccessThresholdUsed));
+            Assert.That(first.HasBreakdown, Is.True);
+            Assert.That(second.HasBreakdown, Is.True);
         }
 
         [Test]
@@ -80,6 +83,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.CrisisPenaltyApplied, Is.EqualTo(0d));
             Assert.That(outcome.FinalChance, Is.EqualTo(1d));
             Assert.That(outcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
+            Assert.That(outcome.HasBreakdown, Is.True);
         }
 
         [Test]
@@ -114,6 +118,7 @@ namespace DungeonBuilder.Tests.EditMode
                         HeatAtStart = 10d,
                         ManaAtStart = 20d,
                         CrisisActiveAtStart = false,
+                        HasBreakdown = true,
                         BaseChance = 0.6d,
                         HeatPenaltyApplied = 0.04d,
                         ManaBonusApplied = 0.2d,
@@ -153,6 +158,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.RecentOutcomes.Length, Is.EqualTo(2));
             Assert.That(loaded.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-7"));
             Assert.That(loaded.runHistory.RecentOutcomes[1].RunId, Is.EqualTo("run-8"));
+            Assert.That(loaded.runHistory.LatestOutcome.HasBreakdown, Is.True);
             Assert.That(loaded.runHistory.LatestOutcome.BaseChance, Is.EqualTo(0.6d));
             Assert.That(loaded.runHistory.LatestOutcome.HeatPenaltyApplied, Is.EqualTo(0.04d));
             Assert.That(loaded.runHistory.LatestOutcome.ManaBonusApplied, Is.EqualTo(0.2d));
@@ -160,6 +166,43 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.FinalChance, Is.EqualTo(0.76d));
             Assert.That(loaded.runHistory.LatestOutcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
         }
+
+        [Test]
+        public void RefreshRunLine_HidesBreakdown_ForLegacyOutcomeWithoutBreakdownFlag()
+        {
+            var go = new GameObject("GameRootTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                var save = new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        LatestOutcome = new RunOutcomeRecord
+                        {
+                            RunId = "run-legacy",
+                            Success = false,
+                            Score = 0,
+                            ReasonKey = "run.reason.failed_threshold",
+                            HasBreakdown = false
+                        },
+                        RecentOutcomes = new[] { new RunOutcomeRecord { RunId = "run-legacy" } }
+                    }
+                };
+
+                typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, save);
+
+                root.RefreshRunLine();
+
+                Assert.That(root.RunBreakdownLine, Is.EqualTo(string.Empty));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
         {
