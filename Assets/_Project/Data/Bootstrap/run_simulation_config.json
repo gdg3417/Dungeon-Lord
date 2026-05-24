@@ -5,5 +5,6 @@
   "CrisisFailurePenalty": 0.3,
   "SuccessThreshold": 0.5,
   "BaseScoreOnSuccess": 100,
-  "ScorePerManaPoint": 2
+  "ScorePerManaPoint": 2,
+  "MaxRunHistoryEntries": 10
 }

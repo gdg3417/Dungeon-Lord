@@ -6,6 +6,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     public sealed class RunSimulationService
     {
         private readonly RunSimulationConfig _config;
+        public RunSimulationConfig Config => _config;
 
         public RunSimulationService(RunSimulationConfig config)
         {

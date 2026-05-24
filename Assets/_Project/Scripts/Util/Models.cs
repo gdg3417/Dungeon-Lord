@@ -15,6 +15,7 @@ namespace DungeonBuilder.M0
         public double SuccessThreshold;
         public int BaseScoreOnSuccess;
         public int ScorePerManaPoint;
+        public int MaxRunHistoryEntries;
     }
 
     [Serializable]
@@ -35,6 +36,31 @@ namespace DungeonBuilder.M0
     {
         public int NextRunSequence = 1;
         public RunOutcomeRecord LatestOutcome;
+        public RunOutcomeRecord[] RecentOutcomes = Array.Empty<RunOutcomeRecord>();
+
+        public void AppendOutcome(RunOutcomeRecord outcome, int maxEntries)
+        {
+            if (outcome == null)
+            {
+                return;
+            }
+
+            int boundedMax = Mathf.Max(1, maxEntries);
+            RunOutcomeRecord[] source = RecentOutcomes ?? Array.Empty<RunOutcomeRecord>();
+            int appendCount = source.Length + 1;
+            int keepCount = Mathf.Min(appendCount, boundedMax);
+            var next = new RunOutcomeRecord[keepCount];
+            int startIndex = Mathf.Max(0, appendCount - keepCount);
+
+            for (int i = 0; i < keepCount; i++)
+            {
+                int index = startIndex + i;
+                next[i] = index < source.Length ? source[index] : outcome;
+            }
+
+            RecentOutcomes = next;
+            LatestOutcome = outcome;
+        }
     }
 
     [Serializable]
