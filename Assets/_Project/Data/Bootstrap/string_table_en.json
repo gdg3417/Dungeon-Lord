@@ -166,6 +166,30 @@
     {
       "key": "ui.banner.risk_lab_paused_heat_crisis",
       "text": "Risk Lab paused by heat crisis safety lockout."
+    },
+    {
+      "key": "ui.dev.button.sim_run_once",
+      "text": "Run Test Adventure"
+    },
+    {
+      "key": "ui.banner.run_simulated",
+      "text": "Deterministic run simulated."
+    },
+    {
+      "key": "ui.banner.run_sim_failed",
+      "text": "Deterministic run could not run."
+    },
+    {
+      "key": "run.reason.success",
+      "text": "Success"
+    },
+    {
+      "key": "run.reason.crisis_failure",
+      "text": "Failed due to active heat crisis."
+    },
+    {
+      "key": "run.reason.failed_threshold",
+      "text": "Failed due to low projected chance."
     }
   ]
 }

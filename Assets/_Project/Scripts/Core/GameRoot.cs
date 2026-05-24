@@ -1,5 +1,6 @@
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace DungeonBuilder.M0
         public TextAsset stringTableJson;
         public TextAsset heatRuntimeJson;
         public TextAsset structureSimulationConfigJson;
+        public TextAsset runSimulationConfigJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -44,6 +46,7 @@ namespace DungeonBuilder.M0
         public string ManaLine { get; private set; } = "Mana: 0.00";
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
+        public string RunLine { get; private set; } = "Run: none";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -54,6 +57,7 @@ namespace DungeonBuilder.M0
         private readonly IHeatSystem _heatSystem = new HeatSystem();
         private readonly PlacementService _placementService = new PlacementService();
         private StructureSimulationPass _structureSimulationPass;
+        private RunSimulationService _runSimulationService;
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
 
@@ -156,6 +160,7 @@ namespace DungeonBuilder.M0
             stringTableJson = EnsureEditorFallbackAsset(stringTableJson, "stringTableJson", "Assets/_Project/Data/Bootstrap/string_table_en.json", assignedFields);
             heatRuntimeJson = EnsureEditorFallbackAsset(heatRuntimeJson, "heatRuntimeJson", "Assets/_Project/Data/Bootstrap/heat_runtime.json", assignedFields);
             structureSimulationConfigJson = EnsureEditorFallbackAsset(structureSimulationConfigJson, "structureSimulationConfigJson", "Assets/_Project/Data/Bootstrap/structure_simulation_config.json", assignedFields);
+            runSimulationConfigJson = EnsureEditorFallbackAsset(runSimulationConfigJson, "runSimulationConfigJson", "Assets/_Project/Data/Bootstrap/run_simulation_config.json", assignedFields);
 
             if (assignedFields.Count > 0)
             {
@@ -255,12 +260,14 @@ namespace DungeonBuilder.M0
             _selectedFloorIndex = 0;
             _selectedSlotIndex = 0;
             InitializeStructureSimulationPass();
+            InitializeRunSimulationService();
             SaveService.Save(Save, SaveReason.Boot);
             SaveLine = "Save: Boot";
 
             Logger.Info("M0 init complete.");
             RefreshDashboardState();
             RefreshStructureRuntimeLines();
+            RefreshRunLine();
         }
 
         private void InitializeStructureSimulationPass()
@@ -276,6 +283,24 @@ namespace DungeonBuilder.M0
             if (Save?.structureRuntime != null)
             {
                 _structureSimulationPass.NormalizeRuntimeFlags(Save.structureRuntime);
+            }
+        }
+
+        private void InitializeRunSimulationService()
+        {
+            _runSimulationService = null;
+            string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
+            try
+            {
+                RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(json);
+                if (config != null)
+                {
+                    _runSimulationService = new RunSimulationService(config);
+                }
+            }
+            catch
+            {
+                _runSimulationService = null;
             }
         }
         
@@ -497,6 +522,22 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        public bool SimulateRunOnce()
+        {
+            if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
+            {
+                return false;
+            }
+
+            long tickStarted = Save.totalTicks;
+            int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
+            Save.runHistory.LatestOutcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
+            Save.runHistory.NextRunSequence = sequence + 1;
+            RefreshRunLine();
+            SaveService.Save(Save, SaveReason.ManualDev);
+            return true;
+        }
+
         public string GetSelectedSlotStructureId()
         {
             if (Save?.dungeonLayout?.Slots == null)
@@ -526,6 +567,24 @@ namespace DungeonBuilder.M0
             HeatLine = $"Heat: {Save.structureRuntime.Heat:0.00}";
             ManaLine = $"Mana: {Save.structureRuntime.ManaReserve:0.00}";
             TickLine = $"Tick: {Save.totalTicks}";
+        }
+
+        public void RefreshRunLine()
+        {
+            if (Save?.runHistory?.LatestOutcome == null)
+            {
+                RunLine = "Run: none";
+                return;
+            }
+
+            RunOutcomeRecord outcome = Save.runHistory.LatestOutcome;
+            string reason = Content != null ? Content.GetString(outcome.ReasonKey, outcome.ReasonKey) : outcome.ReasonKey;
+            RunLine = string.Format(
+                "Run: {0} success={1} score={2} reason={3}",
+                outcome.RunId,
+                outcome.Success,
+                outcome.Score,
+                reason);
         }
 
         private void HandleSimulationTick(long tickIndex)

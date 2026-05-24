@@ -1,0 +1,8 @@
+{
+  "BaseSuccessChance": 0.6,
+  "HeatPenaltyPerPoint": 0.004,
+  "ManaReserveBonusPerPoint": 0.01,
+  "CrisisFailurePenalty": 0.3,
+  "BaseScoreOnSuccess": 100,
+  "ScorePerManaPoint": 2
+}

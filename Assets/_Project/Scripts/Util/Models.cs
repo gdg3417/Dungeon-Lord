@@ -6,6 +6,37 @@ using UnityEngine;
 namespace DungeonBuilder.M0
 {
     [Serializable]
+    public sealed class RunSimulationConfig
+    {
+        public double BaseSuccessChance;
+        public double HeatPenaltyPerPoint;
+        public double ManaReserveBonusPerPoint;
+        public double CrisisFailurePenalty;
+        public int BaseScoreOnSuccess;
+        public int ScorePerManaPoint;
+    }
+
+    [Serializable]
+    public sealed class RunOutcomeRecord
+    {
+        public string RunId;
+        public long TickStarted;
+        public bool Success;
+        public int Score;
+        public string ReasonKey;
+        public double HeatAtStart;
+        public double ManaAtStart;
+        public bool CrisisActiveAtStart;
+    }
+
+    [Serializable]
+    public sealed class RunHistoryState
+    {
+        public int NextRunSequence = 1;
+        public RunOutcomeRecord LatestOutcome;
+    }
+
+    [Serializable]
     public class ContentBootstrap
     {
         public string schema;
@@ -209,6 +240,7 @@ namespace DungeonBuilder.M0
 
         public DungeonLayoutState dungeonLayout;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
+        public RunHistoryState runHistory = new RunHistoryState();
 
         public string[] integrityFlags = Array.Empty<string>();
     }
