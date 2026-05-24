@@ -47,6 +47,7 @@ namespace DungeonBuilder.M0
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
         public string RunLine { get; private set; } = "ui.run.none";
+        public string RunHistoryLine { get; private set; } = "ui.run.history_summary_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -343,6 +344,11 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (config.MaxRunHistoryEntries < 1 || config.MaxRunHistoryEntries > 100)
+            {
+                return false;
+            }
+
             return true;
         }
         
@@ -573,7 +579,9 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            Save.runHistory.LatestOutcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
+            RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
+            RunSimulationConfig config = _runSimulationService.Config;
+            Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
             RefreshRunLine();
             SaveService.Save(Save, SaveReason.ManualDev);
@@ -613,6 +621,12 @@ namespace DungeonBuilder.M0
 
         public void RefreshRunLine()
         {
+            string summaryFormat = Content != null
+                ? Content.GetString("ui.run.history_summary_format", "ui.run.history_summary_format")
+                : "ui.run.history_summary_format";
+            int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
+            RunHistoryLine = string.Format(summaryFormat, historyCount);
+
             if (Save?.runHistory?.LatestOutcome == null)
             {
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";

@@ -188,6 +188,10 @@
       "text": "Run: {0} success={1} score={2} reason={3}"
     },
     {
+      "key": "ui.run.history_summary_format",
+      "text": "Recent runs: {0}"
+    },
+    {
       "key": "run.reason.success",
       "text": "Success"
     },

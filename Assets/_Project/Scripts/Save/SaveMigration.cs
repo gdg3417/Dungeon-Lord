@@ -36,6 +36,17 @@ namespace DungeonBuilder.M0
                 root.primary.runHistory = new RunHistoryState();
             }
 
+            RunHistoryState history = root.primary.runHistory;
+            if (history.RecentOutcomes == null)
+            {
+                history.RecentOutcomes = System.Array.Empty<RunOutcomeRecord>();
+            }
+
+            if ((history.RecentOutcomes == null || history.RecentOutcomes.Length == 0) && history.LatestOutcome != null)
+            {
+                history.RecentOutcomes = new[] { history.LatestOutcome };
+            }
+
             if (root.schemaVersion < LatestSchemaVersion)
             {
                 root.schemaVersion = LatestSchemaVersion;

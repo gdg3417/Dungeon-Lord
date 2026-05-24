@@ -18,7 +18,8 @@ namespace DungeonBuilder.Tests.EditMode
                 CrisisFailurePenalty = 0.3d,
                 SuccessThreshold = 0.5d,
                 BaseScoreOnSuccess = 100,
-                ScorePerManaPoint = 2
+                ScorePerManaPoint = 2,
+                MaxRunHistoryEntries = 10
             };
         }
 
@@ -80,6 +81,25 @@ namespace DungeonBuilder.Tests.EditMode
                         HeatAtStart = 10d,
                         ManaAtStart = 20d,
                         CrisisActiveAtStart = false
+                    },
+                    RecentOutcomes = new[]
+                    {
+                        new RunOutcomeRecord
+                        {
+                            RunId = "run-7",
+                            TickStarted = 20,
+                            Success = false,
+                            Score = 0,
+                            ReasonKey = "run.reason.failed_threshold"
+                        },
+                        new RunOutcomeRecord
+                        {
+                            RunId = "run-8",
+                            TickStarted = 21,
+                            Success = true,
+                            Score = 140,
+                            ReasonKey = "run.reason.success"
+                        }
                     }
                 }
             };
@@ -91,6 +111,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.RunId, Is.EqualTo("run-8"));
             Assert.That(loaded.runHistory.LatestOutcome.Score, Is.EqualTo(140));
             Assert.That(loaded.runHistory.LatestOutcome.ReasonKey, Is.EqualTo("run.reason.success"));
+            Assert.That(loaded.runHistory.RecentOutcomes.Length, Is.EqualTo(2));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-7"));
+            Assert.That(loaded.runHistory.RecentOutcomes[1].RunId, Is.EqualTo("run-8"));
         }
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
@@ -110,6 +133,54 @@ namespace DungeonBuilder.Tests.EditMode
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 
             Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void AppendOutcome_IncrementsHistory_AndKeepsOldestToNewestOrder()
+        {
+            var history = new RunHistoryState();
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 10);
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-2" }, 10);
+
+            Assert.That(history.RecentOutcomes.Length, Is.EqualTo(2));
+            Assert.That(history.RecentOutcomes[0].RunId, Is.EqualTo("run-1"));
+            Assert.That(history.RecentOutcomes[1].RunId, Is.EqualTo("run-2"));
+            Assert.That(history.LatestOutcome.RunId, Is.EqualTo("run-2"));
+        }
+
+        [Test]
+        public void AppendOutcome_TrimsHistory_Deterministically()
+        {
+            var history = new RunHistoryState();
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 2);
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-2" }, 2);
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-3" }, 2);
+
+            Assert.That(history.RecentOutcomes.Length, Is.EqualTo(2));
+            Assert.That(history.RecentOutcomes[0].RunId, Is.EqualTo("run-2"));
+            Assert.That(history.RecentOutcomes[1].RunId, Is.EqualTo("run-3"));
+            Assert.That(history.LatestOutcome.RunId, Is.EqualTo("run-3"));
+        }
+
+        [Test]
+        public void SaveMigration_SeedsRecentOutcomes_FromLegacyLatestOutcome()
+        {
+            var root = new SaveRoot
+            {
+                schemaVersion = 2,
+                primary = new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        NextRunSequence = 5,
+                        LatestOutcome = new RunOutcomeRecord { RunId = "run-4", ReasonKey = "run.reason.success" }
+                    }
+                }
+            };
+
+            SaveRoot migrated = SaveMigration.MigrateToLatest(root);
+            Assert.That(migrated.primary.runHistory.RecentOutcomes.Length, Is.EqualTo(1));
+            Assert.That(migrated.primary.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-4"));
         }
 
     }
