@@ -621,14 +621,15 @@ namespace DungeonBuilder.M0
 
         public void RefreshRunLine()
         {
+            string summaryFormat = Content != null
+                ? Content.GetString("ui.run.history_summary_format", "ui.run.history_summary_format")
+                : "ui.run.history_summary_format";
+            int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
+            RunHistoryLine = string.Format(summaryFormat, historyCount);
+
             if (Save?.runHistory?.LatestOutcome == null)
             {
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
-                string summaryFormat = Content != null
-                    ? Content.GetString("ui.run.history_summary_format", "ui.run.history_summary_format")
-                    : "ui.run.history_summary_format";
-                int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
-                RunHistoryLine = string.Format(summaryFormat, historyCount);
                 return;
             }
 
@@ -643,12 +644,6 @@ namespace DungeonBuilder.M0
                 outcome.Success,
                 outcome.Score,
                 reason);
-
-            string summaryFormat = Content != null
-                ? Content.GetString("ui.run.history_summary_format", "ui.run.history_summary_format")
-                : "ui.run.history_summary_format";
-            int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
-            RunHistoryLine = string.Format(summaryFormat, historyCount);
         }
 
         private void HandleSimulationTick(long tickIndex)
