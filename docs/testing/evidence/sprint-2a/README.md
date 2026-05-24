@@ -16,3 +16,20 @@
 5. Continue running ticks with heat scrubber active until crisis recovers.
 6. Verify placement is allowed again after recovery.
 7. Save, exit play mode, re-enter play mode, and verify crisis/runtime state persisted.
+
+## PR-D Evidence (Closeout)
+
+- PR number: **#24**
+- Feature: **Heat Crisis Lockout behavior and recovery loop**
+- EditMode tests passed:
+  - `StructureSimulationTests`
+  - `PlacementDeterminismTests`
+- Manual UAT passed:
+  - Placed mana generator, heat scrubber, and risk lab.
+  - Ran structure ticks until Heat Crisis became active.
+  - Confirmed placement was blocked during Heat Crisis.
+  - Continued ticking until Heat Crisis recovered.
+  - Confirmed placement was allowed again after recovery.
+  - Saved, exited Play Mode, re-entered Play Mode, and confirmed runtime state persisted.
+- Evidence screenshots were captured manually by tester.
+- Sprint 2A PR-D status: **PASS**
