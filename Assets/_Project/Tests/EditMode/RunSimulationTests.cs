@@ -16,6 +16,7 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatPenaltyPerPoint = 0.004d,
                 ManaReserveBonusPerPoint = 0.01d,
                 CrisisFailurePenalty = 0.3d,
+                SuccessThreshold = 0.5d,
                 BaseScoreOnSuccess = 100,
                 ScorePerManaPoint = 2
             };
@@ -91,5 +92,25 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.Score, Is.EqualTo(140));
             Assert.That(loaded.runHistory.LatestOutcome.ReasonKey, Is.EqualTo("run.reason.success"));
         }
+        [Test]
+        public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
+        {
+            bool ok = GameRoot.TryCreateRunSimulationService("{bad json", out RunSimulationService service);
+
+            Assert.That(ok, Is.False);
+            Assert.That(service, Is.Null);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_Invalid_Config()
+        {
+            var config = BuildConfig();
+            config.SuccessThreshold = 2d;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.False);
+        }
+
     }
 }

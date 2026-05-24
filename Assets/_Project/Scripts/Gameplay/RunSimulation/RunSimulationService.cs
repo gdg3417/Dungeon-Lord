@@ -25,7 +25,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
 
             chance = Math.Max(0d, Math.Min(1d, chance));
-            bool success = chance >= 0.5d;
+            bool success = chance >= _config.SuccessThreshold;
 
             int score = success
                 ? _config.BaseScoreOnSuccess + (int)Math.Round(runtime.ManaReserve * _config.ScorePerManaPoint)
