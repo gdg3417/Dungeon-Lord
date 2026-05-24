@@ -192,6 +192,10 @@
       "text": "Recent runs: {0}"
     },
     {
+      "key": "ui.run.breakdown_format",
+      "text": "Chance: {0:0.00} / threshold {1:0.00}"
+    },
+    {
       "key": "run.reason.success",
       "text": "Success"
     },

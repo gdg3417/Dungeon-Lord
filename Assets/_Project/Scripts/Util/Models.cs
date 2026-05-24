@@ -29,6 +29,12 @@ namespace DungeonBuilder.M0
         public double HeatAtStart;
         public double ManaAtStart;
         public bool CrisisActiveAtStart;
+        public double BaseChance;
+        public double HeatPenaltyApplied;
+        public double ManaBonusApplied;
+        public double CrisisPenaltyApplied;
+        public double FinalChance;
+        public double SuccessThresholdUsed;
     }
 
     [Serializable]
