@@ -33,6 +33,7 @@ namespace DungeonBuilder.Tests.EditMode
                 LootTableId = "loot.table.run.basic",
                 MinPartySize = 3,
                 MaxPartySize = 5,
+                MaxAllowedPartySize = 100,
                 SuccessSurvivorRatio = 1d,
                 FailureSurvivorRatio = 0d
             };
@@ -118,7 +119,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(successOutcome.SurvivalSummary, Is.Not.Null);
             Assert.That(successOutcome.SurvivalSummary.RuleResolved, Is.False);
-            Assert.That(successOutcome.SurvivalSummary.DeterministicErrorCode, Is.Not.EqualTo(0));
+            Assert.That(successOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
 
             RunSimulationConfig invalidFailureRatio = BuildConfig();
             invalidFailureRatio.FailureSurvivorRatio = -0.1d;
@@ -128,7 +129,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(failureOutcome.SurvivalSummary, Is.Not.Null);
             Assert.That(failureOutcome.SurvivalSummary.RuleResolved, Is.False);
-            Assert.That(failureOutcome.SurvivalSummary.DeterministicErrorCode, Is.Not.EqualTo(0));
+            Assert.That(failureOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
         }
 
         [Test]
@@ -596,11 +597,37 @@ namespace DungeonBuilder.Tests.EditMode
         public void IsValidRunSimulationConfig_Rejects_MaxPartySize_AboveCap()
         {
             var config = BuildConfig();
-            config.MaxPartySize = 101;
+            config.MaxPartySize = config.MaxAllowedPartySize + 1;
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 
             Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Accepts_MaxPartySize_EqualToLimit()
+        {
+            var config = BuildConfig();
+            config.MaxPartySize = config.MaxAllowedPartySize;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_SurvivalSummary_MaxPartyAboveAllowed_ReturnsInvalidPartySizeRange()
+        {
+            RunSimulationConfig invalid = BuildConfig();
+            invalid.MaxAllowedPartySize = 4;
+            invalid.MaxPartySize = 5;
+            var service = new RunSimulationService(invalid);
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 14, 10);
+
+            Assert.That(outcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(outcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(outcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange));
         }
 
         [Test]

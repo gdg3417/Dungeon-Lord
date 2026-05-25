@@ -13,6 +13,7 @@
   "LootTableId": "loot.table.run.basic",
   "MinPartySize": 3,
   "MaxPartySize": 5,
+  "MaxAllowedPartySize": 100,
   "SuccessSurvivorRatio": 1.0,
   "FailureSurvivorRatio": 0.0
 }

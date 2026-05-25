@@ -68,12 +68,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             int seed = ComputeResolverSeed(runSequence, tickStarted);
             int minPartySize = _config.MinPartySize;
             int maxPartySize = _config.MaxPartySize;
-            if (minPartySize < 1 || maxPartySize < minPartySize)
+            int maxAllowedPartySize = _config.MaxAllowedPartySize;
+            if (minPartySize < 1 || maxPartySize < minPartySize || maxAllowedPartySize < 1 || maxPartySize > maxAllowedPartySize)
             {
                 return new RunSurvivalSummary
                 {
                     RuleResolved = false,
-                    DeterministicErrorCode = 1,
+                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange,
                     DeterministicSeed = seed,
                     RuleSourceId = "run.survival.rule.v1",
                     SuccessAtResolution = success
@@ -89,7 +90,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return new RunSurvivalSummary
                 {
                     RuleResolved = false,
-                    DeterministicErrorCode = 2,
+                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio,
                     DeterministicSeed = seed,
                     RuleSourceId = "run.survival.rule.v1",
                     SuccessAtResolution = success
@@ -107,7 +108,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 SurvivorRatio = partySize > 0 ? (double)survivorCount / partySize : 0d,
                 DeterministicSeed = seed,
                 RuleResolved = true,
-                DeterministicErrorCode = 0,
+                DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.None,
                 RuleSourceId = "run.survival.rule.v1",
                 SuccessAtResolution = success
             };

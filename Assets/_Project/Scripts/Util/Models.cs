@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0
 {
+    public enum RunSurvivalSummaryErrorCode
+    {
+        None = 0,
+        InvalidPartySizeRange = 1,
+        InvalidSurvivorRatio = 2
+    }
+
     [Serializable]
     public sealed class RunSimulationConfig
     {
@@ -22,6 +29,7 @@ namespace DungeonBuilder.M0
         public string LootTableId;
         public int MinPartySize;
         public int MaxPartySize;
+        public int MaxAllowedPartySize;
         public double SuccessSurvivorRatio;
         public double FailureSurvivorRatio;
     }
