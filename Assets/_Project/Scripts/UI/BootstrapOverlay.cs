@@ -206,6 +206,24 @@ namespace DungeonBuilder.M0
                     : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             }
 
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.run_previous", "ui.dev.button.run_previous")))
+            {
+                _root.SelectPreviousRunOutcome();
+                _root.RefreshRunLine();
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.run_next", "ui.dev.button.run_next")))
+            {
+                _root.SelectNextRunOutcome();
+                _root.RefreshRunLine();
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.run_latest", "ui.dev.button.run_latest")))
+            {
+                _root.SelectLatestRunOutcome();
+                _root.RefreshRunLine();
+            }
+
             GUILayout.EndScrollView();
             GUILayout.EndArea();
         }

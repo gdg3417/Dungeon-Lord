@@ -172,6 +172,18 @@
       "text": "Run Test Adventure"
     },
     {
+      "key": "ui.dev.button.run_latest",
+      "text": "Latest Run"
+    },
+    {
+      "key": "ui.dev.button.run_next",
+      "text": "Next Run"
+    },
+    {
+      "key": "ui.dev.button.run_previous",
+      "text": "Previous Run"
+    },
+    {
       "key": "ui.banner.run_simulated",
       "text": "Deterministic run simulated."
     },
@@ -188,8 +200,8 @@
       "text": "Run: {0} success={1} score={2} reason={3}"
     },
     {
-      "key": "ui.run.history_summary_format",
-      "text": "Recent runs: {0}"
+      "key": "ui.run.history_position_format",
+      "text": "Run history: {0}/{1}"
     },
     {
       "key": "ui.run.breakdown_format",
