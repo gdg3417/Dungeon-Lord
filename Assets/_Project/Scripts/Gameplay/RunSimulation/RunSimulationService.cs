@@ -40,6 +40,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
             string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success);
 
+            RunLootSummary lootSummary = BuildLootSummary(runSequence, tickStarted);
+            RunSurvivalSummary survivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success);
             return new RunOutcomeRecord
             {
                 RunId = $"run-{runSequence}",
@@ -58,8 +60,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 FinalChance = finalChance,
                 SuccessThresholdUsed = successThreshold,
                 FeedbackTagKeys = feedbackTagKeys,
-                LootSummary = BuildLootSummary(runSequence, tickStarted),
-                SurvivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success)
+                LootSummary = lootSummary,
+                SurvivalSummary = survivalSummary,
+                LootExtractionSummary = LootExtractionResolver.Resolve(
+                    _lootConfig,
+                    lootSummary,
+                    survivalSummary,
+                    ComputeResolverSeed(runSequence, tickStarted),
+                    _config.LootExtractionRoundingPolicyId,
+                    _config.LootExtractionRuleSourceId)
             };
         }
 
@@ -137,6 +146,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 TotalGeneratedTradeableWorldValue = result.totalGeneratedTradeableWorldValue
             };
         }
+
 
         private static int ComputeResolverSeed(int runSequence, long tickStarted)
         {

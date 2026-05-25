@@ -254,6 +254,10 @@
     {
       "key": "ui.run.survival_summary_format",
       "text": "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}"
+    },
+    {
+      "key": "ui.run.extraction_summary_format",
+      "text": "Extraction: resolved={0} error={1} ratio={2:0.00} generated={3} extracted={4} lost={5} wv={6} rc={7} twv={8}"
     }
   ]
 }
