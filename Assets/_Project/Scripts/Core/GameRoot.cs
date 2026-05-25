@@ -402,6 +402,12 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(config.LootExtractionRuleSourceId) ||
+                string.IsNullOrWhiteSpace(config.LootExtractionRoundingPolicyId))
+            {
+                return false;
+            }
+
             return true;
         }
         
