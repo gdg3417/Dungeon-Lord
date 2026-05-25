@@ -250,6 +250,10 @@
     {
       "key": "ui.run.loot_summary_format",
       "text": "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}"
+    },
+    {
+      "key": "ui.run.survival_summary_format",
+      "text": "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}"
     }
   ]
 }

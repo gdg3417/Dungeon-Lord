@@ -30,7 +30,12 @@ namespace DungeonBuilder.Tests.EditMode
                 HighHeatFeedbackThreshold = 75d,
                 LowManaFeedbackThreshold = 5d,
                 StrongManaReserveFeedbackThreshold = 50d,
-                LootTableId = "loot.table.run.basic"
+                LootTableId = "loot.table.run.basic",
+                MinPartySize = 3,
+                MaxPartySize = 5,
+                MaxAllowedPartySize = 100,
+                SuccessSurvivorRatio = 1d,
+                FailureSurvivorRatio = 0d
             };
         }
 
@@ -80,8 +85,51 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.LootSummary.ResolverSeed, Is.EqualTo(first.LootSummary.ResolverSeed));
             Assert.That(second.LootSummary.GeneratedItemIds, Is.EqualTo(first.LootSummary.GeneratedItemIds));
             Assert.That(second.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(first.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(second.SurvivalSummary.PartySize, Is.EqualTo(first.SurvivalSummary.PartySize));
+            Assert.That(second.SurvivalSummary.SurvivorCount, Is.EqualTo(first.SurvivalSummary.SurvivorCount));
+            Assert.That(second.SurvivalSummary.SurvivorRatio, Is.EqualTo(first.SurvivalSummary.SurvivorRatio));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_SurvivalSummary_RespectsBoundsAndRatios()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            RunOutcomeRecord successOutcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord failureOutcome = service.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 10, 3);
+
+            Assert.That(successOutcome.SurvivalSummary.PartySize, Is.InRange(3, 5));
+            Assert.That(successOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(successOutcome.SurvivalSummary.PartySize));
+            Assert.That(failureOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(0));
+            Assert.That(successOutcome.SurvivalSummary.SurvivorRatio, Is.EqualTo((double)successOutcome.SurvivalSummary.SurvivorCount / successOutcome.SurvivalSummary.PartySize));
+            Assert.That(failureOutcome.SurvivalSummary.SurvivorRatio, Is.EqualTo((double)failureOutcome.SurvivalSummary.SurvivorCount / failureOutcome.SurvivalSummary.PartySize));
+            Assert.That(successOutcome.SurvivalSummary.DeathCount, Is.EqualTo(successOutcome.SurvivalSummary.PartySize - successOutcome.SurvivalSummary.SurvivorCount));
+            Assert.That(failureOutcome.SurvivalSummary.DeathCount, Is.EqualTo(failureOutcome.SurvivalSummary.PartySize - failureOutcome.SurvivalSummary.SurvivorCount));
+        }
+
+        [Test]
+        public void SimulateOnce_SurvivalSummary_InvalidConfiguredRatio_ReturnsDeterministicFailure()
+        {
+            RunSimulationConfig invalidSuccessRatio = BuildConfig();
+            invalidSuccessRatio.SuccessSurvivorRatio = 2d;
+            var successService = new RunSimulationService(invalidSuccessRatio);
+
+            RunOutcomeRecord successOutcome = successService.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 12, 8);
+
+            Assert.That(successOutcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(successOutcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(successOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
+
+            RunSimulationConfig invalidFailureRatio = BuildConfig();
+            invalidFailureRatio.FailureSurvivorRatio = -0.1d;
+            var failureService = new RunSimulationService(invalidFailureRatio);
+
+            RunOutcomeRecord failureOutcome = failureService.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 13, 9);
+
+            Assert.That(failureOutcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(failureOutcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(failureOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
         }
 
         [Test]
@@ -246,6 +294,18 @@ namespace DungeonBuilder.Tests.EditMode
                             TotalGeneratedWorldValue = 11,
                             TotalGeneratedReserveCost = 3,
                             TotalGeneratedTradeableWorldValue = 3
+                        },
+                        SurvivalSummary = new RunSurvivalSummary
+                        {
+                            PartySize = 4,
+                            SurvivorCount = 4,
+                            DeathCount = 0,
+                            SurvivorRatio = 1d,
+                            DeterministicSeed = 12345,
+                            RuleResolved = true,
+                            DeterministicErrorCode = 0,
+                            RuleSourceId = "run.survival.rule.v1",
+                            SuccessAtResolution = true
                         }
                     },
                     RecentOutcomes = new[]
@@ -304,6 +364,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.FeedbackTagKeys, Is.EqualTo(new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" }));
             Assert.That(loaded.runHistory.LatestOutcome.LootSummary.LootTableId, Is.EqualTo("loot.table.run.basic"));
             Assert.That(loaded.runHistory.LatestOutcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(2));
+            Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary.PartySize, Is.EqualTo(4));
+            Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary.DeterministicSeed, Is.EqualTo(12345));
         }
 
         [Test]
@@ -491,6 +554,52 @@ namespace DungeonBuilder.Tests.EditMode
 
                 root.RefreshRunLine();
                 Assert.That(root.RunLootLine, Is.EqualTo(string.Empty));
+                Assert.That(root.RunSurvivalLine, Is.EqualTo(string.Empty));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void RefreshRunLine_SurvivalSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootSurvivalKeyFallbackTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-survival",
+                                Success = true,
+                                Score = 1,
+                                ReasonKey = "run.reason.success",
+                                SurvivalSummary = new RunSurvivalSummary
+                                {
+                                    PartySize = 4,
+                                    SurvivorCount = 4,
+                                    DeathCount = 0,
+                                    SurvivorRatio = 1d,
+                                    DeterministicSeed = 10,
+                                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.None,
+                                    RuleResolved = true,
+                                    RuleSourceId = "run.survival.rule.v1",
+                                    SuccessAtResolution = true
+                                }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunSurvivalLine, Is.EqualTo("ui.run.survival_summary_format"));
             }
             finally
             {
@@ -527,6 +636,43 @@ namespace DungeonBuilder.Tests.EditMode
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 
             Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_MaxPartySize_AboveCap()
+        {
+            var config = BuildConfig();
+            config.MaxPartySize = config.MaxAllowedPartySize + 1;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Accepts_MaxPartySize_EqualToLimit()
+        {
+            var config = BuildConfig();
+            config.MaxPartySize = config.MaxAllowedPartySize;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_SurvivalSummary_MaxPartyAboveAllowed_ReturnsInvalidPartySizeRange()
+        {
+            RunSimulationConfig invalid = BuildConfig();
+            invalid.MaxAllowedPartySize = 4;
+            invalid.MaxPartySize = 5;
+            var service = new RunSimulationService(invalid);
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 14, 10);
+
+            Assert.That(outcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(outcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(outcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange));
         }
 
         [Test]

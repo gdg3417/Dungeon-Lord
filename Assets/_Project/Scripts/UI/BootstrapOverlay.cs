@@ -52,6 +52,7 @@ namespace DungeonBuilder.M0
             string runBreakdown = _root.RunBreakdownLine;
             string runFeedback = _root.RunFeedbackLine;
             string runLoot = _root.RunLootLine;
+            string runSurvival = _root.RunSurvivalLine;
             string hint = _root.DevPanelEnabled
                 ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
                 : string.Empty;
@@ -81,6 +82,7 @@ namespace DungeonBuilder.M0
                 runBreakdown + "\n" +
                 runFeedback + "\n" +
                 runLoot + "\n" +
+                runSurvival + "\n" +
                 structureState + "\n" +
                 (string.IsNullOrEmpty(banner)
                     ? ""

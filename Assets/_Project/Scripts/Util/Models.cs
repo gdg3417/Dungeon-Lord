@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0
 {
+    public enum RunSurvivalSummaryErrorCode
+    {
+        None = 0,
+        InvalidPartySizeRange = 1,
+        InvalidSurvivorRatio = 2
+    }
+
     [Serializable]
     public sealed class RunSimulationConfig
     {
@@ -20,6 +27,11 @@ namespace DungeonBuilder.M0
         public double LowManaFeedbackThreshold;
         public double StrongManaReserveFeedbackThreshold;
         public string LootTableId;
+        public int MinPartySize;
+        public int MaxPartySize;
+        public int MaxAllowedPartySize;
+        public double SuccessSurvivorRatio;
+        public double FailureSurvivorRatio;
     }
 
     [Serializable]
@@ -42,6 +54,21 @@ namespace DungeonBuilder.M0
         public double SuccessThresholdUsed;
         public string[] FeedbackTagKeys = Array.Empty<string>();
         public RunLootSummary LootSummary;
+        public RunSurvivalSummary SurvivalSummary;
+    }
+
+    [Serializable]
+    public sealed class RunSurvivalSummary
+    {
+        public int PartySize;
+        public int SurvivorCount;
+        public int DeathCount;
+        public double SurvivorRatio;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public string RuleSourceId;
+        public bool SuccessAtResolution;
     }
 
     [Serializable]

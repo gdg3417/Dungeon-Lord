@@ -58,7 +58,59 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 FinalChance = finalChance,
                 SuccessThresholdUsed = successThreshold,
                 FeedbackTagKeys = feedbackTagKeys,
-                LootSummary = BuildLootSummary(runSequence, tickStarted)
+                LootSummary = BuildLootSummary(runSequence, tickStarted),
+                SurvivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success)
+            };
+        }
+
+        private RunSurvivalSummary BuildSurvivalSummary(int runSequence, long tickStarted, bool success)
+        {
+            int seed = ComputeResolverSeed(runSequence, tickStarted);
+            int minPartySize = _config.MinPartySize;
+            int maxPartySize = _config.MaxPartySize;
+            int maxAllowedPartySize = _config.MaxAllowedPartySize;
+            if (minPartySize < 1 || maxPartySize < minPartySize || maxAllowedPartySize < 1 || maxPartySize > maxAllowedPartySize)
+            {
+                return new RunSurvivalSummary
+                {
+                    RuleResolved = false,
+                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange,
+                    DeterministicSeed = seed,
+                    RuleSourceId = "run.survival.rule.v1",
+                    SuccessAtResolution = success
+                };
+            }
+
+            int partySizeRange = maxPartySize - minPartySize + 1;
+            int partySizeOffset = Math.Abs(seed % partySizeRange);
+            int partySize = minPartySize + partySizeOffset;
+            double ratio = success ? _config.SuccessSurvivorRatio : _config.FailureSurvivorRatio;
+            if (ratio < 0d || ratio > 1d)
+            {
+                return new RunSurvivalSummary
+                {
+                    RuleResolved = false,
+                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio,
+                    DeterministicSeed = seed,
+                    RuleSourceId = "run.survival.rule.v1",
+                    SuccessAtResolution = success
+                };
+            }
+
+            int survivorCount = (int)Math.Round(partySize * ratio);
+            survivorCount = Math.Max(0, Math.Min(partySize, survivorCount));
+
+            return new RunSurvivalSummary
+            {
+                PartySize = partySize,
+                SurvivorCount = survivorCount,
+                DeathCount = partySize - survivorCount,
+                SurvivorRatio = partySize > 0 ? (double)survivorCount / partySize : 0d,
+                DeterministicSeed = seed,
+                RuleResolved = true,
+                DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.None,
+                RuleSourceId = "run.survival.rule.v1",
+                SuccessAtResolution = success
             };
         }
 
