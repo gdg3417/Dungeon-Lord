@@ -6,6 +6,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
     public sealed class RunSimulationService
     {
+        private const string LootExtractionRoundFloorPolicyId = "loot_extraction.round_floor";
         private readonly RunSimulationConfig _config;
         private readonly LootConfig _lootConfig;
         private readonly string _lootTableId;
@@ -188,9 +189,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             string[] extracted = SelectExtractedItems(seed, generatedItemIds, extractedItemCount);
             string[] lost = ComputeLostItems(generatedItemIds, extracted);
-            if (!TryCalculateTotals(extracted, out int worldValue, out int reserveCost, out int tradeableWorldValue))
+            RunLootExtractionSummaryErrorCode totalsErrorCode = TryCalculateTotals(extracted, out int worldValue, out int reserveCost, out int tradeableWorldValue);
+            if (totalsErrorCode != RunLootExtractionSummaryErrorCode.None)
             {
-                return BuildExtractionFailureSummary(ruleSourceId, seed, RunLootExtractionSummaryErrorCode.ItemValueLookupFailed, generatedItemCount, generatedItemIds);
+                return BuildExtractionFailureSummary(ruleSourceId, seed, totalsErrorCode, generatedItemCount, generatedItemIds);
             }
 
             return new RunLootExtractionSummary
@@ -226,7 +228,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private int ResolveExtractedItemCount(int generatedCount, double survivorRatio)
         {
             string policyId = _config.LootExtractionRoundingPolicyId;
-            if (string.Equals(policyId, "loot_extraction.round_floor", StringComparison.Ordinal))
+            if (string.Equals(policyId, LootExtractionRoundFloorPolicyId, StringComparison.Ordinal))
             {
                 return Math.Max(0, Math.Min(generatedCount, (int)Math.Floor(generatedCount * survivorRatio)));
             }
@@ -310,7 +312,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return lost.ToArray();
         }
 
-        private bool TryCalculateTotals(string[] extracted, out int worldValue, out int reserveCost, out int tradeableWorldValue)
+        private RunLootExtractionSummaryErrorCode TryCalculateTotals(string[] extracted, out int worldValue, out int reserveCost, out int tradeableWorldValue)
         {
             worldValue = 0;
             reserveCost = 0;
@@ -332,18 +334,28 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 string itemId = extracted[i];
                 if (string.IsNullOrEmpty(itemId) || !valuesById.TryGetValue(itemId, out LootItemRecord item))
                 {
-                    return false;
+                    return RunLootExtractionSummaryErrorCode.ItemValueLookupFailed;
                 }
 
-                worldValue += item.worldValue;
-                reserveCost += item.reserveCost;
-                if (item.isTradeable)
+                try
                 {
-                    tradeableWorldValue += item.worldValue;
+                    checked
+                    {
+                        worldValue += item.worldValue;
+                        reserveCost += item.reserveCost;
+                        if (item.isTradeable)
+                        {
+                            tradeableWorldValue += item.worldValue;
+                        }
+                    }
+                }
+                catch (OverflowException)
+                {
+                    return RunLootExtractionSummaryErrorCode.AggregateOverflow;
                 }
             }
 
-            return true;
+            return RunLootExtractionSummaryErrorCode.None;
         }
 
         private static string[] CloneItemIds(string[] itemIds)

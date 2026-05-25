@@ -790,6 +790,7 @@ namespace DungeonBuilder.M0
                 RunFeedbackLine = string.Empty;
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
+                RunExtractionLine = BuildExtractionLine(outcome);
                 return;
             }
 

@@ -152,6 +152,66 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_ExtractionSummary_PartialRatio_ExtractsDeterministicSubset()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 4;
+            config.MaxPartySize = 4;
+            config.SuccessSurvivorRatio = 0.5d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(2));
+            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.relic.bronze" }));
+            Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_ItemValueLookupFailed_ReturnsDeterministicFailure()
+        {
+            LootConfig missingItemConfig = BuildLootConfig();
+            missingItemConfig.items = new[]
+            {
+                new LootItemRecord { id = "loot.item.scrap.iron", tierId = "loot_tier.iron", rarityId = "loot_rarity.common", categoryId = "loot_category.material", worldValue = 3, reserveCost = 1, nameKey = "loot.item.scrap.iron.name", descriptionKey = "loot.item.scrap.iron.desc", isTradeable = true }
+            };
+
+            var service = new RunSimulationService(BuildConfig(), missingItemConfig);
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.ItemValueLookupFailed));
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_AggregateOverflow_ReturnsDeterministicFailure()
+        {
+            LootConfig overflowConfig = new LootConfig
+            {
+                items = new[]
+                {
+                    new LootItemRecord { id = "loot.item.overflow", tierId = "loot_tier.iron", rarityId = "loot_rarity.common", categoryId = "loot_category.material", worldValue = int.MaxValue, reserveCost = int.MaxValue, nameKey = "loot.item.overflow.name", descriptionKey = "loot.item.overflow.desc", isTradeable = true }
+                },
+                tables = new[]
+                {
+                    new LootTableRecord
+                    {
+                        id = "loot.table.run.basic",
+                        minRollCount = 2,
+                        maxRollCount = 2,
+                        allowEmptyPool = false,
+                        pool = new[] { new LootTablePoolEntry { itemId = "loot.item.overflow", weight = 1d } }
+                    }
+                }
+            };
+
+            var service = new RunSimulationService(BuildConfig(), overflowConfig);
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.AggregateOverflow));
+        }
+
+        [Test]
         public void SimulateOnce_SurvivalSummary_RespectsBoundsAndRatios()
         {
             var service = new RunSimulationService(BuildConfig());
@@ -365,6 +425,20 @@ namespace DungeonBuilder.Tests.EditMode
                             DeterministicErrorCode = 0,
                             RuleSourceId = "run.survival.rule.v1",
                             SuccessAtResolution = true
+                        },
+                        LootExtractionSummary = new RunLootExtractionSummary
+                        {
+                            RuleSourceId = "run.loot_extraction.rule.v1",
+                            DeterministicSeed = 12345,
+                            RuleResolved = true,
+                            DeterministicErrorCode = (int)RunLootExtractionSummaryErrorCode.None,
+                            SurvivorRatioUsed = 1d,
+                            GeneratedItemCount = 2,
+                            ExtractedItemIds = new[] { "loot.item.scrap.iron", "loot.item.relic.bronze" },
+                            LostItemIds = new string[0],
+                            TotalExtractedWorldValue = 11,
+                            TotalExtractedReserveCost = 3,
+                            TotalExtractedTradeableWorldValue = 3
                         }
                     },
                     RecentOutcomes = new[]
@@ -426,6 +500,16 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary, Is.Not.Null);
             Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary.PartySize, Is.EqualTo(4));
             Assert.That(loaded.runHistory.LatestOutcome.SurvivalSummary.DeterministicSeed, Is.EqualTo(12345));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary, Is.Not.Null);
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.RuleResolved, Is.True);
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.None));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.SurvivorRatioUsed, Is.EqualTo(1d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.GeneratedItemCount, Is.EqualTo(2));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron", "loot.item.relic.bronze" }));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.LostItemIds, Is.Empty);
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(11));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedReserveCost, Is.EqualTo(3));
+            Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.EqualTo(3));
         }
 
         [Test]
@@ -614,6 +698,7 @@ namespace DungeonBuilder.Tests.EditMode
                 root.RefreshRunLine();
                 Assert.That(root.RunLootLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunSurvivalLine, Is.EqualTo(string.Empty));
+                Assert.That(root.RunExtractionLine, Is.EqualTo(string.Empty));
             }
             finally
             {

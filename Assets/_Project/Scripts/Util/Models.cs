@@ -18,7 +18,8 @@ namespace DungeonBuilder.M0
         SurvivalSummaryMissingOrFailed = 2,
         InvalidSurvivorRatio = 3,
         UnknownRoundingPolicy = 4,
-        ItemValueLookupFailed = 5
+        ItemValueLookupFailed = 5,
+        AggregateOverflow = 6
     }
 
     [Serializable]
