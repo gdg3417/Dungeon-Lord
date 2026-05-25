@@ -84,6 +84,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             int partySizeOffset = Math.Abs(seed % partySizeRange);
             int partySize = minPartySize + partySizeOffset;
             double ratio = success ? _config.SuccessSurvivorRatio : _config.FailureSurvivorRatio;
+            if (ratio < 0d || ratio > 1d)
+            {
+                return new RunSurvivalSummary
+                {
+                    RuleResolved = false,
+                    DeterministicErrorCode = 2,
+                    DeterministicSeed = seed,
+                    RuleSourceId = "run.survival.rule.v1",
+                    SuccessAtResolution = success
+                };
+            }
+
             int survivorCount = (int)Math.Round(partySize * ratio);
             survivorCount = Math.Max(0, Math.Min(partySize, survivorCount));
 

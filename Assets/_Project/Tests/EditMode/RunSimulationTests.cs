@@ -108,6 +108,30 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_SurvivalSummary_InvalidConfiguredRatio_ReturnsDeterministicFailure()
+        {
+            RunSimulationConfig invalidSuccessRatio = BuildConfig();
+            invalidSuccessRatio.SuccessSurvivorRatio = 2d;
+            var successService = new RunSimulationService(invalidSuccessRatio);
+
+            RunOutcomeRecord successOutcome = successService.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 12, 8);
+
+            Assert.That(successOutcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(successOutcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(successOutcome.SurvivalSummary.DeterministicErrorCode, Is.Not.EqualTo(0));
+
+            RunSimulationConfig invalidFailureRatio = BuildConfig();
+            invalidFailureRatio.FailureSurvivorRatio = -0.1d;
+            var failureService = new RunSimulationService(invalidFailureRatio);
+
+            RunOutcomeRecord failureOutcome = failureService.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 13, 9);
+
+            Assert.That(failureOutcome.SurvivalSummary, Is.Not.Null);
+            Assert.That(failureOutcome.SurvivalSummary.RuleResolved, Is.False);
+            Assert.That(failureOutcome.SurvivalSummary.DeterministicErrorCode, Is.Not.EqualTo(0));
+        }
+
+        [Test]
         public void SimulateOnce_GeneratesDeterministicFeedbackTags_InStableOrder()
         {
             var service = new RunSimulationService(BuildConfig());
@@ -562,6 +586,17 @@ namespace DungeonBuilder.Tests.EditMode
             var config = BuildConfig();
             config.LowManaFeedbackThreshold = 50d;
             config.StrongManaReserveFeedbackThreshold = 50d;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_MaxPartySize_AboveCap()
+        {
+            var config = BuildConfig();
+            config.MaxPartySize = 101;
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 

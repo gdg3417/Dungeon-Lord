@@ -387,7 +387,7 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            if (config.MinPartySize < 1 || config.MaxPartySize < config.MinPartySize)
+            if (config.MinPartySize < 1 || config.MaxPartySize < config.MinPartySize || config.MaxPartySize > 100)
             {
                 return false;
             }
