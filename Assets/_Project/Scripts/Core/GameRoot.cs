@@ -52,6 +52,7 @@ namespace DungeonBuilder.M0
         public string RunBreakdownLine { get; private set; } = string.Empty;
         public string RunFeedbackLine { get; private set; } = string.Empty;
         public string RunLootLine { get; private set; } = string.Empty;
+        public string RunSurvivalLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -382,6 +383,17 @@ namespace DungeonBuilder.M0
             }
 
             if (config.LowManaFeedbackThreshold >= config.StrongManaReserveFeedbackThreshold)
+            {
+                return false;
+            }
+
+            if (config.MinPartySize < 1 || config.MaxPartySize < config.MinPartySize)
+            {
+                return false;
+            }
+
+            if (config.SuccessSurvivorRatio < 0d || config.SuccessSurvivorRatio > 1d ||
+                config.FailureSurvivorRatio < 0d || config.FailureSurvivorRatio > 1d)
             {
                 return false;
             }
@@ -740,6 +752,7 @@ namespace DungeonBuilder.M0
                 RunBreakdownLine = string.Empty;
                 RunFeedbackLine = string.Empty;
                 RunLootLine = BuildLootLine(outcome);
+                RunSurvivalLine = BuildSurvivalLine(outcome);
                 return;
             }
 
@@ -771,6 +784,7 @@ namespace DungeonBuilder.M0
             {
                 RunFeedbackLine = string.Empty;
                 RunLootLine = BuildLootLine(outcome);
+                RunSurvivalLine = BuildSurvivalLine(outcome);
                 return;
             }
 
@@ -786,6 +800,7 @@ namespace DungeonBuilder.M0
                 : "Feedback: {0}";
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
             RunLootLine = BuildLootLine(outcome);
+            RunSurvivalLine = BuildSurvivalLine(outcome);
         }
 
 
@@ -802,6 +817,19 @@ namespace DungeonBuilder.M0
                 : "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             int itemCount = loot.GeneratedItemIds != null ? loot.GeneratedItemIds.Length : 0;
             return string.Format(format, loot.LootTableId, loot.ResolverSuccess, loot.ResolverErrorCode, loot.RollCount, itemCount, loot.TotalGeneratedWorldValue, loot.TotalGeneratedReserveCost, loot.TotalGeneratedTradeableWorldValue);
+        }
+        private string BuildSurvivalLine(RunOutcomeRecord outcome)
+        {
+            RunSurvivalSummary survival = outcome != null ? outcome.SurvivalSummary : null;
+            if (survival == null)
+            {
+                return string.Empty;
+            }
+
+            string format = Content != null
+                ? Content.GetString("ui.run.survival_summary_format", "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}")
+                : "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}";
+            return string.Format(format, survival.PartySize, survival.SurvivorCount, survival.DeathCount, survival.SurvivorRatio, survival.DeterministicSeed, survival.DeterministicErrorCode);
         }
         private bool TryGetRunHistoryCount(out int historyCount)
         {
