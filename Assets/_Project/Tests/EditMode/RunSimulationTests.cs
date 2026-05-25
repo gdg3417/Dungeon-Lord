@@ -35,7 +35,9 @@ namespace DungeonBuilder.Tests.EditMode
                 MaxPartySize = 5,
                 MaxAllowedPartySize = 100,
                 SuccessSurvivorRatio = 1d,
-                FailureSurvivorRatio = 0d
+                FailureSurvivorRatio = 0d,
+                LootExtractionRoundingPolicyId = "loot_extraction.round_floor",
+                LootExtractionRuleSourceId = "run.loot_extraction.rule.v1"
             };
         }
 
@@ -88,8 +90,65 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.SurvivalSummary.PartySize, Is.EqualTo(first.SurvivalSummary.PartySize));
             Assert.That(second.SurvivalSummary.SurvivorCount, Is.EqualTo(first.SurvivalSummary.SurvivorCount));
             Assert.That(second.SurvivalSummary.SurvivorRatio, Is.EqualTo(first.SurvivalSummary.SurvivorRatio));
+            Assert.That(second.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(first.LootExtractionSummary.ExtractedItemIds));
+            Assert.That(second.LootExtractionSummary.LostItemIds, Is.EqualTo(first.LootExtractionSummary.LostItemIds));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_FullSurvivors_ExtractsAll()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.True);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.None));
+            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(outcome.LootSummary.GeneratedItemIds));
+            Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.Empty);
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_ZeroSurvivors_ExtractsNone()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 10, 3);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.True);
+            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.Empty);
+            Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.EqualTo(outcome.LootSummary.GeneratedItemIds));
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_UnknownRoundingPolicy_ReturnsDeterministicFailure()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.LootExtractionRoundingPolicyId = "loot_extraction.round_unknown";
+            var service = new RunSimulationService(config, BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 20, 6);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.UnknownRoundingPolicy));
+            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.Empty);
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_MissingLootSummary_ReturnsDeterministicFailure()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.LootTableId = string.Empty;
+            var service = new RunSimulationService(config, BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 20, 6);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.LootSummaryMissingOrFailed));
+        }
+
+        [Test]
+        public void SimulateOnce_ExtractionSummary_FailedSurvivalSummary_ReturnsDeterministicFailure()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.SuccessSurvivorRatio = 1.5d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 20, 6);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.SurvivalSummaryMissingOrFailed));
         }
 
         [Test]

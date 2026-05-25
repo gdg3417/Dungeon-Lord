@@ -53,6 +53,7 @@ namespace DungeonBuilder.M0
         public string RunFeedbackLine { get; private set; } = string.Empty;
         public string RunLootLine { get; private set; } = string.Empty;
         public string RunSurvivalLine { get; private set; } = string.Empty;
+        public string RunExtractionLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -756,6 +757,7 @@ namespace DungeonBuilder.M0
                 RunFeedbackLine = string.Empty;
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
+                RunExtractionLine = BuildExtractionLine(outcome);
                 return;
             }
 
@@ -804,6 +806,7 @@ namespace DungeonBuilder.M0
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
             RunLootLine = BuildLootLine(outcome);
             RunSurvivalLine = BuildSurvivalLine(outcome);
+            RunExtractionLine = BuildExtractionLine(outcome);
         }
 
 
@@ -842,6 +845,30 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, survival.PartySize, survival.SurvivorCount, survival.DeathCount, survival.SurvivorRatio, survival.DeterministicSeed, survival.DeterministicErrorCode);
+        }
+        private string BuildExtractionLine(RunOutcomeRecord outcome)
+        {
+            RunLootExtractionSummary extraction = outcome != null ? outcome.LootExtractionSummary : null;
+            if (extraction == null)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.extraction_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            int extractedCount = extraction.ExtractedItemIds != null ? extraction.ExtractedItemIds.Length : 0;
+            int lostCount = extraction.LostItemIds != null ? extraction.LostItemIds.Length : 0;
+            return string.Format(format, extraction.RuleResolved, extraction.DeterministicErrorCode, extraction.SurvivorRatioUsed, extraction.GeneratedItemCount, extractedCount, lostCount, extraction.TotalExtractedWorldValue, extraction.TotalExtractedReserveCost, extraction.TotalExtractedTradeableWorldValue);
         }
         private bool TryGetRunHistoryCount(out int historyCount)
         {

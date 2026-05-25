@@ -11,6 +11,15 @@ namespace DungeonBuilder.M0
         InvalidPartySizeRange = 1,
         InvalidSurvivorRatio = 2
     }
+    public enum RunLootExtractionSummaryErrorCode
+    {
+        None = 0,
+        LootSummaryMissingOrFailed = 1,
+        SurvivalSummaryMissingOrFailed = 2,
+        InvalidSurvivorRatio = 3,
+        UnknownRoundingPolicy = 4,
+        ItemValueLookupFailed = 5
+    }
 
     [Serializable]
     public sealed class RunSimulationConfig
@@ -32,6 +41,8 @@ namespace DungeonBuilder.M0
         public int MaxAllowedPartySize;
         public double SuccessSurvivorRatio;
         public double FailureSurvivorRatio;
+        public string LootExtractionRoundingPolicyId;
+        public string LootExtractionRuleSourceId;
     }
 
     [Serializable]
@@ -55,6 +66,7 @@ namespace DungeonBuilder.M0
         public string[] FeedbackTagKeys = Array.Empty<string>();
         public RunLootSummary LootSummary;
         public RunSurvivalSummary SurvivalSummary;
+        public RunLootExtractionSummary LootExtractionSummary;
     }
 
     [Serializable]
@@ -83,6 +95,22 @@ namespace DungeonBuilder.M0
         public int TotalGeneratedWorldValue;
         public int TotalGeneratedReserveCost;
         public int TotalGeneratedTradeableWorldValue;
+    }
+
+    [Serializable]
+    public sealed class RunLootExtractionSummary
+    {
+        public string RuleSourceId;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public double SurvivorRatioUsed;
+        public int GeneratedItemCount;
+        public string[] ExtractedItemIds = Array.Empty<string>();
+        public string[] LostItemIds = Array.Empty<string>();
+        public int TotalExtractedWorldValue;
+        public int TotalExtractedReserveCost;
+        public int TotalExtractedTradeableWorldValue;
     }
 
     [Serializable]

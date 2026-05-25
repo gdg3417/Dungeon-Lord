@@ -15,5 +15,7 @@
   "MaxPartySize": 5,
   "MaxAllowedPartySize": 100,
   "SuccessSurvivorRatio": 1.0,
-  "FailureSurvivorRatio": 0.0
+  "FailureSurvivorRatio": 0.0,
+  "LootExtractionRoundingPolicyId": "loot_extraction.round_floor",
+  "LootExtractionRuleSourceId": "run.loot_extraction.rule.v1"
 }
