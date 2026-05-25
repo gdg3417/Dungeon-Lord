@@ -267,10 +267,12 @@ namespace DungeonBuilder.M0
         public string id;
         public string tierId;
         public string rarityId;
+        public string categoryId;
         public int worldValue;
         public int reserveCost;
         public string nameKey;
         public string descriptionKey;
+        public bool isTradeable;
     }
 
     [Serializable]

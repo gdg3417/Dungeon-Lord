@@ -43,6 +43,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Validate_MissingAndInvalidCategoryId_FailsValidation()
+        {
+            LootConfig missingCategoryConfig = BuildValidConfig();
+            missingCategoryConfig.items[0].categoryId = string.Empty;
+            var missingErrors = LootConfigValidator.Validate(missingCategoryConfig);
+            Assert.That(missingErrors, Has.Some.Contains("categoryId.missing"));
+
+            LootConfig invalidCategoryConfig = BuildValidConfig();
+            invalidCategoryConfig.items[0].categoryId = "loot_category.invalid";
+            var invalidErrors = LootConfigValidator.Validate(invalidCategoryConfig);
+            Assert.That(invalidErrors, Has.Some.Contains("categoryId.invalid"));
+        }
+
+        [Test]
+        public void Validate_MissingLocalizationKeys_FailsValidation()
+        {
+            LootConfig config = BuildValidConfig();
+            config.items[0].nameKey = string.Empty;
+            config.items[0].descriptionKey = string.Empty;
+
+            var errors = LootConfigValidator.Validate(config);
+            Assert.That(errors, Has.Some.Contains("nameKey.missing"));
+            Assert.That(errors, Has.Some.Contains("descriptionKey.missing"));
+        }
+
+        [Test]
         public void Validate_NegativeValueFields_FailValidation()
         {
             LootConfig config = BuildValidConfig();
@@ -64,6 +90,48 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(errors, Has.Some.Contains("minRollCount.invalid"));
             Assert.That(errors, Has.Some.Contains("maxRollCount.invalid"));
             Assert.That(errors, Has.Some.Contains("weight.invalid"));
+        }
+
+        [Test]
+        public void Validate_MissingLootTableId_FailsValidation()
+        {
+            LootConfig config = BuildValidConfig();
+            config.tables[0].id = string.Empty;
+
+            var errors = LootConfigValidator.Validate(config);
+            Assert.That(errors, Has.Some.Contains("loot.tables[0].id.missing"));
+        }
+
+        [Test]
+        public void Validate_DuplicateLootTableId_FailsValidation()
+        {
+            LootConfig config = BuildValidConfig();
+            config.tables = new[]
+            {
+                config.tables[0],
+                new LootTableRecord
+                {
+                    id = config.tables[0].id,
+                    minRollCount = 1,
+                    maxRollCount = 1,
+                    allowEmptyPool = false,
+                    pool = new[] { new LootTablePoolEntry { itemId = "loot.item.relic.bronze", weight = 1d } }
+                }
+            };
+
+            var errors = LootConfigValidator.Validate(config);
+            Assert.That(errors, Has.Some.Contains("loot.tables[1].id.duplicate"));
+        }
+
+        [Test]
+        public void Validate_TradeableAndNonTradeableItems_AreValid()
+        {
+            LootConfig config = BuildValidConfig();
+            config.items[0].isTradeable = true;
+            config.items[1].isTradeable = false;
+
+            var errors = LootConfigValidator.Validate(config);
+            Assert.That(errors, Is.Empty);
         }
 
         [Test]
@@ -92,8 +160,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             LootConfig config = BuildValidConfig();
             config.items = new[]
             {
-                new LootItemRecord { id = "loot.item.a", tierId = "bad", rarityId = "bad", worldValue = -1, reserveCost = -1 }
+                new LootItemRecord
+                {
+                    id = "loot.item.a",
+                    tierId = "bad",
+                    rarityId = "bad",
+                    categoryId = "bad",
+                    nameKey = "",
+                    descriptionKey = "",
+                    worldValue = -1,
+                    reserveCost = -1
+                }
             };
+            config.tables[0].id = "";
             config.tables[0].pool = new[]
             {
                 new LootTablePoolEntry { itemId = "missing", weight = 0d }
@@ -102,10 +181,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var errors = LootConfigValidator.Validate(config).ToArray();
             Assert.That(errors[0], Is.EqualTo("loot.items[0].tier.invalid:bad"));
             Assert.That(errors[1], Is.EqualTo("loot.items[0].rarity.invalid:bad"));
-            Assert.That(errors[2], Is.EqualTo("loot.items[0].worldValue.negative"));
-            Assert.That(errors[3], Is.EqualTo("loot.items[0].reserveCost.negative"));
-            Assert.That(errors[4], Is.EqualTo("loot.tables[0].pool[0].itemRef.missing:missing"));
-            Assert.That(errors[5], Is.EqualTo("loot.tables[0].pool[0].weight.invalid"));
+            Assert.That(errors[2], Is.EqualTo("loot.items[0].categoryId.invalid:bad"));
+            Assert.That(errors[3], Is.EqualTo("loot.items[0].nameKey.missing"));
+            Assert.That(errors[4], Is.EqualTo("loot.items[0].descriptionKey.missing"));
+            Assert.That(errors[5], Is.EqualTo("loot.items[0].worldValue.negative"));
+            Assert.That(errors[6], Is.EqualTo("loot.items[0].reserveCost.negative"));
+            Assert.That(errors[7], Is.EqualTo("loot.tables[0].id.missing"));
+            Assert.That(errors[8], Is.EqualTo("loot.tables[0].pool[0].itemRef.missing:missing"));
+            Assert.That(errors[9], Is.EqualTo("loot.tables[0].pool[0].weight.invalid"));
         }
 
         private static LootConfig BuildValidConfig()
@@ -121,20 +204,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         id = "loot.item.scrap.iron",
                         tierId = "loot_tier.iron",
                         rarityId = "loot_rarity.common",
+                        categoryId = "loot_category.material",
                         worldValue = 3,
                         reserveCost = 1,
                         nameKey = "loot.item.scrap.iron.name",
-                        descriptionKey = "loot.item.scrap.iron.desc"
+                        descriptionKey = "loot.item.scrap.iron.desc",
+                        isTradeable = true
                     },
                     new LootItemRecord
                     {
                         id = "loot.item.relic.bronze",
                         tierId = "loot_tier.bronze",
                         rarityId = "loot_rarity.uncommon",
+                        categoryId = "loot_category.artifact",
                         worldValue = 7,
                         reserveCost = 2,
                         nameKey = "loot.item.relic.bronze.name",
-                        descriptionKey = "loot.item.relic.bronze.desc"
+                        descriptionKey = "loot.item.relic.bronze.desc",
+                        isTradeable = false
                     }
                 },
                 tables = new[]

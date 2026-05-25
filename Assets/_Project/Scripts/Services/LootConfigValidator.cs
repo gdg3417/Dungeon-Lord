@@ -45,6 +45,25 @@ namespace DungeonBuilder.M0
                     errors.Add(path + $".rarity.invalid:{item.rarityId}");
                 }
 
+                if (string.IsNullOrEmpty(item.categoryId))
+                {
+                    errors.Add(path + ".categoryId.missing");
+                }
+                else if (!IsValidCategory(item.categoryId))
+                {
+                    errors.Add(path + $".categoryId.invalid:{item.categoryId}");
+                }
+
+                if (string.IsNullOrEmpty(item.nameKey))
+                {
+                    errors.Add(path + ".nameKey.missing");
+                }
+
+                if (string.IsNullOrEmpty(item.descriptionKey))
+                {
+                    errors.Add(path + ".descriptionKey.missing");
+                }
+
                 if (item.worldValue < 0)
                 {
                     errors.Add(path + ".worldValue.negative");
@@ -56,6 +75,7 @@ namespace DungeonBuilder.M0
                 }
             }
 
+            var tableById = new HashSet<string>(StringComparer.Ordinal);
             LootTableRecord[] tables = config.tables ?? Array.Empty<LootTableRecord>();
             for (int i = 0; i < tables.Length; i++)
             {
@@ -65,6 +85,15 @@ namespace DungeonBuilder.M0
                 {
                     errors.Add(path + ".null");
                     continue;
+                }
+
+                if (string.IsNullOrEmpty(table.id))
+                {
+                    errors.Add(path + ".id.missing");
+                }
+                else if (!tableById.Add(table.id))
+                {
+                    errors.Add(path + $".id.duplicate:{table.id}");
                 }
 
                 if (table.minRollCount <= 0)
@@ -129,6 +158,14 @@ namespace DungeonBuilder.M0
                     rarityId == "loot_rarity.uncommon" ||
                     rarityId == "loot_rarity.rare" ||
                     rarityId == "loot_rarity.epic");
+        }
+
+        private static bool IsValidCategory(string categoryId)
+        {
+            return categoryId == "loot_category.material" ||
+                   categoryId == "loot_category.artifact" ||
+                   categoryId == "loot_category.consumable" ||
+                   categoryId == "loot_category.reagent";
         }
     }
 }
