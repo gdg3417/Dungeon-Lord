@@ -87,6 +87,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_LowManaAndStrongManaTags_AppearInSeparateRuntimeStates()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var lowManaRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 5d, IsHeatCrisisActive = false };
+            var strongManaRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord lowManaOutcome = service.SimulateOnce(lowManaRuntime, 20, 6);
+            RunOutcomeRecord strongManaOutcome = service.SimulateOnce(strongManaRuntime, 21, 7);
+
+            Assert.That(lowManaOutcome.FeedbackTagKeys, Contains.Item("run.feedback.low_mana"));
+            Assert.That(lowManaOutcome.FeedbackTagKeys, Does.Not.Contain("run.feedback.strong_mana_reserve"));
+            Assert.That(strongManaOutcome.FeedbackTagKeys, Contains.Item("run.feedback.strong_mana_reserve"));
+            Assert.That(strongManaOutcome.FeedbackTagKeys, Does.Not.Contain("run.feedback.low_mana"));
+        }
+
+        [Test]
         public void SimulateOnce_HeatPenalty_CausesFailure_WhenInputIsHighHeat()
         {
             var service = new RunSimulationService(BuildConfig());
@@ -296,6 +312,18 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var config = BuildConfig();
             config.HighHeatFeedbackThreshold = -1d;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_Overlapping_ManaThresholds()
+        {
+            var config = BuildConfig();
+            config.LowManaFeedbackThreshold = 50d;
+            config.StrongManaReserveFeedbackThreshold = 50d;
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 

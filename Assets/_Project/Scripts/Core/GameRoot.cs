@@ -358,6 +358,11 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (config.LowManaFeedbackThreshold >= config.StrongManaReserveFeedbackThreshold)
+            {
+                return false;
+            }
+
             return true;
         }
         
