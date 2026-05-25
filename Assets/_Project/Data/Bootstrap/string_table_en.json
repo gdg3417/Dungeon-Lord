@@ -206,6 +206,34 @@
     {
       "key": "run.reason.failed_threshold",
       "text": "Failed due to low projected chance."
+    },
+    {
+      "key": "ui.run.feedback_format",
+      "text": "Feedback: {0}"
+    },
+    {
+      "key": "run.feedback.success",
+      "text": "Successful approach"
+    },
+    {
+      "key": "run.feedback.failure",
+      "text": "Unsuccessful approach"
+    },
+    {
+      "key": "run.feedback.high_heat",
+      "text": "Started at high heat"
+    },
+    {
+      "key": "run.feedback.low_mana",
+      "text": "Started with low mana"
+    },
+    {
+      "key": "run.feedback.heat_crisis",
+      "text": "Heat crisis was active"
+    },
+    {
+      "key": "run.feedback.strong_mana_reserve",
+      "text": "Started with strong mana reserve"
     }
   ]
 }

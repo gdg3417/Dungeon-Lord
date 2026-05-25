@@ -20,7 +20,10 @@ namespace DungeonBuilder.Tests.EditMode
                 SuccessThreshold = 0.5d,
                 BaseScoreOnSuccess = 100,
                 ScorePerManaPoint = 2,
-                MaxRunHistoryEntries = 10
+                MaxRunHistoryEntries = 10,
+                HighHeatFeedbackThreshold = 75d,
+                LowManaFeedbackThreshold = 5d,
+                StrongManaReserveFeedbackThreshold = 50d
             };
         }
 
@@ -39,8 +42,64 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.ReasonKey, Is.EqualTo(first.ReasonKey));
             Assert.That(second.FinalChance, Is.EqualTo(first.FinalChance));
             Assert.That(second.SuccessThresholdUsed, Is.EqualTo(first.SuccessThresholdUsed));
+            Assert.That(second.FeedbackTagKeys, Is.EqualTo(first.FeedbackTagKeys));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_GeneratesDeterministicFeedbackTags_InStableOrder()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var runtime = new StructureRuntimeState { Heat = 75d, ManaReserve = 50d, IsHeatCrisisActive = true };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 44, 11);
+
+            Assert.That(outcome.FeedbackTagKeys, Is.EqualTo(new[]
+            {
+                "run.feedback.success",
+                "run.feedback.high_heat",
+                "run.feedback.heat_crisis",
+                "run.feedback.strong_mana_reserve"
+            }));
+        }
+
+        [Test]
+        public void SimulateOnce_FailureOutcome_GetsFailureTag()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var runtime = new StructureRuntimeState { Heat = 80d, ManaReserve = 0d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 12, 3);
+
+            Assert.That(outcome.FeedbackTagKeys[0], Is.EqualTo("run.feedback.failure"));
+        }
+
+        [Test]
+        public void SimulateOnce_LowManaTagAppears_AtOrBelowThreshold()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var runtime = new StructureRuntimeState { Heat = 0d, ManaReserve = 5d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 20, 6);
+
+            Assert.That(outcome.FeedbackTagKeys, Contains.Item("run.feedback.low_mana"));
+        }
+
+        [Test]
+        public void SimulateOnce_LowManaAndStrongManaTags_AppearInSeparateRuntimeStates()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var lowManaRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 5d, IsHeatCrisisActive = false };
+            var strongManaRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord lowManaOutcome = service.SimulateOnce(lowManaRuntime, 20, 6);
+            RunOutcomeRecord strongManaOutcome = service.SimulateOnce(strongManaRuntime, 21, 7);
+
+            Assert.That(lowManaOutcome.FeedbackTagKeys, Contains.Item("run.feedback.low_mana"));
+            Assert.That(lowManaOutcome.FeedbackTagKeys, Does.Not.Contain("run.feedback.strong_mana_reserve"));
+            Assert.That(strongManaOutcome.FeedbackTagKeys, Contains.Item("run.feedback.strong_mana_reserve"));
+            Assert.That(strongManaOutcome.FeedbackTagKeys, Does.Not.Contain("run.feedback.low_mana"));
         }
 
         [Test]
@@ -124,7 +183,8 @@ namespace DungeonBuilder.Tests.EditMode
                         ManaBonusApplied = 0.2d,
                         CrisisPenaltyApplied = 0d,
                         FinalChance = 0.76d,
-                        SuccessThresholdUsed = 0.5d
+                        SuccessThresholdUsed = 0.5d,
+                        FeedbackTagKeys = new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" }
                     },
                     RecentOutcomes = new[]
                     {
@@ -165,6 +225,41 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.CrisisPenaltyApplied, Is.EqualTo(0d));
             Assert.That(loaded.runHistory.LatestOutcome.FinalChance, Is.EqualTo(0.76d));
             Assert.That(loaded.runHistory.LatestOutcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
+            Assert.That(loaded.runHistory.LatestOutcome.FeedbackTagKeys, Is.EqualTo(new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" }));
+        }
+
+        [Test]
+        public void RefreshRunLine_NullFeedbackTags_IsLegacySafe()
+        {
+            var go = new GameObject("GameRootLegacyFeedbackTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                var save = new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        LatestOutcome = new RunOutcomeRecord
+                        {
+                            RunId = "run-legacy",
+                            Success = true,
+                            Score = 100,
+                            ReasonKey = "run.reason.success",
+                            FeedbackTagKeys = null
+                        }
+                    }
+                };
+
+                typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, save);
+
+                root.RefreshRunLine();
+                Assert.That(root.RunFeedbackLine, Is.EqualTo(string.Empty));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
         }
 
         [Test]
@@ -216,7 +311,19 @@ namespace DungeonBuilder.Tests.EditMode
         public void IsValidRunSimulationConfig_Rejects_Invalid_Config()
         {
             var config = BuildConfig();
-            config.SuccessThreshold = 2d;
+            config.HighHeatFeedbackThreshold = -1d;
+
+            bool isValid = GameRoot.IsValidRunSimulationConfig(config);
+
+            Assert.That(isValid, Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_Overlapping_ManaThresholds()
+        {
+            var config = BuildConfig();
+            config.LowManaFeedbackThreshold = 50d;
+            config.StrongManaReserveFeedbackThreshold = 50d;
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 
