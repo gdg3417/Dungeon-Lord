@@ -561,6 +561,51 @@ namespace DungeonBuilder.Tests.EditMode
                 UnityEngine.Object.DestroyImmediate(go);
             }
         }
+
+        [Test]
+        public void RefreshRunLine_SurvivalSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootSurvivalKeyFallbackTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-survival",
+                                Success = true,
+                                Score = 1,
+                                ReasonKey = "run.reason.success",
+                                SurvivalSummary = new RunSurvivalSummary
+                                {
+                                    PartySize = 4,
+                                    SurvivorCount = 4,
+                                    DeathCount = 0,
+                                    SurvivorRatio = 1d,
+                                    DeterministicSeed = 10,
+                                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.None,
+                                    RuleResolved = true,
+                                    RuleSourceId = "run.survival.rule.v1",
+                                    SuccessAtResolution = true
+                                }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunSurvivalLine, Is.EqualTo("ui.run.survival_summary_format"));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
         {

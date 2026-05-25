@@ -829,9 +829,18 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            string format = Content != null
-                ? Content.GetString("ui.run.survival_summary_format", "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}")
-                : "Survival: party={0} survivors={1} deaths={2} ratio={3:0.00} seed={4} error={5}";
+            const string survivalFormatKey = "ui.run.survival_summary_format";
+            if (Content == null)
+            {
+                return survivalFormatKey;
+            }
+
+            string format = Content.GetString(survivalFormatKey, survivalFormatKey);
+            if (string.Equals(format, survivalFormatKey, StringComparison.Ordinal))
+            {
+                return survivalFormatKey;
+            }
+
             return string.Format(format, survival.PartySize, survival.SurvivorCount, survival.DeathCount, survival.SurvivorRatio, survival.DeterministicSeed, survival.DeterministicErrorCode);
         }
         private bool TryGetRunHistoryCount(out int historyCount)
