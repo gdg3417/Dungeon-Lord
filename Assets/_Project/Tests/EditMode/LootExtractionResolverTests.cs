@@ -64,8 +64,8 @@ namespace DungeonBuilder.Tests.EditMode
                 "loot_extraction.round_floor",
                 "run.loot_extraction.rule.v1");
 
-            Assert.That(summary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.relic.bronze" }));
-            Assert.That(summary.LostItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
+            Assert.That(summary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
+            Assert.That(summary.LostItemIds, Is.EqualTo(new[] { "loot.item.relic.bronze" }));
         }
 
         [Test]

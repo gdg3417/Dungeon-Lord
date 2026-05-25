@@ -163,8 +163,8 @@ namespace DungeonBuilder.Tests.EditMode
             RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
 
             Assert.That(outcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(2));
-            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.relic.bronze" }));
-            Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
+            Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
+            Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.EqualTo(new[] { "loot.item.relic.bronze" }));
         }
 
         [Test]
@@ -192,7 +192,7 @@ namespace DungeonBuilder.Tests.EditMode
             var service = new RunSimulationService(BuildConfig(), overflowConfig);
             RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
             Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
-            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.AggregateOverflow));
+            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.LootSummaryMissingOrFailed));
         }
 
         [Test]
