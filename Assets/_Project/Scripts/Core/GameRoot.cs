@@ -25,6 +25,7 @@ namespace DungeonBuilder.M0
         public TextAsset heatRuntimeJson;
         public TextAsset structureSimulationConfigJson;
         public TextAsset runSimulationConfigJson;
+        public TextAsset lootConfigJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -50,6 +51,7 @@ namespace DungeonBuilder.M0
         public string RunHistoryLine { get; private set; } = "ui.run.history_position_format";
         public string RunBreakdownLine { get; private set; } = string.Empty;
         public string RunFeedbackLine { get; private set; } = string.Empty;
+        public string RunLootLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -165,6 +167,7 @@ namespace DungeonBuilder.M0
             heatRuntimeJson = EnsureEditorFallbackAsset(heatRuntimeJson, "heatRuntimeJson", "Assets/_Project/Data/Bootstrap/heat_runtime.json", assignedFields);
             structureSimulationConfigJson = EnsureEditorFallbackAsset(structureSimulationConfigJson, "structureSimulationConfigJson", "Assets/_Project/Data/Bootstrap/structure_simulation_config.json", assignedFields);
             runSimulationConfigJson = EnsureEditorFallbackAsset(runSimulationConfigJson, "runSimulationConfigJson", "Assets/_Project/Data/Bootstrap/run_simulation_config.json", assignedFields);
+            lootConfigJson = EnsureEditorFallbackAsset(lootConfigJson, "lootConfigJson", "Assets/_Project/Data/Bootstrap/loot_config.json", assignedFields);
 
             if (assignedFields.Count > 0)
             {
@@ -294,13 +297,14 @@ namespace DungeonBuilder.M0
         {
             _runSimulationService = null;
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
-            if (!TryCreateRunSimulationService(json, out _runSimulationService))
+            string lootJson = lootConfigJson != null ? lootConfigJson.text : string.Empty;
+            if (!TryCreateRunSimulationService(json, lootJson, out _runSimulationService))
             {
                 SetBanner(Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             }
         }
 
-        internal static bool TryCreateRunSimulationService(string configJson, out RunSimulationService service)
+        internal static bool TryCreateRunSimulationService(string configJson, string lootConfigJson, out RunSimulationService service)
         {
             service = null;
 
@@ -312,12 +316,30 @@ namespace DungeonBuilder.M0
                     return false;
                 }
 
-                service = new RunSimulationService(config);
+                LootConfig lootConfig = TryParseLootConfig(lootConfigJson);
+                service = new RunSimulationService(config, lootConfig);
                 return true;
             }
             catch
             {
                 return false;
+            }
+        }
+
+        internal static LootConfig TryParseLootConfig(string lootConfigJson)
+        {
+            if (string.IsNullOrWhiteSpace(lootConfigJson))
+            {
+                return null;
+            }
+
+            try
+            {
+                return JsonUtility.FromJson<LootConfig>(lootConfigJson);
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -717,6 +739,7 @@ namespace DungeonBuilder.M0
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
                 RunBreakdownLine = string.Empty;
                 RunFeedbackLine = string.Empty;
+                RunLootLine = BuildLootLine(outcome);
                 return;
             }
 
@@ -747,6 +770,7 @@ namespace DungeonBuilder.M0
             if (feedbackTags.Length == 0)
             {
                 RunFeedbackLine = string.Empty;
+                RunLootLine = BuildLootLine(outcome);
                 return;
             }
 
@@ -761,8 +785,24 @@ namespace DungeonBuilder.M0
                 ? Content.GetString("ui.run.feedback_format", "Feedback: {0}")
                 : "Feedback: {0}";
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
+            RunLootLine = BuildLootLine(outcome);
         }
 
+
+        private string BuildLootLine(RunOutcomeRecord outcome)
+        {
+            RunLootSummary loot = outcome != null ? outcome.LootSummary : null;
+            if (loot == null)
+            {
+                return string.Empty;
+            }
+
+            string format = Content != null
+                ? Content.GetString("ui.run.loot_summary_format", "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}")
+                : "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
+            int itemCount = loot.GeneratedItemIds != null ? loot.GeneratedItemIds.Length : 0;
+            return string.Format(format, loot.LootTableId, loot.ResolverSuccess, loot.ResolverErrorCode, loot.RollCount, itemCount, loot.TotalGeneratedWorldValue, loot.TotalGeneratedReserveCost, loot.TotalGeneratedTradeableWorldValue);
+        }
         private bool TryGetRunHistoryCount(out int historyCount)
         {
             historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;

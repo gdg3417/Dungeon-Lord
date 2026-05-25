@@ -1,0 +1,40 @@
+{
+  "schema": "loot_config",
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "loot.item.scrap.iron",
+      "tierId": "loot_tier.iron",
+      "rarityId": "loot_rarity.common",
+      "categoryId": "loot_category.material",
+      "worldValue": 3,
+      "reserveCost": 1,
+      "nameKey": "loot.item.scrap.iron.name",
+      "descriptionKey": "loot.item.scrap.iron.desc",
+      "isTradeable": true
+    },
+    {
+      "id": "loot.item.relic.bronze",
+      "tierId": "loot_tier.bronze",
+      "rarityId": "loot_rarity.uncommon",
+      "categoryId": "loot_category.artifact",
+      "worldValue": 8,
+      "reserveCost": 2,
+      "nameKey": "loot.item.relic.bronze.name",
+      "descriptionKey": "loot.item.relic.bronze.desc",
+      "isTradeable": false
+    }
+  ],
+  "tables": [
+    {
+      "id": "loot.table.run.basic",
+      "minRollCount": 2,
+      "maxRollCount": 2,
+      "allowEmptyPool": false,
+      "pool": [
+        { "itemId": "loot.item.scrap.iron", "weight": 1.0 },
+        { "itemId": "loot.item.relic.bronze", "weight": 1.0 }
+      ]
+    }
+  ]
+}

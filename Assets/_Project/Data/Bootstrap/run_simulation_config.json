@@ -9,5 +9,6 @@
   "MaxRunHistoryEntries": 10,
   "HighHeatFeedbackThreshold": 75,
   "LowManaFeedbackThreshold": 5,
-  "StrongManaReserveFeedbackThreshold": 50
+  "StrongManaReserveFeedbackThreshold": 50,
+  "LootTableId": "loot.table.run.basic"
 }
