@@ -17,16 +17,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
 
-            double chance = _config.BaseSuccessChance;
-            chance -= runtime.Heat * _config.HeatPenaltyPerPoint;
-            chance += runtime.ManaReserve * _config.ManaReserveBonusPerPoint;
-            if (runtime.IsHeatCrisisActive)
-            {
-                chance -= _config.CrisisFailurePenalty;
-            }
+            double baseChance = _config.BaseSuccessChance;
+            double heatPenaltyApplied = runtime.Heat * _config.HeatPenaltyPerPoint;
+            double manaBonusApplied = runtime.ManaReserve * _config.ManaReserveBonusPerPoint;
+            double crisisPenaltyApplied = runtime.IsHeatCrisisActive ? _config.CrisisFailurePenalty : 0d;
 
-            chance = Math.Max(0d, Math.Min(1d, chance));
-            bool success = chance >= _config.SuccessThreshold;
+            double unclampedChance = baseChance - heatPenaltyApplied + manaBonusApplied - crisisPenaltyApplied;
+            double finalChance = Math.Max(0d, Math.Min(1d, unclampedChance));
+            double successThreshold = _config.SuccessThreshold;
+            bool success = finalChance >= successThreshold;
 
             int score = success
                 ? _config.BaseScoreOnSuccess + (int)Math.Round(runtime.ManaReserve * _config.ScorePerManaPoint)
@@ -45,7 +44,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 ReasonKey = reasonKey,
                 HeatAtStart = runtime.Heat,
                 ManaAtStart = runtime.ManaReserve,
-                CrisisActiveAtStart = runtime.IsHeatCrisisActive
+                CrisisActiveAtStart = runtime.IsHeatCrisisActive,
+                HasBreakdown = true,
+                BaseChance = baseChance,
+                HeatPenaltyApplied = heatPenaltyApplied,
+                ManaBonusApplied = manaBonusApplied,
+                CrisisPenaltyApplied = crisisPenaltyApplied,
+                FinalChance = finalChance,
+                SuccessThresholdUsed = successThreshold
             };
         }
     }

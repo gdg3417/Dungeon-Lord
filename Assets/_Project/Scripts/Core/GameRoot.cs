@@ -48,6 +48,7 @@ namespace DungeonBuilder.M0
         public string PauseLine { get; private set; } = "Pause: Running";
         public string RunLine { get; private set; } = "ui.run.none";
         public string RunHistoryLine { get; private set; } = "ui.run.history_summary_format";
+        public string RunBreakdownLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -630,6 +631,7 @@ namespace DungeonBuilder.M0
             if (Save?.runHistory?.LatestOutcome == null)
             {
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
+                RunBreakdownLine = string.Empty;
                 return;
             }
 
@@ -644,6 +646,17 @@ namespace DungeonBuilder.M0
                 outcome.Success,
                 outcome.Score,
                 reason);
+
+            if (!outcome.HasBreakdown)
+            {
+                RunBreakdownLine = string.Empty;
+                return;
+            }
+
+            string breakdownFormat = Content != null
+                ? Content.GetString("ui.run.breakdown_format", "ui.run.breakdown_format")
+                : "ui.run.breakdown_format";
+            RunBreakdownLine = string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
         }
 
         private void HandleSimulationTick(long tickIndex)

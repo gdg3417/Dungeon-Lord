@@ -2,6 +2,7 @@ using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using System.Reflection;
 using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
@@ -36,6 +37,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.Success, Is.EqualTo(first.Success));
             Assert.That(second.Score, Is.EqualTo(first.Score));
             Assert.That(second.ReasonKey, Is.EqualTo(first.ReasonKey));
+            Assert.That(second.FinalChance, Is.EqualTo(first.FinalChance));
+            Assert.That(second.SuccessThresholdUsed, Is.EqualTo(first.SuccessThresholdUsed));
+            Assert.That(first.HasBreakdown, Is.True);
+            Assert.That(second.HasBreakdown, Is.True);
         }
 
         [Test]
@@ -63,6 +68,38 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.CrisisActiveAtStart, Is.True);
         }
 
+
+        [Test]
+        public void SimulateOnce_ComputesBreakdown_AndClampsFinalChance()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var runtime = new StructureRuntimeState { Heat = 100d, ManaReserve = 200d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 99, 7);
+
+            Assert.That(outcome.BaseChance, Is.EqualTo(0.6d));
+            Assert.That(outcome.HeatPenaltyApplied, Is.EqualTo(0.4d));
+            Assert.That(outcome.ManaBonusApplied, Is.EqualTo(2.0d));
+            Assert.That(outcome.CrisisPenaltyApplied, Is.EqualTo(0d));
+            Assert.That(outcome.FinalChance, Is.EqualTo(1d));
+            Assert.That(outcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
+            Assert.That(outcome.HasBreakdown, Is.True);
+        }
+
+        [Test]
+        public void SimulateOnce_CrisisPenaltyApplied_OnlyWhenCrisisActive()
+        {
+            var service = new RunSimulationService(BuildConfig());
+            var nonCrisisRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 1d, IsHeatCrisisActive = false };
+            var crisisRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 1d, IsHeatCrisisActive = true };
+
+            RunOutcomeRecord nonCrisisOutcome = service.SimulateOnce(nonCrisisRuntime, 10, 1);
+            RunOutcomeRecord crisisOutcome = service.SimulateOnce(crisisRuntime, 10, 2);
+
+            Assert.That(nonCrisisOutcome.CrisisPenaltyApplied, Is.EqualTo(0d));
+            Assert.That(crisisOutcome.CrisisPenaltyApplied, Is.EqualTo(BuildConfig().CrisisFailurePenalty));
+        }
+
         [Test]
         public void SaveData_RunOutcome_PreservesJsonRoundTrip()
         {
@@ -80,7 +117,14 @@ namespace DungeonBuilder.Tests.EditMode
                         ReasonKey = "run.reason.success",
                         HeatAtStart = 10d,
                         ManaAtStart = 20d,
-                        CrisisActiveAtStart = false
+                        CrisisActiveAtStart = false,
+                        HasBreakdown = true,
+                        BaseChance = 0.6d,
+                        HeatPenaltyApplied = 0.04d,
+                        ManaBonusApplied = 0.2d,
+                        CrisisPenaltyApplied = 0d,
+                        FinalChance = 0.76d,
+                        SuccessThresholdUsed = 0.5d
                     },
                     RecentOutcomes = new[]
                     {
@@ -114,7 +158,51 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.RecentOutcomes.Length, Is.EqualTo(2));
             Assert.That(loaded.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-7"));
             Assert.That(loaded.runHistory.RecentOutcomes[1].RunId, Is.EqualTo("run-8"));
+            Assert.That(loaded.runHistory.LatestOutcome.HasBreakdown, Is.True);
+            Assert.That(loaded.runHistory.LatestOutcome.BaseChance, Is.EqualTo(0.6d));
+            Assert.That(loaded.runHistory.LatestOutcome.HeatPenaltyApplied, Is.EqualTo(0.04d));
+            Assert.That(loaded.runHistory.LatestOutcome.ManaBonusApplied, Is.EqualTo(0.2d));
+            Assert.That(loaded.runHistory.LatestOutcome.CrisisPenaltyApplied, Is.EqualTo(0d));
+            Assert.That(loaded.runHistory.LatestOutcome.FinalChance, Is.EqualTo(0.76d));
+            Assert.That(loaded.runHistory.LatestOutcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
         }
+
+        [Test]
+        public void RefreshRunLine_HidesBreakdown_ForLegacyOutcomeWithoutBreakdownFlag()
+        {
+            var go = new GameObject("GameRootTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                var save = new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        LatestOutcome = new RunOutcomeRecord
+                        {
+                            RunId = "run-legacy",
+                            Success = false,
+                            Score = 0,
+                            ReasonKey = "run.reason.failed_threshold",
+                            HasBreakdown = false
+                        },
+                        RecentOutcomes = new[] { new RunOutcomeRecord { RunId = "run-legacy" } }
+                    }
+                };
+
+                typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, save);
+
+                root.RefreshRunLine();
+
+                Assert.That(root.RunBreakdownLine, Is.EqualTo(string.Empty));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
         {
