@@ -376,10 +376,60 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.LootSummary.ResolverSuccess, Is.False);
             Assert.That(outcome.LootSummary.ResolverErrorCode, Is.EqualTo((int)LootRollResolverErrorCode.ItemNotFound));
         }
+
+        [Test]
+        public void TryCreateRunSimulationService_WithLootConfig_ProducesSuccessfulLootSummary()
+        {
+            string runJson = JsonUtility.ToJson(BuildConfig());
+            string lootJson = JsonUtility.ToJson(BuildLootConfig());
+
+            bool ok = GameRoot.TryCreateRunSimulationService(runJson, lootJson, out RunSimulationService service);
+
+            Assert.That(ok, Is.True);
+            Assert.That(service, Is.Not.Null);
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 1);
+            Assert.That(outcome.LootSummary, Is.Not.Null);
+            Assert.That(outcome.LootSummary.ResolverSuccess, Is.True);
+        }
+
+        [Test]
+        public void RefreshRunLine_LegacyNullLootSummary_IsSafeAndEmpty()
+        {
+            var go = new GameObject("GameRootLegacyLootTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-legacy",
+                                Success = true,
+                                Score = 1,
+                                ReasonKey = "run.reason.success",
+                                LootSummary = null
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunLootLine, Is.EqualTo(string.Empty));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
         {
-            bool ok = GameRoot.TryCreateRunSimulationService("{bad json", out RunSimulationService service);
+            bool ok = GameRoot.TryCreateRunSimulationService("{bad json", string.Empty, out RunSimulationService service);
 
             Assert.That(ok, Is.False);
             Assert.That(service, Is.Null);
@@ -401,8 +451,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var config = BuildConfig();
             config.LowManaFeedbackThreshold = 50d;
-            config.StrongManaReserveFeedbackThreshold = 50d,
-                LootTableId = "loot.table.run.basic";
+            config.StrongManaReserveFeedbackThreshold = 50d;
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 

@@ -473,6 +473,9 @@ MonoBehaviour:
   devCommandsJson: {fileID: 4900000, guid: 59ef010fd6a776f488cf476b9b855a67, type: 3}
   stringTableJson: {fileID: 4900000, guid: 1b3229d0ede5df14893110ee52ff2de4, type: 3}
   heatRuntimeJson: {fileID: 4900000, guid: 9e13f9f448564ed393ef7cbb7f7b9d8d, type: 3}
+  structureSimulationConfigJson: {fileID: 4900000, guid: 3afa8d197a0156a4eb59fd2f1db9c7d7, type: 3}
+  runSimulationConfigJson: {fileID: 4900000, guid: 68a1e213feb467c488f7fa17303b1b95, type: 3}
+  lootConfigJson: {fileID: 4900000, guid: c1f56adf81124ebaa284058f2f3ea123, type: 3}
   overlay: {fileID: 1944002266}
 --- !u!4 &1479508743
 Transform:

@@ -246,6 +246,10 @@
     {
       "key": "run.feedback.strong_mana_reserve",
       "text": "Started with strong mana reserve"
+    },
+    {
+      "key": "ui.run.loot_summary_format",
+      "text": "Loot: table={0} success={1} rolls={2} items={3} wv={4} rc={5} twv={6}"
     }
   ]
 }

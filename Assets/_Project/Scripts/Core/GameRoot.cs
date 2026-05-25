@@ -25,6 +25,7 @@ namespace DungeonBuilder.M0
         public TextAsset heatRuntimeJson;
         public TextAsset structureSimulationConfigJson;
         public TextAsset runSimulationConfigJson;
+        public TextAsset lootConfigJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -166,6 +167,7 @@ namespace DungeonBuilder.M0
             heatRuntimeJson = EnsureEditorFallbackAsset(heatRuntimeJson, "heatRuntimeJson", "Assets/_Project/Data/Bootstrap/heat_runtime.json", assignedFields);
             structureSimulationConfigJson = EnsureEditorFallbackAsset(structureSimulationConfigJson, "structureSimulationConfigJson", "Assets/_Project/Data/Bootstrap/structure_simulation_config.json", assignedFields);
             runSimulationConfigJson = EnsureEditorFallbackAsset(runSimulationConfigJson, "runSimulationConfigJson", "Assets/_Project/Data/Bootstrap/run_simulation_config.json", assignedFields);
+            lootConfigJson = EnsureEditorFallbackAsset(lootConfigJson, "lootConfigJson", "Assets/_Project/Data/Bootstrap/loot_config.json", assignedFields);
 
             if (assignedFields.Count > 0)
             {
@@ -295,13 +297,14 @@ namespace DungeonBuilder.M0
         {
             _runSimulationService = null;
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
-            if (!TryCreateRunSimulationService(json, out _runSimulationService))
+            string lootJson = lootConfigJson != null ? lootConfigJson.text : string.Empty;
+            if (!TryCreateRunSimulationService(json, lootJson, out _runSimulationService))
             {
                 SetBanner(Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             }
         }
 
-        internal static bool TryCreateRunSimulationService(string configJson, out RunSimulationService service)
+        internal static bool TryCreateRunSimulationService(string configJson, string lootConfigJson, out RunSimulationService service)
         {
             service = null;
 
@@ -313,12 +316,30 @@ namespace DungeonBuilder.M0
                     return false;
                 }
 
-                service = new RunSimulationService(config);
+                LootConfig lootConfig = TryParseLootConfig(lootConfigJson);
+                service = new RunSimulationService(config, lootConfig);
                 return true;
             }
             catch
             {
                 return false;
+            }
+        }
+
+        internal static LootConfig TryParseLootConfig(string lootConfigJson)
+        {
+            if (string.IsNullOrWhiteSpace(lootConfigJson))
+            {
+                return null;
+            }
+
+            try
+            {
+                return JsonUtility.FromJson<LootConfig>(lootConfigJson);
+            }
+            catch
+            {
+                return null;
             }
         }
 
