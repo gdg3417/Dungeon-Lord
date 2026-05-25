@@ -251,6 +251,45 @@ namespace DungeonBuilder.M0
         public bool enabled;
     }
 
+
+    [Serializable]
+    public sealed class LootConfig
+    {
+        public string schema;
+        public int schemaVersion;
+        public LootItemRecord[] items;
+        public LootTableRecord[] tables;
+    }
+
+    [Serializable]
+    public sealed class LootItemRecord
+    {
+        public string id;
+        public string tierId;
+        public string rarityId;
+        public int worldValue;
+        public int reserveCost;
+        public string nameKey;
+        public string descriptionKey;
+    }
+
+    [Serializable]
+    public sealed class LootTableRecord
+    {
+        public string id;
+        public int minRollCount;
+        public int maxRollCount;
+        public bool allowEmptyPool;
+        public LootTablePoolEntry[] pool;
+    }
+
+    [Serializable]
+    public sealed class LootTablePoolEntry
+    {
+        public string itemId;
+        public double weight;
+    }
+
     public enum SaveReason
     {
         Boot = 0,
