@@ -150,6 +150,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_ConfigNull_ReturnsDeterministicFailure()
+        {
+            var result = LootRollResolver.Resolve(null, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.ConfigNull));
+        }
+
+        [Test]
+        public void Resolve_TableIdMissing_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            var result = LootRollResolver.Resolve(config, string.Empty, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.TableIdMissing));
+        }
+
+        [Test]
         public void Resolve_EmptyPool_Disallowed_ReturnsDeterministicFailure()
         {
             LootConfig config = BuildConfig();
@@ -173,6 +190,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_InvalidWeight_Zero_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].pool[0].weight = 0d;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidWeight));
+        }
+
+        [Test]
+        public void Resolve_InvalidWeight_NaN_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].pool[0].weight = double.NaN;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidWeight));
+        }
+
+        [Test]
+        public void Resolve_InvalidWeight_Infinity_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].pool[0].weight = double.PositiveInfinity;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidWeight));
+        }
+
+        [Test]
+        public void Resolve_ItemNotFound_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].pool[0].itemId = "loot.item.missing";
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.ItemNotFound));
+        }
+
+        [Test]
         public void Resolve_Totals_AreSummedCorrectly()
         {
             LootConfig config = BuildConfig();
@@ -189,6 +246,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.totalGeneratedWorldValue, Is.EqualTo(6));
             Assert.That(result.totalGeneratedReserveCost, Is.EqualTo(2));
             Assert.That(result.totalGeneratedTradeableWorldValue, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void Resolve_AggregateTotals_Overflow_ReturnsDeterministicFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.items[0].worldValue = int.MaxValue;
+            config.items[0].reserveCost = int.MaxValue;
+            config.tables[0].minRollCount = 2;
+            config.tables[0].maxRollCount = 2;
+            config.tables[0].pool = new[]
+            {
+                new LootTablePoolEntry { itemId = "loot.item.scrap.iron", weight = 1d }
+            };
+
+            var result = LootRollResolver.Resolve(config, TableId, 123);
+
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.AggregateOverflow));
+            Assert.That(result.generatedItemIds.Count, Is.EqualTo(0));
+            Assert.That(result.totalGeneratedWorldValue, Is.EqualTo(0));
+            Assert.That(result.totalGeneratedReserveCost, Is.EqualTo(0));
+            Assert.That(result.totalGeneratedTradeableWorldValue, Is.EqualTo(0));
         }
 
         [Test]

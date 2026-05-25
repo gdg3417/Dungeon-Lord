@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0
         PoolEmptyNotAllowed = 4,
         ItemNotFound = 5,
         InvalidWeight = 6,
-        InvalidRollCountRange = 7
+        InvalidRollCountRange = 7,
+        AggregateOverflow = 8
     }
 
     public readonly struct LootRollResolverResult
@@ -141,11 +142,21 @@ namespace DungeonBuilder.M0
                 LootItemRecord selectedItem = itemById[selectedEntry.itemId];
                 generatedItemIds.Add(selectedItem.id);
 
-                totalGeneratedWorldValue += selectedItem.worldValue;
-                totalGeneratedReserveCost += selectedItem.reserveCost;
-                if (selectedItem.isTradeable)
+                try
                 {
-                    totalGeneratedTradeableWorldValue += selectedItem.worldValue;
+                    checked
+                    {
+                        totalGeneratedWorldValue += selectedItem.worldValue;
+                        totalGeneratedReserveCost += selectedItem.reserveCost;
+                        if (selectedItem.isTradeable)
+                        {
+                            totalGeneratedTradeableWorldValue += selectedItem.worldValue;
+                        }
+                    }
+                }
+                catch (OverflowException)
+                {
+                    return Failure(tableId, seed, LootRollResolverErrorCode.AggregateOverflow);
                 }
             }
 
