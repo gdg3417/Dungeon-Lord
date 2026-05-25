@@ -21,29 +21,60 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Resolve_DifferentSeed_CanReturnDifferentGeneratedItems()
+        public void Resolve_KnownSeeds_ReturnExactDeterministicOutputs()
         {
             LootConfig config = BuildConfig();
-            var baseline = LootRollResolver.Resolve(config, TableId, 1001);
-
-            Assert.That(baseline.success, Is.True);
-
-            bool foundDifferent = false;
-            for (int seed = 1002; seed <= 1065; seed++)
+            config.tables[0].id = "loot.table.seed.fixture";
+            config.tables[0].minRollCount = 4;
+            config.tables[0].maxRollCount = 4;
+            config.tables[0].pool = new[]
             {
-                var candidate = LootRollResolver.Resolve(config, TableId, seed);
-                Assert.That(candidate.success, Is.True);
-
-                bool sameItems = baseline.generatedItemIds.SequenceEqual(candidate.generatedItemIds);
-                bool sameRollCount = baseline.rollCount == candidate.rollCount;
-                if (!sameItems || !sameRollCount)
+                new LootTablePoolEntry { itemId = "loot.item.scrap.iron", weight = 1d },
+                new LootTablePoolEntry { itemId = "loot.item.relic.bronze", weight = 1d },
+                new LootTablePoolEntry { itemId = "loot.item.crystal.gem", weight = 1d }
+            };
+            config.items = new[]
+            {
+                config.items[0],
+                config.items[1],
+                new LootItemRecord
                 {
-                    foundDifferent = true;
-                    break;
+                    id = "loot.item.crystal.gem",
+                    tierId = "loot_tier.steel",
+                    rarityId = "loot_rarity.rare",
+                    categoryId = "loot_category.artifact",
+                    worldValue = 10,
+                    reserveCost = 4,
+                    nameKey = "loot.item.crystal.gem.name",
+                    descriptionKey = "loot.item.crystal.gem.desc",
+                    isTradeable = true
                 }
-            }
+            };
 
-            Assert.That(foundDifferent, Is.True);
+            var seed1001 = LootRollResolver.Resolve(config, "loot.table.seed.fixture", 1001);
+            var seed1002 = LootRollResolver.Resolve(config, "loot.table.seed.fixture", 1002);
+
+            Assert.That(seed1001.success, Is.True);
+            Assert.That(seed1001.rollCount, Is.EqualTo(4));
+            Assert.That(seed1001.generatedItemIds, Is.EqualTo(new[]
+            {
+                "loot.item.relic.bronze",
+                "loot.item.crystal.gem",
+                "loot.item.relic.bronze",
+                "loot.item.scrap.iron"
+            }));
+
+            Assert.That(seed1002.success, Is.True);
+            Assert.That(seed1002.rollCount, Is.EqualTo(4));
+            Assert.That(seed1002.generatedItemIds, Is.EqualTo(new[]
+            {
+                "loot.item.scrap.iron",
+                "loot.item.relic.bronze",
+                "loot.item.crystal.gem",
+                "loot.item.relic.bronze"
+            }));
+
+            Assert.That(seed1001.generatedItemIds.SequenceEqual(seed1002.generatedItemIds), Is.False);
         }
 
         [Test]
