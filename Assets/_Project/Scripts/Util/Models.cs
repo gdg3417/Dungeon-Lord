@@ -19,6 +19,7 @@ namespace DungeonBuilder.M0
         public double HighHeatFeedbackThreshold;
         public double LowManaFeedbackThreshold;
         public double StrongManaReserveFeedbackThreshold;
+        public string LootTableId;
     }
 
     [Serializable]
@@ -40,6 +41,21 @@ namespace DungeonBuilder.M0
         public double FinalChance;
         public double SuccessThresholdUsed;
         public string[] FeedbackTagKeys = Array.Empty<string>();
+        public RunLootSummary LootSummary;
+    }
+
+    [Serializable]
+    public sealed class RunLootSummary
+    {
+        public string LootTableId;
+        public int ResolverSeed;
+        public bool ResolverSuccess;
+        public int ResolverErrorCode;
+        public int RollCount;
+        public string[] GeneratedItemIds = Array.Empty<string>();
+        public int TotalGeneratedWorldValue;
+        public int TotalGeneratedReserveCost;
+        public int TotalGeneratedTradeableWorldValue;
     }
 
     [Serializable]

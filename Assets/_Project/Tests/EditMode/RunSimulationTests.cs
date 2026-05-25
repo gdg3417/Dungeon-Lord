@@ -29,14 +29,42 @@ namespace DungeonBuilder.Tests.EditMode
                 MaxRunHistoryEntries = 10,
                 HighHeatFeedbackThreshold = 75d,
                 LowManaFeedbackThreshold = 5d,
-                StrongManaReserveFeedbackThreshold = 50d
+                StrongManaReserveFeedbackThreshold = 50d,
+                LootTableId = "loot.table.run.basic"
             };
         }
 
+
+        private static LootConfig BuildLootConfig()
+        {
+            return new LootConfig
+            {
+                items = new[]
+                {
+                    new LootItemRecord { id = "loot.item.scrap.iron", tierId = "loot_tier.iron", rarityId = "loot_rarity.common", categoryId = "loot_category.material", worldValue = 3, reserveCost = 1, nameKey = "loot.item.scrap.iron.name", descriptionKey = "loot.item.scrap.iron.desc", isTradeable = true },
+                    new LootItemRecord { id = "loot.item.relic.bronze", tierId = "loot_tier.bronze", rarityId = "loot_rarity.uncommon", categoryId = "loot_category.artifact", worldValue = 8, reserveCost = 2, nameKey = "loot.item.relic.bronze.name", descriptionKey = "loot.item.relic.bronze.desc", isTradeable = false }
+                },
+                tables = new[]
+                {
+                    new LootTableRecord
+                    {
+                        id = "loot.table.run.basic",
+                        minRollCount = 2,
+                        maxRollCount = 2,
+                        allowEmptyPool = false,
+                        pool = new[]
+                        {
+                            new LootTablePoolEntry { itemId = "loot.item.scrap.iron", weight = 1d },
+                            new LootTablePoolEntry { itemId = "loot.item.relic.bronze", weight = 1d }
+                        }
+                    }
+                }
+            };
+        }
         [Test]
         public void SimulateOnce_IsDeterministic_ForSameInput()
         {
-            var service = new RunSimulationService(BuildConfig());
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
             var runtime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
 
             RunOutcomeRecord first = service.SimulateOnce(runtime, 50, 1);
@@ -49,6 +77,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.FinalChance, Is.EqualTo(first.FinalChance));
             Assert.That(second.SuccessThresholdUsed, Is.EqualTo(first.SuccessThresholdUsed));
             Assert.That(second.FeedbackTagKeys, Is.EqualTo(first.FeedbackTagKeys));
+            Assert.That(second.LootSummary.ResolverSeed, Is.EqualTo(first.LootSummary.ResolverSeed));
+            Assert.That(second.LootSummary.GeneratedItemIds, Is.EqualTo(first.LootSummary.GeneratedItemIds));
+            Assert.That(second.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(first.LootSummary.TotalGeneratedWorldValue));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
         }
@@ -190,7 +221,19 @@ namespace DungeonBuilder.Tests.EditMode
                         CrisisPenaltyApplied = 0d,
                         FinalChance = 0.76d,
                         SuccessThresholdUsed = 0.5d,
-                        FeedbackTagKeys = new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" }
+                        FeedbackTagKeys = new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" },
+                        LootSummary = new RunLootSummary
+                        {
+                            LootTableId = "loot.table.run.basic",
+                            ResolverSeed = 12345,
+                            ResolverSuccess = true,
+                            ResolverErrorCode = 0,
+                            RollCount = 2,
+                            GeneratedItemIds = new[] { "loot.item.scrap.iron", "loot.item.relic.bronze" },
+                            TotalGeneratedWorldValue = 11,
+                            TotalGeneratedReserveCost = 3,
+                            TotalGeneratedTradeableWorldValue = 3
+                        }
                     },
                     RecentOutcomes = new[]
                     {
@@ -232,6 +275,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.FinalChance, Is.EqualTo(0.76d));
             Assert.That(loaded.runHistory.LatestOutcome.SuccessThresholdUsed, Is.EqualTo(0.5d));
             Assert.That(loaded.runHistory.LatestOutcome.FeedbackTagKeys, Is.EqualTo(new[] { "run.feedback.success", "run.feedback.strong_mana_reserve" }));
+            Assert.That(loaded.runHistory.LatestOutcome.LootSummary.LootTableId, Is.EqualTo("loot.table.run.basic"));
+            Assert.That(loaded.runHistory.LatestOutcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(2));
         }
 
         [Test]
@@ -302,6 +347,35 @@ namespace DungeonBuilder.Tests.EditMode
             }
         }
 
+
+        [Test]
+        public void SimulateOnce_AttachesLootSummary_WhenLootConfigValid()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            var runtime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 50, 1);
+
+            Assert.That(outcome.LootSummary, Is.Not.Null);
+            Assert.That(outcome.LootSummary.LootTableId, Is.EqualTo("loot.table.run.basic"));
+            Assert.That(outcome.LootSummary.ResolverSuccess, Is.True);
+            Assert.That(outcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(outcome.LootSummary.RollCount));
+        }
+
+        [Test]
+        public void SimulateOnce_StoresResolverFailure_WithoutCrashing()
+        {
+            LootConfig invalid = BuildLootConfig();
+            invalid.tables[0].pool[0].itemId = "loot.item.missing";
+            var service = new RunSimulationService(BuildConfig(), invalid);
+            var runtime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 50, 1);
+
+            Assert.That(outcome.LootSummary, Is.Not.Null);
+            Assert.That(outcome.LootSummary.ResolverSuccess, Is.False);
+            Assert.That(outcome.LootSummary.ResolverErrorCode, Is.EqualTo((int)LootRollResolverErrorCode.ItemNotFound));
+        }
         [Test]
         public void TryCreateRunSimulationService_ReturnsFalse_For_Malformed_Config()
         {
@@ -327,7 +401,8 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var config = BuildConfig();
             config.LowManaFeedbackThreshold = 50d;
-            config.StrongManaReserveFeedbackThreshold = 50d;
+            config.StrongManaReserveFeedbackThreshold = 50d,
+                LootTableId = "loot.table.run.basic";
 
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 

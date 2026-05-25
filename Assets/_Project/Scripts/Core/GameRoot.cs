@@ -50,6 +50,7 @@ namespace DungeonBuilder.M0
         public string RunHistoryLine { get; private set; } = "ui.run.history_position_format";
         public string RunBreakdownLine { get; private set; } = string.Empty;
         public string RunFeedbackLine { get; private set; } = string.Empty;
+        public string RunLootLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -717,6 +718,7 @@ namespace DungeonBuilder.M0
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
                 RunBreakdownLine = string.Empty;
                 RunFeedbackLine = string.Empty;
+                RunLootLine = BuildLootLine(outcome);
                 return;
             }
 
@@ -747,6 +749,7 @@ namespace DungeonBuilder.M0
             if (feedbackTags.Length == 0)
             {
                 RunFeedbackLine = string.Empty;
+                RunLootLine = BuildLootLine(outcome);
                 return;
             }
 
@@ -761,8 +764,24 @@ namespace DungeonBuilder.M0
                 ? Content.GetString("ui.run.feedback_format", "Feedback: {0}")
                 : "Feedback: {0}";
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
+            RunLootLine = BuildLootLine(outcome);
         }
 
+
+        private string BuildLootLine(RunOutcomeRecord outcome)
+        {
+            RunLootSummary loot = outcome != null ? outcome.LootSummary : null;
+            if (loot == null)
+            {
+                return string.Empty;
+            }
+
+            string format = Content != null
+                ? Content.GetString("ui.run.loot_summary_format", "Loot: table={0} success={1} rolls={2} items={3} wv={4} rc={5} twv={6}")
+                : "Loot: table={0} success={1} rolls={2} items={3} wv={4} rc={5} twv={6}";
+            int itemCount = loot.GeneratedItemIds != null ? loot.GeneratedItemIds.Length : 0;
+            return string.Format(format, loot.LootTableId, loot.ResolverSuccess, loot.RollCount, itemCount, loot.TotalGeneratedWorldValue, loot.TotalGeneratedReserveCost, loot.TotalGeneratedTradeableWorldValue);
+        }
         private bool TryGetRunHistoryCount(out int historyCount)
         {
             historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;

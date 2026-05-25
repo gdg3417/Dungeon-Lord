@@ -6,11 +6,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     public sealed class RunSimulationService
     {
         private readonly RunSimulationConfig _config;
+        private readonly LootConfig _lootConfig;
+        private readonly string _lootTableId;
         public RunSimulationConfig Config => _config;
 
-        public RunSimulationService(RunSimulationConfig config)
+        public RunSimulationService(RunSimulationConfig config, LootConfig lootConfig = null, string lootTableId = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _lootConfig = lootConfig;
+            _lootTableId = !string.IsNullOrEmpty(lootTableId) ? lootTableId : _config.LootTableId;
         }
 
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence)
@@ -53,8 +57,44 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 CrisisPenaltyApplied = crisisPenaltyApplied,
                 FinalChance = finalChance,
                 SuccessThresholdUsed = successThreshold,
-                FeedbackTagKeys = feedbackTagKeys
+                FeedbackTagKeys = feedbackTagKeys,
+                LootSummary = BuildLootSummary(runSequence, tickStarted)
             };
+        }
+
+        private RunLootSummary BuildLootSummary(int runSequence, long tickStarted)
+        {
+            if (string.IsNullOrEmpty(_lootTableId))
+            {
+                return null;
+            }
+
+            int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
+            LootRollResolverResult result = LootRollResolver.Resolve(_lootConfig, _lootTableId, resolverSeed);
+
+            return new RunLootSummary
+            {
+                LootTableId = _lootTableId,
+                ResolverSeed = resolverSeed,
+                ResolverSuccess = result.success,
+                ResolverErrorCode = (int)result.errorCode,
+                RollCount = result.rollCount,
+                GeneratedItemIds = result.generatedItemIds != null ? new System.Collections.Generic.List<string>(result.generatedItemIds).ToArray() : Array.Empty<string>(),
+                TotalGeneratedWorldValue = result.totalGeneratedWorldValue,
+                TotalGeneratedReserveCost = result.totalGeneratedReserveCost,
+                TotalGeneratedTradeableWorldValue = result.totalGeneratedTradeableWorldValue
+            };
+        }
+
+        private static int ComputeResolverSeed(int runSequence, long tickStarted)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 31) + runSequence;
+                hash = (hash * 31) + tickStarted.GetHashCode();
+                return hash;
+            }
         }
 
         private string[] BuildFeedbackTagKeys(StructureRuntimeState runtime, bool success)
