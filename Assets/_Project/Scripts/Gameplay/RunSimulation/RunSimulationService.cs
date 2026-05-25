@@ -92,7 +92,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 int hash = 17;
                 hash = (hash * 31) + runSequence;
-                hash = (hash * 31) + tickStarted.GetHashCode();
+                int tickLow = (int)(tickStarted & 0xFFFFFFFFL);
+                int tickHigh = (int)((tickStarted >> 32) & 0xFFFFFFFFL);
+                hash = (hash * 31) + tickLow;
+                hash = (hash * 31) + tickHigh;
                 return hash;
             }
         }
