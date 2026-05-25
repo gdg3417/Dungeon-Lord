@@ -706,7 +706,7 @@ namespace DungeonBuilder.M0
             }
 
             string historyFormat = Content != null
-                ? Content.GetString("ui.run.history_position_format", "ui.run.history_position_format")
+                ? Content.GetString("ui.run.history_position_format", "Run history: {0}/{1}")
                 : "Run history: {0}/{1}";
             int selectedPosition = _selectedRunHistoryIndex >= 0 ? _selectedRunHistoryIndex + 1 : 0;
             RunHistoryLine = string.Format(historyFormat, selectedPosition, historyCount);
@@ -722,7 +722,7 @@ namespace DungeonBuilder.M0
 
             string reason = Content != null ? Content.GetString(outcome.ReasonKey, outcome.ReasonKey) : outcome.ReasonKey;
             string format = Content != null
-                ? Content.GetString("ui.run.latest_format", "ui.run.latest_format")
+                ? Content.GetString("ui.run.latest_format", "Run: {0} success={1} score={2} reason={3}")
                 : "Run: {0} success={1} score={2} reason={3}";
             RunLine = string.Format(
                 format,
@@ -738,7 +738,7 @@ namespace DungeonBuilder.M0
             else
             {
                 string breakdownFormat = Content != null
-                    ? Content.GetString("ui.run.breakdown_format", "ui.run.breakdown_format")
+                    ? Content.GetString("ui.run.breakdown_format", "Chance: {0:0.00} / threshold {1:0.00}")
                     : "Chance: {0:0.00} / threshold {1:0.00}";
                 RunBreakdownLine = string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
             }
@@ -758,7 +758,7 @@ namespace DungeonBuilder.M0
             }
 
             string feedbackFormat = Content != null
-                ? Content.GetString("ui.run.feedback_format", "ui.run.feedback_format")
+                ? Content.GetString("ui.run.feedback_format", "Feedback: {0}")
                 : "Feedback: {0}";
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
         }
