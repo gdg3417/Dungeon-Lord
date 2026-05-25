@@ -47,7 +47,7 @@ namespace DungeonBuilder.M0
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
         public string RunLine { get; private set; } = "ui.run.none";
-        public string RunHistoryLine { get; private set; } = "ui.run.history_summary_format";
+        public string RunHistoryLine { get; private set; } = "ui.run.history_position_format";
         public string RunBreakdownLine { get; private set; } = string.Empty;
         public string RunFeedbackLine { get; private set; } = string.Empty;
 
@@ -63,6 +63,7 @@ namespace DungeonBuilder.M0
         private RunSimulationService _runSimulationService;
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
+        private int _selectedRunHistoryIndex = -1;
 
         public bool DevPanelEnabled { get; private set; }
         public bool IsOnline { get; private set; } = true;
@@ -597,8 +598,60 @@ namespace DungeonBuilder.M0
             RunSimulationConfig config = _runSimulationService.Config;
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
+            SelectLatestRunOutcome();
             RefreshRunLine();
             SaveService.Save(Save, SaveReason.ManualDev);
+            return true;
+        }
+
+        public bool SelectPreviousRunOutcome()
+        {
+            if (!TryGetRunHistoryCount(out int historyCount))
+            {
+                return false;
+            }
+
+            int previous = Math.Max(0, _selectedRunHistoryIndex - 1);
+            if (previous == _selectedRunHistoryIndex)
+            {
+                return false;
+            }
+
+            _selectedRunHistoryIndex = previous;
+            return true;
+        }
+
+        public bool SelectNextRunOutcome()
+        {
+            if (!TryGetRunHistoryCount(out int historyCount))
+            {
+                return false;
+            }
+
+            int next = Math.Min(historyCount - 1, _selectedRunHistoryIndex + 1);
+            if (next == _selectedRunHistoryIndex)
+            {
+                return false;
+            }
+
+            _selectedRunHistoryIndex = next;
+            return true;
+        }
+
+        public bool SelectLatestRunOutcome()
+        {
+            if (!TryGetRunHistoryCount(out int historyCount))
+            {
+                return false;
+            }
+
+            int latestIndex = historyCount - 1;
+            if (_selectedRunHistoryIndex == latestIndex)
+            {
+                return false;
+            }
+
+            _selectedRunHistoryIndex = latestIndex;
             return true;
         }
 
@@ -635,13 +688,31 @@ namespace DungeonBuilder.M0
 
         public void RefreshRunLine()
         {
-            string summaryFormat = Content != null
-                ? Content.GetString("ui.run.history_summary_format", "ui.run.history_summary_format")
-                : "ui.run.history_summary_format";
             int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
-            RunHistoryLine = string.Format(summaryFormat, historyCount);
+            if (historyCount > 0)
+            {
+                if (_selectedRunHistoryIndex < 0)
+                {
+                    _selectedRunHistoryIndex = historyCount - 1;
+                }
+                else
+                {
+                    _selectedRunHistoryIndex = Mathf.Clamp(_selectedRunHistoryIndex, 0, historyCount - 1);
+                }
+            }
+            else
+            {
+                _selectedRunHistoryIndex = -1;
+            }
 
-            if (Save?.runHistory?.LatestOutcome == null)
+            string historyFormat = Content != null
+                ? Content.GetString("ui.run.history_position_format", "ui.run.history_position_format")
+                : "ui.run.history_position_format";
+            int selectedPosition = _selectedRunHistoryIndex >= 0 ? _selectedRunHistoryIndex + 1 : 0;
+            RunHistoryLine = string.Format(historyFormat, selectedPosition, historyCount);
+
+            RunOutcomeRecord outcome = GetSelectedRunOutcome();
+            if (outcome == null)
             {
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
                 RunBreakdownLine = string.Empty;
@@ -649,7 +720,6 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            RunOutcomeRecord outcome = Save.runHistory.LatestOutcome;
             string reason = Content != null ? Content.GetString(outcome.ReasonKey, outcome.ReasonKey) : outcome.ReasonKey;
             string format = Content != null
                 ? Content.GetString("ui.run.latest_format", "ui.run.latest_format")
@@ -691,6 +761,36 @@ namespace DungeonBuilder.M0
                 ? Content.GetString("ui.run.feedback_format", "ui.run.feedback_format")
                 : "ui.run.feedback_format";
             RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
+        }
+
+        private bool TryGetRunHistoryCount(out int historyCount)
+        {
+            historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
+            if (historyCount <= 0)
+            {
+                _selectedRunHistoryIndex = -1;
+                return false;
+            }
+
+            if (_selectedRunHistoryIndex < 0)
+            {
+                _selectedRunHistoryIndex = historyCount - 1;
+            }
+            else
+            {
+                _selectedRunHistoryIndex = Mathf.Clamp(_selectedRunHistoryIndex, 0, historyCount - 1);
+            }
+            return true;
+        }
+
+        private RunOutcomeRecord GetSelectedRunOutcome()
+        {
+            if (!TryGetRunHistoryCount(out _))
+            {
+                return null;
+            }
+
+            return Save.runHistory.RecentOutcomes[_selectedRunHistoryIndex];
         }
 
         private void HandleSimulationTick(long tickIndex)

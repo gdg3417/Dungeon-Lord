@@ -9,6 +9,12 @@ namespace DungeonBuilder.Tests.EditMode
 {
     public class RunSimulationTests
     {
+        private static void SetSave(GameRoot root, SaveData save)
+        {
+            typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(root, save);
+        }
+
         private static RunSimulationConfig BuildConfig()
         {
             return new RunSimulationConfig
@@ -250,8 +256,7 @@ namespace DungeonBuilder.Tests.EditMode
                     }
                 };
 
-                typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.SetValue(root, save);
+                SetSave(root, save);
 
                 root.RefreshRunLine();
                 Assert.That(root.RunFeedbackLine, Is.EqualTo(string.Empty));
@@ -285,8 +290,7 @@ namespace DungeonBuilder.Tests.EditMode
                     }
                 };
 
-                typeof(GameRoot).GetField("<Save>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.SetValue(root, save);
+                SetSave(root, save);
 
                 root.RefreshRunLine();
 
@@ -376,6 +380,118 @@ namespace DungeonBuilder.Tests.EditMode
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
             Assert.That(migrated.primary.runHistory.RecentOutcomes.Length, Is.EqualTo(1));
             Assert.That(migrated.primary.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-4"));
+        }
+
+        [Test]
+        public void RefreshRunLine_DefaultsSelection_ToLatestOutcome()
+        {
+            var go = new GameObject("GameRootRunSelectionDefaultLatest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunId = "run-1", Success = false, Score = 0, ReasonKey = "run.reason.failed_threshold" },
+                            new RunOutcomeRecord { RunId = "run-2", Success = true, Score = 120, ReasonKey = "run.reason.success", HasBreakdown = true, FinalChance = 0.8d, SuccessThresholdUsed = 0.5d, FeedbackTagKeys = new[] { "run.feedback.success" } }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-2"));
+                Assert.That(root.RunHistoryLine, Does.Contain("2/2"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RunOutcomeSelection_PreviousNextAndBounds_AreDeterministicAndSafe()
+        {
+            var go = new GameObject("GameRootRunSelectionBounds");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunId = "run-1", ReasonKey = "run.reason.success" },
+                            new RunOutcomeRecord { RunId = "run-2", ReasonKey = "run.reason.success" },
+                            new RunOutcomeRecord { RunId = "run-3", ReasonKey = "run.reason.success" }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-3"));
+                Assert.That(root.SelectPreviousRunOutcome(), Is.True);
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-2"));
+                Assert.That(root.SelectPreviousRunOutcome(), Is.True);
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-1"));
+                Assert.That(root.SelectPreviousRunOutcome(), Is.False);
+                Assert.That(root.SelectNextRunOutcome(), Is.True);
+                Assert.That(root.SelectNextRunOutcome(), Is.True);
+                Assert.That(root.SelectNextRunOutcome(), Is.False);
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-3"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void SelectLatestRunOutcome_SelectsNewestFromOlderSelection()
+        {
+            var go = new GameObject("GameRootRunSelectionLatest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunId = "run-1", ReasonKey = "run.reason.success" },
+                            new RunOutcomeRecord { RunId = "run-2", ReasonKey = "run.reason.success" }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-1"));
+                Assert.That(root.SelectLatestRunOutcome(), Is.True);
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Does.Contain("run-2"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RunOutcomeSelection_EmptyHistory_IsSafe()
+        {
+            var go = new GameObject("GameRootRunSelectionEmpty");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData { runHistory = new RunHistoryState() });
+
+                root.RefreshRunLine();
+                Assert.That(root.SelectPreviousRunOutcome(), Is.False);
+                Assert.That(root.SelectNextRunOutcome(), Is.False);
+                Assert.That(root.SelectLatestRunOutcome(), Is.False);
+                Assert.That(root.RunLine, Is.EqualTo("ui.run.none"));
+            }
+            finally { Object.DestroyImmediate(go); }
         }
 
     }
