@@ -16,6 +16,9 @@ namespace DungeonBuilder.M0
         public int BaseScoreOnSuccess;
         public int ScorePerManaPoint;
         public int MaxRunHistoryEntries;
+        public double HighHeatFeedbackThreshold;
+        public double LowManaFeedbackThreshold;
+        public double StrongManaReserveFeedbackThreshold;
     }
 
     [Serializable]
@@ -36,6 +39,7 @@ namespace DungeonBuilder.M0
         public double CrisisPenaltyApplied;
         public double FinalChance;
         public double SuccessThresholdUsed;
+        public string[] FeedbackTagKeys = Array.Empty<string>();
     }
 
     [Serializable]

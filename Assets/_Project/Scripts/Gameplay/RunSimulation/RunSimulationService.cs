@@ -34,6 +34,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             string reasonKey = success
                 ? "run.reason.success"
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
+            string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success);
 
             return new RunOutcomeRecord
             {
@@ -51,8 +52,37 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 ManaBonusApplied = manaBonusApplied,
                 CrisisPenaltyApplied = crisisPenaltyApplied,
                 FinalChance = finalChance,
-                SuccessThresholdUsed = successThreshold
+                SuccessThresholdUsed = successThreshold,
+                FeedbackTagKeys = feedbackTagKeys
             };
+        }
+
+        private string[] BuildFeedbackTagKeys(StructureRuntimeState runtime, bool success)
+        {
+            System.Collections.Generic.List<string> tags = new System.Collections.Generic.List<string>(5);
+            tags.Add(success ? "run.feedback.success" : "run.feedback.failure");
+
+            if (runtime.Heat >= _config.HighHeatFeedbackThreshold)
+            {
+                tags.Add("run.feedback.high_heat");
+            }
+
+            if (runtime.ManaReserve <= _config.LowManaFeedbackThreshold)
+            {
+                tags.Add("run.feedback.low_mana");
+            }
+
+            if (runtime.IsHeatCrisisActive)
+            {
+                tags.Add("run.feedback.heat_crisis");
+            }
+
+            if (runtime.ManaReserve >= _config.StrongManaReserveFeedbackThreshold)
+            {
+                tags.Add("run.feedback.strong_mana_reserve");
+            }
+
+            return tags.ToArray();
         }
     }
 }

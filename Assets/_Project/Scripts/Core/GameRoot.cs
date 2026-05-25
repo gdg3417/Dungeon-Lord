@@ -49,6 +49,7 @@ namespace DungeonBuilder.M0
         public string RunLine { get; private set; } = "ui.run.none";
         public string RunHistoryLine { get; private set; } = "ui.run.history_summary_format";
         public string RunBreakdownLine { get; private set; } = string.Empty;
+        public string RunFeedbackLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -350,6 +351,13 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (config.HighHeatFeedbackThreshold < 0d ||
+                config.LowManaFeedbackThreshold < 0d ||
+                config.StrongManaReserveFeedbackThreshold < 0d)
+            {
+                return false;
+            }
+
             return true;
         }
         
@@ -632,6 +640,7 @@ namespace DungeonBuilder.M0
             {
                 RunLine = Content != null ? Content.GetString("ui.run.none", "ui.run.none") : "ui.run.none";
                 RunBreakdownLine = string.Empty;
+                RunFeedbackLine = string.Empty;
                 return;
             }
 
@@ -650,13 +659,33 @@ namespace DungeonBuilder.M0
             if (!outcome.HasBreakdown)
             {
                 RunBreakdownLine = string.Empty;
+            }
+            else
+            {
+                string breakdownFormat = Content != null
+                    ? Content.GetString("ui.run.breakdown_format", "ui.run.breakdown_format")
+                    : "ui.run.breakdown_format";
+                RunBreakdownLine = string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
+            }
+
+            string[] feedbackTags = outcome.FeedbackTagKeys ?? Array.Empty<string>();
+            if (feedbackTags.Length == 0)
+            {
+                RunFeedbackLine = string.Empty;
                 return;
             }
 
-            string breakdownFormat = Content != null
-                ? Content.GetString("ui.run.breakdown_format", "ui.run.breakdown_format")
-                : "ui.run.breakdown_format";
-            RunBreakdownLine = string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
+            string[] localizedTags = new string[feedbackTags.Length];
+            for (int i = 0; i < feedbackTags.Length; i++)
+            {
+                string key = feedbackTags[i] ?? string.Empty;
+                localizedTags[i] = Content != null ? Content.GetString(key, key) : key;
+            }
+
+            string feedbackFormat = Content != null
+                ? Content.GetString("ui.run.feedback_format", "ui.run.feedback_format")
+                : "ui.run.feedback_format";
+            RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
         }
 
         private void HandleSimulationTick(long tickIndex)

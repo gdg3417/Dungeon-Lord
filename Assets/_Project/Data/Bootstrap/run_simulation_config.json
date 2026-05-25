@@ -6,5 +6,8 @@
   "SuccessThreshold": 0.5,
   "BaseScoreOnSuccess": 100,
   "ScorePerManaPoint": 2,
-  "MaxRunHistoryEntries": 10
+  "MaxRunHistoryEntries": 10,
+  "HighHeatFeedbackThreshold": 75,
+  "LowManaFeedbackThreshold": 5,
+  "StrongManaReserveFeedbackThreshold": 50
 }
