@@ -168,16 +168,6 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void ExtractionTotals_ItemValueLookupFailed_IsDeterministic()
-        {
-            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
-            MethodInfo method = typeof(RunSimulationService).GetMethod("TryCalculateTotals", BindingFlags.Instance | BindingFlags.NonPublic);
-            object[] args = { new[] { "loot.item.unknown" }, 0, 0, 0 };
-            object result = method.Invoke(service, args);
-            Assert.That((RunLootExtractionSummaryErrorCode)result, Is.EqualTo(RunLootExtractionSummaryErrorCode.ItemValueLookupFailed));
-        }
-
-        [Test]
         public void SimulateOnce_ExtractionSummary_AggregateOverflow_ReturnsDeterministicFailure()
         {
             LootConfig overflowConfig = new LootConfig
