@@ -799,7 +799,7 @@ namespace DungeonBuilder.M0
 
             string format = Content != null
                 ? Content.GetString("ui.run.loot_summary_format", "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}")
-                : "Loot: table={0} success={1} rolls={2} items={3} wv={4} rc={5} twv={6}";
+                : "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             int itemCount = loot.GeneratedItemIds != null ? loot.GeneratedItemIds.Length : 0;
             return string.Format(format, loot.LootTableId, loot.ResolverSuccess, loot.ResolverErrorCode, loot.RollCount, itemCount, loot.TotalGeneratedWorldValue, loot.TotalGeneratedReserveCost, loot.TotalGeneratedTradeableWorldValue);
         }
