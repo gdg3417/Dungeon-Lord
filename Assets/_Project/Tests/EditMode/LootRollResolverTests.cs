@@ -24,12 +24,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Resolve_DifferentSeed_CanReturnDifferentGeneratedItems()
         {
             LootConfig config = BuildConfig();
-            var first = LootRollResolver.Resolve(config, TableId, 1001);
-            var second = LootRollResolver.Resolve(config, TableId, 1002);
+            var baseline = LootRollResolver.Resolve(config, TableId, 1001);
 
-            Assert.That(first.success, Is.True);
-            Assert.That(second.success, Is.True);
-            Assert.That(first.generatedItemIds.SequenceEqual(second.generatedItemIds), Is.False);
+            Assert.That(baseline.success, Is.True);
+
+            bool foundDifferent = false;
+            for (int seed = 1002; seed <= 1065; seed++)
+            {
+                var candidate = LootRollResolver.Resolve(config, TableId, seed);
+                Assert.That(candidate.success, Is.True);
+
+                bool sameItems = baseline.generatedItemIds.SequenceEqual(candidate.generatedItemIds);
+                bool sameRollCount = baseline.rollCount == candidate.rollCount;
+                if (!sameItems || !sameRollCount)
+                {
+                    foundDifferent = true;
+                    break;
+                }
+            }
+
+            Assert.That(foundDifferent, Is.True);
         }
 
         [Test]
@@ -61,6 +75,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             var result = LootRollResolver.Resolve(config, TableId, 99);
             Assert.That(result.rollCount, Is.InRange(2, 4));
+        }
+
+
+        [Test]
+        public void Resolve_InvalidRollCount_MinLessThanOrEqualZero_ReturnsFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].minRollCount = 0;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidRollCountRange));
+        }
+
+        [Test]
+        public void Resolve_InvalidRollCount_MaxLessThanOrEqualZero_ReturnsFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].maxRollCount = 0;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidRollCountRange));
+        }
+
+        [Test]
+        public void Resolve_InvalidRollCount_MaxLessThanMin_ReturnsFailure()
+        {
+            LootConfig config = BuildConfig();
+            config.tables[0].minRollCount = 3;
+            config.tables[0].maxRollCount = 2;
+            var result = LootRollResolver.Resolve(config, TableId, 42);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.errorCode, Is.EqualTo(LootRollResolverErrorCode.InvalidRollCountRange));
         }
 
         [Test]

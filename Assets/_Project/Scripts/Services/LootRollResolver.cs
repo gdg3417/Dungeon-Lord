@@ -11,7 +11,8 @@ namespace DungeonBuilder.M0
         TableNotFound = 3,
         PoolEmptyNotAllowed = 4,
         ItemNotFound = 5,
-        InvalidWeight = 6
+        InvalidWeight = 6,
+        InvalidRollCountRange = 7
     }
 
     public readonly struct LootRollResolverResult
@@ -80,6 +81,11 @@ namespace DungeonBuilder.M0
                 return Failure(tableId, seed, LootRollResolverErrorCode.TableNotFound);
             }
 
+            if (table.minRollCount <= 0 || table.maxRollCount <= 0 || table.maxRollCount < table.minRollCount)
+            {
+                return Failure(tableId, seed, LootRollResolverErrorCode.InvalidRollCountRange);
+            }
+
             LootTablePoolEntry[] pool = table.pool ?? Array.Empty<LootTablePoolEntry>();
             if (pool.Length == 0)
             {
@@ -121,8 +127,8 @@ namespace DungeonBuilder.M0
                 totalWeight += entry.weight;
             }
 
-            var random = new Random(CombineSeed(seed, tableId));
-            int rollCount = random.Next(table.minRollCount, table.maxRollCount + 1);
+            var rng = new DeterministicRng(CombineSeed(seed, tableId));
+            int rollCount = rng.NextInclusive(table.minRollCount, table.maxRollCount);
 
             var generatedItemIds = new List<string>(rollCount);
             int totalGeneratedWorldValue = 0;
@@ -131,7 +137,7 @@ namespace DungeonBuilder.M0
 
             for (int i = 0; i < rollCount; i++)
             {
-                LootTablePoolEntry selectedEntry = SelectEntry(pool, totalWeight, random.NextDouble());
+                LootTablePoolEntry selectedEntry = SelectEntry(pool, totalWeight, rng.NextDouble());
                 LootItemRecord selectedItem = itemById[selectedEntry.itemId];
                 generatedItemIds.Add(selectedItem.id);
 
@@ -143,14 +149,7 @@ namespace DungeonBuilder.M0
                 }
             }
 
-            return Success(
-                tableId,
-                seed,
-                rollCount,
-                generatedItemIds,
-                totalGeneratedWorldValue,
-                totalGeneratedReserveCost,
-                totalGeneratedTradeableWorldValue);
+            return Success(tableId, seed, rollCount, generatedItemIds, totalGeneratedWorldValue, totalGeneratedReserveCost, totalGeneratedTradeableWorldValue);
         }
 
         private static int CombineSeed(int seed, string tableId)
@@ -193,6 +192,48 @@ namespace DungeonBuilder.M0
         private static LootRollResolverResult Success(string tableId, int seed, int rollCount, IReadOnlyList<string> generatedItemIds, int worldValue, int reserveCost, int tradeableWorldValue)
         {
             return new LootRollResolverResult(tableId, seed, rollCount, generatedItemIds, worldValue, reserveCost, tradeableWorldValue, true, LootRollResolverErrorCode.None);
+        }
+
+        private struct DeterministicRng
+        {
+            private uint state;
+
+            public DeterministicRng(int seed)
+            {
+                state = unchecked((uint)seed) + 0x9E3779B9u;
+                if (state == 0u)
+                {
+                    state = 1u;
+                }
+            }
+
+            public double NextDouble()
+            {
+                uint value = NextUInt();
+                return value / (double)uint.MaxValue;
+            }
+
+            public int NextInclusive(int minValue, int maxValue)
+            {
+                uint range = (uint)(maxValue - minValue + 1);
+                uint scaled = (uint)(NextDouble() * range);
+                if (scaled >= range)
+                {
+                    scaled = range - 1;
+                }
+
+                return minValue + (int)scaled;
+            }
+
+            private uint NextUInt()
+            {
+                uint x = state;
+                x ^= x << 13;
+                x ^= x >> 17;
+                x ^= x << 5;
+                state = x;
+                return x;
+            }
         }
     }
 }
