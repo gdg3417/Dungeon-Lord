@@ -407,7 +407,11 @@ namespace DungeonBuilder.M0
                 string.IsNullOrWhiteSpace(config.LootExtractionRoundingPolicyId) ||
                 string.IsNullOrWhiteSpace(config.LootHeatCoolingRuleSourceId) ||
                 config.LootHeatCoolingPerTradeableWorldValue < 0d ||
-                config.MaxLootHeatCoolingPerRun < 0d)
+                config.MaxLootHeatCoolingPerRun < 0d ||
+                double.IsNaN(config.LootHeatCoolingPerTradeableWorldValue) ||
+                double.IsInfinity(config.LootHeatCoolingPerTradeableWorldValue) ||
+                double.IsNaN(config.MaxLootHeatCoolingPerRun) ||
+                double.IsInfinity(config.MaxLootHeatCoolingPerRun))
             {
                 return false;
             }
@@ -644,7 +648,9 @@ namespace DungeonBuilder.M0
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
             RunSimulationConfig config = _runSimulationService.Config;
-            int deterministicSeed = unchecked((sequence * 397) ^ (int)tickStarted);
+            int deterministicSeed = outcome.LootExtractionSummary != null
+                ? outcome.LootExtractionSummary.DeterministicSeed
+                : sequence;
             RunLootHeatCoolingSummary coolingSummary = LootHeatCoolingResolver.Resolve(config, outcome.LootExtractionSummary, CurrentHeat, deterministicSeed);
             outcome.LootHeatCoolingSummary = coolingSummary;
             if (coolingSummary.RuleResolved && coolingSummary.AppliedHeatDelta != 0d)
@@ -777,7 +783,6 @@ namespace DungeonBuilder.M0
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
-            RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 return;
             }
@@ -812,7 +817,6 @@ namespace DungeonBuilder.M0
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
-            RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 return;
             }

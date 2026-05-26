@@ -462,6 +462,19 @@ namespace DungeonBuilder.Tests.EditMode
                                 TotalExtractedWorldValue = 3,
                                 TotalExtractedReserveCost = 1,
                                 TotalExtractedTradeableWorldValue = 3
+                            },
+                            LootHeatCoolingSummary = new RunLootHeatCoolingSummary
+                            {
+                                RuleSourceId = "run.loot_heat_cooling.rule.v1",
+                                DeterministicSeed = 777,
+                                RuleResolved = false,
+                                DeterministicErrorCode = (int)RunLootHeatCoolingSummaryErrorCode.ExtractionSummaryMissingOrFailed,
+                                ExtractedTradeableWorldValueUsed = 0d,
+                                CoolingPerTradeableWorldValueUsed = 0.1d,
+                                UnclampedHeatDelta = 0d,
+                                AppliedHeatDelta = 0d,
+                                HeatBeforeCooling = 20d,
+                                HeatAfterCooling = 20d
                             }
                         },
                         new RunOutcomeRecord
@@ -519,6 +532,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(11));
             Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedReserveCost, Is.EqualTo(3));
             Assert.That(loaded.runHistory.LatestOutcome.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.EqualTo(3));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.RuleResolved, Is.True);
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootHeatCoolingSummaryErrorCode.None));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.ExtractedTradeableWorldValueUsed, Is.EqualTo(3d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.CoolingPerTradeableWorldValueUsed, Is.EqualTo(0.1d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.UnclampedHeatDelta, Is.EqualTo(-0.3d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.AppliedHeatDelta, Is.EqualTo(-0.3d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(10d));
+            Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(9.7d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.RuleResolved, Is.False);
         }
 
         [Test]
@@ -875,6 +897,94 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(isValid, Is.False);
         }
 
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidLootHeatCoolingConfigNumbers()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.LootHeatCoolingPerTradeableWorldValue = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.MaxLootHeatCoolingPerRun = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.LootHeatCoolingRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.MaxLootHeatCoolingPerRun = 0d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.True);
+        }
+
+        [Test]
+        public void RefreshRunLine_HeatCoolingSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootHeatCoolingNullContentTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-heat",
+                                ReasonKey = "run.reason.success",
+                                LootHeatCoolingSummary = new RunLootHeatCoolingSummary { RuleResolved = true, DeterministicErrorCode = (int)RunLootHeatCoolingSummaryErrorCode.None }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatCoolingLine, Is.EqualTo("ui.run.heat_cooling_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_EmptyFeedback_ClearsStaleHeatCoolingLine()
+        {
+            var go = new GameObject("GameRootHeatCoolingStaleTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-a",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new[] { "run.feedback.success" },
+                                LootHeatCoolingSummary = new RunLootHeatCoolingSummary { RuleResolved = true }
+                            },
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-b",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                LootHeatCoolingSummary = null
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatCoolingLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
         [Test]
         public void SimulateOnce_SurvivalSummary_MaxPartyAboveAllowed_ReturnsInvalidPartySizeRange()
         {

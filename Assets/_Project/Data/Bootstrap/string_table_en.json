@@ -261,7 +261,7 @@
     },
     {
       "key": "ui.run.heat_cooling_summary_format",
-      "value": "Heat cooling: resolved={0} error={1} extractedTradeable={2:0.###} perValue={3:0.###} rawDelta={4:0.###} appliedDelta={5:0.###} heatBefore={6:0.###} heatAfter={7:0.###}"
+      "text": "Heat cooling: resolved={0} error={1} extractedTradeable={2:0.###} perValue={3:0.###} rawDelta={4:0.###} appliedDelta={5:0.###} heatBefore={6:0.###} heatAfter={7:0.###}"
     }
   ]
 }
