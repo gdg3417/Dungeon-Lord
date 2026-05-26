@@ -1005,6 +1005,9 @@ namespace DungeonBuilder.Tests.EditMode
                 });
 
                 root.RefreshRunLine();
+                Assert.That(root.RunHeatCoolingLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
                 Assert.That(root.RunHeatCoolingLine, Is.EqualTo("ui.run.heat_cooling_summary_format"));
                 root.SelectNextRunOutcome();
                 root.RefreshRunLine();
@@ -1074,6 +1077,39 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.CurrentHeat, Is.EqualTo(20d));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(20d));
                 Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(20d));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void SimulateRunOnce_CoolingClampToZero_RecordsActualAppliedDelta()
+        {
+            var go = new GameObject("GameRootSimulateRunOnceCoolingClamp");
+            try
+            {
+                RunSimulationConfig config = BuildConfig();
+                config.LootHeatCoolingPerTradeableWorldValue = 10d;
+                config.MaxLootHeatCoolingPerRun = 100d;
+
+                var root = go.AddComponent<GameRoot>();
+                SetPrivateField(root, "_runSimulationService", new RunSimulationService(config, BuildLootConfig()));
+                SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_clamp.json", useAtomicWrites = false }));
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 1d);
+                SetSave(root, new SaveData
+                {
+                    totalTicks = 10,
+                    structureRuntime = new StructureRuntimeState { Heat = 1d, ManaReserve = 50d, IsHeatCrisisActive = false },
+                    runHistory = new RunHistoryState { NextRunSequence = 1 }
+                });
+
+                bool ok = root.SimulateRunOnce();
+                Assert.That(ok, Is.True);
+                RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
+                Assert.That(root.CurrentHeat, Is.EqualTo(0d));
+                Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(0d));
+                Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(0d));
+                Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.EqualTo(-1d));
+                Assert.That(latest.LootHeatCoolingSummary.UnclampedHeatDelta, Is.LessThan(-1d));
             }
             finally { Object.DestroyImmediate(go); }
         }

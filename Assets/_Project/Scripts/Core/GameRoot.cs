@@ -657,6 +657,7 @@ namespace DungeonBuilder.M0
             {
                 ApplyHeatDelta(coolingSummary.AppliedHeatDelta);
                 coolingSummary.HeatAfterCooling = CurrentHeat;
+                coolingSummary.AppliedHeatDelta = CurrentHeat - coolingSummary.HeatBeforeCooling;
             }
 
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
