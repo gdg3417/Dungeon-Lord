@@ -54,6 +54,7 @@ namespace DungeonBuilder.M0
         public string RunLootLine { get; private set; } = string.Empty;
         public string RunSurvivalLine { get; private set; } = string.Empty;
         public string RunExtractionLine { get; private set; } = string.Empty;
+        public string RunHeatCoolingLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -403,7 +404,10 @@ namespace DungeonBuilder.M0
             }
 
             if (string.IsNullOrWhiteSpace(config.LootExtractionRuleSourceId) ||
-                string.IsNullOrWhiteSpace(config.LootExtractionRoundingPolicyId))
+                string.IsNullOrWhiteSpace(config.LootExtractionRoundingPolicyId) ||
+                string.IsNullOrWhiteSpace(config.LootHeatCoolingRuleSourceId) ||
+                config.LootHeatCoolingPerTradeableWorldValue < 0d ||
+                config.MaxLootHeatCoolingPerRun < 0d)
             {
                 return false;
             }
@@ -640,6 +644,15 @@ namespace DungeonBuilder.M0
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
             RunSimulationConfig config = _runSimulationService.Config;
+            int deterministicSeed = unchecked((sequence * 397) ^ (int)tickStarted);
+            RunLootHeatCoolingSummary coolingSummary = LootHeatCoolingResolver.Resolve(config, outcome.LootExtractionSummary, CurrentHeat, deterministicSeed);
+            outcome.LootHeatCoolingSummary = coolingSummary;
+            if (coolingSummary.RuleResolved && coolingSummary.AppliedHeatDelta != 0d)
+            {
+                ApplyHeatDelta(coolingSummary.AppliedHeatDelta);
+                coolingSummary.HeatAfterCooling = CurrentHeat;
+            }
+
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
             SelectLatestRunOutcome();
@@ -764,6 +777,8 @@ namespace DungeonBuilder.M0
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
+            RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 return;
             }
 
@@ -797,6 +812,8 @@ namespace DungeonBuilder.M0
                 RunLootLine = BuildLootLine(outcome);
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
+            RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 return;
             }
 
@@ -814,6 +831,7 @@ namespace DungeonBuilder.M0
             RunLootLine = BuildLootLine(outcome);
             RunSurvivalLine = BuildSurvivalLine(outcome);
             RunExtractionLine = BuildExtractionLine(outcome);
+            RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
         }
 
 
@@ -876,6 +894,29 @@ namespace DungeonBuilder.M0
             int extractedCount = extraction.ExtractedItemIds != null ? extraction.ExtractedItemIds.Length : 0;
             int lostCount = extraction.LostItemIds != null ? extraction.LostItemIds.Length : 0;
             return string.Format(format, extraction.RuleResolved, extraction.DeterministicErrorCode, extraction.SurvivorRatioUsed, extraction.GeneratedItemCount, extractedCount, lostCount, extraction.TotalExtractedWorldValue, extraction.TotalExtractedReserveCost, extraction.TotalExtractedTradeableWorldValue);
+        }
+
+        private string BuildHeatCoolingLine(RunOutcomeRecord outcome)
+        {
+            RunLootHeatCoolingSummary cooling = outcome != null ? outcome.LootHeatCoolingSummary : null;
+            if (cooling == null)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.heat_cooling_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, cooling.RuleResolved, cooling.DeterministicErrorCode, cooling.ExtractedTradeableWorldValueUsed, cooling.CoolingPerTradeableWorldValueUsed, cooling.UnclampedHeatDelta, cooling.AppliedHeatDelta, cooling.HeatBeforeCooling, cooling.HeatAfterCooling);
         }
         private bool TryGetRunHistoryCount(out int historyCount)
         {

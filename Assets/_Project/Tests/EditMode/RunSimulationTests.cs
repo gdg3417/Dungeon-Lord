@@ -37,7 +37,10 @@ namespace DungeonBuilder.Tests.EditMode
                 SuccessSurvivorRatio = 1d,
                 FailureSurvivorRatio = 0d,
                 LootExtractionRoundingPolicyId = "loot_extraction.round_floor",
-                LootExtractionRuleSourceId = "run.loot_extraction.rule.v1"
+                LootExtractionRuleSourceId = "run.loot_extraction.rule.v1",
+                LootHeatCoolingRuleSourceId = "run.loot_heat_cooling.rule.v1",
+                LootHeatCoolingPerTradeableWorldValue = 0.1d,
+                MaxLootHeatCoolingPerRun = 25d
             };
         }
 
