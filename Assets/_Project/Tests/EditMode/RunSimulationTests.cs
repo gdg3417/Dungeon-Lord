@@ -15,6 +15,12 @@ namespace DungeonBuilder.Tests.EditMode
                 ?.SetValue(root, save);
         }
 
+        private static void SetPrivateField<T>(GameRoot root, string fieldName, T value)
+        {
+            typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(root, value);
+        }
+
         private static RunSimulationConfig BuildConfig()
         {
             return new RunSimulationConfig
@@ -426,6 +432,19 @@ namespace DungeonBuilder.Tests.EditMode
                             TotalExtractedWorldValue = 11,
                             TotalExtractedReserveCost = 3,
                             TotalExtractedTradeableWorldValue = 3
+                        },
+                        LootHeatCoolingSummary = new RunLootHeatCoolingSummary
+                        {
+                            RuleSourceId = "run.loot_heat_cooling.rule.v1",
+                            DeterministicSeed = 12345,
+                            RuleResolved = true,
+                            DeterministicErrorCode = (int)RunLootHeatCoolingSummaryErrorCode.None,
+                            ExtractedTradeableWorldValueUsed = 3d,
+                            CoolingPerTradeableWorldValueUsed = 0.1d,
+                            UnclampedHeatDelta = -0.3d,
+                            AppliedHeatDelta = -0.3d,
+                            HeatBeforeCooling = 10d,
+                            HeatAfterCooling = 9.7d
                         }
                     },
                     RecentOutcomes = new[]
@@ -541,6 +560,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(10d));
             Assert.That(loaded.runHistory.LatestOutcome.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(9.7d));
             Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.RuleResolved, Is.False);
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootHeatCoolingSummaryErrorCode.ExtractionSummaryMissingOrFailed));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.ExtractedTradeableWorldValueUsed, Is.EqualTo(0d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.CoolingPerTradeableWorldValueUsed, Is.EqualTo(0.1d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.UnclampedHeatDelta, Is.EqualTo(0d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.AppliedHeatDelta, Is.EqualTo(0d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(20d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(20d));
         }
 
         [Test]
@@ -979,9 +1005,75 @@ namespace DungeonBuilder.Tests.EditMode
                 });
 
                 root.RefreshRunLine();
-                root.SelectPreviousRunOutcome();
+                Assert.That(root.RunHeatCoolingLine, Is.EqualTo("ui.run.heat_cooling_summary_format"));
+                root.SelectNextRunOutcome();
                 root.RefreshRunLine();
                 Assert.That(root.RunHeatCoolingLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void SimulateRunOnce_AttachesCoolingSummary_AndAppliesHeat_WhenResolvedAndNonZero()
+        {
+            var go = new GameObject("GameRootSimulateRunOnceCoolingApplied");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetPrivateField(root, "_runSimulationService", new RunSimulationService(BuildConfig(), BuildLootConfig()));
+                SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_applied.json", useAtomicWrites = false }));
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 20d);
+
+                SetSave(root, new SaveData
+                {
+                    totalTicks = 10,
+                    structureRuntime = new StructureRuntimeState { Heat = 20d, ManaReserve = 50d, IsHeatCrisisActive = false },
+                    runHistory = new RunHistoryState { NextRunSequence = 1 }
+                });
+
+                bool ok = root.SimulateRunOnce();
+                Assert.That(ok, Is.True);
+                RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
+                Assert.That(latest, Is.Not.Null);
+                Assert.That(latest.LootHeatCoolingSummary, Is.Not.Null);
+                Assert.That(latest.LootHeatCoolingSummary.RuleResolved, Is.True);
+                Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.LessThan(0d));
+                Assert.That(root.CurrentHeat, Is.EqualTo(20d + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
+                Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(root.CurrentHeat).Within(1e-9));
+                Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(root.CurrentHeat).Within(1e-9));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void SimulateRunOnce_DoesNotChangeHeat_WhenExtractionMissingOrFailed()
+        {
+            var go = new GameObject("GameRootSimulateRunOnceCoolingNotApplied");
+            try
+            {
+                RunSimulationConfig config = BuildConfig();
+                config.LootTableId = string.Empty;
+
+                var root = go.AddComponent<GameRoot>();
+                SetPrivateField(root, "_runSimulationService", new RunSimulationService(config, BuildLootConfig()));
+                SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_not_applied.json", useAtomicWrites = false }));
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 20d);
+                SetSave(root, new SaveData
+                {
+                    totalTicks = 10,
+                    structureRuntime = new StructureRuntimeState { Heat = 20d, ManaReserve = 50d, IsHeatCrisisActive = false },
+                    runHistory = new RunHistoryState { NextRunSequence = 1 }
+                });
+
+                bool ok = root.SimulateRunOnce();
+                Assert.That(ok, Is.True);
+                RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
+                Assert.That(latest.LootHeatCoolingSummary, Is.Not.Null);
+                Assert.That(latest.LootHeatCoolingSummary.RuleResolved, Is.False);
+                Assert.That(latest.LootHeatCoolingSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootHeatCoolingSummaryErrorCode.ExtractionSummaryMissingOrFailed));
+                Assert.That(root.CurrentHeat, Is.EqualTo(20d));
+                Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(20d));
+                Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(20d));
             }
             finally { Object.DestroyImmediate(go); }
         }
