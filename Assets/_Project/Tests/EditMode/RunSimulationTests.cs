@@ -809,6 +809,53 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void RefreshRunLine_RunDisplay_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootRunDisplayKeyFallbackTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-1",
+                                Success = true,
+                                Score = 12,
+                                ReasonKey = "run.reason.success",
+                                HasBreakdown = true,
+                                FinalChance = 0.7d,
+                                SuccessThresholdUsed = 0.5d,
+                                FeedbackTagKeys = new[] { "run.feedback.success" },
+                                LootSummary = new RunLootSummary
+                                {
+                                    LootTableId = "loot.table.run.basic",
+                                    ResolverSuccess = true,
+                                    ResolverErrorCode = (int)LootRollResolverErrorCode.None
+                                }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunLine, Is.EqualTo("ui.run.latest_format"));
+                Assert.That(root.RunHistoryLine, Is.EqualTo("ui.run.history_position_format"));
+                Assert.That(root.RunBreakdownLine, Is.EqualTo("ui.run.breakdown_format"));
+                Assert.That(root.RunFeedbackLine, Is.EqualTo("ui.run.feedback_format"));
+                Assert.That(root.RunLootLine, Is.EqualTo("ui.run.loot_summary_format"));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void RefreshRunLine_ExtractionSummary_WithNullContent_UsesKeyFallbackSafely()
         {
             var go = new GameObject("GameRootExtractionKeyFallbackTest");

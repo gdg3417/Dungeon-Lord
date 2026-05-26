@@ -769,11 +769,14 @@ namespace DungeonBuilder.M0
                 _selectedRunHistoryIndex = -1;
             }
 
+            const string historyFormatKey = "ui.run.history_position_format";
             string historyFormat = Content != null
-                ? Content.GetString("ui.run.history_position_format", "Run history: {0}/{1}")
-                : "Run history: {0}/{1}";
+                ? Content.GetString(historyFormatKey, historyFormatKey)
+                : historyFormatKey;
             int selectedPosition = _selectedRunHistoryIndex >= 0 ? _selectedRunHistoryIndex + 1 : 0;
-            RunHistoryLine = string.Format(historyFormat, selectedPosition, historyCount);
+            RunHistoryLine = string.Equals(historyFormat, historyFormatKey, StringComparison.Ordinal)
+                ? historyFormatKey
+                : string.Format(historyFormat, selectedPosition, historyCount);
 
             RunOutcomeRecord outcome = GetSelectedRunOutcome();
             if (outcome == null)
@@ -789,15 +792,18 @@ namespace DungeonBuilder.M0
             }
 
             string reason = Content != null ? Content.GetString(outcome.ReasonKey, outcome.ReasonKey) : outcome.ReasonKey;
+            const string latestFormatKey = "ui.run.latest_format";
             string format = Content != null
-                ? Content.GetString("ui.run.latest_format", "Run: {0} success={1} score={2} reason={3}")
-                : "Run: {0} success={1} score={2} reason={3}";
-            RunLine = string.Format(
-                format,
-                outcome.RunId,
-                outcome.Success,
-                outcome.Score,
-                reason);
+                ? Content.GetString(latestFormatKey, latestFormatKey)
+                : latestFormatKey;
+            RunLine = string.Equals(format, latestFormatKey, StringComparison.Ordinal)
+                ? latestFormatKey
+                : string.Format(
+                    format,
+                    outcome.RunId,
+                    outcome.Success,
+                    outcome.Score,
+                    reason);
 
             if (!outcome.HasBreakdown)
             {
@@ -805,10 +811,13 @@ namespace DungeonBuilder.M0
             }
             else
             {
+                const string breakdownFormatKey = "ui.run.breakdown_format";
                 string breakdownFormat = Content != null
-                    ? Content.GetString("ui.run.breakdown_format", "Chance: {0:0.00} / threshold {1:0.00}")
-                    : "Chance: {0:0.00} / threshold {1:0.00}";
-                RunBreakdownLine = string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
+                    ? Content.GetString(breakdownFormatKey, breakdownFormatKey)
+                    : breakdownFormatKey;
+                RunBreakdownLine = string.Equals(breakdownFormat, breakdownFormatKey, StringComparison.Ordinal)
+                    ? breakdownFormatKey
+                    : string.Format(breakdownFormat, outcome.FinalChance, outcome.SuccessThresholdUsed);
             }
 
             string[] feedbackTags = outcome.FeedbackTagKeys ?? Array.Empty<string>();
@@ -829,10 +838,13 @@ namespace DungeonBuilder.M0
                 localizedTags[i] = Content != null ? Content.GetString(key, key) : key;
             }
 
+            const string feedbackFormatKey = "ui.run.feedback_format";
             string feedbackFormat = Content != null
-                ? Content.GetString("ui.run.feedback_format", "Feedback: {0}")
-                : "Feedback: {0}";
-            RunFeedbackLine = string.Format(feedbackFormat, string.Join(", ", localizedTags));
+                ? Content.GetString(feedbackFormatKey, feedbackFormatKey)
+                : feedbackFormatKey;
+            RunFeedbackLine = string.Equals(feedbackFormat, feedbackFormatKey, StringComparison.Ordinal)
+                ? feedbackFormatKey
+                : string.Format(feedbackFormat, string.Join(", ", localizedTags));
             RunLootLine = BuildLootLine(outcome);
             RunSurvivalLine = BuildSurvivalLine(outcome);
             RunExtractionLine = BuildExtractionLine(outcome);
@@ -848,9 +860,18 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            string format = Content != null
-                ? Content.GetString("ui.run.loot_summary_format", "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}")
-                : "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
+            const string lootFormatKey = "ui.run.loot_summary_format";
+            if (Content == null)
+            {
+                return lootFormatKey;
+            }
+
+            string format = Content.GetString(lootFormatKey, lootFormatKey);
+            if (string.Equals(format, lootFormatKey, StringComparison.Ordinal))
+            {
+                return lootFormatKey;
+            }
+
             int itemCount = loot.GeneratedItemIds != null ? loot.GeneratedItemIds.Length : 0;
             return string.Format(format, loot.LootTableId, loot.ResolverSuccess, loot.ResolverErrorCode, loot.RollCount, itemCount, loot.TotalGeneratedWorldValue, loot.TotalGeneratedReserveCost, loot.TotalGeneratedTradeableWorldValue);
         }
