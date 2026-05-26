@@ -258,6 +258,10 @@
     {
       "key": "ui.run.extraction_summary_format",
       "text": "Extraction: resolved={0} error={1} ratio={2:0.00} generated={3} extracted={4} lost={5} wv={6} rc={7} twv={8}"
+    },
+    {
+      "key": "ui.run.heat_cooling_summary_format",
+      "text": "Heat cooling: resolved={0} error={1} extractedTradeable={2:0.###} perValue={3:0.###} rawDelta={4:0.###} appliedDelta={5:0.###} heatBefore={6:0.###} heatAfter={7:0.###}"
     }
   ]
 }
