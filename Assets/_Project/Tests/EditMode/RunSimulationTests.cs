@@ -2,6 +2,7 @@ using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -19,6 +20,30 @@ namespace DungeonBuilder.Tests.EditMode
         {
             typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.SetValue(root, value);
+        }
+
+        private static void SetContent(GameRoot root, ContentService content)
+        {
+            typeof(GameRoot).GetField("<Content>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(root, content);
+        }
+
+        private static ContentService BuildRunDisplayContent()
+        {
+            var content = new ContentService();
+            Dictionary<string, string> map = (Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(content);
+
+            map["ui.run.latest_format"] = "Run: {0} success={1} score={2} reason={3}";
+            map["ui.run.history_position_format"] = "Run history: {0}/{1}";
+            map["ui.run.breakdown_format"] = "Chance: {0:0.00} / threshold {1:0.00}";
+            map["ui.run.feedback_format"] = "Feedback: {0}";
+            map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
+            map["run.reason.success"] = "Success";
+            map["run.reason.failed_threshold"] = "Failed due to low projected chance.";
+            map["run.feedback.success"] = "Successful approach";
+            return content;
         }
 
         private static RunSimulationConfig BuildConfig()
@@ -701,6 +726,7 @@ namespace DungeonBuilder.Tests.EditMode
                         }
                     }
                 });
+                SetContent(root, BuildRunDisplayContent());
 
                 root.RefreshRunLine();
                 StringAssert.Contains("error=5", root.RunLootLine);
@@ -1241,6 +1267,7 @@ namespace DungeonBuilder.Tests.EditMode
                         }
                     }
                 });
+                SetContent(root, BuildRunDisplayContent());
 
                 root.RefreshRunLine();
                 Assert.That(root.RunLine, Does.Contain("run-2"));
@@ -1268,6 +1295,7 @@ namespace DungeonBuilder.Tests.EditMode
                         }
                     }
                 });
+                SetContent(root, BuildRunDisplayContent());
 
                 root.RefreshRunLine();
                 Assert.That(root.RunLine, Does.Contain("run-3"));
@@ -1305,6 +1333,7 @@ namespace DungeonBuilder.Tests.EditMode
                         }
                     }
                 });
+                SetContent(root, BuildRunDisplayContent());
 
                 root.RefreshRunLine();
                 root.SelectPreviousRunOutcome();
