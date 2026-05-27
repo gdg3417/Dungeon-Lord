@@ -60,7 +60,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void RunOutcomeRecord_AttractionSummary_RoundTrips_AndLegacyNullRemainsSafe()
+        public void RunOutcomeRecord_AttractionSummary_RoundTrips_WithPopulatedValues()
         {
             var save = new SaveData
             {
@@ -73,7 +73,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     },
                     RecentOutcomes = new[]
                     {
-                        new RunOutcomeRecord { RunId = "run-1", AdventurerAttractionSummary = null },
+                        new RunOutcomeRecord { RunId = "run-1", AdventurerAttractionSummary = new RunAdventurerAttractionSummary { RuleResolved = true, DeterministicErrorCode = 0, AttractionSignalValue = 2d } },
                         new RunOutcomeRecord { RunId = "run-2", AdventurerAttractionSummary = new RunAdventurerAttractionSummary { RuleResolved = true, DeterministicErrorCode = 0, AttractionSignalValue = 10d } }
                     }
                 }
@@ -83,8 +83,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveData loaded = JsonUtility.FromJson<SaveData>(json);
 
             Assert.That(loaded.runHistory.LatestOutcome.AdventurerAttractionSummary, Is.Not.Null);
-            Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary, Is.Null);
+            Assert.That(loaded.runHistory.LatestOutcome.AdventurerAttractionSummary.RuleResolved, Is.True);
+            Assert.That(loaded.runHistory.LatestOutcome.AdventurerAttractionSummary.DeterministicErrorCode, Is.EqualTo(0));
+            Assert.That(loaded.runHistory.LatestOutcome.AdventurerAttractionSummary.AttractionSignalValue, Is.EqualTo(10d));
+            Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary, Is.Not.Null);
+            Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary.RuleResolved, Is.True);
+            Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary.AttractionSignalValue, Is.EqualTo(2d));
             Assert.That(loaded.runHistory.RecentOutcomes[1].AdventurerAttractionSummary.AttractionSignalValue, Is.EqualTo(10d));
+        }
+
+        [Test]
+        public void RunOutcomeRecord_AttractionSummary_LegacyMissingField_DeserializesSafely()
+        {
+            string legacyJson = "{\"runHistory\":{\"LatestOutcome\":{\"RunId\":\"run-2\"},\"RecentOutcomes\":[{\"RunId\":\"run-1\"}]}}";
+            SaveData loaded = JsonUtility.FromJson<SaveData>(legacyJson);
+
+            Assert.That(loaded, Is.Not.Null);
+            Assert.That(loaded.runHistory, Is.Not.Null);
+            Assert.That(loaded.runHistory.LatestOutcome, Is.Not.Null);
+            Assert.That(loaded.runHistory.RecentOutcomes, Is.Not.Null);
+            Assert.That(loaded.runHistory.RecentOutcomes.Length, Is.EqualTo(1));
+
+            RunAdventurerAttractionSummary latest = loaded.runHistory.LatestOutcome.AdventurerAttractionSummary;
+            RunAdventurerAttractionSummary recent = loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary;
+
+            Assert.That(latest, Is.Not.Null);
+            Assert.That(latest.RuleResolved, Is.False);
+            Assert.That(latest.DeterministicErrorCode, Is.EqualTo(0));
+            Assert.That(latest.AttractionSignalValue, Is.EqualTo(0d));
+
+            Assert.That(recent, Is.Not.Null);
+            Assert.That(recent.RuleResolved, Is.False);
+            Assert.That(recent.DeterministicErrorCode, Is.EqualTo(0));
+            Assert.That(recent.AttractionSignalValue, Is.EqualTo(0d));
         }
     }
 }
