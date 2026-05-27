@@ -14,7 +14,7 @@
 - `RefreshRunLine_AdventurerInterestForecastSummary_ValidOutcome_IsDisplayed`
 - `RefreshRunLine_EmptyFeedback_ClearsStaleAdventurerInterestForecastLine`
 
-## Tests run
+## Tests to run before merge
 - RunSimulationTests
 - AdventurerInterestForecastResolverTests
 - AdventurerAttractionResolverTests

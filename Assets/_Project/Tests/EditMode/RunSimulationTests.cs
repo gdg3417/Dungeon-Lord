@@ -1331,6 +1331,38 @@ namespace DungeonBuilder.Tests.EditMode
             finally { Object.DestroyImmediate(go); }
         }
 
+
+        [Test]
+        public void RefreshRunLine_AdventurerInterestForecastSummary_MissingLocalizationKey_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootForecastMissingKeyTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-forecast",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerInterestForecastSummary = new RunAdventurerInterestForecastSummary { RuleResolved = true }
+                            }
+                        }
+                    }
+                });
+                SetContent(root, new ContentService());
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo("ui.run.adventurer_interest_forecast_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
         [Test]
         public void RefreshRunLine_AdventurerInterestForecastSummary_ValidOutcome_IsDisplayed()
         {
