@@ -56,6 +56,7 @@ namespace DungeonBuilder.M0
         public string RunExtractionLine { get; private set; } = string.Empty;
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
+        public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -809,6 +810,7 @@ namespace DungeonBuilder.M0
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
+                RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 return;
             }
 
@@ -850,6 +852,7 @@ namespace DungeonBuilder.M0
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
+                RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 return;
             }
 
@@ -872,6 +875,7 @@ namespace DungeonBuilder.M0
             RunExtractionLine = BuildExtractionLine(outcome);
             RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
             RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
+            RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
         }
 
 
@@ -990,6 +994,30 @@ namespace DungeonBuilder.M0
 
             return string.Format(format, attraction.RuleResolved, attraction.DeterministicErrorCode, attraction.ExtractedWorldValueUsed, attraction.AttractionPerExtractedWorldValueUsed, attraction.AttractionSignalValue);
         }
+
+        private string BuildAdventurerInterestForecastLine(RunOutcomeRecord outcome)
+        {
+            RunAdventurerInterestForecastSummary forecast = outcome != null ? outcome.AdventurerInterestForecastSummary : null;
+            if (forecast == null)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.adventurer_interest_forecast_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, forecast.RuleResolved, forecast.DeterministicErrorCode, forecast.AttractionSignalUsed, forecast.ForecastInterestScore, forecast.ForecastBandId);
+        }
+
         private bool TryGetRunHistoryCount(out int historyCount)
         {
             historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;

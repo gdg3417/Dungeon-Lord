@@ -61,6 +61,7 @@ namespace DungeonBuilder.M0
             string runExtraction = _root.RunExtractionLine;
             string runHeatCooling = _root.RunHeatCoolingLine;
             string runAdventurerAttraction = _root.RunAdventurerAttractionLine;
+            string runAdventurerInterestForecast = _root.RunAdventurerInterestForecastLine;
             string hint = _root.DevPanelEnabled
                 ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
                 : string.Empty;
@@ -85,6 +86,7 @@ namespace DungeonBuilder.M0
                    runExtraction + "\n" +
                    runHeatCooling + "\n" +
                    runAdventurerAttraction + "\n" +
+                   runAdventurerInterestForecast + "\n" +
                    (string.IsNullOrEmpty(hint) ? string.Empty : ("\n" + hint)) + "\n" +
                    (string.IsNullOrEmpty(diagnosticsHint) ? string.Empty : diagnosticsHint))
                 : (build + "\n" +
@@ -106,6 +108,7 @@ namespace DungeonBuilder.M0
                    runExtraction + "\n" +
                    runHeatCooling + "\n" +
                    runAdventurerAttraction + "\n" +
+                   runAdventurerInterestForecast + "\n" +
                    structureState + "\n" +
                    (string.IsNullOrEmpty(banner)
                        ? string.Empty

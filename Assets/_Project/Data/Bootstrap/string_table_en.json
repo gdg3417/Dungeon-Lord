@@ -270,6 +270,10 @@
     {
       "key": "ui.run.adventurer_attraction_summary_format",
       "text": "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}"
+    },
+    {
+      "key": "ui.run.adventurer_interest_forecast_summary_format",
+      "text": "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}"
     }
   ]
 }
