@@ -55,6 +55,7 @@ namespace DungeonBuilder.M0
         public string RunSurvivalLine { get; private set; } = string.Empty;
         public string RunExtractionLine { get; private set; } = string.Empty;
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
+        public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -792,6 +793,7 @@ namespace DungeonBuilder.M0
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 return;
             }
 
@@ -832,6 +834,7 @@ namespace DungeonBuilder.M0
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 return;
             }
 
@@ -853,6 +856,7 @@ namespace DungeonBuilder.M0
             RunSurvivalLine = BuildSurvivalLine(outcome);
             RunExtractionLine = BuildExtractionLine(outcome);
             RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+            RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
         }
 
 
@@ -947,6 +951,29 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, cooling.RuleResolved, cooling.DeterministicErrorCode, cooling.ExtractedTradeableWorldValueUsed, cooling.CoolingPerTradeableWorldValueUsed, cooling.UnclampedHeatDelta, cooling.AppliedHeatDelta, cooling.HeatBeforeCooling, cooling.HeatAfterCooling);
+        }
+
+        private string BuildAdventurerAttractionLine(RunOutcomeRecord outcome)
+        {
+            RunAdventurerAttractionSummary attraction = outcome != null ? outcome.AdventurerAttractionSummary : null;
+            if (attraction == null)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.adventurer_attraction_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, attraction.RuleResolved, attraction.DeterministicErrorCode, attraction.ExtractedWorldValueUsed, attraction.AttractionPerExtractedWorldValueUsed, attraction.AttractionSignalValue);
         }
         private bool TryGetRunHistoryCount(out int historyCount)
         {

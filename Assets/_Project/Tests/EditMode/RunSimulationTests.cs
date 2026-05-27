@@ -40,6 +40,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.breakdown_format"] = "Chance: {0:0.00} / threshold {1:0.00}";
             map["ui.run.feedback_format"] = "Feedback: {0}";
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
+            map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
             map["run.reason.success"] = "Success";
             map["run.reason.failed_threshold"] = "Failed due to low projected chance.";
             map["run.feedback.success"] = "Successful approach";
@@ -800,6 +801,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.RunLootLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunSurvivalLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunExtractionLine, Is.EqualTo(string.Empty));
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo(string.Empty));
             }
             finally
             {
@@ -1096,6 +1098,106 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void RefreshRunLine_AdventurerAttractionSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootAttractionNullContentTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-attraction",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerAttractionSummary = new RunAdventurerAttractionSummary { RuleResolved = true }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo("ui.run.adventurer_attraction_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerAttractionSummary_MissingLocalizationKey_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootAttractionMissingKeyTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-attraction",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerAttractionSummary = new RunAdventurerAttractionSummary { RuleResolved = true }
+                            }
+                        }
+                    }
+                });
+                SetContent(root, new ContentService());
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo("ui.run.adventurer_attraction_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerAttractionSummary_ValidOutcome_IsDisplayed()
+        {
+            var go = new GameObject("GameRootAttractionDisplayTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-attraction",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerAttractionSummary = new RunAdventurerAttractionSummary
+                                {
+                                    RuleResolved = true,
+                                    DeterministicErrorCode = (int)RunAdventurerAttractionSummaryErrorCode.None,
+                                    ExtractedWorldValueUsed = 11,
+                                    AttractionPerExtractedWorldValueUsed = 2d,
+                                    AttractionSignalValue = 22d
+                                }
+                            }
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+                StringAssert.Contains("resolved=True", root.RunAdventurerAttractionLine);
+                StringAssert.Contains("signal=22", root.RunAdventurerAttractionLine);
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void RefreshRunLine_EmptyFeedback_ClearsStaleHeatCoolingLine()
         {
             var go = new GameObject("GameRootHeatCoolingStaleTest");
@@ -1134,6 +1236,49 @@ namespace DungeonBuilder.Tests.EditMode
                 root.SelectNextRunOutcome();
                 root.RefreshRunLine();
                 Assert.That(root.RunHeatCoolingLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_EmptyFeedback_ClearsStaleAdventurerAttractionLine()
+        {
+            var go = new GameObject("GameRootAttractionStaleTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-a",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new[] { "run.feedback.success" },
+                                AdventurerAttractionSummary = new RunAdventurerAttractionSummary { RuleResolved = true }
+                            },
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-b",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerAttractionSummary = null
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo("ui.run.adventurer_attraction_summary_format"));
+                root.SelectNextRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo(string.Empty));
             }
             finally { Object.DestroyImmediate(go); }
         }
