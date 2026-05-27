@@ -11,6 +11,7 @@
 
 ## Tests added
 - `RefreshRunLine_AdventurerInterestForecastSummary_WithNullContent_UsesKeyFallbackSafely`
+- `RefreshRunLine_AdventurerInterestForecastSummary_MissingLocalizationKey_UsesKeyFallbackSafely`
 - `RefreshRunLine_AdventurerInterestForecastSummary_ValidOutcome_IsDisplayed`
 - `RefreshRunLine_EmptyFeedback_ClearsStaleAdventurerInterestForecastLine`
 
