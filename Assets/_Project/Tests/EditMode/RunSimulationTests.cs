@@ -74,7 +74,12 @@ namespace DungeonBuilder.Tests.EditMode
                 LootHeatCoolingPerTradeableWorldValue = 0.1d,
                 MaxLootHeatCoolingPerRun = 25d,
                 AdventurerAttractionRuleSourceId = "run.adventurer_attraction.rule.v1",
-                AdventurerAttractionPerExtractedWorldValue = 1d
+                AdventurerAttractionPerExtractedWorldValue = 1d,
+                AdventurerInterestForecastRuleSourceId = "run.adventurer_interest_forecast.rule.v1",
+                AdventurerInterestLowThreshold = 5d,
+                AdventurerInterestMediumThreshold = 10d,
+                AdventurerInterestHighThreshold = 20d,
+                AdventurerInterestScorePerAttractionSignal = 1d
             };
         }
 
@@ -1065,6 +1070,32 @@ namespace DungeonBuilder.Tests.EditMode
 
             config = BuildConfig();
             config.AdventurerAttractionPerExtractedWorldValue = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerInterestForecastConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerInterestForecastRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestLowThreshold = -0.01d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestMediumThreshold = 4d;
+            config.AdventurerInterestLowThreshold = 5d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestHighThreshold = 9d;
+            config.AdventurerInterestMediumThreshold = 10d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestScorePerAttractionSignal = double.NaN;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 

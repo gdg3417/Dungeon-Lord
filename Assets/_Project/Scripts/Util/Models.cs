@@ -36,6 +36,13 @@ namespace DungeonBuilder.M0
         InvalidAttractionConfig = 2,
         AggregateOverflow = 3
     }
+    public enum RunAdventurerInterestForecastSummaryErrorCode
+    {
+        None = 0,
+        AttractionSummaryMissingOrFailed = 1,
+        InvalidForecastConfig = 2,
+        AggregateOverflow = 3
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -64,6 +71,11 @@ namespace DungeonBuilder.M0
         public double MaxLootHeatCoolingPerRun;
         public string AdventurerAttractionRuleSourceId;
         public double AdventurerAttractionPerExtractedWorldValue;
+        public string AdventurerInterestForecastRuleSourceId;
+        public double AdventurerInterestLowThreshold;
+        public double AdventurerInterestMediumThreshold;
+        public double AdventurerInterestHighThreshold;
+        public double AdventurerInterestScorePerAttractionSignal;
     }
 
     [Serializable]
@@ -90,6 +102,7 @@ namespace DungeonBuilder.M0
         public RunLootExtractionSummary LootExtractionSummary;
         public RunLootHeatCoolingSummary LootHeatCoolingSummary;
         public RunAdventurerAttractionSummary AdventurerAttractionSummary;
+        public RunAdventurerInterestForecastSummary AdventurerInterestForecastSummary;
     }
 
     [Serializable]
@@ -162,6 +175,18 @@ namespace DungeonBuilder.M0
         public double ExtractedWorldValueUsed;
         public double AttractionPerExtractedWorldValueUsed;
         public double AttractionSignalValue;
+    }
+
+    [Serializable]
+    public sealed class RunAdventurerInterestForecastSummary
+    {
+        public string RuleSourceId;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public double AttractionSignalUsed;
+        public double ForecastInterestScore;
+        public string ForecastBandId;
     }
     [Serializable]
     public sealed class RunHistoryState

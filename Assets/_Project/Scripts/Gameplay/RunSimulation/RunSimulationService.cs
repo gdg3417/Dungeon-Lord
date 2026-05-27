@@ -50,6 +50,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 resolverSeed,
                 _config.LootExtractionRoundingPolicyId,
                 _config.LootExtractionRuleSourceId);
+            RunAdventurerAttractionSummary attractionSummary = AdventurerAttractionResolver.Resolve(
+                _config,
+                extractionSummary,
+                resolverSeed);
 
             return new RunOutcomeRecord
             {
@@ -72,9 +76,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 LootSummary = lootSummary,
                 SurvivalSummary = survivalSummary,
                 LootExtractionSummary = extractionSummary,
-                AdventurerAttractionSummary = AdventurerAttractionResolver.Resolve(
+                AdventurerAttractionSummary = attractionSummary,
+                AdventurerInterestForecastSummary = AdventurerInterestForecastResolver.Resolve(
                     _config,
-                    extractionSummary,
+                    attractionSummary,
                     resolverSeed)
             };
         }
