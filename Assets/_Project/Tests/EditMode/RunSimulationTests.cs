@@ -41,6 +41,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.feedback_format"] = "Feedback: {0}";
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
+            map["ui.run.adventurer_interest_forecast_summary_format"] = "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}";
             map["run.reason.success"] = "Success";
             map["run.reason.failed_threshold"] = "Failed due to low projected chance.";
             map["run.feedback.success"] = "Successful approach";
@@ -835,6 +836,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.RunSurvivalLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunExtractionLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo(string.Empty));
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo(string.Empty));
             }
             finally
             {
@@ -1295,6 +1297,118 @@ namespace DungeonBuilder.Tests.EditMode
                 root.SelectNextRunOutcome();
                 root.RefreshRunLine();
                 Assert.That(root.RunHeatCoolingLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerInterestForecastSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootForecastNullContentTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-forecast",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerInterestForecastSummary = new RunAdventurerInterestForecastSummary { RuleResolved = true }
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo("ui.run.adventurer_interest_forecast_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerInterestForecastSummary_ValidOutcome_IsDisplayed()
+        {
+            var go = new GameObject("GameRootForecastDisplayTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-forecast",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerInterestForecastSummary = new RunAdventurerInterestForecastSummary
+                                {
+                                    RuleResolved = true,
+                                    DeterministicErrorCode = (int)RunAdventurerInterestForecastSummaryErrorCode.None,
+                                    AttractionSignalUsed = 12d,
+                                    ForecastInterestScore = 24d,
+                                    ForecastBandId = "adventurer_interest.high"
+                                }
+                            }
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+                StringAssert.Contains("resolved=True", root.RunAdventurerInterestForecastLine);
+                StringAssert.Contains("score=24", root.RunAdventurerInterestForecastLine);
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_EmptyFeedback_ClearsStaleAdventurerInterestForecastLine()
+        {
+            var go = new GameObject("GameRootForecastStaleTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-a",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new[] { "run.feedback.success" },
+                                AdventurerInterestForecastSummary = new RunAdventurerInterestForecastSummary { RuleResolved = true }
+                            },
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-b",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerInterestForecastSummary = null
+                            }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo("ui.run.adventurer_interest_forecast_summary_format"));
+                root.SelectNextRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo(string.Empty));
             }
             finally { Object.DestroyImmediate(go); }
         }
