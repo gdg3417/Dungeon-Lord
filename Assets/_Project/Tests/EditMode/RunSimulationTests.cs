@@ -144,6 +144,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_AttachesResolvedAdventurerAttractionSummary_FromExtractedWorldValue()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerAttractionPerExtractedWorldValue = 2d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.AdventurerAttractionSummary, Is.Not.Null);
+            Assert.That(outcome.AdventurerAttractionSummary.RuleResolved, Is.True);
+            Assert.That(outcome.AdventurerAttractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerAttractionSummaryErrorCode.None));
+            Assert.That(outcome.AdventurerAttractionSummary.ExtractedWorldValueUsed, Is.EqualTo(outcome.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(outcome.AdventurerAttractionSummary.AttractionSignalValue, Is.EqualTo(outcome.LootExtractionSummary.TotalExtractedWorldValue * config.AdventurerAttractionPerExtractedWorldValue));
+        }
+
+        [Test]
         public void SimulateOnce_ExtractionSummary_ZeroSurvivors_ExtractsNone()
         {
             var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
@@ -1017,6 +1033,37 @@ namespace DungeonBuilder.Tests.EditMode
             config = BuildConfig();
             config.MaxLootHeatCoolingPerRun = 0d;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.True);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Accepts_ValidAdventurerAttractionConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.True);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerAttractionConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerAttractionRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerAttractionRuleSourceId = " ";
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerAttractionPerExtractedWorldValue = -0.01d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerAttractionPerExtractedWorldValue = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerAttractionPerExtractedWorldValue = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 
         [Test]
