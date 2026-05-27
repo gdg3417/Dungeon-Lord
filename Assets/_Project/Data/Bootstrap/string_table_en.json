@@ -116,6 +116,10 @@
       "text": "F1 toggles Dev Panel"
     },
     {
+      "key": "ui.dev.hint.toggle_run_diagnostics",
+      "text": "F2 toggles Run Diagnostics focus"
+    },
+    {
       "key": "ui.dev.banner.heading",
       "text": "Banner"
     },

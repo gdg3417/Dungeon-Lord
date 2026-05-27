@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
 
         private GameRoot _root;
         private bool _devPanelVisible;
+        private bool _runDiagnosticsOnlyVisible;
         private Vector2 _devPanelScrollPosition;
 
         public void Bind(GameRoot root)
@@ -29,6 +30,10 @@ namespace DungeonBuilder.M0
             if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
             {
                 _devPanelVisible = !_devPanelVisible;
+            }
+            if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
+            {
+                _runDiagnosticsOnlyVisible = !_runDiagnosticsOnlyVisible;
             }
 
             if (overlayText == null)
@@ -59,6 +64,9 @@ namespace DungeonBuilder.M0
             string hint = _root.DevPanelEnabled
                 ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
                 : string.Empty;
+            string diagnosticsHint = _root.DevPanelEnabled
+                ? _root.Content.GetString("ui.dev.hint.toggle_run_diagnostics", "ui.dev.hint.toggle_run_diagnostics")
+                : string.Empty;
             string structureState = _root.Content != null
                 ? string.Format(
                     _root.Content.GetString("ui.dev.structure_status", "ui.dev.structure_status"),
@@ -69,31 +77,41 @@ namespace DungeonBuilder.M0
                 )
                 : string.Empty;
 
-            string combined =
-                build + "\n" +
-                state + "\n" +
-                pending + "\n" +
-                gate + "\n" +
-                kpi + "\n" +
-                heat + "\n" +
-                tick + "\n" +
-                mana + "\n" +
-                save + "\n" +
-                pause + "\n" +
-                run + "\n" +
-                runHistory + "\n" +
-                runBreakdown + "\n" +
-                runFeedback + "\n" +
-                runLoot + "\n" +
-                runSurvival + "\n" +
-                runExtraction + "\n" +
-                runHeatCooling + "\n" +
-                runAdventurerAttraction + "\n" +
-                structureState + "\n" +
-                (string.IsNullOrEmpty(banner)
-                    ? ""
-                    : ("\n" + _root.Content.GetString("ui.dev.banner.heading", "ui.dev.banner.heading") + ":\n" + banner + "\n")) +
-                (string.IsNullOrEmpty(hint) ? "" : ("\n" + hint));
+            string combined = _runDiagnosticsOnlyVisible
+                ? (run + "\n" +
+                   runHistory + "\n" +
+                   runLoot + "\n" +
+                   runSurvival + "\n" +
+                   runExtraction + "\n" +
+                   runHeatCooling + "\n" +
+                   runAdventurerAttraction + "\n" +
+                   (string.IsNullOrEmpty(hint) ? string.Empty : ("\n" + hint)) + "\n" +
+                   (string.IsNullOrEmpty(diagnosticsHint) ? string.Empty : diagnosticsHint))
+                : (build + "\n" +
+                   state + "\n" +
+                   pending + "\n" +
+                   gate + "\n" +
+                   kpi + "\n" +
+                   heat + "\n" +
+                   tick + "\n" +
+                   mana + "\n" +
+                   save + "\n" +
+                   pause + "\n" +
+                   run + "\n" +
+                   runHistory + "\n" +
+                   runBreakdown + "\n" +
+                   runFeedback + "\n" +
+                   runLoot + "\n" +
+                   runSurvival + "\n" +
+                   runExtraction + "\n" +
+                   runHeatCooling + "\n" +
+                   runAdventurerAttraction + "\n" +
+                   structureState + "\n" +
+                   (string.IsNullOrEmpty(banner)
+                       ? string.Empty
+                       : ("\n" + _root.Content.GetString("ui.dev.banner.heading", "ui.dev.banner.heading") + ":\n" + banner + "\n")) +
+                   (string.IsNullOrEmpty(hint) ? string.Empty : ("\n" + hint)) + "\n" +
+                   (string.IsNullOrEmpty(diagnosticsHint) ? string.Empty : diagnosticsHint));
 
             overlayText.text = combined;
         }

@@ -6,6 +6,7 @@
 - Added config-owned forecast tuning fields in `RunSimulationConfig` and validation in `GameRoot.IsValidRunSimulationConfig`.
 - Integrated resolver into `RunSimulationService` without spawning/scheduling behavior.
 - Fixed `RunSimulationTests.SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary` to assert forecast band using the computed score + configured thresholds (integration-safe expectation).
+- Added a minimal Bootstrap diagnostics inspectability improvement: `F2` toggles a run-diagnostics-focused overlay mode so run, history, loot, survival, extraction, heat-cooling, and adventurer-attraction lines are directly viewable during smoke validation.
 
 ## Explicit non-goals
 - No adventurer AI, spawning, traffic simulation, party/pathing/combat, or economy loop additions.
@@ -45,6 +46,7 @@
 - [ ] Confirm no localization keys appear during normal loaded-content play.
 - [ ] Confirm no unexpected `.meta` files are created.
 - [ ] If overlay remains vertically clipped, note that diagnostics cannot all be inspected simultaneously in a single viewport.
+- [ ] Press `F2` to toggle run-diagnostics focus mode and verify required lines are visible.
 
 ## Confirmations
 - No gameplay math changes to loot generation, survival, extraction, heat cooling, or attraction.
