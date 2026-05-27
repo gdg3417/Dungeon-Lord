@@ -432,7 +432,22 @@ namespace DungeonBuilder.M0
                 double.IsNaN(config.AdventurerInterestHighThreshold) ||
                 double.IsInfinity(config.AdventurerInterestHighThreshold) ||
                 double.IsNaN(config.AdventurerInterestScorePerAttractionSignal) ||
-                double.IsInfinity(config.AdventurerInterestScorePerAttractionSignal))
+                double.IsInfinity(config.AdventurerInterestScorePerAttractionSignal) ||
+                string.IsNullOrWhiteSpace(config.AdventurerDemandBudgetRuleSourceId) ||
+                config.AdventurerDemandBudgetLowThreshold < 0d ||
+                config.AdventurerDemandBudgetMediumThreshold < 0d ||
+                config.AdventurerDemandBudgetHighThreshold < 0d ||
+                config.AdventurerDemandBudgetScorePerForecastScore < 0d ||
+                config.AdventurerDemandBudgetLowThreshold > config.AdventurerDemandBudgetMediumThreshold ||
+                config.AdventurerDemandBudgetMediumThreshold > config.AdventurerDemandBudgetHighThreshold ||
+                double.IsNaN(config.AdventurerDemandBudgetLowThreshold) ||
+                double.IsInfinity(config.AdventurerDemandBudgetLowThreshold) ||
+                double.IsNaN(config.AdventurerDemandBudgetMediumThreshold) ||
+                double.IsInfinity(config.AdventurerDemandBudgetMediumThreshold) ||
+                double.IsNaN(config.AdventurerDemandBudgetHighThreshold) ||
+                double.IsInfinity(config.AdventurerDemandBudgetHighThreshold) ||
+                double.IsNaN(config.AdventurerDemandBudgetScorePerForecastScore) ||
+                double.IsInfinity(config.AdventurerDemandBudgetScorePerForecastScore))
             {
                 return false;
             }

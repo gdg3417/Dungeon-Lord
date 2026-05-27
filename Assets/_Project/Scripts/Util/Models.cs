@@ -44,6 +44,14 @@ namespace DungeonBuilder.M0
         AggregateOverflow = 3
     }
 
+    public enum RunAdventurerDemandBudgetSummaryErrorCode
+    {
+        None = 0,
+        InterestForecastMissingOrFailed = 1,
+        InvalidDemandBudgetConfig = 2,
+        AggregateOverflow = 3
+    }
+
 [Serializable]
     public sealed class RunSimulationConfig
     {
@@ -76,6 +84,11 @@ namespace DungeonBuilder.M0
         public double AdventurerInterestMediumThreshold;
         public double AdventurerInterestHighThreshold;
         public double AdventurerInterestScorePerAttractionSignal;
+        public string AdventurerDemandBudgetRuleSourceId;
+        public double AdventurerDemandBudgetScorePerForecastScore;
+        public double AdventurerDemandBudgetLowThreshold;
+        public double AdventurerDemandBudgetMediumThreshold;
+        public double AdventurerDemandBudgetHighThreshold;
     }
 
     [Serializable]
@@ -103,6 +116,7 @@ namespace DungeonBuilder.M0
         public RunLootHeatCoolingSummary LootHeatCoolingSummary;
         public RunAdventurerAttractionSummary AdventurerAttractionSummary;
         public RunAdventurerInterestForecastSummary AdventurerInterestForecastSummary;
+        public RunAdventurerDemandBudgetSummary AdventurerDemandBudgetSummary;
     }
 
     [Serializable]
@@ -187,6 +201,19 @@ namespace DungeonBuilder.M0
         public double AttractionSignalUsed;
         public double ForecastInterestScore;
         public string ForecastBandId;
+    }
+
+    [Serializable]
+    public sealed class RunAdventurerDemandBudgetSummary
+    {
+        public string RuleSourceId;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public string ForecastBandIdUsed;
+        public double ForecastInterestScoreUsed;
+        public double DemandBudgetScore;
+        public string DemandBudgetBandId;
     }
     [Serializable]
     public sealed class RunHistoryState

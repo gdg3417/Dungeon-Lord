@@ -54,6 +54,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 _config,
                 extractionSummary,
                 resolverSeed);
+            RunAdventurerInterestForecastSummary forecastSummary = AdventurerInterestForecastResolver.Resolve(
+                _config,
+                attractionSummary,
+                resolverSeed);
 
             return new RunOutcomeRecord
             {
@@ -77,9 +81,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 SurvivalSummary = survivalSummary,
                 LootExtractionSummary = extractionSummary,
                 AdventurerAttractionSummary = attractionSummary,
-                AdventurerInterestForecastSummary = AdventurerInterestForecastResolver.Resolve(
+                AdventurerInterestForecastSummary = forecastSummary,
+                AdventurerDemandBudgetSummary = AdventurerDemandBudgetResolver.Resolve(
                     _config,
-                    attractionSummary,
+                    forecastSummary,
                     resolverSeed)
             };
         }
