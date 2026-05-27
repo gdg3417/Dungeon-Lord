@@ -55,6 +55,7 @@ namespace DungeonBuilder.M0
             string runSurvival = _root.RunSurvivalLine;
             string runExtraction = _root.RunExtractionLine;
             string runHeatCooling = _root.RunHeatCoolingLine;
+            string runAdventurerAttraction = _root.RunAdventurerAttractionLine;
             string hint = _root.DevPanelEnabled
                 ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
                 : string.Empty;
@@ -87,6 +88,7 @@ namespace DungeonBuilder.M0
                 runSurvival + "\n" +
                 runExtraction + "\n" +
                 runHeatCooling + "\n" +
+                runAdventurerAttraction + "\n" +
                 structureState + "\n" +
                 (string.IsNullOrEmpty(banner)
                     ? ""
