@@ -1797,17 +1797,44 @@ namespace DungeonBuilder.Tests.EditMode
             config.AdventurerDemandBudgetLowThreshold = 11d;
             config.AdventurerDemandBudgetMediumThreshold = 10d;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetMediumThreshold = 10d;
+            config.AdventurerDemandBudgetHighThreshold = 9d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 
         [Test]
         public void SimulateOnce_Attaches_ResolvedAdventurerDemandBudgetSummary()
         {
-            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
             RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
 
             Assert.That(outcome.AdventurerDemandBudgetSummary, Is.Not.Null);
             Assert.That(outcome.AdventurerDemandBudgetSummary.RuleResolved, Is.True);
             Assert.That(outcome.AdventurerDemandBudgetSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.None));
+            Assert.That(outcome.AdventurerDemandBudgetSummary.ForecastInterestScoreUsed, Is.EqualTo(outcome.AdventurerInterestForecastSummary.ForecastInterestScore));
+            Assert.That(outcome.AdventurerDemandBudgetSummary.ForecastBandIdUsed, Is.EqualTo(outcome.AdventurerInterestForecastSummary.ForecastBandId));
+
+            double expectedDemandScore = outcome.AdventurerDemandBudgetSummary.ForecastInterestScoreUsed * config.AdventurerDemandBudgetScorePerForecastScore;
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetScore, Is.EqualTo(expectedDemandScore));
+
+            string expectedBand = "adventurer_demand.none";
+            if (expectedDemandScore >= config.AdventurerDemandBudgetHighThreshold)
+            {
+                expectedBand = "adventurer_demand.high";
+            }
+            else if (expectedDemandScore >= config.AdventurerDemandBudgetMediumThreshold)
+            {
+                expectedBand = "adventurer_demand.medium";
+            }
+            else if (expectedDemandScore >= config.AdventurerDemandBudgetLowThreshold)
+            {
+                expectedBand = "adventurer_demand.low";
+            }
+
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo(expectedBand));
         }
 
     }

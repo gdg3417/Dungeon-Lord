@@ -13,8 +13,8 @@
 - No forecast-driven gameplay effects.
 
 ## Tests added
-- `AdventurerDemandBudgetResolverTests` (determinism, config validation, missing/failed forecast handling, threshold boundaries, overflow handling, persistence round-trip, legacy-missing-field safety).
-- `RunSimulationTests` updates for integration attach + config validation.
+- `AdventurerDemandBudgetResolverTests` (determinism, config validation, missing/failed forecast handling, threshold boundaries including non-monotonic medium/high rejection, overflow handling, persistence round-trip with strengthened `RecentOutcomes` value assertions, legacy-missing-field safety).
+- `RunSimulationTests` updates for integration attach + strengthened derivation assertions from forecast summary/config + config validation.
 
 ## Tests to run before merge
 - AdventurerDemandBudgetResolverTests

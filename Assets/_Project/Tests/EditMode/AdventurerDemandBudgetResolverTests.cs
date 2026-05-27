@@ -53,6 +53,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(AdventurerDemandBudgetResolver.Resolve(new RunSimulationConfig { AdventurerDemandBudgetRuleSourceId = "x", AdventurerDemandBudgetLowThreshold = 0d, AdventurerDemandBudgetMediumThreshold = double.PositiveInfinity, AdventurerDemandBudgetHighThreshold = 2d, AdventurerDemandBudgetScorePerForecastScore = 1d }, ResolvedForecast(10d), 4).DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.InvalidDemandBudgetConfig));
             Assert.That(AdventurerDemandBudgetResolver.Resolve(new RunSimulationConfig { AdventurerDemandBudgetRuleSourceId = "x", AdventurerDemandBudgetLowThreshold = 2d, AdventurerDemandBudgetMediumThreshold = 1d, AdventurerDemandBudgetHighThreshold = 3d, AdventurerDemandBudgetScorePerForecastScore = 1d }, ResolvedForecast(10d), 4).DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.InvalidDemandBudgetConfig));
             Assert.That(AdventurerDemandBudgetResolver.Resolve(new RunSimulationConfig { AdventurerDemandBudgetRuleSourceId = "x", AdventurerDemandBudgetLowThreshold = 1d, AdventurerDemandBudgetMediumThreshold = 2d, AdventurerDemandBudgetHighThreshold = 3d, AdventurerDemandBudgetScorePerForecastScore = -0.1d }, ResolvedForecast(10d), 4).DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.InvalidDemandBudgetConfig));
+            Assert.That(AdventurerDemandBudgetResolver.Resolve(new RunSimulationConfig { AdventurerDemandBudgetRuleSourceId = "x", AdventurerDemandBudgetLowThreshold = 1d, AdventurerDemandBudgetMediumThreshold = 10d, AdventurerDemandBudgetHighThreshold = 9d, AdventurerDemandBudgetScorePerForecastScore = 1d }, ResolvedForecast(10d), 4).DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.InvalidDemandBudgetConfig));
         }
 
         [Test]
@@ -94,6 +95,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.runHistory.LatestOutcome.AdventurerDemandBudgetSummary, Is.Not.Null);
             Assert.That(loaded.runHistory.LatestOutcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo("adventurer_demand.medium"));
             Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerDemandBudgetSummary, Is.Not.Null);
+            Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerDemandBudgetSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.InvalidDemandBudgetConfig));
+            Assert.That(loaded.runHistory.RecentOutcomes[1].AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo("adventurer_demand.medium"));
+            Assert.That(loaded.runHistory.RecentOutcomes[1].AdventurerDemandBudgetSummary.DemandBudgetScore, Is.EqualTo(12d));
         }
 
         [Test]
