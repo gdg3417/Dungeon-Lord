@@ -5,6 +5,7 @@
 - Added persisted `RunAdventurerInterestForecastSummary` and attached it to `RunOutcomeRecord` for save/load-safe serialization.
 - Added config-owned forecast tuning fields in `RunSimulationConfig` and validation in `GameRoot.IsValidRunSimulationConfig`.
 - Integrated resolver into `RunSimulationService` without spawning/scheduling behavior.
+- Fixed `RunSimulationTests.SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary` to assert forecast band using the computed score + configured thresholds (integration-safe expectation).
 
 ## Explicit non-goals
 - No adventurer AI, spawning, traffic simulation, party/pathing/combat, or economy loop additions.
@@ -30,6 +31,11 @@
 - `dotnet test Dungeon-Lord.sln --filter LootRollResolverTests`
 - `dotnet test Dungeon-Lord.sln --filter MigrationRunnerTests`
 
+## Unity rerun status
+- Prior Unity result before this fix: 168 total, 167 passed, 1 failed (`SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary`) due to outdated expected band.
+- This change corrects the expected band assertion logic for configured thresholds and computed score.
+- Final Unity rerun results: **pending execution in Unity Test Runner**.
+
 ## Manual validation checklist
 - [ ] Open Bootstrap scene.
 - [ ] Enter Play Mode.
@@ -38,6 +44,7 @@
 - [ ] Confirm no new forecast UI is visible.
 - [ ] Confirm no localization keys appear during normal loaded-content play.
 - [ ] Confirm no unexpected `.meta` files are created.
+- [ ] If overlay remains vertically clipped, note that diagnostics cannot all be inspected simultaneously in a single viewport.
 
 ## Confirmations
 - No gameplay math changes to loot generation, survival, extraction, heat cooling, or attraction.

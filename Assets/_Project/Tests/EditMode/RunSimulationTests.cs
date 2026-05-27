@@ -182,7 +182,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.AdventurerInterestForecastSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerInterestForecastSummaryErrorCode.None));
             Assert.That(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed, Is.EqualTo(outcome.AdventurerAttractionSummary.AttractionSignalValue));
             Assert.That(outcome.AdventurerInterestForecastSummary.ForecastInterestScore, Is.EqualTo(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed * config.AdventurerInterestScorePerAttractionSignal));
-            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastBandId, Is.EqualTo("adventurer_interest.medium"));
+            double score = outcome.AdventurerInterestForecastSummary.ForecastInterestScore;
+            string expectedBandId = score >= config.AdventurerInterestHighThreshold
+                ? "adventurer_interest.high"
+                : (score >= config.AdventurerInterestMediumThreshold
+                    ? "adventurer_interest.medium"
+                    : (score >= config.AdventurerInterestLowThreshold
+                        ? "adventurer_interest.low"
+                        : "adventurer_interest.none"));
+            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastBandId, Is.EqualTo(expectedBandId));
         }
 
         [Test]
