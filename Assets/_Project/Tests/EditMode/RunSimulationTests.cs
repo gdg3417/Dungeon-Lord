@@ -166,6 +166,26 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerInterestScorePerAttractionSignal = 2d;
+            config.AdventurerInterestLowThreshold = 5d;
+            config.AdventurerInterestMediumThreshold = 10d;
+            config.AdventurerInterestHighThreshold = 20d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.AdventurerInterestForecastSummary, Is.Not.Null);
+            Assert.That(outcome.AdventurerInterestForecastSummary.RuleResolved, Is.True);
+            Assert.That(outcome.AdventurerInterestForecastSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerInterestForecastSummaryErrorCode.None));
+            Assert.That(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed, Is.EqualTo(outcome.AdventurerAttractionSummary.AttractionSignalValue));
+            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastInterestScore, Is.EqualTo(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed * config.AdventurerInterestScorePerAttractionSignal));
+            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastBandId, Is.EqualTo("adventurer_interest.medium"));
+        }
+
+        [Test]
         public void SimulateOnce_ExtractionSummary_ZeroSurvivors_ExtractsNone()
         {
             var service = new RunSimulationService(BuildConfig(), BuildLootConfig());

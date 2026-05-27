@@ -22,5 +22,10 @@
   "LootHeatCoolingPerTradeableWorldValue": 0.1,
   "MaxLootHeatCoolingPerRun": 25.0,
   "AdventurerAttractionRuleSourceId": "run.adventurer_attraction.rule.v1",
-  "AdventurerAttractionPerExtractedWorldValue": 1.0
+  "AdventurerAttractionPerExtractedWorldValue": 1.0,
+  "AdventurerInterestForecastRuleSourceId": "run.adventurer_interest_forecast.rule.v1",
+  "AdventurerInterestLowThreshold": 5.0,
+  "AdventurerInterestMediumThreshold": 10.0,
+  "AdventurerInterestHighThreshold": 20.0,
+  "AdventurerInterestScorePerAttractionSignal": 1.0
 }

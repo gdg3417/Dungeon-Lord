@@ -21,7 +21,7 @@
 - `RunSimulationTests` additions:
   - Invalid adventurer interest forecast config validation cases.
 
-## Tests run
+## Tests to run before merge
 - `dotnet test Dungeon-Lord.sln --filter AdventurerInterestForecastResolverTests`
 - `dotnet test Dungeon-Lord.sln --filter AdventurerAttractionResolverTests`
 - `dotnet test Dungeon-Lord.sln --filter RunSimulationTests`
