@@ -17,7 +17,7 @@ Delivered, inspectable chain (runtime + diagnostics + tests):
 5. Adventurer attraction summary
 6. Adventurer interest forecast summary
 7. Bootstrap diagnostics visibility in full overlay and F2 diagnostics focus mode
-8. Save/load compatibility for latest + historical outcomes including legacy-null-safe paths
+8. Save/load compatibility for latest + historical outcomes, with explicit round-trip + legacy-missing-field coverage for newly added summaries
 
 ## Explicit non-goals intentionally unbuilt
 
@@ -35,12 +35,13 @@ The following remain intentionally unbuilt and were verified as still not introd
 → `BuildLootSummary(...)` using `LootRollResolver.Resolve(...)`
 → `BuildSurvivalSummary(...)`
 → `LootExtractionResolver.Resolve(...)`
-→ `LootHeatCoolingResolver.Resolve(...)` + applied through `GameRoot`
 → `AdventurerAttractionResolver.Resolve(...)`
 → `AdventurerInterestForecastResolver.Resolve(...)`
-→ persists in `RunOutcomeRecord` / `RunHistoryState`
-→ rendered in `GameRoot` run lines
-→ displayed in `BootstrapOverlay` full panel and F2 diagnostics-only mode.
+→ returns `RunOutcomeRecord` with deterministic summaries
+→ `GameRoot` resolves/applies `LootHeatCoolingResolver` from extraction summary and records heat cooling summary
+→ `RunOutcomeRecord` / `RunHistoryState` persistence
+→ `GameRoot` run diagnostic lines
+→ `BootstrapOverlay` full panel and F2 diagnostics focus mode.
 
 ## Per-layer closeout audit
 
@@ -66,8 +67,10 @@ The following remain intentionally unbuilt and were verified as still not introd
 
 | Concern | Evidence | Result |
 |---|---|---|
-| Run tuning parameters are config-owned | `RunSimulationConfig` fields include survival, extraction rule IDs, heat cooling, attraction, forecast thresholds and score scalar; values loaded from `run_simulation_config.json`. | Pass |
-| Runtime consumes config instead of hardcoded tuning | `RunSimulationService` and resolvers use `RunSimulationConfig` values (not embedded gameplay tuning literals). | Pass |
+| Survival party bounds and survivor ratios are config-owned | `RunSimulationConfig` in `run_simulation_config.json` owns `MinPartySize`, `MaxPartySize`, `MaxAllowedPartySize`, `SuccessSurvivorRatio`, and `FailureSurvivorRatio`. | Pass |
+| Extraction/heat cooling/attraction/forecast tuning is config-owned | `RunSimulationConfig` in `run_simulation_config.json` owns extraction, heat cooling, attraction, and forecast rule IDs/thresholds/scalars. | Pass |
+| Survival `RuleSourceId` ownership is correctly characterized | Survival uses a stable code identifier (`"run.survival.rule.v1"`) as rule provenance; it is not treated as tunable config. | Pass |
+| Runtime consumes config instead of hardcoded tuning | `RunSimulationService` and resolvers use `RunSimulationConfig` values (not embedded gameplay tuning literals). No gameplay tuning values were found hardcoded in the audited M5 chain. | Pass |
 | Resolver rule provenance retained | Summary objects include `RuleSourceId` + deterministic seed and error code. | Pass |
 
 ## Localization ownership audit
@@ -95,8 +98,10 @@ The following remain intentionally unbuilt and were verified as still not introd
 |---|---|---|
 | LatestOutcome persistence | `RunOutcomeRecord` includes loot/survival/extraction/heat/attraction/forecast summaries. | Pass |
 | RecentOutcomes persistence | `RunHistoryState.RecentOutcomes` stores same `RunOutcomeRecord` shape. | Pass |
-| Round-trip safety | Resolver tests serialize and deserialize populated summaries successfully. | Pass |
-| Legacy missing-field safety | Tests verify legacy JSON without newer summary fields deserializes safely/inspectably. | Pass |
+| Explicit round-trip coverage for newly added summaries | `AdventurerAttractionResolverTests` and `AdventurerInterestForecastResolverTests` include JSON round-trip tests for populated `LatestOutcome` + `RecentOutcomes` summary data. | Pass |
+| Explicit legacy-missing-field coverage for newly added summaries | `AdventurerAttractionResolverTests` and `AdventurerInterestForecastResolverTests` include legacy missing-field deserialization safety checks. | Pass |
+| Earlier summary persistence path | Loot/survival/extraction/heat summaries share the same `RunOutcomeRecord` storage path and are exercised by run simulation + diagnostics test flows. | Pass |
+| Future schema extension expectation | Future summary additions should continue adding explicit `LatestOutcome` and `RecentOutcomes` round-trip tests. | Pass |
 
 ## Diagnostics and smoke-test audit
 
