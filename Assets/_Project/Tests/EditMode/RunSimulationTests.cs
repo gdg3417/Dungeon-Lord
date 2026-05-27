@@ -74,7 +74,12 @@ namespace DungeonBuilder.Tests.EditMode
                 LootHeatCoolingPerTradeableWorldValue = 0.1d,
                 MaxLootHeatCoolingPerRun = 25d,
                 AdventurerAttractionRuleSourceId = "run.adventurer_attraction.rule.v1",
-                AdventurerAttractionPerExtractedWorldValue = 1d
+                AdventurerAttractionPerExtractedWorldValue = 1d,
+                AdventurerInterestForecastRuleSourceId = "run.adventurer_interest_forecast.rule.v1",
+                AdventurerInterestLowThreshold = 5d,
+                AdventurerInterestMediumThreshold = 10d,
+                AdventurerInterestHighThreshold = 20d,
+                AdventurerInterestScorePerAttractionSignal = 1d
             };
         }
 
@@ -158,6 +163,34 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.AdventurerAttractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerAttractionSummaryErrorCode.None));
             Assert.That(outcome.AdventurerAttractionSummary.ExtractedWorldValueUsed, Is.EqualTo(outcome.LootExtractionSummary.TotalExtractedWorldValue));
             Assert.That(outcome.AdventurerAttractionSummary.AttractionSignalValue, Is.EqualTo(outcome.LootExtractionSummary.TotalExtractedWorldValue * config.AdventurerAttractionPerExtractedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerInterestScorePerAttractionSignal = 2d;
+            config.AdventurerInterestLowThreshold = 5d;
+            config.AdventurerInterestMediumThreshold = 10d;
+            config.AdventurerInterestHighThreshold = 20d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.AdventurerInterestForecastSummary, Is.Not.Null);
+            Assert.That(outcome.AdventurerInterestForecastSummary.RuleResolved, Is.True);
+            Assert.That(outcome.AdventurerInterestForecastSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerInterestForecastSummaryErrorCode.None));
+            Assert.That(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed, Is.EqualTo(outcome.AdventurerAttractionSummary.AttractionSignalValue));
+            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastInterestScore, Is.EqualTo(outcome.AdventurerInterestForecastSummary.AttractionSignalUsed * config.AdventurerInterestScorePerAttractionSignal));
+            double score = outcome.AdventurerInterestForecastSummary.ForecastInterestScore;
+            string expectedBandId = score >= config.AdventurerInterestHighThreshold
+                ? "adventurer_interest.high"
+                : (score >= config.AdventurerInterestMediumThreshold
+                    ? "adventurer_interest.medium"
+                    : (score >= config.AdventurerInterestLowThreshold
+                        ? "adventurer_interest.low"
+                        : "adventurer_interest.none"));
+            Assert.That(outcome.AdventurerInterestForecastSummary.ForecastBandId, Is.EqualTo(expectedBandId));
         }
 
         [Test]
@@ -1065,6 +1098,32 @@ namespace DungeonBuilder.Tests.EditMode
 
             config = BuildConfig();
             config.AdventurerAttractionPerExtractedWorldValue = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerInterestForecastConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerInterestForecastRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestLowThreshold = -0.01d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestMediumThreshold = 4d;
+            config.AdventurerInterestLowThreshold = 5d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestHighThreshold = 9d;
+            config.AdventurerInterestMediumThreshold = 10d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerInterestScorePerAttractionSignal = double.NaN;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 

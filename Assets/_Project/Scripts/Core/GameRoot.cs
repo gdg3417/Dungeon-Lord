@@ -411,12 +411,27 @@ namespace DungeonBuilder.M0
                 config.LootHeatCoolingPerTradeableWorldValue < 0d ||
                 config.MaxLootHeatCoolingPerRun < 0d ||
                 config.AdventurerAttractionPerExtractedWorldValue < 0d ||
+                string.IsNullOrWhiteSpace(config.AdventurerInterestForecastRuleSourceId) ||
+                config.AdventurerInterestLowThreshold < 0d ||
+                config.AdventurerInterestMediumThreshold < 0d ||
+                config.AdventurerInterestHighThreshold < 0d ||
+                config.AdventurerInterestScorePerAttractionSignal < 0d ||
+                config.AdventurerInterestLowThreshold > config.AdventurerInterestMediumThreshold ||
+                config.AdventurerInterestMediumThreshold > config.AdventurerInterestHighThreshold ||
                 double.IsNaN(config.LootHeatCoolingPerTradeableWorldValue) ||
                 double.IsInfinity(config.LootHeatCoolingPerTradeableWorldValue) ||
                 double.IsNaN(config.MaxLootHeatCoolingPerRun) ||
                 double.IsInfinity(config.MaxLootHeatCoolingPerRun) ||
                 double.IsNaN(config.AdventurerAttractionPerExtractedWorldValue) ||
-                double.IsInfinity(config.AdventurerAttractionPerExtractedWorldValue))
+                double.IsInfinity(config.AdventurerAttractionPerExtractedWorldValue) ||
+                double.IsNaN(config.AdventurerInterestLowThreshold) ||
+                double.IsInfinity(config.AdventurerInterestLowThreshold) ||
+                double.IsNaN(config.AdventurerInterestMediumThreshold) ||
+                double.IsInfinity(config.AdventurerInterestMediumThreshold) ||
+                double.IsNaN(config.AdventurerInterestHighThreshold) ||
+                double.IsInfinity(config.AdventurerInterestHighThreshold) ||
+                double.IsNaN(config.AdventurerInterestScorePerAttractionSignal) ||
+                double.IsInfinity(config.AdventurerInterestScorePerAttractionSignal))
             {
                 return false;
             }
