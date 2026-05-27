@@ -20,5 +20,7 @@
   "LootExtractionRuleSourceId": "run.loot_extraction.rule.v1",
   "LootHeatCoolingRuleSourceId": "run.loot_heat_cooling.rule.v1",
   "LootHeatCoolingPerTradeableWorldValue": 0.1,
-  "MaxLootHeatCoolingPerRun": 25.0
+  "MaxLootHeatCoolingPerRun": 25.0,
+  "AdventurerAttractionRuleSourceId": "run.adventurer_attraction.rule.v1",
+  "AdventurerAttractionPerExtractedWorldValue": 1.0
 }

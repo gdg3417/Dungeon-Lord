@@ -42,6 +42,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             RunLootSummary lootSummary = BuildLootSummary(runSequence, tickStarted);
             RunSurvivalSummary survivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success);
+            int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
+            RunLootExtractionSummary extractionSummary = LootExtractionResolver.Resolve(
+                _lootConfig,
+                lootSummary,
+                survivalSummary,
+                resolverSeed,
+                _config.LootExtractionRoundingPolicyId,
+                _config.LootExtractionRuleSourceId);
+
             return new RunOutcomeRecord
             {
                 RunId = $"run-{runSequence}",
@@ -62,13 +71,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 FeedbackTagKeys = feedbackTagKeys,
                 LootSummary = lootSummary,
                 SurvivalSummary = survivalSummary,
-                LootExtractionSummary = LootExtractionResolver.Resolve(
-                    _lootConfig,
-                    lootSummary,
-                    survivalSummary,
-                    ComputeResolverSeed(runSequence, tickStarted),
-                    _config.LootExtractionRoundingPolicyId,
-                    _config.LootExtractionRuleSourceId)
+                LootExtractionSummary = extractionSummary,
+                AdventurerAttractionSummary = AdventurerAttractionResolver.Resolve(
+                    _config,
+                    extractionSummary,
+                    resolverSeed)
             };
         }
 

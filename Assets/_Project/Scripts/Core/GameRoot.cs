@@ -406,12 +406,16 @@ namespace DungeonBuilder.M0
             if (string.IsNullOrWhiteSpace(config.LootExtractionRuleSourceId) ||
                 string.IsNullOrWhiteSpace(config.LootExtractionRoundingPolicyId) ||
                 string.IsNullOrWhiteSpace(config.LootHeatCoolingRuleSourceId) ||
+                string.IsNullOrWhiteSpace(config.AdventurerAttractionRuleSourceId) ||
                 config.LootHeatCoolingPerTradeableWorldValue < 0d ||
                 config.MaxLootHeatCoolingPerRun < 0d ||
+                config.AdventurerAttractionPerExtractedWorldValue < 0d ||
                 double.IsNaN(config.LootHeatCoolingPerTradeableWorldValue) ||
                 double.IsInfinity(config.LootHeatCoolingPerTradeableWorldValue) ||
                 double.IsNaN(config.MaxLootHeatCoolingPerRun) ||
-                double.IsInfinity(config.MaxLootHeatCoolingPerRun))
+                double.IsInfinity(config.MaxLootHeatCoolingPerRun) ||
+                double.IsNaN(config.AdventurerAttractionPerExtractedWorldValue) ||
+                double.IsInfinity(config.AdventurerAttractionPerExtractedWorldValue))
             {
                 return false;
             }

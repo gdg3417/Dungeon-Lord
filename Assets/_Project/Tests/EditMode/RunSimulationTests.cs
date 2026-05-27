@@ -71,7 +71,9 @@ namespace DungeonBuilder.Tests.EditMode
                 LootExtractionRuleSourceId = "run.loot_extraction.rule.v1",
                 LootHeatCoolingRuleSourceId = "run.loot_heat_cooling.rule.v1",
                 LootHeatCoolingPerTradeableWorldValue = 0.1d,
-                MaxLootHeatCoolingPerRun = 25d
+                MaxLootHeatCoolingPerRun = 25d,
+                AdventurerAttractionRuleSourceId = "run.adventurer_attraction.rule.v1",
+                AdventurerAttractionPerExtractedWorldValue = 1d
             };
         }
 

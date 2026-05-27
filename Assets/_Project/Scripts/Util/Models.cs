@@ -22,11 +22,18 @@ namespace DungeonBuilder.M0
         AggregateOverflow = 6
     }
 
-        public enum RunLootHeatCoolingSummaryErrorCode
+    public enum RunLootHeatCoolingSummaryErrorCode
     {
         None = 0,
         ExtractionSummaryMissingOrFailed = 1,
         InvalidCoolingConfig = 2,
+        AggregateOverflow = 3
+    }
+    public enum RunAdventurerAttractionSummaryErrorCode
+    {
+        None = 0,
+        ExtractionSummaryMissingOrFailed = 1,
+        InvalidAttractionConfig = 2,
         AggregateOverflow = 3
     }
 
@@ -55,6 +62,8 @@ namespace DungeonBuilder.M0
         public string LootHeatCoolingRuleSourceId;
         public double LootHeatCoolingPerTradeableWorldValue;
         public double MaxLootHeatCoolingPerRun;
+        public string AdventurerAttractionRuleSourceId;
+        public double AdventurerAttractionPerExtractedWorldValue;
     }
 
     [Serializable]
@@ -80,6 +89,7 @@ namespace DungeonBuilder.M0
         public RunSurvivalSummary SurvivalSummary;
         public RunLootExtractionSummary LootExtractionSummary;
         public RunLootHeatCoolingSummary LootHeatCoolingSummary;
+        public RunAdventurerAttractionSummary AdventurerAttractionSummary;
     }
 
     [Serializable]
@@ -140,6 +150,18 @@ namespace DungeonBuilder.M0
         public double AppliedHeatDelta;
         public double HeatBeforeCooling;
         public double HeatAfterCooling;
+    }
+
+    [Serializable]
+    public sealed class RunAdventurerAttractionSummary
+    {
+        public string RuleSourceId;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public double ExtractedWorldValueUsed;
+        public double AttractionPerExtractedWorldValueUsed;
+        public double AttractionSignalValue;
     }
     [Serializable]
     public sealed class RunHistoryState
