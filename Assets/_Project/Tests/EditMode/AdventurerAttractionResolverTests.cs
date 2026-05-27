@@ -62,7 +62,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RunOutcomeRecord_AttractionSummary_RoundTrips_AndLegacyNullRemainsSafe()
         {
-            var save = new SaveStateV1
+            var save = new SaveData
             {
                 runHistory = new RunHistoryState
                 {
@@ -80,7 +80,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             };
 
             string json = JsonUtility.ToJson(save);
-            SaveStateV1 loaded = JsonUtility.FromJson<SaveStateV1>(json);
+            SaveData loaded = JsonUtility.FromJson<SaveData>(json);
 
             Assert.That(loaded.runHistory.LatestOutcome.AdventurerAttractionSummary, Is.Not.Null);
             Assert.That(loaded.runHistory.RecentOutcomes[0].AdventurerAttractionSummary, Is.Null);

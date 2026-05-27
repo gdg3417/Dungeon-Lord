@@ -20,3 +20,8 @@
 ## Manual validation expectations
 - Run a simulation and inspect serialized run outcomes to confirm `AdventurerAttractionSummary` present for new runs.
 - Load older saves lacking attraction summaries; verify runtime remains stable and outcomes inspectable.
+
+## 2026-05-27 test execution update (PR 43 Safe Mode compile fix)
+- Fixed Unity Safe Mode compile blocker by replacing non-existent `SaveStateV1` test usage with the repository's real save contract type `SaveData` in `AdventurerAttractionResolverTests`.
+- Result: test now validates round-trip serialization via `SaveData` for both `LatestOutcome` and `RecentOutcomes`, including a legacy `null` `AdventurerAttractionSummary` entry.
+- Environment note: Unity Editor/Safe Mode and EditMode test runner are not available in this CLI container, so compile/test execution must be verified in the project Unity environment.
