@@ -10,7 +10,7 @@
 
 ## Explicit non-goals
 - No adventurer AI, spawning, traffic simulation, party/pathing/combat, or economy loop additions.
-- No UI/Bootstrap overlay additions in this PR.
+- No forecast UI, production UI, or player-facing feature screen additions. Only a dev diagnostics focus toggle was added to unblock smoke validation.
 - No attraction, loot, extraction, survival, or heat-cooling formula changes.
 
 ## Tests added
@@ -34,19 +34,24 @@
 
 ## Unity rerun status
 - Prior Unity result before this fix: 168 total, 167 passed, 1 failed (`SimulateOnce_AttachesResolvedAdventurerInterestForecastSummary_FromAttractionSummary`) due to outdated expected band.
-- This change corrects the expected band assertion logic for configured thresholds and computed score.
-- Final Unity rerun results: **pending execution in Unity Test Runner**.
+- The integration test expectation was corrected so `ForecastBandId` is derived from computed score and configured thresholds.
+- All required Unity test scripts passed locally.
+- Bootstrap smoke test passed locally.
+- F2 run diagnostics focus mode was verified in Play Mode.
+- Run, history, loot, survival, extraction, heat cooling, and attraction lines are visible.
+- No forecast UI appears.
+- No localization keys appeared during normal loaded-content play.
+- No unexpected `.meta` files were created.
 
 ## Manual validation checklist
-- [ ] Open Bootstrap scene.
-- [ ] Enter Play Mode.
-- [ ] Use dev run simulation control.
-- [ ] Confirm existing run/loot/survival/extraction/heat-cooling/attraction lines display unchanged.
-- [ ] Confirm no new forecast UI is visible.
-- [ ] Confirm no localization keys appear during normal loaded-content play.
-- [ ] Confirm no unexpected `.meta` files are created.
-- [ ] If overlay remains vertically clipped, note that diagnostics cannot all be inspected simultaneously in a single viewport.
-- [ ] Press `F2` to toggle run-diagnostics focus mode and verify required lines are visible.
+- [x] Open Bootstrap scene.
+- [x] Enter Play Mode.
+- [x] Use dev run simulation control.
+- [x] Confirm existing run/loot/survival/extraction/heat-cooling/attraction lines display unchanged.
+- [x] Confirm no new forecast UI is visible.
+- [x] Confirm no localization keys appear during normal loaded-content play.
+- [x] Confirm no unexpected `.meta` files are created.
+- [x] Press `F2` to toggle run-diagnostics focus mode and verify required lines are visible.
 
 ## Confirmations
 - No gameplay math changes to loot generation, survival, extraction, heat cooling, or attraction.
