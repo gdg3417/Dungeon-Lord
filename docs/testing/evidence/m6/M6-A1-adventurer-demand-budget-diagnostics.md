@@ -14,6 +14,7 @@
 ## Tests added
 - `RefreshRunLine_AdventurerDemandBudgetSummary_WithNullContent_UsesKeyFallbackSafely`
 - `RefreshRunLine_AdventurerDemandBudgetSummary_MissingLocalizationKey_UsesKeyFallbackSafely`
+- `RefreshRunLine_AdventurerDemandBudgetSummary_ValidOutcome_IsDisplayed`
 - `RefreshRunLine_SwitchingOutcomes_UpdatesAndClearsAdventurerDemandBudgetLine`
 - Updated `RefreshRunLine_LegacyNullLootSummary_IsSafeAndEmpty` to assert the demand budget line is also empty.
 

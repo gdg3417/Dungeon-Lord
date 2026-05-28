@@ -1882,6 +1882,52 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void RefreshRunLine_AdventurerDemandBudgetSummary_ValidOutcome_IsDisplayed()
+        {
+            var go = new GameObject("GameRootDemandBudgetDisplayTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-demand",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new string[0],
+                                AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary
+                                {
+                                    RuleResolved = true,
+                                    DeterministicErrorCode = 0,
+                                    ForecastInterestScoreUsed = 11d,
+                                    ForecastBandIdUsed = "adventurer_interest.medium",
+                                    DemandBudgetScore = 11d,
+                                    DemandBudgetBandId = "adventurer_demand.medium"
+                                }
+                            }
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+
+                StringAssert.Contains("Demand Budget:", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("resolved=True", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("error=0", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("forecastScore=11", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("forecastBand=adventurer_interest.medium", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("score=11", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("band=adventurer_demand.medium", root.RunAdventurerDemandBudgetLine);
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void RefreshRunLine_SwitchingOutcomes_UpdatesAndClearsAdventurerDemandBudgetLine()
         {
             var go = new GameObject("GameRootDemandBudgetStaleTest");
