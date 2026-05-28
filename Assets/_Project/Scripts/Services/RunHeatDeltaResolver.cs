@@ -4,7 +4,7 @@ namespace DungeonBuilder.M0
 {
     public static class RunHeatDeltaResolver
     {
-        public static RunHeatDeltaSummary Resolve(RunSimulationConfig config, RunSurvivalSummary survivalSummary, RunLootExtractionSummary extractionSummary, RunAdventurerDemandBudgetSummary demandBudgetSummary, int deterministicSeed)
+        public static RunHeatDeltaSummary Resolve(RunSimulationConfig config, RunSurvivalSummary survivalSummary, RunLootExtractionSummary extractionSummary, int deterministicSeed)
         {
             var summary = new RunHeatDeltaSummary
             {
@@ -28,25 +28,58 @@ namespace DungeonBuilder.M0
             }
 
             int deathCount = Math.Max(0, survivalSummary.DeathCount);
-            int eliteDeathCount = demandBudgetSummary != null && demandBudgetSummary.RuleResolved && demandBudgetSummary.DemandBudgetBandId == "adventurer_demand.high" ? deathCount : 0;
+            // M6-B0 has no explicit elite-death source on the run outcome/survival model yet.
+            // Keep elite heat inactive until actual elite death data exists instead of inferring it from forecast/planning signals.
+            int eliteDeathCount = 0;
+            int survivorCount = Math.Max(0, survivalSummary.SurvivorCount);
+            bool fullPartySurvived = survivalSummary.PartySize > 0 && survivorCount == survivalSummary.PartySize;
+            double extractedTradeableValue = Math.Max(0d, extractionSummary.TotalExtractedTradeableWorldValue);
 
-            summary.DeathHeatDelta = deathCount * config.RunHeatNormalDeathDelta;
-            summary.EliteDeathHeatDelta = eliteDeathCount * (config.RunHeatEliteDeathDelta - config.RunHeatNormalDeathDelta);
-            summary.MultipleDeathBonusDelta = deathCount > 1 ? config.RunHeatMultipleDeathBonusDelta : 0d;
-            summary.SurvivorCoolingDelta = -Math.Max(0, survivalSummary.SurvivorCount) * config.RunHeatSurvivorCoolingPerSurvivor;
-            summary.LootCoolingDelta = survivalSummary.SurvivorCount == 0 ? 0d : -Math.Max(0d, extractionSummary.TotalExtractedTradeableWorldValue) * config.RunHeatLootCoolingPerExtractedValue;
-
-            double unclampedDelta = summary.DeathHeatDelta + summary.EliteDeathHeatDelta + summary.MultipleDeathBonusDelta + summary.SurvivorCoolingDelta + summary.LootCoolingDelta;
-            if (double.IsNaN(unclampedDelta) || double.IsInfinity(unclampedDelta))
+            if (!TryMultiply(deathCount, config.RunHeatNormalDeathDelta, out double deathHeatDelta) ||
+                !TryMultiply(eliteDeathCount, config.RunHeatEliteDeathDelta, out double eliteDeathHeatDelta) ||
+                !TryMultiply(fullPartySurvived ? survivorCount : 0, -config.RunHeatSurvivorCoolingPerSurvivor, out double survivorCoolingDelta) ||
+                !TryMultiply(survivorCount == 0 ? 0d : extractedTradeableValue, -config.RunHeatLootCoolingPerExtractedValue, out double lootCoolingDelta))
             {
                 summary.DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.AggregateOverflow;
                 return summary;
             }
 
+            double multipleDeathBonusDelta = deathCount > 1 ? config.RunHeatMultipleDeathBonusDelta : 0d;
+            if (!TryAdd(deathHeatDelta, eliteDeathHeatDelta, out double unclampedDelta) ||
+                !TryAdd(unclampedDelta, multipleDeathBonusDelta, out unclampedDelta) ||
+                !TryAdd(unclampedDelta, survivorCoolingDelta, out unclampedDelta) ||
+                !TryAdd(unclampedDelta, lootCoolingDelta, out unclampedDelta))
+            {
+                summary.DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.AggregateOverflow;
+                return summary;
+            }
+
+            summary.DeathHeatDelta = deathHeatDelta;
+            summary.EliteDeathHeatDelta = eliteDeathHeatDelta;
+            summary.MultipleDeathBonusDelta = multipleDeathBonusDelta;
+            summary.SurvivorCoolingDelta = survivorCoolingDelta;
+            summary.LootCoolingDelta = lootCoolingDelta;
             summary.FinalHeatDelta = Math.Max(config.RunHeatDeltaMinimum, Math.Min(config.RunHeatDeltaMaximum, unclampedDelta));
             summary.RuleResolved = true;
             summary.DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.None;
             return summary;
+        }
+
+        private static bool TryMultiply(double left, double right, out double result)
+        {
+            result = left * right;
+            return IsFinite(result);
+        }
+
+        private static bool TryAdd(double left, double right, out double result)
+        {
+            result = left + right;
+            return IsFinite(result);
+        }
+
+        private static bool IsFinite(double value)
+        {
+            return !double.IsNaN(value) && !double.IsInfinity(value);
         }
 
         private static bool IsValidConfig(RunSimulationConfig config)

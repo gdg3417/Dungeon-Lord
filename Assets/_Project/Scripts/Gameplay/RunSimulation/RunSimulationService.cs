@@ -66,7 +66,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 _config,
                 survivalSummary,
                 extractionSummary,
-                demandBudgetSummary,
                 resolverSeed);
 
             return new RunOutcomeRecord

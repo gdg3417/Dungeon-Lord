@@ -33,7 +33,7 @@
   "AdventurerDemandBudgetLowThreshold": 5.0,
   "AdventurerDemandBudgetMediumThreshold": 10.0,
   "AdventurerDemandBudgetHighThreshold": 20.0,
-  "RunHeatNormalDeathDelta": 2.0,
+  "RunHeatNormalDeathDelta": 1.0,
   "RunHeatEliteDeathDelta": 3.0,
   "RunHeatMultipleDeathBonusDelta": 1.0,
   "RunHeatSurvivorCoolingPerSurvivor": 0.5,
