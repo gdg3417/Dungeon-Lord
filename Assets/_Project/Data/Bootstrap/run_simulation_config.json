@@ -27,5 +27,10 @@
   "AdventurerInterestLowThreshold": 5.0,
   "AdventurerInterestMediumThreshold": 10.0,
   "AdventurerInterestHighThreshold": 20.0,
-  "AdventurerInterestScorePerAttractionSignal": 1.0
+  "AdventurerInterestScorePerAttractionSignal": 1.0,
+  "AdventurerDemandBudgetRuleSourceId": "run.adventurer_demand_budget.rule.v1",
+  "AdventurerDemandBudgetScorePerForecastScore": 1.0,
+  "AdventurerDemandBudgetLowThreshold": 5.0,
+  "AdventurerDemandBudgetMediumThreshold": 10.0,
+  "AdventurerDemandBudgetHighThreshold": 20.0
 }

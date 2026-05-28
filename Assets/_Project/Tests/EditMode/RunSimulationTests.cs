@@ -80,7 +80,12 @@ namespace DungeonBuilder.Tests.EditMode
                 AdventurerInterestLowThreshold = 5d,
                 AdventurerInterestMediumThreshold = 10d,
                 AdventurerInterestHighThreshold = 20d,
-                AdventurerInterestScorePerAttractionSignal = 1d
+                AdventurerInterestScorePerAttractionSignal = 1d,
+                AdventurerDemandBudgetRuleSourceId = "run.adventurer_demand_budget.rule.v1",
+                AdventurerDemandBudgetScorePerForecastScore = 1d,
+                AdventurerDemandBudgetLowThreshold = 5d,
+                AdventurerDemandBudgetMediumThreshold = 10d,
+                AdventurerDemandBudgetHighThreshold = 20d
             };
         }
 
@@ -135,6 +140,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.SurvivalSummary.SurvivorRatio, Is.EqualTo(first.SurvivalSummary.SurvivorRatio));
             Assert.That(second.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(first.LootExtractionSummary.ExtractedItemIds));
             Assert.That(second.LootExtractionSummary.LostItemIds, Is.EqualTo(first.LootExtractionSummary.LostItemIds));
+            Assert.That(second.AdventurerDemandBudgetSummary.DemandBudgetScore, Is.EqualTo(first.AdventurerDemandBudgetSummary.DemandBudgetScore));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
         }
@@ -1761,6 +1767,74 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.RunLine, Is.EqualTo("ui.run.none"));
             }
             finally { Object.DestroyImmediate(go); }
+        }
+
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerDemandBudgetConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.AdventurerDemandBudgetRuleSourceId = " ";
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetLowThreshold = -1d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetMediumThreshold = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetHighThreshold = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetScorePerForecastScore = -0.1d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetLowThreshold = 11d;
+            config.AdventurerDemandBudgetMediumThreshold = 10d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.AdventurerDemandBudgetMediumThreshold = 10d;
+            config.AdventurerDemandBudgetHighThreshold = 9d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
+        public void SimulateOnce_Attaches_ResolvedAdventurerDemandBudgetSummary()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+
+            Assert.That(outcome.AdventurerDemandBudgetSummary, Is.Not.Null);
+            Assert.That(outcome.AdventurerDemandBudgetSummary.RuleResolved, Is.True);
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DeterministicErrorCode, Is.EqualTo((int)RunAdventurerDemandBudgetSummaryErrorCode.None));
+            Assert.That(outcome.AdventurerDemandBudgetSummary.ForecastInterestScoreUsed, Is.EqualTo(outcome.AdventurerInterestForecastSummary.ForecastInterestScore));
+            Assert.That(outcome.AdventurerDemandBudgetSummary.ForecastBandIdUsed, Is.EqualTo(outcome.AdventurerInterestForecastSummary.ForecastBandId));
+
+            double expectedDemandScore = outcome.AdventurerDemandBudgetSummary.ForecastInterestScoreUsed * config.AdventurerDemandBudgetScorePerForecastScore;
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetScore, Is.EqualTo(expectedDemandScore));
+
+            string expectedBand = "adventurer_demand.none";
+            if (expectedDemandScore >= config.AdventurerDemandBudgetHighThreshold)
+            {
+                expectedBand = "adventurer_demand.high";
+            }
+            else if (expectedDemandScore >= config.AdventurerDemandBudgetMediumThreshold)
+            {
+                expectedBand = "adventurer_demand.medium";
+            }
+            else if (expectedDemandScore >= config.AdventurerDemandBudgetLowThreshold)
+            {
+                expectedBand = "adventurer_demand.low";
+            }
+
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo(expectedBand));
         }
 
     }
