@@ -86,7 +86,15 @@ namespace DungeonBuilder.Tests.EditMode
                 AdventurerDemandBudgetScorePerForecastScore = 1d,
                 AdventurerDemandBudgetLowThreshold = 5d,
                 AdventurerDemandBudgetMediumThreshold = 10d,
-                AdventurerDemandBudgetHighThreshold = 20d
+                AdventurerDemandBudgetHighThreshold = 20d,
+                RunHeatNormalDeathDelta = 2d,
+                RunHeatEliteDeathDelta = 3d,
+                RunHeatMultipleDeathBonusDelta = 1d,
+                RunHeatSurvivorCoolingPerSurvivor = 0.5d,
+                RunHeatLootCoolingPerExtractedValue = 0.1d,
+                RunHeatDeltaMinimum = -10d,
+                RunHeatDeltaMaximum = 10d,
+                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.v1"
             };
         }
 

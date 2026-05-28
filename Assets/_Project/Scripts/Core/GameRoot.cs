@@ -448,7 +448,28 @@ namespace DungeonBuilder.M0
                 double.IsNaN(config.AdventurerDemandBudgetHighThreshold) ||
                 double.IsInfinity(config.AdventurerDemandBudgetHighThreshold) ||
                 double.IsNaN(config.AdventurerDemandBudgetScorePerForecastScore) ||
-                double.IsInfinity(config.AdventurerDemandBudgetScorePerForecastScore))
+                double.IsInfinity(config.AdventurerDemandBudgetScorePerForecastScore) ||
+                string.IsNullOrWhiteSpace(config.RunHeatDeltaRuleSourceId) ||
+                config.RunHeatNormalDeathDelta < 0d ||
+                config.RunHeatEliteDeathDelta < config.RunHeatNormalDeathDelta ||
+                config.RunHeatMultipleDeathBonusDelta < 0d ||
+                config.RunHeatSurvivorCoolingPerSurvivor < 0d ||
+                config.RunHeatLootCoolingPerExtractedValue < 0d ||
+                config.RunHeatDeltaMinimum > config.RunHeatDeltaMaximum ||
+                double.IsNaN(config.RunHeatNormalDeathDelta) ||
+                double.IsInfinity(config.RunHeatNormalDeathDelta) ||
+                double.IsNaN(config.RunHeatEliteDeathDelta) ||
+                double.IsInfinity(config.RunHeatEliteDeathDelta) ||
+                double.IsNaN(config.RunHeatMultipleDeathBonusDelta) ||
+                double.IsInfinity(config.RunHeatMultipleDeathBonusDelta) ||
+                double.IsNaN(config.RunHeatSurvivorCoolingPerSurvivor) ||
+                double.IsInfinity(config.RunHeatSurvivorCoolingPerSurvivor) ||
+                double.IsNaN(config.RunHeatLootCoolingPerExtractedValue) ||
+                double.IsInfinity(config.RunHeatLootCoolingPerExtractedValue) ||
+                double.IsNaN(config.RunHeatDeltaMinimum) ||
+                double.IsInfinity(config.RunHeatDeltaMinimum) ||
+                double.IsNaN(config.RunHeatDeltaMaximum) ||
+                double.IsInfinity(config.RunHeatDeltaMaximum))
             {
                 return false;
             }
