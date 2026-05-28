@@ -274,6 +274,10 @@
     {
       "key": "ui.run.adventurer_interest_forecast_summary_format",
       "text": "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}"
+    },
+    {
+      "key": "ui.run.adventurer_demand_budget_summary_format",
+      "text": "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}"
     }
   ]
 }

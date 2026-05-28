@@ -42,6 +42,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
             map["ui.run.adventurer_interest_forecast_summary_format"] = "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}";
+            map["ui.run.adventurer_demand_budget_summary_format"] = "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}";
             map["run.reason.success"] = "Success";
             map["run.reason.failed_threshold"] = "Failed due to low projected chance.";
             map["run.feedback.success"] = "Successful approach";
@@ -843,6 +844,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.RunExtractionLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunAdventurerAttractionLine, Is.EqualTo(string.Empty));
                 Assert.That(root.RunAdventurerInterestForecastLine, Is.EqualTo(string.Empty));
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo(string.Empty));
             }
             finally
             {
@@ -1835,6 +1837,80 @@ namespace DungeonBuilder.Tests.EditMode
             }
 
             Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo(expectedBand));
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerDemandBudgetSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootDemandBudgetNullContentTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[] { new RunOutcomeRecord { AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true } } }
+                    }
+                });
+                SetContent(root, null);
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("ui.run.adventurer_demand_budget_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_AdventurerDemandBudgetSummary_MissingLocalizationKey_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootDemandBudgetMissingKeyTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[] { new RunOutcomeRecord { AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true } } }
+                    }
+                });
+                SetContent(root, new ContentService());
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("ui.run.adventurer_demand_budget_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_SwitchingOutcomes_UpdatesAndClearsAdventurerDemandBudgetLine()
+        {
+            var go = new GameObject("GameRootDemandBudgetStaleTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunId = "run-a", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true } },
+                            new RunOutcomeRecord { RunId = "run-b", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = null },
+                            new RunOutcomeRecord { RunId = "run-c", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true, ForecastBandIdUsed = "adventurer_interest.low", DemandBudgetBandId = "adventurer_demand.low" } }
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+                root.RefreshRunLine();
+                StringAssert.Contains("band=adventurer_demand.low", root.RunAdventurerDemandBudgetLine);
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("ui.run.adventurer_demand_budget_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
         }
 
     }
