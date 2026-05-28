@@ -57,6 +57,7 @@ namespace DungeonBuilder.M0
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
         public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
+        public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -826,6 +827,7 @@ namespace DungeonBuilder.M0
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
+                RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
                 return;
             }
 
@@ -868,6 +870,7 @@ namespace DungeonBuilder.M0
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
+                RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
                 return;
             }
 
@@ -891,6 +894,7 @@ namespace DungeonBuilder.M0
             RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
             RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
             RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
+            RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
         }
 
 
@@ -1031,6 +1035,29 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, forecast.RuleResolved, forecast.DeterministicErrorCode, forecast.AttractionSignalUsed, forecast.ForecastInterestScore, forecast.ForecastBandId);
+        }
+
+        private string BuildAdventurerDemandBudgetLine(RunOutcomeRecord outcome)
+        {
+            RunAdventurerDemandBudgetSummary demandBudget = outcome != null ? outcome.AdventurerDemandBudgetSummary : null;
+            if (demandBudget == null)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.adventurer_demand_budget_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, demandBudget.RuleResolved, demandBudget.DeterministicErrorCode, demandBudget.ForecastInterestScoreUsed, demandBudget.ForecastBandIdUsed, demandBudget.DemandBudgetScore, demandBudget.DemandBudgetBandId);
         }
 
         private bool TryGetRunHistoryCount(out int historyCount)
