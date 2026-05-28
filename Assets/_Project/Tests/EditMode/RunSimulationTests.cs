@@ -1942,19 +1942,37 @@ namespace DungeonBuilder.Tests.EditMode
                         {
                             new RunOutcomeRecord { RunId = "run-a", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true } },
                             new RunOutcomeRecord { RunId = "run-b", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = null },
-                            new RunOutcomeRecord { RunId = "run-c", ReasonKey = "run.reason.success", FeedbackTagKeys = new[] { "run.feedback.success" }, AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary { RuleResolved = true, ForecastBandIdUsed = "adventurer_interest.low", DemandBudgetBandId = "adventurer_demand.low" } }
+                            new RunOutcomeRecord
+                            {
+                                RunId = "run-c",
+                                ReasonKey = "run.reason.success",
+                                FeedbackTagKeys = new[] { "run.feedback.success" },
+                                AdventurerDemandBudgetSummary = new RunAdventurerDemandBudgetSummary
+                                {
+                                    RuleResolved = true,
+                                    DeterministicErrorCode = 0,
+                                    ForecastInterestScoreUsed = 11d,
+                                    ForecastBandIdUsed = "adventurer_interest.low",
+                                    DemandBudgetScore = 11d,
+                                    DemandBudgetBandId = "adventurer_demand.low"
+                                }
+                            }
                         }
                     }
                 });
                 SetContent(root, BuildRunDisplayContent());
                 root.RefreshRunLine();
-                StringAssert.Contains("band=adventurer_demand.low", root.RunAdventurerDemandBudgetLine);
+                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("Demand Budget: resolved=True error=0 forecastScore=11 forecastBand=adventurer_interest.low score=11 band=adventurer_demand.low"));
                 root.SelectPreviousRunOutcome();
                 root.RefreshRunLine();
                 Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo(string.Empty));
                 root.SelectPreviousRunOutcome();
                 root.RefreshRunLine();
-                Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("ui.run.adventurer_demand_budget_summary_format"));
+                StringAssert.Contains("Demand Budget:", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("resolved=True", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("error=0", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("forecastBand=adventurer_interest.low", root.RunAdventurerDemandBudgetLine);
+                StringAssert.Contains("band=adventurer_demand.low", root.RunAdventurerDemandBudgetLine);
             }
             finally { Object.DestroyImmediate(go); }
         }
