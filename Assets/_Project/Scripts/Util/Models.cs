@@ -235,16 +235,16 @@ namespace DungeonBuilder.M0
     [Serializable]
     public sealed class RunHeatDeltaSummary
     {
-        public bool RuleResolved;
-        public int DeterministicErrorCode;
-        public double DeathHeatDelta;
-        public double EliteDeathHeatDelta;
-        public double MultipleDeathBonusDelta;
-        public double SurvivorCoolingDelta;
-        public double LootCoolingDelta;
-        public double FinalHeatDelta;
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.None;
+        public double DeathHeatDelta = 0d;
+        public double EliteDeathHeatDelta = 0d;
+        public double MultipleDeathBonusDelta = 0d;
+        public double SurvivorCoolingDelta = 0d;
+        public double LootCoolingDelta = 0d;
+        public double FinalHeatDelta = 0d;
         public string RuleSourceIdUsed;
-        public int DeterministicSeed;
+        public int DeterministicSeed = 0;
     }
     [Serializable]
     public sealed class RunHistoryState

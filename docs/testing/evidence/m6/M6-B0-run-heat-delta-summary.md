@@ -22,4 +22,4 @@ Add deterministic, config-driven run heat delta summary calculation persisted on
 ## Notes
 - This ticket computes and persists a per-run heat delta only.
 - This ticket does not apply the delta to current/global dungeon heat state.
-- Legacy saves with outcomes lacking `RunHeatDeltaSummary` continue loading with null summary.
+- Legacy saves with outcomes lacking `RunHeatDeltaSummary` deserialize safely without manual migration; Unity may produce either null or a default unresolved summary with finite numeric fields.

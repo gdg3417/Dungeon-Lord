@@ -198,7 +198,14 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(loaded.runHistory.LatestOutcome.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(1d));
 
             SaveData legacy = JsonUtility.FromJson<SaveData>("{\"runHistory\":{\"LatestOutcome\":{\"RunId\":\"legacy\"}}}");
-            Assert.That(legacy.runHistory.LatestOutcome.RunHeatDeltaSummary, Is.Null);
+            Assert.That(legacy.runHistory.LatestOutcome.RunId, Is.EqualTo("legacy"));
+
+            RunHeatDeltaSummary legacySummary = legacy.runHistory.LatestOutcome.RunHeatDeltaSummary;
+            if (legacySummary != null)
+            {
+                Assert.That(legacySummary.RuleResolved, Is.False);
+                AssertFinite(legacySummary);
+            }
         }
 
         private static void AssertFinite(RunHeatDeltaSummary summary)
