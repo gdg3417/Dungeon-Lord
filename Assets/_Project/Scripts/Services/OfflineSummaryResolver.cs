@@ -16,8 +16,8 @@ namespace DungeonBuilder.M0
             var summary = new OfflineSummary
             {
                 ResearchPending = HasPendingResearch(save != null ? save.researchPending : null),
-                ResearchSlotId = save != null && save.researchPending != null ? save.researchPending.SlotId : string.Empty,
-                ResearchProjectId = save != null && save.researchPending != null ? save.researchPending.ProjectId : string.Empty,
+                ResearchSlotId = NormalizeId(save != null && save.researchPending != null ? save.researchPending.SlotId : null),
+                ResearchProjectId = NormalizeId(save != null && save.researchPending != null ? save.researchPending.ProjectId : null),
                 WouldProcessOfflineProgress = false,
                 RuleSourceIdUsed = timeRules != null ? timeRules.offlineSummaryRuleSourceId : string.Empty
             };
@@ -58,6 +58,11 @@ namespace DungeonBuilder.M0
         private static bool HasPendingResearch(ResearchPendingState researchPending)
         {
             return researchPending != null && !string.IsNullOrWhiteSpace(researchPending.ProjectId);
+        }
+
+        private static string NormalizeId(string id)
+        {
+            return id ?? string.Empty;
         }
 
         private static OfflineSummary WithError(OfflineSummary summary, OfflineSummaryErrorCode errorCode)

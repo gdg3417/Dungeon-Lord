@@ -98,16 +98,40 @@ namespace DungeonBuilder.Tests.EditMode
         public void Resolve_LegacySaveWithoutResearchPendingState_RemainsSafeAndReportsNoPendingResearch()
         {
             SaveData legacy = JsonUtility.FromJson<SaveData>("{\"lastSavedUtcUnix\":100}");
+            string before = JsonUtility.ToJson(legacy);
 
             OfflineSummary summary = new OfflineSummaryResolver(new FixedTimeSource(160))
                 .Resolve(legacy, ValidRules(maxOfflineSeconds: 100));
 
-            Assert.That(legacy.researchPending, Is.Null);
             Assert.That(summary.RuleResolved, Is.True);
             Assert.That(summary.ResearchPending, Is.False);
             Assert.That(summary.ResearchSlotId, Is.Empty);
             Assert.That(summary.ResearchProjectId, Is.Empty);
             Assert.That(summary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(JsonUtility.ToJson(legacy), Is.EqualTo(before));
+            Assert.That(legacy.totalTicks, Is.Zero);
+            Assert.That(legacy.runHistory.RecentOutcomes, Is.Empty);
+            Assert.That(legacy.structureRuntime.Heat, Is.Zero);
+            Assert.That(legacy.structureRuntime.ManaReserve, Is.Zero);
+        }
+
+        [Test]
+        public void Resolve_DefaultResearchPendingObject_NormalizesNullIdsWithoutMutation()
+        {
+            var research = new ResearchPendingState();
+            var save = new SaveData { lastSavedUtcUnix = 100, researchPending = research };
+
+            OfflineSummary summary = new OfflineSummaryResolver(new FixedTimeSource(160))
+                .Resolve(save, ValidRules(maxOfflineSeconds: 100));
+
+            Assert.That(summary.RuleResolved, Is.True);
+            Assert.That(summary.ResearchPending, Is.False);
+            Assert.That(summary.ResearchSlotId, Is.Empty);
+            Assert.That(summary.ResearchProjectId, Is.Empty);
+            Assert.That(summary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(save.researchPending, Is.SameAs(research));
+            Assert.That(research.SlotId, Is.Null);
+            Assert.That(research.ProjectId, Is.Null);
         }
 
         [Test]

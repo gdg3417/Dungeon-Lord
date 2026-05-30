@@ -26,7 +26,7 @@ This scaffold does **not**:
 
 ## Data and save compatibility notes
 
-`SaveData.researchPending` is additive and nullable. Legacy saves that do not contain the field deserialize with `researchPending == null`; the resolver reports `ResearchPending == false` safely. No save schema version bump or migration rewrite is required for this nullable scaffold field.
+`SaveData.researchPending` is additive. Unity `JsonUtility` may materialize a missing legacy field as a default `ResearchPendingState` object rather than leaving it `null`. The resolver treats both missing and default objects with an empty `ProjectId` as not pending, normalizes missing summary IDs to `string.Empty`, and does not mutate the source save object. No save schema version bump or migration rewrite is required for this scaffold field.
 
 The existing `timeRules.maxOfflineSeconds` config owns the observed-window cap. M7-A0 adds `timeRules.offlineSummaryRuleSourceId` as a stable config-owned diagnostic source ID. No existing gameplay tuning value was changed.
 
@@ -54,6 +54,7 @@ Unity EditMode tests added:
 - `OfflineSummaryResolverTests.Resolve_MissingRules_ReturnsSafeDeterministicErrorWithoutOfflineEffects`
 - `OfflineSummaryResolverTests.Resolve_InvalidElapsedWindow_ReturnsSafeDeterministicError`
 - `OfflineSummaryResolverTests.Resolve_LegacySaveWithoutResearchPendingState_RemainsSafeAndReportsNoPendingResearch`
+- `OfflineSummaryResolverTests.Resolve_DefaultResearchPendingObject_NormalizesNullIdsWithoutMutation`
 - `OfflineSummaryResolverTests.Resolve_SingleResearchSlot_ReportsPendingWithoutCompletingOrMutatingResearch`
 - `OfflineSummaryDiagnosticsTests.SystemsDiagnostics_IncludesLocalizedOfflineSummaryAndResearchPendingLines`
 - `OfflineSummaryDiagnosticsTests.RefreshAndPageCycling_DoNotApplyOfflineRewardsResearchCompletionOrHeatMutation`
