@@ -60,6 +60,7 @@ namespace DungeonBuilder.M0
             string runSurvival = _root.RunSurvivalLine;
             string runExtraction = _root.RunExtractionLine;
             string runHeatCooling = _root.RunHeatCoolingLine;
+            string runHeatDelta = _root.RunHeatDeltaLine;
             string runAdventurerAttraction = _root.RunAdventurerAttractionLine;
             string runAdventurerInterestForecast = _root.RunAdventurerInterestForecastLine;
             string runAdventurerDemandBudget = _root.RunAdventurerDemandBudgetLine;
@@ -86,6 +87,7 @@ namespace DungeonBuilder.M0
                    runSurvival + "\n" +
                    runExtraction + "\n" +
                    runHeatCooling + "\n" +
+                   runHeatDelta + "\n" +
                    runAdventurerAttraction + "\n" +
                    runAdventurerInterestForecast + "\n" +
                    runAdventurerDemandBudget + "\n" +
@@ -109,6 +111,7 @@ namespace DungeonBuilder.M0
                    runSurvival + "\n" +
                    runExtraction + "\n" +
                    runHeatCooling + "\n" +
+                   runHeatDelta + "\n" +
                    runAdventurerAttraction + "\n" +
                    runAdventurerInterestForecast + "\n" +
                    runAdventurerDemandBudget + "\n" +

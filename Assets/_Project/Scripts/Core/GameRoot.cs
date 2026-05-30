@@ -55,6 +55,7 @@ namespace DungeonBuilder.M0
         public string RunSurvivalLine { get; private set; } = string.Empty;
         public string RunExtractionLine { get; private set; } = string.Empty;
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
+        public string RunHeatDeltaLine { get; private set; } = string.Empty;
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
         public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
         public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
@@ -846,6 +847,7 @@ namespace DungeonBuilder.M0
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -889,6 +891,7 @@ namespace DungeonBuilder.M0
                 RunSurvivalLine = BuildSurvivalLine(outcome);
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+                RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -913,6 +916,7 @@ namespace DungeonBuilder.M0
             RunSurvivalLine = BuildSurvivalLine(outcome);
             RunExtractionLine = BuildExtractionLine(outcome);
             RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
+            RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
             RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
             RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
             RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -1010,6 +1014,29 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, cooling.RuleResolved, cooling.DeterministicErrorCode, cooling.ExtractedTradeableWorldValueUsed, cooling.CoolingPerTradeableWorldValueUsed, cooling.UnclampedHeatDelta, cooling.AppliedHeatDelta, cooling.HeatBeforeCooling, cooling.HeatAfterCooling);
+        }
+
+        private string BuildHeatDeltaLine(RunOutcomeRecord outcome)
+        {
+            RunHeatDeltaSummary heatDelta = outcome != null ? outcome.RunHeatDeltaSummary : null;
+            if (heatDelta == null || !heatDelta.RuleResolved)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.heat_delta_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, heatDelta.RuleResolved, heatDelta.DeterministicErrorCode, heatDelta.DeathHeatDelta, heatDelta.EliteDeathHeatDelta, heatDelta.MultipleDeathBonusDelta, heatDelta.SurvivorCoolingDelta, heatDelta.LootCoolingDelta, heatDelta.FinalHeatDelta, heatDelta.RuleSourceIdUsed);
         }
 
         private string BuildAdventurerAttractionLine(RunOutcomeRecord outcome)
