@@ -48,6 +48,7 @@ namespace DungeonBuilder.M0
             string gate = _root.GateStatusLine;
             string kpi = _root.KpiLine;
             string heat = _root.HeatLine;
+            string currentHeatTier = _root.CurrentHeatTierLine;
             string tick = _root.TickLine;
             string mana = _root.ManaLine;
             string save = _root.SaveLine;
@@ -101,6 +102,7 @@ namespace DungeonBuilder.M0
                    gate + "\n" +
                    kpi + "\n" +
                    heat + "\n" +
+                   currentHeatTier + "\n" +
                    tick + "\n" +
                    mana + "\n" +
                    save + "\n" +

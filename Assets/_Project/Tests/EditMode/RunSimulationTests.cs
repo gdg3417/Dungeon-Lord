@@ -43,6 +43,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             map["ui.run.heat_delta_summary_format"] = "Run Heat Delta: resolved={0} error={1} death={2:0.###} elite={3:0.###} multi={4:0.###} survivorCooling={5:0.###} lootCooling={6:0.###} final={7:0.###} ruleSource={8}";
             map["ui.run.heat_application_summary_format"] = "Heat Application: resolved={0} error={1} before={2:0.###} delta={3:0.###} after={4:0.###} tierBefore={5} tierAfter={6} tierChanged={7} ruleSource={8}";
+            map["ui.heat.current_tier_summary_format"] = "Current Heat Tier: resolved={0} error={1} heat={2:0.###} tier={3} min={4:0.###} max={5:0.###} atMin={6} atMax={7} ruleSource={8}";
             map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
             map["ui.run.adventurer_interest_forecast_summary_format"] = "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}";
             map["ui.run.adventurer_demand_budget_summary_format"] = "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}";
@@ -1539,6 +1540,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = go.AddComponent<GameRoot>();
+                SetContent(root, BuildRunDisplayContent());
                 SetPrivateField(root, "_runSimulationService", new RunSimulationService(BuildConfig(), BuildLootConfig()));
                 SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_applied.json", useAtomicWrites = false }));
                 SetPrivateField(root, "<CurrentHeat>k__BackingField", 20d);
@@ -1564,6 +1566,8 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(latest.LootHeatCoolingSummary.HeatBeforeCooling + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
                 Assert.That(root.CurrentHeat, Is.EqualTo(latest.LootHeatCoolingSummary.HeatAfterCooling).Within(1e-9));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(root.CurrentHeat).Within(1e-9));
+                Assert.That(root.CurrentHeatTierLine, Does.Contain($"heat={root.CurrentHeat:0.###}"));
+                Assert.That(root.CurrentHeatTierLine, Does.Contain("tier=heat_tier.notice"));
             }
             finally { Object.DestroyImmediate(go); }
         }

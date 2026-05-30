@@ -276,6 +276,10 @@
       "text": "Heat Application: resolved={0} error={1} before={2:0.###} delta={3:0.###} after={4:0.###} tierBefore={5} tierAfter={6} tierChanged={7} ruleSource={8}"
     },
     {
+      "key": "ui.heat.current_tier_summary_format",
+      "text": "Current Heat Tier: resolved={0} error={1} heat={2:0.###} tier={3} min={4:0.###} max={5:0.###} atMin={6} atMax={7} ruleSource={8}"
+    },
+    {
       "key": "ui.run.adventurer_attraction_summary_format",
       "text": "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}"
     },
