@@ -7,7 +7,8 @@
   "timeRules": {
     "allowOfflineProgression": true,
     "maxOfflineSeconds": 86400,
-    "detectClockSkewSeconds": 300
+    "detectClockSkewSeconds": 300,
+    "offlineSummaryRuleSourceId": "offline.summary.rule.m7_a0_scaffold"
   },
   "featureFlags": {
     "enableDevPanel": true,

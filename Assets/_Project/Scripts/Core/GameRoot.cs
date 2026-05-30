@@ -61,6 +61,8 @@ namespace DungeonBuilder.M0
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
         public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
         public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
+        public string OfflineSummaryLine { get; private set; } = "ui.dev.offline_summary_format";
+        public string ResearchPendingLine { get; private set; } = "ui.dev.research_pending_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -72,6 +74,7 @@ namespace DungeonBuilder.M0
         private readonly PlacementService _placementService = new PlacementService();
         private StructureSimulationPass _structureSimulationPass;
         private RunSimulationService _runSimulationService;
+        private OfflineSummaryResolver _offlineSummaryResolver;
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
         private int _selectedRunHistoryIndex = -1;
@@ -246,6 +249,8 @@ namespace DungeonBuilder.M0
 
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
+            RefreshOfflineSummaryLines();
 
             if (!string.IsNullOrEmpty(saveBanner))
             {
@@ -819,6 +824,36 @@ namespace DungeonBuilder.M0
             }
 
             return string.Empty;
+        }
+
+        public void RefreshOfflineSummaryLines()
+        {
+            OfflineSummary summary = _offlineSummaryResolver != null
+                ? _offlineSummaryResolver.Resolve(Save, Content != null && Content.Bootstrap != null ? Content.Bootstrap.timeRules : null)
+                : new OfflineSummary { DeterministicErrorCode = (int)OfflineSummaryErrorCode.TimeRulesMissingOrInvalid };
+
+            const string offlineFormatKey = "ui.dev.offline_summary_format";
+            string offlineFormat = Content != null ? Content.GetString(offlineFormatKey, offlineFormatKey) : offlineFormatKey;
+            OfflineSummaryLine = string.Equals(offlineFormat, offlineFormatKey, StringComparison.Ordinal)
+                ? offlineFormatKey
+                : string.Format(
+                    offlineFormat,
+                    summary.RuleResolved,
+                    summary.DeterministicErrorCode,
+                    summary.OfflineSecondsObserved,
+                    summary.OfflineWindowClamped,
+                    summary.WouldProcessOfflineProgress,
+                    summary.RuleSourceIdUsed ?? string.Empty);
+
+            const string researchFormatKey = "ui.dev.research_pending_format";
+            string researchFormat = Content != null ? Content.GetString(researchFormatKey, researchFormatKey) : researchFormatKey;
+            ResearchPendingLine = string.Equals(researchFormat, researchFormatKey, StringComparison.Ordinal)
+                ? researchFormatKey
+                : string.Format(
+                    researchFormat,
+                    summary.ResearchPending,
+                    summary.ResearchSlotId ?? string.Empty,
+                    summary.ResearchProjectId ?? string.Empty);
         }
 
         public void RefreshStructureRuntimeLines()

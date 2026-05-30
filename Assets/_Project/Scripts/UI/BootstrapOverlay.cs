@@ -187,6 +187,8 @@ namespace DungeonBuilder.M0
                 _root.SelectedSlotIndex,
                 _root.GetSelectedSlotStructureId(),
                 _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive));
+            AppendLine(builder, _root.OfflineSummaryLine);
+            AppendLine(builder, _root.ResearchPendingLine);
         }
 
         private string GetLocalizedString(string key)

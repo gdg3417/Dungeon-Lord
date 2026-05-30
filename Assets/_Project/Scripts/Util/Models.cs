@@ -77,6 +77,15 @@ namespace DungeonBuilder.M0
         InvalidCurrentHeat = 2,
         CurrentHeatOutOfRange = 3
     }
+    public enum OfflineSummaryErrorCode
+    {
+        None = 0,
+        SaveMissing = 1,
+        TimeRulesMissingOrInvalid = 2,
+        CurrentTimestampInvalid = 3,
+        LastKnownTimestampInvalid = 4,
+        CurrentTimestampBeforeLastKnownTimestamp = 5
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -299,6 +308,27 @@ namespace DungeonBuilder.M0
         public string RuleSourceIdUsed;
     }
     [Serializable]
+    public sealed class ResearchPendingState
+    {
+        public string SlotId;
+        public string ProjectId;
+    }
+
+    [Serializable]
+    public sealed class OfflineSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)OfflineSummaryErrorCode.None;
+        public long OfflineSecondsObserved = 0;
+        public bool OfflineWindowClamped = false;
+        public bool ResearchPending = false;
+        public string ResearchSlotId;
+        public string ResearchProjectId;
+        public bool WouldProcessOfflineProgress = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
     public sealed class RunHistoryState
     {
         public int NextRunSequence = 1;
@@ -352,6 +382,7 @@ namespace DungeonBuilder.M0
         public bool allowOfflineProgression;
         public int maxOfflineSeconds;
         public int detectClockSkewSeconds;
+        public string offlineSummaryRuleSourceId;
     }
 
     [Serializable]
@@ -576,6 +607,7 @@ namespace DungeonBuilder.M0
         public DungeonLayoutState dungeonLayout;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();
+        public ResearchPendingState researchPending;
 
         public string[] integrityFlags = Array.Empty<string>();
     }
