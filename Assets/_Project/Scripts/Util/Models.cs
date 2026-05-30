@@ -70,6 +70,13 @@ namespace DungeonBuilder.M0
         AggregateOverflow = 6,
         LegacyDefaultUnresolved = 7
     }
+    public enum CurrentHeatTierSummaryErrorCode
+    {
+        None = 0,
+        InvalidHeatTierConfig = 1,
+        InvalidCurrentHeat = 2,
+        CurrentHeatOutOfRange = 3
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -276,6 +283,19 @@ namespace DungeonBuilder.M0
         public string TierBefore;
         public string TierAfter;
         public bool TierChanged = false;
+        public string RuleSourceIdUsed;
+    }
+    [Serializable]
+    public sealed class CurrentHeatTierSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)CurrentHeatTierSummaryErrorCode.None;
+        public double CurrentHeat = 0d;
+        public string TierId;
+        public double TierMinimum = 0d;
+        public double TierMaximum = 0d;
+        public bool IsAtTierMinimum = false;
+        public bool IsAtTierMaximum = false;
         public string RuleSourceIdUsed;
     }
     [Serializable]

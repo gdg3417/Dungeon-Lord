@@ -57,6 +57,7 @@ namespace DungeonBuilder.M0
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
         public string RunHeatDeltaLine { get; private set; } = string.Empty;
         public string RunHeatApplicationLine { get; private set; } = string.Empty;
+        public string CurrentHeatTierLine { get; private set; } = string.Empty;
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
         public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
         public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
@@ -652,6 +653,8 @@ namespace DungeonBuilder.M0
             {
                 Save.structureRuntime.Heat = CurrentHeat;
             }
+
+            RefreshCurrentHeatTierLine();
         }
 
         public void SelectNextSlot()
@@ -828,10 +831,12 @@ namespace DungeonBuilder.M0
             HeatLine = $"Heat: {Save.structureRuntime.Heat:0.00}";
             ManaLine = $"Mana: {Save.structureRuntime.ManaReserve:0.00}";
             TickLine = $"Tick: {Save.totalTicks}";
+            RefreshCurrentHeatTierLine();
         }
 
         public void RefreshRunLine()
         {
+            RefreshCurrentHeatTierLine();
             int historyCount = Save?.runHistory?.RecentOutcomes != null ? Save.runHistory.RecentOutcomes.Length : 0;
             if (historyCount > 0)
             {
@@ -1061,6 +1066,26 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, heatDelta.RuleResolved, heatDelta.DeterministicErrorCode, heatDelta.DeathHeatDelta, heatDelta.EliteDeathHeatDelta, heatDelta.MultipleDeathBonusDelta, heatDelta.SurvivorCoolingDelta, heatDelta.LootCoolingDelta, heatDelta.FinalHeatDelta, heatDelta.RuleSourceIdUsed);
+        }
+
+        private void RefreshCurrentHeatTierLine()
+        {
+            RunSimulationConfig config = _runSimulationService != null ? _runSimulationService.Config : null;
+            double currentHeat = Save != null && Save.structureRuntime != null
+                ? Save.structureRuntime.Heat
+                : CurrentHeat;
+            CurrentHeatTierSummary summary = CurrentHeatTierResolver.Resolve(config, currentHeat);
+            const string formatKey = "ui.heat.current_tier_summary_format";
+            if (Content == null)
+            {
+                CurrentHeatTierLine = formatKey;
+                return;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            CurrentHeatTierLine = string.Equals(format, formatKey, StringComparison.Ordinal)
+                ? formatKey
+                : string.Format(format, summary.RuleResolved, summary.DeterministicErrorCode, summary.CurrentHeat, summary.TierId, summary.TierMinimum, summary.TierMaximum, summary.IsAtTierMinimum, summary.IsAtTierMaximum, summary.RuleSourceIdUsed);
         }
 
         private string BuildHeatApplicationLine(RunOutcomeRecord outcome)
