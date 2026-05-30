@@ -58,6 +58,21 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_BlankRuleSourceId_ReturnsStableInvalidConfigError()
+        {
+            RunSimulationConfig config = ValidConfig();
+            config.RunHeatApplicationRuleSourceId = " ";
+
+            AssertUnresolved(RunHeatStateApplyResolver.Resolve(config, 5d, ResolvedDelta(1d)), RunHeatApplicationSummaryErrorCode.InvalidHeatApplicationConfig, 5d);
+        }
+
+        [Test]
+        public void DefaultSummary_IsUnresolvedAndSafe()
+        {
+            AssertLegacyDefaultIsSafe(new RunHeatApplicationSummary());
+        }
+
+        [Test]
         public void RunOutcomeRecord_ApplicationSummary_RoundTrips_AndLegacyMissingFieldIsSafe()
         {
             string json = JsonUtility.ToJson(new RunOutcomeRecord
@@ -69,7 +84,20 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(loaded.RunHeatApplicationSummary, Is.Not.Null);
             Assert.That(loaded.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(11d));
-            Assert.That(legacy.RunHeatApplicationSummary, Is.Null);
+            if (legacy.RunHeatApplicationSummary != null)
+            {
+                AssertLegacyDefaultIsSafe(legacy.RunHeatApplicationSummary);
+            }
+        }
+
+        private static void AssertLegacyDefaultIsSafe(RunHeatApplicationSummary summary)
+        {
+            Assert.That(summary.RuleResolved, Is.False);
+            Assert.That(summary.DeterministicErrorCode, Is.EqualTo((int)RunHeatApplicationSummaryErrorCode.LegacyDefaultUnresolved));
+            Assert.That(double.IsNaN(summary.HeatBefore) || double.IsInfinity(summary.HeatBefore), Is.False);
+            Assert.That(double.IsNaN(summary.AppliedDelta) || double.IsInfinity(summary.AppliedDelta), Is.False);
+            Assert.That(double.IsNaN(summary.HeatAfter) || double.IsInfinity(summary.HeatAfter), Is.False);
+            Assert.That(summary.AppliedDelta, Is.EqualTo(0d));
         }
 
         private static void AssertUnresolved(RunHeatApplicationSummary result, RunHeatApplicationSummaryErrorCode expectedError, double expectedHeat)

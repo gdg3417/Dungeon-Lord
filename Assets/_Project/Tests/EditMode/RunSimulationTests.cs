@@ -1079,6 +1079,15 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
+        public void IsValidRunSimulationConfig_Rejects_BlankRunHeatApplicationRuleSourceId()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.RunHeatApplicationRuleSourceId = " ";
+
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
         public void IsValidRunSimulationConfig_Rejects_InvalidLootHeatCoolingConfigNumbers()
         {
             RunSimulationConfig config = BuildConfig();
@@ -1541,9 +1550,11 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.LessThan(0d));
                 Assert.That(latest.RunHeatApplicationSummary, Is.Not.Null);
                 Assert.That(latest.RunHeatApplicationSummary.RuleResolved, Is.True);
-                Assert.That(root.CurrentHeat, Is.EqualTo(latest.RunHeatApplicationSummary.HeatAfter + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
+                Assert.That(latest.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(20d));
+                Assert.That(latest.LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(latest.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+                Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(latest.LootHeatCoolingSummary.HeatBeforeCooling + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
+                Assert.That(root.CurrentHeat, Is.EqualTo(latest.LootHeatCoolingSummary.HeatAfterCooling).Within(1e-9));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(root.CurrentHeat).Within(1e-9));
-                Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(root.CurrentHeat).Within(1e-9));
             }
             finally { Object.DestroyImmediate(go); }
         }
@@ -1594,22 +1605,26 @@ namespace DungeonBuilder.Tests.EditMode
                 var root = go.AddComponent<GameRoot>();
                 SetPrivateField(root, "_runSimulationService", new RunSimulationService(config, BuildLootConfig()));
                 SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_clamp.json", useAtomicWrites = false }));
-                SetPrivateField(root, "<CurrentHeat>k__BackingField", 1d);
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 20d);
                 SetSave(root, new SaveData
                 {
                     totalTicks = 10,
-                    structureRuntime = new StructureRuntimeState { Heat = 1d, ManaReserve = 50d, IsHeatCrisisActive = false },
+                    structureRuntime = new StructureRuntimeState { Heat = 20d, ManaReserve = 50d, IsHeatCrisisActive = false },
                     runHistory = new RunHistoryState { NextRunSequence = 1 }
                 });
 
                 bool ok = root.SimulateRunOnce();
                 Assert.That(ok, Is.True);
                 RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
+                Assert.That(latest.RunHeatApplicationSummary.RuleResolved, Is.True);
+                Assert.That(latest.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(20d));
+                Assert.That(latest.LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(latest.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+                Assert.That(latest.LootHeatCoolingSummary.HeatBeforeCooling, Is.GreaterThan(0d));
                 Assert.That(root.CurrentHeat, Is.EqualTo(0d));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(0d));
                 Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(0d));
-                Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.EqualTo(-1d));
-                Assert.That(latest.LootHeatCoolingSummary.UnclampedHeatDelta, Is.LessThan(-1d));
+                Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.EqualTo(-latest.LootHeatCoolingSummary.HeatBeforeCooling).Within(1e-9));
+                Assert.That(latest.LootHeatCoolingSummary.UnclampedHeatDelta, Is.LessThan(latest.LootHeatCoolingSummary.AppliedHeatDelta));
             }
             finally { Object.DestroyImmediate(go); }
         }
@@ -1941,7 +1956,7 @@ namespace DungeonBuilder.Tests.EditMode
                     {
                         RecentOutcomes = new[]
                         {
-                            new RunOutcomeRecord { RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = true } },
+                            new RunOutcomeRecord { RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = true, DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None } },
                             new RunOutcomeRecord { RunHeatApplicationSummary = null },
                             new RunOutcomeRecord { RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = false } }
                         }
@@ -1956,6 +1971,72 @@ namespace DungeonBuilder.Tests.EditMode
                 root.SelectPreviousRunOutcome();
                 root.RefreshRunLine();
                 Assert.That(root.RunHeatApplicationLine, Is.EqualTo("Heat Application: resolved=True error=0 before=0 delta=0 after=0 tierBefore= tierAfter= tierChanged=False ruleSource="));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void DiagnosticsRenderingAndHistoryBrowsing_DoNotMutateHeatOrReapplyOldOutcome()
+        {
+            var rootObject = new GameObject("GameRootHeatApplicationReadOnlyDiagnosticsTest");
+            var overlayObject = new GameObject("BootstrapOverlayHeatApplicationReadOnlyTest");
+            var textObject = new GameObject("BootstrapOverlayHeatApplicationReadOnlyTextTest");
+            try
+            {
+                var runtime = new StructureRuntimeState { Heat = 17d };
+                var root = rootObject.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    structureRuntime = runtime,
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunId = "old-run", RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = true, DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None, HeatBefore = 8d, AppliedDelta = 3d, HeatAfter = 11d } },
+                            new RunOutcomeRecord { RunId = "latest-run", RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = true, DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None, HeatBefore = 11d, AppliedDelta = 6d, HeatAfter = 17d } }
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+                Assert.That(runtime.Heat, Is.EqualTo(17d));
+
+                var overlay = overlayObject.AddComponent<BootstrapOverlay>();
+                overlay.overlayText = textObject.AddComponent<TextMeshProUGUI>();
+                overlay.Bind(root);
+                typeof(BootstrapOverlay).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(overlay, null);
+                Assert.That(runtime.Heat, Is.EqualTo(17d));
+
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(runtime.Heat, Is.EqualTo(17d));
+                Assert.That(root.RunHeatApplicationLine, Does.Contain("before=8 delta=3 after=11"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(textObject);
+                Object.DestroyImmediate(overlayObject);
+                Object.DestroyImmediate(rootObject);
+            }
+        }
+
+        [Test]
+        public void LegacySavedOutcome_DisplayAfterLoad_DoesNotMutateHeat()
+        {
+            var go = new GameObject("GameRootLegacyHeatApplicationDisplayTest");
+            try
+            {
+                SaveData legacy = JsonUtility.FromJson<SaveData>("{\"structureRuntime\":{\"Heat\":17},\"runHistory\":{\"RecentOutcomes\":[{\"RunId\":\"legacy-run\"}]}}");
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, legacy);
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+
+                Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(17d));
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo(string.Empty));
             }
             finally { Object.DestroyImmediate(go); }
         }

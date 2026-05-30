@@ -67,7 +67,8 @@ namespace DungeonBuilder.M0
         InvalidHeatDeltaSummary = 3,
         InvalidHeatApplicationConfig = 4,
         InvalidCurrentHeat = 5,
-        AggregateOverflow = 6
+        AggregateOverflow = 6,
+        LegacyDefaultUnresolved = 7
     }
 
 [Serializable]
@@ -268,7 +269,7 @@ namespace DungeonBuilder.M0
     public sealed class RunHeatApplicationSummary
     {
         public bool RuleResolved = false;
-        public int DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None;
+        public int DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.LegacyDefaultUnresolved;
         public double HeatBefore = 0d;
         public double AppliedDelta = 0d;
         public double HeatAfter = 0d;

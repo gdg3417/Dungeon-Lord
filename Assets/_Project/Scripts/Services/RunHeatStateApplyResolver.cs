@@ -91,6 +91,7 @@ namespace DungeonBuilder.M0
                    IsFinite(config.HeatNoticeMaximum) &&
                    IsFinite(config.HeatConcernMinimum) &&
                    IsFinite(config.HeatConcernMaximum) &&
+                   !string.IsNullOrWhiteSpace(config.RunHeatApplicationRuleSourceId) &&
                    config.HeatPeaceMinimum <= config.HeatPeaceMaximum &&
                    config.HeatPeaceMaximum < config.HeatNoticeMinimum &&
                    config.HeatNoticeMinimum <= config.HeatNoticeMaximum &&

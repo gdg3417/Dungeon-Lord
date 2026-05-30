@@ -484,6 +484,7 @@ namespace DungeonBuilder.M0
                 double.IsInfinity(config.HeatConcernMinimum) ||
                 double.IsNaN(config.HeatConcernMaximum) ||
                 double.IsInfinity(config.HeatConcernMaximum) ||
+                string.IsNullOrWhiteSpace(config.RunHeatApplicationRuleSourceId) ||
                 config.HeatPeaceMinimum > config.HeatPeaceMaximum ||
                 config.HeatPeaceMaximum >= config.HeatNoticeMinimum ||
                 config.HeatNoticeMinimum > config.HeatNoticeMaximum ||
