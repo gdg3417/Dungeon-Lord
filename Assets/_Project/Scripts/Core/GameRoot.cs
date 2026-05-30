@@ -63,6 +63,7 @@ namespace DungeonBuilder.M0
         public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
         public string OfflineSummaryLine { get; private set; } = "ui.dev.offline_summary_format";
         public string ResearchPendingLine { get; private set; } = "ui.dev.research_pending_format";
+        public string ResearchPendingValidationLine { get; private set; } = "ui.dev.research_pending_validation_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -837,11 +838,51 @@ namespace DungeonBuilder.M0
             Save.lastOfflineSummary = ResolveOfflineSummary();
         }
 
+        public bool SetResearchPendingScaffold()
+        {
+            if (Save == null)
+            {
+                return false;
+            }
+
+            ResearchPendingValidationResult result = ResearchPendingResolver.ResolveScaffold(GetResearchPendingScaffoldConfig());
+            if (!result.RuleResolved)
+            {
+                RefreshOfflineSummaryLines();
+                return false;
+            }
+
+            Save.researchPending = new ResearchPendingState
+            {
+                SlotId = result.SlotId,
+                ProjectId = result.ProjectId
+            };
+            SaveService?.Save(Save, SaveReason.ManualDev);
+            RefreshOfflineSummaryLines();
+            return true;
+        }
+
+        public bool ClearResearchPendingScaffold()
+        {
+            if (Save == null)
+            {
+                return false;
+            }
+
+            Save.researchPending = null;
+            SaveService?.Save(Save, SaveReason.ManualDev);
+            RefreshOfflineSummaryLines();
+            return true;
+        }
+
         public void RefreshOfflineSummaryLines()
         {
             OfflineSummary summary = Save != null && IsUsablePersistedOfflineSummary(Save.lastOfflineSummary)
                 ? Save.lastOfflineSummary
                 : ResolveOfflineSummary();
+            ResearchPendingValidationResult research = ResearchPendingResolver.Resolve(
+                Save != null ? Save.researchPending : null,
+                GetResearchPendingScaffoldConfig());
 
             const string offlineFormatKey = "ui.dev.offline_summary_format";
             string offlineFormat = Content != null ? Content.GetString(offlineFormatKey, offlineFormatKey) : offlineFormatKey;
@@ -862,9 +903,24 @@ namespace DungeonBuilder.M0
                 ? researchFormatKey
                 : string.Format(
                     researchFormat,
-                    summary.ResearchPending,
-                    summary.ResearchSlotId ?? string.Empty,
-                    summary.ResearchProjectId ?? string.Empty);
+                    research.Pending,
+                    research.SlotId ?? string.Empty,
+                    research.ProjectId ?? string.Empty);
+
+            const string validationFormatKey = "ui.dev.research_pending_validation_format";
+            string validationFormat = Content != null ? Content.GetString(validationFormatKey, validationFormatKey) : validationFormatKey;
+            ResearchPendingValidationLine = string.Equals(validationFormat, validationFormatKey, StringComparison.Ordinal)
+                ? validationFormatKey
+                : string.Format(
+                    validationFormat,
+                    research.RuleResolved,
+                    research.DeterministicErrorCode,
+                    research.RuleSourceIdUsed ?? string.Empty);
+        }
+
+        private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchPendingScaffold : null;
         }
 
         private static bool IsUsablePersistedOfflineSummary(OfflineSummary summary)

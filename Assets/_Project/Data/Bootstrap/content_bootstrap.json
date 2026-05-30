@@ -22,5 +22,11 @@
     "heatRuntime": {
       "path": "Bootstrap/heat_runtime"
     }
+  },
+  "researchPendingScaffold": {
+    "enabled": true,
+    "slotId": "research.slot.primary",
+    "projectId": "research.project.m7_a2_scaffold",
+    "ruleSourceId": "research.pending.rule.m7_a2_scaffold"
   }
 }

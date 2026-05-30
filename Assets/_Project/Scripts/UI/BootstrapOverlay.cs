@@ -189,6 +189,7 @@ namespace DungeonBuilder.M0
                 _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive));
             AppendLine(builder, _root.OfflineSummaryLine);
             AppendLine(builder, _root.ResearchPendingLine);
+            AppendLine(builder, _root.ResearchPendingValidationLine);
         }
 
         private string GetLocalizedString(string key)
@@ -288,6 +289,20 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(pause
                     ? _root.Content.GetString("ui.banner.paused_dev_panel", "ui.banner.paused_dev_panel")
                     : _root.Content.GetString("ui.banner.resumed_dev_panel", "ui.banner.resumed_dev_panel"));
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.set_research_pending", "ui.dev.button.set_research_pending")))
+            {
+                bool didSet = _root.SetResearchPendingScaffold();
+                _root.SetBanner(_root.Content.GetString(
+                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed",
+                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed"));
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_research_pending", "ui.dev.button.clear_research_pending")))
+            {
+                _root.ClearResearchPendingScaffold();
+                _root.SetBanner(_root.Content.GetString("ui.banner.research_pending_cleared", "ui.banner.research_pending_cleared"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_mana", "ui.dev.button.sim_mana")))

@@ -149,11 +149,11 @@
     },
     {
       "key": "ui.dev.offline_summary_format",
-      "text": "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
+      "text": "Offline Summary \u2014 resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
     {
       "key": "ui.dev.research_pending_format",
-      "text": "Research Pending — pending={0} slot={1} project={2}"
+      "text": "Research Pending \u2014 pending={0} slot={1} project={2}"
     },
     {
       "key": "ui.dev.banner.heading",
@@ -326,6 +326,30 @@
     {
       "key": "ui.run.adventurer_demand_budget_summary_format",
       "text": "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}"
+    },
+    {
+      "key": "ui.dev.research_pending_validation_format",
+      "text": "Research Pending Validation \u2014 resolved={0} error={1} ruleSource={2}"
+    },
+    {
+      "key": "ui.dev.button.set_research_pending",
+      "text": "Set Research Pending"
+    },
+    {
+      "key": "ui.dev.button.clear_research_pending",
+      "text": "Clear Research Pending"
+    },
+    {
+      "key": "ui.banner.research_pending_set",
+      "text": "Research pending scaffold set."
+    },
+    {
+      "key": "ui.banner.research_pending_set_failed",
+      "text": "Research pending scaffold could not be set."
+    },
+    {
+      "key": "ui.banner.research_pending_cleared",
+      "text": "Research pending scaffold cleared."
     }
   ]
 }
