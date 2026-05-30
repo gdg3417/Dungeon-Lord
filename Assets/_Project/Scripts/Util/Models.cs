@@ -608,6 +608,7 @@ namespace DungeonBuilder.M0
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();
         public ResearchPendingState researchPending;
+        public OfflineSummary lastOfflineSummary;
 
         public string[] integrityFlags = Array.Empty<string>();
     }

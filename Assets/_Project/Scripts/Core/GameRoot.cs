@@ -250,6 +250,7 @@ namespace DungeonBuilder.M0
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
+            CaptureOfflineSummaryDiagnostics();
             RefreshOfflineSummaryLines();
 
             if (!string.IsNullOrEmpty(saveBanner))
@@ -826,11 +827,21 @@ namespace DungeonBuilder.M0
             return string.Empty;
         }
 
+        public void CaptureOfflineSummaryDiagnostics()
+        {
+            if (Save == null)
+            {
+                return;
+            }
+
+            Save.lastOfflineSummary = ResolveOfflineSummary();
+        }
+
         public void RefreshOfflineSummaryLines()
         {
-            OfflineSummary summary = _offlineSummaryResolver != null
-                ? _offlineSummaryResolver.Resolve(Save, Content != null && Content.Bootstrap != null ? Content.Bootstrap.timeRules : null)
-                : new OfflineSummary { DeterministicErrorCode = (int)OfflineSummaryErrorCode.TimeRulesMissingOrInvalid };
+            OfflineSummary summary = Save != null && Save.lastOfflineSummary != null
+                ? Save.lastOfflineSummary
+                : ResolveOfflineSummary();
 
             const string offlineFormatKey = "ui.dev.offline_summary_format";
             string offlineFormat = Content != null ? Content.GetString(offlineFormatKey, offlineFormatKey) : offlineFormatKey;
@@ -854,6 +865,13 @@ namespace DungeonBuilder.M0
                     summary.ResearchPending,
                     summary.ResearchSlotId ?? string.Empty,
                     summary.ResearchProjectId ?? string.Empty);
+        }
+
+        private OfflineSummary ResolveOfflineSummary()
+        {
+            return _offlineSummaryResolver != null
+                ? _offlineSummaryResolver.Resolve(Save, Content != null && Content.Bootstrap != null ? Content.Bootstrap.timeRules : null)
+                : new OfflineSummary { DeterministicErrorCode = (int)OfflineSummaryErrorCode.TimeRulesMissingOrInvalid };
         }
 
         public void RefreshStructureRuntimeLines()
