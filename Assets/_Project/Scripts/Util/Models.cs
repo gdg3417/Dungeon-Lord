@@ -86,6 +86,13 @@ namespace DungeonBuilder.M0
         LastKnownTimestampInvalid = 4,
         CurrentTimestampBeforeLastKnownTimestamp = 5
     }
+    public enum ResearchPendingValidationErrorCode
+    {
+        None = 0,
+        ScaffoldConfigMissingOrDisabled = 1,
+        ScaffoldSlotIdMissing = 2,
+        ScaffoldProjectIdMissing = 3
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -315,6 +322,26 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchPendingScaffoldConfig
+    {
+        public bool enabled;
+        public string slotId;
+        public string projectId;
+        public string ruleSourceId;
+    }
+
+    [Serializable]
+    public sealed class ResearchPendingValidationResult
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchPendingValidationErrorCode.None;
+        public bool Pending = false;
+        public string SlotId;
+        public string ProjectId;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
     public sealed class OfflineSummary
     {
         public bool RuleResolved = false;
@@ -372,6 +399,7 @@ namespace DungeonBuilder.M0
         public int tickSeconds;
 
         public TimeRules timeRules;
+        public ResearchPendingScaffoldConfig researchPendingScaffold;
         public FeatureFlags featureFlags;
         public Tables tables;
     }

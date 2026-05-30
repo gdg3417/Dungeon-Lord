@@ -57,6 +57,24 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
             Assert.That(text, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
+            Assert.That(text, Does.Contain("Research Pending Validation — resolved=True error=0 ruleSource=research.pending.rule.test"));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_SetAndClearResearchPendingScaffold_ImmediatelyRendersCurrentSavedState()
+        {
+            Assert.That(_root.SetResearchPendingScaffold(), Is.True);
+            CycleToSystemsDiagnostics();
+            string setText = RefreshText();
+
+            Assert.That(setText, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.scaffold"));
+            Assert.That(setText, Does.Contain("Research Pending Validation — resolved=True error=0 ruleSource=research.pending.rule.test"));
+
+            Assert.That(_root.ClearResearchPendingScaffold(), Is.True);
+            string clearText = RefreshText();
+
+            Assert.That(clearText, Does.Contain("Research Pending — pending=False slot= project="));
+            Assert.That(clearText, Does.Contain("Research Pending Validation — resolved=True error=0 ruleSource=research.pending.rule.test"));
         }
 
         [Test]
@@ -165,6 +183,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("ui.dev.offline_summary_format"));
             Assert.That(text, Does.Contain("ui.dev.research_pending_format"));
+            Assert.That(text, Does.Contain("ui.dev.research_pending_validation_format"));
         }
 
         [Test]
@@ -203,7 +222,14 @@ namespace DungeonBuilder.Tests.EditMode
             typeof(ContentService).GetField("<Bootstrap>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.SetValue(content, new ContentBootstrap
                 {
-                    timeRules = new TimeRules { maxOfflineSeconds = 100, offlineSummaryRuleSourceId = "offline.summary.rule.test" }
+                    timeRules = new TimeRules { maxOfflineSeconds = 100, offlineSummaryRuleSourceId = "offline.summary.rule.test" },
+                    researchPendingScaffold = new ResearchPendingScaffoldConfig
+                    {
+                        enabled = true,
+                        slotId = "research.slot.primary",
+                        projectId = "research.project.scaffold",
+                        ruleSourceId = "research.pending.rule.test"
+                    }
                 });
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.dev.hint.toggle_panel"] = "toggle-panel";
@@ -216,6 +242,7 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 map["ui.dev.offline_summary_format"] = "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}";
                 map["ui.dev.research_pending_format"] = "Research Pending — pending={0} slot={1} project={2}";
+                map["ui.dev.research_pending_validation_format"] = "Research Pending Validation — resolved={0} error={1} ruleSource={2}";
             }
             return content;
         }
