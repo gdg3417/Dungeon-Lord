@@ -60,6 +60,68 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void CaptureBeforeTimestampAdvance_PersistsObservedSnapshotForLaterDiagnostics()
+        {
+            SaveData save = _root.Save;
+
+            _root.CaptureOfflineSummaryDiagnostics();
+            save.lastSavedUtcUnix = 160;
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(save.lastOfflineSummary, Is.Not.Null);
+            Assert.That(save.lastOfflineSummary.RuleResolved, Is.True);
+            Assert.That(save.lastOfflineSummary.OfflineSecondsObserved, Is.EqualTo(60));
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
+        }
+
+        [Test]
+        public void LegacySaveWithoutPersistedSummary_RemainsSafeAndUsesResolverFallback()
+        {
+            SaveData legacy = JsonUtility.FromJson<SaveData>("{\"lastSavedUtcUnix\":100}");
+            string before = JsonUtility.ToJson(legacy);
+            SetBackingField("<Save>k__BackingField", legacy);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
+            Assert.That(text, Does.Contain("Research Pending — pending=False slot= project="));
+            Assert.That(JsonUtility.ToJson(legacy), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void DefaultPersistedSummary_IsIgnoredAndUsesResolverFallback()
+        {
+            SaveData save = _root.Save;
+            save.lastOfflineSummary = new OfflineSummary();
+            string before = JsonUtility.ToJson(save);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
+            Assert.That(text, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void PersistedSummary_RoundTripsThroughSaveSerialization()
+        {
+            _root.CaptureOfflineSummaryDiagnostics();
+
+            SaveData loaded = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(_root.Save));
+
+            Assert.That(loaded.lastOfflineSummary, Is.Not.Null);
+            Assert.That(JsonUtility.ToJson(loaded.lastOfflineSummary), Is.EqualTo(JsonUtility.ToJson(_root.Save.lastOfflineSummary)));
+            Assert.That(loaded.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+        }
+
+        [Test]
         public void RefreshAndPageCycling_DoNotApplyOfflineRewardsResearchCompletionOrHeatMutation()
         {
             SaveData save = _root.Save;
@@ -67,16 +129,29 @@ namespace DungeonBuilder.Tests.EditMode
             ResearchPendingState research = save.researchPending;
             RunHistoryState history = save.runHistory;
 
+            long ticksBefore = save.totalTicks;
+            string structuresBefore = JsonUtility.ToJson(structures);
+            string historyBefore = JsonUtility.ToJson(history);
+            string researchBefore = JsonUtility.ToJson(research);
+
+            _root.CaptureOfflineSummaryDiagnostics();
             _root.RefreshOfflineSummaryLines();
             CycleToSystemsDiagnostics();
             RefreshText();
 
+            Assert.That(save.lastOfflineSummary, Is.Not.Null);
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(save.totalTicks, Is.EqualTo(ticksBefore));
             Assert.That(save.structureRuntime, Is.SameAs(structures));
+            Assert.That(JsonUtility.ToJson(structures), Is.EqualTo(structuresBefore));
             Assert.That(structures.Heat, Is.EqualTo(17d));
             Assert.That(structures.ManaReserve, Is.EqualTo(23d));
             Assert.That(save.runHistory, Is.SameAs(history));
+            Assert.That(JsonUtility.ToJson(history), Is.EqualTo(historyBefore));
+            Assert.That(history.LatestOutcome, Is.Null);
             Assert.That(history.RecentOutcomes, Is.Empty);
             Assert.That(save.researchPending, Is.SameAs(research));
+            Assert.That(JsonUtility.ToJson(research), Is.EqualTo(researchBefore));
             Assert.That(research.ProjectId, Is.EqualTo("research.project.pending"));
         }
 
