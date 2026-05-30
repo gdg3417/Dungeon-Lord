@@ -272,6 +272,10 @@
       "text": "Run Heat Delta: resolved={0} error={1} death={2:0.###} elite={3:0.###} multi={4:0.###} survivorCooling={5:0.###} lootCooling={6:0.###} final={7:0.###} ruleSource={8}"
     },
     {
+      "key": "ui.run.heat_application_summary_format",
+      "text": "Heat Application: resolved={0} error={1} before={2:0.###} delta={3:0.###} after={4:0.###} tierBefore={5} tierAfter={6} tierChanged={7} ruleSource={8}"
+    },
+    {
       "key": "ui.run.adventurer_attraction_summary_format",
       "text": "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}"
     },

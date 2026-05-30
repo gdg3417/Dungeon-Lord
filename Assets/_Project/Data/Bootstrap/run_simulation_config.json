@@ -40,5 +40,12 @@
   "RunHeatLootCoolingPerExtractedValue": 0.1,
   "RunHeatDeltaMinimum": -10.0,
   "RunHeatDeltaMaximum": 10.0,
-  "RunHeatDeltaRuleSourceId": "run.heat_delta.rule.v1"
+  "RunHeatDeltaRuleSourceId": "run.heat_delta.rule.v1",
+  "HeatPeaceMinimum": 0.0,
+  "HeatPeaceMaximum": 9.0,
+  "HeatNoticeMinimum": 10.0,
+  "HeatNoticeMaximum": 24.0,
+  "HeatConcernMinimum": 25.0,
+  "HeatConcernMaximum": 49.0,
+  "RunHeatApplicationRuleSourceId": "run.heat_application.rule.v1"
 }

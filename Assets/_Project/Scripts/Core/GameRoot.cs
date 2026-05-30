@@ -56,6 +56,7 @@ namespace DungeonBuilder.M0
         public string RunExtractionLine { get; private set; } = string.Empty;
         public string RunHeatCoolingLine { get; private set; } = string.Empty;
         public string RunHeatDeltaLine { get; private set; } = string.Empty;
+        public string RunHeatApplicationLine { get; private set; } = string.Empty;
         public string RunAdventurerAttractionLine { get; private set; } = string.Empty;
         public string RunAdventurerInterestForecastLine { get; private set; } = string.Empty;
         public string RunAdventurerDemandBudgetLine { get; private set; } = string.Empty;
@@ -470,7 +471,25 @@ namespace DungeonBuilder.M0
                 double.IsNaN(config.RunHeatDeltaMinimum) ||
                 double.IsInfinity(config.RunHeatDeltaMinimum) ||
                 double.IsNaN(config.RunHeatDeltaMaximum) ||
-                double.IsInfinity(config.RunHeatDeltaMaximum))
+                double.IsInfinity(config.RunHeatDeltaMaximum) ||
+                double.IsNaN(config.HeatPeaceMinimum) ||
+                double.IsInfinity(config.HeatPeaceMinimum) ||
+                double.IsNaN(config.HeatPeaceMaximum) ||
+                double.IsInfinity(config.HeatPeaceMaximum) ||
+                double.IsNaN(config.HeatNoticeMinimum) ||
+                double.IsInfinity(config.HeatNoticeMinimum) ||
+                double.IsNaN(config.HeatNoticeMaximum) ||
+                double.IsInfinity(config.HeatNoticeMaximum) ||
+                double.IsNaN(config.HeatConcernMinimum) ||
+                double.IsInfinity(config.HeatConcernMinimum) ||
+                double.IsNaN(config.HeatConcernMaximum) ||
+                double.IsInfinity(config.HeatConcernMaximum) ||
+                string.IsNullOrWhiteSpace(config.RunHeatApplicationRuleSourceId) ||
+                config.HeatPeaceMinimum > config.HeatPeaceMaximum ||
+                config.HeatPeaceMaximum >= config.HeatNoticeMinimum ||
+                config.HeatNoticeMinimum > config.HeatNoticeMaximum ||
+                config.HeatNoticeMaximum >= config.HeatConcernMinimum ||
+                config.HeatConcernMinimum > config.HeatConcernMaximum)
             {
                 return false;
             }
@@ -707,6 +726,8 @@ namespace DungeonBuilder.M0
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
             RunSimulationConfig config = _runSimulationService.Config;
+            CurrentHeat = Save.structureRuntime.Heat;
+            RefreshStructureRuntimeLines();
             int deterministicSeed = outcome.LootExtractionSummary != null
                 ? outcome.LootExtractionSummary.DeterministicSeed
                 : sequence;
@@ -848,6 +869,7 @@ namespace DungeonBuilder.M0
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
+                RunHeatApplicationLine = BuildHeatApplicationLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -892,6 +914,7 @@ namespace DungeonBuilder.M0
                 RunExtractionLine = BuildExtractionLine(outcome);
                 RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
                 RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
+                RunHeatApplicationLine = BuildHeatApplicationLine(outcome);
                 RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
                 RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
                 RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -917,6 +940,7 @@ namespace DungeonBuilder.M0
             RunExtractionLine = BuildExtractionLine(outcome);
             RunHeatCoolingLine = BuildHeatCoolingLine(outcome);
             RunHeatDeltaLine = BuildHeatDeltaLine(outcome);
+            RunHeatApplicationLine = BuildHeatApplicationLine(outcome);
             RunAdventurerAttractionLine = BuildAdventurerAttractionLine(outcome);
             RunAdventurerInterestForecastLine = BuildAdventurerInterestForecastLine(outcome);
             RunAdventurerDemandBudgetLine = BuildAdventurerDemandBudgetLine(outcome);
@@ -1037,6 +1061,29 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(format, heatDelta.RuleResolved, heatDelta.DeterministicErrorCode, heatDelta.DeathHeatDelta, heatDelta.EliteDeathHeatDelta, heatDelta.MultipleDeathBonusDelta, heatDelta.SurvivorCoolingDelta, heatDelta.LootCoolingDelta, heatDelta.FinalHeatDelta, heatDelta.RuleSourceIdUsed);
+        }
+
+        private string BuildHeatApplicationLine(RunOutcomeRecord outcome)
+        {
+            RunHeatApplicationSummary application = outcome != null ? outcome.RunHeatApplicationSummary : null;
+            if (application == null || !application.RuleResolved)
+            {
+                return string.Empty;
+            }
+
+            const string formatKey = "ui.run.heat_application_summary_format";
+            if (Content == null)
+            {
+                return formatKey;
+            }
+
+            string format = Content.GetString(formatKey, formatKey);
+            if (string.Equals(format, formatKey, StringComparison.Ordinal))
+            {
+                return formatKey;
+            }
+
+            return string.Format(format, application.RuleResolved, application.DeterministicErrorCode, application.HeatBefore, application.AppliedDelta, application.HeatAfter, application.TierBefore, application.TierAfter, application.TierChanged, application.RuleSourceIdUsed);
         }
 
         private string BuildAdventurerAttractionLine(RunOutcomeRecord outcome)
