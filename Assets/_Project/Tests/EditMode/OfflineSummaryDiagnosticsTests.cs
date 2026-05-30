@@ -81,15 +81,32 @@ namespace DungeonBuilder.Tests.EditMode
         public void LegacySaveWithoutPersistedSummary_RemainsSafeAndUsesResolverFallback()
         {
             SaveData legacy = JsonUtility.FromJson<SaveData>("{\"lastSavedUtcUnix\":100}");
+            string before = JsonUtility.ToJson(legacy);
             SetBackingField("<Save>k__BackingField", legacy);
 
             _root.RefreshOfflineSummaryLines();
             CycleToSystemsDiagnostics();
             string text = RefreshText();
 
-            Assert.That(legacy.lastOfflineSummary, Is.Null);
             Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
             Assert.That(text, Does.Contain("Research Pending — pending=False slot= project="));
+            Assert.That(JsonUtility.ToJson(legacy), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void DefaultPersistedSummary_IsIgnoredAndUsesResolverFallback()
+        {
+            SaveData save = _root.Save;
+            save.lastOfflineSummary = new OfflineSummary();
+            string before = JsonUtility.ToJson(save);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
+            Assert.That(text, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
         }
 
         [Test]

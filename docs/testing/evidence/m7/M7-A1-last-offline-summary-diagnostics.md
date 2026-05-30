@@ -27,7 +27,7 @@ M7-A1 does **not**:
 
 ## Save compatibility notes
 
-`SaveData.lastOfflineSummary` is additive and nullable. Legacy saves that do not contain the field deserialize safely with no persisted snapshot. When the snapshot is absent, Systems Diagnostics uses the existing M7-A0 resolver fallback. No save schema version bump, migration rewrite, or `SaveService.Save` timestamp change is required.
+`SaveData.lastOfflineSummary` is additive and nullable. Unity `JsonUtility` may materialize a missing legacy field as a default `OfflineSummary` object rather than leaving it `null`. Systems Diagnostics treats both `null` and default/empty snapshots as missing and uses the existing M7-A0 resolver fallback. No save schema version bump, migration rewrite, or `SaveService.Save` timestamp change is required.
 
 The stored value is diagnostics-only save state. It is a serializable observation snapshot, not gameplay progress, tuning, or a source of gameplay effects.
 
@@ -35,7 +35,7 @@ The stored value is diagnostics-only save state. It is a serializable observatio
 
 At boot, `GameRoot.InitializeServicesAndData` loads or creates the save, constructs `OfflineSummaryResolver`, captures the summary snapshot, refreshes the localized diagnostics lines, and then continues the existing initialization path. The existing boot save still advances `lastSavedUtcUnix` normally.
 
-Later diagnostics refreshes prefer `SaveData.lastOfflineSummary`, so the last observed boot/session offline window remains visible instead of being recomputed as a misleading near-zero window after the boot save timestamp advances. If no persisted snapshot exists, refresh retains M7-A0's safe resolver fallback.
+Later diagnostics refreshes prefer a usable `SaveData.lastOfflineSummary`, so the last observed boot/session offline window remains visible instead of being recomputed as a misleading near-zero window after the boot save timestamp advances. A usable snapshot has meaningful resolver output: a resolved rule, a deterministic error code, or a non-empty rule source ID. If the persisted value is `null` or a default/empty Unity `JsonUtility` object, refresh retains M7-A0's safe resolver fallback.
 
 The existing localized diagnostics keys remain sufficient; M7-A1 adds no new visible line labels:
 
@@ -57,6 +57,7 @@ Unity EditMode tests added or updated in `OfflineSummaryDiagnosticsTests`:
 - `SystemsDiagnostics_IncludesLocalizedOfflineSummaryAndResearchPendingLines`
 - `CaptureBeforeTimestampAdvance_PersistsObservedSnapshotForLaterDiagnostics`
 - `LegacySaveWithoutPersistedSummary_RemainsSafeAndUsesResolverFallback`
+- `DefaultPersistedSummary_IsIgnoredAndUsesResolverFallback`
 - `PersistedSummary_RoundTripsThroughSaveSerialization`
 - `RefreshAndPageCycling_DoNotApplyOfflineRewardsResearchCompletionOrHeatMutation`
 - `MissingLocalization_UsesStableKeysAsSafeFallback`
@@ -72,6 +73,7 @@ Before merge, run all Unity EditMode tests, including the existing `OfflineSumma
 - [ ] Confirm F2 run diagnostics focus still works.
 - [ ] Confirm F3 diagnostics page cycling still works.
 - [ ] Confirm Systems Diagnostics shows the last observed offline summary.
+- [ ] Confirm the shown offline summary reports `wouldProcess=False`.
 - [ ] Confirm the shown offline summary does not disappear or become misleading immediately because the boot save advanced `lastSavedUtcUnix`.
 - [ ] Confirm Research Pending remains scaffold-only.
 - [ ] Confirm no mana, loot, research progress, heat changes, structure ticks, or run history entries are granted from offline time.
@@ -86,4 +88,4 @@ M7-A1 does not modify active-run heat delta composition, the accepted two-stage 
 
 ## M7-A1 confirmation
 
-M7-A1 is diagnostics persistence only. It does not implement offline rewards, research completion, offline heat, production UI, or server verification.
+M7-A1 is diagnostics persistence only. The Unity `JsonUtility` legacy compatibility fix changes diagnostics snapshot selection only; it does not change gameplay behavior. M7-A1 does not implement offline rewards, research completion, offline heat, production UI, or server verification.

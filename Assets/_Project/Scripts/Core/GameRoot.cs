@@ -839,7 +839,7 @@ namespace DungeonBuilder.M0
 
         public void RefreshOfflineSummaryLines()
         {
-            OfflineSummary summary = Save != null && Save.lastOfflineSummary != null
+            OfflineSummary summary = Save != null && IsUsablePersistedOfflineSummary(Save.lastOfflineSummary)
                 ? Save.lastOfflineSummary
                 : ResolveOfflineSummary();
 
@@ -865,6 +865,14 @@ namespace DungeonBuilder.M0
                     summary.ResearchPending,
                     summary.ResearchSlotId ?? string.Empty,
                     summary.ResearchProjectId ?? string.Empty);
+        }
+
+        private static bool IsUsablePersistedOfflineSummary(OfflineSummary summary)
+        {
+            return summary != null &&
+                   (summary.RuleResolved ||
+                    summary.DeterministicErrorCode != (int)OfflineSummaryErrorCode.None ||
+                    !string.IsNullOrWhiteSpace(summary.RuleSourceIdUsed));
         }
 
         private OfflineSummary ResolveOfflineSummary()
