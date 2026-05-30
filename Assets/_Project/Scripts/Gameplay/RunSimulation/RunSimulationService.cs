@@ -21,8 +21,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
 
+            double heatAtStart = runtime.Heat;
             double baseChance = _config.BaseSuccessChance;
-            double heatPenaltyApplied = runtime.Heat * _config.HeatPenaltyPerPoint;
+            double heatPenaltyApplied = heatAtStart * _config.HeatPenaltyPerPoint;
             double manaBonusApplied = runtime.ManaReserve * _config.ManaReserveBonusPerPoint;
             double crisisPenaltyApplied = runtime.IsHeatCrisisActive ? _config.CrisisFailurePenalty : 0d;
 
@@ -67,6 +68,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 survivalSummary,
                 extractionSummary,
                 resolverSeed);
+            RunHeatApplicationSummary heatApplicationSummary = RunHeatStateApplyResolver.Resolve(
+                _config,
+                runtime.Heat,
+                heatDeltaSummary);
+            if (heatApplicationSummary.RuleResolved)
+            {
+                runtime.Heat = heatApplicationSummary.HeatAfter;
+            }
 
             return new RunOutcomeRecord
             {
@@ -75,7 +84,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 Success = success,
                 Score = score,
                 ReasonKey = reasonKey,
-                HeatAtStart = runtime.Heat,
+                HeatAtStart = heatAtStart,
                 ManaAtStart = runtime.ManaReserve,
                 CrisisActiveAtStart = runtime.IsHeatCrisisActive,
                 HasBreakdown = true,
@@ -92,7 +101,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 AdventurerAttractionSummary = attractionSummary,
                 AdventurerInterestForecastSummary = forecastSummary,
                 AdventurerDemandBudgetSummary = demandBudgetSummary,
-                RunHeatDeltaSummary = heatDeltaSummary
+                RunHeatDeltaSummary = heatDeltaSummary,
+                RunHeatApplicationSummary = heatApplicationSummary
             };
         }
 

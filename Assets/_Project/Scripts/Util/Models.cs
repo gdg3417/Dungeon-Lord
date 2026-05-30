@@ -59,6 +59,16 @@ namespace DungeonBuilder.M0
         ExtractionSummaryMissingOrFailed = 3,
         AggregateOverflow = 4
     }
+    public enum RunHeatApplicationSummaryErrorCode
+    {
+        None = 0,
+        HeatDeltaSummaryMissing = 1,
+        HeatDeltaSummaryUnresolved = 2,
+        InvalidHeatDeltaSummary = 3,
+        InvalidHeatApplicationConfig = 4,
+        InvalidCurrentHeat = 5,
+        AggregateOverflow = 6
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -105,6 +115,13 @@ namespace DungeonBuilder.M0
         public double RunHeatDeltaMinimum;
         public double RunHeatDeltaMaximum;
         public string RunHeatDeltaRuleSourceId;
+        public double HeatPeaceMinimum;
+        public double HeatPeaceMaximum;
+        public double HeatNoticeMinimum;
+        public double HeatNoticeMaximum;
+        public double HeatConcernMinimum;
+        public double HeatConcernMaximum;
+        public string RunHeatApplicationRuleSourceId;
     }
 
     [Serializable]
@@ -134,6 +151,7 @@ namespace DungeonBuilder.M0
         public RunAdventurerInterestForecastSummary AdventurerInterestForecastSummary;
         public RunAdventurerDemandBudgetSummary AdventurerDemandBudgetSummary;
         public RunHeatDeltaSummary RunHeatDeltaSummary;
+        public RunHeatApplicationSummary RunHeatApplicationSummary;
     }
 
     [Serializable]
@@ -245,6 +263,19 @@ namespace DungeonBuilder.M0
         public double FinalHeatDelta = 0d;
         public string RuleSourceIdUsed;
         public int DeterministicSeed = 0;
+    }
+    [Serializable]
+    public sealed class RunHeatApplicationSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None;
+        public double HeatBefore = 0d;
+        public double AppliedDelta = 0d;
+        public double HeatAfter = 0d;
+        public string TierBefore;
+        public string TierAfter;
+        public bool TierChanged = false;
+        public string RuleSourceIdUsed;
     }
     [Serializable]
     public sealed class RunHistoryState

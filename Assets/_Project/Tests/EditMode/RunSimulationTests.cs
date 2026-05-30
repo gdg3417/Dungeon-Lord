@@ -42,6 +42,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.feedback_format"] = "Feedback: {0}";
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
             map["ui.run.heat_delta_summary_format"] = "Run Heat Delta: resolved={0} error={1} death={2:0.###} elite={3:0.###} multi={4:0.###} survivorCooling={5:0.###} lootCooling={6:0.###} final={7:0.###} ruleSource={8}";
+            map["ui.run.heat_application_summary_format"] = "Heat Application: resolved={0} error={1} before={2:0.###} delta={3:0.###} after={4:0.###} tierBefore={5} tierAfter={6} tierChanged={7} ruleSource={8}";
             map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
             map["ui.run.adventurer_interest_forecast_summary_format"] = "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}";
             map["ui.run.adventurer_demand_budget_summary_format"] = "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}";
@@ -96,7 +97,14 @@ namespace DungeonBuilder.Tests.EditMode
                 RunHeatLootCoolingPerExtractedValue = 0.1d,
                 RunHeatDeltaMinimum = -10d,
                 RunHeatDeltaMaximum = 10d,
-                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.v1"
+                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.v1",
+                HeatPeaceMinimum = 0d,
+                HeatPeaceMaximum = 9d,
+                HeatNoticeMinimum = 10d,
+                HeatNoticeMaximum = 24d,
+                HeatConcernMinimum = 25d,
+                HeatConcernMaximum = 49d,
+                RunHeatApplicationRuleSourceId = "run.heat_application.rule.v1"
             };
         }
 
@@ -1531,7 +1539,9 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(latest.LootHeatCoolingSummary, Is.Not.Null);
                 Assert.That(latest.LootHeatCoolingSummary.RuleResolved, Is.True);
                 Assert.That(latest.LootHeatCoolingSummary.AppliedHeatDelta, Is.LessThan(0d));
-                Assert.That(root.CurrentHeat, Is.EqualTo(20d + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
+                Assert.That(latest.RunHeatApplicationSummary, Is.Not.Null);
+                Assert.That(latest.RunHeatApplicationSummary.RuleResolved, Is.True);
+                Assert.That(root.CurrentHeat, Is.EqualTo(latest.RunHeatApplicationSummary.HeatAfter + latest.LootHeatCoolingSummary.AppliedHeatDelta).Within(1e-9));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(root.CurrentHeat).Within(1e-9));
                 Assert.That(latest.LootHeatCoolingSummary.HeatAfterCooling, Is.EqualTo(root.CurrentHeat).Within(1e-9));
             }
@@ -1879,6 +1889,78 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_AttachesHeatApplicationSummary_AndMutatesRuntimeExactlyOnce()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 3;
+            config.MaxPartySize = 3;
+            config.FailureSurvivorRatio = 0d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+            var runtime = new StructureRuntimeState { Heat = 20d, ManaReserve = 0d, IsHeatCrisisActive = true };
+
+            RunOutcomeRecord outcome = service.SimulateOnce(runtime, 10, 3);
+            double heatAfterSimulation = runtime.Heat;
+
+            Assert.That(outcome.RunHeatApplicationSummary, Is.Not.Null);
+            Assert.That(outcome.RunHeatApplicationSummary.RuleResolved, Is.True);
+            Assert.That(outcome.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(20d));
+            Assert.That(runtime.Heat, Is.EqualTo(outcome.RunHeatApplicationSummary.HeatAfter));
+            Assert.That(runtime.Heat, Is.EqualTo(20d + outcome.RunHeatApplicationSummary.AppliedDelta));
+
+            var rootObject = new GameObject("GameRootHeatApplicationRefreshDoesNotMutateTest");
+            try
+            {
+                var root = rootObject.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    structureRuntime = runtime,
+                    runHistory = new RunHistoryState { RecentOutcomes = new[] { outcome } }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+                root.RefreshRunLine();
+
+                Assert.That(runtime.Heat, Is.EqualTo(heatAfterSimulation));
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo("Heat Application: resolved=True error=0 before=20 delta=4 after=24 tierBefore=heat_tier.notice tierAfter=heat_tier.notice tierChanged=False ruleSource=run.heat_application.rule.v1"));
+            }
+            finally { Object.DestroyImmediate(rootObject); }
+        }
+
+        [Test]
+        public void RefreshRunLine_HeatApplicationSummary_LegacyOrUnresolvedOutcome_ClearsStaleLineSafely()
+        {
+            var go = new GameObject("GameRootHeatApplicationLegacyTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetContent(root, BuildRunDisplayContent());
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            new RunOutcomeRecord { RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = true } },
+                            new RunOutcomeRecord { RunHeatApplicationSummary = null },
+                            new RunOutcomeRecord { RunHeatApplicationSummary = new RunHeatApplicationSummary { RuleResolved = false } }
+                        }
+                    }
+                });
+
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo("Heat Application: resolved=True error=0 before=0 delta=0 after=0 tierBefore= tierAfter= tierChanged=False ruleSource="));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void RefreshRunLine_AdventurerDemandBudgetSummary_WithNullContent_UsesKeyFallbackSafely()
         {
             var go = new GameObject("GameRootDemandBudgetNullContentTest");
@@ -2188,6 +2270,8 @@ namespace DungeonBuilder.Tests.EditMode
                     ?.SetValue(root, "cooling-line");
                 typeof(GameRoot).GetField("<RunHeatDeltaLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(root, "heat-delta-line");
+                typeof(GameRoot).GetField("<RunHeatApplicationLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, "heat-application-line");
                 typeof(GameRoot).GetField("<RunAdventurerAttractionLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(root, "attraction-line");
 
@@ -2203,10 +2287,12 @@ namespace DungeonBuilder.Tests.EditMode
                 string text = overlay.overlayText.text;
                 int coolingIndex = text.IndexOf("cooling-line", System.StringComparison.Ordinal);
                 int heatDeltaIndex = text.IndexOf("heat-delta-line", System.StringComparison.Ordinal);
+                int heatApplicationIndex = text.IndexOf("heat-application-line", System.StringComparison.Ordinal);
                 int attractionIndex = text.IndexOf("attraction-line", System.StringComparison.Ordinal);
                 Assert.That(coolingIndex, Is.GreaterThanOrEqualTo(0));
                 Assert.That(heatDeltaIndex, Is.GreaterThan(coolingIndex));
-                Assert.That(attractionIndex, Is.GreaterThan(heatDeltaIndex));
+                Assert.That(heatApplicationIndex, Is.GreaterThan(heatDeltaIndex));
+                Assert.That(attractionIndex, Is.GreaterThan(heatApplicationIndex));
             }
             finally
             {
