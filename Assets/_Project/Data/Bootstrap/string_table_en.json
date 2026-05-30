@@ -128,6 +128,10 @@
       "text": "Diagnostics: {0} Page {1}/{2}"
     },
     {
+      "key": "ui.dev.diagnostics.focus.run_diagnostics",
+      "text": "Diagnostics: Run Diagnostics Focus"
+    },
+    {
       "key": "ui.dev.diagnostics.page.runtime_summary",
       "text": "Runtime Summary"
     },

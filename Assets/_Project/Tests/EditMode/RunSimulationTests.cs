@@ -2319,15 +2319,15 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void BootstrapOverlay_FullDiagnostics_IncludesRunHeatDeltaAfterCoolingBeforeAttraction()
+        public void BootstrapOverlay_HeatDiagnostics_IncludesRunHeatDeltaAfterCoolingBeforeApplication()
         {
-            AssertBootstrapOverlayIncludesHeatDelta(runDiagnosticsOnly: false);
+            AssertBootstrapOverlayHeatDeltaSequence(runDiagnosticsFocus: false);
         }
 
         [Test]
-        public void BootstrapOverlay_RunDiagnosticsOnly_IncludesRunHeatDeltaAfterCoolingBeforeAttraction()
+        public void BootstrapOverlay_RunDiagnosticsOnly_IncludesRunHeatDeltaAfterCoolingBeforeApplicationAndAttraction()
         {
-            AssertBootstrapOverlayIncludesHeatDelta(runDiagnosticsOnly: true);
+            AssertBootstrapOverlayHeatDeltaSequence(runDiagnosticsFocus: true);
         }
 
         private static SaveData BuildRunHeatDeltaSave(RunHeatDeltaSummary summary)
@@ -2352,7 +2352,7 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
-        private static void AssertBootstrapOverlayIncludesHeatDelta(bool runDiagnosticsOnly)
+        private static void AssertBootstrapOverlayHeatDeltaSequence(bool runDiagnosticsFocus)
         {
             var rootObject = new GameObject("GameRootHeatDeltaOverlayTest");
             var overlayObject = new GameObject("BootstrapOverlayHeatDeltaTest");
@@ -2372,11 +2372,17 @@ namespace DungeonBuilder.Tests.EditMode
                 var overlay = overlayObject.AddComponent<BootstrapOverlay>();
                 overlay.overlayText = textObject.AddComponent<TextMeshProUGUI>();
                 overlay.Bind(root);
-                typeof(BootstrapOverlay).GetField("_runDiagnosticsOnlyVisible", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.SetValue(overlay, runDiagnosticsOnly);
+                if (runDiagnosticsFocus)
+                {
+                    overlay.ToggleRunDiagnosticsFocus();
+                }
+                else
+                {
+                    overlay.CycleFullDiagnosticsPage();
+                    overlay.CycleFullDiagnosticsPage();
+                }
 
-                typeof(BootstrapOverlay).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.Invoke(overlay, null);
+                overlay.RefreshOverlayText();
 
                 string text = overlay.overlayText.text;
                 int coolingIndex = text.IndexOf("cooling-line", System.StringComparison.Ordinal);
@@ -2386,7 +2392,10 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(coolingIndex, Is.GreaterThanOrEqualTo(0));
                 Assert.That(heatDeltaIndex, Is.GreaterThan(coolingIndex));
                 Assert.That(heatApplicationIndex, Is.GreaterThan(heatDeltaIndex));
-                Assert.That(attractionIndex, Is.GreaterThan(heatApplicationIndex));
+                if (runDiagnosticsFocus)
+                {
+                    Assert.That(attractionIndex, Is.GreaterThan(heatApplicationIndex));
+                }
             }
             finally
             {

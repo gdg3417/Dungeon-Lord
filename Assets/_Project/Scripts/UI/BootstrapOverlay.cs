@@ -75,9 +75,8 @@ namespace DungeonBuilder.M0
 
         private string BuildOverlayText()
         {
-            int renderedPage = _runDiagnosticsOnlyVisible ? RunDiagnosticsPage : _fullDiagnosticsPage;
             var builder = new StringBuilder();
-            AppendHeader(builder, renderedPage);
+            AppendHeader(builder);
 
             if (_runDiagnosticsOnlyVisible)
             {
@@ -104,14 +103,21 @@ namespace DungeonBuilder.M0
             return builder.ToString();
         }
 
-        private void AppendHeader(StringBuilder builder, int renderedPage)
+        private void AppendHeader(StringBuilder builder)
         {
-            string pageName = GetLocalizedString(GetPageNameKey(renderedPage));
-            AppendLine(builder, string.Format(
-                GetLocalizedString("ui.dev.diagnostics.header_format"),
-                pageName,
-                renderedPage + 1,
-                DiagnosticsPageCount));
+            if (_runDiagnosticsOnlyVisible)
+            {
+                AppendLine(builder, GetLocalizedString("ui.dev.diagnostics.focus.run_diagnostics"));
+            }
+            else
+            {
+                string pageName = GetLocalizedString(GetPageNameKey(_fullDiagnosticsPage));
+                AppendLine(builder, string.Format(
+                    GetLocalizedString("ui.dev.diagnostics.header_format"),
+                    pageName,
+                    _fullDiagnosticsPage + 1,
+                    DiagnosticsPageCount));
+            }
             AppendLine(builder, GetLocalizedString("ui.dev.hint.toggle_panel"));
             AppendLine(builder, GetLocalizedString("ui.dev.hint.toggle_run_diagnostics"));
             AppendLine(builder, GetLocalizedString("ui.dev.hint.cycle_diagnostics_page"));

@@ -84,6 +84,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("banner-line"));
             Assert.That(text, Does.Not.Contain("run-line"));
+            Assert.That(text, Does.Not.Contain("run-heat-delta-line"));
         }
 
         [Test]
@@ -108,9 +109,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("current-heat-tier-line", "build-line");
-            Assert.That(_overlay.overlayText.text, Does.Contain("run-heat-cooling-line"));
-            Assert.That(_overlay.overlayText.text, Does.Contain("run-heat-delta-line"));
-            Assert.That(_overlay.overlayText.text, Does.Contain("run-heat-application-line"));
+            AssertLinesAppearInOrder(_overlay.overlayText.text, "run-heat-cooling-line", "run-heat-delta-line", "run-heat-application-line");
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("Structure Sim", "run-line");
@@ -122,11 +121,11 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedFromRuntimePage = RefreshText();
 
-            Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Page 2/4"));
+            Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
-            Assert.That(focusedFromRuntimePage, Does.Contain("run-heat-application-line"));
+            AssertLinesAppearInOrder(focusedFromRuntimePage, "run-heat-cooling-line", "run-heat-delta-line", "run-heat-application-line", "run-attraction-line");
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("build-line"));
 
             _overlay.CycleFullDiagnosticsPage();
@@ -168,6 +167,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.StartWith("ui.dev.diagnostics.header_format"));
             Assert.That(text, Does.Contain("ui.dev.hint.cycle_diagnostics_page"));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            Assert.That(RefreshText(), Does.StartWith("ui.dev.diagnostics.focus.run_diagnostics"));
         }
 
         private void AssertPage(int number, string name)
@@ -187,6 +189,17 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
             Assert.That(text, Does.Contain(included));
             Assert.That(text, Does.Not.Contain(excluded));
+        }
+
+        private static void AssertLinesAppearInOrder(string text, params string[] lines)
+        {
+            int previousIndex = -1;
+            foreach (string line in lines)
+            {
+                int index = text.IndexOf(line, System.StringComparison.Ordinal);
+                Assert.That(index, Is.GreaterThan(previousIndex), $"Expected '{line}' after the preceding diagnostic line.");
+                previousIndex = index;
+            }
         }
 
         private string RefreshText()
@@ -211,6 +224,7 @@ namespace DungeonBuilder.Tests.EditMode
                 map["ui.dev.hint.toggle_run_diagnostics"] = "F2 toggles Run Diagnostics focus";
                 map["ui.dev.hint.cycle_diagnostics_page"] = "F3 cycles Diagnostics Page";
                 map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
+                map["ui.dev.diagnostics.focus.run_diagnostics"] = "Diagnostics: Run Diagnostics Focus";
                 map["ui.dev.diagnostics.page.runtime_summary"] = "Runtime Summary";
                 map["ui.dev.diagnostics.page.run_diagnostics"] = "Run Diagnostics";
                 map["ui.dev.diagnostics.page.heat_diagnostics"] = "Heat Diagnostics";
