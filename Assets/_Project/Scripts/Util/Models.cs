@@ -51,6 +51,14 @@ namespace DungeonBuilder.M0
         InvalidDemandBudgetConfig = 2,
         AggregateOverflow = 3
     }
+    public enum RunHeatDeltaSummaryErrorCode
+    {
+        None = 0,
+        InvalidHeatDeltaConfig = 1,
+        SurvivalSummaryMissingOrFailed = 2,
+        ExtractionSummaryMissingOrFailed = 3,
+        AggregateOverflow = 4
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -89,6 +97,14 @@ namespace DungeonBuilder.M0
         public double AdventurerDemandBudgetLowThreshold;
         public double AdventurerDemandBudgetMediumThreshold;
         public double AdventurerDemandBudgetHighThreshold;
+        public double RunHeatNormalDeathDelta;
+        public double RunHeatEliteDeathDelta;
+        public double RunHeatMultipleDeathBonusDelta;
+        public double RunHeatSurvivorCoolingPerSurvivor;
+        public double RunHeatLootCoolingPerExtractedValue;
+        public double RunHeatDeltaMinimum;
+        public double RunHeatDeltaMaximum;
+        public string RunHeatDeltaRuleSourceId;
     }
 
     [Serializable]
@@ -117,6 +133,7 @@ namespace DungeonBuilder.M0
         public RunAdventurerAttractionSummary AdventurerAttractionSummary;
         public RunAdventurerInterestForecastSummary AdventurerInterestForecastSummary;
         public RunAdventurerDemandBudgetSummary AdventurerDemandBudgetSummary;
+        public RunHeatDeltaSummary RunHeatDeltaSummary;
     }
 
     [Serializable]
@@ -214,6 +231,20 @@ namespace DungeonBuilder.M0
         public double ForecastInterestScoreUsed;
         public double DemandBudgetScore;
         public string DemandBudgetBandId;
+    }
+    [Serializable]
+    public sealed class RunHeatDeltaSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.None;
+        public double DeathHeatDelta = 0d;
+        public double EliteDeathHeatDelta = 0d;
+        public double MultipleDeathBonusDelta = 0d;
+        public double SurvivorCoolingDelta = 0d;
+        public double LootCoolingDelta = 0d;
+        public double FinalHeatDelta = 0d;
+        public string RuleSourceIdUsed;
+        public int DeterministicSeed = 0;
     }
     [Serializable]
     public sealed class RunHistoryState

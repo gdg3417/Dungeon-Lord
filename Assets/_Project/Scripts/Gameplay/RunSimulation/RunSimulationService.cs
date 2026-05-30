@@ -58,6 +58,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 _config,
                 attractionSummary,
                 resolverSeed);
+            RunAdventurerDemandBudgetSummary demandBudgetSummary = AdventurerDemandBudgetResolver.Resolve(
+                _config,
+                forecastSummary,
+                resolverSeed);
+            RunHeatDeltaSummary heatDeltaSummary = RunHeatDeltaResolver.Resolve(
+                _config,
+                survivalSummary,
+                extractionSummary,
+                resolverSeed);
 
             return new RunOutcomeRecord
             {
@@ -82,10 +91,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 LootExtractionSummary = extractionSummary,
                 AdventurerAttractionSummary = attractionSummary,
                 AdventurerInterestForecastSummary = forecastSummary,
-                AdventurerDemandBudgetSummary = AdventurerDemandBudgetResolver.Resolve(
-                    _config,
-                    forecastSummary,
-                    resolverSeed)
+                AdventurerDemandBudgetSummary = demandBudgetSummary,
+                RunHeatDeltaSummary = heatDeltaSummary
             };
         }
 

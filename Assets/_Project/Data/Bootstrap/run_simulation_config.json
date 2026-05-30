@@ -32,5 +32,13 @@
   "AdventurerDemandBudgetScorePerForecastScore": 1.0,
   "AdventurerDemandBudgetLowThreshold": 5.0,
   "AdventurerDemandBudgetMediumThreshold": 10.0,
-  "AdventurerDemandBudgetHighThreshold": 20.0
+  "AdventurerDemandBudgetHighThreshold": 20.0,
+  "RunHeatNormalDeathDelta": 1.0,
+  "RunHeatEliteDeathDelta": 3.0,
+  "RunHeatMultipleDeathBonusDelta": 1.0,
+  "RunHeatSurvivorCoolingPerSurvivor": 0.5,
+  "RunHeatLootCoolingPerExtractedValue": 0.1,
+  "RunHeatDeltaMinimum": -10.0,
+  "RunHeatDeltaMaximum": 10.0,
+  "RunHeatDeltaRuleSourceId": "run.heat_delta.rule.v1"
 }

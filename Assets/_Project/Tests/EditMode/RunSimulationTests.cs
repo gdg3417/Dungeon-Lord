@@ -86,7 +86,15 @@ namespace DungeonBuilder.Tests.EditMode
                 AdventurerDemandBudgetScorePerForecastScore = 1d,
                 AdventurerDemandBudgetLowThreshold = 5d,
                 AdventurerDemandBudgetMediumThreshold = 10d,
-                AdventurerDemandBudgetHighThreshold = 20d
+                AdventurerDemandBudgetHighThreshold = 20d,
+                RunHeatNormalDeathDelta = 1d,
+                RunHeatEliteDeathDelta = 3d,
+                RunHeatMultipleDeathBonusDelta = 1d,
+                RunHeatSurvivorCoolingPerSurvivor = 0.5d,
+                RunHeatLootCoolingPerExtractedValue = 0.1d,
+                RunHeatDeltaMinimum = -10d,
+                RunHeatDeltaMaximum = 10d,
+                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.v1"
             };
         }
 
@@ -1837,6 +1845,35 @@ namespace DungeonBuilder.Tests.EditMode
             }
 
             Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo(expectedBand));
+        }
+
+        [Test]
+        public void SimulateOnce_AttachesResolvedRunHeatDeltaSummary_WithoutApplyingEliteInference()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 3;
+            config.MaxPartySize = 3;
+            config.FailureSurvivorRatio = 0d;
+            config.AdventurerDemandBudgetLowThreshold = 0d;
+            config.AdventurerDemandBudgetMediumThreshold = 0d;
+            config.AdventurerDemandBudgetHighThreshold = 0d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true },
+                10,
+                3);
+
+            Assert.That(outcome.AdventurerDemandBudgetSummary.DemandBudgetBandId, Is.EqualTo("adventurer_demand.high"));
+            Assert.That(outcome.RunHeatDeltaSummary, Is.Not.Null);
+            Assert.That(outcome.RunHeatDeltaSummary.RuleResolved, Is.True);
+            Assert.That(outcome.RunHeatDeltaSummary.RuleSourceIdUsed, Is.EqualTo(config.RunHeatDeltaRuleSourceId));
+            Assert.That(outcome.RunHeatDeltaSummary.DeterministicSeed, Is.EqualTo(outcome.LootSummary.ResolverSeed));
+            Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.EqualTo(3d));
+            Assert.That(outcome.RunHeatDeltaSummary.EliteDeathHeatDelta, Is.EqualTo(0d));
+            Assert.That(outcome.RunHeatDeltaSummary.SurvivorCoolingDelta, Is.EqualTo(0d));
+            Assert.That(outcome.RunHeatDeltaSummary.LootCoolingDelta, Is.EqualTo(0d));
+            Assert.That(outcome.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(4d));
         }
 
         [Test]
