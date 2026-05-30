@@ -139,10 +139,11 @@ namespace DungeonBuilder.Tests.EditMode
         public void SimulateOnce_IsDeterministic_ForSameInput()
         {
             var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
-            var runtime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+            var firstRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+            var secondRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
 
-            RunOutcomeRecord first = service.SimulateOnce(runtime, 50, 1);
-            RunOutcomeRecord second = service.SimulateOnce(runtime, 50, 1);
+            RunOutcomeRecord first = service.SimulateOnce(firstRuntime, 50, 1);
+            RunOutcomeRecord second = service.SimulateOnce(secondRuntime, 50, 1);
 
             Assert.That(second.RunId, Is.EqualTo(first.RunId));
             Assert.That(second.Success, Is.EqualTo(first.Success));
@@ -160,6 +161,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(second.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(first.LootExtractionSummary.ExtractedItemIds));
             Assert.That(second.LootExtractionSummary.LostItemIds, Is.EqualTo(first.LootExtractionSummary.LostItemIds));
             Assert.That(second.AdventurerDemandBudgetSummary.DemandBudgetScore, Is.EqualTo(first.AdventurerDemandBudgetSummary.DemandBudgetScore));
+            Assert.That(secondRuntime.Heat, Is.EqualTo(firstRuntime.Heat));
+            Assert.That(second.RunHeatApplicationSummary.RuleResolved, Is.EqualTo(first.RunHeatApplicationSummary.RuleResolved));
+            Assert.That(second.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(first.RunHeatApplicationSummary.HeatBefore));
+            Assert.That(second.RunHeatApplicationSummary.AppliedDelta, Is.EqualTo(first.RunHeatApplicationSummary.AppliedDelta));
+            Assert.That(second.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(first.RunHeatApplicationSummary.HeatAfter));
+            Assert.That(second.RunHeatApplicationSummary.TierBefore, Is.EqualTo(first.RunHeatApplicationSummary.TierBefore));
+            Assert.That(second.RunHeatApplicationSummary.TierAfter, Is.EqualTo(first.RunHeatApplicationSummary.TierAfter));
+            Assert.That(second.RunHeatApplicationSummary.TierChanged, Is.EqualTo(first.RunHeatApplicationSummary.TierChanged));
             Assert.That(first.HasBreakdown, Is.True);
             Assert.That(second.HasBreakdown, Is.True);
         }

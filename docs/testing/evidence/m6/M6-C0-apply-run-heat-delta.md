@@ -44,6 +44,11 @@ The corrective update addresses the three failing Unity EditMode tests by name:
 
 Additional regression coverage verifies safe default summaries, blank `RunHeatApplicationRuleSourceId` rejection, read-only `RefreshRunLine`, read-only `BootstrapOverlay.Update`, read-only history browsing, and legacy outcome display after load.
 
+A remaining Unity EditMode failure was corrected after the initial PR 52 follow-up:
+
+4. `RunSimulationTests.SimulateOnce_IsDeterministic_ForSameInput`
+   - The test previously reused one mutable `StructureRuntimeState` instance for both calls. Because M6-C0 intentionally applies resolved heat to runtime during `SimulateOnce`, the second call no longer had the same input. The fixture now supplies two separate runtime instances initialized with identical values, preserves the outcome determinism assertions, and verifies matching final runtime heat and matching `RunHeatApplicationSummary` fields.
+
 ## Codex environment results
 
 - Unity EditMode execution was not available in the Codex container because no Unity editor binary is installed.
