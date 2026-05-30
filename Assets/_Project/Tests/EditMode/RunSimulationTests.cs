@@ -2,6 +2,7 @@ using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using TMPro;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.run.breakdown_format"] = "Chance: {0:0.00} / threshold {1:0.00}";
             map["ui.run.feedback_format"] = "Feedback: {0}";
             map["ui.run.loot_summary_format"] = "Loot: table={0} success={1} error={2} rolls={3} items={4} wv={5} rc={6} twv={7}";
+            map["ui.run.heat_delta_summary_format"] = "Run Heat Delta: resolved={0} error={1} death={2:0.###} elite={3:0.###} multi={4:0.###} survivorCooling={5:0.###} lootCooling={6:0.###} final={7:0.###} ruleSource={8}";
             map["ui.run.adventurer_attraction_summary_format"] = "Attraction: resolved={0} error={1} extractedWv={2} perWv={3:0.###} signal={4:0.###}";
             map["ui.run.adventurer_interest_forecast_summary_format"] = "Forecast: resolved={0} error={1} signal={2:0.###} score={3:0.###} band={4}";
             map["ui.run.adventurer_demand_budget_summary_format"] = "Demand Budget: resolved={0} error={1} forecastScore={2:0.###} forecastBand={3} score={4:0.###} band={5}";
@@ -2022,6 +2024,196 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(root.RunAdventurerDemandBudgetLine, Is.EqualTo("Demand Budget: resolved=True error=0 forecastScore=11 forecastBand=adventurer_interest.low score=11 band=adventurer_demand.low"));
             }
             finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_RunHeatDeltaSummary_FormatsResolvedSummary()
+        {
+            var go = new GameObject("GameRootHeatDeltaFormatTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, BuildRunHeatDeltaSave(new RunHeatDeltaSummary
+                {
+                    RuleResolved = true,
+                    DeterministicErrorCode = 0,
+                    DeathHeatDelta = 2d,
+                    EliteDeathHeatDelta = 3d,
+                    MultipleDeathBonusDelta = 1d,
+                    SurvivorCoolingDelta = -1.5d,
+                    LootCoolingDelta = -0.75d,
+                    FinalHeatDelta = 3.75d,
+                    RuleSourceIdUsed = "run.heat_delta.rule.test"
+                }));
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo("Run Heat Delta: resolved=True error=0 death=2 elite=3 multi=1 survivorCooling=-1.5 lootCooling=-0.75 final=3.75 ruleSource=run.heat_delta.rule.test"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_RunHeatDeltaSummary_WithNullContent_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootHeatDeltaNullContentTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, BuildRunHeatDeltaSave(new RunHeatDeltaSummary { RuleResolved = true }));
+                SetContent(root, null);
+
+                root.RefreshRunLine();
+
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo("ui.run.heat_delta_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_RunHeatDeltaSummary_MissingLocalizationKey_UsesKeyFallbackSafely()
+        {
+            var go = new GameObject("GameRootHeatDeltaMissingLocalizationTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, BuildRunHeatDeltaSave(new RunHeatDeltaSummary { RuleResolved = true }));
+                SetContent(root, new ContentService());
+
+                root.RefreshRunLine();
+
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo("ui.run.heat_delta_summary_format"));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_RunHeatDeltaSummary_LegacyOrUnresolvedOutcome_ClearsLineSafely()
+        {
+            var go = new GameObject("GameRootHeatDeltaLegacyTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, BuildRunHeatDeltaSave(null));
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo(string.Empty));
+
+                SetSave(root, BuildRunHeatDeltaSave(new RunHeatDeltaSummary { RuleResolved = false }));
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void RefreshRunLine_SwitchingFromRunHeatDeltaSummary_ToLegacyOrNullOutcome_ClearsStaleLine()
+        {
+            var go = new GameObject("GameRootHeatDeltaStaleTest");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetSave(root, new SaveData
+                {
+                    runHistory = new RunHistoryState
+                    {
+                        RecentOutcomes = new[]
+                        {
+                            BuildRunHeatDeltaOutcome(new RunHeatDeltaSummary { RuleResolved = true }),
+                            BuildRunHeatDeltaOutcome(null)
+                        }
+                    }
+                });
+                SetContent(root, BuildRunDisplayContent());
+
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo(string.Empty));
+                root.SelectPreviousRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo("Run Heat Delta: resolved=True error=0 death=0 elite=0 multi=0 survivorCooling=0 lootCooling=0 final=0 ruleSource="));
+                root.SelectNextRunOutcome();
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo(string.Empty));
+
+                SetSave(root, new SaveData { runHistory = new RunHistoryState() });
+                root.RefreshRunLine();
+                Assert.That(root.RunHeatDeltaLine, Is.EqualTo(string.Empty));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void BootstrapOverlay_FullDiagnostics_IncludesRunHeatDeltaAfterCoolingBeforeAttraction()
+        {
+            AssertBootstrapOverlayIncludesHeatDelta(runDiagnosticsOnly: false);
+        }
+
+        [Test]
+        public void BootstrapOverlay_RunDiagnosticsOnly_IncludesRunHeatDeltaAfterCoolingBeforeAttraction()
+        {
+            AssertBootstrapOverlayIncludesHeatDelta(runDiagnosticsOnly: true);
+        }
+
+        private static SaveData BuildRunHeatDeltaSave(RunHeatDeltaSummary summary)
+        {
+            return new SaveData
+            {
+                runHistory = new RunHistoryState
+                {
+                    RecentOutcomes = new[] { BuildRunHeatDeltaOutcome(summary) }
+                }
+            };
+        }
+
+        private static RunOutcomeRecord BuildRunHeatDeltaOutcome(RunHeatDeltaSummary summary)
+        {
+            return new RunOutcomeRecord
+            {
+                RunId = "run-heat-delta",
+                ReasonKey = "run.reason.success",
+                FeedbackTagKeys = new string[0],
+                RunHeatDeltaSummary = summary
+            };
+        }
+
+        private static void AssertBootstrapOverlayIncludesHeatDelta(bool runDiagnosticsOnly)
+        {
+            var rootObject = new GameObject("GameRootHeatDeltaOverlayTest");
+            var overlayObject = new GameObject("BootstrapOverlayHeatDeltaTest");
+            var textObject = new GameObject("BootstrapOverlayHeatDeltaTextTest");
+            try
+            {
+                var root = rootObject.AddComponent<GameRoot>();
+                typeof(GameRoot).GetField("<RunHeatCoolingLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, "cooling-line");
+                typeof(GameRoot).GetField("<RunHeatDeltaLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, "heat-delta-line");
+                typeof(GameRoot).GetField("<RunAdventurerAttractionLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(root, "attraction-line");
+
+                var overlay = overlayObject.AddComponent<BootstrapOverlay>();
+                overlay.overlayText = textObject.AddComponent<TextMeshProUGUI>();
+                overlay.Bind(root);
+                typeof(BootstrapOverlay).GetField("_runDiagnosticsOnlyVisible", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(overlay, runDiagnosticsOnly);
+
+                typeof(BootstrapOverlay).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(overlay, null);
+
+                string text = overlay.overlayText.text;
+                int coolingIndex = text.IndexOf("cooling-line", System.StringComparison.Ordinal);
+                int heatDeltaIndex = text.IndexOf("heat-delta-line", System.StringComparison.Ordinal);
+                int attractionIndex = text.IndexOf("attraction-line", System.StringComparison.Ordinal);
+                Assert.That(coolingIndex, Is.GreaterThanOrEqualTo(0));
+                Assert.That(heatDeltaIndex, Is.GreaterThan(coolingIndex));
+                Assert.That(attractionIndex, Is.GreaterThan(heatDeltaIndex));
+            }
+            finally
+            {
+                Object.DestroyImmediate(textObject);
+                Object.DestroyImmediate(overlayObject);
+                Object.DestroyImmediate(rootObject);
+            }
         }
 
     }
