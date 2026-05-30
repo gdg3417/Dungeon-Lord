@@ -120,6 +120,30 @@
       "text": "F2 toggles Run Diagnostics focus"
     },
     {
+      "key": "ui.dev.hint.cycle_diagnostics_page",
+      "text": "F3 cycles Diagnostics Page"
+    },
+    {
+      "key": "ui.dev.diagnostics.header_format",
+      "text": "Diagnostics: {0} Page {1}/{2}"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.runtime_summary",
+      "text": "Runtime Summary"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.run_diagnostics",
+      "text": "Run Diagnostics"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.heat_diagnostics",
+      "text": "Heat Diagnostics"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.systems_diagnostics",
+      "text": "Systems Diagnostics"
+    },
+    {
       "key": "ui.dev.banner.heading",
       "text": "Banner"
     },

@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
@@ -10,14 +11,43 @@ namespace DungeonBuilder.M0
         [Header("UI")]
         public TMP_Text overlayText;
 
+        private const int DiagnosticsPageCount = 4;
+        private const int RuntimeSummaryPage = 0;
+        private const int RunDiagnosticsPage = 1;
+        private const int HeatDiagnosticsPage = 2;
+        private const int SystemsDiagnosticsPage = 3;
+
         private GameRoot _root;
         private bool _devPanelVisible;
         private bool _runDiagnosticsOnlyVisible;
+        private int _fullDiagnosticsPage;
         private Vector2 _devPanelScrollPosition;
+
+        public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
 
         public void Bind(GameRoot root)
         {
             _root = root;
+        }
+
+        public void CycleFullDiagnosticsPage()
+        {
+            _fullDiagnosticsPage = (_fullDiagnosticsPage + 1) % DiagnosticsPageCount;
+        }
+
+        public void ToggleRunDiagnosticsFocus()
+        {
+            _runDiagnosticsOnlyVisible = !_runDiagnosticsOnlyVisible;
+        }
+
+        public void RefreshOverlayText()
+        {
+            if (_root == null || overlayText == null)
+            {
+                return;
+            }
+
+            overlayText.text = BuildOverlayText();
         }
 
         private void Update()
@@ -33,101 +63,153 @@ namespace DungeonBuilder.M0
             }
             if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
             {
-                _runDiagnosticsOnlyVisible = !_runDiagnosticsOnlyVisible;
+                ToggleRunDiagnosticsFocus();
+            }
+            if (Keyboard.current != null && Keyboard.current.f3Key.wasPressedThisFrame)
+            {
+                CycleFullDiagnosticsPage();
             }
 
-            if (overlayText == null)
+            RefreshOverlayText();
+        }
+
+        private string BuildOverlayText()
+        {
+            int renderedPage = _runDiagnosticsOnlyVisible ? RunDiagnosticsPage : _fullDiagnosticsPage;
+            var builder = new StringBuilder();
+            AppendHeader(builder, renderedPage);
+
+            if (_runDiagnosticsOnlyVisible)
+            {
+                AppendRunDiagnostics(builder, includeBreakdownAndFeedback: false, includeHeatDiagnostics: true);
+                return builder.ToString();
+            }
+
+            switch (_fullDiagnosticsPage)
+            {
+                case RuntimeSummaryPage:
+                    AppendRuntimeSummary(builder);
+                    break;
+                case RunDiagnosticsPage:
+                    AppendRunDiagnostics(builder, includeBreakdownAndFeedback: true, includeHeatDiagnostics: false);
+                    break;
+                case HeatDiagnosticsPage:
+                    AppendHeatDiagnostics(builder);
+                    break;
+                case SystemsDiagnosticsPage:
+                    AppendSystemsDiagnostics(builder);
+                    break;
+            }
+
+            return builder.ToString();
+        }
+
+        private void AppendHeader(StringBuilder builder, int renderedPage)
+        {
+            string pageName = GetLocalizedString(GetPageNameKey(renderedPage));
+            AppendLine(builder, string.Format(
+                GetLocalizedString("ui.dev.diagnostics.header_format"),
+                pageName,
+                renderedPage + 1,
+                DiagnosticsPageCount));
+            AppendLine(builder, GetLocalizedString("ui.dev.hint.toggle_panel"));
+            AppendLine(builder, GetLocalizedString("ui.dev.hint.toggle_run_diagnostics"));
+            AppendLine(builder, GetLocalizedString("ui.dev.hint.cycle_diagnostics_page"));
+        }
+
+        private void AppendRuntimeSummary(StringBuilder builder)
+        {
+            AppendLine(builder, _root.BuildLine);
+            AppendLine(builder, _root.StateLine);
+            AppendLine(builder, _root.PendingStateLine);
+            AppendLine(builder, _root.GateStatusLine);
+            AppendLine(builder, _root.KpiLine);
+            AppendLine(builder, _root.TickLine);
+            AppendLine(builder, _root.ManaLine);
+            AppendLine(builder, _root.SaveLine);
+            AppendLine(builder, _root.PauseLine);
+
+            if (!string.IsNullOrEmpty(_root.BannerMessage))
+            {
+                AppendLine(builder, GetLocalizedString("ui.dev.banner.heading") + ":");
+                AppendLine(builder, _root.BannerMessage);
+            }
+        }
+
+        private void AppendRunDiagnostics(StringBuilder builder, bool includeBreakdownAndFeedback, bool includeHeatDiagnostics)
+        {
+            AppendLine(builder, _root.RunLine);
+            AppendLine(builder, _root.RunHistoryLine);
+            if (includeBreakdownAndFeedback)
+            {
+                AppendLine(builder, _root.RunBreakdownLine);
+                AppendLine(builder, _root.RunFeedbackLine);
+            }
+            AppendLine(builder, _root.RunLootLine);
+            AppendLine(builder, _root.RunSurvivalLine);
+            AppendLine(builder, _root.RunExtractionLine);
+            if (includeHeatDiagnostics)
+            {
+                AppendLine(builder, _root.RunHeatCoolingLine);
+                AppendLine(builder, _root.RunHeatDeltaLine);
+                AppendLine(builder, _root.RunHeatApplicationLine);
+            }
+            AppendLine(builder, _root.RunAdventurerAttractionLine);
+            AppendLine(builder, _root.RunAdventurerInterestForecastLine);
+            AppendLine(builder, _root.RunAdventurerDemandBudgetLine);
+        }
+
+        private void AppendHeatDiagnostics(StringBuilder builder)
+        {
+            AppendLine(builder, _root.HeatLine);
+            AppendLine(builder, _root.CurrentHeatTierLine);
+            AppendLine(builder, _root.RunHeatCoolingLine);
+            AppendLine(builder, _root.RunHeatDeltaLine);
+            AppendLine(builder, _root.RunHeatApplicationLine);
+        }
+
+        private void AppendSystemsDiagnostics(StringBuilder builder)
+        {
+            if (_root.Content == null)
             {
                 return;
             }
 
-            string banner = _root.BannerMessage;
-            string build = _root.BuildLine;
-            string state = _root.StateLine;
-            string pending = _root.PendingStateLine;
-            string gate = _root.GateStatusLine;
-            string kpi = _root.KpiLine;
-            string heat = _root.HeatLine;
-            string currentHeatTier = _root.CurrentHeatTierLine;
-            string tick = _root.TickLine;
-            string mana = _root.ManaLine;
-            string save = _root.SaveLine;
-            string pause = _root.PauseLine;
-            string run = _root.RunLine;
-            string runHistory = _root.RunHistoryLine;
-            string runBreakdown = _root.RunBreakdownLine;
-            string runFeedback = _root.RunFeedbackLine;
-            string runLoot = _root.RunLootLine;
-            string runSurvival = _root.RunSurvivalLine;
-            string runExtraction = _root.RunExtractionLine;
-            string runHeatCooling = _root.RunHeatCoolingLine;
-            string runHeatDelta = _root.RunHeatDeltaLine;
-            string runHeatApplication = _root.RunHeatApplicationLine;
-            string runAdventurerAttraction = _root.RunAdventurerAttractionLine;
-            string runAdventurerInterestForecast = _root.RunAdventurerInterestForecastLine;
-            string runAdventurerDemandBudget = _root.RunAdventurerDemandBudgetLine;
-            string hint = _root.DevPanelEnabled
-                ? _root.Content.GetString("ui.dev.hint.toggle_panel", "ui.dev.hint.toggle_panel")
-                : string.Empty;
-            string diagnosticsHint = _root.DevPanelEnabled
-                ? _root.Content.GetString("ui.dev.hint.toggle_run_diagnostics", "ui.dev.hint.toggle_run_diagnostics")
-                : string.Empty;
-            string structureState = _root.Content != null
-                ? string.Format(
-                    _root.Content.GetString("ui.dev.structure_status", "ui.dev.structure_status"),
-                    _root.SelectedFloorIndex,
-                    _root.SelectedSlotIndex,
-                    _root.GetSelectedSlotStructureId(),
-                    _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive
-                )
-                : string.Empty;
+            AppendLine(builder, string.Format(
+                GetLocalizedString("ui.dev.structure_status"),
+                _root.SelectedFloorIndex,
+                _root.SelectedSlotIndex,
+                _root.GetSelectedSlotStructureId(),
+                _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive));
+        }
 
-            string combined = _runDiagnosticsOnlyVisible
-                ? (run + "\n" +
-                   runHistory + "\n" +
-                   runLoot + "\n" +
-                   runSurvival + "\n" +
-                   runExtraction + "\n" +
-                   runHeatCooling + "\n" +
-                   runHeatDelta + "\n" +
-                   runHeatApplication + "\n" +
-                   runAdventurerAttraction + "\n" +
-                   runAdventurerInterestForecast + "\n" +
-                   runAdventurerDemandBudget + "\n" +
-                   (string.IsNullOrEmpty(hint) ? string.Empty : ("\n" + hint)) + "\n" +
-                   (string.IsNullOrEmpty(diagnosticsHint) ? string.Empty : diagnosticsHint))
-                : (build + "\n" +
-                   state + "\n" +
-                   pending + "\n" +
-                   gate + "\n" +
-                   kpi + "\n" +
-                   heat + "\n" +
-                   currentHeatTier + "\n" +
-                   tick + "\n" +
-                   mana + "\n" +
-                   save + "\n" +
-                   pause + "\n" +
-                   run + "\n" +
-                   runHistory + "\n" +
-                   runBreakdown + "\n" +
-                   runFeedback + "\n" +
-                   runLoot + "\n" +
-                   runSurvival + "\n" +
-                   runExtraction + "\n" +
-                   runHeatCooling + "\n" +
-                   runHeatDelta + "\n" +
-                   runHeatApplication + "\n" +
-                   runAdventurerAttraction + "\n" +
-                   runAdventurerInterestForecast + "\n" +
-                   runAdventurerDemandBudget + "\n" +
-                   structureState + "\n" +
-                   (string.IsNullOrEmpty(banner)
-                       ? string.Empty
-                       : ("\n" + _root.Content.GetString("ui.dev.banner.heading", "ui.dev.banner.heading") + ":\n" + banner + "\n")) +
-                   (string.IsNullOrEmpty(hint) ? string.Empty : ("\n" + hint)) + "\n" +
-                   (string.IsNullOrEmpty(diagnosticsHint) ? string.Empty : diagnosticsHint));
+        private string GetLocalizedString(string key)
+        {
+            return _root.Content != null ? _root.Content.GetString(key, key) : key;
+        }
 
-            overlayText.text = combined;
+        private static string GetPageNameKey(int page)
+        {
+            switch (page)
+            {
+                case RuntimeSummaryPage:
+                    return "ui.dev.diagnostics.page.runtime_summary";
+                case RunDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.run_diagnostics";
+                case HeatDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.heat_diagnostics";
+                default:
+                    return "ui.dev.diagnostics.page.systems_diagnostics";
+            }
+        }
+
+        private static void AppendLine(StringBuilder builder, string line)
+        {
+            if (builder.Length > 0)
+            {
+                builder.Append('\n');
+            }
+            builder.Append(line ?? string.Empty);
         }
 
         private void OnGUI()
