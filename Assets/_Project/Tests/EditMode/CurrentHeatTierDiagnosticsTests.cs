@@ -117,7 +117,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void BootstrapOverlay_FullDiagnostics_IncludesCurrentTierAfterCurrentHeat()
+        public void BootstrapOverlay_HeatDiagnostics_IncludesCurrentTierAfterCurrentHeat()
         {
             var rootObject = new GameObject("CurrentHeatTierOverlayRootTest");
             var overlayObject = new GameObject("CurrentHeatTierOverlayTest");
@@ -132,11 +132,13 @@ namespace DungeonBuilder.Tests.EditMode
                 var overlay = overlayObject.AddComponent<BootstrapOverlay>();
                 overlay.overlayText = textObject.AddComponent<TextMeshProUGUI>();
                 overlay.Bind(root);
-                typeof(BootstrapOverlay).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(overlay, null);
+                overlay.CycleFullDiagnosticsPage();
+                overlay.CycleFullDiagnosticsPage();
+                overlay.RefreshOverlayText();
 
                 string text = overlay.overlayText.text;
                 Assert.That(text.IndexOf("current-tier-line", System.StringComparison.Ordinal), Is.GreaterThan(text.IndexOf("heat-line", System.StringComparison.Ordinal)));
-                Assert.That(text.IndexOf("tick-line", System.StringComparison.Ordinal), Is.GreaterThan(text.IndexOf("current-tier-line", System.StringComparison.Ordinal)));
+                Assert.That(text, Does.Not.Contain("tick-line"));
             }
             finally
             {
