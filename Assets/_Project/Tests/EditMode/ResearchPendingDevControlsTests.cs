@@ -28,10 +28,10 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SetResearchPendingScaffold_WritesOnlyResearchPendingAndRefreshesDiagnostics()
+        public void SetResearchPendingScaffold_WritesOnlyResearchStateAndRefreshesDiagnostics()
         {
             SaveData save = _root.Save;
-            string beforeWithoutResearch = SerializeWithoutResearchPending(save);
+            string beforeWithoutResearch = SerializeWithoutResearchState(save);
 
             bool didSet = _root.SetResearchPendingScaffold();
 
@@ -39,23 +39,31 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.researchPending, Is.Not.Null);
             Assert.That(save.researchPending.SlotId, Is.EqualTo("research.slot.primary"));
             Assert.That(save.researchPending.ProjectId, Is.EqualTo("research.project.scaffold"));
-            Assert.That(SerializeWithoutResearchPending(save), Is.EqualTo(beforeWithoutResearch));
+            Assert.That(save.researchProgress, Is.Not.Null);
+            Assert.That(save.researchProgress.SlotId, Is.EqualTo("research.slot.primary"));
+            Assert.That(save.researchProgress.ProjectId, Is.EqualTo("research.project.scaffold"));
+            Assert.That(save.researchProgress.ProgressUnits, Is.Zero);
+            Assert.That(save.researchProgress.CompletionPending, Is.False);
+            Assert.That(save.researchProgress.RuleSourceIdUsed, Is.EqualTo("research.progress.rule.test"));
+            Assert.That(SerializeWithoutResearchState(save), Is.EqualTo(beforeWithoutResearch));
             Assert.That(_root.ResearchPendingLine, Does.Contain("pending=True slot=research.slot.primary project=research.project.scaffold"));
             Assert.That(_root.ResearchPendingValidationLine, Does.Contain("resolved=True error=0 ruleSource=research.pending.rule.test"));
         }
 
         [Test]
-        public void ClearResearchPendingScaffold_ClearsOnlyResearchPendingAndRefreshesDiagnostics()
+        public void ClearResearchPendingScaffold_ClearsOnlyResearchStateAndRefreshesDiagnostics()
         {
             SaveData save = _root.Save;
             save.researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = "research.project.saved" };
-            string beforeWithoutResearch = SerializeWithoutResearchPending(save);
+            save.researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = "research.project.saved" };
+            string beforeWithoutResearch = SerializeWithoutResearchState(save);
 
             bool didClear = _root.ClearResearchPendingScaffold();
 
             Assert.That(didClear, Is.True);
             Assert.That(save.researchPending, Is.Null);
-            Assert.That(SerializeWithoutResearchPending(save), Is.EqualTo(beforeWithoutResearch));
+            Assert.That(save.researchProgress, Is.Null);
+            Assert.That(SerializeWithoutResearchState(save), Is.EqualTo(beforeWithoutResearch));
             Assert.That(_root.ResearchPendingLine, Does.Contain("pending=False slot= project="));
             Assert.That(_root.ResearchPendingValidationLine, Does.Contain("resolved=True error=0"));
         }
@@ -101,12 +109,15 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
-        private static string SerializeWithoutResearchPending(SaveData save)
+        private static string SerializeWithoutResearchState(SaveData save)
         {
             ResearchPendingState researchPending = save.researchPending;
+            ResearchProgressState researchProgress = save.researchProgress;
             save.researchPending = null;
+            save.researchProgress = null;
             string json = JsonUtility.ToJson(save);
             save.researchPending = researchPending;
+            save.researchProgress = researchProgress;
             return json;
         }
 
@@ -122,6 +133,11 @@ namespace DungeonBuilder.Tests.EditMode
                         slotId = "research.slot.primary",
                         projectId = "research.project.scaffold",
                         ruleSourceId = "research.pending.rule.test"
+                    },
+                    researchProgressScaffold = new ResearchProgressScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.progress.rule.test"
                     }
                 });
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);

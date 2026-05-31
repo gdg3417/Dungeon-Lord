@@ -191,6 +191,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, _root.ResearchPendingLine);
             AppendLine(builder, _root.ResearchPendingValidationLine);
             AppendLine(builder, _root.ResearchProgressLine);
+            AppendLine(builder, _root.ResearchProgressStateLine);
         }
 
         private string GetLocalizedString(string key)

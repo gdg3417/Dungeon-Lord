@@ -55,12 +55,69 @@ namespace DungeonBuilder.Tests.EditMode
         public void SystemsDiagnostics_NullResearchPending_ShowsSafeNoPendingProgressSummary()
         {
             _root.Save.researchPending = null;
+            _root.Save.researchProgress = null;
             _root.RefreshOfflineSummaryLines();
             CycleToSystemsDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("pending False  "));
             Assert.That(text, Does.Contain("Research Progress Preview — resolved=False error=1 pending=False slot= project="));
+            Assert.That(text, Does.Contain("Research Progress State — resolved=False error=1 pending=False hasState=False slot= project="));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_PendingWithoutProgressState_ShowsSafeMissingStateSummary()
+        {
+            CycleToSystemsDiagnostics();
+
+            Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=2 pending=True hasState=False slot= project="));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_PendingWithEmptyDefaultProgressState_ShowsSafeMissingStateSummaryWithoutMutation()
+        {
+            var progress = new ResearchProgressState();
+            _root.Save.researchProgress = progress;
+            string before = JsonUtility.ToJson(_root.Save);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+
+            Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=2 pending=True hasState=False slot= project="));
+            Assert.That(_root.Save.researchProgress, Is.SameAs(progress));
+            Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_MatchingZeroProgressState_ShowsResolvedLocalizedStateWithoutRawKey()
+        {
+            _root.Save.researchProgress = new ResearchProgressState
+            {
+                SlotId = "research.slot.primary",
+                ProjectId = "research.project.saved",
+                RuleSourceIdUsed = "research.progress.rule.saved"
+            };
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Research Progress State — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.saved progress=0 completionPending=False matchesPending=True ruleSource=research.progress.rule.saved"));
+            Assert.That(text, Does.Not.Contain("ui.dev.research_progress_state_format"));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_StaleProgressState_ShowsSafeMismatch()
+        {
+            _root.Save.researchProgress = new ResearchProgressState
+            {
+                SlotId = "research.slot.primary",
+                ProjectId = "research.project.stale",
+                RuleSourceIdUsed = "research.progress.rule.saved"
+            };
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+
+            Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=5 pending=True hasState=True slot=research.slot.primary project=research.project.stale progress=0 completionPending=False matchesPending=False"));
         }
 
         [Test]
@@ -102,6 +159,7 @@ namespace DungeonBuilder.Tests.EditMode
             CycleToSystemsDiagnostics();
 
             Assert.That(RefreshText(), Does.Contain("ui.dev.research_progress_format"));
+            Assert.That(RefreshText(), Does.Contain("ui.dev.research_progress_state_format"));
         }
 
         [Test]
@@ -110,10 +168,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.SetResearchPendingScaffold(), Is.True);
             Assert.That(_root.ResearchProgressLine, Does.Contain("pending=True slot=research.slot.primary project=research.project.scaffold"));
             Assert.That(_root.ResearchProgressLine, Does.Contain("wouldComplete=False"));
+            Assert.That(_root.Save.researchProgress, Is.Not.Null);
+            Assert.That(_root.ResearchProgressStateLine, Does.Contain("resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 completionPending=False matchesPending=True"));
 
             Assert.That(_root.ClearResearchPendingScaffold(), Is.True);
             Assert.That(_root.ResearchProgressLine, Does.Contain("resolved=False error=1 pending=False slot= project="));
             Assert.That(_root.ResearchProgressLine, Does.Not.Contain("research.project.scaffold"));
+            Assert.That(_root.Save.researchProgress, Is.Null);
+            Assert.That(_root.ResearchProgressStateLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project="));
+            Assert.That(_root.ResearchProgressStateLine, Does.Not.Contain("research.project.scaffold"));
         }
 
         [Test]
@@ -142,6 +205,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(gameRoot, Does.Not.Contain("Research Progress Preview —"));
             Assert.That(overlay, Does.Not.Contain("Research Progress Preview —"));
+            Assert.That(gameRoot, Does.Not.Contain("Research Progress State —"));
+            Assert.That(overlay, Does.Not.Contain("Research Progress State —"));
         }
 
         private static SaveData BuildSave()
@@ -197,6 +262,7 @@ namespace DungeonBuilder.Tests.EditMode
             if (includeProgressFormat)
             {
                 map["ui.dev.research_progress_format"] = "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}";
+                map["ui.dev.research_progress_state_format"] = "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}";
             }
             return content;
         }

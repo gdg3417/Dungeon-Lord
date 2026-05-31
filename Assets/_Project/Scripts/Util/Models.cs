@@ -103,6 +103,17 @@ namespace DungeonBuilder.M0
         InvalidPendingState = 5,
         InvalidConfig = 6
     }
+    public enum ResearchProgressStateSummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingProgressState = 2,
+        InvalidPendingState = 3,
+        ProgressStateSlotMismatch = 4,
+        ProgressStateProjectMismatch = 5,
+        InvalidProgressUnits = 6,
+        CompletionPendingNotActive = 7
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -347,6 +358,31 @@ namespace DungeonBuilder.M0
         public string ruleSourceId;
         public double progressPerActiveSecond;
         public long maxActiveSessionElapsedSeconds;
+    }
+
+    [Serializable]
+    public sealed class ResearchProgressState
+    {
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public bool CompletionPending = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
+    public sealed class ResearchProgressStateSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchProgressStateSummaryErrorCode.None;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public bool CompletionPending = false;
+        public bool StateMatchesPending = false;
+        public string RuleSourceIdUsed;
     }
 
     [Serializable]
@@ -670,6 +706,7 @@ namespace DungeonBuilder.M0
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();
         public ResearchPendingState researchPending;
+        public ResearchProgressState researchProgress;
         public OfflineSummary lastOfflineSummary;
 
         public string[] integrityFlags = Array.Empty<string>();
