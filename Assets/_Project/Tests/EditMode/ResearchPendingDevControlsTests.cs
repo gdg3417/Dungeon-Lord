@@ -31,6 +31,8 @@ namespace DungeonBuilder.Tests.EditMode
         public void SetResearchPendingScaffold_WritesOnlyResearchStateAndRefreshesDiagnostics()
         {
             SaveData save = _root.Save;
+            CompletedResearchState completedBefore = save.completedResearch;
+            string completedJsonBefore = JsonUtility.ToJson(completedBefore);
             string beforeWithoutResearch = SerializeWithoutResearchState(save);
 
             bool didSet = _root.SetResearchPendingScaffold();
@@ -45,6 +47,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.researchProgress.ProgressUnits, Is.Zero);
             Assert.That(save.researchProgress.CompletionPending, Is.False);
             Assert.That(save.researchProgress.RuleSourceIdUsed, Is.EqualTo("research.progress.rule.test"));
+            Assert.That(save.completedResearch, Is.SameAs(completedBefore));
+            Assert.That(JsonUtility.ToJson(save.completedResearch), Is.EqualTo(completedJsonBefore));
             Assert.That(SerializeWithoutResearchState(save), Is.EqualTo(beforeWithoutResearch));
             Assert.That(_root.ResearchPendingLine, Does.Contain("pending=True slot=research.slot.primary project=research.project.scaffold"));
             Assert.That(_root.ResearchPendingValidationLine, Does.Contain("resolved=True error=0 ruleSource=research.pending.rule.test"));
@@ -56,6 +60,8 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData save = _root.Save;
             save.researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = "research.project.saved" };
             save.researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = "research.project.saved" };
+            CompletedResearchState completedBefore = save.completedResearch;
+            string completedJsonBefore = JsonUtility.ToJson(completedBefore);
             string beforeWithoutResearch = SerializeWithoutResearchState(save);
 
             bool didClear = _root.ClearResearchPendingScaffold();
@@ -63,6 +69,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(didClear, Is.True);
             Assert.That(save.researchPending, Is.Null);
             Assert.That(save.researchProgress, Is.Null);
+            Assert.That(save.completedResearch, Is.SameAs(completedBefore));
+            Assert.That(JsonUtility.ToJson(save.completedResearch), Is.EqualTo(completedJsonBefore));
             Assert.That(SerializeWithoutResearchState(save), Is.EqualTo(beforeWithoutResearch));
             Assert.That(_root.ResearchPendingLine, Does.Contain("pending=False slot= project="));
             Assert.That(_root.ResearchPendingValidationLine, Does.Contain("resolved=True error=0"));
@@ -100,6 +108,12 @@ namespace DungeonBuilder.Tests.EditMode
                 lastSavedUtcUnix = 100,
                 structureRuntime = new StructureRuntimeState { Heat = 17d, ManaReserve = 23d, LastProcessedTick = 11 },
                 runHistory = new RunHistoryState(),
+                completedResearch = new CompletedResearchState
+                {
+                    ProjectIds = new[] { "research.project.completed" },
+                    LastCompletedProjectId = "research.project.completed",
+                    LastCompletionRuleSourceId = "research.completed.rule.test"
+                },
                 lastOfflineSummary = new OfflineSummary
                 {
                     RuleResolved = true,

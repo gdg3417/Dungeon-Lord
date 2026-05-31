@@ -69,6 +69,7 @@ namespace DungeonBuilder.M0
         public string ResearchCompletionEligibilityLine { get; private set; } = "ui.dev.research_completion_eligibility_format";
         public string ResearchCompletionPendingApplyLine { get; private set; } = "ui.dev.research_completion_pending_apply_format";
         public string ResearchCompletionClaimReadinessLine { get; private set; } = "ui.dev.research_completion_claim_readiness_format";
+        public string CompletedResearchStateLine { get; private set; } = "ui.dev.completed_research_state_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -1048,6 +1049,29 @@ namespace DungeonBuilder.M0
                     claimReadiness.WouldUnlockContent,
                     claimReadiness.WouldClearPending,
                     claimReadiness.RuleSourceIdUsed ?? string.Empty);
+
+            CompletedResearchStateSummary completedResearch = CompletedResearchStateResolver.Resolve(
+                Save != null ? Save.completedResearch : null,
+                progressPendingState,
+                Save != null ? Save.researchProgress : null);
+            const string completedResearchFormatKey = "ui.dev.completed_research_state_format";
+            string completedResearchFormat = Content != null ? Content.GetString(completedResearchFormatKey, completedResearchFormatKey) : completedResearchFormatKey;
+            CompletedResearchStateLine = string.Equals(completedResearchFormat, completedResearchFormatKey, StringComparison.Ordinal)
+                ? completedResearchFormatKey
+                : string.Format(
+                    completedResearchFormat,
+                    completedResearch.RuleResolved,
+                    completedResearch.DeterministicErrorCode,
+                    completedResearch.HasCompletedState,
+                    completedResearch.CompletedCount,
+                    completedResearch.LastCompletedProjectId ?? string.Empty,
+                    completedResearch.CurrentPendingProjectId ?? string.Empty,
+                    completedResearch.CurrentProgressProjectId ?? string.Empty,
+                    completedResearch.CurrentProjectAlreadyCompleted,
+                    completedResearch.WouldBlockClaimAsDuplicate,
+                    completedResearch.WouldGrantRewards,
+                    completedResearch.WouldUnlockContent,
+                    completedResearch.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()

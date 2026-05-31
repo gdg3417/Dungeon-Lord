@@ -378,6 +378,10 @@
     {
       "key": "ui.dev.research_completion_claim_readiness_format",
       "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
+    },
+    {
+      "key": "ui.dev.completed_research_state_format",
+      "text": "Completed Research State \u2014 resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
     }
   ]
 }

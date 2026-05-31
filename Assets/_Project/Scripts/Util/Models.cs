@@ -161,6 +161,10 @@ namespace DungeonBuilder.M0
         InvalidProgressUnits = 10,
         ConfigProjectMismatch = 11
     }
+    public enum CompletedResearchStateSummaryErrorCode
+    {
+        None = 0
+    }
     public enum ResearchCompletionClaimReadinessSummaryErrorCode
     {
         None = 0,
@@ -438,6 +442,32 @@ namespace DungeonBuilder.M0
         public string ProjectId;
         public double ProgressUnits = 0d;
         public bool CompletionPending = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
+    public sealed class CompletedResearchState
+    {
+        public string[] ProjectIds;
+        public string LastCompletedProjectId;
+        public string LastCompletionRuleSourceId;
+    }
+
+    [Serializable]
+    public sealed class CompletedResearchStateSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)CompletedResearchStateSummaryErrorCode.None;
+        public bool HasCompletedState = false;
+        public int CompletedCount = 0;
+        public string LastCompletedProjectId;
+        public string LastCompletionRuleSourceId;
+        public string CurrentPendingProjectId;
+        public string CurrentProgressProjectId;
+        public bool CurrentProjectAlreadyCompleted = false;
+        public bool WouldBlockClaimAsDuplicate = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
         public string RuleSourceIdUsed;
     }
 
@@ -853,6 +883,7 @@ namespace DungeonBuilder.M0
         public RunHistoryState runHistory = new RunHistoryState();
         public ResearchPendingState researchPending;
         public ResearchProgressState researchProgress;
+        public CompletedResearchState completedResearch;
         public OfflineSummary lastOfflineSummary;
 
         public string[] integrityFlags = Array.Empty<string>();
