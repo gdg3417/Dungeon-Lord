@@ -42,9 +42,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_ShowsExistingProgressLinesAndLocalizedEligibilityWithoutRawKeys()
+        public void ResearchDiagnostics_ShowsExistingProgressLinesAndLocalizedEligibilityWithoutRawKeys()
         {
-            string text = SystemsDiagnosticsText();
+            string text = ResearchDiagnosticsText();
 
             Assert.That(text, Does.Contain("Research Progress Preview —"));
             Assert.That(text, Does.Contain("Research Progress State —"));
@@ -52,6 +52,26 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.dev.research_completion_eligibility_format"));
             Assert.That(text, Does.Contain("Research Completion Pending Apply — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 required=2 eligible=False alreadyCompletionPending=False wouldSetCompletionPending=False wouldComplete=False ruleSource=research.completion_eligibility.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.dev.research_completion_pending_apply_format"));
+            Assert.That(text, Does.Contain("Research Completion Claim Readiness — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 required=2 completionPending=False eligible=False readyForClaim=False wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False ruleSource=research.completion_eligibility.rule.test"));
+            Assert.That(text, Does.Not.Contain("ui.dev.research_completion_claim_readiness_format"));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_DoesNotContainResearchDiagnosticBlock()
+        {
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.RefreshOverlayText();
+            string text = _overlay.overlayText.text;
+
+            Assert.That(text, Does.Contain("Offline Summary —"));
+            Assert.That(text, Does.Not.Contain("Research Pending —"));
+            Assert.That(text, Does.Not.Contain("Research Progress Preview —"));
+            Assert.That(text, Does.Not.Contain("Research Progress State —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Eligibility —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Pending Apply —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Claim Readiness —"));
         }
 
         [Test]
@@ -66,6 +86,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Not.Contain("research.project.scaffold"));
             Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project= progress=0 required=0 eligible=False alreadyCompletionPending=False wouldSetCompletionPending=False wouldComplete=False ruleSource="));
             Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Not.Contain("research.project.scaffold"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project= progress=0 required=0 completionPending=False eligible=False readyForClaim=False wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False ruleSource="));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Not.Contain("research.project.scaffold"));
         }
 
         [Test]
@@ -80,10 +102,12 @@ namespace DungeonBuilder.Tests.EditMode
             InvokeResearchProgressApply();
             _root.RefreshOfflineSummaryLines();
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=1 required=2 remaining=1 eligible=False"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("progress=1 required=2 completionPending=False eligible=False readyForClaim=False"));
             InvokeResearchProgressApply();
             _root.RefreshOfflineSummaryLines();
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("progress=2 required=2 completionPending=False eligible=True readyForClaim=False wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False"));
             Assert.That(save.researchProgress.CompletionPending, Is.False);
             Assert.That(save.researchPending, Is.Not.Null);
             Assert.That(save.researchPending.ProjectId, Is.EqualTo("research.project.scaffold"));
@@ -115,6 +139,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=True error=0 pending=True hasState=True"));
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
             Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("eligible=True alreadyCompletionPending=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("completionPending=True eligible=True readyForClaim=True wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False"));
             Assert.That(JsonUtility.ToJson(save.researchPending), Is.EqualTo(pendingBefore));
             Assert.That(save.structureRuntime.Heat, Is.EqualTo(heatBefore));
             Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(manaBefore));
@@ -135,6 +160,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project="));
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Not.Contain("research.project.scaffold"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project="));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Not.Contain("research.project.scaffold"));
             Assert.That(_root.Save.researchPending, Is.Null);
             Assert.That(_root.Save.researchProgress, Is.Null);
         }
@@ -144,11 +171,13 @@ namespace DungeonBuilder.Tests.EditMode
         {
             StringMap().Remove("ui.dev.research_completion_eligibility_format");
             StringMap().Remove("ui.dev.research_completion_pending_apply_format");
+            StringMap().Remove("ui.dev.research_completion_claim_readiness_format");
 
             _root.RefreshOfflineSummaryLines();
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Is.EqualTo("ui.dev.research_completion_eligibility_format"));
             Assert.That(_root.ResearchCompletionPendingApplyLine, Is.EqualTo("ui.dev.research_completion_pending_apply_format"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Is.EqualTo("ui.dev.research_completion_claim_readiness_format"));
         }
 
         [Test]
@@ -172,15 +201,21 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(overlay, Does.Not.Contain("Research Completion Eligibility —"));
             Assert.That(gameRoot, Does.Not.Contain("Research Completion Pending Apply —"));
             Assert.That(overlay, Does.Not.Contain("Research Completion Pending Apply —"));
+            Assert.That(gameRoot, Does.Not.Contain("Research Completion Claim Readiness —"));
+            Assert.That(overlay, Does.Not.Contain("Research Completion Claim Readiness —"));
         }
 
-        private string SystemsDiagnosticsText()
+        private string ResearchDiagnosticsText()
         {
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
             _overlay.RefreshOverlayText();
-            return _overlay.overlayText.text;
+            string top = _overlay.overlayText.text;
+            _overlay.ScrollFullDiagnosticsLines(100);
+            _overlay.RefreshOverlayText();
+            return top + "\n" + _overlay.overlayText.text;
         }
 
         private void InvokeResearchProgressApply()
@@ -243,8 +278,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.hint.toggle_panel"] = "toggle-panel";
             map["ui.dev.hint.toggle_run_diagnostics"] = "toggle-run";
             map["ui.dev.hint.cycle_diagnostics_page"] = "cycle-page";
+            map["ui.dev.hint.scroll_diagnostics"] = "scroll-diagnostics";
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+            map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             map["ui.dev.structure_status"] = "structure {0} {1} {2} {3}";
             map["ui.dev.offline_summary_format"] = "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}";
             map["ui.dev.research_pending_format"] = "Research Pending — pending={0} slot={1} project={2}";
@@ -253,6 +290,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.research_progress_state_format"] = "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}";
             map["ui.dev.research_completion_eligibility_format"] = "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
             map["ui.dev.research_completion_pending_apply_format"] = "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
+            map["ui.dev.research_completion_claim_readiness_format"] = "Research Completion Claim Readiness — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}";
             return content;
         }
 

@@ -50,21 +50,26 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_IncludesLocalizedOfflineSummaryAndResearchPendingLines()
+        public void SystemsAndResearchDiagnostics_SplitOfflineSummaryFromResearchPendingLines()
         {
             CycleToSystemsDiagnostics();
-            string text = RefreshText();
+            string systemsText = RefreshText();
 
-            Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
-            Assert.That(text, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
-            Assert.That(text, Does.Contain("Research Pending Validation — resolved=True error=0 ruleSource=research.pending.rule.test"));
+            Assert.That(systemsText, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
+            Assert.That(systemsText, Does.Not.Contain("Research Pending —"));
+
+            _overlay.CycleFullDiagnosticsPage();
+            string researchText = RefreshText();
+            Assert.That(researchText, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
+            Assert.That(researchText, Does.Contain("Research Pending Validation — resolved=True error=0 ruleSource=research.pending.rule.test"));
+            Assert.That(researchText, Does.Not.Contain("Offline Summary —"));
         }
 
         [Test]
-        public void SystemsDiagnostics_SetAndClearResearchPendingScaffold_ImmediatelyRendersCurrentSavedState()
+        public void ResearchDiagnostics_SetAndClearResearchPendingScaffold_ImmediatelyRendersCurrentSavedState()
         {
             Assert.That(_root.SetResearchPendingScaffold(), Is.True);
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string setText = RefreshText();
 
             Assert.That(setText, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.scaffold"));
@@ -107,7 +112,9 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
-            Assert.That(text, Does.Contain("Research Pending — pending=False slot= project="));
+            Assert.That(text, Does.Not.Contain("Research Pending —"));
+            _overlay.CycleFullDiagnosticsPage();
+            Assert.That(RefreshText(), Does.Contain("Research Pending — pending=False slot= project="));
             Assert.That(JsonUtility.ToJson(legacy), Is.EqualTo(before));
         }
 
@@ -123,7 +130,9 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("Offline Summary — resolved=True error=0 observedSeconds=60 clamped=False wouldProcess=False ruleSource=offline.summary.rule.test"));
-            Assert.That(text, Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
+            Assert.That(text, Does.Not.Contain("Research Pending —"));
+            _overlay.CycleFullDiagnosticsPage();
+            Assert.That(RefreshText(), Does.Contain("Research Pending — pending=True slot=research.slot.primary project=research.project.pending"));
             Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
         }
 
@@ -182,6 +191,9 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("ui.dev.offline_summary_format"));
+            Assert.That(text, Does.Not.Contain("ui.dev.research_pending_format"));
+            _overlay.CycleFullDiagnosticsPage();
+            text = RefreshText();
             Assert.That(text, Does.Contain("ui.dev.research_pending_format"));
             Assert.That(text, Does.Contain("ui.dev.research_pending_validation_format"));
         }
@@ -202,6 +214,12 @@ namespace DungeonBuilder.Tests.EditMode
         {
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
+        }
+
+        private void CycleToResearchDiagnostics()
+        {
+            CycleToSystemsDiagnostics();
             _overlay.CycleFullDiagnosticsPage();
         }
 
@@ -235,8 +253,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.hint.toggle_panel"] = "toggle-panel";
             map["ui.dev.hint.toggle_run_diagnostics"] = "toggle-run";
             map["ui.dev.hint.cycle_diagnostics_page"] = "cycle-page";
+            map["ui.dev.hint.scroll_diagnostics"] = "scroll-diagnostics";
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+            map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             map["ui.dev.structure_status"] = "structure {0} {1} {2} {3}";
             if (includeFormats)
             {

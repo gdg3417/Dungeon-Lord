@@ -68,6 +68,7 @@ namespace DungeonBuilder.M0
         public string ResearchProgressStateLine { get; private set; } = "ui.dev.research_progress_state_format";
         public string ResearchCompletionEligibilityLine { get; private set; } = "ui.dev.research_completion_eligibility_format";
         public string ResearchCompletionPendingApplyLine { get; private set; } = "ui.dev.research_completion_pending_apply_format";
+        public string ResearchCompletionClaimReadinessLine { get; private set; } = "ui.dev.research_completion_claim_readiness_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -1020,6 +1021,33 @@ namespace DungeonBuilder.M0
                     completionPendingApply.WouldSetCompletionPending,
                     completionPendingApply.WouldCompleteResearch,
                     completionPendingApply.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchCompletionClaimReadinessSummary claimReadiness = ResearchCompletionClaimReadinessResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                GetResearchCompletionEligibilityScaffoldConfig());
+            const string claimReadinessFormatKey = "ui.dev.research_completion_claim_readiness_format";
+            string claimReadinessFormat = Content != null ? Content.GetString(claimReadinessFormatKey, claimReadinessFormatKey) : claimReadinessFormatKey;
+            ResearchCompletionClaimReadinessLine = string.Equals(claimReadinessFormat, claimReadinessFormatKey, StringComparison.Ordinal)
+                ? claimReadinessFormatKey
+                : string.Format(
+                    claimReadinessFormat,
+                    claimReadiness.RuleResolved,
+                    claimReadiness.DeterministicErrorCode,
+                    claimReadiness.Pending,
+                    claimReadiness.HasProgressState,
+                    claimReadiness.SlotId ?? string.Empty,
+                    claimReadiness.ProjectId ?? string.Empty,
+                    claimReadiness.ProgressUnits,
+                    claimReadiness.RequiredProgressUnits,
+                    claimReadiness.CompletionPending,
+                    claimReadiness.EligibleForCompletion,
+                    claimReadiness.ReadyForClaim,
+                    claimReadiness.WouldCompleteResearch,
+                    claimReadiness.WouldGrantRewards,
+                    claimReadiness.WouldUnlockContent,
+                    claimReadiness.WouldClearPending,
+                    claimReadiness.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()

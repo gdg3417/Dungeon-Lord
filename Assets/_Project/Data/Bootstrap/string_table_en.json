@@ -124,6 +124,10 @@
       "text": "F3 cycles Diagnostics Page"
     },
     {
+      "key": "ui.dev.hint.scroll_diagnostics",
+      "text": "Mouse wheel or PageUp PageDown scroll diagnostics"
+    },
+    {
       "key": "ui.dev.diagnostics.header_format",
       "text": "Diagnostics: {0} Page {1}/{2}"
     },
@@ -146,6 +150,10 @@
     {
       "key": "ui.dev.diagnostics.page.systems_diagnostics",
       "text": "Systems Diagnostics"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.research_diagnostics",
+      "text": "Research Diagnostics"
     },
     {
       "key": "ui.dev.offline_summary_format",
@@ -366,6 +374,10 @@
     {
       "key": "ui.dev.research_completion_pending_apply_format",
       "text": "Research Completion Pending Apply \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+    },
+    {
+      "key": "ui.dev.research_completion_claim_readiness_format",
+      "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
     }
   ]
 }

@@ -49,6 +49,13 @@ namespace DungeonBuilder.Tests.EditMode
             SetLine("<RunAdventurerAttractionLine>k__BackingField", "run-attraction-line");
             SetLine("<RunAdventurerInterestForecastLine>k__BackingField", "run-forecast-line");
             SetLine("<RunAdventurerDemandBudgetLine>k__BackingField", "run-demand-budget-line");
+            SetLine("<ResearchPendingLine>k__BackingField", "research-pending-line");
+            SetLine("<ResearchPendingValidationLine>k__BackingField", "research-pending-validation-line");
+            SetLine("<ResearchProgressLine>k__BackingField", "research-progress-line");
+            SetLine("<ResearchProgressStateLine>k__BackingField", "research-progress-state-line");
+            SetLine("<ResearchCompletionEligibilityLine>k__BackingField", "research-completion-eligibility-line");
+            SetLine("<ResearchCompletionPendingApplyLine>k__BackingField", "research-completion-pending-apply-line");
+            SetLine("<ResearchCompletionClaimReadinessLine>k__BackingField", "research-completion-claim-readiness-line");
 
             _root.SetBanner("banner-line");
             SetSave(new SaveData
@@ -80,20 +87,22 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
-            Assert.That(text, Does.StartWith("Diagnostics: Runtime Summary Page 1/4\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
+            Assert.That(text, Does.StartWith("Diagnostics: Runtime Summary Page 1/5\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
-            Assert.That(text, Does.Contain("banner-line"));
+            Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
+            Assert.That(text, Does.Not.Contain("banner-line"));
             Assert.That(text, Does.Not.Contain("run-line"));
             Assert.That(text, Does.Not.Contain("run-heat-delta-line"));
         }
 
         [Test]
-        public void FullDiagnostics_F3PageCycle_WrapsFromSystemsBackToRuntimeSummary()
+        public void FullDiagnostics_F3PageCycle_WrapsFromResearchBackToRuntimeSummary()
         {
             AssertPage(1, "Runtime Summary");
             CycleAndAssertPage(2, "Run Diagnostics");
             CycleAndAssertPage(3, "Heat Diagnostics");
             CycleAndAssertPage(4, "Systems Diagnostics");
+            CycleAndAssertPage(5, "Research Diagnostics");
             CycleAndAssertPage(1, "Runtime Summary");
         }
 
@@ -105,14 +114,34 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("run-breakdown-line", "heat-line");
             Assert.That(_overlay.overlayText.text, Does.Contain("run-feedback-line"));
-            Assert.That(_overlay.overlayText.text, Does.Contain("run-demand-budget-line"));
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("run-demand-budget-line"));
+            _overlay.ScrollFullDiagnosticsLines(100);
+            Assert.That(RefreshText(), Does.Contain("run-demand-budget-line"));
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("current-heat-tier-line", "build-line");
-            AssertLinesAppearInOrder(_overlay.overlayText.text, "run-heat-cooling-line", "run-heat-delta-line", "run-heat-application-line");
+            AssertLinesAppearInOrder(_overlay.overlayText.text, "run-heat-cooling-line", "run-heat-delta-line");
+            _overlay.ScrollFullDiagnosticsLines(100);
+            Assert.That(RefreshText(), Does.Contain("run-heat-application-line"));
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("Structure Sim", "run-line");
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-pending-line"));
+
+            _overlay.CycleFullDiagnosticsPage();
+            AssertPageLines("research-pending-line", "Structure Sim");
+            AssertLinesAppearInOrder(
+                _overlay.overlayText.text,
+                "research-pending-line",
+                "research-pending-validation-line",
+                "research-progress-line",
+                "research-progress-state-line");
+            _overlay.ScrollFullDiagnosticsLines(100);
+            AssertLinesAppearInOrder(
+                RefreshText(),
+                "research-completion-eligibility-line",
+                "research-completion-pending-apply-line",
+                "research-completion-claim-readiness-line");
         }
 
         [Test]
@@ -131,6 +160,62 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             Assert.That(RefreshText(), Is.EqualTo(focusedFromRuntimePage));
+        }
+
+        [Test]
+        public void ResearchDiagnostics_ScrollOffsetClampsAndRevealsBottomLines()
+        {
+            CycleToResearchDiagnostics();
+
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+            Assert.That(RefreshText(), Does.Contain("research-pending-line"));
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-completion-claim-readiness-line"));
+
+            _overlay.ScrollFullDiagnosticsLines(100);
+
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(3));
+            Assert.That(RefreshText(), Does.Contain("research-completion-claim-readiness-line"));
+
+            _overlay.ScrollFullDiagnosticsLines(-100);
+
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+            Assert.That(RefreshText(), Does.Contain("research-pending-line"));
+        }
+
+        [Test]
+        public void PageAndFocusChanges_ResetDiagnosticsScrollOffset()
+        {
+            CycleToResearchDiagnostics();
+            _overlay.ScrollFullDiagnosticsLines(100);
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(3));
+
+            _overlay.CycleFullDiagnosticsPage();
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+
+            CycleToResearchDiagnostics();
+            _overlay.ScrollFullDiagnosticsLines(100);
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(3));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+        }
+
+        [Test]
+        public void ScrollFullDiagnosticsLines_DoesNotMutateSaveHeatRunHistoryOrStructureRuntime()
+        {
+            SaveData save = _root.Save;
+            string before = JsonUtility.ToJson(save);
+
+            CycleToResearchDiagnostics();
+            _overlay.ScrollFullDiagnosticsLines(100);
+            _overlay.RefreshOverlayText();
+            _overlay.ScrollFullDiagnosticsLines(-100);
+            _overlay.RefreshOverlayText();
+
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+            Assert.That(save.structureRuntime.Heat, Is.EqualTo(17d));
+            Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(9d));
+            Assert.That(save.runHistory.RecentOutcomes[0].RunId, Is.EqualTo("run-history-entry"));
         }
 
         [Test]
@@ -167,6 +252,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.StartWith("ui.dev.diagnostics.header_format"));
             Assert.That(text, Does.Contain("ui.dev.hint.cycle_diagnostics_page"));
+            Assert.That(text, Does.Contain("ui.dev.hint.scroll_diagnostics"));
 
             _overlay.ToggleRunDiagnosticsFocus();
             Assert.That(RefreshText(), Does.StartWith("ui.dev.diagnostics.focus.run_diagnostics"));
@@ -175,7 +261,7 @@ namespace DungeonBuilder.Tests.EditMode
         private void AssertPage(int number, string name)
         {
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(number));
-            Assert.That(RefreshText(), Does.StartWith($"Diagnostics: {name} Page {number}/4"));
+            Assert.That(RefreshText(), Does.StartWith($"Diagnostics: {name} Page {number}/5"));
         }
 
         private void CycleAndAssertPage(int number, string name)
@@ -202,6 +288,14 @@ namespace DungeonBuilder.Tests.EditMode
             }
         }
 
+        private void CycleToResearchDiagnostics()
+        {
+            while (_overlay.FullDiagnosticsPageNumber != 5)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
+        }
+
         private string RefreshText()
         {
             _overlay.RefreshOverlayText();
@@ -223,12 +317,14 @@ namespace DungeonBuilder.Tests.EditMode
                 map["ui.dev.hint.toggle_panel"] = "F1 toggles Dev Panel";
                 map["ui.dev.hint.toggle_run_diagnostics"] = "F2 toggles Run Diagnostics focus";
                 map["ui.dev.hint.cycle_diagnostics_page"] = "F3 cycles Diagnostics Page";
+                map["ui.dev.hint.scroll_diagnostics"] = "Mouse wheel or PageUp PageDown scroll diagnostics";
                 map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
                 map["ui.dev.diagnostics.focus.run_diagnostics"] = "Diagnostics: Run Diagnostics Focus";
                 map["ui.dev.diagnostics.page.runtime_summary"] = "Runtime Summary";
                 map["ui.dev.diagnostics.page.run_diagnostics"] = "Run Diagnostics";
                 map["ui.dev.diagnostics.page.heat_diagnostics"] = "Heat Diagnostics";
                 map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+                map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             }
             return content;
         }
