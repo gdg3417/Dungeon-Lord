@@ -65,6 +65,7 @@ namespace DungeonBuilder.M0
         public string ResearchPendingLine { get; private set; } = "ui.dev.research_pending_format";
         public string ResearchPendingValidationLine { get; private set; } = "ui.dev.research_pending_validation_format";
         public string ResearchProgressLine { get; private set; } = "ui.dev.research_progress_format";
+        public string ResearchProgressStateLine { get; private set; } = "ui.dev.research_progress_state_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -859,6 +860,13 @@ namespace DungeonBuilder.M0
                 SlotId = result.SlotId,
                 ProjectId = result.ProjectId
             };
+            ResearchProgressScaffoldConfig progressConfig = GetResearchProgressScaffoldConfig();
+            Save.researchProgress = new ResearchProgressState
+            {
+                SlotId = result.SlotId,
+                ProjectId = result.ProjectId,
+                RuleSourceIdUsed = progressConfig != null ? progressConfig.ruleSourceId : string.Empty
+            };
             SaveService?.Save(Save, SaveReason.ManualDev);
             RefreshOfflineSummaryLines();
             return true;
@@ -872,6 +880,7 @@ namespace DungeonBuilder.M0
             }
 
             Save.researchPending = null;
+            Save.researchProgress = null;
             SaveService?.Save(Save, SaveReason.ManualDev);
             RefreshOfflineSummaryLines();
             return true;
@@ -941,6 +950,26 @@ namespace DungeonBuilder.M0
                     progress.ProgressDeltaPreview,
                     progress.WouldCompleteResearch,
                     progress.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchProgressStateSummary progressState = ResearchProgressStateResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null);
+            const string progressStateFormatKey = "ui.dev.research_progress_state_format";
+            string progressStateFormat = Content != null ? Content.GetString(progressStateFormatKey, progressStateFormatKey) : progressStateFormatKey;
+            ResearchProgressStateLine = string.Equals(progressStateFormat, progressStateFormatKey, StringComparison.Ordinal)
+                ? progressStateFormatKey
+                : string.Format(
+                    progressStateFormat,
+                    progressState.RuleResolved,
+                    progressState.DeterministicErrorCode,
+                    progressState.Pending,
+                    progressState.HasProgressState,
+                    progressState.SlotId ?? string.Empty,
+                    progressState.ProjectId ?? string.Empty,
+                    progressState.ProgressUnits,
+                    progressState.CompletionPending,
+                    progressState.StateMatchesPending,
+                    progressState.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()

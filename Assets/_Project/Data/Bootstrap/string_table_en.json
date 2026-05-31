@@ -354,6 +354,10 @@
     {
       "key": "ui.dev.research_progress_format",
       "text": "Research Progress Preview \u2014 resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
+    },
+    {
+      "key": "ui.dev.research_progress_state_format",
+      "text": "Research Progress State \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
     }
   ]
 }
