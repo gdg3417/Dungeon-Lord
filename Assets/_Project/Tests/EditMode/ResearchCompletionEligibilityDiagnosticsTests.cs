@@ -212,7 +212,10 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.RefreshOverlayText();
-            return _overlay.overlayText.text;
+            string top = _overlay.overlayText.text;
+            _overlay.ScrollFullDiagnosticsLines(100);
+            _overlay.RefreshOverlayText();
+            return top + "\n" + _overlay.overlayText.text;
         }
 
         private void InvokeResearchProgressApply()
@@ -275,6 +278,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.hint.toggle_panel"] = "toggle-panel";
             map["ui.dev.hint.toggle_run_diagnostics"] = "toggle-run";
             map["ui.dev.hint.cycle_diagnostics_page"] = "cycle-page";
+            map["ui.dev.hint.scroll_diagnostics"] = "scroll-diagnostics";
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
             map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";

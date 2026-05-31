@@ -26,7 +26,7 @@ The resolver does not mutate `SaveData`, `researchPending`, `researchProgress`, 
 
 ## Diagnostics notes
 
-PR 67 splits the research diagnostics block onto a dedicated localization-backed `Research Diagnostics` F3 page so Bootstrap smoke validation remains readable after adding `Research Completion Claim Readiness`. Systems Diagnostics keeps non-research lines such as Structure Sim and Offline Summary. Research Diagnostics contains Research Pending, Research Pending Validation, Research Progress Preview, Research Progress State, Research Completion Eligibility, Research Completion Pending Apply, and Research Completion Claim Readiness. The claim-readiness line displays resolved/error status, pending and progress-state presence, slot/project IDs, progress and required units, completion-pending status, eligibility, readiness, all future mutation flags, and rule source. Missing localization follows the existing safe fallback-key behavior. Clearing research pending returns the research page to no-pending output without stale project IDs.
+PR 67 splits the research diagnostics block onto a dedicated localization-backed `Research Diagnostics` F3 page and adds lightweight full-diagnostics line-window scrolling so Bootstrap smoke validation remains readable after adding `Research Completion Claim Readiness`. Mouse wheel and PageUp/PageDown adjust the current full-page scroll offset, F3 page changes and F2 focus transitions reset the active page to the top, and offsets clamp at the available line bounds. Systems Diagnostics keeps non-research lines such as Structure Sim and Offline Summary. Research Diagnostics contains Research Pending, Research Pending Validation, Research Progress Preview, Research Progress State, Research Completion Eligibility, Research Completion Pending Apply, and Research Completion Claim Readiness. The claim-readiness line displays resolved/error status, pending and progress-state presence, slot/project IDs, progress and required units, completion-pending status, eligibility, readiness, all future mutation flags, and rule source. Missing localization follows the existing safe fallback-key behavior. Clearing research pending returns the research page to no-pending output without stale project IDs.
 
 ## Developer control notes
 
@@ -36,7 +36,7 @@ Existing Set Research Pending and Clear Research Pending behavior remains unchan
 
 Added `ResearchCompletionClaimReadinessResolverTests` for no-pending, missing/default state, below/equal/above requirement, completion-pending gating, deterministic repetition, disabled/missing/invalid config, invalid required progress, invalid existing progress, slot/project mismatch, immutable future-mutation flags, and save/adjacent-runtime non-mutation.
 
-Updated `BootstrapOverlayPagingTests`, `OfflineSummaryDiagnosticsTests`, `ResearchProgressDiagnosticsTests`, and `ResearchCompletionEligibilityDiagnosticsTests` for the dedicated Research Diagnostics page. Coverage verifies the five-page F3 cycle, that Systems Diagnostics no longer contains the research block, that Research Diagnostics contains all research lines, localization-backed visibility without raw keys during loaded-content play, fallback-key behavior, safe no-pending output, below-requirement not-ready output, eligible-but-not-completion-pending not-ready output, ready output after the existing completion-pending apply scaffold, no mutation, and no stale IDs after clear.
+Updated `BootstrapOverlayPagingTests`, `OfflineSummaryDiagnosticsTests`, `ResearchProgressDiagnosticsTests`, `ResearchCompletionEligibilityDiagnosticsTests`, and the heat-diagnostics overlay assertion in `RunSimulationTests` for the dedicated scrollable Research Diagnostics page and shared full-page line window. Coverage verifies the five-page F3 cycle, line-window scroll visibility, top/bottom clamping, F3 and F2 reset behavior, that Systems Diagnostics no longer contains the research block, that Research Diagnostics contains all research lines across its scrollable content, localization-backed visibility without raw keys during loaded-content play, fallback-key behavior, safe no-pending output, below-requirement not-ready output, eligible-but-not-completion-pending not-ready output, ready output after the existing completion-pending apply scaffold, no mutation, and no stale IDs after clear.
 
 ## Manual Bootstrap smoke checklist
 
@@ -52,7 +52,7 @@ Updated `BootstrapOverlayPagingTests`, `OfflineSummaryDiagnosticsTests`, `Resear
 10. Confirm Research Progress State from M7-B1 still displays correctly.
 11. Confirm Research Completion Eligibility from M7-B3 displays correctly.
 12. Confirm Research Completion Pending Apply from M7-B4 displays correctly.
-13. Confirm Research Completion Claim Readiness displays safely.
+13. Confirm Research Completion Claim Readiness displays safely after scrolling down with the mouse wheel or PageDown.
 14. Confirm Research Diagnostics remains readable and the no-pending state shows safe no-pending output.
 15. Use Set Research Pending.
 16. Confirm pending becomes true.
@@ -60,7 +60,7 @@ Updated `BootstrapOverlayPagingTests`, `OfflineSummaryDiagnosticsTests`, `Resear
 18. Confirm Research Diagnostics remains readable and claim readiness is false below requirement.
 19. Let active simulation ticks accumulate enough progress to meet or exceed the content-owned requirement.
 20. Confirm `CompletionPending=True`.
-21. Confirm Research Diagnostics remains readable and claim readiness becomes true.
+21. Scroll down and confirm Research Diagnostics remains readable and claim readiness becomes true.
 22. Confirm `researchPending` remains present.
 23. Confirm `researchProgress` remains present.
 24. Confirm no research completion occurs.
@@ -69,10 +69,11 @@ Updated `BootstrapOverlayPagingTests`, `OfflineSummaryDiagnosticsTests`, `Resear
 27. Confirm pending becomes false.
 28. Confirm Research Diagnostics remains readable and progress state and claim readiness diagnostics return to no-pending output.
 29. Confirm no stale project ID remains.
-30. Confirm no offline heat behavior appears.
-31. Confirm no offline progression appears.
-32. Confirm no M6 heat behavior changes.
-33. Confirm no unexpected `.meta` files are created.
+30. Confirm scrolling still works and F3 page cycling still works after clear.
+31. Confirm no offline heat behavior appears.
+32. Confirm no offline progression appears.
+33. Confirm no M6 heat behavior changes.
+34. Confirm no unexpected `.meta` files are created.
 
 ## M6 preservation notes
 

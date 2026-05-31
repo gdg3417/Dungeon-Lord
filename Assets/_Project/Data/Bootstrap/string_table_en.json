@@ -124,6 +124,10 @@
       "text": "F3 cycles Diagnostics Page"
     },
     {
+      "key": "ui.dev.hint.scroll_diagnostics",
+      "text": "Mouse wheel or PageUp PageDown scroll diagnostics"
+    },
+    {
       "key": "ui.dev.diagnostics.header_format",
       "text": "Diagnostics: {0} Page {1}/{2}"
     },

@@ -2383,6 +2383,11 @@ namespace DungeonBuilder.Tests.EditMode
                 }
 
                 overlay.RefreshOverlayText();
+                if (!runDiagnosticsFocus)
+                {
+                    overlay.ScrollFullDiagnosticsLines(100);
+                    overlay.RefreshOverlayText();
+                }
 
                 string text = overlay.overlayText.text;
                 int coolingIndex = text.IndexOf("cooling-line", System.StringComparison.Ordinal);
