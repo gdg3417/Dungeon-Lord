@@ -105,11 +105,11 @@ namespace DungeonBuilder.Tests.EditMode
             const string legacyJson = "{\"researchPending\":{\"SlotId\":\"research.slot.primary\",\"ProjectId\":\"research.project.pending\"},\"researchProgress\":{\"SlotId\":\"research.slot.primary\",\"ProjectId\":\"research.project.pending\",\"ProgressUnits\":2,\"CompletionPending\":true}}";
             SaveData legacy = JsonUtility.FromJson<SaveData>(legacyJson);
 
-            Assert.That(legacy.completedResearch, Is.Null);
+            Assert.That(legacy, Is.Not.Null);
             Assert.That(legacy.researchPending.ProjectId, Is.EqualTo("research.project.pending"));
             Assert.That(legacy.researchProgress.ProgressUnits, Is.EqualTo(2d));
             Assert.That(legacy.researchProgress.CompletionPending, Is.True);
-            AssertSafeEmpty(CompletedResearchStateResolver.Resolve(legacy.completedResearch, legacy.researchPending, legacy.researchProgress), expectCurrentProjects: true);
+            AssertSafeEmpty(CompletedResearchStateResolver.Resolve(legacy.completedResearch));
 
             legacy.completedResearch = new CompletedResearchState
             {
@@ -124,7 +124,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(roundTrip.completedResearch.LastCompletionRuleSourceId, Is.EqualTo("research.completed.rule.test"));
         }
 
-        private static void AssertSafeEmpty(CompletedResearchStateSummary summary, bool expectCurrentProjects = false)
+        private static void AssertSafeEmpty(CompletedResearchStateSummary summary)
         {
             Assert.That(summary.RuleResolved, Is.True);
             Assert.That(summary.DeterministicErrorCode, Is.Zero);
@@ -137,11 +137,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.WouldGrantRewards, Is.False);
             Assert.That(summary.WouldUnlockContent, Is.False);
             Assert.That(summary.RuleSourceIdUsed, Is.Empty);
-            if (!expectCurrentProjects)
-            {
-                Assert.That(summary.CurrentPendingProjectId, Is.Empty);
-                Assert.That(summary.CurrentProgressProjectId, Is.Empty);
-            }
+            Assert.That(summary.CurrentPendingProjectId, Is.Empty);
+            Assert.That(summary.CurrentProgressProjectId, Is.Empty);
         }
     }
 }

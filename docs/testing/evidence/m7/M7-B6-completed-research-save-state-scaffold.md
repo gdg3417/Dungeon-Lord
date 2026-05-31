@@ -14,7 +14,7 @@ This scaffold does not claim or complete research. It does not mutate completed 
 
 ## Legacy save behavior
 
-Legacy JSON with no `completedResearch` field deserializes with a null completed state. The resolver safely reports `resolved=True`, `error=0`, `hasState=False`, and `completedCount=0`. Empty default objects and null or empty project-ID arrays produce the same safe empty completed-state summary.
+Legacy JSON with no `completedResearch` field may deserialize with a null completed state or an empty default object, depending on Unity `JsonUtility` behavior. The resolver safely reports `resolved=True`, `error=0`, `hasState=False`, and `completedCount=0` for either representation. Null or empty project-ID arrays produce the same safe empty completed-state summary.
 
 ## Determinism notes
 
