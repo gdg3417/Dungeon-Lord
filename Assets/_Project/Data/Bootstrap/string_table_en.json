@@ -366,6 +366,10 @@
     {
       "key": "ui.dev.research_completion_pending_apply_format",
       "text": "Research Completion Pending Apply \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+    },
+    {
+      "key": "ui.dev.research_completion_claim_readiness_format",
+      "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
     }
   ]
 }
