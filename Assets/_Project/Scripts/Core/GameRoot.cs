@@ -70,6 +70,7 @@ namespace DungeonBuilder.M0
         public string ResearchCompletionPendingApplyLine { get; private set; } = "ui.dev.research_completion_pending_apply_format";
         public string ResearchCompletionClaimReadinessLine { get; private set; } = "ui.dev.research_completion_claim_readiness_format";
         public string CompletedResearchStateLine { get; private set; } = "ui.dev.completed_research_state_format";
+        public string ResearchCompletionClaimApplyLine { get; private set; } = "ui.dev.research_completion_claim_apply_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -890,6 +891,59 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        public bool ClaimResearchCompletionScaffold()
+        {
+            if (Save == null)
+            {
+                return false;
+            }
+
+            ResearchCompletionClaimApplySummary summary = ResearchCompletionClaimApplyResolver.Resolve(
+                Save.researchPending,
+                Save.researchProgress,
+                Save.completedResearch,
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchCompletionClaimScaffoldConfig());
+            if (!summary.WouldRecordCompletedResearch)
+            {
+                RefreshOfflineSummaryLines();
+                return false;
+            }
+
+            CompletedResearchState completed = Save.completedResearch ?? new CompletedResearchState();
+            string[] source = completed.ProjectIds ?? Array.Empty<string>();
+            bool alreadyPresent = false;
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (string.Equals(source[i], summary.ProjectId, StringComparison.Ordinal))
+                {
+                    alreadyPresent = true;
+                    break;
+                }
+            }
+
+            if (!alreadyPresent)
+            {
+                var appended = new string[source.Length + 1];
+                Array.Copy(source, appended, source.Length);
+                appended[source.Length] = summary.ProjectId;
+                completed.ProjectIds = appended;
+            }
+            else if (completed.ProjectIds == null)
+            {
+                completed.ProjectIds = source;
+            }
+
+            completed.LastCompletedProjectId = summary.ProjectId;
+            completed.LastCompletionRuleSourceId = summary.RuleSourceIdUsed;
+            Save.completedResearch = completed;
+            Save.researchPending = null;
+            Save.researchProgress = null;
+            SaveService?.Save(Save, SaveReason.ManualDev);
+            RefreshOfflineSummaryLines();
+            return true;
+        }
+
         public void RefreshOfflineSummaryLines()
         {
             OfflineSummary summary = Save != null && IsUsablePersistedOfflineSummary(Save.lastOfflineSummary)
@@ -1050,6 +1104,40 @@ namespace DungeonBuilder.M0
                     claimReadiness.WouldClearPending,
                     claimReadiness.RuleSourceIdUsed ?? string.Empty);
 
+            ResearchCompletionClaimApplySummary claimApply = ResearchCompletionClaimApplyResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                Save != null ? Save.completedResearch : null,
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchCompletionClaimScaffoldConfig());
+            const string claimApplyFormatKey = "ui.dev.research_completion_claim_apply_format";
+            string claimApplyFormat = Content != null ? Content.GetString(claimApplyFormatKey, claimApplyFormatKey) : claimApplyFormatKey;
+            ResearchCompletionClaimApplyLine = string.Equals(claimApplyFormat, claimApplyFormatKey, StringComparison.Ordinal)
+                ? claimApplyFormatKey
+                : string.Format(
+                    claimApplyFormat,
+                    claimApply.RuleResolved,
+                    claimApply.DeterministicErrorCode,
+                    claimApply.Pending,
+                    claimApply.HasProgressState,
+                    claimApply.HasCompletedState,
+                    claimApply.SlotId ?? string.Empty,
+                    claimApply.ProjectId ?? string.Empty,
+                    claimApply.ProgressUnits,
+                    claimApply.RequiredProgressUnits,
+                    claimApply.CompletionPending,
+                    claimApply.EligibleForCompletion,
+                    claimApply.ReadyForClaim,
+                    claimApply.AlreadyCompleted,
+                    claimApply.WouldRecordCompletedResearch,
+                    claimApply.WouldClearPending,
+                    claimApply.WouldClearProgress,
+                    claimApply.WouldGrantRewards,
+                    claimApply.WouldUnlockContent,
+                    claimApply.WouldChargeCosts,
+                    claimApply.WouldProcessOfflineProgress,
+                    claimApply.RuleSourceIdUsed ?? string.Empty);
+
             CompletedResearchStateSummary completedResearch = CompletedResearchStateResolver.Resolve(
                 Save != null ? Save.completedResearch : null,
                 progressPendingState,
@@ -1087,6 +1175,11 @@ namespace DungeonBuilder.M0
         private ResearchCompletionEligibilityScaffoldConfig GetResearchCompletionEligibilityScaffoldConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchCompletionEligibilityScaffold : null;
+        }
+
+        private ResearchCompletionClaimScaffoldConfig GetResearchCompletionClaimScaffoldConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchCompletionClaimScaffold : null;
         }
 
         private long GetActiveSessionElapsedSeconds()

@@ -57,6 +57,7 @@ namespace DungeonBuilder.Tests.EditMode
             SetLine("<ResearchCompletionPendingApplyLine>k__BackingField", "research-completion-pending-apply-line");
             SetLine("<ResearchCompletionClaimReadinessLine>k__BackingField", "research-completion-claim-readiness-line");
             SetLine("<CompletedResearchStateLine>k__BackingField", "completed-research-state-line");
+            SetLine("<ResearchCompletionClaimApplyLine>k__BackingField", "research-completion-claim-apply-line");
 
             _root.SetBanner("banner-line");
             SetSave(new SaveData
@@ -143,7 +144,8 @@ namespace DungeonBuilder.Tests.EditMode
                 "research-completion-eligibility-line",
                 "research-completion-pending-apply-line",
                 "research-completion-claim-readiness-line",
-                "completed-research-state-line");
+                "completed-research-state-line",
+                "research-completion-claim-apply-line");
         }
 
         [Test]
@@ -175,7 +177,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.ScrollFullDiagnosticsLines(100);
 
-            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(4));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(5));
             Assert.That(RefreshText(), Does.Contain("research-completion-claim-readiness-line"));
             Assert.That(_overlay.overlayText.text, Does.Contain("completed-research-state-line"));
 
@@ -190,14 +192,14 @@ namespace DungeonBuilder.Tests.EditMode
         {
             CycleToResearchDiagnostics();
             _overlay.ScrollFullDiagnosticsLines(100);
-            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(4));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(5));
 
             _overlay.CycleFullDiagnosticsPage();
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
 
             CycleToResearchDiagnostics();
             _overlay.ScrollFullDiagnosticsLines(100);
-            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(4));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(5));
 
             _overlay.ToggleRunDiagnosticsFocus();
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);

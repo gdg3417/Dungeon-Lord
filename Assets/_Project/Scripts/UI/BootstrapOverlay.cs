@@ -264,6 +264,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, _root.ResearchCompletionPendingApplyLine);
             AppendLine(builder, _root.ResearchCompletionClaimReadinessLine);
             AppendLine(builder, _root.CompletedResearchStateLine);
+            AppendLine(builder, _root.ResearchCompletionClaimApplyLine);
         }
 
         private string GetLocalizedString(string key)
@@ -381,6 +382,14 @@ namespace DungeonBuilder.M0
             {
                 _root.ClearResearchPendingScaffold();
                 _root.SetBanner(_root.Content.GetString("ui.banner.research_pending_cleared", "ui.banner.research_pending_cleared"));
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.claim_research_completion", "ui.dev.button.claim_research_completion")))
+            {
+                bool didClaim = _root.ClaimResearchCompletionScaffold();
+                _root.SetBanner(_root.Content.GetString(
+                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed",
+                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_mana", "ui.dev.button.sim_mana")))
