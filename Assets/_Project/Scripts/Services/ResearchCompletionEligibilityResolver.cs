@@ -41,11 +41,6 @@ namespace DungeonBuilder.M0
                 return Error(ResearchCompletionEligibilitySummaryErrorCode.InvalidProgressUnits, pendingState, progressState);
             }
 
-            if (progressState.CompletionPending)
-            {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.CompletionPendingNotActive, pendingState, progressState);
-            }
-
             if (config == null)
             {
                 return Error(ResearchCompletionEligibilitySummaryErrorCode.MissingConfig, pendingState, progressState);

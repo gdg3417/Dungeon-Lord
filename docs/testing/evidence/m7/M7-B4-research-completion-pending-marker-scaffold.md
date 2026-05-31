@@ -26,7 +26,7 @@ The only new allowed save mutation is setting `Save.researchProgress.CompletionP
 
 ## Diagnostics notes
 
-Systems Diagnostics now includes a localization-backed `Research Completion Pending Apply` line showing resolved state, deterministic error, pending state, progress-state presence, slot, project, accumulated progress, required progress, eligibility, already-pending state, whether the marker would be set, the always-false completion output, and rule source. Current-state diagnostics intentionally avoid persisted last-apply architecture. Clearing research pending returns diagnostics to safe no-pending output without a stale project ID.
+Systems Diagnostics now includes a localization-backed `Research Completion Pending Apply` line showing resolved state, deterministic error, pending state, progress-state presence, slot, project, accumulated progress, required progress, eligibility, already-pending state, whether the marker would be set, the always-false completion output, and rule source. The read-only M7-B3 eligibility diagnostic treats a valid `CompletionPending = true` marker as resolved eligibility state rather than an inactive-state error while continuing to report `WouldSetCompletionPending = false` and `WouldCompleteResearch = false`. Current-state diagnostics intentionally avoid persisted last-apply architecture. Clearing research pending returns diagnostics to safe no-pending output without a stale project ID.
 
 ## Developer control notes
 

@@ -95,6 +95,36 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void CompletionPendingApply_AfterThresholdShowsResolvedEligibilityAndAlreadyPendingWithoutCompletionOrAdjacentRewards()
+        {
+            SaveData save = _root.Save;
+            double heatBefore = save.structureRuntime.Heat;
+            double manaBefore = save.structureRuntime.ManaReserve;
+            string pendingBefore = JsonUtility.ToJson(save.researchPending);
+            string historyBefore = JsonUtility.ToJson(save.runHistory);
+            string offlineBefore = JsonUtility.ToJson(save.lastOfflineSummary);
+            long totalTicksBefore = save.totalTicks;
+
+            InvokeResearchProgressApply();
+            InvokeResearchProgressApply();
+            InvokeResearchCompletionPendingApply();
+            _root.RefreshOfflineSummaryLines();
+
+            Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(2d));
+            Assert.That(save.researchProgress.CompletionPending, Is.True);
+            Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=True error=0 pending=True hasState=True"));
+            Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("eligible=True alreadyCompletionPending=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(JsonUtility.ToJson(save.researchPending), Is.EqualTo(pendingBefore));
+            Assert.That(save.structureRuntime.Heat, Is.EqualTo(heatBefore));
+            Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(manaBefore));
+            Assert.That(JsonUtility.ToJson(save.runHistory), Is.EqualTo(historyBefore));
+            Assert.That(JsonUtility.ToJson(save.lastOfflineSummary), Is.EqualTo(offlineBefore));
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(save.totalTicks, Is.EqualTo(totalTicksBefore));
+        }
+
+        [Test]
         public void ClearResearchPendingScaffold_ReturnsEligibilityToNoPendingWithoutStaleProject()
         {
             InvokeResearchProgressApply();
@@ -156,6 +186,12 @@ namespace DungeonBuilder.Tests.EditMode
         private void InvokeResearchProgressApply()
         {
             typeof(GameRoot).GetMethod("ApplyResearchProgressForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_root, null);
+        }
+
+        private void InvokeResearchCompletionPendingApply()
+        {
+            typeof(GameRoot).GetMethod("ApplyResearchCompletionPendingForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.Invoke(_root, null);
         }
 

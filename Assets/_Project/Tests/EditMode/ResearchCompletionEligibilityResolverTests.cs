@@ -131,12 +131,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void Resolve_CompletionPendingStateReturnsSafeInactiveError()
+        public void Resolve_CompletionPendingStateAtRequirementReturnsResolvedEligibleNonCompletingSummary()
         {
             ResearchProgressState progress = Progress(10d);
             progress.CompletionPending = true;
 
-            AssertSafeError(ResearchCompletionEligibilityResolver.Resolve(Pending(), progress, Config()), ResearchCompletionEligibilitySummaryErrorCode.CompletionPendingNotActive);
+            ResearchCompletionEligibilitySummary summary = ResearchCompletionEligibilityResolver.Resolve(Pending(), progress, Config());
+
+            Assert.That(summary.RuleResolved, Is.True);
+            Assert.That(summary.DeterministicErrorCode, Is.Zero);
+            Assert.That(summary.Pending, Is.True);
+            Assert.That(summary.HasProgressState, Is.True);
+            Assert.That(summary.ProgressUnits, Is.EqualTo(10d));
+            Assert.That(summary.RequiredProgressUnits, Is.EqualTo(10d));
+            Assert.That(summary.RemainingProgressUnits, Is.Zero);
+            Assert.That(summary.EligibleForCompletion, Is.True);
+            AssertNeverMutatesCompletion(summary);
         }
 
         [Test]

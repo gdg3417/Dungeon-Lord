@@ -48,13 +48,16 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void HandleSimulationTick_MultipleActiveTicksApplySumOfPerTickDeltasOnly()
+        public void HandleSimulationTick_BeforeCompletionPendingThresholdMultipleActiveTicksApplySumOfPerTickDeltasOnly()
         {
+            _root.Content.Bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits = 4d;
+
             InvokeSimulationTick(1);
             InvokeSimulationTick(2);
             InvokeSimulationTick(3);
 
             Assert.That(_root.Save.researchProgress.ProgressUnits, Is.EqualTo(3d));
+            Assert.That(_root.Save.researchProgress.CompletionPending, Is.False);
         }
 
         [Test]
@@ -177,7 +180,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void HandleSimulationTick_WhenRequirementReachedMarksCompletionPendingWithoutCompletingOrClearingResearch()
+        public void HandleSimulationTick_AtCompletionPendingThresholdMarksPendingWithoutCompletingOrClearingResearch()
         {
             SaveData save = _root.Save;
             string pendingBefore = JsonUtility.ToJson(save.researchPending);
@@ -198,7 +201,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void HandleSimulationTick_AfterCompletionPendingDoesNotCompleteResearchOrGrantMutation()
+        public void HandleSimulationTick_AlreadyCompletionPendingDoesNotCompleteResearchOrGrantMutation()
         {
             InvokeSimulationTick(1);
             InvokeSimulationTick(2);
