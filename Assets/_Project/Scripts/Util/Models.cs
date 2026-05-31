@@ -103,6 +103,22 @@ namespace DungeonBuilder.M0
         InvalidPendingState = 5,
         InvalidConfig = 6
     }
+    public enum ResearchProgressApplySummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingProgressState = 2,
+        InvalidPendingState = 3,
+        ProgressStateSlotMismatch = 4,
+        ProgressStateProjectMismatch = 5,
+        MissingConfig = 6,
+        DisabledConfig = 7,
+        InvalidConfig = 8,
+        InvalidElapsedTime = 9,
+        InvalidProgressUnits = 10,
+        InvalidProgressDelta = 11,
+        CompletionPendingNotActive = 12
+    }
     public enum ResearchProgressStateSummaryErrorCode
     {
         None = 0,
@@ -367,6 +383,23 @@ namespace DungeonBuilder.M0
         public string ProjectId;
         public double ProgressUnits = 0d;
         public bool CompletionPending = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
+    public sealed class ResearchProgressApplySummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchProgressApplySummaryErrorCode.None;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public string SlotId;
+        public string ProjectId;
+        public long ElapsedSecondsUsed = 0;
+        public double ProgressDeltaApplied = 0d;
+        public double PreviousProgressUnits = 0d;
+        public double NextProgressUnits = 0d;
+        public bool WouldCompleteResearch = false;
         public string RuleSourceIdUsed;
     }
 

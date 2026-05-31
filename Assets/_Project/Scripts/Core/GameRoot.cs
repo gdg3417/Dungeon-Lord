@@ -1405,6 +1405,7 @@ namespace DungeonBuilder.M0
             {
                 _activeSessionTickCount += 1;
             }
+            ApplyResearchProgressForActiveTick();
             RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
@@ -1422,6 +1423,20 @@ namespace DungeonBuilder.M0
             TickLine = $"Tick: {tickIndex}";
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";
+        }
+
+        private void ApplyResearchProgressForActiveTick()
+        {
+            long tickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
+            ResearchProgressApplySummary summary = ResearchProgressApplyResolver.Resolve(
+                Save != null ? Save.researchPending : null,
+                Save != null ? Save.researchProgress : null,
+                GetResearchProgressScaffoldConfig(),
+                tickSeconds);
+            if (summary.RuleResolved && Save != null && Save.researchProgress != null)
+            {
+                Save.researchProgress.ProgressUnits = summary.NextProgressUnits;
+            }
         }
 
         private void HandleTickTelemetry(long tickIndex)
