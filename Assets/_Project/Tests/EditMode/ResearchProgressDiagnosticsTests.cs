@@ -74,6 +74,21 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SystemsDiagnostics_PendingWithEmptyDefaultProgressState_ShowsSafeMissingStateSummaryWithoutMutation()
+        {
+            var progress = new ResearchProgressState();
+            _root.Save.researchProgress = progress;
+            string before = JsonUtility.ToJson(_root.Save);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+
+            Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=2 pending=True hasState=False slot= project="));
+            Assert.That(_root.Save.researchProgress, Is.SameAs(progress));
+            Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+        }
+
+        [Test]
         public void SystemsDiagnostics_MatchingZeroProgressState_ShowsResolvedLocalizedStateWithoutRawKey()
         {
             _root.Save.researchProgress = new ResearchProgressState

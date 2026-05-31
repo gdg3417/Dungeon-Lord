@@ -32,6 +32,24 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_PendingWithEmptyDefaultProgressState_ReturnsSafeMissingStateSummaryWithoutMutation()
+        {
+            ResearchPendingState pending = ValidPending();
+            var progress = new ResearchProgressState();
+            string before = JsonUtility.ToJson(progress);
+
+            ResearchProgressStateSummary summary = ResearchProgressStateResolver.Resolve(pending, progress);
+
+            Assert.That(summary.RuleResolved, Is.False);
+            Assert.That(summary.DeterministicErrorCode, Is.EqualTo((int)ResearchProgressStateSummaryErrorCode.MissingProgressState));
+            Assert.That(summary.Pending, Is.True);
+            Assert.That(summary.HasProgressState, Is.False);
+            Assert.That(summary.SlotId, Is.Empty);
+            Assert.That(summary.ProjectId, Is.Empty);
+            Assert.That(JsonUtility.ToJson(progress), Is.EqualTo(before));
+        }
+
+        [Test]
         public void Resolve_PendingWithMatchingZeroProgressState_ReturnsResolvedSummary()
         {
             ResearchProgressStateSummary summary = ResearchProgressStateResolver.Resolve(ValidPending(), ValidProgress());
@@ -182,8 +200,11 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(save.researchPending, Is.Not.Null);
             Assert.That(save.researchPending.ProjectId, Is.EqualTo("research.project.test"));
-            Assert.That(save.researchProgress, Is.Null);
             Assert.That(summary.DeterministicErrorCode, Is.EqualTo((int)ResearchProgressStateSummaryErrorCode.MissingProgressState));
+            Assert.That(summary.Pending, Is.True);
+            Assert.That(summary.HasProgressState, Is.False);
+            Assert.That(summary.SlotId, Is.Empty);
+            Assert.That(summary.ProjectId, Is.Empty);
         }
 
         [Test]

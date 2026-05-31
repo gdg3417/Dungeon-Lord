@@ -10,11 +10,11 @@ M7-B1 does not accumulate progress from active-session ticks. It does not comple
 
 ## Save compatibility notes
 
-`SaveData.researchProgress` is additive and nullable. No save schema version increment or migration backfill is required: Unity JSON deserialization leaves the missing field null for legacy saves, and the resolver reports a deterministic missing-state summary when research is pending. Existing saves do not require manual repair. New saves may round-trip the state without altering the existing `researchPending` marker.
+`SaveData.researchProgress` is additive and nullable. No save schema version increment or migration backfill is required: Unity JSON deserialization may represent the missing field as null or as an empty default object for legacy saves, and the resolver classifies either representation as a deterministic missing-state summary when research is pending. Existing saves do not require manual repair. New saves may round-trip the state without altering the existing `researchPending` marker.
 
 ## Legacy save behavior
 
-A legacy save without `researchProgress` loads safely. If it has no research pending marker, diagnostics show safe no-pending output. If it has an existing `researchPending` marker, diagnostics show safe missing-progress-state output. The resolver does not synthesize, mutate, or repair save data during reads.
+A legacy save without `researchProgress` loads safely whether Unity represents the absent field as null or as an empty default `ResearchProgressState`. If it has no research pending marker, diagnostics show safe no-pending output. If it has an existing `researchPending` marker, diagnostics show safe missing-progress-state output without exposing empty identity fields as stale state. The resolver does not synthesize, mutate, or repair save data during reads.
 
 ## Determinism notes
 
@@ -34,7 +34,7 @@ Added or updated EditMode coverage:
 
 - `ResearchProgressStateResolverTests`
   - null pending and null state safe no-pending output
-  - pending with null state safe missing-state output
+  - pending with null or Unity-style empty default state safe missing-state output without normalization mutation
   - matching zero-progress state resolved output
   - stale slot and stale project deterministic mismatch output
   - no-pending state does not expose saved progress as active
@@ -46,7 +46,7 @@ Added or updated EditMode coverage:
   - additive JSON round-trip with `researchProgress`
 - `ResearchProgressDiagnosticsTests`
   - localized Research Progress State line
-  - safe no-pending, missing-state, valid zero-progress, and stale-state output
+  - safe no-pending, null or Unity-style empty default missing-state, valid zero-progress, and stale-state output
   - stable localization fallback
   - developer set/clear diagnostics coherence and stale-project prevention
   - diagnostics read-only behavior

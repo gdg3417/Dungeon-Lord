@@ -18,7 +18,7 @@ namespace DungeonBuilder.M0
                 return Error(ResearchProgressStateSummaryErrorCode.InvalidPendingState, pendingState);
             }
 
-            if (progressState == null)
+            if (IsMissingProgressState(progressState))
             {
                 return Error(ResearchProgressStateSummaryErrorCode.MissingProgressState, pendingState);
             }
@@ -46,6 +46,16 @@ namespace DungeonBuilder.M0
             }
 
             return Summary(pendingState, progressState, ruleResolved: true, ResearchProgressStateSummaryErrorCode.None);
+        }
+
+        private static bool IsMissingProgressState(ResearchProgressState progressState)
+        {
+            return progressState == null ||
+                   (string.IsNullOrWhiteSpace(progressState.SlotId) &&
+                    string.IsNullOrWhiteSpace(progressState.ProjectId) &&
+                    progressState.ProgressUnits == 0d &&
+                    !progressState.CompletionPending &&
+                    string.IsNullOrWhiteSpace(progressState.RuleSourceIdUsed));
         }
 
         private static ResearchProgressStateSummary Error(
