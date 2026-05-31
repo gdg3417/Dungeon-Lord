@@ -52,6 +52,37 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SystemsDiagnostics_NullResearchPending_ShowsSafeNoPendingProgressSummary()
+        {
+            _root.Save.researchPending = null;
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("pending False  "));
+            Assert.That(text, Does.Contain("Research Progress Preview — resolved=False error=1 pending=False slot= project="));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_EmptyResearchPendingMarker_NormalizesToSafeNoPendingProgressSummaryWithoutMutation()
+        {
+            var emptyMarker = new ResearchPendingState();
+            _root.Save.researchPending = emptyMarker;
+            string before = JsonUtility.ToJson(_root.Save);
+
+            _root.RefreshOfflineSummaryLines();
+            CycleToSystemsDiagnostics();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("pending False  "));
+            Assert.That(text, Does.Contain("validation True 0 research.pending.rule.test"));
+            Assert.That(text, Does.Contain("Research Progress Preview — resolved=False error=1 pending=False slot= project="));
+            Assert.That(text, Does.Not.Contain("Research Progress Preview — resolved=False error=5"));
+            Assert.That(_root.Save.researchPending, Is.SameAs(emptyMarker));
+            Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+        }
+
+        [Test]
         public void SystemsDiagnostics_ActiveSessionTicksRenderNonZeroPreviewWithoutCompletion()
         {
             SetBackingField("_activeSessionTickCount", 12L);

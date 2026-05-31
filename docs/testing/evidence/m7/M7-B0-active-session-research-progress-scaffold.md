@@ -21,7 +21,7 @@ Runtime C# consumes this typed loaded config. Missing config, disabled config, i
 
 ## Save compatibility notes
 
-No save schema fields were added. Existing and legacy saves remain compatible because the resolver reads the existing optional `SaveData.researchPending` marker only. Research progress is not persisted. `SaveData.lastOfflineSummary` remains diagnostics-only and `OfflineSummary.WouldProcessOfflineProgress` remains false.
+No save schema fields were added. Existing and legacy saves remain compatible because the resolver reads the existing optional `SaveData.researchPending` marker only. The save model defaults that marker to null and the existing Clear Research Pending developer control writes null. Diagnostics also safely normalize a legacy empty marker through `ResearchPendingResolver` without mutating the save. Research progress is not persisted. `SaveData.lastOfflineSummary` remains diagnostics-only and `OfflineSummary.WouldProcessOfflineProgress` remains false.
 
 ## Determinism notes
 
@@ -29,7 +29,7 @@ No save schema fields were added. Existing and legacy saves remain compatible be
 
 ## Diagnostics notes
 
-Systems Diagnostics includes a localization-backed Research Progress Preview line. A valid pending marker renders a preview. No pending marker renders a safe no-progress error summary. The line refreshes immediately after Set Research Pending and Clear Research Pending so cleared state does not display stale project data. Missing localization uses the existing stable localization-key fallback pattern.
+Systems Diagnostics includes a localization-backed Research Progress Preview line. A valid pending marker renders a preview. The existing `ResearchPendingResolver` result is the diagnostics source of truth: when it reports `Pending == false`, including for nullable or legacy empty markers, Research Progress Preview renders the same safe no-pending summary without mutating the save. The line refreshes immediately after Set Research Pending and Clear Research Pending so cleared state does not display stale project data. Missing localization uses the existing stable localization-key fallback pattern.
 
 ## Test list
 
@@ -46,6 +46,7 @@ Added EditMode coverage:
   - no completion assertion
 - `ResearchProgressDiagnosticsTests`
   - localized zero and non-zero active-session preview formatting
+  - nullable and legacy empty pending markers normalize to the same safe no-pending diagnostics output without save mutation
   - stable localization fallback
   - Systems Diagnostics placement
   - no raw localization key during normal localized diagnostics

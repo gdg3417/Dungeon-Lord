@@ -919,8 +919,11 @@ namespace DungeonBuilder.M0
                     research.DeterministicErrorCode,
                     research.RuleSourceIdUsed ?? string.Empty);
 
+            ResearchPendingState progressPendingState = research.Pending && Save != null
+                ? Save.researchPending
+                : null;
             ResearchProgressSummary progress = ResearchProgressResolver.Resolve(
-                Save != null ? Save.researchPending : null,
+                progressPendingState,
                 GetResearchProgressScaffoldConfig(),
                 GetActiveSessionElapsedSeconds());
             const string progressFormatKey = "ui.dev.research_progress_format";
