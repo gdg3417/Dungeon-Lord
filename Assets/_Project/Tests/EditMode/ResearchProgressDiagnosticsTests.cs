@@ -42,9 +42,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_UsesLocalizedResearchProgressPreviewFormatWithoutRawKey()
+        public void ResearchDiagnostics_UsesLocalizedResearchProgressPreviewFormatWithoutRawKey()
         {
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("Research Progress Preview — resolved=True error=0 pending=True slot=research.slot.primary project=research.project.saved elapsedSeconds=0 delta=0 wouldComplete=False ruleSource=research.progress.rule.test"));
@@ -52,12 +52,12 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_NullResearchPending_ShowsSafeNoPendingProgressSummary()
+        public void ResearchDiagnostics_NullResearchPending_ShowsSafeNoPendingProgressSummary()
         {
             _root.Save.researchPending = null;
             _root.Save.researchProgress = null;
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("pending False  "));
@@ -66,22 +66,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_PendingWithoutProgressState_ShowsSafeMissingStateSummary()
+        public void ResearchDiagnostics_PendingWithoutProgressState_ShowsSafeMissingStateSummary()
         {
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
 
             Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=2 pending=True hasState=False slot= project="));
         }
 
         [Test]
-        public void SystemsDiagnostics_PendingWithEmptyDefaultProgressState_ShowsSafeMissingStateSummaryWithoutMutation()
+        public void ResearchDiagnostics_PendingWithEmptyDefaultProgressState_ShowsSafeMissingStateSummaryWithoutMutation()
         {
             var progress = new ResearchProgressState();
             _root.Save.researchProgress = progress;
             string before = JsonUtility.ToJson(_root.Save);
 
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
 
             Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=2 pending=True hasState=False slot= project="));
             Assert.That(_root.Save.researchProgress, Is.SameAs(progress));
@@ -89,7 +89,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_MatchingZeroProgressState_ShowsResolvedLocalizedStateWithoutRawKey()
+        public void ResearchDiagnostics_MatchingZeroProgressState_ShowsResolvedLocalizedStateWithoutRawKey()
         {
             _root.Save.researchProgress = new ResearchProgressState
             {
@@ -98,7 +98,7 @@ namespace DungeonBuilder.Tests.EditMode
                 RuleSourceIdUsed = "research.progress.rule.saved"
             };
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("Research Progress State — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.saved progress=0 completionPending=False matchesPending=True ruleSource=research.progress.rule.saved"));
@@ -106,7 +106,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_StaleProgressState_ShowsSafeMismatch()
+        public void ResearchDiagnostics_StaleProgressState_ShowsSafeMismatch()
         {
             _root.Save.researchProgress = new ResearchProgressState
             {
@@ -115,20 +115,20 @@ namespace DungeonBuilder.Tests.EditMode
                 RuleSourceIdUsed = "research.progress.rule.saved"
             };
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
 
             Assert.That(RefreshText(), Does.Contain("Research Progress State — resolved=False error=5 pending=True hasState=True slot=research.slot.primary project=research.project.stale progress=0 completionPending=False matchesPending=False"));
         }
 
         [Test]
-        public void SystemsDiagnostics_EmptyResearchPendingMarker_NormalizesToSafeNoPendingProgressSummaryWithoutMutation()
+        public void ResearchDiagnostics_EmptyResearchPendingMarker_NormalizesToSafeNoPendingProgressSummaryWithoutMutation()
         {
             var emptyMarker = new ResearchPendingState();
             _root.Save.researchPending = emptyMarker;
             string before = JsonUtility.ToJson(_root.Save);
 
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("pending False  "));
@@ -140,11 +140,11 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_ActiveSessionTicksRenderNonZeroPreviewWithoutCompletion()
+        public void ResearchDiagnostics_ActiveSessionTicksRenderNonZeroPreviewWithoutCompletion()
         {
             SetBackingField("_activeSessionTickCount", 12L);
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             string text = RefreshText();
 
             Assert.That(text, Does.Contain("elapsedSeconds=120 delta=1.2 wouldComplete=False"));
@@ -156,7 +156,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             SetBackingField("<Content>k__BackingField", BuildContent(includeProgressFormat: false));
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
 
             Assert.That(RefreshText(), Does.Contain("ui.dev.research_progress_format"));
             Assert.That(RefreshText(), Does.Contain("ui.dev.research_progress_state_format"));
@@ -186,7 +186,7 @@ namespace DungeonBuilder.Tests.EditMode
             string before = JsonUtility.ToJson(save);
 
             _root.RefreshOfflineSummaryLines();
-            CycleToSystemsDiagnostics();
+            CycleToResearchDiagnostics();
             RefreshText();
 
             Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
@@ -255,6 +255,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.hint.cycle_diagnostics_page"] = "cycle-page";
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+            map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             map["ui.dev.structure_status"] = "structure {0} {1} {2} {3}";
             map["ui.dev.offline_summary_format"] = "offline {0} {1} {2} {3} {4} {5}";
             map["ui.dev.research_pending_format"] = "pending {0} {1} {2}";
@@ -267,8 +268,9 @@ namespace DungeonBuilder.Tests.EditMode
             return content;
         }
 
-        private void CycleToSystemsDiagnostics()
+        private void CycleToResearchDiagnostics()
         {
+            _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();

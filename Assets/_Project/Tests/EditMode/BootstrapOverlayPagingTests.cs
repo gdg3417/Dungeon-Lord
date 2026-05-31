@@ -49,6 +49,13 @@ namespace DungeonBuilder.Tests.EditMode
             SetLine("<RunAdventurerAttractionLine>k__BackingField", "run-attraction-line");
             SetLine("<RunAdventurerInterestForecastLine>k__BackingField", "run-forecast-line");
             SetLine("<RunAdventurerDemandBudgetLine>k__BackingField", "run-demand-budget-line");
+            SetLine("<ResearchPendingLine>k__BackingField", "research-pending-line");
+            SetLine("<ResearchPendingValidationLine>k__BackingField", "research-pending-validation-line");
+            SetLine("<ResearchProgressLine>k__BackingField", "research-progress-line");
+            SetLine("<ResearchProgressStateLine>k__BackingField", "research-progress-state-line");
+            SetLine("<ResearchCompletionEligibilityLine>k__BackingField", "research-completion-eligibility-line");
+            SetLine("<ResearchCompletionPendingApplyLine>k__BackingField", "research-completion-pending-apply-line");
+            SetLine("<ResearchCompletionClaimReadinessLine>k__BackingField", "research-completion-claim-readiness-line");
 
             _root.SetBanner("banner-line");
             SetSave(new SaveData
@@ -80,7 +87,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
-            Assert.That(text, Does.StartWith("Diagnostics: Runtime Summary Page 1/4\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
+            Assert.That(text, Does.StartWith("Diagnostics: Runtime Summary Page 1/5\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("banner-line"));
             Assert.That(text, Does.Not.Contain("run-line"));
@@ -88,12 +95,13 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void FullDiagnostics_F3PageCycle_WrapsFromSystemsBackToRuntimeSummary()
+        public void FullDiagnostics_F3PageCycle_WrapsFromResearchBackToRuntimeSummary()
         {
             AssertPage(1, "Runtime Summary");
             CycleAndAssertPage(2, "Run Diagnostics");
             CycleAndAssertPage(3, "Heat Diagnostics");
             CycleAndAssertPage(4, "Systems Diagnostics");
+            CycleAndAssertPage(5, "Research Diagnostics");
             CycleAndAssertPage(1, "Runtime Summary");
         }
 
@@ -113,6 +121,19 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("Structure Sim", "run-line");
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-pending-line"));
+
+            _overlay.CycleFullDiagnosticsPage();
+            AssertPageLines("research-pending-line", "Structure Sim");
+            AssertLinesAppearInOrder(
+                _overlay.overlayText.text,
+                "research-pending-line",
+                "research-pending-validation-line",
+                "research-progress-line",
+                "research-progress-state-line",
+                "research-completion-eligibility-line",
+                "research-completion-pending-apply-line",
+                "research-completion-claim-readiness-line");
         }
 
         [Test]
@@ -175,7 +196,7 @@ namespace DungeonBuilder.Tests.EditMode
         private void AssertPage(int number, string name)
         {
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(number));
-            Assert.That(RefreshText(), Does.StartWith($"Diagnostics: {name} Page {number}/4"));
+            Assert.That(RefreshText(), Does.StartWith($"Diagnostics: {name} Page {number}/5"));
         }
 
         private void CycleAndAssertPage(int number, string name)
@@ -229,6 +250,7 @@ namespace DungeonBuilder.Tests.EditMode
                 map["ui.dev.diagnostics.page.run_diagnostics"] = "Run Diagnostics";
                 map["ui.dev.diagnostics.page.heat_diagnostics"] = "Heat Diagnostics";
                 map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+                map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             }
             return content;
         }

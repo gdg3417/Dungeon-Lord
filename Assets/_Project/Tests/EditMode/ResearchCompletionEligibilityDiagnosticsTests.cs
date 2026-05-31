@@ -42,9 +42,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SystemsDiagnostics_ShowsExistingProgressLinesAndLocalizedEligibilityWithoutRawKeys()
+        public void ResearchDiagnostics_ShowsExistingProgressLinesAndLocalizedEligibilityWithoutRawKeys()
         {
-            string text = SystemsDiagnosticsText();
+            string text = ResearchDiagnosticsText();
 
             Assert.That(text, Does.Contain("Research Progress Preview —"));
             Assert.That(text, Does.Contain("Research Progress State —"));
@@ -54,6 +54,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.dev.research_completion_pending_apply_format"));
             Assert.That(text, Does.Contain("Research Completion Claim Readiness — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 required=2 completionPending=False eligible=False readyForClaim=False wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False ruleSource=research.completion_eligibility.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.dev.research_completion_claim_readiness_format"));
+        }
+
+        [Test]
+        public void SystemsDiagnostics_DoesNotContainResearchDiagnosticBlock()
+        {
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.RefreshOverlayText();
+            string text = _overlay.overlayText.text;
+
+            Assert.That(text, Does.Contain("Offline Summary —"));
+            Assert.That(text, Does.Not.Contain("Research Pending —"));
+            Assert.That(text, Does.Not.Contain("Research Progress Preview —"));
+            Assert.That(text, Does.Not.Contain("Research Progress State —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Eligibility —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Pending Apply —"));
+            Assert.That(text, Does.Not.Contain("Research Completion Claim Readiness —"));
         }
 
         [Test]
@@ -187,8 +205,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(overlay, Does.Not.Contain("Research Completion Claim Readiness —"));
         }
 
-        private string SystemsDiagnosticsText()
+        private string ResearchDiagnosticsText()
         {
+            _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
@@ -258,6 +277,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.hint.cycle_diagnostics_page"] = "cycle-page";
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
+            map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
             map["ui.dev.structure_status"] = "structure {0} {1} {2} {3}";
             map["ui.dev.offline_summary_format"] = "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}";
             map["ui.dev.research_pending_format"] = "Research Pending — pending={0} slot={1} project={2}";

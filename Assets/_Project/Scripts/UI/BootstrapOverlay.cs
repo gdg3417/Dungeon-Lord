@@ -11,11 +11,12 @@ namespace DungeonBuilder.M0
         [Header("UI")]
         public TMP_Text overlayText;
 
-        private const int DiagnosticsPageCount = 4;
+        private const int DiagnosticsPageCount = 5;
         private const int RuntimeSummaryPage = 0;
         private const int RunDiagnosticsPage = 1;
         private const int HeatDiagnosticsPage = 2;
         private const int SystemsDiagnosticsPage = 3;
+        private const int ResearchDiagnosticsPage = 4;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -97,6 +98,9 @@ namespace DungeonBuilder.M0
                     break;
                 case SystemsDiagnosticsPage:
                     AppendSystemsDiagnostics(builder);
+                    break;
+                case ResearchDiagnosticsPage:
+                    AppendResearchDiagnostics(builder);
                     break;
             }
 
@@ -188,6 +192,10 @@ namespace DungeonBuilder.M0
                 _root.GetSelectedSlotStructureId(),
                 _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive));
             AppendLine(builder, _root.OfflineSummaryLine);
+        }
+
+        private void AppendResearchDiagnostics(StringBuilder builder)
+        {
             AppendLine(builder, _root.ResearchPendingLine);
             AppendLine(builder, _root.ResearchPendingValidationLine);
             AppendLine(builder, _root.ResearchProgressLine);
@@ -212,8 +220,12 @@ namespace DungeonBuilder.M0
                     return "ui.dev.diagnostics.page.run_diagnostics";
                 case HeatDiagnosticsPage:
                     return "ui.dev.diagnostics.page.heat_diagnostics";
-                default:
+                case SystemsDiagnosticsPage:
                     return "ui.dev.diagnostics.page.systems_diagnostics";
+                case ResearchDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_diagnostics";
+                default:
+                    return "ui.dev.diagnostics.page.runtime_summary";
             }
         }
 
