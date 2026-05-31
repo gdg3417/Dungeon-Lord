@@ -168,6 +168,13 @@ namespace DungeonBuilder.Tests.EditMode
                 ?.SetValue(content, new ContentBootstrap
                 {
                     tickSeconds = 10,
+                    researchPendingScaffold = new ResearchPendingScaffoldConfig
+                    {
+                        enabled = true,
+                        slotId = "research.slot.primary",
+                        projectId = "research.project.scaffold",
+                        ruleSourceId = "research.pending.rule.test"
+                    },
                     researchProgressScaffold = new ResearchProgressScaffoldConfig
                     {
                         enabled = true,
