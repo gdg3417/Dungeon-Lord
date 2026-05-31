@@ -66,6 +66,7 @@ namespace DungeonBuilder.M0
         public string ResearchPendingValidationLine { get; private set; } = "ui.dev.research_pending_validation_format";
         public string ResearchProgressLine { get; private set; } = "ui.dev.research_progress_format";
         public string ResearchProgressStateLine { get; private set; } = "ui.dev.research_progress_state_format";
+        public string ResearchCompletionEligibilityLine { get; private set; } = "ui.dev.research_completion_eligibility_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -970,6 +971,30 @@ namespace DungeonBuilder.M0
                     progressState.CompletionPending,
                     progressState.StateMatchesPending,
                     progressState.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchCompletionEligibilitySummary completionEligibility = ResearchCompletionEligibilityResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                GetResearchCompletionEligibilityScaffoldConfig());
+            const string completionEligibilityFormatKey = "ui.dev.research_completion_eligibility_format";
+            string completionEligibilityFormat = Content != null ? Content.GetString(completionEligibilityFormatKey, completionEligibilityFormatKey) : completionEligibilityFormatKey;
+            ResearchCompletionEligibilityLine = string.Equals(completionEligibilityFormat, completionEligibilityFormatKey, StringComparison.Ordinal)
+                ? completionEligibilityFormatKey
+                : string.Format(
+                    completionEligibilityFormat,
+                    completionEligibility.RuleResolved,
+                    completionEligibility.DeterministicErrorCode,
+                    completionEligibility.Pending,
+                    completionEligibility.HasProgressState,
+                    completionEligibility.SlotId ?? string.Empty,
+                    completionEligibility.ProjectId ?? string.Empty,
+                    completionEligibility.ProgressUnits,
+                    completionEligibility.RequiredProgressUnits,
+                    completionEligibility.RemainingProgressUnits,
+                    completionEligibility.EligibleForCompletion,
+                    completionEligibility.WouldSetCompletionPending,
+                    completionEligibility.WouldCompleteResearch,
+                    completionEligibility.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()
@@ -980,6 +1005,11 @@ namespace DungeonBuilder.M0
         private ResearchProgressScaffoldConfig GetResearchProgressScaffoldConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchProgressScaffold : null;
+        }
+
+        private ResearchCompletionEligibilityScaffoldConfig GetResearchCompletionEligibilityScaffoldConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchCompletionEligibilityScaffold : null;
         }
 
         private long GetActiveSessionElapsedSeconds()

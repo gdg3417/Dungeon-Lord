@@ -130,6 +130,22 @@ namespace DungeonBuilder.M0
         InvalidProgressUnits = 6,
         CompletionPendingNotActive = 7
     }
+    public enum ResearchCompletionEligibilitySummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingProgressState = 2,
+        InvalidPendingState = 3,
+        ProgressStateSlotMismatch = 4,
+        ProgressStateProjectMismatch = 5,
+        MissingConfig = 6,
+        DisabledConfig = 7,
+        InvalidConfig = 8,
+        InvalidRequiredProgressUnits = 9,
+        InvalidProgressUnits = 10,
+        ConfigProjectMismatch = 11,
+        CompletionPendingNotActive = 12
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -377,6 +393,15 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchCompletionEligibilityScaffoldConfig
+    {
+        public bool enabled;
+        public string ruleSourceId;
+        public string projectId;
+        public double requiredProgressUnits;
+    }
+
+    [Serializable]
     public sealed class ResearchProgressState
     {
         public string SlotId;
@@ -415,6 +440,24 @@ namespace DungeonBuilder.M0
         public double ProgressUnits = 0d;
         public bool CompletionPending = false;
         public bool StateMatchesPending = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
+    public sealed class ResearchCompletionEligibilitySummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchCompletionEligibilitySummaryErrorCode.None;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public double RequiredProgressUnits = 0d;
+        public double RemainingProgressUnits = 0d;
+        public bool EligibleForCompletion = false;
+        public bool WouldSetCompletionPending = false;
+        public bool WouldCompleteResearch = false;
         public string RuleSourceIdUsed;
     }
 
@@ -503,6 +546,7 @@ namespace DungeonBuilder.M0
         public TimeRules timeRules;
         public ResearchPendingScaffoldConfig researchPendingScaffold;
         public ResearchProgressScaffoldConfig researchProgressScaffold;
+        public ResearchCompletionEligibilityScaffoldConfig researchCompletionEligibilityScaffold;
         public FeatureFlags featureFlags;
         public Tables tables;
     }
