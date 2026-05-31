@@ -2,74 +2,74 @@ using System;
 
 namespace DungeonBuilder.M0
 {
-    public static class ResearchCompletionEligibilityResolver
+    public static class ResearchCompletionPendingApplyResolver
     {
-        public static ResearchCompletionEligibilitySummary Resolve(
+        public static ResearchCompletionPendingApplySummary Resolve(
             ResearchPendingState pendingState,
             ResearchProgressState progressState,
             ResearchCompletionEligibilityScaffoldConfig config)
         {
             if (pendingState == null)
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.NoPendingResearch);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.NoPendingResearch);
             }
 
             if (string.IsNullOrWhiteSpace(pendingState.SlotId) || string.IsNullOrWhiteSpace(pendingState.ProjectId))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.InvalidPendingState, pendingState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.InvalidPendingState, pendingState);
             }
 
             if (IsMissingProgressState(progressState))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.MissingProgressState, pendingState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.MissingProgressState, pendingState);
             }
 
             if (!string.Equals(progressState.SlotId, pendingState.SlotId, StringComparison.Ordinal))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.ProgressStateSlotMismatch, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.ProgressStateSlotMismatch, pendingState, progressState);
             }
 
             if (!string.Equals(progressState.ProjectId, pendingState.ProjectId, StringComparison.Ordinal))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.ProgressStateProjectMismatch, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.ProgressStateProjectMismatch, pendingState, progressState);
             }
 
             if (double.IsNaN(progressState.ProgressUnits) ||
                 double.IsInfinity(progressState.ProgressUnits) ||
                 progressState.ProgressUnits < 0d)
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.InvalidProgressUnits, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.InvalidProgressUnits, pendingState, progressState);
             }
 
             if (config == null)
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.MissingConfig, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.MissingConfig, pendingState, progressState);
             }
 
             if (!config.enabled)
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.DisabledConfig, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.DisabledConfig, pendingState, progressState);
             }
 
             if (string.IsNullOrWhiteSpace(config.ruleSourceId) || string.IsNullOrWhiteSpace(config.projectId))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.InvalidConfig, pendingState, progressState);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.InvalidConfig, pendingState, progressState);
             }
 
             if (double.IsNaN(config.requiredProgressUnits) ||
                 double.IsInfinity(config.requiredProgressUnits) ||
                 config.requiredProgressUnits <= 0d)
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.InvalidRequiredProgressUnits, pendingState, progressState, config.ruleSourceId);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.InvalidRequiredProgressUnits, pendingState, progressState, config.ruleSourceId);
             }
 
             if (!string.Equals(config.projectId, pendingState.ProjectId, StringComparison.Ordinal))
             {
-                return Error(ResearchCompletionEligibilitySummaryErrorCode.ConfigProjectMismatch, pendingState, progressState, config.ruleSourceId);
+                return Error(ResearchCompletionPendingApplySummaryErrorCode.ConfigProjectMismatch, pendingState, progressState, config.ruleSourceId);
             }
 
-            double remainingProgressUnits = Math.Max(0d, config.requiredProgressUnits - progressState.ProgressUnits);
-            return new ResearchCompletionEligibilitySummary
+            bool eligibleForCompletion = progressState.ProgressUnits >= config.requiredProgressUnits;
+            return new ResearchCompletionPendingApplySummary
             {
                 RuleResolved = true,
                 Pending = true,
@@ -78,9 +78,9 @@ namespace DungeonBuilder.M0
                 ProjectId = pendingState.ProjectId,
                 ProgressUnits = progressState.ProgressUnits,
                 RequiredProgressUnits = config.requiredProgressUnits,
-                RemainingProgressUnits = remainingProgressUnits,
-                EligibleForCompletion = progressState.ProgressUnits >= config.requiredProgressUnits,
-                WouldSetCompletionPending = false,
+                EligibleForCompletion = eligibleForCompletion,
+                AlreadyCompletionPending = progressState.CompletionPending,
+                WouldSetCompletionPending = eligibleForCompletion && !progressState.CompletionPending,
                 WouldCompleteResearch = false,
                 RuleSourceIdUsed = config.ruleSourceId
             };
@@ -96,14 +96,14 @@ namespace DungeonBuilder.M0
                     string.IsNullOrWhiteSpace(progressState.RuleSourceIdUsed));
         }
 
-        private static ResearchCompletionEligibilitySummary Error(
-            ResearchCompletionEligibilitySummaryErrorCode errorCode,
+        private static ResearchCompletionPendingApplySummary Error(
+            ResearchCompletionPendingApplySummaryErrorCode errorCode,
             ResearchPendingState pendingState = null,
             ResearchProgressState progressState = null,
             string ruleSourceId = "")
         {
             bool hasProgressState = progressState != null && !IsMissingProgressState(progressState);
-            return new ResearchCompletionEligibilitySummary
+            return new ResearchCompletionPendingApplySummary
             {
                 DeterministicErrorCode = (int)errorCode,
                 Pending = pendingState != null,
@@ -111,6 +111,7 @@ namespace DungeonBuilder.M0
                 SlotId = hasProgressState ? progressState.SlotId ?? string.Empty : pendingState != null ? pendingState.SlotId ?? string.Empty : string.Empty,
                 ProjectId = hasProgressState ? progressState.ProjectId ?? string.Empty : pendingState != null ? pendingState.ProjectId ?? string.Empty : string.Empty,
                 ProgressUnits = hasProgressState ? progressState.ProgressUnits : 0d,
+                AlreadyCompletionPending = hasProgressState && progressState.CompletionPending,
                 WouldSetCompletionPending = false,
                 WouldCompleteResearch = false,
                 RuleSourceIdUsed = ruleSourceId ?? string.Empty

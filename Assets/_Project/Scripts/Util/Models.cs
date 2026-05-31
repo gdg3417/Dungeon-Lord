@@ -146,6 +146,21 @@ namespace DungeonBuilder.M0
         ConfigProjectMismatch = 11,
         CompletionPendingNotActive = 12
     }
+    public enum ResearchCompletionPendingApplySummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingProgressState = 2,
+        InvalidPendingState = 3,
+        ProgressStateSlotMismatch = 4,
+        ProgressStateProjectMismatch = 5,
+        MissingConfig = 6,
+        DisabledConfig = 7,
+        InvalidConfig = 8,
+        InvalidRequiredProgressUnits = 9,
+        InvalidProgressUnits = 10,
+        ConfigProjectMismatch = 11
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -456,6 +471,24 @@ namespace DungeonBuilder.M0
         public double RequiredProgressUnits = 0d;
         public double RemainingProgressUnits = 0d;
         public bool EligibleForCompletion = false;
+        public bool WouldSetCompletionPending = false;
+        public bool WouldCompleteResearch = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
+    public sealed class ResearchCompletionPendingApplySummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchCompletionPendingApplySummaryErrorCode.None;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public double RequiredProgressUnits = 0d;
+        public bool EligibleForCompletion = false;
+        public bool AlreadyCompletionPending = false;
         public bool WouldSetCompletionPending = false;
         public bool WouldCompleteResearch = false;
         public string RuleSourceIdUsed;

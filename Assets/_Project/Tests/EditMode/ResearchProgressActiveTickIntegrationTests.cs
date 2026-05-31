@@ -48,13 +48,16 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void HandleSimulationTick_MultipleActiveTicksApplySumOfPerTickDeltasOnly()
+        public void HandleSimulationTick_BeforeCompletionPendingThresholdMultipleActiveTicksApplySumOfPerTickDeltasOnly()
         {
+            _root.Content.Bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits = 4d;
+
             InvokeSimulationTick(1);
             InvokeSimulationTick(2);
             InvokeSimulationTick(3);
 
             Assert.That(_root.Save.researchProgress.ProgressUnits, Is.EqualTo(3d));
+            Assert.That(_root.Save.researchProgress.CompletionPending, Is.False);
         }
 
         [Test]
@@ -152,6 +155,68 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void ApplyResearchCompletionPendingForActiveTick_EligibleStateMutatesOnlyCompletionPending()
+        {
+            SaveData save = _root.Save;
+            save.researchProgress.ProgressUnits = 2d;
+            string pendingBefore = JsonUtility.ToJson(save.researchPending);
+            string structureBefore = JsonUtility.ToJson(save.structureRuntime);
+            string runHistoryBefore = JsonUtility.ToJson(save.runHistory);
+            string offlineBefore = JsonUtility.ToJson(save.lastOfflineSummary);
+            long totalTicksBefore = save.totalTicks;
+
+            InvokeResearchCompletionPendingApply();
+
+            Assert.That(save.researchProgress.SlotId, Is.EqualTo("research.slot.primary"));
+            Assert.That(save.researchProgress.ProjectId, Is.EqualTo("research.project.scaffold"));
+            Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(2d));
+            Assert.That(save.researchProgress.CompletionPending, Is.True);
+            Assert.That(JsonUtility.ToJson(save.researchPending), Is.EqualTo(pendingBefore));
+            Assert.That(JsonUtility.ToJson(save.structureRuntime), Is.EqualTo(structureBefore));
+            Assert.That(JsonUtility.ToJson(save.runHistory), Is.EqualTo(runHistoryBefore));
+            Assert.That(JsonUtility.ToJson(save.lastOfflineSummary), Is.EqualTo(offlineBefore));
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(save.totalTicks, Is.EqualTo(totalTicksBefore));
+        }
+
+        [Test]
+        public void HandleSimulationTick_AtCompletionPendingThresholdMarksPendingWithoutCompletingOrClearingResearch()
+        {
+            SaveData save = _root.Save;
+            string pendingBefore = JsonUtility.ToJson(save.researchPending);
+            string runHistoryBefore = JsonUtility.ToJson(save.runHistory);
+            string offlineBefore = JsonUtility.ToJson(save.lastOfflineSummary);
+
+            InvokeSimulationTick(1);
+            Assert.That(save.researchProgress.CompletionPending, Is.False);
+
+            InvokeSimulationTick(2);
+
+            Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(2d));
+            Assert.That(save.researchProgress.CompletionPending, Is.True);
+            Assert.That(JsonUtility.ToJson(save.researchPending), Is.EqualTo(pendingBefore));
+            Assert.That(JsonUtility.ToJson(save.runHistory), Is.EqualTo(runHistoryBefore));
+            Assert.That(JsonUtility.ToJson(save.lastOfflineSummary), Is.EqualTo(offlineBefore));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("alreadyCompletionPending=True wouldSetCompletionPending=False wouldComplete=False"));
+        }
+
+        [Test]
+        public void HandleSimulationTick_AlreadyCompletionPendingDoesNotCompleteResearchOrGrantMutation()
+        {
+            InvokeSimulationTick(1);
+            InvokeSimulationTick(2);
+            string pendingBefore = JsonUtility.ToJson(_root.Save.researchPending);
+            string runHistoryBefore = JsonUtility.ToJson(_root.Save.runHistory);
+
+            InvokeSimulationTick(3);
+
+            Assert.That(_root.Save.researchProgress.ProgressUnits, Is.EqualTo(2d));
+            Assert.That(_root.Save.researchProgress.CompletionPending, Is.True);
+            Assert.That(JsonUtility.ToJson(_root.Save.researchPending), Is.EqualTo(pendingBefore));
+            Assert.That(JsonUtility.ToJson(_root.Save.runHistory), Is.EqualTo(runHistoryBefore));
+        }
+
+        [Test]
         public void ClearResearchPendingScaffold_ReturnsDiagnosticsToNoPendingWithoutStaleProject()
         {
             InvokeSimulationTick(1);
@@ -160,6 +225,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.ResearchProgressStateLine, Does.Contain("pending=False hasState=False slot= project="));
             Assert.That(_root.ResearchProgressStateLine, Does.Not.Contain("research.project.scaffold"));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("pending=False hasState=False slot= project="));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Not.Contain("research.project.scaffold"));
         }
 
         private void InvokeSimulationTick(long tickIndex)
@@ -171,6 +238,12 @@ namespace DungeonBuilder.Tests.EditMode
         private void InvokeResearchProgressApply()
         {
             typeof(GameRoot).GetMethod("ApplyResearchProgressForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_root, null);
+        }
+
+        private void InvokeResearchCompletionPendingApply()
+        {
+            typeof(GameRoot).GetMethod("ApplyResearchCompletionPendingForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.Invoke(_root, null);
         }
 
@@ -205,6 +278,13 @@ namespace DungeonBuilder.Tests.EditMode
                         progressPerActiveSecond = 0.1d,
                         maxActiveSessionElapsedSeconds = 600
                     },
+                    researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.completion.rule.test",
+                        projectId = "research.project.scaffold",
+                        requiredProgressUnits = 2d
+                    },
                     timeRules = new TimeRules
                     {
                         maxOfflineSeconds = 600,
@@ -217,6 +297,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.research_pending_validation_format"] = "Research Pending Validation — resolved={0} error={1} ruleSource={2}";
             map["ui.dev.research_progress_format"] = "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6} wouldComplete={7} ruleSource={8}";
             map["ui.dev.research_progress_state_format"] = "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6} completionPending={7} matchesPending={8} ruleSource={9}";
+            map["ui.dev.research_completion_eligibility_format"] = "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6} required={7} remaining={8} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
+            map["ui.dev.research_completion_pending_apply_format"] = "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6} required={7} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
             return content;
         }
 

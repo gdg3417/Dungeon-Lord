@@ -67,6 +67,7 @@ namespace DungeonBuilder.M0
         public string ResearchProgressLine { get; private set; } = "ui.dev.research_progress_format";
         public string ResearchProgressStateLine { get; private set; } = "ui.dev.research_progress_state_format";
         public string ResearchCompletionEligibilityLine { get; private set; } = "ui.dev.research_completion_eligibility_format";
+        public string ResearchCompletionPendingApplyLine { get; private set; } = "ui.dev.research_completion_pending_apply_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -995,6 +996,30 @@ namespace DungeonBuilder.M0
                     completionEligibility.WouldSetCompletionPending,
                     completionEligibility.WouldCompleteResearch,
                     completionEligibility.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchCompletionPendingApplySummary completionPendingApply = ResearchCompletionPendingApplyResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                GetResearchCompletionEligibilityScaffoldConfig());
+            const string completionPendingApplyFormatKey = "ui.dev.research_completion_pending_apply_format";
+            string completionPendingApplyFormat = Content != null ? Content.GetString(completionPendingApplyFormatKey, completionPendingApplyFormatKey) : completionPendingApplyFormatKey;
+            ResearchCompletionPendingApplyLine = string.Equals(completionPendingApplyFormat, completionPendingApplyFormatKey, StringComparison.Ordinal)
+                ? completionPendingApplyFormatKey
+                : string.Format(
+                    completionPendingApplyFormat,
+                    completionPendingApply.RuleResolved,
+                    completionPendingApply.DeterministicErrorCode,
+                    completionPendingApply.Pending,
+                    completionPendingApply.HasProgressState,
+                    completionPendingApply.SlotId ?? string.Empty,
+                    completionPendingApply.ProjectId ?? string.Empty,
+                    completionPendingApply.ProgressUnits,
+                    completionPendingApply.RequiredProgressUnits,
+                    completionPendingApply.EligibleForCompletion,
+                    completionPendingApply.AlreadyCompletionPending,
+                    completionPendingApply.WouldSetCompletionPending,
+                    completionPendingApply.WouldCompleteResearch,
+                    completionPendingApply.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()
@@ -1436,6 +1461,7 @@ namespace DungeonBuilder.M0
                 _activeSessionTickCount += 1;
             }
             ApplyResearchProgressForActiveTick();
+            ApplyResearchCompletionPendingForActiveTick();
             RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
@@ -1466,6 +1492,18 @@ namespace DungeonBuilder.M0
             if (summary.RuleResolved && Save != null && Save.researchProgress != null)
             {
                 Save.researchProgress.ProgressUnits = summary.NextProgressUnits;
+            }
+        }
+
+        private void ApplyResearchCompletionPendingForActiveTick()
+        {
+            ResearchCompletionPendingApplySummary summary = ResearchCompletionPendingApplyResolver.Resolve(
+                Save != null ? Save.researchPending : null,
+                Save != null ? Save.researchProgress : null,
+                GetResearchCompletionEligibilityScaffoldConfig());
+            if (summary.WouldSetCompletionPending && Save != null && Save.researchProgress != null)
+            {
+                Save.researchProgress.CompletionPending = true;
             }
         }
 

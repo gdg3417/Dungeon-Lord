@@ -50,6 +50,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Research Progress State —"));
             Assert.That(text, Does.Contain("Research Completion Eligibility — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 required=2 remaining=2 eligible=False wouldSetCompletionPending=False wouldComplete=False ruleSource=research.completion_eligibility.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.dev.research_completion_eligibility_format"));
+            Assert.That(text, Does.Contain("Research Completion Pending Apply — resolved=True error=0 pending=True hasState=True slot=research.slot.primary project=research.project.scaffold progress=0 required=2 eligible=False alreadyCompletionPending=False wouldSetCompletionPending=False wouldComplete=False ruleSource=research.completion_eligibility.rule.test"));
+            Assert.That(text, Does.Not.Contain("ui.dev.research_completion_pending_apply_format"));
         }
 
         [Test]
@@ -62,6 +64,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project= progress=0 required=0 remaining=0 eligible=False wouldSetCompletionPending=False wouldComplete=False ruleSource="));
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Not.Contain("research.project.scaffold"));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("resolved=False error=1 pending=False hasState=False slot= project= progress=0 required=0 eligible=False alreadyCompletionPending=False wouldSetCompletionPending=False wouldComplete=False ruleSource="));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Not.Contain("research.project.scaffold"));
         }
 
         [Test]
@@ -91,6 +95,36 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void CompletionPendingApply_AfterThresholdShowsResolvedEligibilityAndAlreadyPendingWithoutCompletionOrAdjacentRewards()
+        {
+            SaveData save = _root.Save;
+            double heatBefore = save.structureRuntime.Heat;
+            double manaBefore = save.structureRuntime.ManaReserve;
+            string pendingBefore = JsonUtility.ToJson(save.researchPending);
+            string historyBefore = JsonUtility.ToJson(save.runHistory);
+            string offlineBefore = JsonUtility.ToJson(save.lastOfflineSummary);
+            long totalTicksBefore = save.totalTicks;
+
+            InvokeResearchProgressApply();
+            InvokeResearchProgressApply();
+            InvokeResearchCompletionPendingApply();
+            _root.RefreshOfflineSummaryLines();
+
+            Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(2d));
+            Assert.That(save.researchProgress.CompletionPending, Is.True);
+            Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=True error=0 pending=True hasState=True"));
+            Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Does.Contain("eligible=True alreadyCompletionPending=True wouldSetCompletionPending=False wouldComplete=False"));
+            Assert.That(JsonUtility.ToJson(save.researchPending), Is.EqualTo(pendingBefore));
+            Assert.That(save.structureRuntime.Heat, Is.EqualTo(heatBefore));
+            Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(manaBefore));
+            Assert.That(JsonUtility.ToJson(save.runHistory), Is.EqualTo(historyBefore));
+            Assert.That(JsonUtility.ToJson(save.lastOfflineSummary), Is.EqualTo(offlineBefore));
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(save.totalTicks, Is.EqualTo(totalTicksBefore));
+        }
+
+        [Test]
         public void ClearResearchPendingScaffold_ReturnsEligibilityToNoPendingWithoutStaleProject()
         {
             InvokeResearchProgressApply();
@@ -109,10 +143,12 @@ namespace DungeonBuilder.Tests.EditMode
         public void RefreshOfflineSummaryLines_MissingLocalizationUsesSafeFallbackKey()
         {
             StringMap().Remove("ui.dev.research_completion_eligibility_format");
+            StringMap().Remove("ui.dev.research_completion_pending_apply_format");
 
             _root.RefreshOfflineSummaryLines();
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Is.EqualTo("ui.dev.research_completion_eligibility_format"));
+            Assert.That(_root.ResearchCompletionPendingApplyLine, Is.EqualTo("ui.dev.research_completion_pending_apply_format"));
         }
 
         [Test]
@@ -134,6 +170,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(gameRoot, Does.Not.Contain("Research Completion Eligibility —"));
             Assert.That(overlay, Does.Not.Contain("Research Completion Eligibility —"));
+            Assert.That(gameRoot, Does.Not.Contain("Research Completion Pending Apply —"));
+            Assert.That(overlay, Does.Not.Contain("Research Completion Pending Apply —"));
         }
 
         private string SystemsDiagnosticsText()
@@ -148,6 +186,12 @@ namespace DungeonBuilder.Tests.EditMode
         private void InvokeResearchProgressApply()
         {
             typeof(GameRoot).GetMethod("ApplyResearchProgressForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_root, null);
+        }
+
+        private void InvokeResearchCompletionPendingApply()
+        {
+            typeof(GameRoot).GetMethod("ApplyResearchCompletionPendingForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.Invoke(_root, null);
         }
 
@@ -208,6 +252,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.research_progress_format"] = "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}";
             map["ui.dev.research_progress_state_format"] = "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}";
             map["ui.dev.research_completion_eligibility_format"] = "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
+            map["ui.dev.research_completion_pending_apply_format"] = "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}";
             return content;
         }
 
