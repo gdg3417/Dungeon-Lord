@@ -34,5 +34,11 @@
     "ruleSourceId": "research.progress.rule.m7_b0_scaffold",
     "progressPerActiveSecond": 0.01,
     "maxActiveSessionElapsedSeconds": 86400
+  },
+  "researchCompletionEligibilityScaffold": {
+    "enabled": true,
+    "ruleSourceId": "research.completion_eligibility.rule.m7_b3_scaffold",
+    "projectId": "research.project.m7_a2_scaffold",
+    "requiredProgressUnits": 1.0
   }
 }
