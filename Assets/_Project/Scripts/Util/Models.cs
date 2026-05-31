@@ -93,6 +93,16 @@ namespace DungeonBuilder.M0
         ScaffoldSlotIdMissing = 2,
         ScaffoldProjectIdMissing = 3
     }
+    public enum ResearchProgressSummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingConfig = 2,
+        DisabledConfig = 3,
+        InvalidElapsedTime = 4,
+        InvalidPendingState = 5,
+        InvalidConfig = 6
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -331,6 +341,29 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchProgressScaffoldConfig
+    {
+        public bool enabled;
+        public string ruleSourceId;
+        public double progressPerActiveSecond;
+        public long maxActiveSessionElapsedSeconds;
+    }
+
+    [Serializable]
+    public sealed class ResearchProgressSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchProgressSummaryErrorCode.None;
+        public bool Pending = false;
+        public string SlotId;
+        public string ProjectId;
+        public long ElapsedSecondsUsed = 0;
+        public double ProgressDeltaPreview = 0d;
+        public bool WouldCompleteResearch = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
     public sealed class ResearchPendingValidationResult
     {
         public bool RuleResolved = false;
@@ -400,6 +433,7 @@ namespace DungeonBuilder.M0
 
         public TimeRules timeRules;
         public ResearchPendingScaffoldConfig researchPendingScaffold;
+        public ResearchProgressScaffoldConfig researchProgressScaffold;
         public FeatureFlags featureFlags;
         public Tables tables;
     }

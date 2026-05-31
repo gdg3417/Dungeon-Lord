@@ -64,6 +64,7 @@ namespace DungeonBuilder.M0
         public string OfflineSummaryLine { get; private set; } = "ui.dev.offline_summary_format";
         public string ResearchPendingLine { get; private set; } = "ui.dev.research_pending_format";
         public string ResearchPendingValidationLine { get; private set; } = "ui.dev.research_pending_validation_format";
+        public string ResearchProgressLine { get; private set; } = "ui.dev.research_progress_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -79,6 +80,7 @@ namespace DungeonBuilder.M0
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
         private int _selectedRunHistoryIndex = -1;
+        private long _activeSessionTickCount;
 
         public bool DevPanelEnabled { get; private set; }
         public bool IsOnline { get; private set; } = true;
@@ -916,11 +918,52 @@ namespace DungeonBuilder.M0
                     research.RuleResolved,
                     research.DeterministicErrorCode,
                     research.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchPendingState progressPendingState = research.Pending && Save != null
+                ? Save.researchPending
+                : null;
+            ResearchProgressSummary progress = ResearchProgressResolver.Resolve(
+                progressPendingState,
+                GetResearchProgressScaffoldConfig(),
+                GetActiveSessionElapsedSeconds());
+            const string progressFormatKey = "ui.dev.research_progress_format";
+            string progressFormat = Content != null ? Content.GetString(progressFormatKey, progressFormatKey) : progressFormatKey;
+            ResearchProgressLine = string.Equals(progressFormat, progressFormatKey, StringComparison.Ordinal)
+                ? progressFormatKey
+                : string.Format(
+                    progressFormat,
+                    progress.RuleResolved,
+                    progress.DeterministicErrorCode,
+                    progress.Pending,
+                    progress.SlotId ?? string.Empty,
+                    progress.ProjectId ?? string.Empty,
+                    progress.ElapsedSecondsUsed,
+                    progress.ProgressDeltaPreview,
+                    progress.WouldCompleteResearch,
+                    progress.RuleSourceIdUsed ?? string.Empty);
         }
 
         private ResearchPendingScaffoldConfig GetResearchPendingScaffoldConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchPendingScaffold : null;
+        }
+
+        private ResearchProgressScaffoldConfig GetResearchProgressScaffoldConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchProgressScaffold : null;
+        }
+
+        private long GetActiveSessionElapsedSeconds()
+        {
+            long tickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
+            if (_activeSessionTickCount <= 0 || tickSeconds <= 0)
+            {
+                return 0;
+            }
+
+            return _activeSessionTickCount > long.MaxValue / tickSeconds
+                ? long.MaxValue
+                : _activeSessionTickCount * tickSeconds;
         }
 
         private static bool IsUsablePersistedOfflineSummary(OfflineSummary summary)
@@ -1329,6 +1372,11 @@ namespace DungeonBuilder.M0
 
         private void HandleSimulationTick(long tickIndex)
         {
+            if (_activeSessionTickCount < long.MaxValue)
+            {
+                _activeSessionTickCount += 1;
+            }
+            RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
                 CurrentHeat,

@@ -350,6 +350,10 @@
     {
       "key": "ui.banner.research_pending_cleared",
       "text": "Research pending scaffold cleared."
+    },
+    {
+      "key": "ui.dev.research_progress_format",
+      "text": "Research Progress Preview \u2014 resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
     }
   ]
 }
