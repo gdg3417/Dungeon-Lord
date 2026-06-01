@@ -17,7 +17,10 @@ namespace DungeonBuilder.M0
             CompletedResearchState completedState,
             ResearchCompletionEligibilityScaffoldConfig config)
         {
-            CompletedResearchStateSummary completed = CompletedResearchStateResolver.Resolve(completedState);
+            CompletedResearchStateSummary completed = CompletedResearchStateResolver.Resolve(
+                completedState,
+                pendingState,
+                progressState);
             if (!IsValidConfig(config))
             {
                 return Blocked(completed.HasCompletedState);
@@ -37,6 +40,11 @@ namespace DungeonBuilder.M0
                     : Create(ResearchStatusPresentationState.NoResearch, false, false, completed.HasCompletedState,
                         string.Empty, string.Empty, 0d, config.requiredProgressUnits, false, false,
                         NoResearchStatusKey, config.ruleSourceId);
+            }
+
+            if (completed.CurrentProjectAlreadyCompleted)
+            {
+                return Blocked(completed.HasCompletedState, config.ruleSourceId);
             }
 
             ResearchCompletionEligibilitySummary eligibility = ResearchCompletionEligibilityResolver.Resolve(

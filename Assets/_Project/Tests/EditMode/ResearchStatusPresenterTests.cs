@@ -110,6 +110,43 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void ActivePendingProjectAlreadyCompleted_ReturnsBlockedWithoutProductionSideEffects()
+        {
+            ResearchPendingState pending = Pending();
+            ResearchProgressState progress = Progress(1d);
+            CompletedResearchState completed = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+            string pendingBefore = JsonUtility.ToJson(pending);
+            string progressBefore = JsonUtility.ToJson(progress);
+            string completedBefore = JsonUtility.ToJson(completed);
+
+            ResearchStatusPresentation first = Present(pending, progress, completed);
+            ResearchStatusPresentation second = Present(pending, progress, completed);
+
+            AssertBlockedWithoutProductionSideEffects(first);
+            Assert.That(first.State, Is.Not.EqualTo(ResearchStatusPresentationState.ActiveInProgress));
+            Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
+            Assert.That(JsonUtility.ToJson(pending), Is.EqualTo(pendingBefore));
+            Assert.That(JsonUtility.ToJson(progress), Is.EqualTo(progressBefore));
+            Assert.That(JsonUtility.ToJson(completed), Is.EqualTo(completedBefore));
+        }
+
+        [Test]
+        public void ActiveProgressProjectAlreadyCompleted_ReturnsBlockedWithoutProductionSideEffects()
+        {
+            ResearchProgressState progress = Progress(1d);
+            progress.ProjectId = "research.project.completed.progress";
+            CompletedResearchState completed = new CompletedResearchState
+            {
+                ProjectIds = new[] { progress.ProjectId }
+            };
+
+            ResearchStatusPresentation presentation = Present(Pending(), progress, completed);
+
+            AssertBlockedWithoutProductionSideEffects(presentation);
+            Assert.That(presentation.State, Is.Not.EqualTo(ResearchStatusPresentationState.ActiveInProgress));
+        }
+
+        [Test]
         public void IdenticalInputs_ReturnIdenticalPresentation()
         {
             ResearchPendingState pending = Pending();
@@ -159,6 +196,17 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(presentation.State, Is.EqualTo(ResearchStatusPresentationState.BlockedOrInvalid));
             Assert.That(presentation.SlotId, Is.Empty);
             Assert.That(presentation.ProjectId, Is.Empty);
+        }
+
+        private static void AssertBlockedWithoutProductionSideEffects(ResearchStatusPresentation presentation)
+        {
+            Assert.That(presentation.State, Is.EqualTo(ResearchStatusPresentationState.BlockedOrInvalid));
+            Assert.That(presentation.CanClaimProduction, Is.False);
+            Assert.That(presentation.ReadyToClaim, Is.False);
+            Assert.That(presentation.WouldGrantRewards, Is.False);
+            Assert.That(presentation.WouldUnlockContent, Is.False);
+            Assert.That(presentation.WouldChargeCosts, Is.False);
+            Assert.That(presentation.WouldProcessOfflineProgress, Is.False);
         }
 
         private static ResearchStatusPresentation Present(

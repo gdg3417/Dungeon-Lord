@@ -11,12 +11,13 @@ namespace DungeonBuilder.M0
         [Header("UI")]
         public TMP_Text overlayText;
 
-        private const int DiagnosticsPageCount = 5;
+        private const int DiagnosticsPageCount = 6;
         private const int RuntimeSummaryPage = 0;
         private const int RunDiagnosticsPage = 1;
         private const int HeatDiagnosticsPage = 2;
         private const int SystemsDiagnosticsPage = 3;
         private const int ResearchDiagnosticsPage = 4;
+        private const int ResearchStatusDiagnosticsPage = 5;
         private const int VisibleDiagnosticsBodyLineCount = 4;
 
         private GameRoot _root;
@@ -170,6 +171,9 @@ namespace DungeonBuilder.M0
                 case ResearchDiagnosticsPage:
                     AppendResearchDiagnostics(builder);
                     break;
+                case ResearchStatusDiagnosticsPage:
+                    AppendResearchStatusDiagnostics(builder);
+                    break;
             }
             return builder;
         }
@@ -265,7 +269,12 @@ namespace DungeonBuilder.M0
             AppendLine(builder, _root.ResearchCompletionClaimReadinessLine);
             AppendLine(builder, _root.CompletedResearchStateLine);
             AppendLine(builder, _root.ResearchCompletionClaimApplyLine);
+        }
+
+        private void AppendResearchStatusDiagnostics(StringBuilder builder)
+        {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
+            AppendLine(builder, _root.ResearchStatusSafetyLine);
         }
 
         private string GetLocalizedString(string key)
@@ -287,6 +296,8 @@ namespace DungeonBuilder.M0
                     return "ui.dev.diagnostics.page.systems_diagnostics";
                 case ResearchDiagnosticsPage:
                     return "ui.dev.diagnostics.page.research_diagnostics";
+                case ResearchStatusDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_status_diagnostics";
                 default:
                     return "ui.dev.diagnostics.page.runtime_summary";
             }

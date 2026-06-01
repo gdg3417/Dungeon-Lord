@@ -2,7 +2,7 @@
 
 ## Scope delivered
 
-M7-C1 adds the smallest production-safe, read-only research status presenter after M7-C0. `ResearchStatusPresenter` deterministically summarizes the current MVP single-slot research lifecycle into `ResearchStatusPresentation` without mutating save data or runtime state. The presentation distinguishes no research, active progress, active completion pending, verification required, completed research, and blocked or invalid inputs.
+M7-C1 adds the smallest production-safe, read-only research status presenter after M7-C0. `ResearchStatusPresenter` deterministically summarizes the current MVP single-slot research lifecycle into `ResearchStatusPresentation` without mutating save data or runtime state. The presentation distinguishes no research, active progress, active completion pending, verification required, completed research, and blocked or invalid inputs. An active project that already exists in completed research is blocked instead of presented as normal active progress.
 
 ## Explicit non-goals
 
@@ -22,7 +22,7 @@ No save fields, migrations, or stable ID renames are added. Legacy saves with no
 
 ## Diagnostics notes
 
-Research Diagnostics Page 5/5 retains its existing M7-B0 through M7-B7 lines and adds one localization-backed `Research Status Presentation` line. The line reports state, existing-state presence, slot/project IDs, progress, requirement, completion and verification state, production-claim safety flags, status localization key, and rule source. Diagnostics scrolling remains enabled. Cleared active state does not display stale active slot or project IDs; developer-only claim displays completed state safely.
+Research Diagnostics Page 5/6 retains its existing M7-B0 through M7-B7 lifecycle lines. Research Status Diagnostics Page 6/6 contains localization-backed `Research Status Presentation` and `Research Status Safety` rows so the dense lifecycle page remains readable. The rows report state, existing-state presence, slot/project IDs, progress, requirement, completion and verification state, production-claim safety flags, status localization key, and rule source. Diagnostics scrolling remains enabled and clamps safely. Cleared active state does not display stale active slot or project IDs; developer-only claim displays completed state safely. An active project already present in completed research is presented as `BlockedOrInvalid`, not as normal progress.
 
 ## Test list
 
@@ -38,10 +38,10 @@ Research Diagnostics Page 5/5 retains its existing M7-B0 through M7-B7 lines and
 3. Confirm F1 developer panel toggle still works.
 4. Confirm F2 run diagnostics focus still works.
 5. Confirm F3 diagnostics page cycling still works.
-6. Go to Research Diagnostics Page 5/5.
+6. Go to Research Diagnostics Page 5/6.
 7. Confirm Research Diagnostics scrolling still works.
 8. Confirm M7-B0 through M7-B7 research diagnostics still display.
-9. Confirm Research Status Presentation displays safely.
+9. Go to Research Status Diagnostics Page 6/6 and confirm Research Status Presentation and Research Status Safety display safely.
 10. Confirm no-pending state shows `NoResearch` or the intended safe no-pending output.
 11. Use Set Research Pending.
 12. Confirm pending becomes true.
@@ -56,7 +56,7 @@ Research Diagnostics Page 5/5 retains its existing M7-B0 through M7-B7 lines and
 21. Confirm completed research state updates.
 22. Confirm Research Status Presentation shows completed or safe no-pending output without stale pending or progress project IDs.
 23. Use Set Research Pending again.
-24. Confirm completed research is not cleared.
+24. Confirm completed research is not cleared and duplicate completed active research presents as `BlockedOrInvalid`.
 25. Use Clear Research Pending.
 26. Confirm no stale project IDs remain.
 27. Confirm no unexpected `.meta` files are created.

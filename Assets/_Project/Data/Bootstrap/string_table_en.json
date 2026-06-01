@@ -156,6 +156,10 @@
       "text": "Research Diagnostics"
     },
     {
+      "key": "ui.dev.diagnostics.page.research_status_diagnostics",
+      "text": "Research Status Diagnostics"
+    },
+    {
       "key": "ui.dev.offline_summary_format",
       "text": "Offline Summary \u2014 resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
@@ -401,7 +405,11 @@
     },
     {
       "key": "ui.dev.research_status_presentation_format",
-      "text": "Research Status Presentation \u2014 state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} canClaimProduction={14} wouldGrantRewards={15} wouldUnlockContent={16} wouldChargeCosts={17} wouldProcessOfflineProgress={18} statusKey={19} ruleSource={20}"
+      "text": "Research Status Presentation \u2014 state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
+    },
+    {
+      "key": "ui.dev.research_status_safety_format",
+      "text": "Research Status Safety \u2014 canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.research.status.no_research",
