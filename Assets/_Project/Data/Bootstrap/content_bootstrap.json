@@ -40,5 +40,9 @@
     "ruleSourceId": "research.completion_eligibility.rule.m7_b3_scaffold",
     "projectId": "research.project.m7_a2_scaffold",
     "requiredProgressUnits": 1.0
+  },
+  "researchCompletionClaimScaffold": {
+    "enabled": true,
+    "ruleSourceId": "research.completion_claim.rule.m7_b7_scaffold"
   }
 }

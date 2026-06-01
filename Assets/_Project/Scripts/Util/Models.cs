@@ -180,6 +180,24 @@ namespace DungeonBuilder.M0
         InvalidProgressUnits = 10,
         ConfigProjectMismatch = 11
     }
+    public enum ResearchCompletionClaimApplySummaryErrorCode
+    {
+        None = 0,
+        NoPendingResearch = 1,
+        MissingProgressState = 2,
+        InvalidPendingState = 3,
+        ProgressStateSlotMismatch = 4,
+        ProgressStateProjectMismatch = 5,
+        MissingEligibilityConfig = 6,
+        DisabledEligibilityConfig = 7,
+        InvalidEligibilityConfig = 8,
+        InvalidRequiredProgressUnits = 9,
+        InvalidProgressUnits = 10,
+        EligibilityConfigProjectMismatch = 11,
+        MissingClaimConfig = 12,
+        DisabledClaimConfig = 13,
+        InvalidClaimConfig = 14
+    }
 
 [Serializable]
     public sealed class RunSimulationConfig
@@ -436,6 +454,13 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchCompletionClaimScaffoldConfig
+    {
+        public bool enabled;
+        public string ruleSourceId;
+    }
+
+    [Serializable]
     public sealed class ResearchProgressState
     {
         public string SlotId;
@@ -561,6 +586,32 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchCompletionClaimApplySummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchCompletionClaimApplySummaryErrorCode.None;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public bool HasCompletedState = false;
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public double RequiredProgressUnits = 0d;
+        public bool CompletionPending = false;
+        public bool EligibleForCompletion = false;
+        public bool ReadyForClaim = false;
+        public bool AlreadyCompleted = false;
+        public bool WouldRecordCompletedResearch = false;
+        public bool WouldClearPending = false;
+        public bool WouldClearProgress = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
+        public bool WouldChargeCosts = false;
+        public bool WouldProcessOfflineProgress = false;
+        public string RuleSourceIdUsed;
+    }
+
+    [Serializable]
     public sealed class ResearchProgressSummary
     {
         public bool RuleResolved = false;
@@ -646,6 +697,7 @@ namespace DungeonBuilder.M0
         public ResearchPendingScaffoldConfig researchPendingScaffold;
         public ResearchProgressScaffoldConfig researchProgressScaffold;
         public ResearchCompletionEligibilityScaffoldConfig researchCompletionEligibilityScaffold;
+        public ResearchCompletionClaimScaffoldConfig researchCompletionClaimScaffold;
         public FeatureFlags featureFlags;
         public Tables tables;
     }
