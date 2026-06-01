@@ -132,15 +132,13 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("research-pending-line", "Structure Sim");
+            string researchText = CollectAllResearchDiagnosticsText();
             AssertLinesAppearInOrder(
-                _overlay.overlayText.text,
+                researchText,
                 "research-pending-line",
                 "research-pending-validation-line",
                 "research-progress-line",
-                "research-progress-state-line");
-            _overlay.ScrollFullDiagnosticsLines(100);
-            AssertLinesAppearInOrder(
-                RefreshText(),
+                "research-progress-state-line",
                 "research-completion-eligibility-line",
                 "research-completion-pending-apply-line",
                 "research-completion-claim-readiness-line",
@@ -298,6 +296,26 @@ namespace DungeonBuilder.Tests.EditMode
             while (_overlay.FullDiagnosticsPageNumber != 5)
             {
                 _overlay.CycleFullDiagnosticsPage();
+            }
+        }
+
+        private string CollectAllResearchDiagnosticsText()
+        {
+            CycleToResearchDiagnostics();
+            while (_overlay.FullDiagnosticsScrollOffset > 0)
+            {
+                _overlay.ScrollFullDiagnosticsLines(-1);
+            }
+            var windows = new List<string>();
+            while (true)
+            {
+                windows.Add(RefreshText());
+                int previousOffset = _overlay.FullDiagnosticsScrollOffset;
+                _overlay.ScrollFullDiagnosticsLines(1);
+                if (_overlay.FullDiagnosticsScrollOffset == previousOffset)
+                {
+                    return string.Join("\n", windows);
+                }
             }
         }
 

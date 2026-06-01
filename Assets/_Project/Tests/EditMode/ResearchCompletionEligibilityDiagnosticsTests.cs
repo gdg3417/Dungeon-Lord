@@ -265,15 +265,31 @@ namespace DungeonBuilder.Tests.EditMode
 
         private string ResearchDiagnosticsText()
         {
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.RefreshOverlayText();
-            string top = _overlay.overlayText.text;
-            _overlay.ScrollFullDiagnosticsLines(100);
-            _overlay.RefreshOverlayText();
-            return top + "\n" + _overlay.overlayText.text;
+            CycleToResearchDiagnostics();
+            while (_overlay.FullDiagnosticsScrollOffset > 0)
+            {
+                _overlay.ScrollFullDiagnosticsLines(-1);
+            }
+            var windows = new List<string>();
+            while (true)
+            {
+                _overlay.RefreshOverlayText();
+                windows.Add(_overlay.overlayText.text);
+                int previousOffset = _overlay.FullDiagnosticsScrollOffset;
+                _overlay.ScrollFullDiagnosticsLines(1);
+                if (_overlay.FullDiagnosticsScrollOffset == previousOffset)
+                {
+                    return string.Join("\n", windows);
+                }
+            }
+        }
+
+        private void CycleToResearchDiagnostics()
+        {
+            while (_overlay.FullDiagnosticsPageNumber != 5)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
         }
 
         private void InvokeResearchProgressApply()
