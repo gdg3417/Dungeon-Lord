@@ -210,8 +210,20 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.CompletedResearchStateLine, Does.Not.Contain("research.project.scaffold"));
             Assert.That(_root.ResearchCompletionClaimApplyLine, Does.Contain("pending=False hasProgressState=False"));
             Assert.That(_root.ResearchCompletionClaimApplyLine, Does.Not.Contain("research.project.scaffold"));
-            Assert.That(_root.ResearchStatusPresentationLine, Does.Contain("state=NoResearch pending=False hasProgressState=False slot= project="));
-            Assert.That(_root.ResearchStatusPresentationLine, Does.Not.Contain("project=research.project.scaffold"));
+            string statusPresentation = _root.ResearchStatusPresentationLine;
+            Assert.That(statusPresentation, Does.Contain("state=NoResearch"));
+            Assert.That(statusPresentation, Does.Contain("pending=False"));
+            Assert.That(statusPresentation, Does.Contain("hasProgressState=False"));
+            Assert.That(statusPresentation, Does.Contain("hasCompletedState=False"));
+            Assert.That(statusPresentation, Does.Contain("slot="));
+            Assert.That(statusPresentation, Does.Contain("project="));
+            Assert.That(statusPresentation, Does.Contain(" slot= project="));
+            Assert.That(statusPresentation, Does.Contain("canClaimProduction=False"));
+            Assert.That(statusPresentation, Does.Contain("wouldGrantRewards=False"));
+            Assert.That(statusPresentation, Does.Contain("wouldUnlockContent=False"));
+            Assert.That(statusPresentation, Does.Contain("wouldChargeCosts=False"));
+            Assert.That(statusPresentation, Does.Contain("wouldProcessOfflineProgress=False"));
+            Assert.That(statusPresentation, Does.Not.Contain("research.project.scaffold"));
             Assert.That(_root.Save.researchPending, Is.Null);
             Assert.That(_root.Save.researchProgress, Is.Null);
         }
