@@ -71,6 +71,8 @@ namespace DungeonBuilder.M0
         public string ResearchCompletionClaimReadinessLine { get; private set; } = "ui.dev.research_completion_claim_readiness_format";
         public string CompletedResearchStateLine { get; private set; } = "ui.dev.completed_research_state_format";
         public string ResearchCompletionClaimApplyLine { get; private set; } = "ui.dev.research_completion_claim_apply_format";
+        public string ResearchStatusPresentationLine { get; private set; } = "ui.dev.research_status_presentation_format";
+        public string ResearchStatusSafetyLine { get; private set; } = "ui.dev.research_status_safety_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -1103,6 +1105,46 @@ namespace DungeonBuilder.M0
                     claimReadiness.WouldUnlockContent,
                     claimReadiness.WouldClearPending,
                     claimReadiness.RuleSourceIdUsed ?? string.Empty);
+
+            ResearchStatusPresentation statusPresentation = ResearchStatusPresenter.Present(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                Save != null ? Save.completedResearch : null,
+                GetResearchCompletionEligibilityScaffoldConfig());
+            const string statusPresentationFormatKey = "ui.dev.research_status_presentation_format";
+            string statusPresentationFormat = Content != null ? Content.GetString(statusPresentationFormatKey, statusPresentationFormatKey) : statusPresentationFormatKey;
+            ResearchStatusPresentationLine = string.Equals(statusPresentationFormat, statusPresentationFormatKey, StringComparison.Ordinal)
+                ? statusPresentationFormatKey
+                : string.Format(
+                    statusPresentationFormat,
+                    statusPresentation.State,
+                    statusPresentation.Pending,
+                    statusPresentation.HasProgressState,
+                    statusPresentation.HasCompletedState,
+                    statusPresentation.SlotId ?? string.Empty,
+                    statusPresentation.ProjectId ?? string.Empty,
+                    statusPresentation.ProgressUnits,
+                    statusPresentation.RequiredProgressUnits,
+                    statusPresentation.CompletionPending,
+                    statusPresentation.EligibleForCompletion,
+                    statusPresentation.VerificationRequired,
+                    statusPresentation.ReadyToClaim,
+                    statusPresentation.Completed,
+                    statusPresentation.BlockedOrInvalid,
+                    statusPresentation.StatusLocalizationKey ?? string.Empty,
+                    statusPresentation.RuleSourceIdUsed ?? string.Empty);
+
+            const string statusSafetyFormatKey = "ui.dev.research_status_safety_format";
+            string statusSafetyFormat = Content != null ? Content.GetString(statusSafetyFormatKey, statusSafetyFormatKey) : statusSafetyFormatKey;
+            ResearchStatusSafetyLine = string.Equals(statusSafetyFormat, statusSafetyFormatKey, StringComparison.Ordinal)
+                ? statusSafetyFormatKey
+                : string.Format(
+                    statusSafetyFormat,
+                    statusPresentation.CanClaimProduction,
+                    statusPresentation.WouldGrantRewards,
+                    statusPresentation.WouldUnlockContent,
+                    statusPresentation.WouldChargeCosts,
+                    statusPresentation.WouldProcessOfflineProgress);
 
             ResearchCompletionClaimApplySummary claimApply = ResearchCompletionClaimApplyResolver.Resolve(
                 progressPendingState,

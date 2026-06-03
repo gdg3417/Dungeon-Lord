@@ -611,6 +611,43 @@ namespace DungeonBuilder.M0
         public string RuleSourceIdUsed;
     }
 
+    public enum ResearchStatusPresentationState
+    {
+        NoResearch = 0,
+        ActiveInProgress = 1,
+        ActiveCompletionPending = 2,
+        VerificationRequired = 3,
+        ReadyToClaim = 4,
+        Completed = 5,
+        BlockedOrInvalid = 6
+    }
+
+    [Serializable]
+    public sealed class ResearchStatusPresentation
+    {
+        public ResearchStatusPresentationState State = ResearchStatusPresentationState.BlockedOrInvalid;
+        public bool Pending = false;
+        public bool HasProgressState = false;
+        public bool HasCompletedState = false;
+        public string SlotId;
+        public string ProjectId;
+        public double ProgressUnits = 0d;
+        public double RequiredProgressUnits = 0d;
+        public bool CompletionPending = false;
+        public bool EligibleForCompletion = false;
+        public bool VerificationRequired = false;
+        public bool ReadyToClaim = false;
+        public bool Completed = false;
+        public bool BlockedOrInvalid = true;
+        public bool CanClaimProduction = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
+        public bool WouldChargeCosts = false;
+        public bool WouldProcessOfflineProgress = false;
+        public string StatusLocalizationKey;
+        public string RuleSourceIdUsed;
+    }
+
     [Serializable]
     public sealed class ResearchProgressSummary
     {
