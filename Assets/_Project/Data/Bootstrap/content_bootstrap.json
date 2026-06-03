@@ -44,5 +44,10 @@
   "researchCompletionClaimScaffold": {
     "enabled": true,
     "ruleSourceId": "research.completion_claim.rule.m7_b7_scaffold"
+  },
+  "researchVerificationScaffold": {
+    "enabled": true,
+    "ruleSourceId": "research.verification.rule.m7_c2_scaffold",
+    "verificationMode": "unavailable"
   }
 }

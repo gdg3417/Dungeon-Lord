@@ -73,6 +73,8 @@ namespace DungeonBuilder.M0
         public string ResearchCompletionClaimApplyLine { get; private set; } = "ui.dev.research_completion_claim_apply_format";
         public string ResearchStatusPresentationLine { get; private set; } = "ui.dev.research_status_presentation_format";
         public string ResearchStatusSafetyLine { get; private set; } = "ui.dev.research_status_safety_format";
+        public string ResearchVerificationBoundaryLine { get; private set; } = "ui.dev.research_verification_boundary_format";
+        public string ResearchVerificationSafetyLine { get; private set; } = "ui.dev.research_verification_safety_format";
 
         private AppStateMachine _sm;
 #if UNITY_EDITOR
@@ -1146,6 +1148,50 @@ namespace DungeonBuilder.M0
                     statusPresentation.WouldChargeCosts,
                     statusPresentation.WouldProcessOfflineProgress);
 
+
+            ResearchVerificationBoundarySummary verificationBoundary = ResearchVerificationBoundaryResolver.Resolve(
+                progressPendingState,
+                Save != null ? Save.researchProgress : null,
+                Save != null ? Save.completedResearch : null,
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchVerificationScaffoldConfig());
+            const string verificationBoundaryFormatKey = "ui.dev.research_verification_boundary_format";
+            string verificationBoundaryFormat = Content != null ? Content.GetString(verificationBoundaryFormatKey, verificationBoundaryFormatKey) : verificationBoundaryFormatKey;
+            ResearchVerificationBoundaryLine = string.Equals(verificationBoundaryFormat, verificationBoundaryFormatKey, StringComparison.Ordinal)
+                ? verificationBoundaryFormatKey
+                : string.Format(
+                    verificationBoundaryFormat,
+                    verificationBoundary.RuleResolved,
+                    verificationBoundary.DeterministicErrorCode,
+                    verificationBoundary.Pending,
+                    verificationBoundary.HasProgressState,
+                    verificationBoundary.HasCompletedState,
+                    verificationBoundary.SlotId ?? string.Empty,
+                    verificationBoundary.ProjectId ?? string.Empty,
+                    verificationBoundary.ProgressUnits,
+                    verificationBoundary.RequiredProgressUnits,
+                    verificationBoundary.CompletionPending,
+                    verificationBoundary.EligibleForCompletion,
+                    verificationBoundary.AlreadyCompleted,
+                    verificationBoundary.VerificationRequired,
+                    verificationBoundary.VerificationAvailable,
+                    verificationBoundary.VerificationSatisfied,
+                    verificationBoundary.CanClaimProduction,
+                    verificationBoundary.VerificationModeUsed ?? string.Empty,
+                    verificationBoundary.RuleSourceIdUsed ?? string.Empty);
+
+            const string verificationSafetyFormatKey = "ui.dev.research_verification_safety_format";
+            string verificationSafetyFormat = Content != null ? Content.GetString(verificationSafetyFormatKey, verificationSafetyFormatKey) : verificationSafetyFormatKey;
+            ResearchVerificationSafetyLine = string.Equals(verificationSafetyFormat, verificationSafetyFormatKey, StringComparison.Ordinal)
+                ? verificationSafetyFormatKey
+                : string.Format(
+                    verificationSafetyFormat,
+                    verificationBoundary.WouldCallServer,
+                    verificationBoundary.WouldGrantRewards,
+                    verificationBoundary.WouldUnlockContent,
+                    verificationBoundary.WouldChargeCosts,
+                    verificationBoundary.WouldProcessOfflineProgress);
+
             ResearchCompletionClaimApplySummary claimApply = ResearchCompletionClaimApplyResolver.Resolve(
                 progressPendingState,
                 Save != null ? Save.researchProgress : null,
@@ -1222,6 +1268,11 @@ namespace DungeonBuilder.M0
         private ResearchCompletionClaimScaffoldConfig GetResearchCompletionClaimScaffoldConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchCompletionClaimScaffold : null;
+        }
+
+        private ResearchVerificationScaffoldConfig GetResearchVerificationScaffoldConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchVerificationScaffold : null;
         }
 
         private long GetActiveSessionElapsedSeconds()
