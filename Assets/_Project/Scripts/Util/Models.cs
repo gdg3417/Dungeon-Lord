@@ -77,6 +77,12 @@ namespace DungeonBuilder.M0
         InvalidCurrentHeat = 2,
         CurrentHeatOutOfRange = 3
     }
+
+    public enum MvpPlayerLoopSummaryErrorCode
+    {
+        None = 0,
+        MissingSave = 1
+    }
     public enum OfflineSummaryErrorCode
     {
         None = 0,
@@ -439,6 +445,39 @@ namespace DungeonBuilder.M0
         public bool IsAtTierMaximum = false;
         public string RuleSourceIdUsed;
     }
+    [Serializable]
+    public sealed class MvpPlayerLoopSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)MvpPlayerLoopSummaryErrorCode.None;
+        public bool HasPlacementContext = false;
+        public string SelectedStructureId;
+        public bool HasRunOutcome = false;
+        public string LatestRunId;
+        public bool RunSucceeded = false;
+        public double ManaReserve = 0d;
+        public int LootGeneratedWorldValue = 0;
+        public int LootExtractedWorldValue = 0;
+        public int LootExtractedTradeableWorldValue = 0;
+        public double HeatBefore = 0d;
+        public double HeatAfter = 0d;
+        public string HeatTierId;
+        public bool HasResearchStatus = false;
+        public string ResearchProjectId;
+        public string ResearchStatusKey;
+        public bool ResearchVerificationRuleResolved = false;
+        public int ResearchVerificationDeterministicErrorCode = (int)ResearchVerificationBoundarySummaryErrorCode.None;
+        public bool VerificationRequired = false;
+        public bool VerificationAvailable = false;
+        public bool CanClaimProduction = false;
+        public string NextOptimizationSuggestionKey;
+        public bool WouldMutateState = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
+        public bool WouldCallServer = false;
+        public bool WouldProcessOfflineProgress = false;
+    }
+
     [Serializable]
     public sealed class ResearchPendingState
     {
