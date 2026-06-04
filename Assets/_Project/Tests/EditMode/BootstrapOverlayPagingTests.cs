@@ -60,6 +60,8 @@ namespace DungeonBuilder.Tests.EditMode
             SetLine("<ResearchCompletionClaimApplyLine>k__BackingField", "research-completion-claim-apply-line");
             SetLine("<ResearchStatusPresentationLine>k__BackingField", "research-status-presentation-line");
             SetLine("<ResearchStatusSafetyLine>k__BackingField", "research-status-safety-line");
+            SetLine("<ResearchVerificationBoundaryLine>k__BackingField", "research-verification-boundary-line");
+            SetLine("<ResearchVerificationSafetyLine>k__BackingField", "research-verification-safety-line");
 
             _root.SetBanner("banner-line");
             SetSave(new SaveData
@@ -152,6 +154,8 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("research-status-presentation-line", "research-pending-line");
             Assert.That(_overlay.overlayText.text, Does.Contain("research-status-safety-line"));
+            Assert.That(_overlay.overlayText.text, Does.Contain("research-verification-boundary-line"));
+            Assert.That(_overlay.overlayText.text, Does.Contain("research-verification-safety-line"));
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
             _overlay.ScrollFullDiagnosticsLines(100);
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);

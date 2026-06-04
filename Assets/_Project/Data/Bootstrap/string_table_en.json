@@ -412,6 +412,14 @@
       "text": "Research Status Safety \u2014 canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
+      "key": "ui.dev.research_verification_boundary_format",
+      "text": "Research Verification Boundary \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
+    },
+    {
+      "key": "ui.dev.research_verification_safety_format",
+      "text": "Research Verification Safety \u2014 wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+    },
+    {
       "key": "ui.research.status.no_research",
       "text": "No research"
     },

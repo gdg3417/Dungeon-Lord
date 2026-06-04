@@ -275,6 +275,8 @@ namespace DungeonBuilder.M0
         {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
             AppendLine(builder, _root.ResearchStatusSafetyLine);
+            AppendLine(builder, _root.ResearchVerificationBoundaryLine);
+            AppendLine(builder, _root.ResearchVerificationSafetyLine);
         }
 
         private string GetLocalizedString(string key)
