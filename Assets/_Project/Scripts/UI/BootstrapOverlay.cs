@@ -11,15 +11,20 @@ namespace DungeonBuilder.M0
         [Header("UI")]
         public TMP_Text overlayText;
 
-        private const int DiagnosticsPageCount = 7;
+        private const int DiagnosticsPageCount = 9;
         private const int RuntimeSummaryPage = 0;
         private const int RunDiagnosticsPage = 1;
         private const int HeatDiagnosticsPage = 2;
         private const int SystemsDiagnosticsPage = 3;
         private const int ResearchDiagnosticsPage = 4;
-        private const int ResearchStatusDiagnosticsPage = 5;
-        private const int ResearchVerificationDiagnosticsPage = 6;
+        private const int ResearchStatusPresentationDiagnosticsPage = 5;
+        private const int ResearchStatusSafetyDiagnosticsPage = 6;
+        private const int ResearchVerificationBoundaryDiagnosticsPage = 7;
+        private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
+        private const float MinimalMvpActionPanelWidth = 260f;
+        private const float MinimalMvpActionPanelHeight = 110f;
+        private const float MinimalMvpActionPanelMargin = 10f;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -30,6 +35,9 @@ namespace DungeonBuilder.M0
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
+        public bool DevPanelVisible => _devPanelVisible;
+        public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
+        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
 
         public void Bind(GameRoot root)
         {
@@ -40,6 +48,11 @@ namespace DungeonBuilder.M0
         {
             _fullDiagnosticsPage = (_fullDiagnosticsPage + 1) % DiagnosticsPageCount;
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
+        }
+
+        public void ToggleDevPanel()
+        {
+            _devPanelVisible = !_devPanelVisible;
         }
 
         public void ToggleRunDiagnosticsFocus()
@@ -82,7 +95,7 @@ namespace DungeonBuilder.M0
 
             if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
             {
-                _devPanelVisible = !_devPanelVisible;
+                ToggleDevPanel();
             }
             if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
             {
@@ -195,11 +208,17 @@ namespace DungeonBuilder.M0
                 case ResearchDiagnosticsPage:
                     AppendResearchDiagnostics(builder);
                     break;
-                case ResearchStatusDiagnosticsPage:
-                    AppendResearchStatusDiagnostics(builder);
+                case ResearchStatusPresentationDiagnosticsPage:
+                    AppendResearchStatusPresentationDiagnostics(builder);
                     break;
-                case ResearchVerificationDiagnosticsPage:
-                    AppendResearchVerificationDiagnostics(builder);
+                case ResearchStatusSafetyDiagnosticsPage:
+                    AppendResearchStatusSafetyDiagnostics(builder);
+                    break;
+                case ResearchVerificationBoundaryDiagnosticsPage:
+                    AppendResearchVerificationBoundaryDiagnostics(builder);
+                    break;
+                case ResearchVerificationSafetyDiagnosticsPage:
+                    AppendResearchVerificationSafetyDiagnostics(builder);
                     break;
             }
             return builder;
@@ -298,15 +317,23 @@ namespace DungeonBuilder.M0
             AppendLine(builder, _root.ResearchCompletionClaimApplyLine);
         }
 
-        private void AppendResearchStatusDiagnostics(StringBuilder builder)
+        private void AppendResearchStatusPresentationDiagnostics(StringBuilder builder)
         {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
+        }
+
+        private void AppendResearchStatusSafetyDiagnostics(StringBuilder builder)
+        {
             AppendLine(builder, _root.ResearchStatusSafetyLine);
         }
 
-        private void AppendResearchVerificationDiagnostics(StringBuilder builder)
+        private void AppendResearchVerificationBoundaryDiagnostics(StringBuilder builder)
         {
             AppendLine(builder, _root.ResearchVerificationBoundaryLine);
+        }
+
+        private void AppendResearchVerificationSafetyDiagnostics(StringBuilder builder)
+        {
             AppendLine(builder, _root.ResearchVerificationSafetyLine);
         }
 
@@ -334,10 +361,14 @@ namespace DungeonBuilder.M0
                     return "ui.dev.diagnostics.page.systems_diagnostics";
                 case ResearchDiagnosticsPage:
                     return "ui.dev.diagnostics.page.research_diagnostics";
-                case ResearchStatusDiagnosticsPage:
-                    return "ui.dev.diagnostics.page.research_status_diagnostics";
-                case ResearchVerificationDiagnosticsPage:
-                    return "ui.dev.diagnostics.page.research_verification_diagnostics";
+                case ResearchStatusPresentationDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_status_presentation_diagnostics";
+                case ResearchStatusSafetyDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_status_safety_diagnostics";
+                case ResearchVerificationBoundaryDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_verification_boundary_diagnostics";
+                case ResearchVerificationSafetyDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_verification_safety_diagnostics";
                 default:
                     return "ui.dev.diagnostics.page.runtime_summary";
             }
@@ -354,6 +385,8 @@ namespace DungeonBuilder.M0
 
         private void OnGUI()
         {
+            DrawMinimalMvpActionPanel();
+
             if (_root == null || !_root.DevPanelEnabled || !_devPanelVisible)
             {
                 return;
@@ -512,6 +545,52 @@ namespace DungeonBuilder.M0
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+
+        public Rect GetMinimalMvpActionPanelRect()
+        {
+            float x = Mathf.Max(MinimalMvpActionPanelMargin, Screen.width - MinimalMvpActionPanelWidth - MinimalMvpActionPanelMargin);
+            return new Rect(x, MinimalMvpActionPanelMargin, MinimalMvpActionPanelWidth, MinimalMvpActionPanelHeight);
+        }
+
+        private void DrawMinimalMvpActionPanel()
+        {
+            if (!MinimalMvpActionGuiVisible)
+            {
+                return;
+            }
+
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => GetLocalizedString(key, fallback));
+            GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
+            GUILayout.Label(labels.Title);
+            if (GUILayout.Button(labels.PlacementButton))
+            {
+                ShowPlayerPlacementBanner();
+            }
+
+            if (GUILayout.Button(labels.RunButton))
+            {
+                ShowPlayerRunBanner();
+            }
+            GUILayout.EndArea();
+        }
+
+        private void ShowPlayerPlacementBanner()
+        {
+            bool ok = _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out string bannerKey);
+            string message = _root.Content.GetString(bannerKey, bannerKey);
+            _root.SetBanner(ok ? string.Format(message, StructureSimulationPass.ManaGeneratorBasicId) : message);
+            RefreshOverlayText();
+        }
+
+        private void ShowPlayerRunBanner()
+        {
+            bool didRun = _root.SimulateRunOnce();
+            _root.SetBanner(didRun
+                ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
+                : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
+            RefreshOverlayText();
         }
 
         private void ShowPlacementBanner(string structureId)
