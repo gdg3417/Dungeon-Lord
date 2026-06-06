@@ -1,4 +1,5 @@
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -64,8 +65,11 @@ namespace DungeonBuilder.Tests.EditMode
             SetLine("<ResearchVerificationSafetyLine>k__BackingField", "research-verification-safety-line");
 
             _root.SetBanner("banner-line");
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
             SetSave(new SaveData
             {
+                dungeonLayout = layout,
                 structureRuntime = new StructureRuntimeState { Heat = 17d, ManaReserve = 9d, IsHeatCrisisActive = true },
                 runHistory = new RunHistoryState
                 {
@@ -99,7 +103,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
             Assert.That(text, Does.StartWith("MVP Loop Summary"));
             Assert.That(text, Does.Contain("Guided MVP Action"));
-            Assert.That(text, Does.Contain("Next action: Place one structure, or modify the selected slot."));
+            Assert.That(text, Does.Contain("Placement: Mana Generator"));
+            Assert.That(text, Does.Not.Contain("Placement: structure.mana_generator.basic"));
+            Assert.That(text, Does.Contain("Next action: Run the dungeon and watch the MVP Loop Summary update."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify mana generator] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
@@ -140,6 +146,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Research: Research unavailable"));
         }
 
+
+        [Test]
+        public void MinimalMvpActionPlacementBanner_UsesLocalizedStructureNameInsteadOfRawId()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+
+            typeof(BootstrapOverlay).GetMethod("ShowPlayerPlacementBanner", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_overlay, null);
+
+            Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
+            Assert.That(_root.BannerMessage, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+        }
+
         [Test]
         public void FullDiagnostics_F3PageCycle_WrapsFromFinalDiagnosticsBackToRuntimeSummary()
         {
@@ -175,6 +199,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("Structure Sim", "run-line");
+            Assert.That(_overlay.overlayText.text, Does.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-pending-line"));
 
             _overlay.CycleFullDiagnosticsPage();
@@ -496,6 +521,11 @@ namespace DungeonBuilder.Tests.EditMode
             var content = new ContentService();
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.dev.structure_status"] = "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}";
+            map["ui.banner.place_success"] = "Placed structure: {0}";
+            map["structure.mana_generator.basic.display_name"] = "Mana Generator";
+            map["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber";
+            map["structure.risk_lab.basic.display_name"] = "Risk Lab";
+            map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
