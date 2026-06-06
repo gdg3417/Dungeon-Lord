@@ -113,6 +113,11 @@ namespace DungeonBuilder.M0
                 GetResearchVerificationScaffoldConfig());
         }
 
+        public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)
+        {
+            return GuidedMvpActionPathPresenter.Resolve(Save, summary ?? ResolveMvpPlayerLoopSummary());
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

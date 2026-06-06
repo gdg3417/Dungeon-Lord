@@ -98,6 +98,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
             Assert.That(text, Does.StartWith("MVP Loop Summary"));
+            Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("Next action: Place one structure, or modify the selected slot."));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/7\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
@@ -213,6 +215,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("MVP Loop Summary"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Guided MVP Action"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
@@ -450,6 +453,32 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
+            map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
+            map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
+            map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
+            map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
+            map["ui.guided_mvp.panel.complete_format"] = "Path complete: {0}";
+            map["ui.guided_mvp.value.complete_yes"] = "Yes";
+            map["ui.guided_mvp.value.complete_no"] = "No";
+            map["guided_mvp.step.place_or_modify_structure"] = "Place or modify one structure";
+            map["guided_mvp.step.run_or_observe"] = "Run or observe adventurers";
+            map["guided_mvp.step.reduce_heat_pressure"] = "Reduce heat pressure";
+            map["guided_mvp.step.improve_survivability_or_layout"] = "Improve survivability or layout";
+            map["guided_mvp.step.verify_research_status"] = "Verify research status";
+            map["guided_mvp.step.repeat_or_improve"] = "Repeat the loop or improve placement";
+            map["guided_mvp.status.missing_save"] = "Save state is not available yet.";
+            map["guided_mvp.status.place_or_modify_structure"] = "No placed structure is visible in the current summary.";
+            map["guided_mvp.status.run_or_observe"] = "A structure is placed; no adventurer run has been observed yet.";
+            map["guided_mvp.status.heat_pressure"] = "The latest summary shows heat pressure.";
+            map["guided_mvp.status.poor_loot_extraction"] = "The latest run generated loot but extracted none.";
+            map["guided_mvp.status.research_completion_pending"] = "Research completion is pending verification.";
+            map["guided_mvp.status.repeat_or_improve"] = "Placement, run, mana, loot, heat, and research are visible in the summary.";
+            map["guided_mvp.action.place_structure"] = "Place one structure, or modify the selected slot.";
+            map["guided_mvp.action.run_dungeon"] = "Run the dungeon and watch the MVP Loop Summary update.";
+            map["guided_mvp.action.reduce_heat_pressure"] = "Improve placement toward lower heat pressure before pushing further.";
+            map["guided_mvp.action.improve_survivability_or_layout"] = "Improve survivability or layout, then run again.";
+            map["guided_mvp.action.verify_research_status"] = "Check the research status line before claiming progress.";
+            map["guided_mvp.action.repeat_or_improve"] = "Run again or adjust one placement based on the summary.";
             if (includeDiagnosticsLocalization)
             {
                 map["ui.dev.hint.toggle_panel"] = "F1 toggles Dev Panel";
