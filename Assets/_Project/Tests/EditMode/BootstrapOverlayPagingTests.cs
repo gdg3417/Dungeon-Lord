@@ -202,11 +202,21 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedFromRuntimePage = RefreshText();
 
-            Assert.That(focusedFromRuntimePage, Does.Contain("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
-            AssertLinesAppearInOrder(focusedFromRuntimePage, "run-heat-cooling-line", "run-heat-delta-line", "run-heat-application-line", "run-attraction-line");
+            Assert.That(focusedFromRuntimePage, Does.Contain("run-survival-line"));
+            Assert.That(focusedFromRuntimePage, Does.Contain("run-extraction-line"));
+            AssertLinesAppearInOrder(
+                focusedFromRuntimePage,
+                "run-heat-cooling-line",
+                "run-heat-delta-line",
+                "run-heat-application-line",
+                "run-attraction-line",
+                "run-forecast-line",
+                "run-demand-budget-line");
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("build-line"));
 
             _overlay.CycleFullDiagnosticsPage();

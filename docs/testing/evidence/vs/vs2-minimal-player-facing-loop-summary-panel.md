@@ -38,7 +38,8 @@ _Date: 2026-06-04 (UTC)_
   - missing optional loot, heat, and research summary data;
   - player-facing labels and suggestion values resolving through localization keys;
   - no mutation of save or summary state while formatting the panel.
-- Updated `BootstrapOverlayPagingTests` to preserve existing diagnostics paging coverage with the player-facing panel prepended.
+- Updated `BootstrapOverlayPagingTests` to preserve existing diagnostics paging coverage with the player-facing panel prepended on full diagnostics pages.
+- Added coverage that F2 Run Diagnostics Focus suppresses the MVP Loop Summary panel while preserving run, loot, survival, extraction, heat, attraction, forecast, and demand-budget diagnostic lines.
 - Updated Bootstrap no-mutation assertions to include research and offline summary state alongside save, heat, mana, and run history.
 
 ## Manual Bootstrap smoke checklist
@@ -49,12 +50,17 @@ _Date: 2026-06-04 (UTC)_
 4. Use existing dev controls to place a structure.
 5. Use existing dev controls to run one deterministic adventure.
 6. Confirm the panel updates placement, latest run status, mana reserve, loot, heat before/after/tier, research, and next suggestion without requiring a new action path.
-7. Toggle F1/F2/F3 and scroll diagnostics to confirm existing Bootstrap diagnostics paging still works below the panel.
-8. Confirm no panel display action saves, simulates a run, applies heat, grants rewards, unlocks content, charges costs, calls backend services, or processes offline research/heat.
+7. Toggle F1/F3 and scroll full diagnostics pages to confirm existing Bootstrap diagnostics paging still works below the panel.
+8. Toggle F2 Run Diagnostics Focus and confirm the MVP Loop Summary panel is suppressed so the run diagnostics focus header and run lines remain readable on screen.
+9. Confirm no panel display action saves, simulates a run, applies heat, grants rewards, unlocks content, charges costs, calls backend services, or processes offline research/heat.
+
+## Manual overflow finding and fix
+
+Manual smoke testing found that prepending the MVP Loop Summary panel above every overlay mode pushed `Diagnostics: Run Diagnostics Focus` off the visible screen. F2 Run Diagnostics Focus now suppresses the MVP Loop Summary panel so the focus mode remains readable and dedicated to run diagnostics. Normal full diagnostics pages still show the MVP Loop Summary panel above their paged diagnostics body.
 
 ## Explicit behavior confirmation
 
-This PR only adds read-only UI presentation. It does not add gameplay behavior, rewards, unlocks, backend calls, offline research progression, offline heat processing, new costs, new run simulation, new heat application, multi-slot research, Hostile/Raid tiers, raids, seasons, leaderboards, monetization, or new monster families.
+This PR only adds read-only UI presentation and a focused overflow/readability fix. It does not add gameplay behavior, rewards, unlocks, backend calls, offline research progression, offline heat processing, new costs, new run simulation, new heat application, multi-slot research, Hostile/Raid tiers, raids, seasons, leaderboards, monetization, or new monster families.
 
 ## Local test execution note
 

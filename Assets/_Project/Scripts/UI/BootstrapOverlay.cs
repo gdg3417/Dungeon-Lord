@@ -118,8 +118,11 @@ namespace DungeonBuilder.M0
         private string BuildOverlayText()
         {
             var builder = new StringBuilder();
-            AppendMvpLoopSummaryPanel(builder);
-            AppendLine(builder, string.Empty);
+            if (!_runDiagnosticsOnlyVisible)
+            {
+                AppendMvpLoopSummaryPanel(builder);
+                AppendLine(builder, string.Empty);
+            }
             AppendHeader(builder);
 
             if (_runDiagnosticsOnlyVisible)
