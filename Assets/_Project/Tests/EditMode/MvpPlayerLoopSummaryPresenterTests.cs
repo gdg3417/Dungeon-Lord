@@ -123,12 +123,32 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(summary.HasResearchStatus, Is.True);
             Assert.That(summary.ResearchProjectId, Is.EqualTo(ProjectId));
-            Assert.That(summary.ResearchStatusKey, Is.EqualTo("ui.research.status.verification_required"));
+            Assert.That(summary.ResearchStatusKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.ResearchVerificationRequiredKey));
             Assert.That(summary.ResearchVerificationRuleResolved, Is.True);
             Assert.That(summary.ResearchVerificationDeterministicErrorCode, Is.EqualTo((int)ResearchVerificationBoundarySummaryErrorCode.None));
             Assert.That(summary.VerificationRequired, Is.True);
             Assert.That(summary.VerificationAvailable, Is.True);
             Assert.That(summary.CanClaimProduction, Is.False);
+        }
+
+
+        [Test]
+        public void Resolve_CompletionPendingWithUnavailableVerification_ReportsResearchUnavailableAndDoesNotSuggestVerify()
+        {
+            SaveData save = FullSave();
+            save.researchProgress.ProgressUnits = 3d;
+            save.researchProgress.CompletionPending = true;
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), UnavailableVerificationConfig());
+
+            Assert.That(summary.HasResearchStatus, Is.True);
+            Assert.That(summary.ResearchStatusKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey));
+            Assert.That(summary.ResearchVerificationRuleResolved, Is.False);
+            Assert.That(summary.ResearchVerificationDeterministicErrorCode, Is.EqualTo((int)ResearchVerificationBoundarySummaryErrorCode.UnavailableVerificationMode));
+            Assert.That(summary.VerificationRequired, Is.False);
+            Assert.That(summary.VerificationAvailable, Is.False);
+            Assert.That(summary.NextOptimizationSuggestionKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey));
+            AssertSafetyFlags(summary);
         }
 
         [Test]
@@ -308,6 +328,17 @@ namespace DungeonBuilder.Tests.EditMode
                 enabled = true,
                 ruleSourceId = "test.research.verification",
                 verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode
+            };
+        }
+
+
+        private static ResearchVerificationScaffoldConfig UnavailableVerificationConfig()
+        {
+            return new ResearchVerificationScaffoldConfig
+            {
+                enabled = true,
+                ruleSourceId = "test.research.verification",
+                verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode
             };
         }
 

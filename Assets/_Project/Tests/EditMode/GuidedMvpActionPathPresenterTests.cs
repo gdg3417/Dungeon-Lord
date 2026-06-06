@@ -17,6 +17,8 @@ namespace DungeonBuilder.Tests.EditMode
         {
             SaveData save = FullSave();
             save.dungeonLayout = DungeonLayoutState.CreateEmpty(1, 2);
+            save.researchProgress.ProgressUnits = 3d;
+            save.researchProgress.CompletionPending = true;
 
             GuidedMvpActionPathSummary summary = Resolve(save);
 
@@ -33,6 +35,8 @@ namespace DungeonBuilder.Tests.EditMode
         {
             SaveData save = FullSave();
             save.runHistory = new RunHistoryState();
+            save.researchProgress.ProgressUnits = 3d;
+            save.researchProgress.CompletionPending = true;
 
             GuidedMvpActionPathSummary summary = Resolve(save);
 
@@ -80,12 +84,36 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData save = FullSave();
             save.researchProgress.CompletionPending = true;
 
-            GuidedMvpActionPathSummary summary = Resolve(save);
+            MvpPlayerLoopSummary loopSummary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig());
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(save, loopSummary);
 
+            Assert.That(loopSummary.ResearchStatusKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.ResearchVerificationRequiredKey));
+            Assert.That(loopSummary.VerificationRequired, Is.True);
+            Assert.That(loopSummary.VerificationAvailable, Is.True);
             Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepVerifyResearchStatusId));
             Assert.That(summary.CurrentStepStatusKey, Is.EqualTo(GuidedMvpActionPathPresenter.StatusResearchCompletionPendingKey));
             Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionVerifyResearchStatusKey));
             Assert.That(summary.IsComplete, Is.False);
+            AssertSafetyFlags(summary);
+        }
+
+
+        [Test]
+        public void Resolve_CompletionPendingWithUnavailableResearch_DoesNotSuggestVerifyingResearchStatus()
+        {
+            SaveData save = FullSave();
+            save.researchProgress.ProgressUnits = 3d;
+            save.researchProgress.CompletionPending = true;
+
+            MvpPlayerLoopSummary loopSummary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), UnavailableVerificationConfig());
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(save, loopSummary);
+
+            Assert.That(loopSummary.ResearchStatusKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey));
+            Assert.That(loopSummary.VerificationRequired, Is.False);
+            Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepRepeatOrImproveId));
+            Assert.That(summary.CurrentStepId, Is.Not.EqualTo(GuidedMvpActionPathPresenter.StepVerifyResearchStatusId));
+            Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionRepeatOrImproveKey));
+            Assert.That(summary.NextActionKey, Is.Not.EqualTo(GuidedMvpActionPathPresenter.ActionVerifyResearchStatusKey));
             AssertSafetyFlags(summary);
         }
 
@@ -270,6 +298,17 @@ namespace DungeonBuilder.Tests.EditMode
                 enabled = true,
                 ruleSourceId = "test.research.verification",
                 verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode
+            };
+        }
+
+
+        private static ResearchVerificationScaffoldConfig UnavailableVerificationConfig()
+        {
+            return new ResearchVerificationScaffoldConfig
+            {
+                enabled = true,
+                ruleSourceId = "test.research.verification",
+                verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode
             };
         }
 

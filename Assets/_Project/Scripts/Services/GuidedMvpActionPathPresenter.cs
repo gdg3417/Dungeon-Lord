@@ -62,7 +62,7 @@ namespace DungeonBuilder.M0
                     isComplete: false);
             }
 
-            if (summary.HasResearchStatus && summary.VerificationRequired && !summary.CanClaimProduction)
+            if (summary.HasResearchStatus && summary.VerificationRequired && summary.VerificationAvailable && !summary.CanClaimProduction)
             {
                 return Create(
                     ruleResolved: true,
