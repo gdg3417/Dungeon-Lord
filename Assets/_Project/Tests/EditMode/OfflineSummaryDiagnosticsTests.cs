@@ -212,15 +212,29 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void CycleToSystemsDiagnostics()
         {
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
+            ShowDiagnostics();
+            while (_overlay.FullDiagnosticsPageNumber != 4)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
         }
 
         private void CycleToResearchDiagnostics()
         {
-            CycleToSystemsDiagnostics();
-            _overlay.CycleFullDiagnosticsPage();
+            ShowDiagnostics();
+            while (_overlay.FullDiagnosticsPageNumber != 5)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
+        }
+
+        private void ShowDiagnostics()
+        {
+            if (!_overlay.DiagnosticsVisible)
+            {
+                _overlay.ToggleDiagnosticsVisibility();
+            }
+            _overlay.RefreshOverlayText();
         }
 
         private string RefreshText()

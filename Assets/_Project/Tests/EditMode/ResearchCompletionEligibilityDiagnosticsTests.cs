@@ -81,9 +81,11 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void SystemsDiagnostics_DoesNotContainResearchDiagnosticBlock()
         {
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
-            _overlay.CycleFullDiagnosticsPage();
+            ShowDiagnostics();
+            while (_overlay.FullDiagnosticsPageNumber != 4)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
             _overlay.RefreshOverlayText();
             string text = _overlay.overlayText.text;
 
@@ -376,6 +378,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private string DiagnosticsPageText(int pageNumber)
         {
+            ShowDiagnostics();
             while (_overlay.FullDiagnosticsPageNumber != pageNumber)
             {
                 _overlay.CycleFullDiagnosticsPage();
@@ -386,10 +389,20 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void CycleToResearchDiagnostics()
         {
+            ShowDiagnostics();
             while (_overlay.FullDiagnosticsPageNumber != 5)
             {
                 _overlay.CycleFullDiagnosticsPage();
             }
+        }
+
+        private void ShowDiagnostics()
+        {
+            if (!_overlay.DiagnosticsVisible)
+            {
+                _overlay.ToggleDiagnosticsVisibility();
+            }
+            _overlay.RefreshOverlayText();
         }
 
         private void InvokeResearchProgressApply()

@@ -96,8 +96,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void FullDiagnostics_InitialPage_IsRuntimeSummaryWithLocalizedHeader()
+        public void FullDiagnostics_WhenShown_InitialPageIsRuntimeSummaryWithLocalizedHeader()
         {
+            ShowDiagnosticsFromPlayerFacingDefault();
             string text = RefreshText();
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
@@ -117,24 +118,8 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void DiagnosticsVisibility_DefaultMode_ShowsDiagnosticsAndPlayerFacingPanels()
+        public void DiagnosticsVisibility_DefaultMode_HidesDiagnosticsAndShowsPlayerFacingPanelsStatusAndBanner()
         {
-            string text = RefreshText();
-
-            Assert.That(_overlay.DiagnosticsVisible, Is.True);
-            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
-            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Contain("MVP Loop Summary"));
-            Assert.That(text, Does.Contain("Guided MVP Action"));
-            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9"));
-            Assert.That(text, Does.Contain("build-line"));
-            Assert.That(text, Does.Contain("F1 toggles Dev Panel"));
-        }
-
-        [Test]
-        public void ToggleDiagnosticsVisibility_PlayerFacingMode_HidesDiagnosticsHeaderBodyAndHintsButKeepsPlayerPanelsAndStatus()
-        {
-            _overlay.ToggleDiagnosticsVisibility();
             string text = RefreshText();
 
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
@@ -153,15 +138,16 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void ToggleDiagnosticsVisibility_RestoresDiagnosticsHeaderBodyAndHints()
+        public void ToggleDiagnosticsVisibility_ShowsDiagnosticsPageOneHeaderBodyAndHints()
         {
-            _overlay.ToggleDiagnosticsVisibility();
-            Assert.That(RefreshText(), Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            _overlay.CycleFullDiagnosticsPage();
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(2));
 
             _overlay.ToggleDiagnosticsVisibility();
             string text = RefreshText();
 
             Assert.That(_overlay.DiagnosticsVisible, Is.True);
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("F1 toggles Dev Panel"));
@@ -170,9 +156,29 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void ToggleDiagnosticsVisibility_WhenShown_HidesDiagnosticsAgain()
+        {
+            ShowDiagnosticsFromPlayerFacingDefault();
+
+            _overlay.ToggleDiagnosticsVisibility();
+            string text = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(text, Does.Contain("MVP Loop Summary"));
+            Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            Assert.That(text, Does.Not.Contain("build-line"));
+            Assert.That(text, Does.Not.Contain("F1 toggles Dev Panel"));
+            Assert.That(text, Does.Not.Contain("F2 toggles Run Diagnostics focus"));
+            Assert.That(text, Does.Not.Contain("F3 cycles Diagnostics Page"));
+        }
+
+        [Test]
         public void RunDiagnosticsFocus_FromPlayerFacingMode_RestoresPriorPlayerFacingModeSafely()
         {
-            _overlay.ToggleDiagnosticsVisibility();
             string playerFacingText = RefreshText();
             Assert.That(playerFacingText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -200,8 +206,6 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PlayerFacingMode_MinimalMvpActionLabelsIncludePlacementRunAndDiagnosticsToggleKeys()
         {
-            _overlay.ToggleDiagnosticsVisibility();
-
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => _root.Content.GetString(key, fallback));
 
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
@@ -209,6 +213,36 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+        }
+
+        [Test]
+        public void DefaultPlayerFacingMode_PlayerPlacementAndRunActionsRemainAvailable()
+        {
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+
+            typeof(BootstrapOverlay).GetMethod("ShowPlayerPlacementBanner", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_overlay, null);
+            string placementText = RefreshText();
+
+            Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
+            Assert.That(placementText, Does.Contain("Placed structure: Mana Generator"));
+            Assert.That(placementText, Does.Contain("MVP Loop Summary"));
+            Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_action_test.json", useAtomicWrites = false }));
+
+            typeof(BootstrapOverlay).GetMethod("ShowPlayerRunBanner", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(_overlay, null);
+            string runText = RefreshText();
+
+            Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
+            Assert.That(runText, Does.Contain("Run simulated."));
+            Assert.That(runText, Does.Contain("Latest run:"));
+            Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
         }
 
 
@@ -262,6 +296,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void FullDiagnostics_F3PageCycle_WrapsFromFinalDiagnosticsBackToRuntimeSummary()
         {
+            ShowDiagnosticsFromPlayerFacingDefault();
             AssertPage(1, "Runtime Summary");
             CycleAndAssertPage(2, "Run Diagnostics");
             CycleAndAssertPage(3, "Heat Diagnostics");
@@ -275,8 +310,24 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void HiddenDiagnostics_F3OnlyChangesHiddenPageStateAndDoesNotChangePlayerFacingText()
+        {
+            string before = RefreshText();
+
+            _overlay.CycleFullDiagnosticsPage();
+            string after = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(2));
+            Assert.That(after, Is.EqualTo(before));
+            Assert.That(after, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(after, Does.Not.Contain("Diagnostics: Run Diagnostics Page 2/9"));
+        }
+
+        [Test]
         public void FullDiagnostics_PagesIncludeTheirLinesAndExcludeOtherPageLines()
         {
+            ShowDiagnosticsFromPlayerFacingDefault();
             AssertPageLines("build-line", "run-line");
 
             _overlay.CycleFullDiagnosticsPage();
@@ -387,6 +438,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void ResearchDiagnostics_ScrollOffsetClampsAndRevealsBottomLines()
         {
+            ShowDiagnosticsFromPlayerFacingDefault();
             CycleToResearchDiagnostics();
 
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
@@ -408,6 +460,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PageAndFocusChanges_ResetDiagnosticsScrollOffset()
         {
+            ShowDiagnosticsFromPlayerFacingDefault();
             CycleToResearchDiagnostics();
             _overlay.ScrollFullDiagnosticsLines(100);
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(5));
@@ -429,6 +482,7 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData save = _root.Save;
             string before = JsonUtility.ToJson(save);
 
+            ShowDiagnosticsFromPlayerFacingDefault();
             CycleToResearchDiagnostics();
             _overlay.ScrollFullDiagnosticsLines(100);
             _overlay.RefreshOverlayText();
@@ -449,7 +503,7 @@ namespace DungeonBuilder.Tests.EditMode
             RunHistoryState history = save.runHistory;
             RunOutcomeRecord[] outcomes = history.RecentOutcomes;
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 9; i++)
             {
                 _overlay.CycleFullDiagnosticsPage();
                 _overlay.RefreshOverlayText();
@@ -509,10 +563,48 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static int VisibleScrollPageSizeForTest() => 4;
 
+        private static RunSimulationService BuildRunSimulationServiceForActionTest()
+        {
+            return new RunSimulationService(new RunSimulationConfig
+            {
+                BaseSuccessChance = 0.6d,
+                HeatPenaltyPerPoint = 0.004d,
+                ManaReserveBonusPerPoint = 0.01d,
+                CrisisFailurePenalty = 0.3d,
+                SuccessThreshold = 0.5d,
+                BaseScoreOnSuccess = 100,
+                ScorePerManaPoint = 2,
+                MaxRunHistoryEntries = 10,
+                HighHeatFeedbackThreshold = 75d,
+                LowManaFeedbackThreshold = 5d,
+                StrongManaReserveFeedbackThreshold = 50d,
+                MinPartySize = 3,
+                MaxPartySize = 5,
+                MaxAllowedPartySize = 100,
+                SuccessSurvivorRatio = 1d,
+                FailureSurvivorRatio = 0d,
+                LootExtractionRoundingPolicyId = "loot_extraction.round_floor",
+                LootExtractionRuleSourceId = "run.loot_extraction.rule.test",
+                LootHeatCoolingRuleSourceId = "run.loot_heat_cooling.rule.test",
+                AdventurerAttractionRuleSourceId = "run.adventurer_attraction.rule.test",
+                AdventurerInterestForecastRuleSourceId = "run.adventurer_interest_forecast.rule.test",
+                AdventurerDemandBudgetRuleSourceId = "run.adventurer_demand_budget.rule.test",
+                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.test",
+                HeatPeaceMinimum = 0d,
+                HeatPeaceMaximum = 9d,
+                HeatNoticeMinimum = 10d,
+                HeatNoticeMaximum = 24d,
+                HeatConcernMinimum = 25d,
+                HeatConcernMaximum = 49d,
+                RunHeatApplicationRuleSourceId = "run.heat_application.rule.test"
+            });
+        }
+
         [Test]
         public void Header_MissingLocalization_UsesLocalizationKeyFallbacksSafely()
         {
             SetContent(BuildContent(includeDiagnosticsLocalization: false));
+            ShowDiagnosticsFromPlayerFacingDefault();
 
             string text = RefreshText();
 
@@ -522,6 +614,14 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.ToggleRunDiagnosticsFocus();
             Assert.That(RefreshText(), Does.Contain("ui.dev.diagnostics.focus.run_diagnostics"));
+        }
+
+        private void ShowDiagnosticsFromPlayerFacingDefault()
+        {
+            if (!_overlay.DiagnosticsVisible)
+            {
+                _overlay.ToggleDiagnosticsVisibility();
+            }
         }
 
         private void AssertPage(int number, string name)
@@ -622,6 +722,8 @@ namespace DungeonBuilder.Tests.EditMode
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.dev.structure_status"] = "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}";
             map["ui.banner.place_success"] = "Placed structure: {0}";
+            map["ui.banner.run_simulated"] = "Run simulated.";
+            map["ui.banner.run_sim_failed"] = "Run simulation failed.";
             map["structure.mana_generator.basic.display_name"] = "Mana Generator";
             map["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber";
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";

@@ -2330,6 +2330,15 @@ namespace DungeonBuilder.Tests.EditMode
             AssertBootstrapOverlayHeatDeltaSequence(runDiagnosticsFocus: true);
         }
 
+        private static void ShowDiagnostics(BootstrapOverlay overlay)
+        {
+            if (!overlay.DiagnosticsVisible)
+            {
+                overlay.ToggleDiagnosticsVisibility();
+            }
+            overlay.RefreshOverlayText();
+        }
+
         private static SaveData BuildRunHeatDeltaSave(RunHeatDeltaSummary summary)
         {
             return new SaveData
@@ -2378,6 +2387,7 @@ namespace DungeonBuilder.Tests.EditMode
                 }
                 else
                 {
+                    ShowDiagnostics(overlay);
                     overlay.CycleFullDiagnosticsPage();
                     overlay.CycleFullDiagnosticsPage();
                 }
