@@ -106,7 +106,11 @@ namespace DungeonBuilder.M0
         public MvpPlayerLoopSummary ResolveMvpPlayerLoopSummary()
         {
             RunSimulationConfig config = _runSimulationService != null ? _runSimulationService.Config : null;
-            return MvpPlayerLoopSummaryPresenter.Resolve(Save, config);
+            return MvpPlayerLoopSummaryPresenter.Resolve(
+                Save,
+                config,
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchVerificationScaffoldConfig());
         }
 
         private void Awake()

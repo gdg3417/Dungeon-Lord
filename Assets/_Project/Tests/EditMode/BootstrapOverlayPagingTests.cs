@@ -106,6 +106,36 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("run-heat-delta-line"));
         }
 
+
+        [Test]
+        public void MvpLoopPanel_CompletionPendingResearch_UsesGameRootScaffoldConfigPath()
+        {
+            const string projectId = "research.project.panel_config";
+            SetContent(BuildContentWithResearchScaffold(projectId));
+            SetSave(new SaveData
+            {
+                structureRuntime = new StructureRuntimeState { Heat = 3d, ManaReserve = 14d },
+                runHistory = new RunHistoryState(),
+                researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = projectId },
+                researchProgress = new ResearchProgressState
+                {
+                    SlotId = "research.slot.primary",
+                    ProjectId = projectId,
+                    ProgressUnits = 2d,
+                    CompletionPending = true,
+                    RuleSourceIdUsed = "research.progress.rule.test"
+                }
+            });
+
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            string text = RefreshText();
+
+            Assert.That(summary.ResearchStatusKey, Is.EqualTo("ui.research.status.verification_required"));
+            Assert.That(summary.ResearchVerificationRuleResolved, Is.True);
+            Assert.That(text, Does.Contain("Research: Verification required"));
+            Assert.That(text, Does.Not.Contain("Research: Research unavailable"));
+        }
+
         [Test]
         public void FullDiagnostics_F3PageCycle_WrapsFromResearchStatusBackToRuntimeSummary()
         {
@@ -344,6 +374,29 @@ namespace DungeonBuilder.Tests.EditMode
             }
         }
 
+        private static ContentService BuildContentWithResearchScaffold(string projectId)
+        {
+            ContentService content = BuildContent(includeDiagnosticsLocalization: true);
+            typeof(ContentService).GetField("<Bootstrap>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(content, new ContentBootstrap
+                {
+                    researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.completion_eligibility.rule.test",
+                        projectId = projectId,
+                        requiredProgressUnits = 2d
+                    },
+                    researchVerificationScaffold = new ResearchVerificationScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.verification.rule.test",
+                        verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode
+                    }
+                });
+            return content;
+        }
+
         private string RefreshText()
         {
             _overlay.RefreshOverlayText();
@@ -374,6 +427,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.value.no_research"] = "No research";
             map["ui.mvp_loop.run_status.succeeded"] = "Succeeded";
             map["ui.mvp_loop.run_status.failed"] = "Failed";
+            map["ui.research.status.verification_required"] = "Verification required";
+            map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             if (includeDiagnosticsLocalization)
