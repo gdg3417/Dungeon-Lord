@@ -23,6 +23,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.TitleKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.PlacementButtonKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.RunButtonKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.ShowDiagnosticsButtonKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.HideDiagnosticsButtonKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.CompactFormatKey));
         }
 
@@ -34,6 +36,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.Title, Is.EqualTo(MinimalMvpActionPanelPresenter.TitleKey));
             Assert.That(labels.PlacementButton, Is.EqualTo(MinimalMvpActionPanelPresenter.PlacementButtonKey));
             Assert.That(labels.RunButton, Is.EqualTo(MinimalMvpActionPanelPresenter.RunButtonKey));
+            Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo(MinimalMvpActionPanelPresenter.ShowDiagnosticsButtonKey));
+            Assert.That(labels.HideDiagnosticsButton, Is.EqualTo(MinimalMvpActionPanelPresenter.HideDiagnosticsButtonKey));
         }
     }
 }
