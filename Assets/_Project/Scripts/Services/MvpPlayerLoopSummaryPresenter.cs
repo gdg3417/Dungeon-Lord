@@ -13,6 +13,8 @@ namespace DungeonBuilder.M0
         public const string SuggestImproveSurvivabilityOrLayoutKey = "mvp_loop.suggestion.improve_survivability_or_layout";
         public const string SuggestVerifyResearchStatusKey = "mvp_loop.suggestion.verify_research_status";
         public const string SuggestRepeatOrImprovePlacementKey = "mvp_loop.suggestion.repeat_or_improve_placement";
+        public const string ResearchVerificationRequiredKey = "ui.research.status.verification_required";
+        public const string ResearchUnavailableKey = MvpPlayerFacingLabelResolver.ResearchUnavailableKey;
 
         public static MvpPlayerLoopSummary Resolve(
             SaveData save,
@@ -51,6 +53,8 @@ namespace DungeonBuilder.M0
             bool hasRunOutcome = latestRun != null;
             bool hasResolvedHeatApplication = heatApplication != null && heatApplication.RuleResolved;
             bool hasResearchStatus = HasResearchSignal(researchStatus, verificationBoundary, save.researchPending, save.researchProgress, save.completedResearch);
+            bool verificationActionable = IsVerificationActionable(researchStatus, verificationBoundary);
+            string researchStatusKey = ResolveResearchStatusKey(researchStatus, verificationActionable);
             string researchProjectId = FirstNonEmpty(verificationBoundary?.ProjectId, researchStatus?.ProjectId, save.researchProgress?.ProjectId, save.researchPending?.ProjectId);
             string heatTierId = FirstNonEmpty(heatTier.RuleResolved ? heatTier.TierId : null, heatApplication?.TierAfter);
             int generatedWorldValue = lootSummary?.TotalGeneratedWorldValue ?? 0;
@@ -75,10 +79,10 @@ namespace DungeonBuilder.M0
                 HeatTierId = heatTierId,
                 HasResearchStatus = hasResearchStatus,
                 ResearchProjectId = researchProjectId,
-                ResearchStatusKey = researchStatus?.StatusLocalizationKey ?? string.Empty,
+                ResearchStatusKey = researchStatusKey,
                 ResearchVerificationRuleResolved = verificationBoundary != null && verificationBoundary.RuleResolved,
                 ResearchVerificationDeterministicErrorCode = verificationBoundary?.DeterministicErrorCode ?? (int)ResearchVerificationBoundarySummaryErrorCode.NoPendingResearch,
-                VerificationRequired = verificationBoundary != null && verificationBoundary.VerificationRequired,
+                VerificationRequired = verificationActionable,
                 VerificationAvailable = verificationBoundary != null && verificationBoundary.VerificationAvailable,
                 CanClaimProduction = (researchStatus != null && researchStatus.CanClaimProduction) || (verificationBoundary != null && verificationBoundary.CanClaimProduction),
                 WouldMutateState = false,
@@ -155,6 +159,38 @@ namespace DungeonBuilder.M0
                    (completed != null && completed.ProjectIds != null && completed.ProjectIds.Any(projectId => !string.IsNullOrWhiteSpace(projectId)));
         }
 
+        private static string ResolveResearchStatusKey(
+            ResearchStatusPresentation status,
+            bool verificationActionable)
+        {
+            if (status == null)
+            {
+                return string.Empty;
+            }
+
+            if (!status.VerificationRequired)
+            {
+                return status.StatusLocalizationKey ?? string.Empty;
+            }
+
+            return verificationActionable
+                ? ResearchVerificationRequiredKey
+                : ResearchUnavailableKey;
+        }
+
+        private static bool IsVerificationActionable(
+            ResearchStatusPresentation status,
+            ResearchVerificationBoundarySummary boundary)
+        {
+            return status != null &&
+                   status.VerificationRequired &&
+                   boundary != null &&
+                   boundary.RuleResolved &&
+                   boundary.VerificationRequired &&
+                   boundary.VerificationAvailable &&
+                   !boundary.CanClaimProduction;
+        }
+
         private static string ChooseSuggestion(MvpPlayerLoopSummary summary)
         {
             if (summary == null || !summary.HasRunOutcome)
@@ -162,7 +198,7 @@ namespace DungeonBuilder.M0
                 return SuggestRunDungeonKey;
             }
 
-            if (summary.HasResearchStatus && summary.VerificationRequired && !summary.CanClaimProduction)
+            if (summary.HasResearchStatus && summary.VerificationRequired && summary.VerificationAvailable && !summary.CanClaimProduction)
             {
                 return SuggestVerifyResearchStatusKey;
             }
