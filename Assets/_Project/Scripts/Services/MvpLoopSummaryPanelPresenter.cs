@@ -59,7 +59,7 @@ namespace DungeonBuilder.M0
                 return Localize(localize, ValueNoPlacementKey);
             }
 
-            return summary.SelectedStructureId;
+            return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(summary.SelectedStructureId, localize);
         }
 
         private static string ResolveRun(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -85,7 +85,7 @@ namespace DungeonBuilder.M0
                 return Localize(localize, ValueNoResearchKey);
             }
 
-            return ResolveKeyOrFallback(summary.ResearchStatusKey, localize, ValueNoResearchKey);
+            return MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize);
         }
 
         private static string ResolveKeyOrFallback(string key, Func<string, string, string> localize, string fallbackKey)

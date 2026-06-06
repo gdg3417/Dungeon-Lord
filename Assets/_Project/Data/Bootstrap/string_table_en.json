@@ -112,6 +112,22 @@
       "text": "Structure simulation config missing or invalid."
     },
     {
+      "key": "structure.mana_generator.basic.display_name",
+      "text": "Mana Generator"
+    },
+    {
+      "key": "structure.heat_scrubber.basic.display_name",
+      "text": "Heat Scrubber"
+    },
+    {
+      "key": "structure.risk_lab.basic.display_name",
+      "text": "Risk Lab"
+    },
+    {
+      "key": "ui.mvp_label.structure.unknown",
+      "text": "Unknown structure"
+    },
+    {
       "key": "ui.dev.hint.toggle_panel",
       "text": "F1 toggles Dev Panel"
     },

@@ -49,7 +49,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
 
-            Assert.That(text, Does.Contain("structure.mana_generator.basic"));
+            Assert.That(text, Does.Contain("LOC[structure.mana_generator.basic.display_name]"));
+            Assert.That(text, Does.Not.Contain("LOC[ui.mvp_loop.panel.placement_format]:structure.mana_generator.basic"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.run_status.failed] (run.missing_optional)"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.panel.loot_format]:0:0:0"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.value.unknown]"));
@@ -95,9 +96,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.HeatFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.ResearchFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.SuggestionFormatKey));
+            Assert.That(requestedKeys, Does.Contain("structure.heat_scrubber.basic.display_name"));
             Assert.That(requestedKeys, Does.Contain(CurrentHeatTierResolver.NoticeTierId));
             Assert.That(requestedKeys, Does.Contain("ui.research.status.active_in_progress"));
             Assert.That(requestedKeys, Does.Contain(MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey));
+        }
+
+
+        [Test]
+        public void BuildPanelText_UnknownResearchStatus_UsesSafeLocalizedFallbackInsteadOfRawProjectId()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasResearchStatus = true,
+                ResearchProjectId = "research.project.unmapped",
+                ResearchStatusKey = string.Empty,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[ui.research.status.blocked_or_invalid]"));
+            Assert.That(text, Does.Not.Contain("research.project.unmapped"));
         }
 
         [Test]

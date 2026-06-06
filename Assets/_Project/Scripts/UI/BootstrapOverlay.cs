@@ -578,9 +578,11 @@ namespace DungeonBuilder.M0
 
         private void ShowPlayerPlacementBanner()
         {
-            bool ok = _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out string bannerKey);
+            const string structureId = StructureSimulationPass.ManaGeneratorBasicId;
+            bool ok = _root.TryMvpPlaceOrModifySelectedStructure(structureId, out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
-            _root.SetBanner(ok ? string.Format(message, StructureSimulationPass.ManaGeneratorBasicId) : message);
+            string displayName = MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(structureId, (key, fallback) => GetLocalizedString(key, fallback));
+            _root.SetBanner(ok ? string.Format(message, displayName) : message);
             RefreshOverlayText();
         }
 
