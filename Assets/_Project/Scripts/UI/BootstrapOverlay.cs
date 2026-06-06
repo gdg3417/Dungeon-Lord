@@ -144,6 +144,14 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, panelText);
             }
+
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(guidedText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, guidedText);
+            }
         }
 
         private void AppendHeader(StringBuilder builder)

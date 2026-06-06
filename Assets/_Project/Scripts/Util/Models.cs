@@ -83,6 +83,11 @@ namespace DungeonBuilder.M0
         None = 0,
         MissingSave = 1
     }
+    public enum GuidedMvpActionPathErrorCode
+    {
+        None = 0,
+        MissingSave = 1
+    }
     public enum OfflineSummaryErrorCode
     {
         None = 0,
@@ -476,6 +481,25 @@ namespace DungeonBuilder.M0
         public bool WouldUnlockContent = false;
         public bool WouldCallServer = false;
         public bool WouldProcessOfflineProgress = false;
+    }
+
+    [Serializable]
+    public sealed class GuidedMvpActionPathSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)GuidedMvpActionPathErrorCode.None;
+        public string CurrentStepId;
+        public string CurrentStepStatusKey;
+        public string NextActionKey;
+        public bool IsComplete = false;
+        public bool WouldMutateState = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
+        public bool WouldChargeCosts = false;
+        public bool WouldCallServer = false;
+        public bool WouldProcessOfflineResearch = false;
+        public bool WouldProcessOfflineHeat = false;
+        public bool WouldStartRaid = false;
     }
 
     [Serializable]
