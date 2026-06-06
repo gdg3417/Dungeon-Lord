@@ -21,6 +21,11 @@ Main is merged through PR 73 / M7-C2. The repository now contains M6 heat closeo
 - Attach validation evidence under `docs/testing/evidence`.
 - Documentation-only PRs should run available text or formatting checks and confirm that no runtime, tuning, scene, prefab, asset, or `.meta` changes were introduced.
 
+VS4 first-session MVP smoke documentation:
+
+- [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
+- [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
+
 ## Next intended work
 
 The next phase is MVP vertical-slice integration, not deeper scaffold expansion. Upcoming PRs should compose existing structure placement, run simulation, mana, loot extraction, active heat, and single-slot research outputs into the smallest coherent player-facing loop before adding broader systems.
