@@ -22,7 +22,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = GuidedMvpActionPathPanelPresenter.BuildPanelText(summary, (key, fallback) =>
             {
                 requestedKeys.Add(key);
-                return "LOC[" + key + "]";
+                return Localize(key, fallback);
             });
 
             Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPanelPresenter.TitleKey + "]"));
