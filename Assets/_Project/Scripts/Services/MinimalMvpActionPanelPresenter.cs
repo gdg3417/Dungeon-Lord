@@ -7,6 +7,8 @@ namespace DungeonBuilder.M0
         public const string TitleKey = "ui.mvp_action.panel.title";
         public const string PlacementButtonKey = "ui.mvp_action.button.place_or_modify";
         public const string RunButtonKey = "ui.mvp_action.button.run_or_observe";
+        public const string ShowDiagnosticsButtonKey = "ui.mvp_action.button.show_diagnostics";
+        public const string HideDiagnosticsButtonKey = "ui.mvp_action.button.hide_diagnostics";
         public const string CompactFormatKey = "ui.mvp_action.panel.compact_format";
 
         public static MinimalMvpActionPanelLabels BuildLabels(Func<string, string, string> localize)
@@ -14,7 +16,9 @@ namespace DungeonBuilder.M0
             return new MinimalMvpActionPanelLabels(
                 Localize(localize, TitleKey),
                 Localize(localize, PlacementButtonKey),
-                Localize(localize, RunButtonKey));
+                Localize(localize, RunButtonKey),
+                Localize(localize, ShowDiagnosticsButtonKey),
+                Localize(localize, HideDiagnosticsButtonKey));
         }
 
         public static string BuildPanelText(Func<string, string, string> localize)
@@ -37,15 +41,24 @@ namespace DungeonBuilder.M0
 
     public struct MinimalMvpActionPanelLabels
     {
-        public MinimalMvpActionPanelLabels(string title, string placementButton, string runButton)
+        public MinimalMvpActionPanelLabels(
+            string title,
+            string placementButton,
+            string runButton,
+            string showDiagnosticsButton,
+            string hideDiagnosticsButton)
         {
             Title = title;
             PlacementButton = placementButton;
             RunButton = runButton;
+            ShowDiagnosticsButton = showDiagnosticsButton;
+            HideDiagnosticsButton = hideDiagnosticsButton;
         }
 
         public string Title { get; }
         public string PlacementButton { get; }
         public string RunButton { get; }
+        public string ShowDiagnosticsButton { get; }
+        public string HideDiagnosticsButton { get; }
     }
 }

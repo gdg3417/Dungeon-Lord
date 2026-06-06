@@ -668,6 +668,22 @@
       "text": "Run again or adjust one placement based on the summary."
     },
     {
+      "key": "ui.mvp_action.button.show_diagnostics",
+      "text": "Show diagnostics"
+    },
+    {
+      "key": "ui.mvp_action.button.hide_diagnostics",
+      "text": "Hide diagnostics"
+    },
+    {
+      "key": "ui.mvp_view.player_mode.status",
+      "text": "Player view: diagnostics hidden."
+    },
+    {
+      "key": "ui.mvp_view.diagnostics_mode.status",
+      "text": "Diagnostics visible."
+    },
+    {
       "key": "heat_tier.peace",
       "text": "Peace"
     },

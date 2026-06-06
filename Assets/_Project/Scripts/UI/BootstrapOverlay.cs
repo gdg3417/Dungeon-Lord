@@ -23,12 +23,13 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 110f;
+        private const float MinimalMvpActionPanelHeight = 140f;
         private const float MinimalMvpActionPanelMargin = 10f;
 
         private GameRoot _root;
         private bool _devPanelVisible;
         private bool _runDiagnosticsOnlyVisible;
+        private bool _diagnosticsVisible = true;
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
@@ -36,6 +37,7 @@ namespace DungeonBuilder.M0
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
         public bool DevPanelVisible => _devPanelVisible;
+        public bool DiagnosticsVisible => _diagnosticsVisible || _runDiagnosticsOnlyVisible;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
 
@@ -61,9 +63,15 @@ namespace DungeonBuilder.M0
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
         }
 
+        public void ToggleDiagnosticsVisibility()
+        {
+            _diagnosticsVisible = !_diagnosticsVisible;
+            _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
+        }
+
         public void ScrollFullDiagnosticsLines(int lineDelta)
         {
-            if (_runDiagnosticsOnlyVisible || lineDelta == 0)
+            if (_runDiagnosticsOnlyVisible || !_diagnosticsVisible || lineDelta == 0)
             {
                 return;
             }
@@ -137,14 +145,20 @@ namespace DungeonBuilder.M0
                 AppendMvpLoopSummaryPanel(builder);
                 AppendLine(builder, string.Empty);
             }
-            AppendHeader(builder);
-
             if (_runDiagnosticsOnlyVisible)
             {
+                AppendHeader(builder);
                 AppendRunDiagnostics(builder, includeBreakdownAndFeedback: false, includeHeatDiagnostics: true);
                 return builder.ToString();
             }
 
+            if (!_diagnosticsVisible)
+            {
+                AppendPlayerFacingStatus(builder);
+                return builder.ToString();
+            }
+
+            AppendHeader(builder);
             AppendScrolledFullDiagnosticsBody(builder, BuildCurrentFullDiagnosticsBody());
             return builder.ToString();
         }
@@ -164,6 +178,16 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, string.Empty);
                 AppendLine(builder, guidedText);
+            }
+        }
+
+        private void AppendPlayerFacingStatus(StringBuilder builder)
+        {
+            AppendLine(builder, string.Empty);
+            AppendLine(builder, GetLocalizedString("ui.mvp_view.player_mode.status"));
+            if (!string.IsNullOrEmpty(_root.BannerMessage))
+            {
+                AppendLine(builder, _root.BannerMessage);
             }
         }
 
@@ -564,6 +588,9 @@ namespace DungeonBuilder.M0
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => GetLocalizedString(key, fallback));
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
             GUILayout.Label(labels.Title);
+            GUILayout.Label(GetLocalizedString(_diagnosticsVisible
+                ? "ui.mvp_view.diagnostics_mode.status"
+                : "ui.mvp_view.player_mode.status"));
             if (GUILayout.Button(labels.PlacementButton))
             {
                 ShowPlayerPlacementBanner();
@@ -572,6 +599,13 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(labels.RunButton))
             {
                 ShowPlayerRunBanner();
+            }
+
+            string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
+            if (GUILayout.Button(diagnosticsButton))
+            {
+                ToggleDiagnosticsVisibility();
+                RefreshOverlayText();
             }
             GUILayout.EndArea();
         }

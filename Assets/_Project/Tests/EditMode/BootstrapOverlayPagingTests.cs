@@ -116,6 +116,101 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("run-heat-delta-line"));
         }
 
+        [Test]
+        public void DiagnosticsVisibility_DefaultMode_ShowsDiagnosticsAndPlayerFacingPanels()
+        {
+            string text = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.True);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(text, Does.Contain("MVP Loop Summary"));
+            Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            Assert.That(text, Does.Contain("build-line"));
+            Assert.That(text, Does.Contain("F1 toggles Dev Panel"));
+        }
+
+        [Test]
+        public void ToggleDiagnosticsVisibility_PlayerFacingMode_HidesDiagnosticsHeaderBodyAndHintsButKeepsPlayerPanelsAndStatus()
+        {
+            _overlay.ToggleDiagnosticsVisibility();
+            string text = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(text, Does.Contain("MVP Loop Summary"));
+            Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Contain("banner-line"));
+            Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            Assert.That(text, Does.Not.Contain("build-line"));
+            Assert.That(text, Does.Not.Contain("F1 toggles Dev Panel"));
+            Assert.That(text, Does.Not.Contain("F2 toggles Run Diagnostics focus"));
+            Assert.That(text, Does.Not.Contain("F3 cycles Diagnostics Page"));
+            Assert.That(text, Does.Not.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
+        }
+
+        [Test]
+        public void ToggleDiagnosticsVisibility_RestoresDiagnosticsHeaderBodyAndHints()
+        {
+            _overlay.ToggleDiagnosticsVisibility();
+            Assert.That(RefreshText(), Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+
+            _overlay.ToggleDiagnosticsVisibility();
+            string text = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.True);
+            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            Assert.That(text, Does.Contain("build-line"));
+            Assert.That(text, Does.Contain("F1 toggles Dev Panel"));
+            Assert.That(text, Does.Contain("F2 toggles Run Diagnostics focus"));
+            Assert.That(text, Does.Contain("F3 cycles Diagnostics Page"));
+        }
+
+        [Test]
+        public void RunDiagnosticsFocus_FromPlayerFacingMode_RestoresPriorPlayerFacingModeSafely()
+        {
+            _overlay.ToggleDiagnosticsVisibility();
+            string playerFacingText = RefreshText();
+            Assert.That(playerFacingText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string focusedText = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.True);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.False);
+            Assert.That(focusedText, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(focusedText, Does.Contain("run-line"));
+            Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string restoredText = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(restoredText, Does.Contain("MVP Loop Summary"));
+            Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(restoredText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+        }
+
+        [Test]
+        public void PlayerFacingMode_MinimalMvpActionLabelsIncludePlacementRunAndDiagnosticsToggleKeys()
+        {
+            _overlay.ToggleDiagnosticsVisibility();
+
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => _root.Content.GetString(key, fallback));
+
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify mana generator"));
+            Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
+            Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
+            Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
+        }
+
 
         [Test]
         public void MvpLoopPanel_CompletionPendingResearch_UsesGameRootScaffoldConfigPath()
@@ -396,9 +491,14 @@ namespace DungeonBuilder.Tests.EditMode
             string before = JsonUtility.ToJson(save);
 
             _overlay.RefreshOverlayText();
+            _overlay.ToggleDiagnosticsVisibility();
+            _overlay.RefreshOverlayText();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.ScrollFullDiagnosticsLines(1);
             _overlay.ToggleRunDiagnosticsFocus();
             _overlay.RefreshOverlayText();
             _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.ToggleDiagnosticsVisibility();
             _overlay.CycleFullDiagnosticsPage();
             _overlay.ScrollFullDiagnosticsLines(VisibleScrollPageSizeForTest());
             _overlay.ScrollFullDiagnosticsLines(-VisibleScrollPageSizeForTest());
@@ -548,7 +648,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
             map["ui.mvp_action.button.place_or_modify"] = "Place or modify mana generator";
             map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
+            map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
+            map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.panel.compact_format"] = "{0}: [{1}] [{2}]";
+            map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
+            map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
             map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
             map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
