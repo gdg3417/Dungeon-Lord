@@ -366,17 +366,17 @@ namespace DungeonBuilder.Tests.EditMode
 
         private string ResearchStatusDiagnosticsText()
         {
-            while (_overlay.FullDiagnosticsPageNumber != 6)
-            {
-                _overlay.CycleFullDiagnosticsPage();
-            }
-            _overlay.RefreshOverlayText();
-            return _overlay.overlayText.text;
+            return DiagnosticsPageText(6) + "\n" + DiagnosticsPageText(7);
         }
 
         private string ResearchVerificationDiagnosticsText()
         {
-            while (_overlay.FullDiagnosticsPageNumber != 7)
+            return DiagnosticsPageText(8) + "\n" + DiagnosticsPageText(9);
+        }
+
+        private string DiagnosticsPageText(int pageNumber)
+        {
+            while (_overlay.FullDiagnosticsPageNumber != pageNumber)
             {
                 _overlay.CycleFullDiagnosticsPage();
             }
@@ -467,8 +467,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.dev.diagnostics.header_format"] = "Diagnostics: {0} Page {1}/{2}";
             map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
             map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
-            map["ui.dev.diagnostics.page.research_status_diagnostics"] = "Research Status Diagnostics";
-            map["ui.dev.diagnostics.page.research_verification_diagnostics"] = "Research Verification Diagnostics";
+            map["ui.dev.diagnostics.page.research_status_presentation_diagnostics"] = "Research Status Presentation Diagnostics";
+            map["ui.dev.diagnostics.page.research_status_safety_diagnostics"] = "Research Status Safety Diagnostics";
+            map["ui.dev.diagnostics.page.research_verification_boundary_diagnostics"] = "Research Verification Boundary Diagnostics";
+            map["ui.dev.diagnostics.page.research_verification_safety_diagnostics"] = "Research Verification Safety Diagnostics";
             map["ui.dev.structure_status"] = "structure {0} {1} {2} {3}";
             map["ui.dev.offline_summary_format"] = "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}";
             map["ui.dev.research_pending_format"] = "Research Pending — pending={0} slot={1} project={2}";

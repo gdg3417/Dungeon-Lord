@@ -156,12 +156,20 @@
       "text": "Research Diagnostics"
     },
     {
-      "key": "ui.dev.diagnostics.page.research_status_diagnostics",
-      "text": "Research Status Diagnostics"
+      "key": "ui.dev.diagnostics.page.research_status_presentation_diagnostics",
+      "text": "Research Status Presentation Diagnostics"
     },
     {
-      "key": "ui.dev.diagnostics.page.research_verification_diagnostics",
-      "text": "Research Verification Diagnostics"
+      "key": "ui.dev.diagnostics.page.research_status_safety_diagnostics",
+      "text": "Research Status Safety Diagnostics"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.research_verification_boundary_diagnostics",
+      "text": "Research Verification Boundary Diagnostics"
+    },
+    {
+      "key": "ui.dev.diagnostics.page.research_verification_safety_diagnostics",
+      "text": "Research Verification Safety Diagnostics"
     },
     {
       "key": "ui.dev.offline_summary_format",
