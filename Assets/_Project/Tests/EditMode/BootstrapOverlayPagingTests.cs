@@ -98,7 +98,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
             Assert.That(text, Does.StartWith("MVP Loop Summary"));
-            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/6\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
+            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/7\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
             Assert.That(text, Does.Not.Contain("banner-line"));
@@ -145,6 +145,7 @@ namespace DungeonBuilder.Tests.EditMode
             CycleAndAssertPage(4, "Systems Diagnostics");
             CycleAndAssertPage(5, "Research Diagnostics");
             CycleAndAssertPage(6, "Research Status Diagnostics");
+            CycleAndAssertPage(7, "Research Verification Diagnostics");
             CycleAndAssertPage(1, "Runtime Summary");
         }
 
@@ -189,8 +190,16 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             AssertPageLines("research-status-presentation-line", "research-pending-line");
             Assert.That(_overlay.overlayText.text, Does.Contain("research-status-safety-line"));
-            Assert.That(_overlay.overlayText.text, Does.Contain("research-verification-boundary-line"));
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-verification-boundary-line"));
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-verification-safety-line"));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+            _overlay.ScrollFullDiagnosticsLines(100);
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
+
+            _overlay.CycleFullDiagnosticsPage();
+            AssertPageLines("research-verification-boundary-line", "research-status-presentation-line");
             Assert.That(_overlay.overlayText.text, Does.Contain("research-verification-safety-line"));
+            Assert.That(_overlay.overlayText.text, Does.Not.Contain("research-status-safety-line"));
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
             _overlay.ScrollFullDiagnosticsLines(100);
             Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.Zero);
@@ -289,7 +298,7 @@ namespace DungeonBuilder.Tests.EditMode
             RunHistoryState history = save.runHistory;
             RunOutcomeRecord[] outcomes = history.RecentOutcomes;
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 7; i++)
             {
                 _overlay.CycleFullDiagnosticsPage();
                 _overlay.RefreshOverlayText();
@@ -329,7 +338,7 @@ namespace DungeonBuilder.Tests.EditMode
         private void AssertPage(int number, string name)
         {
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(number));
-            Assert.That(RefreshText(), Does.Contain($"Diagnostics: {name} Page {number}/6"));
+            Assert.That(RefreshText(), Does.Contain($"Diagnostics: {name} Page {number}/7"));
         }
 
         private void CycleAndAssertPage(int number, string name)
@@ -455,6 +464,7 @@ namespace DungeonBuilder.Tests.EditMode
                 map["ui.dev.diagnostics.page.systems_diagnostics"] = "Systems Diagnostics";
                 map["ui.dev.diagnostics.page.research_diagnostics"] = "Research Diagnostics";
                 map["ui.dev.diagnostics.page.research_status_diagnostics"] = "Research Status Diagnostics";
+                map["ui.dev.diagnostics.page.research_verification_diagnostics"] = "Research Verification Diagnostics";
             }
             return content;
         }

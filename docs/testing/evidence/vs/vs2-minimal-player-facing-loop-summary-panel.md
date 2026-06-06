@@ -40,6 +40,7 @@ _Date: 2026-06-04 (UTC)_
   - no mutation of save or summary state while formatting the panel.
 - Updated `BootstrapOverlayPagingTests` to preserve existing diagnostics paging coverage with the player-facing panel prepended on full diagnostics pages.
 - Added coverage that F2 Run Diagnostics Focus suppresses the MVP Loop Summary panel while preserving run, loot, survival, extraction, heat, attraction, forecast, and demand-budget diagnostic lines.
+- Added coverage for the Research Status Diagnostics split: page 6 contains research status lines, page 7 contains research verification lines, and page 7 wraps back to runtime summary.
 - Updated Bootstrap no-mutation assertions to include research and offline summary state alongside save, heat, mana, and run history.
 
 ## Manual Bootstrap smoke checklist
@@ -52,11 +53,15 @@ _Date: 2026-06-04 (UTC)_
 6. Confirm the panel updates placement, latest run status, mana reserve, loot, heat before/after/tier, research, and next suggestion without requiring a new action path.
 7. Toggle F1/F3 and scroll full diagnostics pages to confirm existing Bootstrap diagnostics paging still works below the panel.
 8. Toggle F2 Run Diagnostics Focus and confirm the MVP Loop Summary panel is suppressed so the run diagnostics focus header and run lines remain readable on screen.
-9. Confirm no panel display action saves, simulates a run, applies heat, grants rewards, unlocks content, charges costs, calls backend services, or processes offline research/heat.
+9. Cycle to page 6 and confirm Research Status Diagnostics shows research status presentation/safety without verification boundary/safety lines.
+10. Cycle to page 7 and confirm Research Verification Diagnostics shows verification boundary/safety without research status presentation/safety lines.
+11. Confirm no panel display action saves, simulates a run, applies heat, grants rewards, unlocks content, charges costs, calls backend services, or processes offline research/heat.
 
 ## Manual overflow finding and fix
 
 Manual smoke testing found that prepending the MVP Loop Summary panel above every overlay mode pushed `Diagnostics: Run Diagnostics Focus` off the visible screen. F2 Run Diagnostics Focus now suppresses the MVP Loop Summary panel so the focus mode remains readable and dedicated to run diagnostics. Normal full diagnostics pages still show the MVP Loop Summary panel above their paged diagnostics body.
+
+Manual smoke testing also found that page 6, Research Status Diagnostics, visually overflowed because long diagnostic lines wrapped even though the logical line count did not create a scroll range. The diagnostics overlay now splits that content into page 6 Research Status Diagnostics for status presentation/safety and page 7 Research Verification Diagnostics for verification boundary/safety, preserving all diagnostic content while keeping each page shorter.
 
 ## Explicit behavior confirmation
 

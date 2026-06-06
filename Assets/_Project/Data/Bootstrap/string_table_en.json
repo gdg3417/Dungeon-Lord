@@ -160,6 +160,10 @@
       "text": "Research Status Diagnostics"
     },
     {
+      "key": "ui.dev.diagnostics.page.research_verification_diagnostics",
+      "text": "Research Verification Diagnostics"
+    },
+    {
       "key": "ui.dev.offline_summary_format",
       "text": "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
