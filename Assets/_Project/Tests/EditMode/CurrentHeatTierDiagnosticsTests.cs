@@ -132,6 +132,7 @@ namespace DungeonBuilder.Tests.EditMode
                 var overlay = overlayObject.AddComponent<BootstrapOverlay>();
                 overlay.overlayText = textObject.AddComponent<TextMeshProUGUI>();
                 overlay.Bind(root);
+                ShowDiagnostics(overlay);
                 overlay.CycleFullDiagnosticsPage();
                 overlay.CycleFullDiagnosticsPage();
                 overlay.RefreshOverlayText();
@@ -146,6 +147,15 @@ namespace DungeonBuilder.Tests.EditMode
                 Object.DestroyImmediate(overlayObject);
                 Object.DestroyImmediate(rootObject);
             }
+        }
+
+        private static void ShowDiagnostics(BootstrapOverlay overlay)
+        {
+            if (!overlay.DiagnosticsVisible)
+            {
+                overlay.ToggleDiagnosticsVisibility();
+            }
+            overlay.RefreshOverlayText();
         }
 
         private static void SetSave(GameRoot root, SaveData save) => SetBackingField(root, "<Save>k__BackingField", save);

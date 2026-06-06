@@ -22,6 +22,8 @@
   - Showing diagnostics through the existing toggle resets the full diagnostics page to Runtime Summary page 1/9.
 - `Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs`
   - Updated Bootstrap overlay EditMode coverage for player-facing defaults, diagnostics toggling, F2 focus restore, F3 paging, no-mutation view-only controls, F1 Dev Panel state, localized player-facing labels, and default action availability.
+- `Assets/_Project/Tests/EditMode/CurrentHeatTierDiagnosticsTests.cs`, `Assets/_Project/Tests/EditMode/OfflineSummaryDiagnosticsTests.cs`, `Assets/_Project/Tests/EditMode/ResearchCompletionEligibilityDiagnosticsTests.cs`, `Assets/_Project/Tests/EditMode/ResearchProgressDiagnosticsTests.cs`, and `Assets/_Project/Tests/EditMode/RunSimulationTests.cs`
+  - Updated older diagnostics tests to explicitly opt into diagnostics mode before asserting diagnostics content.
 - `docs/testing/evidence/vs/vs9-default-player-facing-first-session-view.md`
   - Added this evidence note and manual smoke checklist.
 
@@ -36,6 +38,12 @@
 - Kept and updated view-only no-mutation coverage for refresh, diagnostics visibility toggle, F2 focus, F3 paging, PageUp/PageDown-sized scrolling, and mouse-wheel-sized scrolling.
 - Added default player-facing action availability coverage for placement and run actions.
 - Kept player-facing label coverage through localization-key-backed presenter labels.
+
+## Follow-up diagnostic test compatibility fix
+
+- The initial local Unity EditMode run for PR83 failed because older diagnostics tests assumed Bootstrap diagnostics were visible immediately after `RefreshOverlayText()`.
+- Those tests now explicitly opt into diagnostics mode before asserting diagnostics headers, bodies, line ordering, or page-specific content.
+- The runtime default remains player-facing: Bootstrap diagnostics are still hidden by default, and the existing Show diagnostics path remains the opt-in route to diagnostics.
 
 ## Manual smoke checklist
 
