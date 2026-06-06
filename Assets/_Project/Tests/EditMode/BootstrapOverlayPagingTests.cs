@@ -105,7 +105,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Guided MVP Action"));
             Assert.That(text, Does.Contain("Placement: Mana Generator"));
             Assert.That(text, Does.Not.Contain("Placement: structure.mana_generator.basic"));
-            Assert.That(text, Does.Contain("Next action: Run the dungeon and watch the MVP Loop Summary update."));
+            Assert.That(text, Does.Contain("Next action: Run again or adjust one placement based on the summary."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify mana generator] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
