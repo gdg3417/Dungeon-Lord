@@ -118,6 +118,8 @@ namespace DungeonBuilder.M0
         private string BuildOverlayText()
         {
             var builder = new StringBuilder();
+            AppendMvpLoopSummaryPanel(builder);
+            AppendLine(builder, string.Empty);
             AppendHeader(builder);
 
             if (_runDiagnosticsOnlyVisible)
@@ -128,6 +130,16 @@ namespace DungeonBuilder.M0
 
             AppendScrolledFullDiagnosticsBody(builder, BuildCurrentFullDiagnosticsBody());
             return builder.ToString();
+        }
+
+        private void AppendMvpLoopSummaryPanel(StringBuilder builder)
+        {
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(panelText))
+            {
+                AppendLine(builder, panelText);
+            }
         }
 
         private void AppendHeader(StringBuilder builder)
@@ -281,7 +293,12 @@ namespace DungeonBuilder.M0
 
         private string GetLocalizedString(string key)
         {
-            return _root.Content != null ? _root.Content.GetString(key, key) : key;
+            return GetLocalizedString(key, key);
+        }
+
+        private string GetLocalizedString(string key, string fallback)
+        {
+            return _root.Content != null ? _root.Content.GetString(key, fallback) : fallback;
         }
 
         private static string GetPageNameKey(int page)

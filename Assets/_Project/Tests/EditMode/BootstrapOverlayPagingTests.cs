@@ -71,7 +71,11 @@ namespace DungeonBuilder.Tests.EditMode
                 {
                     NextRunSequence = 3,
                     RecentOutcomes = new[] { new RunOutcomeRecord { RunId = "run-history-entry" } }
-                }
+                },
+                researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = "research.project.panel" },
+                researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = "research.project.panel", ProgressUnits = 1d },
+                completedResearch = new CompletedResearchState { ProjectIds = new[] { "research.project.done" } },
+                lastOfflineSummary = new OfflineSummary { RuleResolved = true, OfflineSecondsObserved = 12, WouldProcessOfflineProgress = false }
             });
 
             _overlay = _overlayObject.AddComponent<BootstrapOverlay>();
@@ -93,7 +97,8 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
-            Assert.That(text, Does.StartWith("Diagnostics: Runtime Summary Page 1/6\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
+            Assert.That(text, Does.StartWith("MVP Loop Summary"));
+            Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/6\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
             Assert.That(text, Does.Not.Contain("banner-line"));
@@ -167,7 +172,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedFromRuntimePage = RefreshText();
 
-            Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(focusedFromRuntimePage, Does.Contain("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
@@ -259,6 +264,11 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(history.NextRunSequence, Is.EqualTo(3));
             Assert.That(history.RecentOutcomes, Is.SameAs(outcomes));
             Assert.That(history.RecentOutcomes[0].RunId, Is.EqualTo("run-history-entry"));
+            Assert.That(save.researchPending.ProjectId, Is.EqualTo("research.project.panel"));
+            Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(1d));
+            Assert.That(save.completedResearch.ProjectIds[0], Is.EqualTo("research.project.done"));
+            Assert.That(save.lastOfflineSummary.OfflineSecondsObserved, Is.EqualTo(12));
+            Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
         }
 
         [Test]
@@ -268,18 +278,18 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = RefreshText();
 
-            Assert.That(text, Does.StartWith("ui.dev.diagnostics.header_format"));
+            Assert.That(text, Does.Contain("ui.dev.diagnostics.header_format"));
             Assert.That(text, Does.Contain("ui.dev.hint.cycle_diagnostics_page"));
             Assert.That(text, Does.Contain("ui.dev.hint.scroll_diagnostics"));
 
             _overlay.ToggleRunDiagnosticsFocus();
-            Assert.That(RefreshText(), Does.StartWith("ui.dev.diagnostics.focus.run_diagnostics"));
+            Assert.That(RefreshText(), Does.Contain("ui.dev.diagnostics.focus.run_diagnostics"));
         }
 
         private void AssertPage(int number, string name)
         {
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(number));
-            Assert.That(RefreshText(), Does.StartWith($"Diagnostics: {name} Page {number}/6"));
+            Assert.That(RefreshText(), Does.Contain($"Diagnostics: {name} Page {number}/6"));
         }
 
         private void CycleAndAssertPage(int number, string name)
@@ -350,6 +360,22 @@ namespace DungeonBuilder.Tests.EditMode
             var content = new ContentService();
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.dev.structure_status"] = "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}";
+            map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
+            map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
+            map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
+            map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
+            map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
+            map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
+            map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
+            map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
+            map["ui.mvp_loop.value.no_placement"] = "No structure placed";
+            map["ui.mvp_loop.value.no_run"] = "No run yet";
+            map["ui.mvp_loop.value.unknown"] = "Unknown";
+            map["ui.mvp_loop.value.no_research"] = "No research";
+            map["ui.mvp_loop.run_status.succeeded"] = "Succeeded";
+            map["ui.mvp_loop.run_status.failed"] = "Failed";
+            map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
+            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             if (includeDiagnosticsLocalization)
             {
                 map["ui.dev.hint.toggle_panel"] = "F1 toggles Dev Panel";
