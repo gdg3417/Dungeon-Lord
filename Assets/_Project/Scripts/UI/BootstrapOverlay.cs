@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0
         private GameRoot _root;
         private bool _devPanelVisible;
         private bool _runDiagnosticsOnlyVisible;
-        private bool _diagnosticsVisible = true;
+        private bool _diagnosticsVisible;
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
@@ -66,6 +66,10 @@ namespace DungeonBuilder.M0
         public void ToggleDiagnosticsVisibility()
         {
             _diagnosticsVisible = !_diagnosticsVisible;
+            if (_diagnosticsVisible)
+            {
+                _fullDiagnosticsPage = RuntimeSummaryPage;
+            }
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
         }
 
