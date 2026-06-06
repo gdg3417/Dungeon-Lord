@@ -710,6 +710,16 @@ namespace DungeonBuilder.M0
 
         public bool TryPlaceSelectedStructure(string structureId, out string bannerKey)
         {
+            return TryPlaceSelectedStructure(structureId, allowReplace: false, out bannerKey);
+        }
+
+        public bool TryMvpPlaceOrModifySelectedStructure(string structureId, out string bannerKey)
+        {
+            return TryPlaceSelectedStructure(structureId, allowReplace: true, out bannerKey);
+        }
+
+        private bool TryPlaceSelectedStructure(string structureId, bool allowReplace, out string bannerKey)
+        {
             bannerKey = "ui.banner.place_success";
             if (Save?.dungeonLayout == null)
             {
@@ -724,8 +734,8 @@ namespace DungeonBuilder.M0
 
             try
             {
-                _placementService.PlaceStructure(Save.dungeonLayout, _selectedFloorIndex, _selectedSlotIndex, structureId);
-                SaveService.Save(Save, SaveReason.ManualDev);
+                _placementService.PlaceStructure(Save.dungeonLayout, _selectedFloorIndex, _selectedSlotIndex, structureId, allowReplace);
+                SaveService?.Save(Save, SaveReason.ManualDev);
                 RefreshStructureRuntimeLines();
                 return true;
             }

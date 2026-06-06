@@ -528,6 +528,22 @@
       "text": "Guided MVP Action"
     },
     {
+      "key": "ui.mvp_action.panel.title",
+      "text": "Minimal MVP Actions"
+    },
+    {
+      "key": "ui.mvp_action.button.place_or_modify",
+      "text": "Place or modify mana generator"
+    },
+    {
+      "key": "ui.mvp_action.button.run_or_observe",
+      "text": "Run or observe dungeon"
+    },
+    {
+      "key": "ui.mvp_action.panel.compact_format",
+      "text": "{0}: [{1}] [{2}]"
+    },
+    {
       "key": "ui.guided_mvp.panel.step_format",
       "text": "Step: {0}"
     },

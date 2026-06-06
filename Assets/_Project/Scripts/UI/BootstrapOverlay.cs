@@ -30,6 +30,8 @@ namespace DungeonBuilder.M0
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
+        public bool DevPanelVisible => _devPanelVisible;
+        public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
 
         public void Bind(GameRoot root)
         {
@@ -40,6 +42,11 @@ namespace DungeonBuilder.M0
         {
             _fullDiagnosticsPage = (_fullDiagnosticsPage + 1) % DiagnosticsPageCount;
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
+        }
+
+        public void ToggleDevPanel()
+        {
+            _devPanelVisible = !_devPanelVisible;
         }
 
         public void ToggleRunDiagnosticsFocus()
@@ -82,7 +89,7 @@ namespace DungeonBuilder.M0
 
             if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
             {
-                _devPanelVisible = !_devPanelVisible;
+                ToggleDevPanel();
             }
             if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
             {
@@ -151,6 +158,13 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, string.Empty);
                 AppendLine(builder, guidedText);
+            }
+
+            string actionText = MinimalMvpActionPanelPresenter.BuildPanelText((key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(actionText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, actionText);
             }
         }
 
@@ -354,6 +368,8 @@ namespace DungeonBuilder.M0
 
         private void OnGUI()
         {
+            DrawMinimalMvpActionPanel();
+
             if (_root == null || !_root.DevPanelEnabled || !_devPanelVisible)
             {
                 return;
@@ -512,6 +528,45 @@ namespace DungeonBuilder.M0
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawMinimalMvpActionPanel()
+        {
+            if (_root == null || !PlayerFacingPanelsVisible)
+            {
+                return;
+            }
+
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => GetLocalizedString(key, fallback));
+            GUILayout.BeginArea(new Rect(380, 120, 260, 110), GUI.skin.box);
+            GUILayout.Label(labels.Title);
+            if (GUILayout.Button(labels.PlacementButton))
+            {
+                ShowPlayerPlacementBanner();
+            }
+
+            if (GUILayout.Button(labels.RunButton))
+            {
+                ShowPlayerRunBanner();
+            }
+            GUILayout.EndArea();
+        }
+
+        private void ShowPlayerPlacementBanner()
+        {
+            bool ok = _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out string bannerKey);
+            string message = _root.Content.GetString(bannerKey, bannerKey);
+            _root.SetBanner(ok ? string.Format(message, StructureSimulationPass.ManaGeneratorBasicId) : message);
+            RefreshOverlayText();
+        }
+
+        private void ShowPlayerRunBanner()
+        {
+            bool didRun = _root.SimulateRunOnce();
+            _root.SetBanner(didRun
+                ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
+                : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
+            RefreshOverlayText();
         }
 
         private void ShowPlacementBanner(string structureId)

@@ -100,6 +100,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.StartWith("MVP Loop Summary"));
             Assert.That(text, Does.Contain("Guided MVP Action"));
             Assert.That(text, Does.Contain("Next action: Place one structure, or modify the selected slot."));
+            Assert.That(text, Does.Contain("Minimal MVP Actions: [Place or modify mana generator] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/7\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
@@ -214,8 +215,10 @@ namespace DungeonBuilder.Tests.EditMode
             string focusedFromRuntimePage = RefreshText();
 
             Assert.That(focusedFromRuntimePage, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Guided MVP Action"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Minimal MVP Actions"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
@@ -234,6 +237,10 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CycleFullDiagnosticsPage();
             _overlay.CycleFullDiagnosticsPage();
             Assert.That(RefreshText(), Is.EqualTo(focusedFromRuntimePage));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(RefreshText(), Does.Contain("Minimal MVP Actions"));
         }
 
         [Test]
@@ -322,6 +329,39 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.lastOfflineSummary.OfflineSecondsObserved, Is.EqualTo(12));
             Assert.That(save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
         }
+
+
+        [Test]
+        public void ToggleDevPanel_PreservesF1DevPanelVisibilityToggleState()
+        {
+            Assert.That(_overlay.DevPanelVisible, Is.False);
+
+            _overlay.ToggleDevPanel();
+            Assert.That(_overlay.DevPanelVisible, Is.True);
+
+            _overlay.ToggleDevPanel();
+            Assert.That(_overlay.DevPanelVisible, Is.False);
+        }
+
+        [Test]
+        public void ViewOnlyRefreshFocusPagingAndScroll_DoNotMutateSaveState()
+        {
+            SaveData save = _root.Save;
+            string before = JsonUtility.ToJson(save);
+
+            _overlay.RefreshOverlayText();
+            _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.RefreshOverlayText();
+            _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.ScrollFullDiagnosticsLines(VisibleScrollPageSizeForTest());
+            _overlay.ScrollFullDiagnosticsLines(-VisibleScrollPageSizeForTest());
+            _overlay.RefreshOverlayText();
+
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+        }
+
+        private static int VisibleScrollPageSizeForTest() => 4;
 
         [Test]
         public void Header_MissingLocalization_UsesLocalizationKeyFallbacksSafely()
@@ -454,6 +494,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
+            map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
+            map["ui.mvp_action.button.place_or_modify"] = "Place or modify mana generator";
+            map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
+            map["ui.mvp_action.panel.compact_format"] = "{0}: [{1}] [{2}]";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
             map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
             map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
