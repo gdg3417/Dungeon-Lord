@@ -1,0 +1,73 @@
+# VS2 Minimal Player-Facing Loop Summary Panel Evidence
+
+_Date: 2026-06-04 (UTC)_
+
+## Scope
+
+- Added a minimal player-facing MVP Loop Summary panel to the existing Bootstrap overlay.
+- The panel consumes `MvpPlayerLoopSummaryPresenter.Resolve` through `GameRoot.ResolveMvpPlayerLoopSummary` and renders a compact summary for placement, latest run status, mana reserve, loot, heat, research, and the next optimization suggestion.
+- Added a focused presentation helper so formatting and localization behavior can be tested without growing Bootstrap overlay logic excessively.
+- Added localization string-table entries for every visible panel label, fallback value, run status label, and suggestion key.
+
+## Non-goals
+
+- No gameplay simulation changes.
+- No new gameplay tuning values.
+- No new run path.
+- No new heat application path.
+- No save behavior changes.
+- No reward, unlock, cost, claim, backend, offline research, or offline heat behavior.
+- No multi-slot research, raids, seasons, leaderboards, monetization, Hostile/Raid heat tiers, or new monster families.
+
+## Changed files
+
+- `Assets/_Project/Scripts/Services/MvpLoopSummaryPanelPresenter.cs`
+- `Assets/_Project/Scripts/Services/MvpLoopSummaryPanelPresenter.cs.meta`
+- `Assets/_Project/Scripts/Core/GameRoot.cs`
+- `Assets/_Project/Scripts/UI/BootstrapOverlay.cs`
+- `Assets/_Project/Data/Bootstrap/string_table_en.json`
+- `Assets/_Project/Tests/EditMode/MvpLoopSummaryPanelPresenterTests.cs`
+- `Assets/_Project/Tests/EditMode/MvpLoopSummaryPanelPresenterTests.cs.meta`
+- `Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs`
+- `docs/testing/evidence/vs/vs2-minimal-player-facing-loop-summary-panel.md`
+
+## Tests added or updated
+
+- Added `MvpLoopSummaryPanelPresenterTests` coverage for:
+  - no run history safe fallbacks;
+  - missing optional loot, heat, and research summary data;
+  - player-facing labels and suggestion values resolving through localization keys;
+  - no mutation of save or summary state while formatting the panel.
+- Updated `BootstrapOverlayPagingTests` to preserve existing diagnostics paging coverage with the player-facing panel prepended on full diagnostics pages.
+- Added coverage that F2 Run Diagnostics Focus suppresses the MVP Loop Summary panel while preserving run, loot, survival, extraction, heat, attraction, forecast, and demand-budget diagnostic lines.
+- Added coverage for the Research Status Diagnostics split: page 6 contains research status lines, page 7 contains research verification lines, and page 7 wraps back to runtime summary.
+- Updated Bootstrap no-mutation assertions to include research and offline summary state alongside save, heat, mana, and run history.
+
+## Manual Bootstrap smoke checklist
+
+1. Launch the Bootstrap scene.
+2. Confirm the MVP Loop Summary appears above diagnostics text.
+3. Confirm a fresh or no-run save shows localized safe fallbacks for placement, latest run, heat tier, and research.
+4. Use existing dev controls to place a structure.
+5. Use existing dev controls to run one deterministic adventure.
+6. Confirm the panel updates placement, latest run status, mana reserve, loot, heat before/after/tier, research, and next suggestion without requiring a new action path.
+7. Toggle F1/F3 and scroll full diagnostics pages to confirm existing Bootstrap diagnostics paging still works below the panel.
+8. Toggle F2 Run Diagnostics Focus and confirm the MVP Loop Summary panel is suppressed so the run diagnostics focus header and run lines remain readable on screen.
+9. Cycle to page 6 and confirm Research Status Diagnostics shows research status presentation/safety without verification boundary/safety lines.
+10. Cycle to page 7 and confirm Research Verification Diagnostics shows verification boundary/safety without research status presentation/safety lines.
+11. Confirm no panel display action saves, simulates a run, applies heat, grants rewards, unlocks content, charges costs, calls backend services, or processes offline research/heat.
+
+## Manual overflow finding and fix
+
+Manual smoke testing found that prepending the MVP Loop Summary panel above every overlay mode pushed `Diagnostics: Run Diagnostics Focus` off the visible screen. F2 Run Diagnostics Focus now suppresses the MVP Loop Summary panel so the focus mode remains readable and dedicated to run diagnostics. Normal full diagnostics pages still show the MVP Loop Summary panel above their paged diagnostics body.
+
+Manual smoke testing also found that page 6, Research Status Diagnostics, visually overflowed because long diagnostic lines wrapped even though the logical line count did not create a scroll range. The diagnostics overlay now splits that content into page 6 Research Status Diagnostics for status presentation/safety and page 7 Research Verification Diagnostics for verification boundary/safety, preserving all diagnostic content while keeping each page shorter.
+
+## Explicit behavior confirmation
+
+This PR only adds read-only UI presentation and a focused overflow/readability fix. It does not add gameplay behavior, rewards, unlocks, backend calls, offline research progression, offline heat processing, new costs, new run simulation, new heat application, multi-slot research, Hostile/Raid tiers, raids, seasons, leaderboards, monetization, or new monster families.
+
+## Local test execution note
+
+- Unity EditMode execution could not be run in this container because no Unity Editor executable (`unity-editor`, `Unity`, or `unity`) is installed on the PATH or under the checked `/opt` and `/usr` locations.
+- Static checks were run for JSON validity, whitespace/diff errors, and display-path guardrails.

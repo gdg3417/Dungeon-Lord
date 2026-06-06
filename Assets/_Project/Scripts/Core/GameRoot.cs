@@ -103,6 +103,16 @@ namespace DungeonBuilder.M0
         public int SelectedFloorIndex => _selectedFloorIndex;
         public int SelectedSlotIndex => _selectedSlotIndex;
 
+        public MvpPlayerLoopSummary ResolveMvpPlayerLoopSummary()
+        {
+            RunSimulationConfig config = _runSimulationService != null ? _runSimulationService.Config : null;
+            return MvpPlayerLoopSummaryPresenter.Resolve(
+                Save,
+                config,
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchVerificationScaffoldConfig());
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

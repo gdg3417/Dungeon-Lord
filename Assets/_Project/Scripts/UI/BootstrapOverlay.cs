@@ -11,13 +11,14 @@ namespace DungeonBuilder.M0
         [Header("UI")]
         public TMP_Text overlayText;
 
-        private const int DiagnosticsPageCount = 6;
+        private const int DiagnosticsPageCount = 7;
         private const int RuntimeSummaryPage = 0;
         private const int RunDiagnosticsPage = 1;
         private const int HeatDiagnosticsPage = 2;
         private const int SystemsDiagnosticsPage = 3;
         private const int ResearchDiagnosticsPage = 4;
         private const int ResearchStatusDiagnosticsPage = 5;
+        private const int ResearchVerificationDiagnosticsPage = 6;
         private const int VisibleDiagnosticsBodyLineCount = 4;
 
         private GameRoot _root;
@@ -118,6 +119,11 @@ namespace DungeonBuilder.M0
         private string BuildOverlayText()
         {
             var builder = new StringBuilder();
+            if (!_runDiagnosticsOnlyVisible)
+            {
+                AppendMvpLoopSummaryPanel(builder);
+                AppendLine(builder, string.Empty);
+            }
             AppendHeader(builder);
 
             if (_runDiagnosticsOnlyVisible)
@@ -128,6 +134,16 @@ namespace DungeonBuilder.M0
 
             AppendScrolledFullDiagnosticsBody(builder, BuildCurrentFullDiagnosticsBody());
             return builder.ToString();
+        }
+
+        private void AppendMvpLoopSummaryPanel(StringBuilder builder)
+        {
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(panelText))
+            {
+                AppendLine(builder, panelText);
+            }
         }
 
         private void AppendHeader(StringBuilder builder)
@@ -173,6 +189,9 @@ namespace DungeonBuilder.M0
                     break;
                 case ResearchStatusDiagnosticsPage:
                     AppendResearchStatusDiagnostics(builder);
+                    break;
+                case ResearchVerificationDiagnosticsPage:
+                    AppendResearchVerificationDiagnostics(builder);
                     break;
             }
             return builder;
@@ -275,13 +294,22 @@ namespace DungeonBuilder.M0
         {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
             AppendLine(builder, _root.ResearchStatusSafetyLine);
+        }
+
+        private void AppendResearchVerificationDiagnostics(StringBuilder builder)
+        {
             AppendLine(builder, _root.ResearchVerificationBoundaryLine);
             AppendLine(builder, _root.ResearchVerificationSafetyLine);
         }
 
         private string GetLocalizedString(string key)
         {
-            return _root.Content != null ? _root.Content.GetString(key, key) : key;
+            return GetLocalizedString(key, key);
+        }
+
+        private string GetLocalizedString(string key, string fallback)
+        {
+            return _root.Content != null ? _root.Content.GetString(key, fallback) : fallback;
         }
 
         private static string GetPageNameKey(int page)
@@ -300,6 +328,8 @@ namespace DungeonBuilder.M0
                     return "ui.dev.diagnostics.page.research_diagnostics";
                 case ResearchStatusDiagnosticsPage:
                     return "ui.dev.diagnostics.page.research_status_diagnostics";
+                case ResearchVerificationDiagnosticsPage:
+                    return "ui.dev.diagnostics.page.research_verification_diagnostics";
                 default:
                     return "ui.dev.diagnostics.page.runtime_summary";
             }
