@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 140f;
+        private const float MinimalMvpActionPanelHeight = 230f;
         private const float MinimalMvpActionPanelMargin = 10f;
 
         private GameRoot _root;
@@ -33,6 +33,7 @@ namespace DungeonBuilder.M0
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
+        private string _selectedMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -40,6 +41,7 @@ namespace DungeonBuilder.M0
         public bool DiagnosticsVisible => _diagnosticsVisible || _runDiagnosticsOnlyVisible;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
+        public string SelectedMvpStructureId => _selectedMvpStructureId;
 
         public void Bind(GameRoot root)
         {
@@ -71,6 +73,37 @@ namespace DungeonBuilder.M0
                 _fullDiagnosticsPage = RuntimeSummaryPage;
             }
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
+        }
+
+        public bool SelectMvpStructure(string structureId)
+        {
+            if (!IsAllowedMvpStructure(structureId))
+            {
+                return false;
+            }
+
+            _selectedMvpStructureId = structureId;
+            return true;
+        }
+
+        public string GetSelectedMvpStructureNameKey()
+        {
+            return GetMvpSelectionNameKey(_selectedMvpStructureId);
+        }
+
+        public string GetSelectedMvpStructureDisplayName()
+        {
+            return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public void PlaceSelectedMvpStructure()
+        {
+            ShowPlayerPlacementBanner();
+        }
+
+        public void RunOrObserveDungeon()
+        {
+            ShowPlayerRunBanner();
         }
 
         public void ScrollFullDiagnosticsLines(int lineDelta)
@@ -596,20 +629,35 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => GetLocalizedString(key, fallback));
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+                (key, fallback) => GetLocalizedString(key, fallback),
+                GetSelectedMvpStructureNameKey());
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
             GUILayout.Label(labels.Title);
+            GUILayout.Label(labels.SelectedStructureLabel);
+            if (GUILayout.Button(labels.ManaGeneratorSelection))
+            {
+                SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+            }
+            if (GUILayout.Button(labels.HeatScrubberSelection))
+            {
+                SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            }
+            if (GUILayout.Button(labels.RiskLabSelection))
+            {
+                SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            }
             GUILayout.Label(GetLocalizedString(_diagnosticsVisible
                 ? "ui.mvp_view.diagnostics_mode.status"
                 : "ui.mvp_view.player_mode.status"));
             if (GUILayout.Button(labels.PlacementButton))
             {
-                ShowPlayerPlacementBanner();
+                PlaceSelectedMvpStructure();
             }
 
             if (GUILayout.Button(labels.RunButton))
             {
-                ShowPlayerRunBanner();
+                RunOrObserveDungeon();
             }
 
             string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
@@ -623,7 +671,7 @@ namespace DungeonBuilder.M0
 
         private void ShowPlayerPlacementBanner()
         {
-            const string structureId = StructureSimulationPass.ManaGeneratorBasicId;
+            string structureId = _selectedMvpStructureId;
             bool ok = _root.TryMvpPlaceOrModifySelectedStructure(structureId, out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
             string displayName = MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(structureId, (key, fallback) => GetLocalizedString(key, fallback));
@@ -645,6 +693,27 @@ namespace DungeonBuilder.M0
             bool ok = _root.TryPlaceSelectedStructure(structureId, out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
             _root.SetBanner(ok ? string.Format(message, structureId) : message);
+        }
+
+        private static bool IsAllowedMvpStructure(string structureId)
+        {
+            return structureId == StructureSimulationPass.ManaGeneratorBasicId ||
+                   structureId == StructureSimulationPass.HeatScrubberBasicId ||
+                   structureId == StructureSimulationPass.RiskLabBasicId;
+        }
+
+        private static string GetMvpSelectionNameKey(string structureId)
+        {
+            switch (structureId)
+            {
+                case StructureSimulationPass.HeatScrubberBasicId:
+                    return MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey;
+                case StructureSimulationPass.RiskLabBasicId:
+                    return MinimalMvpActionPanelPresenter.RiskLabSelectionKey;
+                case StructureSimulationPass.ManaGeneratorBasicId:
+                default:
+                    return MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey;
+            }
         }
     }
 }

@@ -10,11 +10,26 @@ namespace DungeonBuilder.M0
         public const string ShowDiagnosticsButtonKey = "ui.mvp_action.button.show_diagnostics";
         public const string HideDiagnosticsButtonKey = "ui.mvp_action.button.hide_diagnostics";
         public const string CompactFormatKey = "ui.mvp_action.panel.compact_format";
+        public const string SelectionLabelKey = "ui.mvp_action.selection.label";
+        public const string ManaGeneratorSelectionKey = "ui.mvp_action.selection.mana_generator";
+        public const string HeatScrubberSelectionKey = "ui.mvp_action.selection.heat_scrubber";
+        public const string RiskLabSelectionKey = "ui.mvp_action.selection.risk_lab";
 
         public static MinimalMvpActionPanelLabels BuildLabels(Func<string, string, string> localize)
         {
+            return BuildLabels(localize, ManaGeneratorSelectionKey);
+        }
+
+        public static MinimalMvpActionPanelLabels BuildLabels(Func<string, string, string> localize, string selectedStructureNameKey)
+        {
+            string selectedName = Localize(localize, string.IsNullOrWhiteSpace(selectedStructureNameKey) ? ManaGeneratorSelectionKey : selectedStructureNameKey);
+            string selectionFormat = Localize(localize, SelectionLabelKey);
             return new MinimalMvpActionPanelLabels(
                 Localize(localize, TitleKey),
+                string.Format(selectionFormat, selectedName),
+                Localize(localize, ManaGeneratorSelectionKey),
+                Localize(localize, HeatScrubberSelectionKey),
+                Localize(localize, RiskLabSelectionKey),
                 Localize(localize, PlacementButtonKey),
                 Localize(localize, RunButtonKey),
                 Localize(localize, ShowDiagnosticsButtonKey),
@@ -23,9 +38,14 @@ namespace DungeonBuilder.M0
 
         public static string BuildPanelText(Func<string, string, string> localize)
         {
-            MinimalMvpActionPanelLabels labels = BuildLabels(localize);
+            return BuildPanelText(localize, ManaGeneratorSelectionKey);
+        }
+
+        public static string BuildPanelText(Func<string, string, string> localize, string selectedStructureNameKey)
+        {
+            MinimalMvpActionPanelLabels labels = BuildLabels(localize, selectedStructureNameKey);
             string format = Localize(localize, CompactFormatKey);
-            return string.Format(format, labels.Title, labels.PlacementButton, labels.RunButton);
+            return string.Format(format, labels.Title, labels.SelectedStructureLabel, labels.PlacementButton, labels.RunButton);
         }
 
         private static string Localize(Func<string, string, string> localize, string key)
@@ -43,12 +63,20 @@ namespace DungeonBuilder.M0
     {
         public MinimalMvpActionPanelLabels(
             string title,
+            string selectedStructureLabel,
+            string manaGeneratorSelection,
+            string heatScrubberSelection,
+            string riskLabSelection,
             string placementButton,
             string runButton,
             string showDiagnosticsButton,
             string hideDiagnosticsButton)
         {
             Title = title;
+            SelectedStructureLabel = selectedStructureLabel;
+            ManaGeneratorSelection = manaGeneratorSelection;
+            HeatScrubberSelection = heatScrubberSelection;
+            RiskLabSelection = riskLabSelection;
             PlacementButton = placementButton;
             RunButton = runButton;
             ShowDiagnosticsButton = showDiagnosticsButton;
@@ -56,6 +84,10 @@ namespace DungeonBuilder.M0
         }
 
         public string Title { get; }
+        public string SelectedStructureLabel { get; }
+        public string ManaGeneratorSelection { get; }
+        public string HeatScrubberSelection { get; }
+        public string RiskLabSelection { get; }
         public string PlacementButton { get; }
         public string RunButton { get; }
         public string ShowDiagnosticsButton { get; }
