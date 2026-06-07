@@ -23,8 +23,10 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 250f;
+        private const float MinimalMvpActionPanelHeight = 230f;
         private const float MinimalMvpActionPanelMargin = 10f;
+        private const float MinimalMvpActionPanelLabelHeight = 17f;
+        private const float MinimalMvpActionPanelButtonHeight = 19f;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -638,37 +640,56 @@ namespace DungeonBuilder.M0
                 (key, fallback) => GetLocalizedString(key, fallback),
                 GetSelectedMvpStructureNameKey(),
                 _selectedMvpStructureId);
-            GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
-            GUILayout.Label(labels.Title);
-            GUILayout.Label(labels.SelectedStructureLabel);
-            GUILayout.Label(labels.PreviewText);
-            if (GUILayout.Button(labels.ManaGeneratorSelection))
+            GUIStyle compactBox = new GUIStyle(GUI.skin.box)
+            {
+                padding = new RectOffset(6, 6, 4, 4)
+            };
+            GUIStyle compactLabel = new GUIStyle(GUI.skin.label)
+            {
+                clipping = TextClipping.Clip,
+                wordWrap = false,
+                margin = new RectOffset(0, 0, 0, 0),
+                padding = new RectOffset(2, 2, 0, 0)
+            };
+            GUIStyle compactButton = new GUIStyle(GUI.skin.button)
+            {
+                margin = new RectOffset(0, 0, 1, 1),
+                padding = new RectOffset(4, 4, 1, 1)
+            };
+            GUILayoutOption labelHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight);
+            GUILayoutOption buttonHeight = GUILayout.Height(MinimalMvpActionPanelButtonHeight);
+
+            GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
+            GUILayout.Label(labels.Title, compactLabel, labelHeight);
+            GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
+            GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            if (GUILayout.Button(labels.ManaGeneratorSelection, compactButton, buttonHeight))
             {
                 SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
             }
-            if (GUILayout.Button(labels.HeatScrubberSelection))
+            if (GUILayout.Button(labels.HeatScrubberSelection, compactButton, buttonHeight))
             {
                 SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
             }
-            if (GUILayout.Button(labels.RiskLabSelection))
+            if (GUILayout.Button(labels.RiskLabSelection, compactButton, buttonHeight))
             {
                 SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
             }
             GUILayout.Label(GetLocalizedString(_diagnosticsVisible
                 ? "ui.mvp_view.diagnostics_mode.status"
-                : "ui.mvp_view.player_mode.status"));
-            if (GUILayout.Button(labels.PlacementButton))
+                : "ui.mvp_view.player_mode.status"), compactLabel, labelHeight);
+            if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
             }
 
-            if (GUILayout.Button(labels.RunButton))
+            if (GUILayout.Button(labels.RunButton, compactButton, buttonHeight))
             {
                 RunOrObserveDungeon();
             }
 
             string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
-            if (GUILayout.Button(diagnosticsButton))
+            if (GUILayout.Button(diagnosticsButton, compactButton, buttonHeight))
             {
                 ToggleDiagnosticsVisibility();
                 RefreshOverlayText();

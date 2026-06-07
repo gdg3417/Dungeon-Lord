@@ -18,11 +18,11 @@ namespace DungeonBuilder.Tests.EditMode
                 {
                     requestedKeys.Add(key);
                     return key == MvpStructureImpactPreviewPresenter.ManaGeneratorPreviewKey
-                        ? "Preview: improves mana reserve for future runs."
+                        ? "Role: improves mana reserve."
                         : fallback;
                 });
 
-            Assert.That(text, Is.EqualTo("Preview: improves mana reserve for future runs."));
+            Assert.That(text, Is.EqualTo("Role: improves mana reserve."));
             Assert.That(requestedKeys, Does.Contain(MvpStructureImpactPreviewPresenter.ManaGeneratorPreviewKey));
         }
 
@@ -32,10 +32,10 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpStructureImpactPreviewPresenter.BuildPreviewText(
                 StructureSimulationPass.HeatScrubberBasicId,
                 (key, fallback) => key == MvpStructureImpactPreviewPresenter.HeatScrubberPreviewKey
-                    ? "Preview: helps reduce heat pressure after runs."
+                    ? "Role: lowers heat pressure."
                     : fallback);
 
-            Assert.That(text, Is.EqualTo("Preview: helps reduce heat pressure after runs."));
+            Assert.That(text, Is.EqualTo("Role: lowers heat pressure."));
         }
 
         [Test]
@@ -44,10 +44,10 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpStructureImpactPreviewPresenter.BuildPreviewText(
                 StructureSimulationPass.RiskLabBasicId,
                 (key, fallback) => key == MvpStructureImpactPreviewPresenter.RiskLabPreviewKey
-                    ? "Preview: supports research visibility and risk analysis."
+                    ? "Role: clarifies research risk."
                     : fallback);
 
-            Assert.That(text, Is.EqualTo("Preview: supports research visibility and risk analysis."));
+            Assert.That(text, Is.EqualTo("Role: clarifies research risk."));
         }
 
         [Test]
@@ -56,15 +56,15 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpStructureImpactPreviewPresenter.BuildPreviewText(
                 "structure.debug.not_player_facing",
                 (key, fallback) => key == MvpStructureImpactPreviewPresenter.UnknownPreviewKey
-                    ? "Preview unavailable for this structure."
+                    ? "Role unavailable."
                     : fallback);
 
-            Assert.That(text, Is.EqualTo("Preview unavailable for this structure."));
+            Assert.That(text, Is.EqualTo("Role unavailable."));
         }
 
-        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Preview: improves mana reserve for future runs.")]
-        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Preview: helps reduce heat pressure after runs.")]
-        [TestCase(StructureSimulationPass.RiskLabBasicId, "Preview: supports research visibility and risk analysis.")]
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Role: improves mana reserve.")]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Role: lowers heat pressure.")]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Role: clarifies research risk.")]
         public void PreviewText_DoesNotExposeRawStructureIds(string structureId, string localizedText)
         {
             string text = MvpStructureImpactPreviewPresenter.BuildPreviewText(

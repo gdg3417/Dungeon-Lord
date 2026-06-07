@@ -5,12 +5,15 @@
 - Added a compact, read-only impact preview for the currently selected MVP-safe structure in the Minimal MVP Actions panel.
 - Preview resolution is driven by stable structure IDs and localization keys.
 - Covered Mana Generator, Heat Scrubber, and Risk Lab with player-facing localized English string table entries.
+- Initial local smoke found the Minimal MVP Actions panel clipped lower buttons after the first preview pass.
+- Preview copy and panel layout were compacted so the title, selected structure label, preview line, three structure buttons, status, placement, run, and diagnostics toggle controls fit without increasing panel height.
 - Preserved diagnostics behavior, including F2 Run Diagnostics Focus hiding player-facing panels and raw IDs remaining available in developer diagnostics where useful.
 
 ## Non-goals
 
 - No gameplay systems were added.
 - No simulation formulas or runtime behavior were added or changed.
+- No tuning, save schema, or gameplay scope was changed by the UI fit fix.
 - No new structure definitions were added.
 - No save-state inspection or mutation is required to resolve previews.
 - No tutorial framework or multi-step onboarding system was added.
@@ -32,7 +35,7 @@
 
 - Added EditMode presenter coverage for Mana Generator, Heat Scrubber, Risk Lab, unknown fallback, localization-key fallback, and raw structure ID suppression in preview text.
 - Updated Minimal MVP Actions presenter coverage to include preview labels and localization-key requests.
-- Updated Bootstrap overlay coverage for the preview appearing with the selected structure, changing when the selected structure changes, preserving placement/run actions, hiding under F2 Run Diagnostics Focus, restoring after F2, keeping diagnostics paging behavior, preserving F1 Dev Panel toggling, and avoiding save mutation during view-only refresh/toggle/page/scroll calls.
+- Updated Bootstrap overlay coverage for the compact preview appearing with the selected structure, changing when the selected structure changes, preserving placement/run actions, hiding under F2 Run Diagnostics Focus, restoring after F2, keeping diagnostics paging behavior, preserving F1 Dev Panel toggling, preserving the compact panel height, and avoiding save mutation during view-only refresh/toggle/page/scroll calls.
 
 ## Manual smoke checklist
 

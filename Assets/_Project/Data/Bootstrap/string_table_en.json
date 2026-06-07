@@ -733,19 +733,19 @@
     },
     {
       "key": "ui.mvp_structure_preview.mana_generator",
-      "text": "Preview: improves mana reserve for future runs."
+      "text": "Role: improves mana reserve."
     },
     {
       "key": "ui.mvp_structure_preview.heat_scrubber",
-      "text": "Preview: helps reduce heat pressure after runs."
+      "text": "Role: lowers heat pressure."
     },
     {
       "key": "ui.mvp_structure_preview.risk_lab",
-      "text": "Preview: supports research visibility and risk analysis."
+      "text": "Role: clarifies research risk."
     },
     {
       "key": "ui.mvp_structure_preview.unknown",
-      "text": "Preview unavailable for this structure."
+      "text": "Role unavailable."
     }
   ]
 }
