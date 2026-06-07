@@ -217,6 +217,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
+            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
@@ -227,12 +228,14 @@ namespace DungeonBuilder.Tests.EditMode
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
-                _overlay.GetSelectedMvpStructureNameKey());
+                _overlay.GetSelectedMvpStructureNameKey(),
+                _overlay.SelectedMvpStructureId);
             Rect rect = _overlay.GetMinimalMvpActionPanelRect();
 
             Assert.That(rect.width, Is.EqualTo(260f));
             Assert.That(rect.height, Is.EqualTo(230f));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
@@ -246,31 +249,36 @@ namespace DungeonBuilder.Tests.EditMode
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
-                _overlay.GetSelectedMvpStructureNameKey());
+                _overlay.GetSelectedMvpStructureNameKey(),
+                _overlay.SelectedMvpStructureId);
 
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
         }
 
-        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey)]
-        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey)]
-        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey)]
-        public void PlayerFacingStructureSelection_AllowsExistingMvpSafeStructureOptions(string structureId, string displayName, string selectionKey)
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey, "Role: improves mana reserve.")]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey, "Role: lowers heat pressure.")]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey, "Role: clarifies research risk.")]
+        public void PlayerFacingStructureSelection_AllowsExistingMvpSafeStructureOptions(string structureId, string displayName, string selectionKey, string previewText)
         {
             bool selected = _overlay.SelectMvpStructure(structureId);
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
-                _overlay.GetSelectedMvpStructureNameKey());
+                _overlay.GetSelectedMvpStructureNameKey(),
+                _overlay.SelectedMvpStructureId);
 
             Assert.That(selected, Is.True);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(structureId));
             Assert.That(_overlay.GetSelectedMvpStructureNameKey(), Is.EqualTo(selectionKey));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo(displayName));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo($"Selected structure: {displayName}"));
+            Assert.That(labels.PreviewText, Is.EqualTo(previewText));
+            Assert.That(labels.PreviewText, Does.Not.Contain(structureId));
         }
 
         [Test]
@@ -414,6 +422,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
             Assert.That(focusedText, Does.Not.Contain("Selected structure"));
             Assert.That(focusedText, Does.Not.Contain("Heat Scrubber"));
+            Assert.That(focusedText, Does.Not.Contain("Role:"));
 
             _overlay.ToggleRunDiagnosticsFocus();
 
@@ -421,6 +430,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.HeatScrubberBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Heat Scrubber"));
+            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: lowers heat pressure."));
         }
 
         [Test]
@@ -888,7 +898,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.selection.mana_generator"] = "Mana Generator";
             map["ui.mvp_action.selection.heat_scrubber"] = "Heat Scrubber";
             map["ui.mvp_action.selection.risk_lab"] = "Risk Lab";
-            map["ui.mvp_action.panel.compact_format"] = "{0}: {1} [{2}] [{3}]";
+            map["ui.mvp_structure_preview.mana_generator"] = "Role: improves mana reserve.";
+            map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
+            map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
+            map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
+            map["ui.mvp_action.panel.compact_format"] = "{0}: {1} {2} [{3}] [{4}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
             map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
