@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 230f;
+        private const float MinimalMvpActionPanelHeight = 250f;
         private const float MinimalMvpActionPanelMargin = 10f;
 
         private GameRoot _root;
@@ -94,6 +94,11 @@ namespace DungeonBuilder.M0
         public string GetSelectedMvpStructureDisplayName()
         {
             return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public string GetSelectedMvpStructurePreviewText()
+        {
+            return MvpStructureImpactPreviewPresenter.BuildPreviewText(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public void PlaceSelectedMvpStructure()
@@ -631,10 +636,12 @@ namespace DungeonBuilder.M0
 
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
                 (key, fallback) => GetLocalizedString(key, fallback),
-                GetSelectedMvpStructureNameKey());
+                GetSelectedMvpStructureNameKey(),
+                _selectedMvpStructureId);
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
             GUILayout.Label(labels.Title);
             GUILayout.Label(labels.SelectedStructureLabel);
+            GUILayout.Label(labels.PreviewText);
             if (GUILayout.Button(labels.ManaGeneratorSelection))
             {
                 SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);

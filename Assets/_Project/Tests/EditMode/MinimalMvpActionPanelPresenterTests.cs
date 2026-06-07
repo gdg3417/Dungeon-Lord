@@ -16,7 +16,7 @@ namespace DungeonBuilder.Tests.EditMode
                 requestedKeys.Add(key);
                 if (key == MinimalMvpActionPanelPresenter.CompactFormatKey)
                 {
-                    return "{0}|{1}|{2}|{3}";
+                    return "{0}|{1}|{2}|{3}|{4}";
                 }
                 if (key == MinimalMvpActionPanelPresenter.SelectionLabelKey)
                 {
@@ -26,12 +26,13 @@ namespace DungeonBuilder.Tests.EditMode
                 return "LOC[" + key + "]";
             }, MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey);
 
-            Assert.That(text, Is.EqualTo("LOC[ui.mvp_action.panel.title]|Selected=LOC[ui.mvp_action.selection.heat_scrubber]|LOC[ui.mvp_action.button.place_or_modify]|LOC[ui.mvp_action.button.run_or_observe]"));
+            Assert.That(text, Is.EqualTo("LOC[ui.mvp_action.panel.title]|Selected=LOC[ui.mvp_action.selection.heat_scrubber]|LOC[ui.mvp_structure_preview.heat_scrubber]|LOC[ui.mvp_action.button.place_or_modify]|LOC[ui.mvp_action.button.run_or_observe]"));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.TitleKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.SelectionLabelKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.RiskLabSelectionKey));
+            Assert.That(requestedKeys, Does.Contain(MvpStructureImpactPreviewPresenter.HeatScrubberPreviewKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.PlacementButtonKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.RunButtonKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.ShowDiagnosticsButtonKey));
@@ -46,6 +47,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(labels.Title, Is.EqualTo(MinimalMvpActionPanelPresenter.TitleKey));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo(MinimalMvpActionPanelPresenter.SelectionLabelKey));
+            Assert.That(labels.PreviewText, Is.EqualTo(MvpStructureImpactPreviewPresenter.ManaGeneratorPreviewKey));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey));
             Assert.That(labels.RiskLabSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.RiskLabSelectionKey));
