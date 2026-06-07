@@ -635,7 +635,6 @@ namespace DungeonBuilder.M0
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
             GUILayout.Label(labels.Title);
             GUILayout.Label(labels.SelectedStructureLabel);
-            GUILayout.BeginHorizontal();
             if (GUILayout.Button(labels.ManaGeneratorSelection))
             {
                 SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
@@ -648,7 +647,6 @@ namespace DungeonBuilder.M0
             {
                 SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
             }
-            GUILayout.EndHorizontal();
             GUILayout.Label(GetLocalizedString(_diagnosticsVisible
                 ? "ui.mvp_view.diagnostics_mode.status"
                 : "ui.mvp_view.player_mode.status"));

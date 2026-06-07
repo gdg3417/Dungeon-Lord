@@ -222,6 +222,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
         }
 
+        [Test]
+        public void PlayerFacingMode_MinimalMvpActionPanelKeepsAllVerticalSelectorLabelsInCompactRect()
+        {
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+                (key, fallback) => _root.Content.GetString(key, fallback),
+                _overlay.GetSelectedMvpStructureNameKey());
+            Rect rect = _overlay.GetMinimalMvpActionPanelRect();
+
+            Assert.That(rect.width, Is.EqualTo(260f));
+            Assert.That(rect.height, Is.EqualTo(230f));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
+            Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
+            Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
+            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
+            Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
+            Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
+        }
 
         [Test]
         public void PlayerFacingStructureSelection_DefaultsToManaGeneratorAndExposesLocalizedChoices()

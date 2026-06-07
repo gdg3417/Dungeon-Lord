@@ -2,6 +2,7 @@
 
 ## Scope
 - Add a compact player-facing structure selector to the existing Bootstrap Minimal MVP Actions overlay.
+- Follow-up UI fit note: initial smoke found the Risk Lab button was partially clipped in the horizontal selector row; the selector was adjusted to stack the three structure choices vertically so all options are fully visible within the existing compact panel width.
 - Keep Mana Generator as the default selected structure.
 - Allow the tester to select only the existing MVP-safe structure options:
   - Mana Generator
@@ -22,6 +23,7 @@
 - `Assets/_Project/Scripts/UI/BootstrapOverlay.cs`
   - Added in-memory selected MVP structure state defaulting to Mana Generator.
   - Added compact selector controls for Mana Generator, Heat Scrubber, and Risk Lab.
+  - Adjusted the selector from a horizontal row to vertical choice buttons after smoke testing found the Risk Lab button was clipped; the existing compact panel width/height remains unchanged and the panel stays anchored to the top-right overlay area to avoid the MVP Loop Summary, Guided MVP Action, first-session status, and diagnostics text.
   - Updated player placement to place or modify the selected structure and show a localized selected-structure name in the banner.
   - Preserved diagnostics focus behavior so F2 hides player-facing structure choice controls.
 - `Assets/_Project/Scripts/Services/MinimalMvpActionPanelPresenter.cs`
@@ -31,7 +33,7 @@
 - `Assets/_Project/Tests/EditMode/MinimalMvpActionPanelPresenterTests.cs`
   - Updated presenter coverage for selected structure localization keys.
 - `Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs`
-  - Added/updated overlay coverage for selection defaults, all three MVP-safe choices, selected placement, localized banners/summaries, diagnostics raw ID visibility, F2 restoration, and save-state immutability for view-only controls.
+  - Added/updated overlay coverage for selection defaults, all three MVP-safe choices, selected placement, localized banners/summaries, diagnostics raw ID visibility, compact selector labels/rect, F2 restoration, and save-state immutability for view-only controls.
 - `docs/testing/evidence/vs/vs11-minimal-player-facing-structure-choice.md`
   - Added this scope, non-goals, test, and smoke evidence checklist.
 
@@ -39,6 +41,7 @@
 - EditMode coverage added/updated for:
   - Selected structure defaults to Mana Generator.
   - Selecting Mana Generator, Heat Scrubber, and Risk Lab.
+  - Selector labels remain available in a compact fixed-width panel after switching from horizontal row to vertical choice buttons.
   - Placement uses the selected structure ID through the existing MVP place-or-modify path.
   - Placement banner uses the localized selected structure name.
   - MVP Loop Summary placement uses localized labels after each selection.
@@ -60,6 +63,7 @@
 5. Confirm First-session completion/status line is visible.
 6. Confirm Minimal MVP Actions is visible.
 7. Confirm selected structure defaults to Mana Generator.
+7a. Confirm the Mana Generator, Heat Scrubber, and Risk Lab buttons are stacked vertically and fully visible; specifically confirm Risk Lab is no longer clipped.
 8. Select Mana Generator and click place or modify.
 9. Confirm placement and banner show Mana Generator.
 10. Select Heat Scrubber and click place or modify.
