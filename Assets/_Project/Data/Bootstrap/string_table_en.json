@@ -754,6 +754,30 @@
     {
       "key": "ui.mvp_structure_feedback.changed_format",
       "text": "Changed: {0} -> {1}. {2}"
+    },
+    {
+      "key": "ui.mvp_run_feedback.success_stable_heat",
+      "text": "Run result: succeeded. Loot extracted, heat stable."
+    },
+    {
+      "key": "ui.mvp_run_feedback.success_heat_reduced",
+      "text": "Run result: succeeded. Loot extracted, heat reduced."
+    },
+    {
+      "key": "ui.mvp_run_feedback.success_heat_increased",
+      "text": "Run result: succeeded. Loot extracted, heat increased."
+    },
+    {
+      "key": "ui.mvp_run_feedback.failed",
+      "text": "Run result: failed. Review placement and try again."
+    },
+    {
+      "key": "ui.mvp_run_feedback.unavailable",
+      "text": "Run result unavailable."
+    },
+    {
+      "key": "ui.mvp_run_feedback.format",
+      "text": "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}."
     }
   ]
 }

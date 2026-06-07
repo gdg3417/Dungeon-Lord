@@ -314,6 +314,11 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(runText, Does.Contain("Run simulated."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Run result: succeeded."));
+            Assert.That(runText, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(runText, Does.Contain("Mana 9."));
+            Assert.That(runText, Does.Contain("Loot 0/0/0."));
+            Assert.That(runText, Does.Contain("Heat 17->17."));
             Assert.That(runText, Does.Contain("Latest run:"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
@@ -478,7 +483,62 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Run result: succeeded."));
             Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+        }
+
+        [Test]
+        public void RunFeedback_UpdatesAfterEachRunAndDoesNotExposeRawIds()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 4d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_run_feedback_updates_test.json", useAtomicWrites = false }));
+
+            _overlay.RunOrObserveDungeon();
+            string firstFeedback = _overlay.MvpRunResultFeedback;
+            _root.Save.structureRuntime.Heat = 8d;
+
+            _overlay.RunOrObserveDungeon();
+            string text = RefreshText();
+
+            Assert.That(firstFeedback, Is.Not.Empty);
+            Assert.That(_overlay.MvpRunResultFeedback, Is.Not.EqualTo(firstFeedback));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Heat 8->8."));
+            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-2"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
+        }
+
+        [Test]
+        public void RunDiagnosticsFocus_HidesRunFeedbackAndRestoresSafely()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 4d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_run_feedback_focus_test.json", useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
+            string feedback = _overlay.MvpRunResultFeedback;
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string focusedText = RefreshText();
+
+            Assert.That(focusedText, Does.Not.Contain(feedback));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string restoredText = RefreshText();
+
+            Assert.That(restoredText, Does.Contain(feedback));
         }
 
         [Test]
@@ -798,6 +858,7 @@ namespace DungeonBuilder.Tests.EditMode
             string before = JsonUtility.ToJson(save);
 
             _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: lowers heat pressure."));
             _overlay.RefreshOverlayText();
             _overlay.ToggleDiagnosticsVisibility();
             _overlay.RefreshOverlayText();
@@ -1016,6 +1077,12 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
             map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
             map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
+            map["ui.mvp_run_feedback.success_stable_heat"] = "Run result: succeeded. Loot extracted, heat stable.";
+            map["ui.mvp_run_feedback.success_heat_reduced"] = "Run result: succeeded. Loot extracted, heat reduced.";
+            map["ui.mvp_run_feedback.success_heat_increased"] = "Run result: succeeded. Loot extracted, heat increased.";
+            map["ui.mvp_run_feedback.failed"] = "Run result: failed. Review placement and try again.";
+            map["ui.mvp_run_feedback.unavailable"] = "Run result unavailable.";
+            map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
             map["ui.mvp_action.panel.compact_format"] = "{0}: {1} {2} [{3}] [{4}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";

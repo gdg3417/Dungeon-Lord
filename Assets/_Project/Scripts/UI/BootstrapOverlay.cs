@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0
         private Vector2 _devPanelScrollPosition;
         private string _selectedMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
         private string _mvpStructurePlacementFeedback = string.Empty;
+        private string _mvpRunResultFeedback = string.Empty;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -46,6 +47,7 @@ namespace DungeonBuilder.M0
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
+        public string MvpRunResultFeedback => _mvpRunResultFeedback;
 
         public void Bind(GameRoot root)
         {
@@ -245,6 +247,10 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
             {
                 AppendLine(builder, _mvpStructurePlacementFeedback);
+            }
+            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
+            {
+                AppendLine(builder, _mvpRunResultFeedback);
             }
         }
 
@@ -729,7 +735,14 @@ namespace DungeonBuilder.M0
 
         private void ShowPlayerRunBanner()
         {
+            MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
             bool didRun = _root.SimulateRunOnce();
+            MvpPlayerLoopSummary afterRunSummary = _root.ResolveMvpPlayerLoopSummary();
+            _mvpRunResultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                beforeRunSummary,
+                afterRunSummary,
+                didRun,
+                (key, fallback) => GetLocalizedString(key, fallback));
             _root.SetBanner(didRun
                 ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
                 : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
