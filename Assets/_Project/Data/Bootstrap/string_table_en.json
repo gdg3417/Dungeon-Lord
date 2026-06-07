@@ -557,7 +557,7 @@
     },
     {
       "key": "ui.mvp_action.button.place_or_modify",
-      "text": "Place or modify mana generator"
+      "text": "Place or modify selected"
     },
     {
       "key": "ui.mvp_action.button.run_or_observe",
@@ -565,7 +565,7 @@
     },
     {
       "key": "ui.mvp_action.panel.compact_format",
-      "text": "{0}: [{1}] [{2}]"
+      "text": "{0}: {1} [{2}] [{3}]"
     },
     {
       "key": "ui.guided_mvp.panel.step_format",
@@ -714,6 +714,22 @@
     {
       "key": "heat_tier.concern",
       "text": "Concern"
+    },
+    {
+      "key": "ui.mvp_action.selection.label",
+      "text": "Selected structure: {0}"
+    },
+    {
+      "key": "ui.mvp_action.selection.mana_generator",
+      "text": "Mana Generator"
+    },
+    {
+      "key": "ui.mvp_action.selection.heat_scrubber",
+      "text": "Heat Scrubber"
+    },
+    {
+      "key": "ui.mvp_action.selection.risk_lab",
+      "text": "Risk Lab"
     }
   ]
 }

@@ -110,7 +110,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
             Assert.That(text, Does.Not.Contain("First-session status: structure placed; run the dungeon next."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify mana generator] [Run or observe dungeon]"));
+            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify selected] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
@@ -215,11 +215,55 @@ namespace DungeonBuilder.Tests.EditMode
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => _root.Content.GetString(key, fallback));
 
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify mana generator"));
+            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
+        }
+
+
+        [Test]
+        public void PlayerFacingStructureSelection_DefaultsToManaGeneratorAndExposesLocalizedChoices()
+        {
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+                (key, fallback) => _root.Content.GetString(key, fallback),
+                _overlay.GetSelectedMvpStructureNameKey());
+
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
+            Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
+            Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
+        }
+
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey)]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey)]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey)]
+        public void PlayerFacingStructureSelection_AllowsExistingMvpSafeStructureOptions(string structureId, string displayName, string selectionKey)
+        {
+            bool selected = _overlay.SelectMvpStructure(structureId);
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+                (key, fallback) => _root.Content.GetString(key, fallback),
+                _overlay.GetSelectedMvpStructureNameKey());
+
+            Assert.That(selected, Is.True);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(structureId));
+            Assert.That(_overlay.GetSelectedMvpStructureNameKey(), Is.EqualTo(selectionKey));
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo(displayName));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo($"Selected structure: {displayName}"));
+        }
+
+        [Test]
+        public void PlayerFacingStructureSelection_RejectsUnknownStructureWithoutChangingSelection()
+        {
+            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+
+            bool selected = _overlay.SelectMvpStructure("structure.debug.not_player_facing");
+
+            Assert.That(selected, Is.False);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
         }
 
         [Test]
@@ -228,8 +272,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
 
-            typeof(BootstrapOverlay).GetMethod("ShowPlayerPlacementBanner", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(_overlay, null);
+            _overlay.PlaceSelectedMvpStructure();
             string placementText = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
@@ -240,8 +283,7 @@ namespace DungeonBuilder.Tests.EditMode
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_action_test.json", useAtomicWrites = false }));
 
-            typeof(BootstrapOverlay).GetMethod("ShowPlayerRunBanner", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(_overlay, null);
+            _overlay.RunOrObserveDungeon();
             string runText = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
@@ -292,11 +334,75 @@ namespace DungeonBuilder.Tests.EditMode
                 structureRuntime = new StructureRuntimeState()
             });
 
-            typeof(BootstrapOverlay).GetMethod("ShowPlayerPlacementBanner", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(_overlay, null);
+            _overlay.PlaceSelectedMvpStructure();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
             Assert.That(_root.BannerMessage, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+        }
+
+
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator")]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber")]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab")]
+        public void MinimalMvpActionPlacement_UsesSelectedStructurePathBannerAndLocalizedSummary(string structureId, string displayName)
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+
+            _overlay.SelectMvpStructure(structureId);
+            _overlay.PlaceSelectedMvpStructure();
+            string text = RefreshText();
+
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(structureId));
+            Assert.That(_root.BannerMessage, Is.EqualTo($"Placed structure: {displayName}"));
+            Assert.That(text, Does.Contain($"Placement: {displayName}"));
+            Assert.That(text, Does.Contain($"Placed structure: {displayName}"));
+            Assert.That(text, Does.Not.Contain(structureId));
+            Assert.That(_root.BannerMessage, Does.Not.Contain(structureId));
+        }
+
+        [Test]
+        public void DiagnosticsStillPreserveRawStructureIdWhereUseful()
+        {
+            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            ShowDiagnosticsFromPlayerFacingDefault();
+
+            while (_overlay.FullDiagnosticsPageNumber != 4)
+            {
+                _overlay.CycleFullDiagnosticsPage();
+            }
+
+            string text = RefreshText();
+            Assert.That(text, Does.Contain(StructureSimulationPass.RiskLabBasicId));
+        }
+
+        [Test]
+        public void RunDiagnosticsFocus_RestoresPlayerFacingDefaultWithSelectedStructurePreserved()
+        {
+            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string focusedText = RefreshText();
+
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.HeatScrubberBasicId));
+            Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
+            Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
+            Assert.That(focusedText, Does.Not.Contain("Selected structure"));
+            Assert.That(focusedText, Does.Not.Contain("Heat Scrubber"));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.HeatScrubberBasicId));
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Heat Scrubber"));
         }
 
         [Test]
@@ -416,7 +522,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("First-session loop complete:"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Minimal MVP Actions"));
-            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify mana generator"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify selected"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Run or observe dungeon"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
@@ -551,6 +657,7 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData save = _root.Save;
             string before = JsonUtility.ToJson(save);
 
+            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
             _overlay.RefreshOverlayText();
             _overlay.ToggleDiagnosticsVisibility();
             _overlay.RefreshOverlayText();
@@ -755,11 +862,15 @@ namespace DungeonBuilder.Tests.EditMode
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
-            map["ui.mvp_action.button.place_or_modify"] = "Place or modify mana generator";
+            map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected";
             map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
-            map["ui.mvp_action.panel.compact_format"] = "{0}: [{1}] [{2}]";
+            map["ui.mvp_action.selection.label"] = "Selected structure: {0}";
+            map["ui.mvp_action.selection.mana_generator"] = "Mana Generator";
+            map["ui.mvp_action.selection.heat_scrubber"] = "Heat Scrubber";
+            map["ui.mvp_action.selection.risk_lab"] = "Risk Lab";
+            map["ui.mvp_action.panel.compact_format"] = "{0}: {1} [{2}] [{3}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
             map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
