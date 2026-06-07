@@ -746,6 +746,14 @@
     {
       "key": "ui.mvp_structure_preview.unknown",
       "text": "Role unavailable."
+    },
+    {
+      "key": "ui.mvp_structure_feedback.empty_slot",
+      "text": "Empty slot"
+    },
+    {
+      "key": "ui.mvp_structure_feedback.changed_format",
+      "text": "Changed: {0} -> {1}. {2}"
     }
   ]
 }

@@ -392,6 +392,118 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void PlacementFeedback_EmptySlotToManaGenerator_AppearsAfterPlaceOrModifySelected()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            string text = RefreshText();
+
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+        }
+
+        [Test]
+        public void PlacementFeedback_UpdatesAfterEachSelectedStructurePlacement()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Mana Generator -> Heat Scrubber. Role: lowers heat pressure."));
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            string text = RefreshText();
+
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+            Assert.That(text, Does.Contain("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
+        }
+
+        [Test]
+        public void PlacementFeedback_UnknownPriorPlacementUsesSafeFallback()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, "structure.debug.not_player_facing");
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+            string text = RefreshText();
+
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Heat Scrubber. Role: lowers heat pressure."));
+            Assert.That(text, Does.Not.Contain("structure.debug.not_player_facing"));
+        }
+
+        [Test]
+        public void RunOrObserveDungeon_DoesNotOverwritePlacementFeedback()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState(),
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_feedback_run_test.json", useAtomicWrites = false }));
+            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+            _overlay.PlaceSelectedMvpStructure();
+
+            _overlay.RunOrObserveDungeon();
+            string text = RefreshText();
+
+            Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+        }
+
+        [Test]
+        public void RunDiagnosticsFocus_HidesPlacementFeedbackAndRestoresSafely()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
+            SetSave(new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState()
+            });
+            _overlay.PlaceSelectedMvpStructure();
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string focusedText = RefreshText();
+
+            Assert.That(focusedText, Does.Not.Contain("Changed: Empty slot -> Mana Generator"));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string restoredText = RefreshText();
+
+            Assert.That(restoredText, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+        }
+
+        [Test]
         public void DiagnosticsStillPreserveRawStructureIdWhereUseful()
         {
             _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
@@ -902,6 +1014,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
             map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
             map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
+            map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
+            map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
             map["ui.mvp_action.panel.compact_format"] = "{0}: {1} {2} [{3}] [{4}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";

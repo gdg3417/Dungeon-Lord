@@ -36,6 +36,7 @@ namespace DungeonBuilder.M0
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
         private string _selectedMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
+        private string _mvpStructurePlacementFeedback = string.Empty;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -44,6 +45,7 @@ namespace DungeonBuilder.M0
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
+        public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
 
         public void Bind(GameRoot root)
         {
@@ -239,6 +241,10 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(_root.BannerMessage))
             {
                 AppendLine(builder, _root.BannerMessage);
+            }
+            if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
+            {
+                AppendLine(builder, _mvpStructurePlacementFeedback);
             }
         }
 
@@ -700,10 +706,24 @@ namespace DungeonBuilder.M0
         private void ShowPlayerPlacementBanner()
         {
             string structureId = _selectedMvpStructureId;
+            string priorStructureId = _root.GetSelectedSlotStructureId();
             bool ok = _root.TryMvpPlaceOrModifySelectedStructure(structureId, out string bannerKey);
+            string newStructureId = _root.GetSelectedSlotStructureId();
             string message = _root.Content.GetString(bannerKey, bannerKey);
             string displayName = MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(structureId, (key, fallback) => GetLocalizedString(key, fallback));
             _root.SetBanner(ok ? string.Format(message, displayName) : message);
+            if (ok)
+            {
+                _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildFeedbackText(
+                    priorStructureId,
+                    newStructureId,
+                    structureId,
+                    (key, fallback) => GetLocalizedString(key, fallback));
+            }
+            else
+            {
+                _mvpStructurePlacementFeedback = string.Empty;
+            }
             RefreshOverlayText();
         }
 
