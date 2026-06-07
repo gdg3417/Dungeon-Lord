@@ -183,6 +183,13 @@ namespace DungeonBuilder.M0
                 AppendLine(builder, string.Empty);
                 AppendLine(builder, guidedText);
             }
+
+            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(firstSessionText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, firstSessionText);
+            }
         }
 
         private void AppendPlayerFacingStatus(StringBuilder builder)

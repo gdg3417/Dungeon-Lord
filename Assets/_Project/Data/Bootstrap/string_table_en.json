@@ -668,6 +668,26 @@
       "text": "Run again or adjust one placement based on the summary."
     },
     {
+      "key": "ui.first_session.status.not_started",
+      "text": "First-session status: waiting for MVP loop summary."
+    },
+    {
+      "key": "ui.first_session.status.place_structure",
+      "text": "First-session status: place one structure to start the loop."
+    },
+    {
+      "key": "ui.first_session.status.run_dungeon",
+      "text": "First-session status: structure placed; run the dungeon next."
+    },
+    {
+      "key": "ui.first_session.status.observe_summary",
+      "text": "First-session status: observe mana, loot, heat, research, and next action."
+    },
+    {
+      "key": "ui.first_session.status.complete",
+      "text": "First-session loop complete: placement, run, mana, loot, heat, and research are visible."
+    },
+    {
       "key": "ui.mvp_action.button.show_diagnostics",
       "text": "Show diagnostics"
     },

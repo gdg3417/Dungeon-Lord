@@ -107,6 +107,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Placement: Mana Generator"));
             Assert.That(text, Does.Not.Contain("Placement: structure.mana_generator.basic"));
             Assert.That(text, Does.Contain("Next action: Run again or adjust one placement based on the summary."));
+            Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
+            Assert.That(text, Does.Not.Contain("First-session status: structure placed; run the dungeon next."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify mana generator] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
@@ -127,6 +129,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Contain("MVP Loop Summary"));
             Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("banner-line"));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -190,6 +194,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedText, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedText, Does.Contain("run-line"));
             Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
+            Assert.That(focusedText, Does.Not.Contain("First-session loop complete:"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
 
             _overlay.ToggleRunDiagnosticsFocus();
@@ -199,6 +204,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(restoredText, Does.Contain("MVP Loop Summary"));
+            Assert.That(restoredText, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
             Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(restoredText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
         }
@@ -407,6 +413,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Guided MVP Action"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("First-session loop complete:"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Minimal MVP Actions"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify mana generator"));
@@ -755,6 +762,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.panel.compact_format"] = "{0}: [{1}] [{2}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
+            map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
+            map["ui.first_session.status.place_structure"] = "First-session status: place one structure to start the loop.";
+            map["ui.first_session.status.run_dungeon"] = "First-session status: structure placed; run the dungeon next.";
+            map["ui.first_session.status.observe_summary"] = "First-session status: observe mana, loot, heat, research, and next action.";
+            map["ui.first_session.status.complete"] = "First-session loop complete: placement, run, mana, loot, heat, and research are visible.";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
             map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
             map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
