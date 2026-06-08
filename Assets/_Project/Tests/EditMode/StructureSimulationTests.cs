@@ -171,9 +171,53 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void MvpActiveLoop_AppliesConfiguredStructureTickBeforeRun_ForEachMvpSafeStructure()
         {
-            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.ManaGeneratorBasicId, expectedManaAtRunStart: 10d, expectedHeatAtRunStart: 25d);
-            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.HeatScrubberBasicId, expectedManaAtRunStart: 0d, expectedHeatAtRunStart: 12d);
-            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.RiskLabBasicId, expectedManaAtRunStart: 18d, expectedHeatAtRunStart: 35d);
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.ManaGeneratorBasicId, expectedManaAtRunStart: 6d, expectedHeatAtRunStart: 22d);
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.HeatScrubberBasicId, expectedManaAtRunStart: 0d, expectedHeatAtRunStart: 14d);
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.RiskLabBasicId, expectedManaAtRunStart: 9d, expectedHeatAtRunStart: 30d);
+        }
+
+        [Test]
+        public void MvpActiveLoop_FirstSessionSequence_RemainsDistinctAndReadable()
+        {
+            var save = new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { ManaReserve = 0d, Heat = 20d },
+                runHistory = new RunHistoryState()
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true))
+            {
+                Assert.That(harness.Root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out _), Is.True);
+                Assert.That(harness.Root.SimulateMvpActiveLoopOnce(out bool manaTickApplied), Is.True);
+                Assert.That(manaTickApplied, Is.True);
+                RunOutcomeRecord manaOutcome = harness.Root.Save.runHistory.LatestOutcome;
+
+                Assert.That(harness.Root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.HeatScrubberBasicId, out _), Is.True);
+                Assert.That(harness.Root.SimulateMvpActiveLoopOnce(out bool scrubberTickApplied), Is.True);
+                Assert.That(scrubberTickApplied, Is.True);
+                RunOutcomeRecord scrubberOutcome = harness.Root.Save.runHistory.LatestOutcome;
+
+                Assert.That(harness.Root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.RiskLabBasicId, out _), Is.True);
+                Assert.That(harness.Root.SimulateMvpActiveLoopOnce(out bool riskTickApplied), Is.True);
+                Assert.That(riskTickApplied, Is.True);
+                RunOutcomeRecord riskOutcome = harness.Root.Save.runHistory.LatestOutcome;
+
+                Assert.That(manaOutcome.ManaAtStart, Is.EqualTo(6d));
+                Assert.That(manaOutcome.HeatAtStart, Is.EqualTo(22d));
+                Assert.That(scrubberOutcome.ManaAtStart, Is.EqualTo(6d));
+                Assert.That(scrubberOutcome.HeatAtStart, Is.EqualTo(16d));
+                Assert.That(riskOutcome.ManaAtStart, Is.EqualTo(15d));
+                Assert.That(riskOutcome.HeatAtStart, Is.EqualTo(26d));
+
+                Assert.That(manaOutcome.ManaAtStart, Is.GreaterThan(0d));
+                Assert.That(scrubberOutcome.HeatAtStart, Is.LessThan(manaOutcome.HeatAtStart));
+                Assert.That(riskOutcome.ManaAtStart, Is.GreaterThan(manaOutcome.ManaAtStart));
+                Assert.That(riskOutcome.HeatAtStart, Is.GreaterThan(scrubberOutcome.HeatAtStart));
+                Assert.That(riskOutcome.ManaAtStart, Is.LessThanOrEqualTo(20d));
+                Assert.That(riskOutcome.HeatAtStart, Is.LessThanOrEqualTo(30d));
+                Assert.That(harness.Root.Save.runHistory.RecentOutcomes.Length, Is.EqualTo(3));
+            }
         }
 
         [Test]
@@ -538,9 +582,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 PlacementBlockedDuringCrisis = true,
                 Structures = new[]
                 {
-                    new StructureTuningEntry { StructureId = StructureSimulationPass.ManaGeneratorBasicId, ManaDeltaPerTick = 10d, HeatDeltaPerTick = 5d },
-                    new StructureTuningEntry { StructureId = StructureSimulationPass.HeatScrubberBasicId, ManaDeltaPerTick = 0d, HeatDeltaPerTick = -8d },
-                    new StructureTuningEntry { StructureId = StructureSimulationPass.RiskLabBasicId, ManaDeltaPerTick = 18d, HeatDeltaPerTick = 15d }
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.ManaGeneratorBasicId, ManaDeltaPerTick = 6d, HeatDeltaPerTick = 2d },
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.HeatScrubberBasicId, ManaDeltaPerTick = 0d, HeatDeltaPerTick = -6d },
+                    new StructureTuningEntry { StructureId = StructureSimulationPass.RiskLabBasicId, ManaDeltaPerTick = 9d, HeatDeltaPerTick = 10d }
                 }
             };
         }

@@ -2,18 +2,18 @@
   "Structures": [
     {
       "StructureId": "structure.mana_generator.basic",
-      "ManaDeltaPerTick": 10.0,
-      "HeatDeltaPerTick": 5.0
+      "ManaDeltaPerTick": 6.0,
+      "HeatDeltaPerTick": 2.0
     },
     {
       "StructureId": "structure.heat_scrubber.basic",
       "ManaDeltaPerTick": 0.0,
-      "HeatDeltaPerTick": -8.0
+      "HeatDeltaPerTick": -6.0
     },
     {
       "StructureId": "structure.risk_lab.basic",
-      "ManaDeltaPerTick": 18.0,
-      "HeatDeltaPerTick": 15.0
+      "ManaDeltaPerTick": 9.0,
+      "HeatDeltaPerTick": 10.0
     }
   ],
   "HeatCrisisEnterThreshold": 100.0,
