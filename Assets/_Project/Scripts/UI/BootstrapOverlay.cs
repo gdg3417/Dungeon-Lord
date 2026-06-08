@@ -121,6 +121,20 @@ namespace DungeonBuilder.M0
             ShowPlayerRunBanner();
         }
 
+        public bool ResetCleanMvpValidationSessionFromDevPanel()
+        {
+            if (_root == null || !_root.ResetCleanMvpValidationSession())
+            {
+                return false;
+            }
+
+            _mvpStructurePlacementFeedback = string.Empty;
+            _mvpRunResultFeedback = string.Empty;
+            _root.SetBanner(GetLocalizedString("ui.banner.clean_mvp_validation_reset", "ui.banner.clean_mvp_validation_reset"));
+            RefreshOverlayText();
+            return true;
+        }
+
         public void ScrollFullDiagnosticsLines(int lineDelta)
         {
             if (_runDiagnosticsOnlyVisible || !_diagnosticsVisible || lineDelta == 0)
@@ -520,6 +534,11 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_banner", "ui.dev.button.clear_banner")))
             {
                 _root.SetBanner(string.Empty);
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clean_mvp_validation_reset", "ui.dev.button.clean_mvp_validation_reset")))
+            {
+                ResetCleanMvpValidationSessionFromDevPanel();
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.toggle_online", "ui.dev.button.toggle_online")))

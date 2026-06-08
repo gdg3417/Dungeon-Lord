@@ -52,6 +52,10 @@
       "text": "Clear Banner"
     },
     {
+      "key": "ui.dev.button.clean_mvp_validation_reset",
+      "text": "Clean MVP Validation Reset"
+    },
+    {
       "key": "ui.dev.button.toggle_online",
       "text": "Toggle Online/Offline"
     },
@@ -202,6 +206,10 @@
     {
       "key": "ui.banner.saved_dev",
       "text": "Saved (Dev)."
+    },
+    {
+      "key": "ui.banner.clean_mvp_validation_reset",
+      "text": "Clean MVP validation session reset."
     },
     {
       "key": "ui.banner.online_restored",
