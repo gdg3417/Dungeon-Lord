@@ -762,6 +762,22 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        public bool SimulateMvpActiveLoopOnce(out bool didApplyStructureTick)
+        {
+            didApplyStructureTick = false;
+            if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
+            {
+                return false;
+            }
+
+            if (_structureSimulationPass != null && Save.dungeonLayout != null)
+            {
+                didApplyStructureTick = SimulateStructureTick();
+            }
+
+            return SimulateRunOnce();
+        }
+
         public bool SimulateRunOnce()
         {
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
