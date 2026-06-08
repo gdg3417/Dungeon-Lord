@@ -44,6 +44,13 @@
   - F2 Run Diagnostics Focus hides run feedback and restores player-facing default safely
   - new run feedback excludes raw run/rule/structure IDs while diagnostics may still expose raw IDs where useful
 
+
+## PR88 focused test fix note
+
+- Initial local Unity validation reported one failure in `BootstrapOverlayPagingTests.DefaultPlayerFacingMode_PlayerPlacementAndRunActionsRemainAvailable` because the test assumed run feedback always began with the localized success message.
+- The fixture starts from heat/crisis state that can validly produce failed run feedback; the runtime behavior was correct because it reported the actual run result.
+- The test was updated to assert valid localized run feedback for either success or failure while still requiring non-empty feedback, player-facing overlay visibility, default player-facing mode, the run-simulated banner, and exclusion of raw run IDs, raw structure IDs, and raw rule IDs.
+
 ## Manual smoke checklist
 
 1. Launch Bootstrap.
