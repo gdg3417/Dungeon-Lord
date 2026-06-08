@@ -1,7 +1,9 @@
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using System.Reflection;
 using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -167,6 +169,63 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void MvpActiveLoop_AppliesConfiguredStructureTickBeforeRun_ForEachMvpSafeStructure()
+        {
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.ManaGeneratorBasicId, expectedManaAtRunStart: 10d, expectedHeatAtRunStart: 25d);
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.HeatScrubberBasicId, expectedManaAtRunStart: 0d, expectedHeatAtRunStart: 12d);
+            AssertMvpActiveLoopStructureImpact(StructureSimulationPass.RiskLabBasicId, expectedManaAtRunStart: 18d, expectedHeatAtRunStart: 35d);
+        }
+
+        [Test]
+        public void MvpActiveLoop_NoPlacement_StillRunsWithNoStructureDelta()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            var save = new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState { ManaReserve = 3d, Heat = 20d },
+                runHistory = new RunHistoryState()
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+                RunOutcomeRecord outcome = harness.Root.Save.runHistory.RecentOutcomes[0];
+
+                Assert.That(didRun, Is.True);
+                Assert.That(didApplyStructureTick, Is.True);
+                Assert.That(outcome.ManaAtStart, Is.EqualTo(3d));
+                Assert.That(outcome.HeatAtStart, Is.EqualTo(20d));
+                Assert.That(harness.Root.Save.totalTicks, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void MvpActiveLoop_MissingStructureSimulationData_FallsBackToRunOnly()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.RiskLabBasicId);
+            var save = new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState { ManaReserve = 7d, Heat = 20d },
+                runHistory = new RunHistoryState()
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: false))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+                RunOutcomeRecord outcome = harness.Root.Save.runHistory.RecentOutcomes[0];
+
+                Assert.That(didRun, Is.True);
+                Assert.That(didApplyStructureTick, Is.False);
+                Assert.That(outcome.ManaAtStart, Is.EqualTo(7d));
+                Assert.That(outcome.HeatAtStart, Is.EqualTo(20d));
+                Assert.That(harness.Root.Save.totalTicks, Is.EqualTo(0));
+            }
+        }
+
+        [Test]
         public void TryCreateStructureSimulationPass_ReturnsFalse_For_Malformed_Config()
         {
             bool ok = GameRoot.TryCreateStructureSimulationPass(new HeatSystem(), "{bad json", out StructureSimulationPass pass);
@@ -285,6 +344,130 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 UnityEngine.Object.DestroyImmediate(go);
             }
+        }
+
+        private static void AssertMvpActiveLoopStructureImpact(string structureId, double expectedManaAtRunStart, double expectedHeatAtRunStart)
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, structureId);
+            var save = new SaveData
+            {
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState { ManaReserve = 0d, Heat = 20d },
+                runHistory = new RunHistoryState()
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+                RunOutcomeRecord outcome = harness.Root.Save.runHistory.RecentOutcomes[0];
+
+                Assert.That(didRun, Is.True);
+                Assert.That(didApplyStructureTick, Is.True);
+                Assert.That(outcome.ManaAtStart, Is.EqualTo(expectedManaAtRunStart));
+                Assert.That(outcome.HeatAtStart, Is.EqualTo(expectedHeatAtRunStart));
+            }
+        }
+
+        private static GameRootTestHarness CreateMvpLoopHarness(SaveData save, bool includeStructurePass)
+        {
+            var rootObject = new GameObject("GameRoot_MvpActiveLoop_Test");
+            var root = rootObject.AddComponent<GameRoot>();
+            var saveService = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = $"mvp_active_loop_{System.Guid.NewGuid():N}.json", useAtomicWrites = false });
+            SetGameRootField(root, "<Save>k__BackingField", save);
+            SetGameRootField(root, "<SaveService>k__BackingField", saveService);
+            SetGameRootField(root, "_runSimulationService", new RunSimulationService(BuildRunConfigForMvpActiveLoop()));
+            if (includeStructurePass)
+            {
+                SetGameRootField(root, "_structureSimulationPass", new StructureSimulationPass(new HeatSystem(), BuildTestConfig()));
+            }
+
+            return new GameRootTestHarness(rootObject, root, saveService.SavePath);
+        }
+
+        private static void SetGameRootField(GameRoot root, string fieldName, object value)
+        {
+            typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(root, value);
+        }
+
+        private sealed class GameRootTestHarness : System.IDisposable
+        {
+            private readonly GameObject _rootObject;
+            private readonly string _savePath;
+            public GameRoot Root { get; }
+
+            public GameRootTestHarness(GameObject rootObject, GameRoot root, string savePath)
+            {
+                _rootObject = rootObject;
+                _savePath = savePath;
+                Root = root;
+            }
+
+            public void Dispose()
+            {
+                if (!string.IsNullOrEmpty(_savePath) && System.IO.File.Exists(_savePath))
+                {
+                    System.IO.File.Delete(_savePath);
+                }
+
+                Object.DestroyImmediate(_rootObject);
+            }
+        }
+
+        private static RunSimulationConfig BuildRunConfigForMvpActiveLoop()
+        {
+            return new RunSimulationConfig
+            {
+                BaseSuccessChance = 0.6d,
+                HeatPenaltyPerPoint = 0.004d,
+                ManaReserveBonusPerPoint = 0.01d,
+                CrisisFailurePenalty = 0.3d,
+                SuccessThreshold = 0.5d,
+                BaseScoreOnSuccess = 100,
+                ScorePerManaPoint = 2,
+                MaxRunHistoryEntries = 10,
+                HighHeatFeedbackThreshold = 75d,
+                LowManaFeedbackThreshold = 5d,
+                StrongManaReserveFeedbackThreshold = 50d,
+                LootTableId = string.Empty,
+                MinPartySize = 3,
+                MaxPartySize = 5,
+                MaxAllowedPartySize = 100,
+                SuccessSurvivorRatio = 1d,
+                FailureSurvivorRatio = 0d,
+                LootExtractionRoundingPolicyId = "loot_extraction.round_floor",
+                LootExtractionRuleSourceId = "run.loot_extraction.rule.test",
+                LootHeatCoolingRuleSourceId = "run.loot_heat_cooling.rule.test",
+                LootHeatCoolingPerTradeableWorldValue = 0.1d,
+                MaxLootHeatCoolingPerRun = 25d,
+                AdventurerAttractionRuleSourceId = "run.adventurer_attraction.rule.test",
+                AdventurerAttractionPerExtractedWorldValue = 1d,
+                AdventurerInterestForecastRuleSourceId = "run.adventurer_interest_forecast.rule.test",
+                AdventurerInterestLowThreshold = 5d,
+                AdventurerInterestMediumThreshold = 10d,
+                AdventurerInterestHighThreshold = 20d,
+                AdventurerInterestScorePerAttractionSignal = 1d,
+                AdventurerDemandBudgetRuleSourceId = "run.adventurer_demand_budget.rule.test",
+                AdventurerDemandBudgetScorePerForecastScore = 1d,
+                AdventurerDemandBudgetLowThreshold = 5d,
+                AdventurerDemandBudgetMediumThreshold = 10d,
+                AdventurerDemandBudgetHighThreshold = 20d,
+                RunHeatNormalDeathDelta = 1d,
+                RunHeatEliteDeathDelta = 3d,
+                RunHeatMultipleDeathBonusDelta = 1d,
+                RunHeatSurvivorCoolingPerSurvivor = 0.5d,
+                RunHeatLootCoolingPerExtractedValue = 0.1d,
+                RunHeatDeltaMinimum = -10d,
+                RunHeatDeltaMaximum = 10d,
+                RunHeatDeltaRuleSourceId = "run.heat_delta.rule.test",
+                HeatPeaceMinimum = 0d,
+                HeatPeaceMaximum = 9d,
+                HeatNoticeMinimum = 10d,
+                HeatNoticeMaximum = 24d,
+                HeatConcernMinimum = 25d,
+                HeatConcernMaximum = 49d,
+                RunHeatApplicationRuleSourceId = "run.heat_application.rule.test"
+            };
         }
 
         private static StructureSimulationConfig BuildTestConfig()

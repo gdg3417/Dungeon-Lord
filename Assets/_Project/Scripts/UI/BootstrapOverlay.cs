@@ -757,7 +757,7 @@ namespace DungeonBuilder.M0
         private void ShowPlayerRunBanner()
         {
             MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            bool didRun = _root.SimulateRunOnce();
+            bool didRun = _root.SimulateMvpActiveLoopOnce(out _);
             MvpPlayerLoopSummary afterRunSummary = _root.ResolveMvpPlayerLoopSummary();
             _mvpRunResultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
                 beforeRunSummary,
