@@ -110,6 +110,10 @@ The vertical-slice integration phase remains locked to the MVP loop above. The f
 - Keeps evidence paths organized and easy to find under `docs/testing/evidence`.
 - Confirms Unity tests are required only when runtime code changes are part of the PR under test.
 
+## VS16 closeout and gameplay handoff
+
+The player-facing vertical-slice stream is closed out by `docs/planning/vs16-player-facing-mvp-vertical-slice-closeout.md`. After VS16, return to gameplay/system development and avoid additional presentation-only slices unless a smoke blocker or usability blocker appears.
+
 ## Risk register
 
 | Risk | Mitigation |
