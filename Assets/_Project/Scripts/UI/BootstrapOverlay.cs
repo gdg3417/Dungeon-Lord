@@ -31,6 +31,7 @@ namespace DungeonBuilder.M0
         private const float OverlayTextSafeTopMargin = 14f;
         private const float OverlayTextSafeBottomMargin = 10f;
         private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
+        private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -39,7 +40,7 @@ namespace DungeonBuilder.M0
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
-        private string _selectedMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
+        private string _selectedMvpStructureId = DefaultMvpStructureId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
 
@@ -128,6 +129,7 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            _selectedMvpStructureId = DefaultMvpStructureId;
             _mvpStructurePlacementFeedback = string.Empty;
             _mvpRunResultFeedback = string.Empty;
             _root.SetBanner(GetLocalizedString("ui.banner.clean_mvp_validation_reset", "ui.banner.clean_mvp_validation_reset"));

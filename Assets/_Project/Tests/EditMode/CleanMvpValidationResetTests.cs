@@ -259,12 +259,16 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void ResetFromDevPanel_ClearsCachedFeedbackAndRefreshesPlayerFacingSummary()
+        public void ResetFromDevPanel_ClearsCachedFeedbackResetsSelectionAndRefreshesPlayerFacingSummary()
         {
+            Assert.That(_overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId), Is.True);
             SetOverlayPrivateField("_mvpStructurePlacementFeedback", "stale placement feedback");
             SetOverlayPrivateField("_mvpRunResultFeedback", "stale run feedback");
-            Assert.That(RefreshText(), Does.Contain("Latest run: Succeeded"));
-            Assert.That(RefreshText(), Does.Contain("Mana reserve: 45"));
+            string dirtyText = RefreshText();
+            Assert.That(dirtyText, Does.Contain("Latest run: Succeeded"));
+            Assert.That(dirtyText, Does.Contain("Mana reserve: 45"));
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(dirtyText, Does.Contain("Selected structure: Risk Lab"));
 
             bool didReset = _overlay.ResetCleanMvpValidationSessionFromDevPanel();
             string refreshed = RefreshText();
@@ -272,11 +276,16 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(didReset, Is.True);
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.Empty);
             Assert.That(_overlay.MvpRunResultFeedback, Is.Empty);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
+            Assert.That(refreshed, Does.Contain("Selected structure: Mana Generator"));
+            Assert.That(refreshed, Does.Contain("Role: improves mana reserve."));
             Assert.That(refreshed, Does.Contain("Placement: No structure placed"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("First-session status: place one structure to start the loop."));
+            Assert.That(refreshed, Does.Not.Contain("Selected structure: Risk Lab"));
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
             Assert.That(refreshed, Does.Not.Contain("Clean MVP Validation Reset"));
