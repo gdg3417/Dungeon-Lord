@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         public const string LootFormatKey = "ui.mvp_loop.panel.loot_format";
         public const string HeatFormatKey = "ui.mvp_loop.panel.heat_format";
         public const string ResearchFormatKey = "ui.mvp_loop.panel.research_format";
+        public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
         public const string SuggestionFormatKey = "ui.mvp_loop.panel.suggestion_format";
         public const string ValueNoPlacementKey = "ui.mvp_loop.value.no_placement";
         public const string ValueNoRunKey = "ui.mvp_loop.value.no_run";
@@ -46,6 +47,16 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(
                 Localize(localize, ResearchFormatKey),
                 ResolveResearch(summary, localize)));
+            if (summary != null && summary.RuleResolved && summary.HasRunOutcome)
+            {
+                string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
+                if (!string.IsNullOrEmpty(partyPreview))
+                {
+                    AppendLine(builder, string.Format(
+                        Localize(localize, AdventurerPartyFormatKey),
+                        partyPreview));
+                }
+            }
             AppendLine(builder, string.Format(
                 Localize(localize, SuggestionFormatKey),
                 ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));

@@ -60,6 +60,9 @@ namespace DungeonBuilder.M0
             int generatedWorldValue = lootSummary?.TotalGeneratedWorldValue ?? 0;
             int extractedWorldValue = extractionSummary?.TotalExtractedWorldValue ?? 0;
             int extractedTradeableWorldValue = extractionSummary?.TotalExtractedTradeableWorldValue ?? 0;
+            AdventurerPartyCompositionSummary partyPreview = hasRunOutcome
+                ? AdventurerPartyCompositionResolver.Resolve(runConfig, latestRun.RunId, latestRun.TickStarted, selectedSlot.HasValue ? selectedSlot.Value.StructureId : string.Empty)
+                : null;
 
             var summary = new MvpPlayerLoopSummary
             {
@@ -85,6 +88,10 @@ namespace DungeonBuilder.M0
                 VerificationRequired = verificationActionable,
                 VerificationAvailable = verificationBoundary != null && verificationBoundary.VerificationAvailable,
                 CanClaimProduction = (researchStatus != null && researchStatus.CanClaimProduction) || (verificationBoundary != null && verificationBoundary.CanClaimProduction),
+                AdventurerPartyClassIds = partyPreview != null && partyPreview.ClassIds != null ? partyPreview.ClassIds : System.Array.Empty<string>(),
+                AdventurerPartyPreviewResolved = partyPreview != null && partyPreview.RuleResolved,
+                AdventurerPartyPreviewDeterministicErrorCode = partyPreview != null ? partyPreview.DeterministicErrorCode : (int)AdventurerPartyCompositionSummaryErrorCode.None,
+                AdventurerPartyPreviewRuleSourceId = partyPreview != null ? partyPreview.RuleSourceId : string.Empty,
                 WouldMutateState = false,
                 WouldGrantRewards = false,
                 WouldUnlockContent = false,

@@ -105,7 +105,19 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatNoticeMaximum = 24d,
                 HeatConcernMinimum = 25d,
                 HeatConcernMaximum = 49d,
-                RunHeatApplicationRuleSourceId = "run.heat_application.rule.v1"
+                RunHeatApplicationRuleSourceId = "run.heat_application.rule.v1",
+                AdventurerPartyCompositionRuleSourceId = "run.adventurer_party_composition.rule.test",
+                AdventurerPartyCompositionMinSize = 1,
+                AdventurerPartyCompositionMaxSize = 3,
+                AdventurerPartyCompositionMaxAllowedSize = 5,
+                AdventurerPartyCompositionClassIds = new[]
+                {
+                    AdventurerPartyCompositionResolver.WarriorClassId,
+                    AdventurerPartyCompositionResolver.RogueClassId,
+                    AdventurerPartyCompositionResolver.MageClassId,
+                    AdventurerPartyCompositionResolver.ClericClassId,
+                    AdventurerPartyCompositionResolver.RangerClassId
+                }
             };
         }
 

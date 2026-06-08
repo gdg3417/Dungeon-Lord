@@ -51,6 +51,13 @@ namespace DungeonBuilder.M0
         InvalidDemandBudgetConfig = 2,
         AggregateOverflow = 3
     }
+
+    public enum AdventurerPartyCompositionSummaryErrorCode
+    {
+        None = 0,
+        MissingOrInvalidConfig = 1,
+        NoAllowedMvpClasses = 2
+    }
     public enum RunHeatDeltaSummaryErrorCode
     {
         None = 0,
@@ -282,6 +289,11 @@ namespace DungeonBuilder.M0
         public double HeatConcernMinimum;
         public double HeatConcernMaximum;
         public string RunHeatApplicationRuleSourceId;
+        public string AdventurerPartyCompositionRuleSourceId;
+        public int AdventurerPartyCompositionMinSize;
+        public int AdventurerPartyCompositionMaxSize;
+        public int AdventurerPartyCompositionMaxAllowedSize;
+        public string[] AdventurerPartyCompositionClassIds = Array.Empty<string>();
     }
 
     [Serializable]
@@ -411,6 +423,16 @@ namespace DungeonBuilder.M0
         public string DemandBudgetBandId;
     }
     [Serializable]
+    public sealed class AdventurerPartyCompositionSummary
+    {
+        public string RuleSourceId;
+        public int DeterministicSeed;
+        public bool RuleResolved;
+        public int DeterministicErrorCode;
+        public string[] ClassIds = Array.Empty<string>();
+    }
+
+    [Serializable]
     public sealed class RunHeatDeltaSummary
     {
         public bool RuleResolved = false;
@@ -475,6 +497,10 @@ namespace DungeonBuilder.M0
         public bool VerificationRequired = false;
         public bool VerificationAvailable = false;
         public bool CanClaimProduction = false;
+        public string[] AdventurerPartyClassIds = Array.Empty<string>();
+        public bool AdventurerPartyPreviewResolved = false;
+        public int AdventurerPartyPreviewDeterministicErrorCode = (int)AdventurerPartyCompositionSummaryErrorCode.None;
+        public string AdventurerPartyPreviewRuleSourceId;
         public string NextOptimizationSuggestionKey;
         public bool WouldMutateState = false;
         public bool WouldGrantRewards = false;

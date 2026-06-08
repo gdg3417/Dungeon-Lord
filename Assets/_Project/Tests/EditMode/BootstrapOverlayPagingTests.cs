@@ -604,6 +604,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Run result: succeeded."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
+            Assert.That(text, Does.Contain("Adventurers: "));
             Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
         }
@@ -634,6 +637,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-2"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.RogueClassId));
         }
 
         [Test]
@@ -1031,7 +1035,19 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatNoticeMaximum = 24d,
                 HeatConcernMinimum = 25d,
                 HeatConcernMaximum = 49d,
-                RunHeatApplicationRuleSourceId = "run.heat_application.rule.test"
+                RunHeatApplicationRuleSourceId = "run.heat_application.rule.test",
+                AdventurerPartyCompositionRuleSourceId = "run.adventurer_party_composition.rule.test",
+                AdventurerPartyCompositionMinSize = 1,
+                AdventurerPartyCompositionMaxSize = 3,
+                AdventurerPartyCompositionMaxAllowedSize = 5,
+                AdventurerPartyCompositionClassIds = new[]
+                {
+                    AdventurerPartyCompositionResolver.WarriorClassId,
+                    AdventurerPartyCompositionResolver.RogueClassId,
+                    AdventurerPartyCompositionResolver.MageClassId,
+                    AdventurerPartyCompositionResolver.ClericClassId,
+                    AdventurerPartyCompositionResolver.RangerClassId
+                }
             });
         }
 
@@ -1185,6 +1201,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
+            map["ui.mvp_loop.panel.adventurer_party_format"] = "{0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
             map["ui.mvp_loop.value.no_placement"] = "No structure placed";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
@@ -1218,6 +1235,14 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_feedback.failed"] = "Run result: failed. Review placement and try again.";
             map["ui.mvp_run_feedback.unavailable"] = "Run result unavailable.";
             map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
+            map["ui.mvp_run_feedback.format_with_party"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}";
+            map["ui.mvp_adventurer_party.preview_format"] = "Adventurers: {0}";
+            map["ui.mvp_adventurer_party.class.unknown"] = "Unknown adventurer";
+            map["adventurer.class.warrior.display_name"] = "Warrior";
+            map["adventurer.class.rogue.display_name"] = "Rogue";
+            map["adventurer.class.mage.display_name"] = "Mage";
+            map["adventurer.class.cleric.display_name"] = "Cleric";
+            map["adventurer.class.ranger.display_name"] = "Ranger";
             map["ui.mvp_action.panel.compact_format"] = "{0}: {1} {2} [{3}] [{4}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
