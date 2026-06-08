@@ -524,7 +524,13 @@ namespace DungeonBuilder.M0
                 config.HeatPeaceMaximum >= config.HeatNoticeMinimum ||
                 config.HeatNoticeMinimum > config.HeatNoticeMaximum ||
                 config.HeatNoticeMaximum >= config.HeatConcernMinimum ||
-                config.HeatConcernMinimum > config.HeatConcernMaximum)
+                config.HeatConcernMinimum > config.HeatConcernMaximum ||
+                string.IsNullOrWhiteSpace(config.AdventurerPartyCompositionRuleSourceId) ||
+                config.AdventurerPartyCompositionMinSize < 1 ||
+                config.AdventurerPartyCompositionMaxSize < config.AdventurerPartyCompositionMinSize ||
+                config.AdventurerPartyCompositionMaxAllowedSize < 1 ||
+                config.AdventurerPartyCompositionMaxSize > config.AdventurerPartyCompositionMaxAllowedSize ||
+                !HasConfiguredMvpAdventurerClasses(config.AdventurerPartyCompositionClassIds))
             {
                 return false;
             }
@@ -532,6 +538,25 @@ namespace DungeonBuilder.M0
             return true;
         }
         
+
+        private static bool HasConfiguredMvpAdventurerClasses(string[] classIds)
+        {
+            if (classIds == null || classIds.Length == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < classIds.Length; i++)
+            {
+                if (AdventurerPartyCompositionResolver.IsMvpClassId(classIds[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         internal static bool TryCreateStructureSimulationPass(
             IHeatSystem heatSystem,
             string configJson,

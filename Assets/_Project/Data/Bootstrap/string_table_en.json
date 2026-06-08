@@ -786,6 +786,42 @@
     {
       "key": "ui.mvp_run_feedback.format",
       "text": "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}."
+    },
+    {
+      "key": "ui.mvp_loop.panel.adventurer_party_format",
+      "text": "{0}"
+    },
+    {
+      "key": "ui.mvp_run_feedback.format_with_party",
+      "text": "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}"
+    },
+    {
+      "key": "ui.mvp_adventurer_party.preview_format",
+      "text": "Adventurers: {0}"
+    },
+    {
+      "key": "ui.mvp_adventurer_party.class.unknown",
+      "text": "Unknown adventurer"
+    },
+    {
+      "key": "adventurer.class.warrior.display_name",
+      "text": "Warrior"
+    },
+    {
+      "key": "adventurer.class.rogue.display_name",
+      "text": "Rogue"
+    },
+    {
+      "key": "adventurer.class.mage.display_name",
+      "text": "Mage"
+    },
+    {
+      "key": "adventurer.class.cleric.display_name",
+      "text": "Cleric"
+    },
+    {
+      "key": "adventurer.class.ranger.display_name",
+      "text": "Ranger"
     }
   ]
 }

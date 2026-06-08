@@ -10,6 +10,8 @@ namespace DungeonBuilder.M0
         public const string FailedKey = "ui.mvp_run_feedback.failed";
         public const string UnavailableKey = "ui.mvp_run_feedback.unavailable";
         public const string FormatKey = "ui.mvp_run_feedback.format";
+        public const string FormatWithPartyKey = "ui.mvp_run_feedback.format_with_party";
+        public const string PartyPreviewFormatKey = "ui.mvp_adventurer_party.preview_format";
 
         public static string BuildFeedbackText(
             MvpPlayerLoopSummary beforeRunSummary,
@@ -23,7 +25,23 @@ namespace DungeonBuilder.M0
             }
 
             string interpretation = Localize(localize, ResolveInterpretationKey(afterRunSummary));
-            string format = Localize(localize, FormatKey);
+            string partyPreview = BuildPartyPreview(afterRunSummary, localize);
+            string format = string.IsNullOrEmpty(partyPreview)
+                ? Localize(localize, FormatKey)
+                : Localize(localize, FormatWithPartyKey);
+            if (string.IsNullOrEmpty(partyPreview))
+            {
+                return string.Format(
+                    format,
+                    interpretation,
+                    afterRunSummary.ManaReserve,
+                    afterRunSummary.LootGeneratedWorldValue,
+                    afterRunSummary.LootExtractedWorldValue,
+                    afterRunSummary.LootExtractedTradeableWorldValue,
+                    afterRunSummary.HeatBefore,
+                    afterRunSummary.HeatAfter);
+            }
+
             return string.Format(
                 format,
                 interpretation,
@@ -32,7 +50,24 @@ namespace DungeonBuilder.M0
                 afterRunSummary.LootExtractedWorldValue,
                 afterRunSummary.LootExtractedTradeableWorldValue,
                 afterRunSummary.HeatBefore,
-                afterRunSummary.HeatAfter);
+                afterRunSummary.HeatAfter,
+                partyPreview);
+        }
+
+        public static string BuildPartyPreview(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.AdventurerPartyPreviewResolved || summary.AdventurerPartyClassIds == null || summary.AdventurerPartyClassIds.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string[] labels = new string[summary.AdventurerPartyClassIds.Length];
+            for (int i = 0; i < summary.AdventurerPartyClassIds.Length; i++)
+            {
+                labels[i] = AdventurerPartyCompositionResolver.ResolveClassLabel(summary.AdventurerPartyClassIds[i], localize);
+            }
+
+            return string.Format(Localize(localize, PartyPreviewFormatKey), string.Join(", ", labels));
         }
 
         private static string ResolveInterpretationKey(MvpPlayerLoopSummary summary)

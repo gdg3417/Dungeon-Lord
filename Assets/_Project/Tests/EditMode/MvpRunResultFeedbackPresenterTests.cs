@@ -58,6 +58,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
         }
 
+
+        [Test]
+        public void Feedback_WithResolvedPartyPreview_IncludesLocalizedPartyAndNoRawClassIds()
+        {
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                Summary(runSucceeded: true, mana: 12d, generatedLoot: 7, extractedLoot: 5, tradeableLoot: 3, heatBefore: 4d, heatAfter: 4d, partyClassIds: new[]
+                {
+                    AdventurerPartyCompositionResolver.WarriorClassId,
+                    AdventurerPartyCompositionResolver.RogueClassId
+                }),
+                didRun: true,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Run result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Adventurers: Warrior, Rogue"));
+            Assert.That(text, Does.Not.Contain("adventurer.class."));
+        }
+
         [Test]
         public void UnavailableRun_UsesLocalizedFallbackWithoutFormattingRawState()
         {
@@ -100,7 +118,8 @@ namespace DungeonBuilder.Tests.EditMode
             int extractedLoot = 0,
             int tradeableLoot = 0,
             double heatBefore = 0d,
-            double heatAfter = 0d)
+            double heatAfter = 0d,
+            string[] partyClassIds = null)
         {
             return new MvpPlayerLoopSummary
             {
@@ -114,7 +133,9 @@ namespace DungeonBuilder.Tests.EditMode
                 LootExtractedWorldValue = extractedLoot,
                 LootExtractedTradeableWorldValue = tradeableLoot,
                 HeatBefore = heatBefore,
-                HeatAfter = heatAfter
+                HeatAfter = heatAfter,
+                AdventurerPartyPreviewResolved = partyClassIds != null && partyClassIds.Length > 0,
+                AdventurerPartyClassIds = partyClassIds ?? System.Array.Empty<string>()
             };
         }
 
@@ -127,7 +148,14 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.SuccessHeatIncreasedKey] = "Run result: succeeded. Loot extracted, heat increased.",
                 [MvpRunResultFeedbackPresenter.FailedKey] = "Run result: failed. Review placement and try again.",
                 [MvpRunResultFeedbackPresenter.UnavailableKey] = "Run result unavailable.",
-                [MvpRunResultFeedbackPresenter.FormatKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}."
+                [MvpRunResultFeedbackPresenter.FormatKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.",
+                [MvpRunResultFeedbackPresenter.FormatWithPartyKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}",
+                [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
+                ["adventurer.class.warrior.display_name"] = "Warrior",
+                ["adventurer.class.rogue.display_name"] = "Rogue",
+                ["adventurer.class.mage.display_name"] = "Mage",
+                ["adventurer.class.cleric.display_name"] = "Cleric",
+                ["adventurer.class.ranger.display_name"] = "Ranger"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;
