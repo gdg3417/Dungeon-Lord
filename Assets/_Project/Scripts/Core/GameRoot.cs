@@ -765,7 +765,12 @@ namespace DungeonBuilder.M0
         public bool SimulateMvpActiveLoopOnce(out bool didApplyStructureTick)
         {
             didApplyStructureTick = false;
-            if (_structureSimulationPass != null && Save?.dungeonLayout != null && Save.structureRuntime != null)
+            if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
+            {
+                return false;
+            }
+
+            if (_structureSimulationPass != null && Save.dungeonLayout != null)
             {
                 didApplyStructureTick = SimulateStructureTick();
             }

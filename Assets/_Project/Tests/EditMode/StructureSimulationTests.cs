@@ -226,6 +226,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void MvpActiveLoop_MissingRunSimulationService_DoesNotApplyStructureTickOrMutateRuntime()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            var save = new SaveData
+            {
+                totalTicks = 12,
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState { ManaReserve = 4d, Heat = 20d },
+                runHistory = new RunHistoryState()
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true, includeRunService: false))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+
+                Assert.That(didRun, Is.False);
+                Assert.That(didApplyStructureTick, Is.False);
+                Assert.That(harness.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(4d));
+                Assert.That(harness.Root.Save.structureRuntime.Heat, Is.EqualTo(20d));
+                Assert.That(harness.Root.Save.totalTicks, Is.EqualTo(12));
+                Assert.That(harness.Root.Save.runHistory.RecentOutcomes, Is.Empty);
+            }
+        }
+
+        [Test]
+        public void MvpActiveLoop_MissingRunHistory_DoesNotApplyStructureTickOrMutateRuntime()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.RiskLabBasicId);
+            var save = new SaveData
+            {
+                totalTicks = 7,
+                dungeonLayout = layout,
+                structureRuntime = new StructureRuntimeState { ManaReserve = 5d, Heat = 20d },
+                runHistory = null
+            };
+
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+
+                Assert.That(didRun, Is.False);
+                Assert.That(didApplyStructureTick, Is.False);
+                Assert.That(harness.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(5d));
+                Assert.That(harness.Root.Save.structureRuntime.Heat, Is.EqualTo(20d));
+                Assert.That(harness.Root.Save.totalTicks, Is.EqualTo(7));
+                Assert.That(harness.Root.Save.runHistory, Is.Null);
+            }
+        }
+
+        [Test]
         public void TryCreateStructureSimulationPass_ReturnsFalse_For_Malformed_Config()
         {
             bool ok = GameRoot.TryCreateStructureSimulationPass(new HeatSystem(), "{bad json", out StructureSimulationPass pass);
@@ -369,14 +421,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
-        private static GameRootTestHarness CreateMvpLoopHarness(SaveData save, bool includeStructurePass)
+        private static GameRootTestHarness CreateMvpLoopHarness(SaveData save, bool includeStructurePass, bool includeRunService = true)
         {
             var rootObject = new GameObject("GameRoot_MvpActiveLoop_Test");
             var root = rootObject.AddComponent<GameRoot>();
             var saveService = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = $"mvp_active_loop_{System.Guid.NewGuid():N}.json", useAtomicWrites = false });
             SetGameRootField(root, "<Save>k__BackingField", save);
             SetGameRootField(root, "<SaveService>k__BackingField", saveService);
-            SetGameRootField(root, "_runSimulationService", new RunSimulationService(BuildRunConfigForMvpActiveLoop()));
+            if (includeRunService)
+            {
+                SetGameRootField(root, "_runSimulationService", new RunSimulationService(BuildRunConfigForMvpActiveLoop()));
+            }
             if (includeStructurePass)
             {
                 SetGameRootField(root, "_structureSimulationPass", new StructureSimulationPass(new HeatSystem(), BuildTestConfig()));
