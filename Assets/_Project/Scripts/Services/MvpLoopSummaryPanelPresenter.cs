@@ -69,13 +69,7 @@ namespace DungeonBuilder.M0
                 return Localize(localize, ValueNoRunKey);
             }
 
-            string status = Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
-            if (string.IsNullOrWhiteSpace(summary.LatestRunId))
-            {
-                return status;
-            }
-
-            return status + " (" + summary.LatestRunId + ")";
+            return Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
         }
 
         private static string ResolveResearch(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

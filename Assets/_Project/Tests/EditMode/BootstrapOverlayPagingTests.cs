@@ -245,6 +245,23 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void OverlayTextSafeArea_KeepsPlayerFacingTextInsideLeftEdgeAndReservedFromActionPanel()
+        {
+            RefreshText();
+
+            RectTransform rectTransform = _overlay.overlayText.rectTransform;
+
+            Assert.That(rectTransform.anchorMin, Is.EqualTo(Vector2.zero));
+            Assert.That(rectTransform.anchorMax, Is.EqualTo(Vector2.one));
+            Assert.That(rectTransform.pivot, Is.EqualTo(new Vector2(0f, 1f)));
+            Assert.That(rectTransform.offsetMin.x, Is.EqualTo(24f));
+            Assert.That(rectTransform.offsetMin.y, Is.EqualTo(10f));
+            Assert.That(rectTransform.offsetMax.x, Is.EqualTo(-304f));
+            Assert.That(rectTransform.offsetMax.y, Is.EqualTo(-14f));
+            Assert.That(_overlay.overlayText.alignment, Is.EqualTo(TextAlignmentOptions.TopLeft));
+        }
+
+        [Test]
         public void PlayerFacingStructureSelection_DefaultsToManaGeneratorAndExposesLocalizedChoices()
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
@@ -330,6 +347,101 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runText, Does.Contain("Latest run:"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+        }
+
+        [Test]
+        public void FirstSessionMvpUxFlow_HardensSelectionPlacementRunDiagnosticsAndRawIdBoundaries()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 4d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_vs15_flow_test.json", useAtomicWrites = false }));
+
+            string defaultText = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(defaultText, Does.Contain("MVP Loop Summary"));
+            Assert.That(defaultText, Does.Contain("Guided MVP Action"));
+            Assert.That(defaultText, Does.Contain("First-session status:"));
+            Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
+            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: improves mana reserve."));
+            _overlay.PlaceSelectedMvpStructure();
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Heat Scrubber"));
+            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: lowers heat pressure."));
+            _overlay.PlaceSelectedMvpStructure();
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Mana Generator -> Heat Scrubber. Role: lowers heat pressure."));
+
+            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Risk Lab"));
+            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: clarifies research risk."));
+            _overlay.PlaceSelectedMvpStructure();
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+
+            _overlay.RunOrObserveDungeon();
+            string playerFacingText = RefreshText();
+
+            Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
+            Assert.That(playerFacingText, Does.Contain("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+            Assert.That(playerFacingText, Does.Contain(_overlay.MvpRunResultFeedback));
+            AssertNoPlayerFacingRawIds(playerFacingText);
+            AssertNoPlayerFacingRawIds(_overlay.MvpStructurePlacementFeedback);
+            AssertNoPlayerFacingRawIds(_overlay.MvpRunResultFeedback);
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string focusedText = RefreshText();
+
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
+            Assert.That(focusedText, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
+            Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
+            Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
+            Assert.That(focusedText, Does.Not.Contain("Changed: Heat Scrubber -> Risk Lab"));
+            Assert.That(focusedText, Does.Not.Contain(_overlay.MvpRunResultFeedback));
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            string restoredText = RefreshText();
+
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(restoredText, Does.Contain("MVP Loop Summary"));
+            Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
+            AssertNoPlayerFacingRawIds(restoredText);
+
+            _overlay.ToggleDiagnosticsVisibility();
+            AssertPage(1, "Runtime Summary");
+
+            CycleAndAssertPage(2, "Run Diagnostics");
+            CycleAndAssertPage(3, "Heat Diagnostics");
+            CycleAndAssertPage(4, "Systems Diagnostics");
+            string systemsDiagnostics = RefreshText();
+            Assert.That(systemsDiagnostics, Does.Contain(StructureSimulationPass.RiskLabBasicId));
+            CycleAndAssertPage(5, "Research Diagnostics");
+            CycleAndAssertPage(6, "Research Status Presentation Diagnostics");
+            CycleAndAssertPage(7, "Research Status Safety Diagnostics");
+            CycleAndAssertPage(8, "Research Verification Boundary Diagnostics");
+            CycleAndAssertPage(9, "Research Verification Safety Diagnostics");
+            CycleAndAssertPage(1, "Runtime Summary");
+
+            Assert.That(_overlay.DevPanelVisible, Is.False);
+            _overlay.ToggleDevPanel();
+            Assert.That(_overlay.DevPanelVisible, Is.True);
+            _overlay.ToggleDevPanel();
+            Assert.That(_overlay.DevPanelVisible, Is.False);
         }
 
 
@@ -975,6 +1087,21 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(index, Is.GreaterThan(previousIndex), $"Expected '{line}' after the preceding diagnostic line.");
                 previousIndex = index;
             }
+        }
+
+        private static void AssertNoPlayerFacingRawIds(string text)
+        {
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(text, Does.Not.Contain("run-"));
+            Assert.That(text, Does.Not.Contain("run.loot_extraction.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.loot_heat_cooling.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.adventurer_attraction.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.adventurer_interest_forecast.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.adventurer_demand_budget.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
+            Assert.That(text, Does.Not.Contain("run.heat_application.rule.test"));
         }
 
         private void CycleToResearchDiagnostics()

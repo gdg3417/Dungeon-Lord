@@ -27,6 +27,10 @@ namespace DungeonBuilder.M0
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
+        private const float OverlayTextSafeLeftMargin = 24f;
+        private const float OverlayTextSafeTopMargin = 14f;
+        private const float OverlayTextSafeBottomMargin = 10f;
+        private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -139,7 +143,24 @@ namespace DungeonBuilder.M0
                 return;
             }
 
+            ApplyOverlayTextSafeArea();
             overlayText.text = BuildOverlayText();
+        }
+
+        public void ApplyOverlayTextSafeArea()
+        {
+            if (overlayText == null || overlayText.rectTransform == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = overlayText.rectTransform;
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.pivot = new Vector2(0f, 1f);
+            rectTransform.offsetMin = new Vector2(OverlayTextSafeLeftMargin, OverlayTextSafeBottomMargin);
+            rectTransform.offsetMax = new Vector2(-OverlayTextRightActionPanelReserve, -OverlayTextSafeTopMargin);
+            overlayText.alignment = TextAlignmentOptions.TopLeft;
         }
 
         private void Update()
