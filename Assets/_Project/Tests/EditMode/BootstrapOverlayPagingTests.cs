@@ -245,6 +245,23 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void OverlayTextSafeArea_KeepsPlayerFacingTextInsideLeftEdgeAndReservedFromActionPanel()
+        {
+            RefreshText();
+
+            RectTransform rectTransform = _overlay.overlayText.rectTransform;
+
+            Assert.That(rectTransform.anchorMin, Is.EqualTo(Vector2.zero));
+            Assert.That(rectTransform.anchorMax, Is.EqualTo(Vector2.one));
+            Assert.That(rectTransform.pivot, Is.EqualTo(new Vector2(0f, 1f)));
+            Assert.That(rectTransform.offsetMin.x, Is.EqualTo(24f));
+            Assert.That(rectTransform.offsetMin.y, Is.EqualTo(10f));
+            Assert.That(rectTransform.offsetMax.x, Is.EqualTo(-304f));
+            Assert.That(rectTransform.offsetMax.y, Is.EqualTo(-14f));
+            Assert.That(_overlay.overlayText.alignment, Is.EqualTo(TextAlignmentOptions.TopLeft));
+        }
+
+        [Test]
         public void PlayerFacingStructureSelection_DefaultsToManaGeneratorAndExposesLocalizedChoices()
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(

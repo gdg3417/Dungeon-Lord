@@ -25,6 +25,8 @@ VS15 also does not change the save schema, Unity scenes, prefabs, project settin
 
 ## Changed files
 
+- `Assets/_Project/Scripts/UI/BootstrapOverlay.cs`
+  - Corrected the runtime overlay text safe area so player-facing text is anchored inside the visible Game view with a left margin and reserves right-side space for the Minimal MVP Actions panel.
 - `Assets/_Project/Scripts/Services/MvpLoopSummaryPanelPresenter.cs`
   - Kept the player-facing latest-run line status-only so raw run IDs remain out of the MVP Loop Summary while diagnostics can still carry raw IDs.
 - `Assets/_Project/Tests/EditMode/MvpLoopSummaryPanelPresenterTests.cs`
@@ -36,6 +38,8 @@ VS15 also does not change the save schema, Unity scenes, prefabs, project settin
   - Added this consolidated VS15 evidence and manual smoke checklist.
 
 ## Tests added or updated
+
+Initial manual smoke found a blocker where the left edge of player-facing overlay lines such as MVP Loop Summary, Placement, Latest run, Mana reserve, First-session status, and Player view could start off-screen. The Bootstrap overlay text safe area was corrected so the text uses a safe left margin and reserves right-side space for the Minimal MVP Actions panel.
 
 Updated `MvpLoopSummaryPanelPresenterTests` to verify raw run IDs stay out of the player-facing latest-run line.
 
@@ -55,6 +59,8 @@ Updated `BootstrapOverlayPagingTests` with `FirstSessionMvpUxFlow_HardensSelecti
 - F3 cycles all 9 diagnostics pages and wraps;
 - F1 Dev Panel still opens and closes; and
 - diagnostics still preserve raw structure IDs where useful.
+
+Added `OverlayTextSafeArea_KeepsPlayerFacingTextInsideLeftEdgeAndReservedFromActionPanel` to assert the runtime TMP overlay is anchored to the visible Game view, uses a non-negative left margin, and reserves right-side space so player-facing text does not overlap the Minimal MVP Actions panel.
 
 Existing coverage continues to verify that view-only operations do not mutate save state, including `RefreshOverlayText`, diagnostics visibility toggle, F2 focus toggle, F3 page cycling, PageUp/PageDown-style scroll calls, mouse-wheel-equivalent scroll calls, and structure selection without placement.
 
@@ -112,9 +118,11 @@ Existing coverage continues to verify that view-only operations do not mutate sa
 
 VS15 does not add deeper gameplay, economy, progression, research completion, new content, or balancing. It only hardens the current first-session MVP UX and smoke coverage.
 
-Manual Game view overflow and clipping validation still requires running the Bootstrap scene in Unity at the target smoke-test Game view size. The automated EditMode regression checks compact panel dimensions and player-facing text boundaries, but it does not replace the manual visual smoke pass.
+Manual Game view overflow and clipping validation still requires running the Bootstrap scene in Unity at the target smoke-test Game view size. The automated EditMode regression now checks the configured overlay safe area and compact panel dimensions, but it does not replace the manual visual smoke pass.
 
 ## Explicit MVP scope confirmation
+
+Confirmed: The left-edge clipping fix is presentation-only and made no gameplay, simulation, tuning, save schema, or scope changes.
 
 Confirmed: VS15 added no rewards, unlocks, costs, backend calls, offline research progression, offline heat processing, raids, Hostile/Raid tiers, seasons, leaderboards, monetization, new monster families, save schema changes, tuning changes, new structure definitions, new simulation behavior, formulas, or tutorial framework.
 
