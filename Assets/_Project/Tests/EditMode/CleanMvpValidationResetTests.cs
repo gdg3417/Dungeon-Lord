@@ -253,7 +253,7 @@ namespace DungeonBuilder.Tests.EditMode
             string playerFacingText = RefreshText();
 
             Assert.That(_overlay.ResetCleanMvpValidationSessionFromDevPanel(), Is.False);
-            Assert.That(playerFacingText, Does.Contain("Minimal MVP Actions"));
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(playerFacingText, Does.Not.Contain("Clean MVP Validation Reset"));
             Assert.That(playerFacingText, Does.Not.Contain("clean_mvp_validation_reset"));
         }
@@ -268,7 +268,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(dirtyText, Does.Contain("Latest run: Succeeded"));
             Assert.That(dirtyText, Does.Contain("Mana reserve: 45"));
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
-            Assert.That(dirtyText, Does.Contain("Selected structure: Risk Lab"));
+            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Risk Lab"));
 
             bool didReset = _overlay.ResetCleanMvpValidationSessionFromDevPanel();
             string refreshed = RefreshText();
@@ -278,14 +278,11 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Is.Empty);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
-            Assert.That(refreshed, Does.Contain("Selected structure: Mana Generator"));
-            Assert.That(refreshed, Does.Contain("Role: improves mana reserve."));
             Assert.That(refreshed, Does.Contain("Placement: No structure placed"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("First-session status: place one structure to start the loop."));
-            Assert.That(refreshed, Does.Not.Contain("Selected structure: Risk Lab"));
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
             Assert.That(refreshed, Does.Not.Contain("Clean MVP Validation Reset"));
@@ -351,6 +348,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
             map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
+            map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
+            map["ui.guided_mvp.panel.complete_format"] = "Complete: {0}";
+            map["ui.guided_mvp.value.complete_yes"] = "Yes";
+            map["ui.guided_mvp.value.complete_no"] = "No";
             map["guided_mvp.step.place_or_modify_structure"] = "Place or modify structure";
             map["guided_mvp.step.run_or_observe"] = "Run or observe";
             map["guided_mvp.step.repeat_or_improve"] = "Repeat or improve";
