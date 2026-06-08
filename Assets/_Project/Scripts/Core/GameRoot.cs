@@ -762,6 +762,54 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        public bool ResetCleanMvpValidationSession()
+        {
+            if (!DevPanelEnabled || Save == null)
+            {
+                return false;
+            }
+
+            ApplyCleanMvpValidationBaseline(Save);
+            _selectedFloorIndex = 0;
+            _selectedSlotIndex = 0;
+            _selectedRunHistoryIndex = -1;
+            _activeSessionTickCount = 0;
+
+            if (_structureSimulationPass != null && Save.structureRuntime != null)
+            {
+                _structureSimulationPass.NormalizeRuntimeFlags(Save.structureRuntime);
+            }
+
+            CurrentHeat = Save.structureRuntime != null ? Save.structureRuntime.Heat : 0d;
+            Save.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+            CaptureOfflineSummaryDiagnostics();
+            RefreshDashboardState();
+            RefreshOfflineSummaryLines();
+            RefreshStructureRuntimeLines();
+            RefreshRunLine();
+            SaveService?.Save(Save, SaveReason.ManualDev);
+            SaveLine = "Save: ManualDev";
+            return true;
+        }
+
+        internal static void ApplyCleanMvpValidationBaseline(SaveData save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            save.totalTicks = 0;
+            save.lastPausedUtcUnix = 0;
+            save.lastResumedUtcUnix = 0;
+            save.dungeonLayout = DungeonLayoutState.CreateEmpty(SaveMigration.DefaultFloorCount, SaveMigration.DefaultSlotsPerFloor);
+            save.structureRuntime = new StructureRuntimeState();
+            save.runHistory = new RunHistoryState();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.lastOfflineSummary = null;
+        }
+
         public bool SimulateMvpActiveLoopOnce(out bool didApplyStructureTick)
         {
             didApplyStructureTick = false;

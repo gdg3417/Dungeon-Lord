@@ -31,6 +31,7 @@ namespace DungeonBuilder.M0
         private const float OverlayTextSafeTopMargin = 14f;
         private const float OverlayTextSafeBottomMargin = 10f;
         private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
+        private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -39,7 +40,7 @@ namespace DungeonBuilder.M0
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
-        private string _selectedMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
+        private string _selectedMvpStructureId = DefaultMvpStructureId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
 
@@ -119,6 +120,21 @@ namespace DungeonBuilder.M0
         public void RunOrObserveDungeon()
         {
             ShowPlayerRunBanner();
+        }
+
+        public bool ResetCleanMvpValidationSessionFromDevPanel()
+        {
+            if (_root == null || !_root.ResetCleanMvpValidationSession())
+            {
+                return false;
+            }
+
+            _selectedMvpStructureId = DefaultMvpStructureId;
+            _mvpStructurePlacementFeedback = string.Empty;
+            _mvpRunResultFeedback = string.Empty;
+            _root.SetBanner(GetLocalizedString("ui.banner.clean_mvp_validation_reset", "ui.banner.clean_mvp_validation_reset"));
+            RefreshOverlayText();
+            return true;
         }
 
         public void ScrollFullDiagnosticsLines(int lineDelta)
@@ -520,6 +536,11 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_banner", "ui.dev.button.clear_banner")))
             {
                 _root.SetBanner(string.Empty);
+            }
+
+            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clean_mvp_validation_reset", "ui.dev.button.clean_mvp_validation_reset")))
+            {
+                ResetCleanMvpValidationSessionFromDevPanel();
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.toggle_online", "ui.dev.button.toggle_online")))
