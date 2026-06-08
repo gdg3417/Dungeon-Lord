@@ -51,7 +51,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("LOC[structure.mana_generator.basic.display_name]"));
             Assert.That(text, Does.Not.Contain("LOC[ui.mvp_loop.panel.placement_format]:structure.mana_generator.basic"));
-            Assert.That(text, Does.Contain("LOC[ui.mvp_loop.run_status.failed] (run.missing_optional)"));
+            Assert.That(text, Does.Contain("LOC[ui.mvp_loop.run_status.failed]"));
+            Assert.That(text, Does.Not.Contain("run.missing_optional"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.panel.loot_format]:0:0:0"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.value.unknown]"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.value.no_research]"));
