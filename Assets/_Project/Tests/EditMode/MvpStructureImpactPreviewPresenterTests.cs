@@ -74,6 +74,54 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(structureId));
         }
 
+
+        [TestCase(MinimalMvpActionPanelPresenter.BalancedPostureKey, "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.CautiousPostureKey, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.GreedyPostureKey, "Plan: Mana Generator + Greedy run.\nExpected tradeoff: higher loot, higher heat pressure.")]
+        public void RunPlanPreview_ResolvesPostureTradeoffThroughLocalization(string postureNameKey, string expected)
+        {
+            string text = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(
+                StructureSimulationPass.ManaGeneratorBasicId,
+                postureNameKey,
+                LocalizedRunPlan);
+
+            Assert.That(text, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void RunPlanPreview_DoesNotExposeRawStructureOrPostureIds()
+        {
+            string text = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(
+                StructureSimulationPass.ManaGeneratorBasicId,
+                MinimalMvpActionPanelPresenter.GreedyPostureKey,
+                LocalizedRunPlan);
+
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(text, Does.Not.Contain(RunPostureResolver.GreedyId));
+            Assert.That(text, Does.Not.Contain("structure."));
+            Assert.That(text, Does.Not.Contain("run.posture"));
+        }
+
+        private static string LocalizedRunPlan(string key, string fallback)
+        {
+            var map = new Dictionary<string, string>
+            {
+                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} run.",
+                [MvpStructureImpactPreviewPresenter.RunTradeoffFormatKey] = "Expected tradeoff: {0}",
+                [MvpStructureImpactPreviewPresenter.RunPlanCombinedFormatKey] = "{0}\n{1}",
+                [MvpStructureImpactPreviewPresenter.CautiousRunTradeoffKey] = "lower loot, safer heat pressure.",
+                [MvpStructureImpactPreviewPresenter.BalancedRunTradeoffKey] = "standard loot and heat pressure.",
+                [MvpStructureImpactPreviewPresenter.GreedyRunTradeoffKey] = "higher loot, higher heat pressure.",
+                [MinimalMvpActionPanelPresenter.CautiousPostureKey] = "Cautious",
+                [MinimalMvpActionPanelPresenter.BalancedPostureKey] = "Balanced",
+                [MinimalMvpActionPanelPresenter.GreedyPostureKey] = "Greedy",
+                ["structure.mana_generator.basic.display_name"] = "Mana Generator",
+                ["ui.mvp_label.structure.unknown"] = "Unknown structure"
+            };
+
+            return map.TryGetValue(key, out string value) ? value : fallback;
+        }
+
         [Test]
         public void NullLocalizer_FallsBackToStableLocalizationKey()
         {

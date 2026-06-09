@@ -776,6 +776,34 @@
       "text": "Role unavailable."
     },
     {
+      "key": "ui.mvp_run_plan_preview.plan_format",
+      "text": "Plan: {0} + {1} run."
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.tradeoff_format",
+      "text": "Expected tradeoff: {0}"
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.combined_format",
+      "text": "{0}\n{1}"
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.tradeoff.cautious",
+      "text": "lower loot, safer heat pressure."
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.tradeoff.balanced",
+      "text": "standard loot and heat pressure."
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.tradeoff.greedy",
+      "text": "higher loot, higher heat pressure."
+    },
+    {
+      "key": "ui.mvp_run_plan_preview.tradeoff.unknown",
+      "text": "run tradeoff unavailable."
+    },
+    {
       "key": "ui.mvp_structure_feedback.empty_slot",
       "text": "Empty slot"
     },

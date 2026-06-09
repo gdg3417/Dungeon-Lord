@@ -217,7 +217,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
@@ -233,10 +233,10 @@ namespace DungeonBuilder.Tests.EditMode
             Rect rect = _overlay.GetMinimalMvpActionPanelRect();
 
             Assert.That(rect.width, Is.EqualTo(260f));
-            Assert.That(rect.height, Is.EqualTo(300f));
+            Assert.That(rect.height, Is.EqualTo(322f));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
             Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
@@ -276,15 +276,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
         }
 
-        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey, "Role: improves mana reserve.")]
-        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey, "Role: lowers heat pressure.")]
-        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey, "Role: clarifies research risk.")]
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey, "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey, "Plan: Heat Scrubber + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey, "Plan: Risk Lab + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
         public void PlayerFacingStructureSelection_AllowsExistingMvpSafeStructureOptions(string structureId, string displayName, string selectionKey, string previewText)
         {
             bool selected = _overlay.SelectMvpStructure(structureId);
@@ -300,6 +300,55 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo($"Selected structure: {displayName}"));
             Assert.That(labels.PreviewText, Is.EqualTo(previewText));
             Assert.That(labels.PreviewText, Does.Not.Contain(structureId));
+        }
+
+        [Test]
+        public void CleanMvpValidationResetPreview_DefaultsToManaGeneratorBalancedPlan()
+        {
+            SetBackingField("<DevPanelEnabled>k__BackingField", true);
+            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            _overlay.SelectMvpRunPosture(RunPostureResolver.GreedyId);
+            typeof(BootstrapOverlay).GetField("_mvpStructurePlacementFeedback", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_overlay, "stale placement feedback");
+            typeof(BootstrapOverlay).GetField("_mvpRunResultFeedback", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_overlay, "stale run feedback");
+
+            bool didReset = _overlay.ResetCleanMvpValidationSessionFromDevPanel();
+            string text = RefreshText();
+
+            Assert.That(didReset, Is.True);
+            Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.BalancedId));
+            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Not.Contain("stale placement feedback"));
+            Assert.That(text, Does.Not.Contain("stale run feedback"));
+        }
+
+        [TestCase(RunPostureResolver.CautiousId, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
+        [TestCase(RunPostureResolver.GreedyId, "Plan: Mana Generator + Greedy run.\nExpected tradeoff: higher loot, higher heat pressure.")]
+        public void SelectingRunPosture_UpdatesReadOnlyRunPlanPreview(string postureId, string expectedPreview)
+        {
+            bool selected = _overlay.SelectMvpRunPosture(postureId);
+            string text = RefreshText();
+
+            Assert.That(selected, Is.True);
+            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo(expectedPreview));
+            Assert.That(text, Does.Contain(expectedPreview));
+        }
+
+        [Test]
+        public void RunPlanPreview_DoesNotExposeRawStructureOrPostureIds()
+        {
+            _overlay.SelectMvpRunPosture(RunPostureResolver.GreedyId);
+
+            string preview = _overlay.GetSelectedMvpRunPlanPreviewText();
+            string text = RefreshText();
+
+            Assert.That(preview, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(preview, Does.Not.Contain(RunPostureResolver.GreedyId));
+            Assert.That(preview, Does.Not.Contain("structure."));
+            Assert.That(preview, Does.Not.Contain("run.posture"));
+            Assert.That(text, Does.Contain(preview));
         }
 
         [Test]
@@ -1238,6 +1287,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
             map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
             map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
+            map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
+            map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
+            map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
+            map["ui.mvp_run_plan_preview.tradeoff.cautious"] = "lower loot, safer heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.balanced"] = "standard loot and heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.greedy"] = "higher loot, higher heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "run tradeoff unavailable.";
             map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
             map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
             map["ui.mvp_run_feedback.success_stable_heat"] = "Run result: succeeded. Loot extracted, heat stable.";
