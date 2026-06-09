@@ -302,12 +302,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PreviewText, Does.Not.Contain(structureId));
         }
 
-
         [Test]
         public void CleanMvpValidationResetPreview_DefaultsToManaGeneratorBalancedPlan()
         {
+            SetBackingField("<DevPanelEnabled>k__BackingField", true);
             _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
             _overlay.SelectMvpRunPosture(RunPostureResolver.GreedyId);
+            typeof(BootstrapOverlay).GetField("_mvpStructurePlacementFeedback", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_overlay, "stale placement feedback");
+            typeof(BootstrapOverlay).GetField("_mvpRunResultFeedback", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_overlay, "stale run feedback");
 
             bool didReset = _overlay.ResetCleanMvpValidationSessionFromDevPanel();
             string text = RefreshText();
@@ -318,6 +320,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Not.Contain("stale placement feedback"));
+            Assert.That(text, Does.Not.Contain("stale run feedback"));
         }
 
         [TestCase(RunPostureResolver.CautiousId, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
