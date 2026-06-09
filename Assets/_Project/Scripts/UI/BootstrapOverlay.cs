@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 300f;
+        private const float MinimalMvpActionPanelHeight = 322f;
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
@@ -112,6 +112,11 @@ namespace DungeonBuilder.M0
         public string GetSelectedMvpStructurePreviewText()
         {
             return MvpStructureImpactPreviewPresenter.BuildPreviewText(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public string GetSelectedMvpRunPlanPreviewText()
+        {
+            return MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(_selectedMvpStructureId, GetSelectedMvpRunPostureNameKey(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public bool SelectMvpRunPosture(string postureId)
@@ -294,6 +299,13 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, string.Empty);
                 AppendLine(builder, firstSessionText);
+            }
+
+            string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
+            if (!string.IsNullOrEmpty(runPlanPreviewText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, runPlanPreviewText);
             }
         }
 
@@ -736,13 +748,14 @@ namespace DungeonBuilder.M0
                 padding = new RectOffset(4, 4, 1, 1)
             };
             GUILayoutOption labelHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight);
+            GUILayoutOption previewHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight * 2f);
             GUILayoutOption buttonHeight = GUILayout.Height(MinimalMvpActionPanelButtonHeight);
 
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
-            GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            GUILayout.Label(labels.PreviewText, compactLabel, previewHeight);
             if (GUILayout.Button(labels.ManaGeneratorSelection, compactButton, buttonHeight))
             {
                 SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);

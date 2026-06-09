@@ -282,11 +282,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.BalancedId));
             Assert.That(_overlay.GetSelectedMvpRunPostureDisplayName(), Is.EqualTo("Balanced"));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
+            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Contain("Placement: No structure placed"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("First-session status: place one structure to start the loop."));
+            Assert.That(refreshed, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(refreshed, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
             Assert.That(refreshed, Does.Not.Contain("Clean MVP Validation Reset"));
@@ -385,6 +388,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.mana_generator"] = "Role: improves mana reserve.";
             map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
             map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
+            map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
+            map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
+            map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
+            map["ui.mvp_run_plan_preview.tradeoff.cautious"] = "lower loot, safer heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.balanced"] = "standard loot and heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.greedy"] = "higher loot, higher heat pressure.";
+            map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "run tradeoff unavailable.";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.banner.clean_mvp_validation_reset"] = "Clean MVP validation session reset.";
             map["ui.dev.button.clean_mvp_validation_reset"] = "Clean MVP Validation Reset";

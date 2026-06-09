@@ -45,7 +45,7 @@ namespace DungeonBuilder.M0
                 Localize(localize, TitleKey),
                 string.Format(selectionFormat, selectedName),
                 string.Format(postureFormat, selectedPostureName),
-                MvpStructureImpactPreviewPresenter.BuildPreviewText(selectedStructureId, localize),
+                MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize),
                 Localize(localize, CautiousPostureKey),
                 Localize(localize, BalancedPostureKey),
                 Localize(localize, GreedyPostureKey),
