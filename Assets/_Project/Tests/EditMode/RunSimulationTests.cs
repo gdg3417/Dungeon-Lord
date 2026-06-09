@@ -117,6 +117,12 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.MageClassId,
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
+                },
+                RunPostures = new[]
+                {
+                    new RunPostureConfig { Id = RunPostureResolver.CautiousId, DisplayNameKey = "run.posture.cautious.name", GeneratedLootWorldValueMultiplier = 0.8d, ExtractedLootWorldValueMultiplier = 0.8d, HeatDeltaOffset = -1d },
+                    new RunPostureConfig { Id = RunPostureResolver.BalancedId, DisplayNameKey = "run.posture.balanced.name", GeneratedLootWorldValueMultiplier = 1d, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 0d },
+                    new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "run.posture.greedy.name", GeneratedLootWorldValueMultiplier = 1.25d, ExtractedLootWorldValueMultiplier = 1.25d, HeatDeltaOffset = 1d }
                 }
             };
         }
@@ -148,6 +154,79 @@ namespace DungeonBuilder.Tests.EditMode
                 }
             };
         }
+
+        [Test]
+        public void RunPostureResolver_ResolvesCautiousBalancedAndGreedyFromConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.CautiousId).DisplayNameKey, Is.EqualTo("run.posture.cautious.name"));
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.BalancedId).DisplayNameKey, Is.EqualTo("run.posture.balanced.name"));
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.GreedyId).DisplayNameKey, Is.EqualTo("run.posture.greedy.name"));
+        }
+
+        [Test]
+        public void SimulateOnce_BalancedPosture_MatchesDefaultBehavior()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            var defaultRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+            var balancedRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord defaultOutcome = service.SimulateOnce(defaultRuntime, 10, 2);
+            RunOutcomeRecord balancedOutcome = service.SimulateOnce(balancedRuntime, 10, 2, RunPostureResolver.BalancedId);
+
+            Assert.That(balancedOutcome.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(defaultOutcome.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(balancedOutcome.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(defaultOutcome.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(balancedOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(defaultOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+        }
+
+        [Test]
+        public void SimulateOnce_Postures_AdjustHeatPressureDeterministicallyAroundBalanced()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord cautious = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.CautiousId);
+            RunOutcomeRecord balanced = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(cautious.RunHeatApplicationSummary.HeatAfter, Is.LessThanOrEqualTo(balanced.RunHeatApplicationSummary.HeatAfter));
+            Assert.That(greedy.RunHeatApplicationSummary.HeatAfter, Is.GreaterThanOrEqualTo(balanced.RunHeatApplicationSummary.HeatAfter));
+        }
+
+        [Test]
+        public void SimulateOnce_GreedyPosture_HasEqualOrHigherLootUpsideThanBalanced()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+
+            RunOutcomeRecord balanced = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(greedy.LootSummary.TotalGeneratedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootExtractionSummary.TotalExtractedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_MissingOrInvalidPostureConfig_FallsBackToBalancedSafely()
+        {
+            RunSimulationConfig missing = BuildConfig();
+            missing.RunPostures = null;
+            RunSimulationConfig invalid = BuildConfig();
+            invalid.RunPostures = new[]
+            {
+                new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "", GeneratedLootWorldValueMultiplier = double.NaN, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 1d }
+            };
+
+            RunOutcomeRecord missingOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+            RunOutcomeRecord invalidOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+            RunOutcomeRecord balancedOutcome = new RunSimulationService(BuildConfig(), BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+
+            Assert.That(RunPostureResolver.Resolve(missing, RunPostureResolver.GreedyId).Id, Is.EqualTo(RunPostureResolver.BalancedId));
+            Assert.That(RunPostureResolver.Resolve(invalid, RunPostureResolver.GreedyId).Id, Is.EqualTo(RunPostureResolver.BalancedId));
+            Assert.That(missingOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(balancedOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+            Assert.That(invalidOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(balancedOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+        }
+
         [Test]
         public void SimulateOnce_IsDeterministic_ForSameInput()
         {

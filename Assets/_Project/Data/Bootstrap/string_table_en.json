@@ -728,6 +728,26 @@
       "text": "Selected structure: {0}"
     },
     {
+      "key": "ui.mvp_action.posture.label",
+      "text": "Run posture: {0}"
+    },
+    {
+      "key": "run.posture.cautious.name",
+      "text": "Cautious"
+    },
+    {
+      "key": "run.posture.balanced.name",
+      "text": "Balanced"
+    },
+    {
+      "key": "run.posture.greedy.name",
+      "text": "Greedy"
+    },
+    {
+      "key": "ui.mvp_run_feedback.posture_format",
+      "text": "Posture: {0}. {1}"
+    },
+    {
       "key": "ui.mvp_action.selection.mana_generator",
       "text": "Mana Generator"
     },

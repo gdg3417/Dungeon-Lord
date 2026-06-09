@@ -12,6 +12,10 @@ namespace DungeonBuilder.M0
         public const string HideDiagnosticsButtonKey = "ui.mvp_action.button.hide_diagnostics";
         public const string CompactFormatKey = "ui.mvp_action.panel.compact_format";
         public const string SelectionLabelKey = "ui.mvp_action.selection.label";
+        public const string PostureLabelKey = "ui.mvp_action.posture.label";
+        public const string CautiousPostureKey = "run.posture.cautious.name";
+        public const string BalancedPostureKey = "run.posture.balanced.name";
+        public const string GreedyPostureKey = "run.posture.greedy.name";
         public const string ManaGeneratorSelectionKey = "ui.mvp_action.selection.mana_generator";
         public const string HeatScrubberSelectionKey = "ui.mvp_action.selection.heat_scrubber";
         public const string RiskLabSelectionKey = "ui.mvp_action.selection.risk_lab";
@@ -28,12 +32,23 @@ namespace DungeonBuilder.M0
 
         public static MinimalMvpActionPanelLabels BuildLabels(Func<string, string, string> localize, string selectedStructureNameKey, string selectedStructureId)
         {
+            return BuildLabels(localize, selectedStructureNameKey, selectedStructureId, BalancedPostureKey);
+        }
+
+        public static MinimalMvpActionPanelLabels BuildLabels(Func<string, string, string> localize, string selectedStructureNameKey, string selectedStructureId, string selectedPostureNameKey)
+        {
             string selectedName = Localize(localize, string.IsNullOrWhiteSpace(selectedStructureNameKey) ? ManaGeneratorSelectionKey : selectedStructureNameKey);
             string selectionFormat = Localize(localize, SelectionLabelKey);
+            string selectedPostureName = Localize(localize, string.IsNullOrWhiteSpace(selectedPostureNameKey) ? BalancedPostureKey : selectedPostureNameKey);
+            string postureFormat = Localize(localize, PostureLabelKey);
             return new MinimalMvpActionPanelLabels(
                 Localize(localize, TitleKey),
                 string.Format(selectionFormat, selectedName),
+                string.Format(postureFormat, selectedPostureName),
                 MvpStructureImpactPreviewPresenter.BuildPreviewText(selectedStructureId, localize),
+                Localize(localize, CautiousPostureKey),
+                Localize(localize, BalancedPostureKey),
+                Localize(localize, GreedyPostureKey),
                 Localize(localize, ManaGeneratorSelectionKey),
                 Localize(localize, HeatScrubberSelectionKey),
                 Localize(localize, RiskLabSelectionKey),
@@ -91,7 +106,11 @@ namespace DungeonBuilder.M0
         public MinimalMvpActionPanelLabels(
             string title,
             string selectedStructureLabel,
+            string postureLabel,
             string previewText,
+            string cautiousPosture,
+            string balancedPosture,
+            string greedyPosture,
             string manaGeneratorSelection,
             string heatScrubberSelection,
             string riskLabSelection,
@@ -102,7 +121,11 @@ namespace DungeonBuilder.M0
         {
             Title = title;
             SelectedStructureLabel = selectedStructureLabel;
+            PostureLabel = postureLabel;
             PreviewText = previewText;
+            CautiousPosture = cautiousPosture;
+            BalancedPosture = balancedPosture;
+            GreedyPosture = greedyPosture;
             ManaGeneratorSelection = manaGeneratorSelection;
             HeatScrubberSelection = heatScrubberSelection;
             RiskLabSelection = riskLabSelection;
@@ -114,7 +137,11 @@ namespace DungeonBuilder.M0
 
         public string Title { get; }
         public string SelectedStructureLabel { get; }
+        public string PostureLabel { get; }
         public string PreviewText { get; }
+        public string CautiousPosture { get; }
+        public string BalancedPosture { get; }
+        public string GreedyPosture { get; }
         public string ManaGeneratorSelection { get; }
         public string HeatScrubberSelection { get; }
         public string RiskLabSelection { get; }

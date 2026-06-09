@@ -837,6 +837,11 @@ namespace DungeonBuilder.M0
 
         public bool SimulateMvpActiveLoopOnce(out bool didApplyStructureTick)
         {
+            return SimulateMvpActiveLoopOnce(out didApplyStructureTick, RunPostureResolver.BalancedId);
+        }
+
+        public bool SimulateMvpActiveLoopOnce(out bool didApplyStructureTick, string postureId)
+        {
             didApplyStructureTick = false;
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
             {
@@ -848,10 +853,15 @@ namespace DungeonBuilder.M0
                 didApplyStructureTick = SimulateStructureTick();
             }
 
-            return SimulateRunOnce();
+            return SimulateRunOnce(postureId);
         }
 
         public bool SimulateRunOnce()
+        {
+            return SimulateRunOnce(RunPostureResolver.BalancedId);
+        }
+
+        public bool SimulateRunOnce(string postureId)
         {
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
             {
@@ -860,7 +870,7 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence);
+            RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;
             RefreshStructureRuntimeLines();

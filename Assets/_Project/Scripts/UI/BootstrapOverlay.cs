@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 230f;
+        private const float MinimalMvpActionPanelHeight = 300f;
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
@@ -41,6 +41,7 @@ namespace DungeonBuilder.M0
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
         private string _selectedMvpStructureId = DefaultMvpStructureId;
+        private string _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
 
@@ -51,6 +52,7 @@ namespace DungeonBuilder.M0
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
+        public string SelectedMvpRunPostureId => _selectedMvpRunPostureId;
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
         public string MvpRunResultFeedback => _mvpRunResultFeedback;
 
@@ -112,6 +114,27 @@ namespace DungeonBuilder.M0
             return MvpStructureImpactPreviewPresenter.BuildPreviewText(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
+        public bool SelectMvpRunPosture(string postureId)
+        {
+            if (!IsAllowedMvpRunPosture(postureId))
+            {
+                return false;
+            }
+
+            _selectedMvpRunPostureId = postureId;
+            return true;
+        }
+
+        public string GetSelectedMvpRunPostureNameKey()
+        {
+            return GetMvpRunPostureNameKey(_selectedMvpRunPostureId);
+        }
+
+        public string GetSelectedMvpRunPostureDisplayName()
+        {
+            return GetLocalizedString(GetSelectedMvpRunPostureNameKey(), GetSelectedMvpRunPostureNameKey());
+        }
+
         public void PlaceSelectedMvpStructure()
         {
             ShowPlayerPlacementBanner();
@@ -130,6 +153,7 @@ namespace DungeonBuilder.M0
             }
 
             _selectedMvpStructureId = DefaultMvpStructureId;
+            _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
             _mvpStructurePlacementFeedback = string.Empty;
             _mvpRunResultFeedback = string.Empty;
             _root.SetBanner(GetLocalizedString("ui.banner.clean_mvp_validation_reset", "ui.banner.clean_mvp_validation_reset"));
@@ -693,7 +717,8 @@ namespace DungeonBuilder.M0
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
                 (key, fallback) => GetLocalizedString(key, fallback),
                 GetSelectedMvpStructureNameKey(),
-                _selectedMvpStructureId);
+                _selectedMvpStructureId,
+                GetSelectedMvpRunPostureNameKey());
             GUIStyle compactBox = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(6, 6, 4, 4)
@@ -716,6 +741,7 @@ namespace DungeonBuilder.M0
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
+            GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
             if (GUILayout.Button(labels.ManaGeneratorSelection, compactButton, buttonHeight))
             {
@@ -728,6 +754,18 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(labels.RiskLabSelection, compactButton, buttonHeight))
             {
                 SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            }
+            if (GUILayout.Button(labels.CautiousPosture, compactButton, buttonHeight))
+            {
+                SelectMvpRunPosture(RunPostureResolver.CautiousId);
+            }
+            if (GUILayout.Button(labels.BalancedPosture, compactButton, buttonHeight))
+            {
+                SelectMvpRunPosture(RunPostureResolver.BalancedId);
+            }
+            if (GUILayout.Button(labels.GreedyPosture, compactButton, buttonHeight))
+            {
+                SelectMvpRunPosture(RunPostureResolver.GreedyId);
             }
             GUILayout.Label(GetLocalizedString(_diagnosticsVisible
                 ? "ui.mvp_view.diagnostics_mode.status"
@@ -778,13 +816,14 @@ namespace DungeonBuilder.M0
         private void ShowPlayerRunBanner()
         {
             MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            bool didRun = _root.SimulateMvpActiveLoopOnce(out _);
+            bool didRun = _root.SimulateMvpActiveLoopOnce(out _, _selectedMvpRunPostureId);
             MvpPlayerLoopSummary afterRunSummary = _root.ResolveMvpPlayerLoopSummary();
             _mvpRunResultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
                 beforeRunSummary,
                 afterRunSummary,
                 didRun,
-                (key, fallback) => GetLocalizedString(key, fallback));
+                (key, fallback) => GetLocalizedString(key, fallback),
+                GetSelectedMvpRunPostureNameKey());
             _root.SetBanner(didRun
                 ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
                 : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
@@ -803,6 +842,27 @@ namespace DungeonBuilder.M0
             return structureId == StructureSimulationPass.ManaGeneratorBasicId ||
                    structureId == StructureSimulationPass.HeatScrubberBasicId ||
                    structureId == StructureSimulationPass.RiskLabBasicId;
+        }
+
+        private static bool IsAllowedMvpRunPosture(string postureId)
+        {
+            return postureId == RunPostureResolver.CautiousId ||
+                   postureId == RunPostureResolver.BalancedId ||
+                   postureId == RunPostureResolver.GreedyId;
+        }
+
+        private static string GetMvpRunPostureNameKey(string postureId)
+        {
+            switch (postureId)
+            {
+                case RunPostureResolver.CautiousId:
+                    return MinimalMvpActionPanelPresenter.CautiousPostureKey;
+                case RunPostureResolver.GreedyId:
+                    return MinimalMvpActionPanelPresenter.GreedyPostureKey;
+                case RunPostureResolver.BalancedId:
+                default:
+                    return MinimalMvpActionPanelPresenter.BalancedPostureKey;
+            }
         }
 
         private static string GetMvpSelectionNameKey(string structureId)

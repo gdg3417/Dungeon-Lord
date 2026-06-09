@@ -262,12 +262,14 @@ namespace DungeonBuilder.Tests.EditMode
         public void ResetFromDevPanel_ClearsCachedFeedbackResetsSelectionAndRefreshesPlayerFacingSummary()
         {
             Assert.That(_overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId), Is.True);
+            Assert.That(_overlay.SelectMvpRunPosture(RunPostureResolver.GreedyId), Is.True);
             SetOverlayPrivateField("_mvpStructurePlacementFeedback", "stale placement feedback");
             SetOverlayPrivateField("_mvpRunResultFeedback", "stale run feedback");
             string dirtyText = RefreshText();
             Assert.That(dirtyText, Does.Contain("Latest run: Succeeded"));
             Assert.That(dirtyText, Does.Contain("Mana reserve: 45"));
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Risk Lab"));
 
             bool didReset = _overlay.ResetCleanMvpValidationSessionFromDevPanel();
@@ -277,6 +279,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.Empty);
             Assert.That(_overlay.MvpRunResultFeedback, Is.Empty);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.BalancedId));
+            Assert.That(_overlay.GetSelectedMvpRunPostureDisplayName(), Is.EqualTo("Balanced"));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(refreshed, Does.Contain("Placement: No structure placed"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
@@ -371,6 +375,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected structure: {0}";
+            map["ui.mvp_action.posture.label"] = "Run posture: {0}";
+            map["run.posture.cautious.name"] = "Cautious";
+            map["run.posture.balanced.name"] = "Balanced";
+            map["run.posture.greedy.name"] = "Greedy";
             map["ui.mvp_action.selection.mana_generator"] = "Mana Generator";
             map["ui.mvp_action.selection.heat_scrubber"] = "Heat Scrubber";
             map["ui.mvp_action.selection.risk_lab"] = "Risk Lab";
