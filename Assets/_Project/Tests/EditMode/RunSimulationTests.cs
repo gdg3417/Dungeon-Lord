@@ -128,6 +128,15 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+        private static void AssertNoPostureAdjustment(RunOutcomeRecord actual, RunOutcomeRecord expected)
+        {
+            Assert.That(actual.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(expected.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(actual.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(expected.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(actual.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.EqualTo(expected.LootExtractionSummary.TotalExtractedTradeableWorldValue));
+            Assert.That(actual.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(expected.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+        }
+
+
         private static void SetPostureMultipliers(RunSimulationConfig config, string postureId, double generatedMultiplier, double extractedMultiplier)
         {
             RunPostureConfig[] postures = config.RunPostures ?? System.Array.Empty<RunPostureConfig>();
@@ -251,7 +260,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SimulateOnce_MissingOrInvalidPostureConfig_FallsBackToBalancedSafely()
+        public void SimulateOnce_MissingOrInvalidPostureConfig_AppliesNoPostureAdjustmentSafely()
         {
             RunSimulationConfig missing = BuildConfig();
             missing.RunPostures = null;
@@ -261,14 +270,15 @@ namespace DungeonBuilder.Tests.EditMode
                 new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "", GeneratedLootWorldValueMultiplier = double.NaN, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 1d }
             };
 
-            RunOutcomeRecord missingOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
-            RunOutcomeRecord invalidOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
-            RunOutcomeRecord balancedOutcome = new RunSimulationService(BuildConfig(), BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+            RunOutcomeRecord missingDefaultOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord missingRequestedOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+            RunOutcomeRecord invalidDefaultOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord invalidRequestedOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
 
-            Assert.That(RunPostureResolver.Resolve(missing, RunPostureResolver.GreedyId).Id, Is.EqualTo(RunPostureResolver.BalancedId));
-            Assert.That(RunPostureResolver.Resolve(invalid, RunPostureResolver.GreedyId).Id, Is.EqualTo(RunPostureResolver.BalancedId));
-            Assert.That(missingOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(balancedOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
-            Assert.That(invalidOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(balancedOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+            Assert.That(RunPostureResolver.Resolve(missing, RunPostureResolver.GreedyId), Is.Null);
+            Assert.That(RunPostureResolver.Resolve(invalid, RunPostureResolver.GreedyId), Is.Null);
+            AssertNoPostureAdjustment(missingRequestedOutcome, missingDefaultOutcome);
+            AssertNoPostureAdjustment(invalidRequestedOutcome, invalidDefaultOutcome);
         }
 
         [Test]

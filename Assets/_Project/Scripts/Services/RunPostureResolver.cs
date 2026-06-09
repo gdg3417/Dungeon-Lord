@@ -7,8 +7,6 @@ namespace DungeonBuilder.M0
         public const string CautiousId = "run.posture.cautious";
         public const string BalancedId = "run.posture.balanced";
         public const string GreedyId = "run.posture.greedy";
-        public const string BalancedDisplayNameKey = "run.posture.balanced.name";
-
         public static RunPostureConfig Resolve(RunSimulationConfig config, string postureId)
         {
             RunPostureConfig balanced = null;
@@ -35,24 +33,12 @@ namespace DungeonBuilder.M0
                 }
             }
 
-            return requested ?? balanced ?? CreateBuiltInBalancedFallback();
+            return requested ?? balanced;
         }
 
         public static string ResolveDisplayNameKey(RunSimulationConfig config, string postureId)
         {
-            return Resolve(config, postureId).DisplayNameKey;
-        }
-
-        private static RunPostureConfig CreateBuiltInBalancedFallback()
-        {
-            return new RunPostureConfig
-            {
-                Id = BalancedId,
-                DisplayNameKey = BalancedDisplayNameKey,
-                GeneratedLootWorldValueMultiplier = 1d,
-                ExtractedLootWorldValueMultiplier = 1d,
-                HeatDeltaOffset = 0d
-            };
+            return Resolve(config, postureId)?.DisplayNameKey;
         }
 
         private static bool IsValid(RunPostureConfig config)
