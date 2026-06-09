@@ -233,12 +233,16 @@ namespace DungeonBuilder.Tests.EditMode
             Rect rect = _overlay.GetMinimalMvpActionPanelRect();
 
             Assert.That(rect.width, Is.EqualTo(260f));
-            Assert.That(rect.height, Is.EqualTo(230f));
+            Assert.That(rect.height, Is.EqualTo(300f));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: improves mana reserve."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
+            Assert.That(labels.CautiousPosture, Is.EqualTo("Cautious"));
+            Assert.That(labels.BalancedPosture, Is.EqualTo("Balanced"));
+            Assert.That(labels.GreedyPosture, Is.EqualTo("Greedy"));
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
@@ -330,8 +334,8 @@ namespace DungeonBuilder.Tests.EditMode
             string runText = RefreshText();
 
             string runFeedback = _overlay.MvpRunResultFeedback;
-            bool hasLocalizedRunResult = runFeedback.StartsWith("Run result: succeeded.", System.StringComparison.Ordinal) ||
-                                         runFeedback.StartsWith("Run result: failed.", System.StringComparison.Ordinal);
+            bool hasLocalizedRunResult = runFeedback.StartsWith("Posture: Balanced. Run result: succeeded.", System.StringComparison.Ordinal) ||
+                                         runFeedback.StartsWith("Posture: Balanced. Run result: failed.", System.StringComparison.Ordinal);
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(runText, Does.Contain("Run simulated."));
@@ -603,7 +607,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Run result: succeeded."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Posture: Balanced. Run result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Adventurers: "));
@@ -634,10 +638,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.EqualTo(firstFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Heat 8->8."));
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.posture_format"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.posture"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-2"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.RogueClassId));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("adventurer.class."));
         }
 
         [Test]
@@ -1220,6 +1227,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected structure: {0}";
+            map["ui.mvp_action.posture.label"] = "Run posture: {0}";
+            map["run.posture.cautious.name"] = "Cautious";
+            map["run.posture.balanced.name"] = "Balanced";
+            map["run.posture.greedy.name"] = "Greedy";
             map["ui.mvp_action.selection.mana_generator"] = "Mana Generator";
             map["ui.mvp_action.selection.heat_scrubber"] = "Heat Scrubber";
             map["ui.mvp_action.selection.risk_lab"] = "Risk Lab";
@@ -1236,6 +1247,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_feedback.unavailable"] = "Run result unavailable.";
             map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
             map["ui.mvp_run_feedback.format_with_party"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}";
+            map["ui.mvp_run_feedback.posture_format"] = "Posture: {0}. {1}";
             map["ui.mvp_adventurer_party.preview_format"] = "Adventurers: {0}";
             map["ui.mvp_adventurer_party.class.unknown"] = "Unknown adventurer";
             map["adventurer.class.warrior.display_name"] = "Warrior";

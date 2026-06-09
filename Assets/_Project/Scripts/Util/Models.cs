@@ -294,6 +294,17 @@ namespace DungeonBuilder.M0
         public int AdventurerPartyCompositionMaxSize;
         public int AdventurerPartyCompositionMaxAllowedSize;
         public string[] AdventurerPartyCompositionClassIds = Array.Empty<string>();
+        public RunPostureConfig[] RunPostures = Array.Empty<RunPostureConfig>();
+    }
+
+    [Serializable]
+    public sealed class RunPostureConfig
+    {
+        public string Id;
+        public string DisplayNameKey;
+        public double GeneratedLootWorldValueMultiplier = 1d;
+        public double ExtractedLootWorldValueMultiplier = 1d;
+        public double HeatDeltaOffset = 0d;
     }
 
     [Serializable]

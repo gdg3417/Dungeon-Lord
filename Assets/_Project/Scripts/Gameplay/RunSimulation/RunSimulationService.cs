@@ -19,8 +19,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence)
         {
+            return SimulateOnce(runtime, tickStarted, runSequence, RunPostureResolver.BalancedId);
+        }
+
+        public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId)
+        {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
 
+            RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
             double heatAtStart = runtime.Heat;
             double baseChance = _config.BaseSuccessChance;
             double heatPenaltyApplied = heatAtStart * _config.HeatPenaltyPerPoint;
@@ -41,16 +47,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
             string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success);
 
-            RunLootSummary lootSummary = BuildLootSummary(runSequence, tickStarted);
+            RunLootSummary lootSummary = ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture);
             RunSurvivalSummary survivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success);
             int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
-            RunLootExtractionSummary extractionSummary = LootExtractionResolver.Resolve(
+            RunLootExtractionSummary extractionSummary = ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(
                 _lootConfig,
                 lootSummary,
                 survivalSummary,
                 resolverSeed,
                 _config.LootExtractionRoundingPolicyId,
-                _config.LootExtractionRuleSourceId);
+                _config.LootExtractionRuleSourceId), lootSummary, posture);
             RunAdventurerAttractionSummary attractionSummary = AdventurerAttractionResolver.Resolve(
                 _config,
                 extractionSummary,
@@ -63,11 +69,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 _config,
                 forecastSummary,
                 resolverSeed);
-            RunHeatDeltaSummary heatDeltaSummary = RunHeatDeltaResolver.Resolve(
+            RunHeatDeltaSummary heatDeltaSummary = ApplyPostureToHeatDeltaSummary(RunHeatDeltaResolver.Resolve(
                 _config,
                 survivalSummary,
                 extractionSummary,
-                resolverSeed);
+                resolverSeed), posture);
             RunHeatApplicationSummary heatApplicationSummary = RunHeatStateApplyResolver.Resolve(
                 _config,
                 runtime.Heat,
@@ -179,6 +185,73 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 TotalGeneratedReserveCost = result.totalGeneratedReserveCost,
                 TotalGeneratedTradeableWorldValue = result.totalGeneratedTradeableWorldValue
             };
+        }
+
+
+        private RunLootSummary ApplyPostureToLootSummary(RunLootSummary summary, RunPostureConfig posture)
+        {
+            if (summary == null || posture == null || !summary.ResolverSuccess)
+            {
+                return summary;
+            }
+
+            summary.TotalGeneratedWorldValue = ScaleToInt(summary.TotalGeneratedWorldValue, posture.GeneratedLootWorldValueMultiplier);
+            return summary;
+        }
+
+        private RunLootExtractionSummary ApplyPostureToExtractionSummary(RunLootExtractionSummary summary, RunLootSummary lootSummary, RunPostureConfig posture)
+        {
+            if (summary == null || posture == null || !summary.RuleResolved)
+            {
+                return summary;
+            }
+
+            int generatedWorldValue = Math.Max(0, lootSummary?.TotalGeneratedWorldValue ?? 0);
+            summary.TotalExtractedWorldValue = Math.Min(
+                generatedWorldValue,
+                ScaleToInt(summary.TotalExtractedWorldValue, posture.ExtractedLootWorldValueMultiplier));
+            summary.TotalExtractedTradeableWorldValue = Math.Min(
+                summary.TotalExtractedWorldValue,
+                ScaleToInt(summary.TotalExtractedTradeableWorldValue, posture.ExtractedLootWorldValueMultiplier));
+            return summary;
+        }
+
+        private RunHeatDeltaSummary ApplyPostureToHeatDeltaSummary(RunHeatDeltaSummary summary, RunPostureConfig posture)
+        {
+            if (summary == null || posture == null || !summary.RuleResolved)
+            {
+                return summary;
+            }
+
+            double adjusted = summary.FinalHeatDelta + posture.HeatDeltaOffset;
+            if (double.IsNaN(adjusted) || double.IsInfinity(adjusted))
+            {
+                return summary;
+            }
+
+            summary.FinalHeatDelta = Math.Max(_config.RunHeatDeltaMinimum, Math.Min(_config.RunHeatDeltaMaximum, adjusted));
+            return summary;
+        }
+
+        private static int ScaleToInt(int value, double multiplier)
+        {
+            if (value <= 0 || multiplier <= 0d)
+            {
+                return 0;
+            }
+
+            double scaled = value * multiplier;
+            if (double.IsNaN(scaled) || double.IsInfinity(scaled))
+            {
+                return value;
+            }
+
+            if (scaled >= int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return Math.Max(0, (int)Math.Round(scaled));
         }
 
 

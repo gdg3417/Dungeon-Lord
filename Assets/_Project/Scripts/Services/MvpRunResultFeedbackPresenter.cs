@@ -11,13 +11,15 @@ namespace DungeonBuilder.M0
         public const string UnavailableKey = "ui.mvp_run_feedback.unavailable";
         public const string FormatKey = "ui.mvp_run_feedback.format";
         public const string FormatWithPartyKey = "ui.mvp_run_feedback.format_with_party";
+        public const string PostureFormatKey = "ui.mvp_run_feedback.posture_format";
         public const string PartyPreviewFormatKey = "ui.mvp_adventurer_party.preview_format";
 
         public static string BuildFeedbackText(
             MvpPlayerLoopSummary beforeRunSummary,
             MvpPlayerLoopSummary afterRunSummary,
             bool didRun,
-            Func<string, string, string> localize)
+            Func<string, string, string> localize,
+            string postureNameKey = null)
         {
             if (!didRun || afterRunSummary == null || !afterRunSummary.RuleResolved || !afterRunSummary.HasRunOutcome)
             {
@@ -31,7 +33,22 @@ namespace DungeonBuilder.M0
                 : Localize(localize, FormatWithPartyKey);
             if (string.IsNullOrEmpty(partyPreview))
             {
-                return string.Format(
+                return ApplyPosturePrefix(
+                    string.Format(
+                        format,
+                        interpretation,
+                        afterRunSummary.ManaReserve,
+                        afterRunSummary.LootGeneratedWorldValue,
+                        afterRunSummary.LootExtractedWorldValue,
+                        afterRunSummary.LootExtractedTradeableWorldValue,
+                        afterRunSummary.HeatBefore,
+                        afterRunSummary.HeatAfter),
+                    postureNameKey,
+                    localize);
+            }
+
+            return ApplyPosturePrefix(
+                string.Format(
                     format,
                     interpretation,
                     afterRunSummary.ManaReserve,
@@ -39,19 +56,10 @@ namespace DungeonBuilder.M0
                     afterRunSummary.LootExtractedWorldValue,
                     afterRunSummary.LootExtractedTradeableWorldValue,
                     afterRunSummary.HeatBefore,
-                    afterRunSummary.HeatAfter);
-            }
-
-            return string.Format(
-                format,
-                interpretation,
-                afterRunSummary.ManaReserve,
-                afterRunSummary.LootGeneratedWorldValue,
-                afterRunSummary.LootExtractedWorldValue,
-                afterRunSummary.LootExtractedTradeableWorldValue,
-                afterRunSummary.HeatBefore,
-                afterRunSummary.HeatAfter,
-                partyPreview);
+                    afterRunSummary.HeatAfter,
+                    partyPreview),
+                postureNameKey,
+                localize);
         }
 
         public static string BuildPartyPreview(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -68,6 +76,18 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(Localize(localize, PartyPreviewFormatKey), string.Join(", ", labels));
+        }
+
+        private static string ApplyPosturePrefix(string feedbackText, string postureNameKey, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(postureNameKey))
+            {
+                return feedbackText;
+            }
+
+            string postureName = Localize(localize, postureNameKey);
+            string format = Localize(localize, PostureFormatKey);
+            return string.Format(format, postureName, feedbackText);
         }
 
         private static string ResolveInterpretationKey(MvpPlayerLoopSummary summary)

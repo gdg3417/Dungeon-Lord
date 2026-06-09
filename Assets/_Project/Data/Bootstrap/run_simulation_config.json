@@ -58,5 +58,28 @@
     "adventurer.class.mage",
     "adventurer.class.cleric",
     "adventurer.class.ranger"
+  ],
+  "RunPostures": [
+    {
+      "Id": "run.posture.cautious",
+      "DisplayNameKey": "run.posture.cautious.name",
+      "GeneratedLootWorldValueMultiplier": 0.8,
+      "ExtractedLootWorldValueMultiplier": 0.8,
+      "HeatDeltaOffset": -1.0
+    },
+    {
+      "Id": "run.posture.balanced",
+      "DisplayNameKey": "run.posture.balanced.name",
+      "GeneratedLootWorldValueMultiplier": 1.0,
+      "ExtractedLootWorldValueMultiplier": 1.0,
+      "HeatDeltaOffset": 0.0
+    },
+    {
+      "Id": "run.posture.greedy",
+      "DisplayNameKey": "run.posture.greedy.name",
+      "GeneratedLootWorldValueMultiplier": 1.25,
+      "ExtractedLootWorldValueMultiplier": 1.25,
+      "HeatDeltaOffset": 1.0
+    }
   ]
 }

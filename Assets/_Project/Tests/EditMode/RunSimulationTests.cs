@@ -117,8 +117,38 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.MageClassId,
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
+                },
+                RunPostures = new[]
+                {
+                    new RunPostureConfig { Id = RunPostureResolver.CautiousId, DisplayNameKey = "run.posture.cautious.name", GeneratedLootWorldValueMultiplier = 0.8d, ExtractedLootWorldValueMultiplier = 0.8d, HeatDeltaOffset = -1d },
+                    new RunPostureConfig { Id = RunPostureResolver.BalancedId, DisplayNameKey = "run.posture.balanced.name", GeneratedLootWorldValueMultiplier = 1d, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 0d },
+                    new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "run.posture.greedy.name", GeneratedLootWorldValueMultiplier = 1.25d, ExtractedLootWorldValueMultiplier = 1.25d, HeatDeltaOffset = 1d }
                 }
             };
+        }
+
+
+        private static void AssertNoPostureAdjustment(RunOutcomeRecord actual, RunOutcomeRecord expected)
+        {
+            Assert.That(actual.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(expected.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(actual.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(expected.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(actual.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.EqualTo(expected.LootExtractionSummary.TotalExtractedTradeableWorldValue));
+            Assert.That(actual.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(expected.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+        }
+
+
+        private static void SetPostureMultipliers(RunSimulationConfig config, string postureId, double generatedMultiplier, double extractedMultiplier)
+        {
+            RunPostureConfig[] postures = config.RunPostures ?? System.Array.Empty<RunPostureConfig>();
+            for (int i = 0; i < postures.Length; i++)
+            {
+                if (postures[i] != null && postures[i].Id == postureId)
+                {
+                    postures[i].GeneratedLootWorldValueMultiplier = generatedMultiplier;
+                    postures[i].ExtractedLootWorldValueMultiplier = extractedMultiplier;
+                    return;
+                }
+            }
         }
 
 
@@ -148,6 +178,109 @@ namespace DungeonBuilder.Tests.EditMode
                 }
             };
         }
+
+        [Test]
+        public void RunPostureResolver_ResolvesCautiousBalancedAndGreedyFromConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.CautiousId).DisplayNameKey, Is.EqualTo("run.posture.cautious.name"));
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.BalancedId).DisplayNameKey, Is.EqualTo("run.posture.balanced.name"));
+            Assert.That(RunPostureResolver.Resolve(config, RunPostureResolver.GreedyId).DisplayNameKey, Is.EqualTo("run.posture.greedy.name"));
+        }
+
+        [Test]
+        public void SimulateOnce_BalancedPosture_MatchesDefaultBehavior()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            var defaultRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+            var balancedRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord defaultOutcome = service.SimulateOnce(defaultRuntime, 10, 2);
+            RunOutcomeRecord balancedOutcome = service.SimulateOnce(balancedRuntime, 10, 2, RunPostureResolver.BalancedId);
+
+            Assert.That(balancedOutcome.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(defaultOutcome.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(balancedOutcome.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(defaultOutcome.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(balancedOutcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(defaultOutcome.RunHeatApplicationSummary.HeatAfter).Within(1e-9));
+        }
+
+        [Test]
+        public void SimulateOnce_Postures_AdjustHeatPressureDeterministicallyAroundBalanced()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord cautious = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.CautiousId);
+            RunOutcomeRecord balanced = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(cautious.RunHeatApplicationSummary.HeatAfter, Is.LessThanOrEqualTo(balanced.RunHeatApplicationSummary.HeatAfter));
+            Assert.That(greedy.RunHeatApplicationSummary.HeatAfter, Is.GreaterThanOrEqualTo(balanced.RunHeatApplicationSummary.HeatAfter));
+        }
+
+        [Test]
+        public void SimulateOnce_GreedyPosture_HasEqualOrHigherLootUpsideThanBalanced()
+        {
+            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
+
+            RunOutcomeRecord balanced = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId);
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(greedy.LootSummary.TotalGeneratedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootExtractionSummary.TotalExtractedWorldValue));
+        }
+
+
+        [Test]
+        public void SimulateOnce_GreedyPosture_ClampsExtractedLootToGeneratedLoot()
+        {
+            RunSimulationConfig config = BuildConfig();
+            SetPostureMultipliers(config, RunPostureResolver.GreedyId, generatedMultiplier: 1.25d, extractedMultiplier: 10d);
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(greedy.LootSummary.TotalGeneratedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.LessThanOrEqualTo(greedy.LootSummary.TotalGeneratedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_CautiousPosture_ClampsTradeableExtractedLootToExtractedLoot()
+        {
+            RunSimulationConfig config = BuildConfig();
+            SetPostureMultipliers(config, RunPostureResolver.CautiousId, generatedMultiplier: 0.8d, extractedMultiplier: 0.1d);
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord cautious = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.CautiousId);
+
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.LessThanOrEqualTo(cautious.LootExtractionSummary.TotalExtractedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_MissingOrInvalidPostureConfig_AppliesNoPostureAdjustmentSafely()
+        {
+            RunSimulationConfig missing = BuildConfig();
+            missing.RunPostures = null;
+            RunSimulationConfig invalid = BuildConfig();
+            invalid.RunPostures = new[]
+            {
+                new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "", GeneratedLootWorldValueMultiplier = double.NaN, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 1d }
+            };
+
+            RunOutcomeRecord missingDefaultOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord missingRequestedOutcome = new RunSimulationService(missing, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+            RunOutcomeRecord invalidDefaultOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord invalidRequestedOutcome = new RunSimulationService(invalid, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(RunPostureResolver.Resolve(missing, RunPostureResolver.GreedyId), Is.Null);
+            Assert.That(RunPostureResolver.Resolve(invalid, RunPostureResolver.GreedyId), Is.Null);
+            AssertNoPostureAdjustment(missingRequestedOutcome, missingDefaultOutcome);
+            AssertNoPostureAdjustment(invalidRequestedOutcome, invalidDefaultOutcome);
+        }
+
         [Test]
         public void SimulateOnce_IsDeterministic_ForSameInput()
         {

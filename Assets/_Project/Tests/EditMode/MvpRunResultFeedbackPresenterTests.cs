@@ -77,6 +77,21 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Feedback_WithPosture_UsesLocalizedPostureNameAndDoesNotExposeRawPostureId()
+        {
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                Summary(runSucceeded: true, mana: 12d, generatedLoot: 7, extractedLoot: 5, tradeableLoot: 3, heatBefore: 4d, heatAfter: 4d),
+                didRun: true,
+                Localized,
+                MinimalMvpActionPanelPresenter.GreedyPostureKey);
+
+            Assert.That(text, Is.EqualTo("Posture: Greedy. Run result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4."));
+            Assert.That(text, Does.Not.Contain(RunPostureResolver.GreedyId));
+            Assert.That(text, Does.Not.Contain("run.posture"));
+        }
+
+        [Test]
         public void UnavailableRun_UsesLocalizedFallbackWithoutFormattingRawState()
         {
             string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
@@ -150,7 +165,11 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.UnavailableKey] = "Run result unavailable.",
                 [MvpRunResultFeedbackPresenter.FormatKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.",
                 [MvpRunResultFeedbackPresenter.FormatWithPartyKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}",
+                [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Posture: {0}. {1}",
                 [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
+                [MinimalMvpActionPanelPresenter.CautiousPostureKey] = "Cautious",
+                [MinimalMvpActionPanelPresenter.BalancedPostureKey] = "Balanced",
+                [MinimalMvpActionPanelPresenter.GreedyPostureKey] = "Greedy",
                 ["adventurer.class.warrior.display_name"] = "Warrior",
                 ["adventurer.class.rogue.display_name"] = "Rogue",
                 ["adventurer.class.mage.display_name"] = "Mage",
