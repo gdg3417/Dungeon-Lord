@@ -128,6 +128,21 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+        private static void SetPostureMultipliers(RunSimulationConfig config, string postureId, double generatedMultiplier, double extractedMultiplier)
+        {
+            RunPostureConfig[] postures = config.RunPostures ?? System.Array.Empty<RunPostureConfig>();
+            for (int i = 0; i < postures.Length; i++)
+            {
+                if (postures[i] != null && postures[i].Id == postureId)
+                {
+                    postures[i].GeneratedLootWorldValueMultiplier = generatedMultiplier;
+                    postures[i].ExtractedLootWorldValueMultiplier = extractedMultiplier;
+                    return;
+                }
+            }
+        }
+
+
         private static LootConfig BuildLootConfig()
         {
             return new LootConfig
@@ -204,6 +219,35 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(greedy.LootSummary.TotalGeneratedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootSummary.TotalGeneratedWorldValue));
             Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(balanced.LootExtractionSummary.TotalExtractedWorldValue));
+        }
+
+
+        [Test]
+        public void SimulateOnce_GreedyPosture_ClampsExtractedLootToGeneratedLoot()
+        {
+            RunSimulationConfig config = BuildConfig();
+            SetPostureMultipliers(config, RunPostureResolver.GreedyId, generatedMultiplier: 1.25d, extractedMultiplier: 10d);
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.GreedyId);
+
+            Assert.That(greedy.LootSummary.TotalGeneratedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(greedy.LootExtractionSummary.TotalExtractedWorldValue, Is.LessThanOrEqualTo(greedy.LootSummary.TotalGeneratedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_CautiousPosture_ClampsTradeableExtractedLootToExtractedLoot()
+        {
+            RunSimulationConfig config = BuildConfig();
+            SetPostureMultipliers(config, RunPostureResolver.CautiousId, generatedMultiplier: 0.8d, extractedMultiplier: 0.1d);
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord cautious = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.CautiousId);
+
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(cautious.LootExtractionSummary.TotalExtractedTradeableWorldValue, Is.LessThanOrEqualTo(cautious.LootExtractionSummary.TotalExtractedWorldValue));
         }
 
         [Test]

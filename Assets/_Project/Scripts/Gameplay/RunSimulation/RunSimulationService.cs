@@ -56,7 +56,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 survivalSummary,
                 resolverSeed,
                 _config.LootExtractionRoundingPolicyId,
-                _config.LootExtractionRuleSourceId), posture);
+                _config.LootExtractionRuleSourceId), lootSummary, posture);
             RunAdventurerAttractionSummary attractionSummary = AdventurerAttractionResolver.Resolve(
                 _config,
                 extractionSummary,
@@ -199,14 +199,20 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return summary;
         }
 
-        private RunLootExtractionSummary ApplyPostureToExtractionSummary(RunLootExtractionSummary summary, RunPostureConfig posture)
+        private RunLootExtractionSummary ApplyPostureToExtractionSummary(RunLootExtractionSummary summary, RunLootSummary lootSummary, RunPostureConfig posture)
         {
             if (summary == null || posture == null || !summary.RuleResolved)
             {
                 return summary;
             }
 
-            summary.TotalExtractedWorldValue = ScaleToInt(summary.TotalExtractedWorldValue, posture.ExtractedLootWorldValueMultiplier);
+            int generatedWorldValue = Math.Max(0, lootSummary?.TotalGeneratedWorldValue ?? 0);
+            summary.TotalExtractedWorldValue = Math.Min(
+                generatedWorldValue,
+                ScaleToInt(summary.TotalExtractedWorldValue, posture.ExtractedLootWorldValueMultiplier));
+            summary.TotalExtractedTradeableWorldValue = Math.Min(
+                summary.TotalExtractedWorldValue,
+                ScaleToInt(summary.TotalExtractedTradeableWorldValue, posture.ExtractedLootWorldValueMultiplier));
             return summary;
         }
 
