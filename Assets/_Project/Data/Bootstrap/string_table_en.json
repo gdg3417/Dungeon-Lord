@@ -832,6 +832,22 @@
       "text": "Run result unavailable."
     },
     {
+      "key": "ui.mvp_run_feedback.outcome_cue.failed",
+      "text": "Outcome cue: the run failed, so reduce pressure before trying again."
+    },
+    {
+      "key": "ui.mvp_run_feedback.outcome_cue.heat_increased",
+      "text": "Outcome cue: heat pressure rose; consider a safer posture or heat control."
+    },
+    {
+      "key": "ui.mvp_run_feedback.outcome_cue.controlled_loot",
+      "text": "Outcome cue: loot landed while heat stayed controlled."
+    },
+    {
+      "key": "ui.mvp_run_feedback.outcome_cue.format",
+      "text": "{0} {1}"
+    },
+    {
       "key": "ui.mvp_run_feedback.format",
       "text": "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}."
     },

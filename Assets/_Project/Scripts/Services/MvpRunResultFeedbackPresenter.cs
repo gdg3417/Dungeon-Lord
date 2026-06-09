@@ -9,6 +9,10 @@ namespace DungeonBuilder.M0
         public const string SuccessHeatIncreasedKey = "ui.mvp_run_feedback.success_heat_increased";
         public const string FailedKey = "ui.mvp_run_feedback.failed";
         public const string UnavailableKey = "ui.mvp_run_feedback.unavailable";
+        public const string OutcomeCueFailedKey = "ui.mvp_run_feedback.outcome_cue.failed";
+        public const string OutcomeCueHeatIncreasedKey = "ui.mvp_run_feedback.outcome_cue.heat_increased";
+        public const string OutcomeCueControlledLootKey = "ui.mvp_run_feedback.outcome_cue.controlled_loot";
+        public const string OutcomeCueFormatKey = "ui.mvp_run_feedback.outcome_cue.format";
         public const string FormatKey = "ui.mvp_run_feedback.format";
         public const string FormatWithPartyKey = "ui.mvp_run_feedback.format_with_party";
         public const string PostureFormatKey = "ui.mvp_run_feedback.posture_format";
@@ -27,6 +31,7 @@ namespace DungeonBuilder.M0
             }
 
             string interpretation = Localize(localize, ResolveInterpretationKey(afterRunSummary));
+            string outcomeCue = BuildOutcomeCue(beforeRunSummary, afterRunSummary, localize);
             string partyPreview = BuildPartyPreview(afterRunSummary, localize);
             string format = string.IsNullOrEmpty(partyPreview)
                 ? Localize(localize, FormatKey)
@@ -34,6 +39,24 @@ namespace DungeonBuilder.M0
             if (string.IsNullOrEmpty(partyPreview))
             {
                 return ApplyPosturePrefix(
+                    AppendOutcomeCue(
+                        string.Format(
+                            format,
+                            interpretation,
+                            afterRunSummary.ManaReserve,
+                            afterRunSummary.LootGeneratedWorldValue,
+                            afterRunSummary.LootExtractedWorldValue,
+                            afterRunSummary.LootExtractedTradeableWorldValue,
+                            afterRunSummary.HeatBefore,
+                            afterRunSummary.HeatAfter),
+                        outcomeCue,
+                        localize),
+                    postureNameKey,
+                    localize);
+            }
+
+            return ApplyPosturePrefix(
+                AppendOutcomeCue(
                     string.Format(
                         format,
                         interpretation,
@@ -42,22 +65,10 @@ namespace DungeonBuilder.M0
                         afterRunSummary.LootExtractedWorldValue,
                         afterRunSummary.LootExtractedTradeableWorldValue,
                         afterRunSummary.HeatBefore,
-                        afterRunSummary.HeatAfter),
-                    postureNameKey,
-                    localize);
-            }
-
-            return ApplyPosturePrefix(
-                string.Format(
-                    format,
-                    interpretation,
-                    afterRunSummary.ManaReserve,
-                    afterRunSummary.LootGeneratedWorldValue,
-                    afterRunSummary.LootExtractedWorldValue,
-                    afterRunSummary.LootExtractedTradeableWorldValue,
-                    afterRunSummary.HeatBefore,
-                    afterRunSummary.HeatAfter,
-                    partyPreview),
+                        afterRunSummary.HeatAfter,
+                        partyPreview),
+                    outcomeCue,
+                    localize),
                 postureNameKey,
                 localize);
         }
@@ -76,6 +87,41 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(Localize(localize, PartyPreviewFormatKey), string.Join(", ", labels));
+        }
+
+        private static string BuildOutcomeCue(MvpPlayerLoopSummary beforeRunSummary, MvpPlayerLoopSummary afterRunSummary, Func<string, string, string> localize)
+        {
+            if (afterRunSummary == null || !afterRunSummary.RuleResolved || !afterRunSummary.HasRunOutcome)
+            {
+                return string.Empty;
+            }
+
+            if (!afterRunSummary.RunSucceeded)
+            {
+                return Localize(localize, OutcomeCueFailedKey);
+            }
+
+            if (afterRunSummary.HeatAfter > afterRunSummary.HeatBefore)
+            {
+                return Localize(localize, OutcomeCueHeatIncreasedKey);
+            }
+
+            if (afterRunSummary.HeatAfter <= afterRunSummary.HeatBefore && afterRunSummary.LootExtractedWorldValue > 0)
+            {
+                return Localize(localize, OutcomeCueControlledLootKey);
+            }
+
+            return string.Empty;
+        }
+
+        private static string AppendOutcomeCue(string feedbackText, string outcomeCue, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(outcomeCue))
+            {
+                return feedbackText;
+            }
+
+            return string.Format(Localize(localize, OutcomeCueFormatKey), feedbackText, outcomeCue);
         }
 
         private static string ApplyPosturePrefix(string feedbackText, string postureNameKey, Func<string, string, string> localize)
