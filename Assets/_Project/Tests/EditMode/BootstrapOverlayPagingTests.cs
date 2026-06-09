@@ -394,6 +394,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runFeedback, Does.Contain("Mana 9."));
             Assert.That(runFeedback, Does.Contain("Loot 0/0/0."));
             Assert.That(runFeedback, Does.Contain("Heat 17->17."));
+            Assert.That(runFeedback, Does.Not.Contain("ui.mvp_run_feedback.outcome_cue"));
             Assert.That(runFeedback, Does.Not.Contain("run-1"));
             Assert.That(runFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(runFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
@@ -662,6 +663,31 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Adventurers: "));
             Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+        }
+
+        [Test]
+        public void RunOrObserveDungeon_RunFeedbackIncludesLocalizedOutcomeCue()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 49d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_run_feedback_outcome_cue_test.json", useAtomicWrites = false }));
+
+            _overlay.RunOrObserveDungeon();
+            string text = RefreshText();
+
+            Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.outcome_cue"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.posture"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-1"));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
         }
 
         [Test]
@@ -1301,6 +1327,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_feedback.success_heat_increased"] = "Run result: succeeded. Loot extracted, heat increased.";
             map["ui.mvp_run_feedback.failed"] = "Run result: failed. Review placement and try again.";
             map["ui.mvp_run_feedback.unavailable"] = "Run result unavailable.";
+            map["ui.mvp_run_feedback.outcome_cue.failed"] = "Outcome cue: the run failed, so reduce pressure before trying again.";
+            map["ui.mvp_run_feedback.outcome_cue.heat_increased"] = "Outcome cue: heat pressure rose; consider a safer posture or heat control.";
+            map["ui.mvp_run_feedback.outcome_cue.controlled_loot"] = "Outcome cue: loot landed while heat stayed controlled.";
+            map["ui.mvp_run_feedback.outcome_cue.format"] = "{0} {1}";
             map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
             map["ui.mvp_run_feedback.format_with_party"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}";
             map["ui.mvp_run_feedback.posture_format"] = "Posture: {0}. {1}";
