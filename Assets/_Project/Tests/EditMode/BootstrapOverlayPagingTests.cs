@@ -1585,6 +1585,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_smoke.section.plan_and_action"] = "Plan and action";
             map["ui.mvp_smoke.section.latest_run_feedback"] = "Latest run feedback";
             map["ui.mvp_smoke.section.compact"] = "Compact Smoke View";
+            map["ui.mvp_smoke.adventurers_unavailable"] = "Adventurers: unavailable";
             map["ui.mvp_smoke.copy.confirmation"] = "Smoke text copied.";
             map["ui.mvp_action.button.collapse_panel"] = "Collapse actions (F7)";
             map["ui.mvp_action.button.expand_panel"] = "Expand actions (F7)";

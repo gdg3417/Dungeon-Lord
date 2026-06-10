@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
         private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
         private const float OverlayTextRightCollapsedActionPanelReserve = 96f;
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
+        private const string CompactSmokeAdventurersUnavailableKey = "ui.mvp_smoke.adventurers_unavailable";
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -423,6 +424,7 @@ namespace DungeonBuilder.M0
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
+            AppendCompactAdventurersFallbackIfMissing(body);
             string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
             if (!string.IsNullOrEmpty(runPlanPreviewText))
             {
@@ -462,6 +464,36 @@ namespace DungeonBuilder.M0
 
                 AppendLine(builder, line);
             }
+        }
+
+        private void AppendCompactAdventurersFallbackIfMissing(StringBuilder builder)
+        {
+            if (ContainsAdventurerLine(builder))
+            {
+                return;
+            }
+
+            AppendLine(builder, GetLocalizedString(CompactSmokeAdventurersUnavailableKey));
+        }
+
+        private bool ContainsAdventurerLine(StringBuilder builder)
+        {
+            string partyPreviewPrefix = GetLocalizedString(MvpRunResultFeedbackPresenter.PartyPreviewFormatKey).Split('{')[0];
+            if (string.IsNullOrEmpty(partyPreviewPrefix))
+            {
+                return false;
+            }
+
+            string[] lines = builder.ToString().Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith(partyPreviewPrefix))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private string BuildLoopSummarySectionText()

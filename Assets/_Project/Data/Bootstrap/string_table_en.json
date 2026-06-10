@@ -912,6 +912,10 @@
       "text": "Compact Smoke View"
     },
     {
+      "key": "ui.mvp_smoke.adventurers_unavailable",
+      "text": "Adventurers: unavailable"
+    },
+    {
       "key": "ui.mvp_smoke.copy.confirmation",
       "text": "Smoke text copied."
     },
