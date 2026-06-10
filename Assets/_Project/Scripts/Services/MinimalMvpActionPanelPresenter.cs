@@ -10,6 +10,8 @@ namespace DungeonBuilder.M0
         public const string RunButtonKey = "ui.mvp_action.button.run_or_observe";
         public const string ShowDiagnosticsButtonKey = "ui.mvp_action.button.show_diagnostics";
         public const string HideDiagnosticsButtonKey = "ui.mvp_action.button.hide_diagnostics";
+        public const string CollapsePanelButtonKey = "ui.mvp_action.button.collapse_panel";
+        public const string ExpandPanelButtonKey = "ui.mvp_action.button.expand_panel";
         public const string CompactFormatKey = "ui.mvp_action.panel.compact_format";
         public const string SelectionLabelKey = "ui.mvp_action.selection.label";
         public const string PostureLabelKey = "ui.mvp_action.posture.label";
@@ -55,7 +57,9 @@ namespace DungeonBuilder.M0
                 Localize(localize, PlacementButtonKey),
                 Localize(localize, RunButtonKey),
                 Localize(localize, ShowDiagnosticsButtonKey),
-                Localize(localize, HideDiagnosticsButtonKey));
+                Localize(localize, HideDiagnosticsButtonKey),
+                Localize(localize, CollapsePanelButtonKey),
+                Localize(localize, ExpandPanelButtonKey));
         }
 
         public static string BuildPanelText(Func<string, string, string> localize)
@@ -117,7 +121,9 @@ namespace DungeonBuilder.M0
             string placementButton,
             string runButton,
             string showDiagnosticsButton,
-            string hideDiagnosticsButton)
+            string hideDiagnosticsButton,
+            string collapsePanelButton,
+            string expandPanelButton)
         {
             Title = title;
             SelectedStructureLabel = selectedStructureLabel;
@@ -133,6 +139,8 @@ namespace DungeonBuilder.M0
             RunButton = runButton;
             ShowDiagnosticsButton = showDiagnosticsButton;
             HideDiagnosticsButton = hideDiagnosticsButton;
+            CollapsePanelButton = collapsePanelButton;
+            ExpandPanelButton = expandPanelButton;
         }
 
         public string Title { get; }
@@ -149,5 +157,7 @@ namespace DungeonBuilder.M0
         public string RunButton { get; }
         public string ShowDiagnosticsButton { get; }
         public string HideDiagnosticsButton { get; }
+        public string CollapsePanelButton { get; }
+        public string ExpandPanelButton { get; }
     }
 }

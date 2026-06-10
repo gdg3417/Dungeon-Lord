@@ -886,6 +886,42 @@
     {
       "key": "adventurer.class.ranger.display_name",
       "text": "Ranger"
+    },
+    {
+      "key": "ui.mvp_smoke.section.status_format",
+      "text": "Smoke section: {0} ({1}/{2})"
+    },
+    {
+      "key": "ui.mvp_smoke.section.full",
+      "text": "Full player-facing text"
+    },
+    {
+      "key": "ui.mvp_smoke.section.loop_summary",
+      "text": "Loop summary"
+    },
+    {
+      "key": "ui.mvp_smoke.section.plan_and_action",
+      "text": "Plan and action"
+    },
+    {
+      "key": "ui.mvp_smoke.section.latest_run_feedback",
+      "text": "Latest run feedback"
+    },
+    {
+      "key": "ui.mvp_smoke.section.compact",
+      "text": "Compact Smoke View"
+    },
+    {
+      "key": "ui.mvp_smoke.copy.confirmation",
+      "text": "Smoke text copied."
+    },
+    {
+      "key": "ui.mvp_action.button.collapse_panel",
+      "text": "Collapse actions (F7)"
+    },
+    {
+      "key": "ui.mvp_action.button.expand_panel",
+      "text": "Expand actions (F7)"
     }
   ]
 }

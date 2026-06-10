@@ -22,6 +22,12 @@ namespace DungeonBuilder.M0
         private const int ResearchVerificationBoundaryDiagnosticsPage = 7;
         private const int ResearchVerificationSafetyDiagnosticsPage = 8;
         private const int VisibleDiagnosticsBodyLineCount = 4;
+        private const int VisiblePlayerFacingLineCount = 28;
+        private const int PlayerFacingSectionCount = 4;
+        private const int PlayerFacingSectionFull = 0;
+        private const int PlayerFacingSectionLoopSummary = 1;
+        private const int PlayerFacingSectionPlanAndAction = 2;
+        private const int PlayerFacingSectionLatestRunFeedback = 3;
         private const float MinimalMvpActionPanelWidth = 260f;
         private const float MinimalMvpActionPanelHeight = 322f;
         private const float MinimalMvpActionPanelMargin = 10f;
@@ -31,6 +37,7 @@ namespace DungeonBuilder.M0
         private const float OverlayTextSafeTopMargin = 14f;
         private const float OverlayTextSafeBottomMargin = 10f;
         private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
+        private const float OverlayTextRightCollapsedActionPanelReserve = 96f;
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
 
         private GameRoot _root;
@@ -44,13 +51,22 @@ namespace DungeonBuilder.M0
         private string _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
+        private int _playerFacingScrollOffset;
+        private bool _compactSmokeViewEnabled;
+        private int _playerFacingSectionIndex;
+        private bool _minimalMvpActionPanelCollapsed;
+        private string _smokeViewportStatusMessage = string.Empty;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
+        public int PlayerFacingScrollOffset => _playerFacingScrollOffset;
+        public bool CompactSmokeViewEnabled => _compactSmokeViewEnabled;
+        public int PlayerFacingSectionNumber => _playerFacingSectionIndex + 1;
+        public bool MinimalMvpActionPanelCollapsed => _minimalMvpActionPanelCollapsed;
         public bool DevPanelVisible => _devPanelVisible;
         public bool DiagnosticsVisible => _diagnosticsVisible || _runDiagnosticsOnlyVisible;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
-        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible;
+        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
         public string SelectedMvpRunPostureId => _selectedMvpRunPostureId;
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
@@ -161,6 +177,11 @@ namespace DungeonBuilder.M0
             _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
             _mvpStructurePlacementFeedback = string.Empty;
             _mvpRunResultFeedback = string.Empty;
+            _playerFacingScrollOffset = 0;
+            _compactSmokeViewEnabled = false;
+            _playerFacingSectionIndex = PlayerFacingSectionFull;
+            _minimalMvpActionPanelCollapsed = false;
+            _smokeViewportStatusMessage = string.Empty;
             _root.SetBanner(GetLocalizedString("ui.banner.clean_mvp_validation_reset", "ui.banner.clean_mvp_validation_reset"));
             RefreshOverlayText();
             return true;
@@ -179,6 +200,63 @@ namespace DungeonBuilder.M0
                 _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] + lineDelta,
                 0,
                 maxOffset);
+        }
+
+        public void ScrollPlayerFacingTextLines(int lineDelta)
+        {
+            if (_runDiagnosticsOnlyVisible || lineDelta == 0)
+            {
+                return;
+            }
+
+            ClampPlayerFacingScrollOffset(_playerFacingScrollOffset + lineDelta);
+        }
+
+        public void JumpPlayerFacingTextToTop()
+        {
+            if (_runDiagnosticsOnlyVisible)
+            {
+                return;
+            }
+
+            _playerFacingScrollOffset = 0;
+        }
+
+        public void JumpPlayerFacingTextToBottom()
+        {
+            if (_runDiagnosticsOnlyVisible)
+            {
+                return;
+            }
+
+            ClampPlayerFacingScrollOffset(int.MaxValue);
+        }
+
+        public void ToggleCompactSmokeView()
+        {
+            _compactSmokeViewEnabled = !_compactSmokeViewEnabled;
+            _playerFacingScrollOffset = 0;
+        }
+
+        public void CyclePlayerFacingSmokeSection()
+        {
+            _playerFacingSectionIndex = (_playerFacingSectionIndex + 1) % PlayerFacingSectionCount;
+            _playerFacingScrollOffset = 0;
+        }
+
+        public void ToggleMinimalMvpActionPanelCollapsed()
+        {
+            _minimalMvpActionPanelCollapsed = !_minimalMvpActionPanelCollapsed;
+            _playerFacingScrollOffset = 0;
+        }
+
+        public string CopyFullSmokeTextToClipboard()
+        {
+            string smokeText = BuildFullPlayerFacingSmokeText();
+            GUIUtility.systemCopyBuffer = smokeText;
+            _smokeViewportStatusMessage = GetLocalizedString("ui.mvp_smoke.copy.confirmation");
+            RefreshOverlayText();
+            return smokeText;
         }
 
         public void RefreshOverlayText()
@@ -204,7 +282,8 @@ namespace DungeonBuilder.M0
             rectTransform.anchorMax = Vector2.one;
             rectTransform.pivot = new Vector2(0f, 1f);
             rectTransform.offsetMin = new Vector2(OverlayTextSafeLeftMargin, OverlayTextSafeBottomMargin);
-            rectTransform.offsetMax = new Vector2(-OverlayTextRightActionPanelReserve, -OverlayTextSafeTopMargin);
+            float rightReserve = _minimalMvpActionPanelCollapsed ? OverlayTextRightCollapsedActionPanelReserve : OverlayTextRightActionPanelReserve;
+            rectTransform.offsetMax = new Vector2(-rightReserve, -OverlayTextSafeTopMargin);
             overlayText.alignment = TextAlignmentOptions.TopLeft;
         }
 
@@ -227,13 +306,39 @@ namespace DungeonBuilder.M0
             {
                 CycleFullDiagnosticsPage();
             }
+            if (Keyboard.current != null && Keyboard.current.f4Key.wasPressedThisFrame)
+            {
+                ToggleCompactSmokeView();
+            }
+            if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame)
+            {
+                CyclePlayerFacingSmokeSection();
+            }
+            if (Keyboard.current != null && Keyboard.current.f6Key.wasPressedThisFrame)
+            {
+                CopyFullSmokeTextToClipboard();
+            }
+            if (Keyboard.current != null && Keyboard.current.f7Key.wasPressedThisFrame)
+            {
+                ToggleMinimalMvpActionPanelCollapsed();
+            }
             if (Keyboard.current != null && Keyboard.current.pageUpKey.wasPressedThisFrame)
             {
+                ScrollPlayerFacingTextLines(-VisiblePlayerFacingLineCount);
                 ScrollFullDiagnosticsLines(-VisibleDiagnosticsBodyLineCount);
             }
             if (Keyboard.current != null && Keyboard.current.pageDownKey.wasPressedThisFrame)
             {
+                ScrollPlayerFacingTextLines(VisiblePlayerFacingLineCount);
                 ScrollFullDiagnosticsLines(VisibleDiagnosticsBodyLineCount);
+            }
+            if (Keyboard.current != null && Keyboard.current.homeKey.wasPressedThisFrame)
+            {
+                JumpPlayerFacingTextToTop();
+            }
+            if (Keyboard.current != null && Keyboard.current.endKey.wasPressedThisFrame)
+            {
+                JumpPlayerFacingTextToBottom();
             }
             if (Mouse.current != null)
             {
@@ -256,7 +361,14 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             if (!_runDiagnosticsOnlyVisible)
             {
-                AppendMvpLoopSummaryPanel(builder);
+                if (_diagnosticsVisible)
+                {
+                    AppendMvpLoopSummaryPanel(builder);
+                }
+                else
+                {
+                    AppendScrolledPlayerFacingSmokeText(builder, BuildCurrentPlayerFacingSmokeText());
+                }
                 AppendLine(builder, string.Empty);
             }
             if (_runDiagnosticsOnlyVisible)
@@ -268,13 +380,173 @@ namespace DungeonBuilder.M0
 
             if (!_diagnosticsVisible)
             {
-                AppendPlayerFacingStatus(builder);
                 return builder.ToString();
             }
 
             AppendHeader(builder);
             AppendScrolledFullDiagnosticsBody(builder, BuildCurrentFullDiagnosticsBody());
             return builder.ToString();
+        }
+
+        public string BuildFullPlayerFacingSmokeText()
+        {
+            var builder = new StringBuilder();
+            AppendMvpLoopSummaryPanel(builder);
+            AppendPlayerFacingStatus(builder);
+            return builder.ToString();
+        }
+
+        public string BuildCurrentPlayerFacingSmokeText()
+        {
+            if (_compactSmokeViewEnabled)
+            {
+                return BuildCompactSmokeText();
+            }
+
+            switch (_playerFacingSectionIndex)
+            {
+                case PlayerFacingSectionLoopSummary:
+                    return BuildLoopSummarySectionText();
+                case PlayerFacingSectionPlanAndAction:
+                    return BuildPlanAndActionSectionText();
+                case PlayerFacingSectionLatestRunFeedback:
+                    return BuildLatestRunFeedbackSectionText();
+                case PlayerFacingSectionFull:
+                default:
+                    return BuildSectionText("ui.mvp_smoke.section.full", BuildFullPlayerFacingSmokeText());
+            }
+        }
+
+        public string BuildCompactSmokeText()
+        {
+            var body = new StringBuilder();
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
+            AppendCompactLoopSummaryLines(body, panelText);
+            string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
+            if (!string.IsNullOrEmpty(runPlanPreviewText))
+            {
+                AppendLine(body, runPlanPreviewText);
+            }
+            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
+            {
+                AppendLine(body, _mvpRunResultFeedback);
+            }
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            AppendLine(body, string.Format(
+                GetLocalizedString(GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
+                GetLocalizedString(guidedPath != null && guidedPath.IsComplete
+                    ? GuidedMvpActionPathPanelPresenter.CompleteYesKey
+                    : GuidedMvpActionPathPanelPresenter.CompleteNoKey)));
+
+            return BuildSectionText("ui.mvp_smoke.section.compact", body.ToString());
+        }
+
+        private void AppendCompactLoopSummaryLines(StringBuilder builder, string panelText)
+        {
+            if (string.IsNullOrEmpty(panelText))
+            {
+                return;
+            }
+
+            string suggestionPrefix = GetLocalizedString(MvpLoopSummaryPanelPresenter.SuggestionFormatKey).Split('{')[0];
+            string title = GetLocalizedString(MvpLoopSummaryPanelPresenter.TitleKey);
+            string[] lines = panelText.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (string.IsNullOrEmpty(line) || line == title || (!string.IsNullOrEmpty(suggestionPrefix) && line.StartsWith(suggestionPrefix)))
+                {
+                    continue;
+                }
+
+                AppendLine(builder, line);
+            }
+        }
+
+        private string BuildLoopSummarySectionText()
+        {
+            var body = new StringBuilder();
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback)));
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(guidedText))
+            {
+                AppendLine(body, string.Empty);
+                AppendLine(body, guidedText);
+            }
+            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(firstSessionText))
+            {
+                AppendLine(body, string.Empty);
+                AppendLine(body, firstSessionText);
+            }
+            return BuildSectionText("ui.mvp_smoke.section.loop_summary", body.ToString());
+        }
+
+        private string BuildPlanAndActionSectionText()
+        {
+            var body = new StringBuilder();
+            AppendLine(body, GetSelectedMvpRunPlanPreviewText());
+            AppendLine(body, GetLocalizedString("ui.mvp_view.player_mode.status"));
+            if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
+            {
+                AppendLine(body, _mvpStructurePlacementFeedback);
+            }
+            return BuildSectionText("ui.mvp_smoke.section.plan_and_action", body.ToString());
+        }
+
+        private string BuildLatestRunFeedbackSectionText()
+        {
+            var body = new StringBuilder();
+            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
+            {
+                AppendLine(body, _mvpRunResultFeedback);
+            }
+            else
+            {
+                AppendLine(body, GetLocalizedString("ui.mvp_run_feedback.unavailable"));
+            }
+            return BuildSectionText("ui.mvp_smoke.section.latest_run_feedback", body.ToString());
+        }
+
+        private string BuildSectionText(string sectionNameKey, string body)
+        {
+            var builder = new StringBuilder();
+            AppendLine(builder, string.Format(
+                GetLocalizedString("ui.mvp_smoke.section.status_format"),
+                GetLocalizedString(sectionNameKey),
+                _playerFacingSectionIndex + 1,
+                PlayerFacingSectionCount));
+            if (!string.IsNullOrEmpty(_smokeViewportStatusMessage))
+            {
+                AppendLine(builder, _smokeViewportStatusMessage);
+            }
+            if (!string.IsNullOrEmpty(body))
+            {
+                AppendLine(builder, body);
+            }
+            return builder.ToString();
+        }
+
+        private void AppendScrolledPlayerFacingSmokeText(StringBuilder builder, string text)
+        {
+            string[] bodyLines = (text ?? string.Empty).Split('\n');
+            int maxOffset = Mathf.Max(0, bodyLines.Length - VisiblePlayerFacingLineCount);
+            _playerFacingScrollOffset = Mathf.Clamp(_playerFacingScrollOffset, 0, maxOffset);
+            int end = Mathf.Min(bodyLines.Length, _playerFacingScrollOffset + VisiblePlayerFacingLineCount);
+            for (int i = _playerFacingScrollOffset; i < end; i++)
+            {
+                AppendLine(builder, bodyLines[i]);
+            }
+        }
+
+        private void ClampPlayerFacingScrollOffset(int requestedOffset)
+        {
+            string[] bodyLines = BuildCurrentPlayerFacingSmokeText().Split('\n');
+            int maxOffset = Mathf.Max(0, bodyLines.Length - VisiblePlayerFacingLineCount);
+            _playerFacingScrollOffset = Mathf.Clamp(requestedOffset, 0, maxOffset);
         }
 
         private void AppendMvpLoopSummaryPanel(StringBuilder builder)
@@ -713,6 +985,33 @@ namespace DungeonBuilder.M0
         }
 
 
+        private void DrawCollapsedMinimalMvpActionPanel()
+        {
+            GUIStyle compactBox = new GUIStyle(GUI.skin.box)
+            {
+                padding = new RectOffset(6, 6, 4, 4)
+            };
+            GUIStyle compactButton = new GUIStyle(GUI.skin.button)
+            {
+                margin = new RectOffset(0, 0, 1, 1),
+                padding = new RectOffset(4, 4, 1, 1)
+            };
+            GUILayout.BeginArea(GetCollapsedMinimalMvpActionPanelRect(), compactBox);
+            if (GUILayout.Button(GetLocalizedString("ui.mvp_action.button.expand_panel"), compactButton, GUILayout.Height(MinimalMvpActionPanelButtonHeight)))
+            {
+                ToggleMinimalMvpActionPanelCollapsed();
+                RefreshOverlayText();
+            }
+            GUILayout.EndArea();
+        }
+
+        public Rect GetCollapsedMinimalMvpActionPanelRect()
+        {
+            float width = OverlayTextRightCollapsedActionPanelReserve - (MinimalMvpActionPanelMargin * 2f);
+            float x = Mathf.Max(MinimalMvpActionPanelMargin, Screen.width - width - MinimalMvpActionPanelMargin);
+            return new Rect(x, MinimalMvpActionPanelMargin, width, MinimalMvpActionPanelButtonHeight + (MinimalMvpActionPanelMargin * 2f));
+        }
+
         public Rect GetMinimalMvpActionPanelRect()
         {
             float x = Mathf.Max(MinimalMvpActionPanelMargin, Screen.width - MinimalMvpActionPanelWidth - MinimalMvpActionPanelMargin);
@@ -721,8 +1020,14 @@ namespace DungeonBuilder.M0
 
         private void DrawMinimalMvpActionPanel()
         {
-            if (!MinimalMvpActionGuiVisible)
+            if (_root == null || !PlayerFacingPanelsVisible)
             {
+                return;
+            }
+
+            if (_minimalMvpActionPanelCollapsed)
+            {
+                DrawCollapsedMinimalMvpActionPanel();
                 return;
             }
 
