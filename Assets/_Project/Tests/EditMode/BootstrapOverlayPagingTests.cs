@@ -976,6 +976,40 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(RefreshText(), Does.Contain("research-pending-line"));
         }
 
+
+        [Test]
+        public void PageDownWhileDiagnosticsVisibleScrollsDiagnosticsOnlyAndKeepsPlayerFacingAtTop()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_diagnostics_page_down_smoke_scroll_test.json");
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+            ShowDiagnosticsFromPlayerFacingDefault();
+            CycleToResearchDiagnostics();
+            int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
+
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+            _overlay.ScrollFullDiagnosticsLines(VisibleScrollPageSizeForTest());
+
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(VisibleScrollPageSizeForTest()));
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+
+            _overlay.ToggleDiagnosticsVisibility();
+            string playerFacingText = RefreshText();
+            Assert.That(playerFacingText, Does.StartWith("Smoke section: Full player-facing text"));
+        }
+
+        [Test]
+        public void PageDownWhileRunDiagnosticsFocusVisibleDoesNotScrollHiddenPlayerFacingText()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_run_focus_page_down_smoke_scroll_test.json");
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+        }
+
         [Test]
         public void PageAndFocusChanges_ResetDiagnosticsScrollOffset()
         {
@@ -1081,6 +1115,206 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
         }
+
+        [Test]
+        public void PlayerFacingPageUpPageDownChangesSmokeScrollWithoutChangingDiagnosticsPageNumber()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_scroll_feedback_test.json");
+            string firstPage = RefreshText();
+            int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
+
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+            string scrolled = RefreshText();
+
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+            Assert.That(scrolled, Is.Not.EqualTo(firstPage));
+
+            _overlay.ScrollPlayerFacingTextLines(-VisiblePlayerFacingScrollPageSizeForTest());
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+        }
+
+        [Test]
+        public void PlayerFacingHomeEndJumpToTopAndBottom()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_home_end_feedback_test.json");
+
+            _overlay.JumpPlayerFacingTextToBottom();
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
+
+            _overlay.JumpPlayerFacingTextToTop();
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+        }
+
+        [Test]
+        public void F4CompactSmokeViewToggleShowsCompactSmokeFacts()
+        {
+            Assert.That(_overlay.CompactSmokeViewEnabled, Is.False);
+
+            _overlay.ToggleCompactSmokeView();
+            string text = RefreshText();
+
+            Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
+            Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
+            Assert.That(text, Does.Contain("Placement: Mana Generator"));
+            Assert.That(text, Does.Contain("Latest run:"));
+            Assert.That(text, Does.Contain("Mana reserve:"));
+            Assert.That(text, Does.Contain("Loot:"));
+            Assert.That(text, Does.Contain("Heat:"));
+            Assert.That(text, Does.Contain("Research:"));
+            Assert.That(text, Does.Contain("Adventurers:"));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Path complete:"));
+
+            _overlay.ToggleCompactSmokeView();
+            Assert.That(_overlay.CompactSmokeViewEnabled, Is.False);
+        }
+
+        [Test]
+        public void CompactSmokeViewIncludesLatestRunFeedbackAndOutcomeCueWhenPresent()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 49d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_compact_feedback_test.json", useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
+
+            _overlay.ToggleCompactSmokeView();
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(text, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+        }
+
+        [Test]
+        public void F5CyclesPlayerFacingSectionsWithoutChangingDiagnosticsPages()
+        {
+            int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
+            Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(1));
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            string loop = RefreshText();
+            Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(2));
+            Assert.That(loop, Does.Contain("Smoke section: Loop summary"));
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            string plan = RefreshText();
+            Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(3));
+            Assert.That(plan, Does.Contain("Smoke section: Plan and action"));
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            string feedback = RefreshText();
+            Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(4));
+            Assert.That(feedback, Does.Contain("Smoke section: Latest run feedback"));
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(1));
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+        }
+
+        [Test]
+        public void F6BuildsAndCopiesFullSmokeTextIncludingOutcomeCueWhenPresent()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 49d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_copy_feedback_test.json", useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
+            _overlay.CyclePlayerFacingSmokeSection();
+
+            string copied = _overlay.CopyFullSmokeTextToClipboard();
+            string visible = RefreshText();
+
+            Assert.That(copied, Does.Contain("MVP Loop Summary"));
+            Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+            Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
+            Assert.That(visible, Does.Contain("Smoke text copied."));
+        }
+
+        [Test]
+        public void F7CollapsesAndExpandsMinimalMvpActionsPanel()
+        {
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionPanelCollapsed, Is.False);
+
+            _overlay.ToggleMinimalMvpActionPanelCollapsed();
+            Assert.That(_overlay.MinimalMvpActionPanelCollapsed, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
+
+            _overlay.ToggleMinimalMvpActionPanelCollapsed();
+            Assert.That(_overlay.MinimalMvpActionPanelCollapsed, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+        }
+
+        [Test]
+        public void CollapsedActionPanelDoesNotHideOrAlterPlayerFacingSmokeText()
+        {
+            string before = RefreshText();
+
+            _overlay.ToggleMinimalMvpActionPanelCollapsed();
+            string after = RefreshText();
+
+            Assert.That(after, Is.EqualTo(before));
+            Assert.That(after, Does.Contain("MVP Loop Summary"));
+            Assert.That(after, Does.Contain("Player view: diagnostics hidden."));
+        }
+
+        [Test]
+        public void VisibleAndCopiedPlayerFacingSmokeTextDoesNotExposeRawIdsOrLocalizationKeys()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 49d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_no_raw_ids_test.json", useAtomicWrites = false }));
+            _overlay.PlaceSelectedMvpStructure();
+            _overlay.RunOrObserveDungeon();
+
+            string visible = RefreshText();
+            string copied = _overlay.CopyFullSmokeTextToClipboard();
+
+            AssertNoRawPlayerFacingSmokeIds(visible);
+            AssertNoRawPlayerFacingSmokeIds(copied);
+        }
+
+        private static void AssertNoRawPlayerFacingSmokeIds(string text)
+        {
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(text, Does.Not.Contain("run.posture"));
+            Assert.That(text, Does.Not.Contain("adventurer.class."));
+            Assert.That(text, Does.Not.Contain("run-"));
+            Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_"));
+        }
+
+
+        private void MakePlayerFacingSmokeTextScrollable(string saveFileName)
+        {
+            _overlay.PlaceSelectedMvpStructure();
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = saveFileName, useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
+            SetOverlayBackingField("_mvpRunResultFeedback", _overlay.MvpRunResultFeedback + "\nExtra smoke line A.\nExtra smoke line B.\nExtra smoke line C.\nExtra smoke line D.\nExtra smoke line E.");
+        }
+
+        private static int VisiblePlayerFacingScrollPageSizeForTest() => 28;
 
         private static int VisibleScrollPageSizeForTest() => 4;
 
@@ -1263,6 +1497,7 @@ namespace DungeonBuilder.Tests.EditMode
         private void SetSave(SaveData save) => SetBackingField("<Save>k__BackingField", save);
         private void SetContent(ContentService content) => SetBackingField("<Content>k__BackingField", content);
         private void SetBackingField(string fieldName, object value) => typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_root, value);
+        private void SetOverlayBackingField(string fieldName, object value) => typeof(BootstrapOverlay).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_overlay, value);
 
         private static ContentService BuildContent(bool includeDiagnosticsLocalization)
         {
@@ -1344,6 +1579,16 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.panel.compact_format"] = "{0}: {1} {2} [{3}] [{4}]";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
             map["ui.mvp_view.diagnostics_mode.status"] = "Diagnostics visible.";
+            map["ui.mvp_smoke.section.status_format"] = "Smoke section: {0} ({1}/{2})";
+            map["ui.mvp_smoke.section.full"] = "Full player-facing text";
+            map["ui.mvp_smoke.section.loop_summary"] = "Loop summary";
+            map["ui.mvp_smoke.section.plan_and_action"] = "Plan and action";
+            map["ui.mvp_smoke.section.latest_run_feedback"] = "Latest run feedback";
+            map["ui.mvp_smoke.section.compact"] = "Compact Smoke View";
+            map["ui.mvp_smoke.adventurers_unavailable"] = "Adventurers: unavailable";
+            map["ui.mvp_smoke.copy.confirmation"] = "Smoke text copied.";
+            map["ui.mvp_action.button.collapse_panel"] = "Collapse actions (F7)";
+            map["ui.mvp_action.button.expand_panel"] = "Expand actions (F7)";
             map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
             map["ui.first_session.status.place_structure"] = "First-session status: place one structure to start the loop.";
             map["ui.first_session.status.run_dungeon"] = "First-session status: structure placed; run the dungeon next.";

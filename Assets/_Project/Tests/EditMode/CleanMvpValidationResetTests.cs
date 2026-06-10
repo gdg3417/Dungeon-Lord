@@ -396,6 +396,16 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_plan_preview.tradeoff.greedy"] = "higher loot, higher heat pressure.";
             map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "run tradeoff unavailable.";
             map["ui.mvp_view.player_mode.status"] = "Player view: diagnostics hidden.";
+            map["ui.mvp_smoke.section.status_format"] = "Smoke section: {0} ({1}/{2})";
+            map["ui.mvp_smoke.section.full"] = "Full player-facing text";
+            map["ui.mvp_smoke.section.loop_summary"] = "Loop summary";
+            map["ui.mvp_smoke.section.plan_and_action"] = "Plan and action";
+            map["ui.mvp_smoke.section.latest_run_feedback"] = "Latest run feedback";
+            map["ui.mvp_smoke.section.compact"] = "Compact Smoke View";
+            map["ui.mvp_smoke.adventurers_unavailable"] = "Adventurers: unavailable";
+            map["ui.mvp_smoke.copy.confirmation"] = "Smoke text copied.";
+            map["ui.mvp_action.button.collapse_panel"] = "Collapse actions (F7)";
+            map["ui.mvp_action.button.expand_panel"] = "Expand actions (F7)";
             map["ui.banner.clean_mvp_validation_reset"] = "Clean MVP validation session reset.";
             map["ui.dev.button.clean_mvp_validation_reset"] = "Clean MVP Validation Reset";
             map["structure.mana_generator.basic.display_name"] = "Mana Generator";
