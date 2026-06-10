@@ -163,9 +163,14 @@ namespace DungeonBuilder.M0
             return MvpStructureImpactPreviewPresenter.BuildPreviewText(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
-        public string GetSelectedMvpRunPlanPreviewText()
+        public string GetSelectedMvpPlacementPreviewText()
         {
             return MvpDungeonPlacementPresenter.BuildPreviewText(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public string GetSelectedMvpRunPlanPreviewText()
+        {
+            return MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(_selectedMvpStructureId, GetSelectedMvpRunPostureNameKey(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public bool SelectMvpRunPosture(string postureId)
@@ -459,11 +464,7 @@ namespace DungeonBuilder.M0
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
             AppendCompactAdventurersFallbackIfMissing(body);
-            string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
-            if (!string.IsNullOrEmpty(runPlanPreviewText))
-            {
-                AppendLine(body, runPlanPreviewText);
-            }
+            AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
             {
                 AppendLine(body, _mvpRunResultFeedback);
@@ -554,7 +555,7 @@ namespace DungeonBuilder.M0
         private string BuildPlanAndActionSectionText()
         {
             var body = new StringBuilder();
-            AppendLine(body, GetSelectedMvpRunPlanPreviewText());
+            AppendSelectedPlacementAndRunPlanPreviews(body);
             AppendLine(body, GetLocalizedString("ui.mvp_view.player_mode.status"));
             if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
             {
@@ -639,10 +640,22 @@ namespace DungeonBuilder.M0
                 AppendLine(builder, firstSessionText);
             }
 
+            AppendLine(builder, string.Empty);
+            AppendSelectedPlacementAndRunPlanPreviews(builder);
+        }
+
+
+        private void AppendSelectedPlacementAndRunPlanPreviews(StringBuilder builder)
+        {
+            string placementPreviewText = GetSelectedMvpPlacementPreviewText();
+            if (!string.IsNullOrEmpty(placementPreviewText))
+            {
+                AppendLine(builder, placementPreviewText);
+            }
+
             string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
             if (!string.IsNullOrEmpty(runPlanPreviewText))
             {
-                AppendLine(builder, string.Empty);
                 AppendLine(builder, runPlanPreviewText);
             }
         }
@@ -1101,6 +1114,7 @@ namespace DungeonBuilder.M0
                 (key, fallback) => GetLocalizedString(key, fallback),
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId,
+                _selectedMvpStructureId,
                 GetSelectedMvpRunPostureNameKey());
             GUIStyle compactBox = new GUIStyle(GUI.skin.box)
             {
@@ -1127,7 +1141,8 @@ namespace DungeonBuilder.M0
             GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
-            GUILayout.Label(labels.PreviewText, compactLabel, previewHeight);
+            GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
             if (GUILayout.Button(labels.RoomCategory, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
