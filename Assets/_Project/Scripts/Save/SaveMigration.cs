@@ -1,4 +1,5 @@
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 
 namespace DungeonBuilder.M0
@@ -24,6 +25,21 @@ namespace DungeonBuilder.M0
             if (root.primary.dungeonLayout == null)
             {
                 root.primary.dungeonLayout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
+            }
+
+            if (root.primary.mvpDungeonPlacements == null)
+            {
+                root.primary.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            }
+
+            if (root.primary.mvpDungeonPlacements.Entries == null)
+            {
+                root.primary.mvpDungeonPlacements.Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>();
+            }
+
+            if (root.primary.mvpDungeonPlacements.NextRevision < 1)
+            {
+                root.primary.mvpDungeonPlacements.NextRevision = 1;
             }
 
             if (root.primary.structureRuntime == null)

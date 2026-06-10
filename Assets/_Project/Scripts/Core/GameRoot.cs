@@ -1,5 +1,6 @@
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using System;
@@ -743,6 +744,61 @@ namespace DungeonBuilder.M0
             return TryPlaceSelectedStructure(structureId, allowReplace: true, out bannerKey);
         }
 
+        public bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey)
+        {
+            priorEntry = null;
+            newEntry = null;
+            bannerKey = "ui.banner.place_success";
+            if (Save == null || !MvpDungeonPlacementIds.IsAllowedCategory(categoryId) || !MvpDungeonPlacementIds.IsAllowedOption(optionId))
+            {
+                bannerKey = "ui.banner.place_failed";
+                return false;
+            }
+
+            if (!MvpDungeonPlacementIds.TryGetCategoryForOption(optionId, out string optionCategoryId) ||
+                !string.Equals(optionCategoryId, categoryId, StringComparison.Ordinal))
+            {
+                bannerKey = "ui.banner.place_failed";
+                return false;
+            }
+
+            if (Save.structureRuntime != null && Save.structureRuntime.PlacementLocked)
+            {
+                bannerKey = "ui.banner.place_blocked_heat_crisis";
+                return false;
+            }
+
+            if (Save.mvpDungeonPlacements == null)
+            {
+                Save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            }
+
+            if (Save.mvpDungeonPlacements.Entries == null)
+            {
+                Save.mvpDungeonPlacements.Entries = new List<MvpDungeonPlacementEntry>();
+            }
+
+            int existingIndex = Save.mvpDungeonPlacements.Entries.FindIndex(entry =>
+                entry != null && string.Equals(entry.CategoryId, categoryId, StringComparison.Ordinal));
+            if (existingIndex >= 0)
+            {
+                MvpDungeonPlacementEntry existing = Save.mvpDungeonPlacements.Entries[existingIndex];
+                priorEntry = new MvpDungeonPlacementEntry(existing.CategoryId, existing.OptionId, existing.Revision);
+                existing.OptionId = optionId;
+                existing.Revision = Math.Max(1, Save.mvpDungeonPlacements.NextRevision);
+                newEntry = existing;
+            }
+            else
+            {
+                newEntry = new MvpDungeonPlacementEntry(categoryId, optionId, Math.Max(1, Save.mvpDungeonPlacements.NextRevision));
+                Save.mvpDungeonPlacements.Entries.Add(newEntry);
+            }
+
+            Save.mvpDungeonPlacements.NextRevision = Math.Max(newEntry.Revision + 1, Save.mvpDungeonPlacements.NextRevision + 1);
+            SaveService?.Save(Save, SaveReason.ManualDev);
+            return true;
+        }
+
         private bool TryPlaceSelectedStructure(string structureId, bool allowReplace, out string bannerKey)
         {
             bannerKey = "ui.banner.place_success";
@@ -828,6 +884,7 @@ namespace DungeonBuilder.M0
             save.lastPausedUtcUnix = 0;
             save.lastResumedUtcUnix = 0;
             save.dungeonLayout = DungeonLayoutState.CreateEmpty(SaveMigration.DefaultFloorCount, SaveMigration.DefaultSlotsPerFloor);
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState();
             save.structureRuntime = new StructureRuntimeState();
             save.runHistory = new RunHistoryState();
             save.researchPending = null;

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 
@@ -30,6 +31,7 @@ namespace DungeonBuilder.M0
             StructureRuntimeState runtime = save.structureRuntime;
             RunOutcomeRecord latestRun = GetLatestRun(save.runHistory);
             DungeonSlot? selectedSlot = GetSelectedSlot(save.dungeonLayout);
+            MvpDungeonPlacementEntry[] dungeonPlacements = GetOrderedMvpPlacements(save.mvpDungeonPlacements);
             double currentMana = runtime?.ManaReserve ?? 0d;
             double currentHeat = runtime?.Heat ?? 0d;
 
@@ -68,8 +70,9 @@ namespace DungeonBuilder.M0
             {
                 RuleResolved = true,
                 DeterministicErrorCode = (int)MvpPlayerLoopSummaryErrorCode.None,
-                HasPlacementContext = selectedSlot.HasValue,
+                HasPlacementContext = dungeonPlacements.Length > 0 || selectedSlot.HasValue,
                 SelectedStructureId = selectedSlot.HasValue ? selectedSlot.Value.StructureId ?? string.Empty : string.Empty,
+                DungeonPlacements = dungeonPlacements,
                 HasRunOutcome = hasRunOutcome,
                 LatestRunId = latestRun?.RunId ?? string.Empty,
                 RunSucceeded = latestRun != null && latestRun.Success,
@@ -132,6 +135,22 @@ namespace DungeonBuilder.M0
 
             RunOutcomeRecord[] recent = runHistory.RecentOutcomes;
             return recent != null && recent.Length > 0 ? recent[recent.Length - 1] : null;
+        }
+
+        private static MvpDungeonPlacementEntry[] GetOrderedMvpPlacements(MvpDungeonPlacementState placements)
+        {
+            if (placements == null || placements.Entries == null || placements.Entries.Count == 0)
+            {
+                return Array.Empty<MvpDungeonPlacementEntry>();
+            }
+
+            return placements.Entries
+                .Where(entry => entry != null &&
+                    MvpDungeonPlacementIds.IsAllowedCategory(entry.CategoryId) &&
+                    MvpDungeonPlacementIds.IsAllowedOption(entry.OptionId))
+                .OrderBy(entry => Array.IndexOf(MvpDungeonPlacementIds.OrderedCategoryIds, entry.CategoryId))
+                .ThenBy(entry => entry.Revision)
+                .ToArray();
         }
 
         private static DungeonSlot? GetSelectedSlot(DungeonLayoutState layout)

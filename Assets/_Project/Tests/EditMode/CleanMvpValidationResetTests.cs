@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -117,6 +118,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.dungeonLayout.SlotsPerFloor, Is.EqualTo(SaveMigration.DefaultSlotsPerFloor));
             Assert.That(save.dungeonLayout.Slots.Count, Is.EqualTo(SaveMigration.DefaultFloorCount * SaveMigration.DefaultSlotsPerFloor));
             Assert.That(save.dungeonLayout.Slots.All(slot => !slot.IsOccupied), Is.True);
+            Assert.That(save.mvpDungeonPlacements, Is.Not.Null);
+            Assert.That(save.mvpDungeonPlacements.Entries, Is.Empty);
+            Assert.That(save.mvpDungeonPlacements.NextRevision, Is.EqualTo(1));
             Assert.That(save.structureRuntime, Is.Not.Null);
             Assert.That(save.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(save.structureRuntime.Heat, Is.Zero);
@@ -144,6 +148,15 @@ namespace DungeonBuilder.Tests.EditMode
                 lastPausedUtcUnix = 111,
                 lastResumedUtcUnix = 222,
                 dungeonLayout = layout,
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2)
+                    },
+                    NextRevision = 3
+                },
                 structureRuntime = new StructureRuntimeState
                 {
                     ManaReserve = 99d,

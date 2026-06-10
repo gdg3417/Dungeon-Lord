@@ -6,7 +6,8 @@ namespace DungeonBuilder.M0
     public static class MvpLoopSummaryPanelPresenter
     {
         public const string TitleKey = "ui.mvp_loop.panel.title";
-        public const string PlacementFormatKey = "ui.mvp_loop.panel.placement_format";
+        public const string PlacementFormatKey = "ui.mvp_loop.panel.composition_format";
+        public const string CompositionFormatKey = PlacementFormatKey;
         public const string LatestRunFormatKey = "ui.mvp_loop.panel.latest_run_format";
         public const string ManaFormatKey = "ui.mvp_loop.panel.mana_format";
         public const string LootFormatKey = "ui.mvp_loop.panel.loot_format";
@@ -26,8 +27,8 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
             AppendLine(builder, string.Format(
-                Localize(localize, PlacementFormatKey),
-                ResolvePlacement(summary, localize)));
+                Localize(localize, CompositionFormatKey),
+                ResolveComposition(summary, localize)));
             AppendLine(builder, string.Format(
                 Localize(localize, LatestRunFormatKey),
                 ResolveRun(summary, localize)));
@@ -63,14 +64,24 @@ namespace DungeonBuilder.M0
             return builder.ToString();
         }
 
-        private static string ResolvePlacement(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        private static string ResolveComposition(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved || !summary.HasPlacementContext || string.IsNullOrWhiteSpace(summary.SelectedStructureId))
+            if (summary == null || !summary.RuleResolved)
             {
                 return Localize(localize, ValueNoPlacementKey);
             }
 
-            return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(summary.SelectedStructureId, localize);
+            if (summary.DungeonPlacements != null && summary.DungeonPlacements.Length > 0)
+            {
+                return MvpDungeonPlacementPresenter.BuildCompositionText(summary.DungeonPlacements, localize);
+            }
+
+            if (summary.HasPlacementContext && !string.IsNullOrWhiteSpace(summary.SelectedStructureId))
+            {
+                return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(summary.SelectedStructureId, localize);
+            }
+
+            return Localize(localize, ValueNoPlacementKey);
         }
 
         private static string ResolveRun(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
