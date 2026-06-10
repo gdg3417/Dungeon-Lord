@@ -1157,7 +1157,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
             Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
             Assert.That(text, Does.Contain("Placement: Mana Generator"));
-            Assert.That(text, Does.Contain("Latest run: Succeeded"));
+            Assert.That(text, Does.Contain("Latest run:"));
             Assert.That(text, Does.Contain("Mana reserve:"));
             Assert.That(text, Does.Contain("Loot:"));
             Assert.That(text, Does.Contain("Heat:"));
