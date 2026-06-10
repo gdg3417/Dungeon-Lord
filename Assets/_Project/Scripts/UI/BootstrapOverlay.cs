@@ -204,7 +204,7 @@ namespace DungeonBuilder.M0
 
         public void ScrollPlayerFacingTextLines(int lineDelta)
         {
-            if (_runDiagnosticsOnlyVisible || lineDelta == 0)
+            if (_runDiagnosticsOnlyVisible || _diagnosticsVisible || lineDelta == 0)
             {
                 return;
             }
@@ -214,7 +214,7 @@ namespace DungeonBuilder.M0
 
         public void JumpPlayerFacingTextToTop()
         {
-            if (_runDiagnosticsOnlyVisible)
+            if (_runDiagnosticsOnlyVisible || _diagnosticsVisible)
             {
                 return;
             }
@@ -224,7 +224,7 @@ namespace DungeonBuilder.M0
 
         public void JumpPlayerFacingTextToBottom()
         {
-            if (_runDiagnosticsOnlyVisible)
+            if (_runDiagnosticsOnlyVisible || _diagnosticsVisible)
             {
                 return;
             }

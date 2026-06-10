@@ -976,6 +976,40 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(RefreshText(), Does.Contain("research-pending-line"));
         }
 
+
+        [Test]
+        public void PageDownWhileDiagnosticsVisibleScrollsDiagnosticsOnlyAndKeepsPlayerFacingAtTop()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_diagnostics_page_down_smoke_scroll_test.json");
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+            ShowDiagnosticsFromPlayerFacingDefault();
+            CycleToResearchDiagnostics();
+            int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
+
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+            _overlay.ScrollFullDiagnosticsLines(VisibleScrollPageSizeForTest());
+
+            Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
+            Assert.That(_overlay.FullDiagnosticsScrollOffset, Is.EqualTo(VisibleScrollPageSizeForTest()));
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+
+            _overlay.ToggleDiagnosticsVisibility();
+            string playerFacingText = RefreshText();
+            Assert.That(playerFacingText, Does.StartWith("Smoke section: Full player-facing text"));
+        }
+
+        [Test]
+        public void PageDownWhileRunDiagnosticsFocusVisibleDoesNotScrollHiddenPlayerFacingText()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_run_focus_page_down_smoke_scroll_test.json");
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+
+            _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+        }
+
         [Test]
         public void PageAndFocusChanges_ResetDiagnosticsScrollOffset()
         {
@@ -1085,11 +1119,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PlayerFacingPageUpPageDownChangesSmokeScrollWithoutChangingDiagnosticsPageNumber()
         {
-            _overlay.PlaceSelectedMvpStructure();
-            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
-            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_scroll_feedback_test.json", useAtomicWrites = false }));
-            _overlay.RunOrObserveDungeon();
-            SetOverlayBackingField("_mvpRunResultFeedback", _overlay.MvpRunResultFeedback + "\nExtra smoke line A.\nExtra smoke line B.\nExtra smoke line C.\nExtra smoke line D.\nExtra smoke line E.");
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_scroll_feedback_test.json");
             string firstPage = RefreshText();
             int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
 
@@ -1107,11 +1137,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PlayerFacingHomeEndJumpToTopAndBottom()
         {
-            _overlay.PlaceSelectedMvpStructure();
-            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
-            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_home_end_feedback_test.json", useAtomicWrites = false }));
-            _overlay.RunOrObserveDungeon();
-            SetOverlayBackingField("_mvpRunResultFeedback", _overlay.MvpRunResultFeedback + "\nExtra smoke line A.\nExtra smoke line B.\nExtra smoke line C.\nExtra smoke line D.\nExtra smoke line E.");
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_home_end_feedback_test.json");
 
             _overlay.JumpPlayerFacingTextToBottom();
             Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
@@ -1276,6 +1302,16 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("run-"));
             Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
+        }
+
+
+        private void MakePlayerFacingSmokeTextScrollable(string saveFileName)
+        {
+            _overlay.PlaceSelectedMvpStructure();
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = saveFileName, useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
+            SetOverlayBackingField("_mvpRunResultFeedback", _overlay.MvpRunResultFeedback + "\nExtra smoke line A.\nExtra smoke line B.\nExtra smoke line C.\nExtra smoke line D.\nExtra smoke line E.");
         }
 
         private static int VisiblePlayerFacingScrollPageSizeForTest() => 28;
