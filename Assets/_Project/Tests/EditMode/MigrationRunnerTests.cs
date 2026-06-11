@@ -139,6 +139,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 {
                     runHistory = null,
                     dungeonLayout = null,
+                    mvpDungeonPlacements = null,
                     structureRuntime = null
                 }
             };
@@ -147,6 +148,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.NotNull(migrated.primary.runHistory);
             Assert.NotNull(migrated.primary.dungeonLayout);
+            Assert.NotNull(migrated.primary.mvpDungeonPlacements);
+            Assert.NotNull(migrated.primary.mvpDungeonPlacements.Entries);
+            Assert.IsEmpty(migrated.primary.mvpDungeonPlacements.Entries);
+            Assert.AreEqual(1, migrated.primary.mvpDungeonPlacements.NextRevision);
             Assert.NotNull(migrated.primary.structureRuntime);
             Assert.AreEqual(SaveMigration.LatestSchemaVersion, migrated.schemaVersion);
         }

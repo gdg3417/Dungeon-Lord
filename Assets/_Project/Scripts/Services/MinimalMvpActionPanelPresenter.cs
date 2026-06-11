@@ -1,4 +1,5 @@
 using System;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 
 namespace DungeonBuilder.M0
@@ -15,6 +16,7 @@ namespace DungeonBuilder.M0
         public const string CompactFormatKey = "ui.mvp_action.panel.compact_format";
         public const string SelectionLabelKey = "ui.mvp_action.selection.label";
         public const string PostureLabelKey = "ui.mvp_action.posture.label";
+        public const string CategoryLabelKey = "ui.mvp_action.category.label";
         public const string CautiousPostureKey = "run.posture.cautious.name";
         public const string BalancedPostureKey = "run.posture.balanced.name";
         public const string GreedyPostureKey = "run.posture.greedy.name";
@@ -43,23 +45,42 @@ namespace DungeonBuilder.M0
             string selectionFormat = Localize(localize, SelectionLabelKey);
             string selectedPostureName = Localize(localize, string.IsNullOrWhiteSpace(selectedPostureNameKey) ? BalancedPostureKey : selectedPostureNameKey);
             string postureFormat = Localize(localize, PostureLabelKey);
-            return new MinimalMvpActionPanelLabels(
-                Localize(localize, TitleKey),
+            return CreateLabels(
+                localize,
                 string.Format(selectionFormat, selectedName),
+                string.Empty,
                 string.Format(postureFormat, selectedPostureName),
                 MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize),
-                Localize(localize, CautiousPostureKey),
-                Localize(localize, BalancedPostureKey),
-                Localize(localize, GreedyPostureKey),
-                Localize(localize, ManaGeneratorSelectionKey),
-                Localize(localize, HeatScrubberSelectionKey),
-                Localize(localize, RiskLabSelectionKey),
-                Localize(localize, PlacementButtonKey),
-                Localize(localize, RunButtonKey),
-                Localize(localize, ShowDiagnosticsButtonKey),
-                Localize(localize, HideDiagnosticsButtonKey),
-                Localize(localize, CollapsePanelButtonKey),
-                Localize(localize, ExpandPanelButtonKey));
+                MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize));
+        }
+
+        public static MinimalMvpActionPanelLabels BuildPlacementLabels(
+            Func<string, string, string> localize,
+            string selectedCategoryId,
+            string selectedOptionId,
+            string selectedPostureNameKey)
+        {
+            return BuildPlacementLabels(localize, selectedCategoryId, selectedOptionId, StructureSimulationPass.ManaGeneratorBasicId, selectedPostureNameKey);
+        }
+
+        public static MinimalMvpActionPanelLabels BuildPlacementLabels(
+            Func<string, string, string> localize,
+            string selectedCategoryId,
+            string selectedOptionId,
+            string selectedStructureId,
+            string selectedPostureNameKey)
+        {
+            string categoryLabel = string.Format(
+                Localize(localize, CategoryLabelKey),
+                MvpDungeonPlacementPresenter.ResolveCategoryName(selectedCategoryId, localize));
+            string selectedLabel = string.Format(
+                Localize(localize, SelectionLabelKey),
+                MvpDungeonPlacementPresenter.ResolveOptionName(selectedOptionId, localize));
+            string selectedPostureName = Localize(localize, string.IsNullOrWhiteSpace(selectedPostureNameKey) ? BalancedPostureKey : selectedPostureNameKey);
+            string postureLabel = string.Format(Localize(localize, PostureLabelKey), selectedPostureName);
+            string placementPreview = MvpDungeonPlacementPresenter.BuildPreviewText(selectedOptionId, localize);
+            string runPlanPreview = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize);
+            return CreateLabels(localize, selectedLabel, categoryLabel, postureLabel, placementPreview, runPlanPreview);
         }
 
         public static string BuildPanelText(Func<string, string, string> localize)
@@ -72,6 +93,43 @@ namespace DungeonBuilder.M0
             MinimalMvpActionPanelLabels labels = BuildLabels(localize, selectedStructureNameKey);
             string format = Localize(localize, CompactFormatKey);
             return string.Format(format, labels.Title, labels.SelectedStructureLabel, labels.PreviewText, labels.PlacementButton, labels.RunButton);
+        }
+
+        private static MinimalMvpActionPanelLabels CreateLabels(
+            Func<string, string, string> localize,
+            string selectedLabel,
+            string categoryLabel,
+            string postureLabel,
+            string previewText,
+            string runPlanPreviewText)
+        {
+            return new MinimalMvpActionPanelLabels(
+                Localize(localize, TitleKey),
+                selectedLabel,
+                categoryLabel,
+                postureLabel,
+                previewText,
+                runPlanPreviewText,
+                Localize(localize, CautiousPostureKey),
+                Localize(localize, BalancedPostureKey),
+                Localize(localize, GreedyPostureKey),
+                Localize(localize, MvpDungeonPlacementPresenter.RoomCategoryKey),
+                Localize(localize, MvpDungeonPlacementPresenter.MonsterCategoryKey),
+                Localize(localize, MvpDungeonPlacementPresenter.TrapCategoryKey),
+                Localize(localize, MvpDungeonPlacementPresenter.LootNodeCategoryKey),
+                Localize(localize, MvpDungeonPlacementPresenter.BasicRoomOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.SkeletonOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.SpikeTrapOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.BasicLootNodeOptionKey),
+                Localize(localize, ManaGeneratorSelectionKey),
+                Localize(localize, HeatScrubberSelectionKey),
+                Localize(localize, RiskLabSelectionKey),
+                Localize(localize, PlacementButtonKey),
+                Localize(localize, RunButtonKey),
+                Localize(localize, ShowDiagnosticsButtonKey),
+                Localize(localize, HideDiagnosticsButtonKey),
+                Localize(localize, CollapsePanelButtonKey),
+                Localize(localize, ExpandPanelButtonKey));
         }
 
         private static string ResolveStructureIdFromSelectionKey(string selectedStructureNameKey)
@@ -96,12 +154,7 @@ namespace DungeonBuilder.M0
 
         private static string Localize(Func<string, string, string> localize, string key)
         {
-            if (localize == null)
-            {
-                return key;
-            }
-
-            return localize(key, key);
+            return localize == null ? key : localize(key, key);
         }
     }
 
@@ -110,11 +163,21 @@ namespace DungeonBuilder.M0
         public MinimalMvpActionPanelLabels(
             string title,
             string selectedStructureLabel,
+            string categoryLabel,
             string postureLabel,
             string previewText,
+            string runPlanPreviewText,
             string cautiousPosture,
             string balancedPosture,
             string greedyPosture,
+            string roomCategory,
+            string monsterCategory,
+            string trapCategory,
+            string lootNodeCategory,
+            string basicRoomSelection,
+            string skeletonSelection,
+            string spikeTrapSelection,
+            string basicLootNodeSelection,
             string manaGeneratorSelection,
             string heatScrubberSelection,
             string riskLabSelection,
@@ -127,11 +190,21 @@ namespace DungeonBuilder.M0
         {
             Title = title;
             SelectedStructureLabel = selectedStructureLabel;
+            CategoryLabel = categoryLabel;
             PostureLabel = postureLabel;
             PreviewText = previewText;
+            RunPlanPreviewText = runPlanPreviewText;
             CautiousPosture = cautiousPosture;
             BalancedPosture = balancedPosture;
             GreedyPosture = greedyPosture;
+            RoomCategory = roomCategory;
+            MonsterCategory = monsterCategory;
+            TrapCategory = trapCategory;
+            LootNodeCategory = lootNodeCategory;
+            BasicRoomSelection = basicRoomSelection;
+            SkeletonSelection = skeletonSelection;
+            SpikeTrapSelection = spikeTrapSelection;
+            BasicLootNodeSelection = basicLootNodeSelection;
             ManaGeneratorSelection = manaGeneratorSelection;
             HeatScrubberSelection = heatScrubberSelection;
             RiskLabSelection = riskLabSelection;
@@ -145,11 +218,21 @@ namespace DungeonBuilder.M0
 
         public string Title { get; }
         public string SelectedStructureLabel { get; }
+        public string CategoryLabel { get; }
         public string PostureLabel { get; }
         public string PreviewText { get; }
+        public string RunPlanPreviewText { get; }
         public string CautiousPosture { get; }
         public string BalancedPosture { get; }
         public string GreedyPosture { get; }
+        public string RoomCategory { get; }
+        public string MonsterCategory { get; }
+        public string TrapCategory { get; }
+        public string LootNodeCategory { get; }
+        public string BasicRoomSelection { get; }
+        public string SkeletonSelection { get; }
+        public string SpikeTrapSelection { get; }
+        public string BasicLootNodeSelection { get; }
         public string ManaGeneratorSelection { get; }
         public string HeatScrubberSelection { get; }
         public string RiskLabSelection { get; }

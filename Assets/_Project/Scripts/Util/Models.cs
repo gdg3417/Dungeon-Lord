@@ -1,6 +1,7 @@
 using System;
 using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -490,6 +491,7 @@ namespace DungeonBuilder.M0
         public int DeterministicErrorCode = (int)MvpPlayerLoopSummaryErrorCode.None;
         public bool HasPlacementContext = false;
         public string SelectedStructureId;
+        public MvpDungeonPlacementEntry[] DungeonPlacements = Array.Empty<MvpDungeonPlacementEntry>();
         public bool HasRunOutcome = false;
         public string LatestRunId;
         public bool RunSucceeded = false;
@@ -1125,6 +1127,7 @@ namespace DungeonBuilder.M0
         public string lastKnownAppState = "None";
 
         public DungeonLayoutState dungeonLayout;
+        public MvpDungeonPlacementState mvpDungeonPlacements = new MvpDungeonPlacementState();
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();
         public ResearchPendingState researchPending;

@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0
 {
@@ -29,7 +30,7 @@ namespace DungeonBuilder.M0
         private const int PlayerFacingSectionPlanAndAction = 2;
         private const int PlayerFacingSectionLatestRunFeedback = 3;
         private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 322f;
+        private const float MinimalMvpActionPanelHeight = 420f;
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
@@ -39,6 +40,8 @@ namespace DungeonBuilder.M0
         private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
         private const float OverlayTextRightCollapsedActionPanelReserve = 96f;
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
+        private const string DefaultMvpPlacementCategoryId = MvpDungeonPlacementIds.RoomCategoryId;
+        private const string DefaultMvpPlacementOptionId = MvpDungeonPlacementIds.BasicRoomOptionId;
         private const string CompactSmokeAdventurersUnavailableKey = "ui.mvp_smoke.adventurers_unavailable";
 
         private GameRoot _root;
@@ -49,6 +52,8 @@ namespace DungeonBuilder.M0
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
         private string _selectedMvpStructureId = DefaultMvpStructureId;
+        private string _selectedMvpPlacementCategoryId = DefaultMvpPlacementCategoryId;
+        private string _selectedMvpPlacementOptionId = DefaultMvpPlacementOptionId;
         private string _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
@@ -69,6 +74,8 @@ namespace DungeonBuilder.M0
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
+        public string SelectedMvpPlacementCategoryId => _selectedMvpPlacementCategoryId;
+        public string SelectedMvpPlacementOptionId => _selectedMvpPlacementOptionId;
         public string SelectedMvpRunPostureId => _selectedMvpRunPostureId;
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
         public string MvpRunResultFeedback => _mvpRunResultFeedback;
@@ -116,6 +123,31 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        public bool SelectMvpPlacementCategory(string categoryId)
+        {
+            if (!MvpDungeonPlacementIds.IsAllowedCategory(categoryId))
+            {
+                return false;
+            }
+
+            _selectedMvpPlacementCategoryId = categoryId;
+            _selectedMvpPlacementOptionId = MvpDungeonPlacementIds.GetStarterOptionForCategory(categoryId);
+            return !string.IsNullOrWhiteSpace(_selectedMvpPlacementOptionId);
+        }
+
+        public bool SelectMvpPlacementOption(string optionId)
+        {
+            if (!MvpDungeonPlacementIds.IsAllowedOption(optionId) ||
+                !MvpDungeonPlacementIds.TryGetCategoryForOption(optionId, out string categoryId) ||
+                !string.Equals(categoryId, _selectedMvpPlacementCategoryId, System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            _selectedMvpPlacementOptionId = optionId;
+            return true;
+        }
+
         public string GetSelectedMvpStructureNameKey()
         {
             return GetMvpSelectionNameKey(_selectedMvpStructureId);
@@ -129,6 +161,11 @@ namespace DungeonBuilder.M0
         public string GetSelectedMvpStructurePreviewText()
         {
             return MvpStructureImpactPreviewPresenter.BuildPreviewText(_selectedMvpStructureId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public string GetSelectedMvpPlacementPreviewText()
+        {
+            return MvpDungeonPlacementPresenter.BuildPreviewText(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string GetSelectedMvpRunPlanPreviewText()
@@ -175,6 +212,8 @@ namespace DungeonBuilder.M0
             }
 
             _selectedMvpStructureId = DefaultMvpStructureId;
+            _selectedMvpPlacementCategoryId = DefaultMvpPlacementCategoryId;
+            _selectedMvpPlacementOptionId = DefaultMvpPlacementOptionId;
             _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
             _mvpStructurePlacementFeedback = string.Empty;
             _mvpRunResultFeedback = string.Empty;
@@ -425,11 +464,7 @@ namespace DungeonBuilder.M0
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
             AppendCompactAdventurersFallbackIfMissing(body);
-            string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
-            if (!string.IsNullOrEmpty(runPlanPreviewText))
-            {
-                AppendLine(body, runPlanPreviewText);
-            }
+            AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
             {
                 AppendLine(body, _mvpRunResultFeedback);
@@ -520,7 +555,7 @@ namespace DungeonBuilder.M0
         private string BuildPlanAndActionSectionText()
         {
             var body = new StringBuilder();
-            AppendLine(body, GetSelectedMvpRunPlanPreviewText());
+            AppendSelectedPlacementAndRunPlanPreviews(body);
             AppendLine(body, GetLocalizedString("ui.mvp_view.player_mode.status"));
             if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
             {
@@ -605,10 +640,22 @@ namespace DungeonBuilder.M0
                 AppendLine(builder, firstSessionText);
             }
 
+            AppendLine(builder, string.Empty);
+            AppendSelectedPlacementAndRunPlanPreviews(builder);
+        }
+
+
+        private void AppendSelectedPlacementAndRunPlanPreviews(StringBuilder builder)
+        {
+            string placementPreviewText = GetSelectedMvpPlacementPreviewText();
+            if (!string.IsNullOrEmpty(placementPreviewText))
+            {
+                AppendLine(builder, placementPreviewText);
+            }
+
             string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
             if (!string.IsNullOrEmpty(runPlanPreviewText))
             {
-                AppendLine(builder, string.Empty);
                 AppendLine(builder, runPlanPreviewText);
             }
         }
@@ -1063,9 +1110,10 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
                 (key, fallback) => GetLocalizedString(key, fallback),
-                GetSelectedMvpStructureNameKey(),
+                _selectedMvpPlacementCategoryId,
+                _selectedMvpPlacementOptionId,
                 _selectedMvpStructureId,
                 GetSelectedMvpRunPostureNameKey());
             GUIStyle compactBox = new GUIStyle(GUI.skin.box)
@@ -1090,20 +1138,46 @@ namespace DungeonBuilder.M0
 
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
+            GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
-            GUILayout.Label(labels.PreviewText, compactLabel, previewHeight);
-            if (GUILayout.Button(labels.ManaGeneratorSelection, compactButton, buttonHeight))
+            GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
+            if (GUILayout.Button(labels.RoomCategory, compactButton, buttonHeight))
             {
-                SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
             }
-            if (GUILayout.Button(labels.HeatScrubberSelection, compactButton, buttonHeight))
+            if (GUILayout.Button(labels.MonsterCategory, compactButton, buttonHeight))
             {
-                SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
             }
-            if (GUILayout.Button(labels.RiskLabSelection, compactButton, buttonHeight))
+            if (GUILayout.Button(labels.TrapCategory, compactButton, buttonHeight))
             {
-                SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
+            }
+            if (GUILayout.Button(labels.LootNodeCategory, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+            }
+            if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);
+            }
+            if (GUILayout.Button(labels.SkeletonSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.SkeletonOptionId);
+            }
+            if (GUILayout.Button(labels.SpikeTrapSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.SpikeTrapOptionId);
+            }
+            if (GUILayout.Button(labels.BasicLootNodeSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId);
             }
             if (GUILayout.Button(labels.CautiousPosture, compactButton, buttonHeight))
             {
@@ -1141,19 +1215,20 @@ namespace DungeonBuilder.M0
 
         private void ShowPlayerPlacementBanner()
         {
-            string structureId = _selectedMvpStructureId;
-            string priorStructureId = _root.GetSelectedSlotStructureId();
-            bool ok = _root.TryMvpPlaceOrModifySelectedStructure(structureId, out string bannerKey);
-            string newStructureId = _root.GetSelectedSlotStructureId();
+            bool ok = _root.TryMvpPlaceOrModifySelectedPlacement(
+                _selectedMvpPlacementCategoryId,
+                _selectedMvpPlacementOptionId,
+                out MvpDungeonPlacementEntry priorEntry,
+                out MvpDungeonPlacementEntry newEntry,
+                out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
-            string displayName = MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(structureId, (key, fallback) => GetLocalizedString(key, fallback));
+            string displayName = MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback));
             _root.SetBanner(ok ? string.Format(message, displayName) : message);
             if (ok)
             {
-                _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildFeedbackText(
-                    priorStructureId,
-                    newStructureId,
-                    structureId,
+                _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
+                    priorEntry,
+                    newEntry,
                     (key, fallback) => GetLocalizedString(key, fallback));
             }
             else

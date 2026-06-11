@@ -1,6 +1,7 @@
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -104,13 +105,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(1));
             Assert.That(text, Does.StartWith("MVP Loop Summary"));
             Assert.That(text, Does.Contain("Guided MVP Action"));
-            Assert.That(text, Does.Contain("Placement: Mana Generator"));
-            Assert.That(text, Does.Not.Contain("Placement: structure.mana_generator.basic"));
+            Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
+            Assert.That(text, Does.Not.Contain("Dungeon composition: structure.mana_generator.basic"));
             Assert.That(text, Does.Contain("Next action: Run again or adjust one placement based on the summary."));
             Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
-            Assert.That(text, Does.Not.Contain("First-session status: structure placed; run the dungeon next."));
+            Assert.That(text, Does.Not.Contain("First-session status: dungeon placement ready; run the dungeon next."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify selected] [Run or observe dungeon]"));
+            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify selected placement] [Run or observe dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
@@ -212,12 +213,20 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PlayerFacingMode_MinimalMvpActionLabelsIncludePlacementRunAndDiagnosticsToggleKeys()
         {
-            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels((key, fallback) => _root.Content.GetString(key, fallback));
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
+                (key, fallback) => _root.Content.GetString(key, fallback),
+                _overlay.SelectedMvpPlacementCategoryId,
+                _overlay.SelectedMvpPlacementOptionId,
+                _overlay.SelectedMvpStructureId,
+                _overlay.GetSelectedMvpRunPostureNameKey());
 
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
+            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
+            Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
+            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
@@ -226,24 +235,33 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void PlayerFacingMode_MinimalMvpActionPanelKeepsAllVerticalSelectorLabelsInCompactRect()
         {
-            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildLabels(
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
-                _overlay.GetSelectedMvpStructureNameKey(),
-                _overlay.SelectedMvpStructureId);
+                _overlay.SelectedMvpPlacementCategoryId,
+                _overlay.SelectedMvpPlacementOptionId,
+                _overlay.SelectedMvpStructureId,
+                _overlay.GetSelectedMvpRunPostureNameKey());
             Rect rect = _overlay.GetMinimalMvpActionPanelRect();
 
             Assert.That(rect.width, Is.EqualTo(260f));
-            Assert.That(rect.height, Is.EqualTo(322f));
-            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(rect.height, Is.EqualTo(420f));
+            Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
-            Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
-            Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
-            Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
+            Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
+            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(labels.RoomCategory, Is.EqualTo("Room"));
+            Assert.That(labels.MonsterCategory, Is.EqualTo("Monster"));
+            Assert.That(labels.TrapCategory, Is.EqualTo("Trap"));
+            Assert.That(labels.LootNodeCategory, Is.EqualTo("Loot node"));
+            Assert.That(labels.BasicRoomSelection, Is.EqualTo("Basic Room"));
+            Assert.That(labels.SkeletonSelection, Is.EqualTo("Skeleton"));
+            Assert.That(labels.SpikeTrapSelection, Is.EqualTo("Spike Trap"));
+            Assert.That(labels.BasicLootNodeSelection, Is.EqualTo("Basic Loot Node"));
             Assert.That(labels.CautiousPosture, Is.EqualTo("Cautious"));
             Assert.That(labels.BalancedPosture, Is.EqualTo("Balanced"));
             Assert.That(labels.GreedyPosture, Is.EqualTo("Greedy"));
-            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected"));
+            Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
         }
@@ -275,7 +293,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
-            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected structure: Mana Generator"));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Mana Generator"));
             Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
@@ -297,7 +315,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(structureId));
             Assert.That(_overlay.GetSelectedMvpStructureNameKey(), Is.EqualTo(selectionKey));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo(displayName));
-            Assert.That(labels.SelectedStructureLabel, Is.EqualTo($"Selected structure: {displayName}"));
+            Assert.That(labels.SelectedStructureLabel, Is.EqualTo($"Selected placement: {displayName}"));
             Assert.That(labels.PreviewText, Is.EqualTo(previewText));
             Assert.That(labels.PreviewText, Does.Not.Contain(structureId));
         }
@@ -371,8 +389,9 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
             string placementText = RefreshText();
 
-            Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
-            Assert.That(placementText, Does.Contain("Placed structure: Mana Generator"));
+            Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
+            Assert.That(placementText, Does.Contain("Placed: Basic Room"));
+            Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(placementText, Does.Contain("MVP Loop Summary"));
             Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -427,29 +446,26 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
-            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
-            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: improves mana reserve."));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId), Is.True);
+            Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds room space and path context."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
-            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Heat Scrubber"));
-            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: lowers heat pressure."));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
+            Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds danger and mana pressure."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Mana Generator -> Heat Scrubber. Role: lowers heat pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
-            Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Risk Lab"));
-            Assert.That(_overlay.GetSelectedMvpStructurePreviewText(), Is.EqualTo("Role: clarifies research risk."));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId), Is.True);
+            Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds danger, heat, and path pressure."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
 
             _overlay.RunOrObserveDungeon();
             string playerFacingText = RefreshText();
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
-            Assert.That(playerFacingText, Does.Contain("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
+            Assert.That(playerFacingText, Does.Contain("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
             Assert.That(playerFacingText, Does.Contain(_overlay.MvpRunResultFeedback));
             AssertNoPlayerFacingRawIds(playerFacingText);
             AssertNoPlayerFacingRawIds(_overlay.MvpStructurePlacementFeedback);
@@ -463,7 +479,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedText, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
-            Assert.That(focusedText, Does.Not.Contain("Changed: Heat Scrubber -> Risk Lab"));
+            Assert.That(focusedText, Does.Not.Contain("Changed placement: Empty slot -> Trap: Spike Trap"));
             Assert.That(focusedText, Does.Not.Contain(_overlay.MvpRunResultFeedback));
 
             _overlay.ToggleRunDiagnosticsFocus();
@@ -476,6 +492,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
             AssertNoPlayerFacingRawIds(restoredText);
 
+            _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.RiskLabBasicId, out _);
             _overlay.ToggleDiagnosticsVisibility();
             AssertPage(1, "Runtime Summary");
 
@@ -530,7 +547,7 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
-        public void MinimalMvpActionPlacementBanner_UsesLocalizedStructureNameInsteadOfRawId()
+        public void MinimalMvpActionPlacementBanner_UsesLocalizedPlacementNameInsteadOfRawId()
         {
             DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
             SetSave(new SaveData
@@ -541,15 +558,16 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_root.BannerMessage, Is.EqualTo("Placed structure: Mana Generator"));
-            Assert.That(_root.BannerMessage, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
+            Assert.That(_root.BannerMessage, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
 
-        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator")]
-        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber")]
-        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab")]
-        public void MinimalMvpActionPlacement_UsesSelectedStructurePathBannerAndLocalizedSummary(string structureId, string displayName)
+        [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, "Room", "Basic Room")]
+        [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, "Monster", "Skeleton")]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, "Trap", "Spike Trap")]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, "Loot node", "Basic Loot Node")]
+        public void MinimalMvpActionPlacement_UsesSelectedPlacementBannerAndLocalizedSummary(string categoryId, string optionId, string categoryName, string displayName)
         {
             DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
             SetSave(new SaveData
@@ -558,16 +576,18 @@ namespace DungeonBuilder.Tests.EditMode
                 structureRuntime = new StructureRuntimeState()
             });
 
-            _overlay.SelectMvpStructure(structureId);
+            Assert.That(_overlay.SelectMvpPlacementCategory(categoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(optionId), Is.True);
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
-            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(structureId));
-            Assert.That(_root.BannerMessage, Is.EqualTo($"Placed structure: {displayName}"));
-            Assert.That(text, Does.Contain($"Placement: {displayName}"));
-            Assert.That(text, Does.Contain($"Placed structure: {displayName}"));
-            Assert.That(text, Does.Not.Contain(structureId));
-            Assert.That(_root.BannerMessage, Does.Not.Contain(structureId));
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
+            Assert.That(_root.BannerMessage, Is.EqualTo($"Placed: {displayName}"));
+            Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
+            Assert.That(text, Does.Contain($"Placed: {displayName}"));
+            Assert.That(text, Does.Not.Contain(categoryId));
+            Assert.That(text, Does.Not.Contain(optionId));
+            Assert.That(_root.BannerMessage, Does.Not.Contain(optionId));
         }
 
         [Test]
@@ -580,14 +600,13 @@ namespace DungeonBuilder.Tests.EditMode
                 structureRuntime = new StructureRuntimeState()
             });
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
-            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
-            Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
-            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
         [Test]
@@ -600,22 +619,20 @@ namespace DungeonBuilder.Tests.EditMode
                 structureRuntime = new StructureRuntimeState()
             });
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Mana Generator -> Heat Scrubber. Role: lowers heat pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Room: Basic Room -> Room: Basic Room. Role: adds room space and path context."));
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
+            _overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
-            Assert.That(_root.GetSelectedSlotStructureId(), Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
-            Assert.That(text, Does.Contain("Changed: Heat Scrubber -> Risk Lab. Role: clarifies research risk."));
-            Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
+            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
         }
 
         [Test]
@@ -629,11 +646,11 @@ namespace DungeonBuilder.Tests.EditMode
                 structureRuntime = new StructureRuntimeState()
             });
 
-            _overlay.SelectMvpStructure(StructureSimulationPass.HeatScrubberBasicId);
+            _overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Heat Scrubber. Role: lowers heat pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
             Assert.That(text, Does.Not.Contain("structure.debug.not_player_facing"));
         }
 
@@ -649,19 +666,18 @@ namespace DungeonBuilder.Tests.EditMode
             });
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_feedback_run_test.json", useAtomicWrites = false }));
-            _overlay.SelectMvpStructure(StructureSimulationPass.ManaGeneratorBasicId);
             _overlay.PlaceSelectedMvpStructure();
 
             _overlay.RunOrObserveDungeon();
             string text = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Posture: Balanced. Run result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Adventurers: "));
-            Assert.That(text, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
         }
 
@@ -761,19 +777,19 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedText = RefreshText();
 
-            Assert.That(focusedText, Does.Not.Contain("Changed: Empty slot -> Mana Generator"));
+            Assert.That(focusedText, Does.Not.Contain("Changed placement: Empty slot -> Room: Basic Room"));
 
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain("Changed: Empty slot -> Mana Generator. Role: improves mana reserve."));
+            Assert.That(restoredText, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
         }
 
         [Test]
         public void DiagnosticsStillPreserveRawStructureIdWhereUseful()
         {
             _overlay.SelectMvpStructure(StructureSimulationPass.RiskLabBasicId);
-            _overlay.PlaceSelectedMvpStructure();
+            _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.RiskLabBasicId, out _);
             ShowDiagnosticsFromPlayerFacingDefault();
 
             while (_overlay.FullDiagnosticsPageNumber != 4)
@@ -798,7 +814,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.HeatScrubberBasicId));
             Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
-            Assert.That(focusedText, Does.Not.Contain("Selected structure"));
+            Assert.That(focusedText, Does.Not.Contain("Selected placement"));
             Assert.That(focusedText, Does.Not.Contain("Heat Scrubber"));
             Assert.That(focusedText, Does.Not.Contain("Role:"));
 
@@ -928,7 +944,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("First-session loop complete:"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Minimal MVP Actions"));
-            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify selected"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify selected placement"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Run or observe dungeon"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
@@ -1156,13 +1172,14 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
             Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
-            Assert.That(text, Does.Contain("Placement: Mana Generator"));
+            Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
             Assert.That(text, Does.Contain("Latest run:"));
             Assert.That(text, Does.Contain("Mana reserve:"));
             Assert.That(text, Does.Contain("Loot:"));
             Assert.That(text, Does.Contain("Heat:"));
             Assert.That(text, Does.Contain("Research:"));
             Assert.That(text, Does.Contain("Adventurers:"));
+            Assert.That(text, Does.Contain("Role: adds room space and path context."));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Path complete:"));
 
@@ -1206,6 +1223,9 @@ namespace DungeonBuilder.Tests.EditMode
             string plan = RefreshText();
             Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(3));
             Assert.That(plan, Does.Contain("Smoke section: Plan and action"));
+            Assert.That(plan, Does.Contain("Role: adds room space and path context."));
+            Assert.That(plan, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(plan, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
 
             _overlay.CyclePlayerFacingSmokeSection();
@@ -1230,6 +1250,7 @@ namespace DungeonBuilder.Tests.EditMode
             });
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_copy_feedback_test.json", useAtomicWrites = false }));
+            _overlay.PlaceSelectedMvpStructure();
             _overlay.RunOrObserveDungeon();
             _overlay.CyclePlayerFacingSmokeSection();
 
@@ -1237,8 +1258,10 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
+            Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+            AssertNoRawPlayerFacingSmokeIds(copied);
             Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
             Assert.That(visible, Does.Contain("Smoke text copied."));
         }
@@ -1298,6 +1321,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
             Assert.That(text, Does.Not.Contain("run.posture"));
+            Assert.That(text, Does.Not.Contain("placement.category"));
+            Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("adventurer.class."));
             Assert.That(text, Does.Not.Contain("run-"));
             Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
@@ -1426,6 +1451,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.RiskLabBasicId));
+            Assert.That(text, Does.Not.Contain("placement.category"));
+            Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("run-"));
             Assert.That(text, Does.Not.Contain("run.loot_extraction.rule.test"));
             Assert.That(text, Does.Not.Contain("run.loot_heat_cooling.rule.test"));
@@ -1504,7 +1531,7 @@ namespace DungeonBuilder.Tests.EditMode
             var content = new ContentService();
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.dev.structure_status"] = "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}";
-            map["ui.banner.place_success"] = "Placed structure: {0}";
+            map["ui.banner.place_success"] = "Placed: {0}";
             map["ui.banner.run_simulated"] = "Run simulated.";
             map["ui.banner.run_sim_failed"] = "Run simulation failed.";
             map["structure.mana_generator.basic.display_name"] = "Mana Generator";
@@ -1513,6 +1540,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
+            map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
             map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
             map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
             map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
@@ -1520,7 +1548,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
             map["ui.mvp_loop.panel.adventurer_party_format"] = "{0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
-            map["ui.mvp_loop.value.no_placement"] = "No structure placed";
+            map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
             map["ui.mvp_loop.value.unknown"] = "Unknown";
             map["ui.mvp_loop.value.no_research"] = "No research";
@@ -1532,11 +1560,12 @@ namespace DungeonBuilder.Tests.EditMode
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
-            map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected";
+            map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected placement";
             map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
-            map["ui.mvp_action.selection.label"] = "Selected structure: {0}";
+            map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
+            map["ui.mvp_action.category.label"] = "Selected category: {0}";
             map["ui.mvp_action.posture.label"] = "Run posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
@@ -1548,6 +1577,25 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
             map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
             map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
+            map["placement.category.room.display_name"] = "Room";
+            map["placement.category.monster.display_name"] = "Monster";
+            map["placement.category.trap.display_name"] = "Trap";
+            map["placement.category.loot_node.display_name"] = "Loot node";
+            map["placement.option.room.basic.display_name"] = "Basic Room";
+            map["placement.option.monster.skeleton.display_name"] = "Skeleton";
+            map["placement.option.trap.spike.display_name"] = "Spike Trap";
+            map["placement.option.loot_node.basic.display_name"] = "Basic Loot Node";
+            map["ui.mvp_label.placement_category.unknown"] = "Unknown category";
+            map["ui.mvp_label.placement_option.unknown"] = "Unknown placement";
+            map["ui.mvp_composition.empty"] = "No dungeon placements yet";
+            map["ui.mvp_composition.entry_format"] = "{0}: {1}";
+            map["ui.mvp_composition.separator"] = "; ";
+            map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
+            map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
+            map["ui.mvp_placement_preview.trap.spike"] = "Role: adds danger, heat, and path pressure.";
+            map["ui.mvp_placement_preview.loot_node.basic"] = "Role: adds loot and adventurer attraction context.";
+            map["ui.mvp_placement_preview.unknown"] = "Role unavailable.";
+            map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
             map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
             map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
             map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
@@ -1590,8 +1638,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.collapse_panel"] = "Collapse actions (F7)";
             map["ui.mvp_action.button.expand_panel"] = "Expand actions (F7)";
             map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
-            map["ui.first_session.status.place_structure"] = "First-session status: place one structure to start the loop.";
-            map["ui.first_session.status.run_dungeon"] = "First-session status: structure placed; run the dungeon next.";
+            map["ui.first_session.status.place_structure"] = "First-session status: place one room, monster, trap, or loot node to start the loop.";
+            map["ui.first_session.status.run_dungeon"] = "First-session status: dungeon placement ready; run the dungeon next.";
             map["ui.first_session.status.observe_summary"] = "First-session status: observe mana, loot, heat, research, and next action.";
             map["ui.first_session.status.complete"] = "First-session loop complete: placement, run, mana, loot, heat, and research are visible.";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
@@ -1600,20 +1648,20 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.guided_mvp.panel.complete_format"] = "Path complete: {0}";
             map["ui.guided_mvp.value.complete_yes"] = "Yes";
             map["ui.guided_mvp.value.complete_no"] = "No";
-            map["guided_mvp.step.place_or_modify_structure"] = "Place or modify one structure";
+            map["guided_mvp.step.place_or_modify_structure"] = "Place or modify one dungeon placement";
             map["guided_mvp.step.run_or_observe"] = "Run or observe adventurers";
             map["guided_mvp.step.reduce_heat_pressure"] = "Reduce heat pressure";
             map["guided_mvp.step.improve_survivability_or_layout"] = "Improve survivability or layout";
             map["guided_mvp.step.verify_research_status"] = "Verify research status";
             map["guided_mvp.step.repeat_or_improve"] = "Repeat the loop or improve placement";
             map["guided_mvp.status.missing_save"] = "Save state is not available yet.";
-            map["guided_mvp.status.place_or_modify_structure"] = "No placed structure is visible in the current summary.";
-            map["guided_mvp.status.run_or_observe"] = "A structure is placed; no adventurer run has been observed yet.";
+            map["guided_mvp.status.place_or_modify_structure"] = "No dungeon placement is visible in the current summary.";
+            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer run has been observed yet.";
             map["guided_mvp.status.heat_pressure"] = "The latest summary shows heat pressure.";
             map["guided_mvp.status.poor_loot_extraction"] = "The latest run generated loot but extracted none.";
             map["guided_mvp.status.research_completion_pending"] = "Research completion is pending verification.";
             map["guided_mvp.status.repeat_or_improve"] = "Placement, run, mana, loot, heat, and research are visible in the summary.";
-            map["guided_mvp.action.place_structure"] = "Place one structure, or modify the selected slot.";
+            map["guided_mvp.action.place_structure"] = "Place one room, monster, trap, or loot node.";
             map["guided_mvp.action.run_dungeon"] = "Run the dungeon and watch the MVP Loop Summary update.";
             map["guided_mvp.action.reduce_heat_pressure"] = "Improve placement toward lower heat pressure before pushing further.";
             map["guided_mvp.action.improve_survivability_or_layout"] = "Improve survivability or layout, then run again.";

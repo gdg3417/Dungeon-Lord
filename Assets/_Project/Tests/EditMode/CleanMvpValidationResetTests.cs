@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -117,6 +118,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.dungeonLayout.SlotsPerFloor, Is.EqualTo(SaveMigration.DefaultSlotsPerFloor));
             Assert.That(save.dungeonLayout.Slots.Count, Is.EqualTo(SaveMigration.DefaultFloorCount * SaveMigration.DefaultSlotsPerFloor));
             Assert.That(save.dungeonLayout.Slots.All(slot => !slot.IsOccupied), Is.True);
+            Assert.That(save.mvpDungeonPlacements, Is.Not.Null);
+            Assert.That(save.mvpDungeonPlacements.Entries, Is.Empty);
+            Assert.That(save.mvpDungeonPlacements.NextRevision, Is.EqualTo(1));
             Assert.That(save.structureRuntime, Is.Not.Null);
             Assert.That(save.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(save.structureRuntime.Heat, Is.Zero);
@@ -144,6 +148,15 @@ namespace DungeonBuilder.Tests.EditMode
                 lastPausedUtcUnix = 111,
                 lastResumedUtcUnix = 222,
                 dungeonLayout = layout,
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2)
+                    },
+                    NextRevision = 3
+                },
                 structureRuntime = new StructureRuntimeState
                 {
                     ManaReserve = 99d,
@@ -283,16 +296,27 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.GetSelectedMvpRunPostureDisplayName(), Is.EqualTo("Balanced"));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
-            Assert.That(refreshed, Does.Contain("Placement: No structure placed"));
+            Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
-            Assert.That(refreshed, Does.Contain("First-session status: place one structure to start the loop."));
+            Assert.That(refreshed, Does.Contain("First-session status: place one room, monster, trap, or loot node to start the loop."));
             Assert.That(refreshed, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(refreshed, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
             Assert.That(refreshed, Does.Not.Contain("Clean MVP Validation Reset"));
+            Assert.That(refreshed, Does.Not.Contain("ui.mvp_loop.panel.composition_format"));
+            Assert.That(refreshed, Does.Not.Contain("ui.mvp_"));
+            Assert.That(refreshed, Does.Not.Contain("placement.category"));
+            Assert.That(refreshed, Does.Not.Contain("placement.option"));
+
+            string copied = _overlay.CopyFullSmokeTextToClipboard();
+            Assert.That(copied, Does.Contain("Dungeon composition: No dungeon placements yet"));
+            Assert.That(copied, Does.Not.Contain("ui.mvp_loop.panel.composition_format"));
+            Assert.That(copied, Does.Not.Contain("ui.mvp_"));
+            Assert.That(copied, Does.Not.Contain("placement.category"));
+            Assert.That(copied, Does.Not.Contain("placement.option"));
         }
 
         private string RefreshText()
@@ -339,13 +363,14 @@ namespace DungeonBuilder.Tests.EditMode
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
+            map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
             map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
             map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
             map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
-            map["ui.mvp_loop.value.no_placement"] = "No structure placed";
+            map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
             map["ui.mvp_loop.value.no_research"] = "No research";
             map["ui.mvp_loop.value.unknown"] = "Unknown";
@@ -359,25 +384,26 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.guided_mvp.panel.complete_format"] = "Complete: {0}";
             map["ui.guided_mvp.value.complete_yes"] = "Yes";
             map["ui.guided_mvp.value.complete_no"] = "No";
-            map["guided_mvp.step.place_or_modify_structure"] = "Place or modify structure";
+            map["guided_mvp.step.place_or_modify_structure"] = "Place or modify one dungeon placement";
             map["guided_mvp.step.run_or_observe"] = "Run or observe";
             map["guided_mvp.step.repeat_or_improve"] = "Repeat or improve";
-            map["guided_mvp.status.place_or_modify_structure"] = "Place one structure to start.";
-            map["guided_mvp.status.run_or_observe"] = "Run the dungeon next.";
+            map["guided_mvp.status.place_or_modify_structure"] = "Place one room, monster, trap, or loot node to start.";
+            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; run the dungeon next.";
             map["guided_mvp.status.repeat_or_improve"] = "Summary visible.";
-            map["guided_mvp.action.place_structure"] = "Place one structure, or modify the selected slot.";
+            map["guided_mvp.action.place_structure"] = "Place one room, monster, trap, or loot node.";
             map["guided_mvp.action.run_dungeon"] = "Run the dungeon and watch the MVP Loop Summary update.";
             map["guided_mvp.action.repeat_or_improve"] = "Run again or adjust one placement based on the summary.";
-            map["ui.first_session.status.place_structure"] = "First-session status: place one structure to start the loop.";
-            map["ui.first_session.status.run_dungeon"] = "First-session status: structure placed; run the dungeon next.";
+            map["ui.first_session.status.place_structure"] = "First-session status: place one room, monster, trap, or loot node to start the loop.";
+            map["ui.first_session.status.run_dungeon"] = "First-session status: dungeon placement ready; run the dungeon next.";
             map["ui.first_session.status.observe_summary"] = "First-session status: observe mana, loot, heat, research, and next action.";
             map["ui.first_session.status.complete"] = "First-session loop complete: placement, run, mana, loot, heat, and research are visible.";
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
-            map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected";
+            map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected placement";
             map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
-            map["ui.mvp_action.selection.label"] = "Selected structure: {0}";
+            map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
+            map["ui.mvp_action.category.label"] = "Selected category: {0}";
             map["ui.mvp_action.posture.label"] = "Run posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
@@ -388,6 +414,26 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_preview.mana_generator"] = "Role: improves mana reserve.";
             map["ui.mvp_structure_preview.heat_scrubber"] = "Role: lowers heat pressure.";
             map["ui.mvp_structure_preview.risk_lab"] = "Role: clarifies research risk.";
+            map["ui.mvp_structure_preview.unknown"] = "Role unavailable.";
+            map["placement.category.room.display_name"] = "Room";
+            map["placement.category.monster.display_name"] = "Monster";
+            map["placement.category.trap.display_name"] = "Trap";
+            map["placement.category.loot_node.display_name"] = "Loot node";
+            map["placement.option.room.basic.display_name"] = "Basic Room";
+            map["placement.option.monster.skeleton.display_name"] = "Skeleton";
+            map["placement.option.trap.spike.display_name"] = "Spike Trap";
+            map["placement.option.loot_node.basic.display_name"] = "Basic Loot Node";
+            map["ui.mvp_label.placement_category.unknown"] = "Unknown category";
+            map["ui.mvp_label.placement_option.unknown"] = "Unknown placement";
+            map["ui.mvp_composition.empty"] = "No dungeon placements yet";
+            map["ui.mvp_composition.entry_format"] = "{0}: {1}";
+            map["ui.mvp_composition.separator"] = "; ";
+            map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
+            map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
+            map["ui.mvp_placement_preview.trap.spike"] = "Role: adds danger, heat, and path pressure.";
+            map["ui.mvp_placement_preview.loot_node.basic"] = "Role: adds loot and adventurer attraction context.";
+            map["ui.mvp_placement_preview.unknown"] = "Role unavailable.";
+            map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
             map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
             map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
             map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
