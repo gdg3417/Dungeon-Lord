@@ -306,12 +306,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
             Assert.That(refreshed, Does.Not.Contain("Clean MVP Validation Reset"));
+            Assert.That(refreshed, Does.Not.Contain("ui.mvp_loop.panel.composition_format"));
             Assert.That(refreshed, Does.Not.Contain("ui.mvp_"));
             Assert.That(refreshed, Does.Not.Contain("placement.category"));
             Assert.That(refreshed, Does.Not.Contain("placement.option"));
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copied, Does.Contain("Dungeon composition: No dungeon placements yet"));
+            Assert.That(copied, Does.Not.Contain("ui.mvp_loop.panel.composition_format"));
             Assert.That(copied, Does.Not.Contain("ui.mvp_"));
             Assert.That(copied, Does.Not.Contain("placement.category"));
             Assert.That(copied, Does.Not.Contain("placement.option"));
