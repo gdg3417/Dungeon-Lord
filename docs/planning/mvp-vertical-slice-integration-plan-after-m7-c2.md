@@ -10,6 +10,28 @@ This documentation-only plan defines the next phase as MVP vertical-slice integr
 
 This plan does not amend locked design specs, add gameplay behavior, add tuning data, add localization keys, or authorize production backend work.
 
+
+## Post-GD9 gameplay direction update
+
+_Status basis update: PR #99 has merged; GD9 is complete._
+
+GD9 added the MVP dungeon placement category scaffold: Room, Monster, Trap, and Loot node. That scaffold is not the final dungeon editor and should not be treated as sufficient playable dungeon-building depth. The next phase must make those categories mechanically meaningful by tying composition to placement effects, run outcomes, loot, heat, mana pressure, and eventually one research unlock bridge.
+
+The next recommended implementation PR is **GD10: Deterministic MVP placement effects resolver**. After GD9, future PRs should usually answer: **“What can the player do now that feels more like building or running a dungeon?”** Avoid scaffold-only PRs unless they directly unlock a playable feature in the next one or two PRs. Diagnostics, smoke helpers, internal-only labels, and future-ready models should not dominate the roadmap.
+
+### GD10-GD15 implementation sequence
+
+| GD | Goal | Player-facing value | Merge boundary |
+| --- | --- | --- | --- |
+| GD10 | Deterministic MVP placement effects resolver. | Room, Monster, Trap, and Loot node visibly change mana, loot, heat, danger, path/capacity, attraction, and/or adventurer-result context. | Next recommended implementation PR; no combat AI, grid editor, drag/drop, new monster families, research unlocks, raids, `Hostile`/`Raid` heat tiers, or production UI rewrite. |
+| GD11 | Run outcome uses dungeon composition. | The player understands how their room/monster/trap/loot setup affected loot, heat, mana, success/failure, and adventurer results. | Consume placement effects, posture, and party deterministically; no animated combat, advanced AI, full encounter timeline, or unsafe hero/elite expansion. |
+| GD12 | Basic floor/node layout representation. | The dungeon starts to feel spatial instead of being only a category list. | One floor, small fixed node count, one placement per node, ordered path affects resolver; no production grid editor, drag/drop, pathfinding UI, or multi-floor UI. |
+| GD13 | First simple dungeon editor view. | The player can select a node, choose Room/Monster/Trap/Loot node, place or replace a starter option, and see current composition. | Keep visuals simple; no art-polish requirement, full production UI framework, expanded content library, or non-trivial drag/drop scope. |
+| GD14 | Loot table MVP. | Loot node produces visible deterministic loot from a real MVP table instead of a generic output number. | Basic loot table only; generated/extracted/tradeable values and heat/economy hooks; no inventory UI, monetization, marketplace, or advanced crafting. |
+| GD15 | Research unlock bridge. | Research unlocks or improves one real dungeon-building option. | Single-slot research remains; one unlock/upgrade only, such as Skeleton, Spike Trap, or Basic Loot Node; no full tech tree UI, multi-queue research, online verification expansion, or monetization. |
+
+Acceptance criteria and test expectations for the full GD10-GD15 sequence live in `docs/planning/actionable-backlog.md`. GD10 must include deterministic resolver tests, empty/legacy placement fallback coverage, summary/run-explanation coverage including compact and copied smoke text when touched, localization guard coverage for player-facing text, and save-compatibility checks.
+
 ## Current state after M7-C2
 
 The repository has progressed through the deterministic backend and diagnostics foundation for the current MVP scope:
@@ -42,7 +64,7 @@ Upcoming vertical-slice PRs should compose existing systems before adding new on
 
 | Existing system | Expected reuse in vertical slice |
 | --- | --- |
-| Structure placement scaffold | Provide the player-visible setup action for placing or modifying a room or structure. |
+| GD9 placement category scaffold | Provide the current Room, Monster, Trap, and Loot node setup categories that GD10 must make mechanically meaningful. |
 | Run simulation service | Drive the observable adventurer run outcome without adding a new simulation path. |
 | Loot extraction summaries | Surface extraction results as part of the loop summary. |
 | Active heat application and current heat tier diagnostics | Surface heat impact and current tier using the already-scaffolded active-play heat path. |
@@ -67,7 +89,9 @@ The vertical-slice integration phase remains locked to the MVP loop above. The f
 11. No new monster families beyond MVP scope.
 12. No feature expansion outside the locked MVP.
 
-## Recommended next PR sequence
+## Historical VS0-VS4 PR sequence
+
+The VS0-VS4 presentation sequence below is historical context. It has been superseded by the post-GD9 gameplay sequence above for active implementation planning. Do not continue Bootstrap/presentation-only expansion unless it fixes a smoke blocker or directly supports GD10-GD15 playable mechanics.
 
 | PR | Scope | Required boundary |
 | --- | --- | --- |
@@ -99,7 +123,7 @@ The vertical-slice integration phase remains locked to the MVP loop above. The f
 
 - Provides one guided path for place, run, observe, and improve.
 - Keeps the player choice to one clear next optimization decision.
-- Reuses the structure placement scaffold and run simulation service instead of adding parallel behavior.
+- Reuses the placement category scaffold and run simulation service instead of adding parallel behavior.
 - Preserves active-play-only heat and single-slot research boundaries.
 - Includes EditMode coverage for deterministic guidance state and a Bootstrap smoke checklist for the guided path.
 
@@ -122,7 +146,7 @@ The player-facing vertical-slice stream is closed out by `docs/planning/vs16-pla
 | Diagnostics are not production UX. | Treat diagnostics as evidence and developer support; player-facing panels should be intentionally designed and localized. |
 | README was previously too thin for handoff. | Keep README concise but explicit about status, validation expectations, and next work. |
 | Documentation evidence paths may become cluttered. | Use milestone- or vertical-slice-specific evidence files and templates rather than ad hoc notes. |
-| Adding more scaffold depth before testing fun would be a mistake. | Require VS1 through VS4 to integrate and validate the smallest coherent playable loop before deeper systems work. |
+| Adding more scaffold depth before testing fun would be a mistake. | Require GD10-GD15 to convert the GD9 placement category scaffold into playable mechanics before deeper systems work. |
 
 ## Testing guidance
 
