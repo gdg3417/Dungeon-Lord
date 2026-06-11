@@ -75,6 +75,7 @@ namespace DungeonBuilder.M0
                 SelectedStructureId = selectedSlot.HasValue ? selectedSlot.Value.StructureId ?? string.Empty : string.Empty,
                 DungeonPlacements = dungeonPlacements,
                 PlacementEffects = placementEffects,
+                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects),
                 HasRunOutcome = hasRunOutcome,
                 LatestRunId = latestRun?.RunId ?? string.Empty,
                 RunSucceeded = latestRun != null && latestRun.Success,
@@ -121,6 +122,14 @@ namespace DungeonBuilder.M0
                 WouldCallServer = false,
                 WouldProcessOfflineProgress = false
             };
+        }
+
+        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
+        {
+            MvpPlacementEffectsSummary stored = latestRun?.CompositionOutcomeSummary?.PlacementEffects;
+            return stored != null && stored.RuleResolved
+                ? stored
+                : currentPlacementEffects;
         }
 
         private static RunOutcomeRecord GetLatestRun(RunHistoryState runHistory)

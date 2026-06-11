@@ -99,9 +99,22 @@ namespace DungeonBuilder.M0
 
         private static string BuildPlacementEffectsImpact(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            return MvpPlacementEffectsPresenter.HasAnyEffect(summary?.PlacementEffects)
-                ? MvpPlacementEffectsPresenter.BuildEffectsText(summary.PlacementEffects, localize)
+            MvpPlacementEffectsSummary effects = ResolveFeedbackPlacementEffects(summary);
+            return MvpPlacementEffectsPresenter.HasAnyEffect(effects)
+                ? MvpPlacementEffectsPresenter.BuildEffectsText(effects, localize)
                 : string.Empty;
+        }
+
+        private static MvpPlacementEffectsSummary ResolveFeedbackPlacementEffects(MvpPlayerLoopSummary summary)
+        {
+            if (summary == null)
+            {
+                return null;
+            }
+
+            return summary.LatestRunPlacementEffects != null && summary.LatestRunPlacementEffects.RuleResolved
+                ? summary.LatestRunPlacementEffects
+                : summary.PlacementEffects;
         }
 
         private static string BuildOutcomeCue(MvpPlayerLoopSummary beforeRunSummary, MvpPlayerLoopSummary afterRunSummary, Func<string, string, string> localize)

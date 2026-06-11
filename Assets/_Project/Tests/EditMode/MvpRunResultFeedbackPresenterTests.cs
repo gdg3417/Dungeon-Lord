@@ -108,6 +108,52 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Feedback_UsesLatestRunPlacementEffects_WhenPresentInsteadOfCurrentEffects()
+        {
+            MvpPlacementEffectsSummary currentEffects = Effects(path: 9, danger: 0, explanationKey: "effect.current");
+            MvpPlacementEffectsSummary runEffects = Effects(path: 2, danger: 5, explanationKey: "effect.run");
+
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                Summary(
+                    runSucceeded: true,
+                    extractedLoot: 1,
+                    heatBefore: 1d,
+                    heatAfter: 1d,
+                    placementEffects: currentEffects,
+                    latestRunPlacementEffects: runEffects),
+                didRun: true,
+                Localized);
+
+            Assert.That(text, Does.Contain("Placement impact: path +2, danger +5 (Run composition)."));
+            Assert.That(text, Does.Not.Contain("path +9"));
+            Assert.That(text, Does.Not.Contain("Current composition"));
+            AssertNoRawPlayerFacingIds(text);
+        }
+
+        [Test]
+        public void Feedback_LegacyOutcomeWithoutStoredCompositionFallsBackToCurrentPlacementEffects()
+        {
+            MvpPlacementEffectsSummary currentEffects = Effects(path: 3, danger: 1, explanationKey: "effect.current");
+
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                Summary(
+                    runSucceeded: true,
+                    extractedLoot: 1,
+                    heatBefore: 1d,
+                    heatAfter: 1d,
+                    placementEffects: currentEffects,
+                    latestRunPlacementEffects: null),
+                didRun: true,
+                Localized);
+
+            Assert.That(text, Does.Contain("Placement impact: path +3, danger +1 (Current composition)."));
+            Assert.That(text, Does.Not.Contain("Run composition"));
+            AssertNoRawPlayerFacingIds(text);
+        }
+
+        [Test]
         public void Feedback_RequestsLocalizationKeysInsteadOfHardcodedEnglish()
         {
             var requestedKeys = new List<string>();
@@ -139,7 +185,9 @@ namespace DungeonBuilder.Tests.EditMode
             int tradeableLoot = 0,
             double heatBefore = 0d,
             double heatAfter = 0d,
-            string[] partyClassIds = null)
+            string[] partyClassIds = null,
+            MvpPlacementEffectsSummary placementEffects = null,
+            MvpPlacementEffectsSummary latestRunPlacementEffects = null)
         {
             return new MvpPlayerLoopSummary
             {
@@ -154,8 +202,35 @@ namespace DungeonBuilder.Tests.EditMode
                 LootExtractedTradeableWorldValue = tradeableLoot,
                 HeatBefore = heatBefore,
                 HeatAfter = heatAfter,
+                PlacementEffects = placementEffects ?? new MvpPlacementEffectsSummary(),
+                LatestRunPlacementEffects = latestRunPlacementEffects ?? new MvpPlacementEffectsSummary(),
                 AdventurerPartyPreviewResolved = partyClassIds != null && partyClassIds.Length > 0,
                 AdventurerPartyClassIds = partyClassIds ?? System.Array.Empty<string>()
+            };
+        }
+
+        private static void AssertNoRawPlayerFacingIds(string text)
+        {
+            Assert.That(text, Does.Not.Contain("ui.mvp_"));
+            Assert.That(text, Does.Not.Contain("placement.category"));
+            Assert.That(text, Does.Not.Contain("placement.option"));
+            Assert.That(text, Does.Not.Contain("heat_tier."));
+            Assert.That(text, Does.Not.Contain("mvp_loop.suggestion"));
+            Assert.That(text, Does.Not.Contain("run.posture"));
+            Assert.That(text, Does.Not.Contain("adventurer.class."));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
+            Assert.That(text, Does.Not.Contain("run-test"));
+        }
+
+        private static MvpPlacementEffectsSummary Effects(int path, int danger, string explanationKey)
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                PathCapacity = path,
+                Danger = danger,
+                EffectLocalizationKeys = new[] { explanationKey }
             };
         }
 
@@ -176,6 +251,13 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.FormatWithPartyKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}",
                 [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Posture: {0}. {1}",
                 [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
+                [MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey] = "{0} Placement impact: {1}.",
+                [MvpPlacementEffectsPresenter.DetailSeparatorKey] = ", ",
+                [MvpPlacementEffectsPresenter.PathCapacityFormatKey] = "path +{0}",
+                [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger +{0}",
+                [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",
+                ["effect.current"] = "Current composition",
+                ["effect.run"] = "Run composition",
                 [MinimalMvpActionPanelPresenter.CautiousPostureKey] = "Cautious",
                 [MinimalMvpActionPanelPresenter.BalancedPostureKey] = "Balanced",
                 [MinimalMvpActionPanelPresenter.GreedyPostureKey] = "Greedy",

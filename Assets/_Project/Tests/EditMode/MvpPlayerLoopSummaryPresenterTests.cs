@@ -1,5 +1,6 @@
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
@@ -83,6 +84,56 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.LootExtractedTradeableWorldValue, Is.EqualTo(0));
             Assert.That(summary.HeatBefore, Is.EqualTo(7d));
             Assert.That(summary.HeatAfter, Is.EqualTo(save.structureRuntime.Heat));
+        }
+
+        [Test]
+        public void Resolve_UsesStoredLatestRunPlacementEffectsForRunFeedback_WhenCurrentPlacementsChange()
+        {
+            SaveData save = FullSave();
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            save.runHistory.LatestOutcome = RunWithStoredPlacementEffects();
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, PlacementConfig(), EligibilityConfig(), VerificationConfig());
+            string feedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                new MvpPlayerLoopSummary { RuleResolved = true },
+                summary,
+                didRun: true,
+                LocalizedFeedback);
+            string panel = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, LocalizedFeedback);
+
+            Assert.That(MvpPlacementEffectsPresenter.HasAnyEffect(summary.PlacementEffects), Is.False);
+            Assert.That(summary.LatestRunPlacementEffects, Is.Not.Null);
+            Assert.That(summary.LatestRunPlacementEffects.RuleResolved, Is.True);
+            Assert.That(summary.LatestRunPlacementEffects.PathCapacity, Is.EqualTo(2));
+            Assert.That(summary.LatestRunPlacementEffects.Danger, Is.EqualTo(5));
+            Assert.That(feedback, Does.Contain("Placement impact: path +2, danger +5 (Stored run composition)."));
+            Assert.That(panel, Does.Contain("Effects: none"));
+            Assert.That(panel, Does.Not.Contain("Stored run composition"));
+        }
+
+        [Test]
+        public void Resolve_LegacyLatestRunWithoutStoredCompositionFallsBackToCurrentPlacementEffects()
+        {
+            SaveData save = FullSave();
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState
+            {
+                Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1)
+                }
+            };
+            save.runHistory.LatestOutcome = RunWithLoot(generatedWorldValue: 5, extractedWorldValue: 5, extractedTradeableWorldValue: 3);
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, PlacementConfig(), EligibilityConfig(), VerificationConfig());
+            string feedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                new MvpPlayerLoopSummary { RuleResolved = true },
+                summary,
+                didRun: true,
+                LocalizedFeedback);
+
+            Assert.That(summary.LatestRunPlacementEffects, Is.SameAs(summary.PlacementEffects));
+            Assert.That(summary.LatestRunPlacementEffects.PathCapacity, Is.EqualTo(2));
+            Assert.That(feedback, Does.Contain("Placement impact: path +2 (Current room composition)."));
         }
 
         [Test]
@@ -241,6 +292,25 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+        private static RunOutcomeRecord RunWithStoredPlacementEffects()
+        {
+            RunOutcomeRecord outcome = RunWithLoot(generatedWorldValue: 12, extractedWorldValue: 10, extractedTradeableWorldValue: 6);
+            outcome.CompositionOutcomeSummary = new RunCompositionOutcomeSummary
+            {
+                RuleResolved = true,
+                RuleSourceId = "test.run.composition",
+                PlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    RuleSourceId = "test.placement.effects",
+                    PathCapacity = 2,
+                    Danger = 5,
+                    EffectLocalizationKeys = new[] { "effect.stored" }
+                }
+            };
+            return outcome;
+        }
+
         private static RunOutcomeRecord RunWithLoot(int generatedWorldValue, int extractedWorldValue, int extractedTradeableWorldValue)
         {
             return new RunOutcomeRecord
@@ -340,6 +410,70 @@ namespace DungeonBuilder.Tests.EditMode
                 ruleSourceId = "test.research.verification",
                 verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode
             };
+        }
+
+        private static RunSimulationConfig PlacementConfig()
+        {
+            RunSimulationConfig config = HeatConfig();
+            config.MvpPlacementEffectsRuleSourceId = "test.placement.effects";
+            config.MvpPlacementEffects = new[]
+            {
+                new MvpPlacementEffectConfig
+                {
+                    CategoryId = MvpDungeonPlacementIds.RoomCategoryId,
+                    OptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    PathCapacity = 2,
+                    ExplanationKey = "effect.current_room"
+                }
+            };
+            return config;
+        }
+
+        private static string LocalizedFeedback(string key, string fallback)
+        {
+            var map = new System.Collections.Generic.Dictionary<string, string>
+            {
+                [MvpLoopSummaryPanelPresenter.TitleKey] = "Loop",
+                [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Composition: {0}",
+                [MvpLoopSummaryPanelPresenter.LatestRunFormatKey] = "Run: {0}",
+                [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Effects: {0}",
+                [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana: {0}",
+                [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {0}/{1}/{2}",
+                [MvpLoopSummaryPanelPresenter.HeatFormatKey] = "Heat: {0}->{1} {2}",
+                [MvpLoopSummaryPanelPresenter.ResearchFormatKey] = "Research: {0}",
+                [MvpLoopSummaryPanelPresenter.SuggestionFormatKey] = "Suggestion: {0}",
+                [MvpLoopSummaryPanelPresenter.ValueNoPlacementKey] = "No placements",
+                [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No run",
+                [MvpLoopSummaryPanelPresenter.ValueUnknownKey] = "Unknown",
+                [MvpLoopSummaryPanelPresenter.ValueNoResearchKey] = "No research",
+                [MvpLoopSummaryPanelPresenter.RunSucceededKey] = "Succeeded",
+                [MvpLoopSummaryPanelPresenter.RunFailedKey] = "Failed",
+                [MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey] = "Repeat",
+                [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Run dungeon",
+                [MvpPlacementEffectsPresenter.EmptyKey] = "none",
+                [MvpPlacementEffectsPresenter.DetailSeparatorKey] = ", ",
+                [MvpPlacementEffectsPresenter.PathCapacityFormatKey] = "path +{0}",
+                [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger +{0}",
+                [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",
+                [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",
+                [MvpDungeonPlacementPresenter.BasicRoomOptionKey] = "Basic Room",
+                [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0}: {1}",
+                [MvpDungeonPlacementPresenter.SeparatorKey] = "; ",
+                [MvpRunResultFeedbackPresenter.SuccessStableHeatKey] = "Run result: stable.",
+                [MvpRunResultFeedbackPresenter.SuccessHeatIncreasedKey] = "Run result: heated.",
+                [MvpRunResultFeedbackPresenter.FailedKey] = "Run result: failed.",
+                [MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey] = "Outcome: loot controlled.",
+                [MvpRunResultFeedbackPresenter.OutcomeCueHeatIncreasedKey] = "Outcome: heat increased.",
+                [MvpRunResultFeedbackPresenter.OutcomeCueFailedKey] = "Outcome: failed.",
+                [MvpRunResultFeedbackPresenter.OutcomeCueFormatKey] = "{0} {1}",
+                [MvpRunResultFeedbackPresenter.FormatKey] = "{0} Mana {1}. Loot {2}/{3}/{4}. Heat {5}->{6}.",
+                [MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey] = "{0} Placement impact: {1}.",
+                ["effect.stored"] = "Stored run composition",
+                ["effect.current_room"] = "Current room composition",
+                [CurrentHeatTierResolver.NoticeTierId] = "Notice"
+            };
+
+            return map.TryGetValue(key, out string value) ? value : fallback;
         }
 
         private static RunSimulationConfig HeatConfig()
