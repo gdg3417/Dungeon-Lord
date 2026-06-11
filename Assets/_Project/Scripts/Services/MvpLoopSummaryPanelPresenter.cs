@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0
         public const string PlacementFormatKey = "ui.mvp_loop.panel.composition_format";
         public const string CompositionFormatKey = PlacementFormatKey;
         public const string LatestRunFormatKey = "ui.mvp_loop.panel.latest_run_format";
+        public const string PlacementEffectsFormatKey = "ui.mvp_loop.panel.placement_effects_format";
         public const string ManaFormatKey = "ui.mvp_loop.panel.mana_format";
         public const string LootFormatKey = "ui.mvp_loop.panel.loot_format";
         public const string HeatFormatKey = "ui.mvp_loop.panel.heat_format";
@@ -32,6 +33,9 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(
                 Localize(localize, LatestRunFormatKey),
                 ResolveRun(summary, localize)));
+            AppendLine(builder, string.Format(
+                Localize(localize, PlacementEffectsFormatKey),
+                MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
             AppendLine(builder, string.Format(
                 Localize(localize, ManaFormatKey),
                 summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));

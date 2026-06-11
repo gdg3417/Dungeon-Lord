@@ -258,6 +258,8 @@ namespace DungeonBuilder.M0
         public int MaxAllowedPartySize;
         public double SuccessSurvivorRatio;
         public double FailureSurvivorRatio;
+        public string MvpPlacementEffectsRuleSourceId;
+        public MvpPlacementEffectConfig[] MvpPlacementEffects = Array.Empty<MvpPlacementEffectConfig>();
         public string LootExtractionRoundingPolicyId;
         public string LootExtractionRuleSourceId;
         public string LootHeatCoolingRuleSourceId;
@@ -296,6 +298,20 @@ namespace DungeonBuilder.M0
         public int AdventurerPartyCompositionMaxAllowedSize;
         public string[] AdventurerPartyCompositionClassIds = Array.Empty<string>();
         public RunPostureConfig[] RunPostures = Array.Empty<RunPostureConfig>();
+    }
+
+    [Serializable]
+    public sealed class MvpPlacementEffectConfig
+    {
+        public string CategoryId;
+        public string OptionId;
+        public int PathCapacity;
+        public int Danger;
+        public int ManaPressure;
+        public int HeatPressure;
+        public int LootBonus;
+        public int Attraction;
+        public string ExplanationKey;
     }
 
     [Serializable]
@@ -492,6 +508,7 @@ namespace DungeonBuilder.M0
         public bool HasPlacementContext = false;
         public string SelectedStructureId;
         public MvpDungeonPlacementEntry[] DungeonPlacements = Array.Empty<MvpDungeonPlacementEntry>();
+        public MvpPlacementEffectsSummary PlacementEffects = new MvpPlacementEffectsSummary();
         public bool HasRunOutcome = false;
         public string LatestRunId;
         public bool RunSucceeded = false;
@@ -520,6 +537,21 @@ namespace DungeonBuilder.M0
         public bool WouldUnlockContent = false;
         public bool WouldCallServer = false;
         public bool WouldProcessOfflineProgress = false;
+    }
+
+    [Serializable]
+    public sealed class MvpPlacementEffectsSummary
+    {
+        public bool RuleResolved = false;
+        public string RuleSourceId;
+        public int PathCapacity = 0;
+        public int Danger = 0;
+        public int ManaPressure = 0;
+        public int HeatPressure = 0;
+        public int LootBonus = 0;
+        public int Attraction = 0;
+        public string[] ContributingOptionIds = Array.Empty<string>();
+        public string[] EffectLocalizationKeys = Array.Empty<string>();
     }
 
     [Serializable]

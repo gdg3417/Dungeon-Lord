@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         public const string FormatKey = "ui.mvp_run_feedback.format";
         public const string FormatWithPartyKey = "ui.mvp_run_feedback.format_with_party";
         public const string PostureFormatKey = "ui.mvp_run_feedback.posture_format";
+        public const string PlacementEffectsImpactFormatKey = "ui.mvp_run_feedback.placement_effects_impact_format";
         public const string PartyPreviewFormatKey = "ui.mvp_adventurer_party.preview_format";
 
         public static string BuildFeedbackText(
@@ -33,12 +34,34 @@ namespace DungeonBuilder.M0
             string interpretation = Localize(localize, ResolveInterpretationKey(afterRunSummary));
             string outcomeCue = BuildOutcomeCue(beforeRunSummary, afterRunSummary, localize);
             string partyPreview = BuildPartyPreview(afterRunSummary, localize);
+            string placementEffects = BuildPlacementEffectsImpact(afterRunSummary, localize);
             string format = string.IsNullOrEmpty(partyPreview)
                 ? Localize(localize, FormatKey)
                 : Localize(localize, FormatWithPartyKey);
             if (string.IsNullOrEmpty(partyPreview))
             {
                 return ApplyPosturePrefix(
+                    ApplyPlacementEffectsImpact(
+                        AppendOutcomeCue(
+                            string.Format(
+                                format,
+                                interpretation,
+                                afterRunSummary.ManaReserve,
+                                afterRunSummary.LootGeneratedWorldValue,
+                                afterRunSummary.LootExtractedWorldValue,
+                                afterRunSummary.LootExtractedTradeableWorldValue,
+                                afterRunSummary.HeatBefore,
+                                afterRunSummary.HeatAfter),
+                            outcomeCue,
+                            localize),
+                        placementEffects,
+                        localize),
+                    postureNameKey,
+                    localize);
+            }
+
+            return ApplyPosturePrefix(
+                ApplyPlacementEffectsImpact(
                     AppendOutcomeCue(
                         string.Format(
                             format,
@@ -48,26 +71,11 @@ namespace DungeonBuilder.M0
                             afterRunSummary.LootExtractedWorldValue,
                             afterRunSummary.LootExtractedTradeableWorldValue,
                             afterRunSummary.HeatBefore,
-                            afterRunSummary.HeatAfter),
+                            afterRunSummary.HeatAfter,
+                            partyPreview),
                         outcomeCue,
                         localize),
-                    postureNameKey,
-                    localize);
-            }
-
-            return ApplyPosturePrefix(
-                AppendOutcomeCue(
-                    string.Format(
-                        format,
-                        interpretation,
-                        afterRunSummary.ManaReserve,
-                        afterRunSummary.LootGeneratedWorldValue,
-                        afterRunSummary.LootExtractedWorldValue,
-                        afterRunSummary.LootExtractedTradeableWorldValue,
-                        afterRunSummary.HeatBefore,
-                        afterRunSummary.HeatAfter,
-                        partyPreview),
-                    outcomeCue,
+                    placementEffects,
                     localize),
                 postureNameKey,
                 localize);
@@ -87,6 +95,13 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(Localize(localize, PartyPreviewFormatKey), string.Join(", ", labels));
+        }
+
+        private static string BuildPlacementEffectsImpact(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            return MvpPlacementEffectsPresenter.HasAnyEffect(summary?.PlacementEffects)
+                ? MvpPlacementEffectsPresenter.BuildEffectsText(summary.PlacementEffects, localize)
+                : string.Empty;
         }
 
         private static string BuildOutcomeCue(MvpPlayerLoopSummary beforeRunSummary, MvpPlayerLoopSummary afterRunSummary, Func<string, string, string> localize)
@@ -122,6 +137,16 @@ namespace DungeonBuilder.M0
             }
 
             return string.Format(Localize(localize, OutcomeCueFormatKey), feedbackText, outcomeCue);
+        }
+
+        private static string ApplyPlacementEffectsImpact(string feedbackText, string placementEffects, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(placementEffects))
+            {
+                return feedbackText;
+            }
+
+            return string.Format(Localize(localize, PlacementEffectsImpactFormatKey), feedbackText, placementEffects);
         }
 
         private static string ApplyPosturePrefix(string feedbackText, string postureNameKey, Func<string, string, string> localize)

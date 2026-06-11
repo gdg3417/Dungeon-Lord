@@ -81,5 +81,52 @@
       "ExtractedLootWorldValueMultiplier": 1.25,
       "HeatDeltaOffset": 1.0
     }
+  ],
+  "MvpPlacementEffectsRuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+  "MvpPlacementEffects": [
+    {
+      "CategoryId": "placement.category.room",
+      "OptionId": "placement.option.room.basic",
+      "PathCapacity": 2,
+      "Danger": 0,
+      "ManaPressure": 0,
+      "HeatPressure": 0,
+      "LootBonus": 0,
+      "Attraction": 0,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.room.basic"
+    },
+    {
+      "CategoryId": "placement.category.monster",
+      "OptionId": "placement.option.monster.skeleton",
+      "PathCapacity": 0,
+      "Danger": 3,
+      "ManaPressure": 2,
+      "HeatPressure": 0,
+      "LootBonus": 0,
+      "Attraction": 0,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.skeleton"
+    },
+    {
+      "CategoryId": "placement.category.trap",
+      "OptionId": "placement.option.trap.spike",
+      "PathCapacity": 0,
+      "Danger": 2,
+      "ManaPressure": 0,
+      "HeatPressure": 1,
+      "LootBonus": 0,
+      "Attraction": 0,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.spike"
+    },
+    {
+      "CategoryId": "placement.category.loot_node",
+      "OptionId": "placement.option.loot_node.basic",
+      "PathCapacity": 0,
+      "Danger": 0,
+      "ManaPressure": 0,
+      "HeatPressure": 0,
+      "LootBonus": 4,
+      "Attraction": 2,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.basic"
+    }
   ]
 }
