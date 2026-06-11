@@ -260,6 +260,7 @@ namespace DungeonBuilder.M0
         public double FailureSurvivorRatio;
         public string MvpPlacementEffectsRuleSourceId;
         public MvpPlacementEffectConfig[] MvpPlacementEffects = Array.Empty<MvpPlacementEffectConfig>();
+        public MvpCompositionOutcomeTuningConfig MvpCompositionOutcomeTuning;
         public string LootExtractionRoundingPolicyId;
         public string LootExtractionRuleSourceId;
         public string LootHeatCoolingRuleSourceId;
@@ -315,6 +316,21 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class MvpCompositionOutcomeTuningConfig
+    {
+        public string RuleSourceId;
+        public double SuccessChancePerPathCapacity;
+        public double SuccessChancePenaltyPerDanger;
+        public double ManaReserveCostPerManaPressure;
+        public double SurvivorRatioBonusPerPathCapacity;
+        public double SurvivorRatioPenaltyPerDanger;
+        public double GeneratedLootMultiplierPerLootBonus;
+        public double ExtractedLootMultiplierPerLootBonus;
+        public double HeatDeltaPerHeatPressure;
+        public double AttractionSignalPerAttraction;
+    }
+
+    [Serializable]
     public sealed class RunPostureConfig
     {
         public string Id;
@@ -352,6 +368,23 @@ namespace DungeonBuilder.M0
         public RunAdventurerDemandBudgetSummary AdventurerDemandBudgetSummary;
         public RunHeatDeltaSummary RunHeatDeltaSummary;
         public RunHeatApplicationSummary RunHeatApplicationSummary;
+        public RunCompositionOutcomeSummary CompositionOutcomeSummary;
+    }
+
+    [Serializable]
+    public sealed class RunCompositionOutcomeSummary
+    {
+        public bool RuleResolved = false;
+        public string RuleSourceId;
+        public MvpPlacementEffectsSummary PlacementEffects = new MvpPlacementEffectsSummary();
+        public double SuccessChanceDelta = 0d;
+        public double EffectiveManaReserve = 0d;
+        public double ManaReservePressureCost = 0d;
+        public double SurvivorRatioDelta = 0d;
+        public double GeneratedLootMultiplier = 1d;
+        public double ExtractedLootMultiplier = 1d;
+        public double HeatDeltaOffset = 0d;
+        public double AttractionSignalBonus = 0d;
     }
 
     [Serializable]
