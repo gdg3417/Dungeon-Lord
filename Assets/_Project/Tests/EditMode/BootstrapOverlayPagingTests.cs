@@ -1259,6 +1259,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
+            Assert.That(copied, Does.Contain("Placement effects: none yet"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
             AssertNoRawPlayerFacingSmokeIds(copied);
@@ -1311,6 +1312,8 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
+            Assert.That(visible, Does.Contain("Placement effects: none yet"));
+            Assert.That(copied, Does.Contain("Placement effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(visible);
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
@@ -1324,6 +1327,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("placement.category"));
             Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("adventurer.class."));
+            Assert.That(text, Does.Not.Contain("heat_tier."));
+            Assert.That(text, Does.Not.Contain("mvp_loop.suggestion"));
+            Assert.That(text, Does.Not.Contain("structure."));
             Assert.That(text, Does.Not.Contain("run-"));
             Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
@@ -1557,6 +1563,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.research.status.verification_required"] = "Verification required";
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
+            AddGd10PlacementEffectsLocalization(map);
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
@@ -1686,6 +1693,28 @@ namespace DungeonBuilder.Tests.EditMode
                 map["ui.dev.diagnostics.page.research_verification_safety_diagnostics"] = "Research Verification Safety Diagnostics";
             }
             return content;
+        }
+
+        private static void AddGd10PlacementEffectsLocalization(Dictionary<string, string> map)
+        {
+            map["ui.mvp_loop.panel.placement_effects_format"] = "Placement effects: {0}";
+            map["ui.mvp_placement_effects.empty"] = "none yet";
+            map["ui.mvp_placement_effects.combined_format"] = "{0}";
+            map["ui.mvp_placement_effects.detail_separator"] = ", ";
+            map["ui.mvp_placement_effects.path_capacity_format"] = "path capacity +{0}";
+            map["ui.mvp_placement_effects.danger_format"] = "danger +{0}";
+            map["ui.mvp_placement_effects.mana_pressure_format"] = "mana pressure +{0}";
+            map["ui.mvp_placement_effects.heat_pressure_format"] = "heat pressure +{0}";
+            map["ui.mvp_placement_effects.loot_bonus_format"] = "loot +{0}";
+            map["ui.mvp_placement_effects.attraction_format"] = "attraction +{0}";
+            map["ui.mvp_placement_effects.explanation_format"] = "{0} ({1})";
+            map["ui.mvp_placement_effects.explanation.room.basic"] = "Basic Room opens the run path and capacity context";
+            map["ui.mvp_placement_effects.explanation.monster.skeleton"] = "Skeleton adds danger and mana upkeep pressure";
+            map["ui.mvp_placement_effects.explanation.trap.spike"] = "Spike Trap adds danger and heat pressure";
+            map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
+            map["ui.mvp_run_feedback.placement_effects_impact_format"] = "{0} Placement effects: {1}.";
+            map["heat_tier.concern"] = "Concern";
+            map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
         }
     }
 }

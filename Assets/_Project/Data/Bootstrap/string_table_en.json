@@ -97,7 +97,7 @@
     },
     {
       "key": "ui.dev.structure_status",
-      "text": "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
+      "text": "Structure Sim \u2014 Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
     },
     {
       "key": "ui.banner.place_success",
@@ -193,11 +193,11 @@
     },
     {
       "key": "ui.dev.offline_summary_format",
-      "text": "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
+      "text": "Offline Summary \u2014 resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
     {
       "key": "ui.dev.research_pending_format",
-      "text": "Research Pending — pending={0} slot={1} project={2}"
+      "text": "Research Pending \u2014 pending={0} slot={1} project={2}"
     },
     {
       "key": "ui.dev.banner.heading",
@@ -377,7 +377,7 @@
     },
     {
       "key": "ui.dev.research_pending_validation_format",
-      "text": "Research Pending Validation — resolved={0} error={1} ruleSource={2}"
+      "text": "Research Pending Validation \u2014 resolved={0} error={1} ruleSource={2}"
     },
     {
       "key": "ui.dev.button.set_research_pending",
@@ -401,27 +401,27 @@
     },
     {
       "key": "ui.dev.research_progress_format",
-      "text": "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
+      "text": "Research Progress Preview \u2014 resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
     },
     {
       "key": "ui.dev.research_progress_state_format",
-      "text": "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
+      "text": "Research Progress State \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
     },
     {
       "key": "ui.dev.research_completion_eligibility_format",
-      "text": "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Eligibility \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_pending_apply_format",
-      "text": "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Pending Apply \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_claim_readiness_format",
-      "text": "Research Completion Claim Readiness — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
+      "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.completed_research_state_format",
-      "text": "Completed Research State — resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
+      "text": "Completed Research State \u2014 resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
     },
     {
       "key": "ui.dev.button.claim_research_completion",
@@ -437,23 +437,23 @@
     },
     {
       "key": "ui.dev.research_completion_claim_apply_format",
-      "text": "Research Completion Claim Apply — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
+      "text": "Research Completion Claim Apply \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
     },
     {
       "key": "ui.dev.research_status_presentation_format",
-      "text": "Research Status Presentation — state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
+      "text": "Research Status Presentation \u2014 state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.research_status_safety_format",
-      "text": "Research Status Safety — canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Status Safety \u2014 canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.dev.research_verification_boundary_format",
-      "text": "Research Verification Boundary — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
+      "text": "Research Verification Boundary \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
     },
     {
       "key": "ui.dev.research_verification_safety_format",
-      "text": "Research Verification Safety — wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Verification Safety \u2014 wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.research.status.no_research",
@@ -501,7 +501,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.heat_format",
-      "text": "Heat: {0:0.##} → {1:0.##} ({2})"
+      "text": "Heat: {0:0.##} \u2192 {1:0.##} ({2})"
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
@@ -1010,6 +1010,70 @@
     {
       "key": "ui.mvp_placement_feedback.changed_format",
       "text": "Changed placement: {0} -> {1}: {2}. {3}"
+    },
+    {
+      "key": "ui.mvp_loop.panel.placement_effects_format",
+      "text": "Placement effects: {0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.empty",
+      "text": "none yet"
+    },
+    {
+      "key": "ui.mvp_placement_effects.combined_format",
+      "text": "{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.detail_separator",
+      "text": ", "
+    },
+    {
+      "key": "ui.mvp_placement_effects.path_capacity_format",
+      "text": "path capacity +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.danger_format",
+      "text": "danger +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.mana_pressure_format",
+      "text": "mana pressure +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.heat_pressure_format",
+      "text": "heat pressure +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.loot_bonus_format",
+      "text": "loot +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.attraction_format",
+      "text": "attraction +{0}"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation_format",
+      "text": "{0} ({1})"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.room.basic",
+      "text": "Basic Room opens the run path and capacity context"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.monster.skeleton",
+      "text": "Skeleton adds danger and mana upkeep pressure"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.trap.spike",
+      "text": "Spike Trap adds danger and heat pressure"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.loot_node.basic",
+      "text": "Basic Loot Node increases loot and adventurer attraction context"
+    },
+    {
+      "key": "ui.mvp_run_feedback.placement_effects_impact_format",
+      "text": "{0} Placement effects: {1}."
     }
   ]
 }

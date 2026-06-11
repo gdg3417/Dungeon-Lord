@@ -536,9 +536,49 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (!HasValidMvpPlacementEffectsConfig(config))
+            {
+                return false;
+            }
+
             return true;
         }
         
+
+        private static bool HasValidMvpPlacementEffectsConfig(RunSimulationConfig config)
+        {
+            if (config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(config.MvpPlacementEffectsRuleSourceId))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < config.MvpPlacementEffects.Length; i++)
+            {
+                MvpPlacementEffectConfig effect = config.MvpPlacementEffects[i];
+                if (effect == null ||
+                    !MvpDungeonPlacementIds.IsAllowedCategory(effect.CategoryId) ||
+                    !MvpDungeonPlacementIds.IsAllowedOption(effect.OptionId) ||
+                    !MvpDungeonPlacementIds.TryGetCategoryForOption(effect.OptionId, out string optionCategoryId) ||
+                    !string.Equals(optionCategoryId, effect.CategoryId, StringComparison.Ordinal) ||
+                    effect.PathCapacity < 0 ||
+                    effect.Danger < 0 ||
+                    effect.ManaPressure < 0 ||
+                    effect.HeatPressure < 0 ||
+                    effect.LootBonus < 0 ||
+                    effect.Attraction < 0 ||
+                    string.IsNullOrWhiteSpace(effect.ExplanationKey))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         private static bool HasConfiguredMvpAdventurerClasses(string[] classIds)
         {
