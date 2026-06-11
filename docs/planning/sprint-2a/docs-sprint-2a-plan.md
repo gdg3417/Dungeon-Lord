@@ -1,5 +1,8 @@
 # Sprint 2A Kickoff Plan - Dungeon Lord Vertical Slice
 
+> **Post-GD9 planning note (PR #99 merged):** This Sprint 2A plan is historical context for the earlier structure-slot foundation. Active near-term implementation planning is now the GD10-GD15 sequence in `docs/planning/actionable-backlog.md`, starting with GD10: Deterministic MVP placement effects resolver. The current MVP placement categories are Room, Monster, Trap, and Loot node; future work should make those categories mechanically meaningful rather than continue generic structure-slot or Bootstrap-only scaffolding.
+
+
 ## Active Ticket and Scope Anchor
 - **Active Ticket**: `S2-T00A-I01` (Dungeon layout and placement MVP foundation).
 - **Sprint Goal**: Deliver the minimum playable dungeon-management gameplay loop while preserving all Sprint 1 deterministic and infrastructure invariants.

@@ -18,6 +18,245 @@
 - `Docs/Sprint1_Completion_Plan_2026-05-13.md` - baseline Sprint 2/3/4 execution plan.
 - `Docs/Sprint1_Closeout_Checklist_2026-05-13.md` - Sprint 1 closure gates and quality evidence requirements.
 
+
+## Planning Update: Post-GD9 Gameplay Direction
+
+_Status basis: PR #99 merged; GD9 is complete._
+
+GD9 completed the MVP dungeon placement category scaffold. The current placement categories are now represented as:
+
+- Room
+- Monster
+- Trap
+- Loot node
+
+This is a scaffold, not the final dungeon editor. Future work must make these categories mechanically meaningful by connecting dungeon composition to placement effects, run outcomes, loot, heat, mana pressure, and research progression. The next recommended implementation PR is **GD10: Deterministic MVP placement effects resolver**.
+
+### Stop doing endless scaffolding
+
+Future PRs should usually answer: **“What can the player do now that feels more like building or running a dungeon?”**
+
+Avoid scaffold-only PRs unless they directly unlock a playable feature in the next one or two PRs. Diagnostics, smoke helpers, internal-only labels, future-ready models, and Bootstrap-only presentation cleanup should support playable dungeon-building validation, not dominate the roadmap. Runtime work must continue to obey repository guardrails: gameplay tuning stays in config/data or typed config assets, player-facing text stays localization-owned, deterministic tests remain required for deterministic systems, save compatibility is preserved, and post-MVP systems remain deferred.
+
+### Revised near-term roadmap: GD10-GD15
+
+#### GD10: Deterministic MVP placement effects resolver
+
+Goal:
+Make Room, Monster, Trap, and Loot node mechanically affect the next run.
+
+Player-facing value:
+The player should see that dungeon composition changes mana, loot, heat, danger, and/or adventurer results.
+
+Scope:
+- Add a deterministic placement effects resolver.
+- Room contributes path/capacity context.
+- Monster contributes danger and mana pressure.
+- Trap contributes danger, heat, and path pressure.
+- Loot node contributes loot and adventurer attraction context.
+- Show effects in summary, compact smoke, copied smoke text, and run explanation.
+
+Non-goals:
+- No combat AI.
+- No grid editor.
+- No drag/drop.
+- No new monster families.
+- No research unlocks yet.
+- No raids or `Hostile`/`Raid` heat tiers.
+- No production UI rewrite.
+
+Acceptance criteria:
+- Given the same save state, placement catalog/config, posture, party inputs, and deterministic seed or no-RNG path, when placement effects resolve twice, then outputs are identical.
+- Given at least one Room, Monster, Trap, and Loot node starter placement, when the next run summary is generated, then the summary exposes each category's contribution to mana pressure, loot, heat, danger, path/capacity, attraction, or adventurer-result context as applicable.
+- Given placement effects are shown in summary, compact smoke, copied smoke text, and run explanation, when text is player-facing, then it uses localization keys or table references rather than hardcoded English.
+- Given tuning values for placement effects, when runtime resolves effects, then numeric gameplay tuning is consumed from config/data or typed config assets, not hardcoded in runtime logic.
+- Given a legacy or empty placement state, when effects resolve, then the resolver returns a safe deterministic fallback and preserves save compatibility.
+
+Test expectations:
+- Add or update deterministic EditMode coverage for resolver repeatability and category contribution mapping.
+- Add or update tests proving empty/legacy placement states remain safe.
+- Add or update coverage for summary/run-explanation output paths touched by GD10, including copied/compact smoke text if those paths are code-backed.
+- Add or update localization/text guard coverage where player-facing strings change.
+- Run existing Unity EditMode tests relevant to placement, run summary, smoke text, and save compatibility.
+
+Merge gate:
+- GD10 may merge only if Room, Monster, Trap, and Loot node all affect at least one observable run-facing output through deterministic, config-owned logic; all new player-facing text is localization-owned; no runtime tuning constants are introduced; no grid editor, combat AI, research unlock, loot-table expansion, raid tier, or UI rewrite scope is added; and relevant deterministic/save/localization tests pass or have documented environment-only limitations.
+
+#### GD11: Run outcome uses dungeon composition
+
+Goal:
+Make run outcome resolve from dungeon composition instead of only existing Bootstrap run assumptions.
+
+Player-facing value:
+The player should understand how their room/monster/trap/loot setup affected the run.
+
+Scope:
+- Consume placement effects.
+- Consume posture.
+- Consume adventurer party.
+- Resolve deterministic outcome.
+- Explain loot, heat, mana, success/failure, and adventurer result.
+
+Non-goals:
+- No animated combat.
+- No advanced AI.
+- No full encounter timeline.
+- No elite/hero systems unless already present and safe.
+
+Acceptance criteria:
+- Given different valid dungeon compositions with the same posture and party, when runs resolve, then run outcomes and explanations reflect the composition differences.
+- Given the same composition, posture, party, config, and seed or deterministic path, when runs resolve twice, then outcome and explanation are identical.
+- Given success, failure, retreat, or equivalent MVP adventurer-result states supported by existing systems, when displayed, then loot, heat, mana, and adventurer-result causes are explained with localized text.
+
+Test expectations:
+- Deterministic composition-to-outcome resolver tests.
+- Composition/posture/party interaction tests for at least the MVP-supported outcome bands.
+- Summary and explanation text tests for localization-key usage where applicable.
+- Save compatibility regression coverage for run history or summary state touched by the PR.
+
+Merge gate:
+- GD11 may merge only if dungeon composition is an actual input to run resolution, the result is deterministic and explainable, and no advanced combat timeline, advanced AI, hero/elite expansion, or post-MVP feature is introduced.
+
+#### GD12: Basic floor/node layout representation
+
+Goal:
+Introduce a simple floor/node layout representation.
+
+Player-facing value:
+The dungeon starts to feel spatial instead of being only a list of categories.
+
+Scope:
+- One floor.
+- Small fixed number of nodes.
+- Each node can hold one placement entry.
+- Ordered path affects run resolver.
+- Summary shows node/path order.
+
+Non-goals:
+- No production grid editor.
+- No drag/drop.
+- No pathfinding UI.
+- No multi-floor UI yet.
+
+Acceptance criteria:
+- Given the MVP floor state, when placements are assigned to nodes, then each node holds no more than one placement entry.
+- Given different ordered paths with the same entries, when the resolver runs, then path order can affect the deterministic run-facing summary or outcome.
+- Given the floor summary is shown, when text is player-facing, then node/path order is communicated through localization-owned strings.
+- Given existing saves, when loaded after GD12, then default node/floor state is additive and migration-safe.
+
+Test expectations:
+- Node occupancy and ordered-path determinism tests.
+- Resolver interaction tests for path order.
+- Save migration/default-state compatibility tests.
+- UI/summary smoke coverage if a visible path-order surface changes.
+
+Merge gate:
+- GD12 may merge only if one-floor node/path data is deterministic, save-compatible, visibly summarized, and still avoids production grid, drag/drop, pathfinding UI, and multi-floor scope.
+
+#### GD13: First simple dungeon editor view
+
+Goal:
+Create the first simple dungeon editor view.
+
+Player-facing value:
+The player can interact with a dungeon editing screen instead of only Bootstrap buttons.
+
+Scope:
+- Select a node.
+- Choose Room, Monster, Trap, or Loot node.
+- Place/replace starter option.
+- Show current composition.
+- Keep visuals simple.
+
+Non-goals:
+- No art polish requirement.
+- No drag/drop unless trivial.
+- No full production UI framework.
+- No expanded content library.
+
+Acceptance criteria:
+- Given the editor view, when a player selects a node and starter category option, then the node placement updates or replaces deterministically.
+- Given current composition, when the editor renders, then the player can see the placed categories and selected node state through localized text.
+- Given invalid or unavailable placement options, when selected, then the view fails safely with localized feedback and does not corrupt save state.
+
+Test expectations:
+- Presenter/view-model tests for node selection, placement, replacement, and invalid selection.
+- Localization coverage for new player-facing editor text.
+- Manual smoke evidence for the editor flow if visual UI changes are made.
+- Existing deterministic placement/run tests remain passing.
+
+Merge gate:
+- GD13 may merge only if the player can perform a basic node-select and place/replace flow without broad UI-framework work, art-polish requirements, expanded content libraries, or non-MVP interaction systems.
+
+#### GD14: Loot table MVP
+
+Goal:
+Make loot node produce loot from a simple MVP loot table.
+
+Player-facing value:
+Loot becomes a real system rather than a generic output number.
+
+Scope:
+- Basic loot table.
+- Deterministic generated/extracted/tradeable values.
+- Visible loot profile.
+- Loot affects heat/economy hooks.
+
+Non-goals:
+- No full inventory UI.
+- No monetization.
+- No marketplace.
+- No advanced crafting.
+
+Acceptance criteria:
+- Given a Basic Loot Node or MVP-equivalent loot placement, when a run resolves, then generated, extracted, and tradeable loot values come from a data/config-owned loot table.
+- Given identical inputs, when loot resolves twice, then outputs are deterministic.
+- Given loot affects heat/economy hooks, when summary/explanation renders, then the player can see the loot profile and relevant consequences through localized text.
+
+Test expectations:
+- Loot-table resolution determinism tests.
+- Generated/extracted/tradeable value mapping tests.
+- Heat/economy hook regression tests for loot impact.
+- Localization/text guard coverage for visible loot profile text.
+
+Merge gate:
+- GD14 may merge only if loot-node output is table-driven, deterministic, visible, and connected to existing heat/economy hooks without inventory UI, monetization, marketplace, or advanced crafting scope.
+
+#### GD15: Research unlock bridge
+
+Goal:
+Connect research to dungeon-building progression.
+
+Player-facing value:
+Research unlocks or improves something real in the dungeon.
+
+Scope:
+- Single-slot research remains.
+- One unlock or upgrade only.
+- Example: improve Skeleton, Spike Trap, or Basic Loot Node.
+- Summary shows unlocked/improved placement option.
+
+Non-goals:
+- No full tech tree UI.
+- No multi-queue research.
+- No online verification expansion.
+- No monetization.
+
+Acceptance criteria:
+- Given the single MVP research unlock/upgrade completes through the existing safe lifecycle, when the dungeon summary/editor is shown, then one placement option is unlocked or improved.
+- Given pre-unlock and post-unlock states, when placement effects or run summaries resolve, then the improvement is deterministic and data/config-owned.
+- Given the unlock/improvement is visible, when text is player-facing, then it uses localization keys or table references.
+- Given legacy saves without the research bridge state, when loaded, then they remain valid and default to the pre-unlock state.
+
+Test expectations:
+- Single-slot research bridge state tests.
+- Pre/post-unlock placement effect tests.
+- Save compatibility tests for missing bridge state.
+- Localization guard coverage for unlock/improvement summaries.
+
+Merge gate:
+- GD15 may merge only if exactly one research unlock or upgrade is connected to dungeon building through the existing single-slot lifecycle, without full tech tree UI, multi-queue research, online verification expansion, monetization, or other post-MVP scope.
+
 ## Assumptions and Open Questions
 1. Sprint planning baseline appears to be **post-Sprint-1 closeout**, but closure evidence is external; Sprint 2 start is contingent on full UAT signoff. **Needs clarification**.
 2. Heat system numeric thresholds are marked "locked pending final numbers" in Spec 02 language; implementation framing is clear but exact tuning may still be pending. **Needs clarification**.

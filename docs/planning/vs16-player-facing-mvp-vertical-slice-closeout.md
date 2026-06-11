@@ -85,10 +85,28 @@ D. Optional narrow run posture/risk choice only if supported by existing specs a
 
 E. Save/load and restart-session polish only if it blocks playable validation.
 
-## 9. Handoff rule
+
+## 9. Post-GD9 gameplay handoff
+
+PR #99 has merged and GD9 is complete. The MVP dungeon placement categories are now represented as Room, Monster, Trap, and Loot node. This is a scaffold, not the final dungeon editor. The active handoff is no longer to add more Bootstrap scaffolding; it is to make these categories mechanically meaningful.
+
+The next recommended implementation PR is **GD10: Deterministic MVP placement effects resolver**. Future PRs should usually answer: **“What can the player do now that feels more like building or running a dungeon?”** Avoid scaffold-only PRs unless they directly unlock a playable feature in the next one or two PRs. Diagnostics, smoke helpers, internal-only labels, and future-ready models should support playable mechanics rather than dominate the roadmap.
+
+Near-term gameplay sequence:
+
+1. GD10: Deterministic MVP placement effects resolver.
+2. GD11: Run outcome uses dungeon composition.
+3. GD12: Basic floor/node layout representation.
+4. GD13: First simple dungeon editor view.
+5. GD14: Loot table MVP.
+6. GD15: Research unlock bridge.
+
+Keep the non-goals explicit while this sequence is underway: no combat AI, no production grid editor, no drag/drop-driven scope, no new monster families, no raids or `Hostile`/`Raid` heat tiers, no production UI rewrite, no advanced AI/timeline, no full inventory UI, no monetization, no marketplace, no advanced crafting, no full tech tree UI, no multi-queue research, and no online verification expansion.
+
+## 10. Historical handoff rule
 
 After VS16 is merged, return to gameplay/system development.
 
 Do not continue adding presentation-only slices unless a smoke blocker or usability blocker is found.
 
-The next PR after VS16 should be gameplay-facing, data-driven, and scoped to making the loop mechanically more interesting.
+The next PR after VS16 should be gameplay-facing, data-driven, and scoped to making the loop mechanically more interesting. After GD9, this means GD10 should come next.
