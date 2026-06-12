@@ -128,5 +128,17 @@
       "Attraction": 2,
       "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.basic"
     }
-  ]
+  ],
+  "MvpCompositionOutcomeTuning": {
+    "RuleSourceId": "mvp.composition_outcome.rule.gd11.v1",
+    "SuccessChancePerPathCapacity": 0.02,
+    "SuccessChancePenaltyPerDanger": 0.015,
+    "ManaReserveCostPerManaPressure": 1.0,
+    "SurvivorRatioBonusPerPathCapacity": 0.03,
+    "SurvivorRatioPenaltyPerDanger": 0.04,
+    "GeneratedLootMultiplierPerLootBonus": 0.05,
+    "ExtractedLootMultiplierPerLootBonus": 0.05,
+    "HeatDeltaPerHeatPressure": 0.5,
+    "AttractionSignalPerAttraction": 1.0
+  }
 }

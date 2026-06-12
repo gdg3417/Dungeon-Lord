@@ -536,14 +536,37 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            if (!HasValidMvpPlacementEffectsConfig(config))
+            if (!HasValidMvpPlacementEffectsConfig(config) || !HasValidMvpCompositionOutcomeTuningConfig(config.MvpCompositionOutcomeTuning))
             {
                 return false;
             }
 
             return true;
         }
-        
+
+        private static bool HasValidMvpCompositionOutcomeTuningConfig(MvpCompositionOutcomeTuningConfig tuning)
+        {
+            if (tuning == null)
+            {
+                return true;
+            }
+
+            return !string.IsNullOrWhiteSpace(tuning.RuleSourceId) &&
+                   IsFiniteNonNegative(tuning.SuccessChancePerPathCapacity) &&
+                   IsFiniteNonNegative(tuning.SuccessChancePenaltyPerDanger) &&
+                   IsFiniteNonNegative(tuning.ManaReserveCostPerManaPressure) &&
+                   IsFiniteNonNegative(tuning.SurvivorRatioBonusPerPathCapacity) &&
+                   IsFiniteNonNegative(tuning.SurvivorRatioPenaltyPerDanger) &&
+                   IsFiniteNonNegative(tuning.GeneratedLootMultiplierPerLootBonus) &&
+                   IsFiniteNonNegative(tuning.ExtractedLootMultiplierPerLootBonus) &&
+                   IsFiniteNonNegative(tuning.HeatDeltaPerHeatPressure) &&
+                   IsFiniteNonNegative(tuning.AttractionSignalPerAttraction);
+        }
+
+        private static bool IsFiniteNonNegative(double value)
+        {
+            return value >= 0d && !double.IsNaN(value) && !double.IsInfinity(value);
+        }
 
         private static bool HasValidMvpPlacementEffectsConfig(RunSimulationConfig config)
         {
@@ -967,7 +990,8 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(Save.mvpDungeonPlacements, _runSimulationService.Config);
+            RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId, placementEffects);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;
             RefreshStructureRuntimeLines();

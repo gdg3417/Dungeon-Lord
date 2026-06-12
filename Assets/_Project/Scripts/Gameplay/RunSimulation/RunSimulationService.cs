@@ -19,48 +19,59 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence)
         {
-            return SimulateOnce(runtime, tickStarted, runSequence, RunPostureResolver.BalancedId);
+            return SimulateOnce(runtime, tickStarted, runSequence, RunPostureResolver.BalancedId, null);
         }
 
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId)
         {
+            return SimulateOnce(runtime, tickStarted, runSequence, postureId, null);
+        }
+
+        public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary placementEffects)
+        {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
 
             RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
+            RunCompositionOutcomeSummary compositionOutcome = BuildCompositionOutcomeSummary(placementEffects, runtime.ManaReserve);
             double heatAtStart = runtime.Heat;
             double baseChance = _config.BaseSuccessChance;
             double heatPenaltyApplied = heatAtStart * _config.HeatPenaltyPerPoint;
-            double manaBonusApplied = runtime.ManaReserve * _config.ManaReserveBonusPerPoint;
+            double manaBonusApplied = compositionOutcome.EffectiveManaReserve * _config.ManaReserveBonusPerPoint;
             double crisisPenaltyApplied = runtime.IsHeatCrisisActive ? _config.CrisisFailurePenalty : 0d;
 
-            double unclampedChance = baseChance - heatPenaltyApplied + manaBonusApplied - crisisPenaltyApplied;
+            double unclampedChance = baseChance - heatPenaltyApplied + manaBonusApplied - crisisPenaltyApplied + compositionOutcome.SuccessChanceDelta;
             double finalChance = Math.Max(0d, Math.Min(1d, unclampedChance));
             double successThreshold = _config.SuccessThreshold;
             bool success = finalChance >= successThreshold;
 
             int score = success
-                ? _config.BaseScoreOnSuccess + (int)Math.Round(runtime.ManaReserve * _config.ScorePerManaPoint)
+                ? _config.BaseScoreOnSuccess + (int)Math.Round(compositionOutcome.EffectiveManaReserve * _config.ScorePerManaPoint)
                 : 0;
 
             string reasonKey = success
                 ? "run.reason.success"
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
-            string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success);
+            string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
 
-            RunLootSummary lootSummary = ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture);
-            RunSurvivalSummary survivalSummary = BuildSurvivalSummary(runSequence, tickStarted, success);
+            RunLootSummary lootSummary = ApplyCompositionToLootSummary(
+                ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture),
+                compositionOutcome);
+            RunSurvivalSummary survivalSummary = ApplyCompositionToSurvivalSummary(BuildSurvivalSummary(runSequence, tickStarted, success), compositionOutcome);
             int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
-            RunLootExtractionSummary extractionSummary = ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(
-                _lootConfig,
+            RunLootExtractionSummary extractionSummary = ApplyCompositionToExtractionSummary(
+                ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(
+                    _lootConfig,
+                    lootSummary,
+                    survivalSummary,
+                    resolverSeed,
+                    _config.LootExtractionRoundingPolicyId,
+                    _config.LootExtractionRuleSourceId), lootSummary, posture),
                 lootSummary,
-                survivalSummary,
-                resolverSeed,
-                _config.LootExtractionRoundingPolicyId,
-                _config.LootExtractionRuleSourceId), lootSummary, posture);
-            RunAdventurerAttractionSummary attractionSummary = AdventurerAttractionResolver.Resolve(
+                compositionOutcome);
+            RunAdventurerAttractionSummary attractionSummary = ApplyCompositionToAttractionSummary(AdventurerAttractionResolver.Resolve(
                 _config,
                 extractionSummary,
-                resolverSeed);
+                resolverSeed), compositionOutcome);
             RunAdventurerInterestForecastSummary forecastSummary = AdventurerInterestForecastResolver.Resolve(
                 _config,
                 attractionSummary,
@@ -69,11 +80,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 _config,
                 forecastSummary,
                 resolverSeed);
-            RunHeatDeltaSummary heatDeltaSummary = ApplyPostureToHeatDeltaSummary(RunHeatDeltaResolver.Resolve(
-                _config,
-                survivalSummary,
-                extractionSummary,
-                resolverSeed), posture);
+            RunHeatDeltaSummary heatDeltaSummary = ApplyCompositionToHeatDeltaSummary(
+                ApplyPostureToHeatDeltaSummary(RunHeatDeltaResolver.Resolve(
+                    _config,
+                    survivalSummary,
+                    extractionSummary,
+                    resolverSeed), posture),
+                compositionOutcome);
             RunHeatApplicationSummary heatApplicationSummary = RunHeatStateApplyResolver.Resolve(
                 _config,
                 runtime.Heat,
@@ -108,7 +121,63 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 AdventurerInterestForecastSummary = forecastSummary,
                 AdventurerDemandBudgetSummary = demandBudgetSummary,
                 RunHeatDeltaSummary = heatDeltaSummary,
-                RunHeatApplicationSummary = heatApplicationSummary
+                RunHeatApplicationSummary = heatApplicationSummary,
+                CompositionOutcomeSummary = compositionOutcome
+            };
+        }
+
+        private RunCompositionOutcomeSummary BuildCompositionOutcomeSummary(MvpPlacementEffectsSummary effects, double manaReserve)
+        {
+            MvpCompositionOutcomeTuningConfig tuning = _config.MvpCompositionOutcomeTuning;
+            var summary = new RunCompositionOutcomeSummary
+            {
+                RuleResolved = tuning != null,
+                RuleSourceId = tuning?.RuleSourceId ?? string.Empty,
+                PlacementEffects = ClonePlacementEffects(effects),
+                EffectiveManaReserve = manaReserve,
+                GeneratedLootMultiplier = 1d,
+                ExtractedLootMultiplier = 1d
+            };
+
+            if (tuning == null || effects == null || !effects.RuleResolved)
+            {
+                return summary;
+            }
+
+            summary.SuccessChanceDelta =
+                (effects.PathCapacity * tuning.SuccessChancePerPathCapacity) -
+                (effects.Danger * tuning.SuccessChancePenaltyPerDanger);
+            summary.ManaReservePressureCost = Math.Max(0d, effects.ManaPressure * tuning.ManaReserveCostPerManaPressure);
+            summary.EffectiveManaReserve = Math.Max(0d, manaReserve - summary.ManaReservePressureCost);
+            summary.SurvivorRatioDelta =
+                (effects.PathCapacity * tuning.SurvivorRatioBonusPerPathCapacity) -
+                (effects.Danger * tuning.SurvivorRatioPenaltyPerDanger);
+            summary.GeneratedLootMultiplier = Math.Max(0d, 1d + (effects.LootBonus * tuning.GeneratedLootMultiplierPerLootBonus));
+            summary.ExtractedLootMultiplier = Math.Max(0d, 1d + (effects.LootBonus * tuning.ExtractedLootMultiplierPerLootBonus));
+            summary.HeatDeltaOffset = effects.HeatPressure * tuning.HeatDeltaPerHeatPressure;
+            summary.AttractionSignalBonus = Math.Max(0d, effects.Attraction * tuning.AttractionSignalPerAttraction);
+            return summary;
+        }
+
+        private static MvpPlacementEffectsSummary ClonePlacementEffects(MvpPlacementEffectsSummary effects)
+        {
+            if (effects == null)
+            {
+                return new MvpPlacementEffectsSummary { RuleResolved = true, ContributingOptionIds = Array.Empty<string>(), EffectLocalizationKeys = Array.Empty<string>() };
+            }
+
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = effects.RuleResolved,
+                RuleSourceId = effects.RuleSourceId,
+                PathCapacity = effects.PathCapacity,
+                Danger = effects.Danger,
+                ManaPressure = effects.ManaPressure,
+                HeatPressure = effects.HeatPressure,
+                LootBonus = effects.LootBonus,
+                Attraction = effects.Attraction,
+                ContributingOptionIds = effects.ContributingOptionIds != null ? (string[])effects.ContributingOptionIds.Clone() : Array.Empty<string>(),
+                EffectLocalizationKeys = effects.EffectLocalizationKeys != null ? (string[])effects.EffectLocalizationKeys.Clone() : Array.Empty<string>()
             };
         }
 
@@ -187,7 +256,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             };
         }
 
-
         private RunLootSummary ApplyPostureToLootSummary(RunLootSummary summary, RunPostureConfig posture)
         {
             if (summary == null || posture == null || !summary.ResolverSuccess)
@@ -196,6 +264,35 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
 
             summary.TotalGeneratedWorldValue = ScaleToInt(summary.TotalGeneratedWorldValue, posture.GeneratedLootWorldValueMultiplier);
+            return summary;
+        }
+
+        private RunLootSummary ApplyCompositionToLootSummary(RunLootSummary summary, RunCompositionOutcomeSummary composition)
+        {
+            if (summary == null || composition == null || !summary.ResolverSuccess)
+            {
+                return summary;
+            }
+
+            summary.TotalGeneratedWorldValue = ScaleToInt(summary.TotalGeneratedWorldValue, composition.GeneratedLootMultiplier);
+            summary.TotalGeneratedTradeableWorldValue = Math.Min(
+                summary.TotalGeneratedWorldValue,
+                ScaleToInt(summary.TotalGeneratedTradeableWorldValue, composition.GeneratedLootMultiplier));
+            return summary;
+        }
+
+        private RunSurvivalSummary ApplyCompositionToSurvivalSummary(RunSurvivalSummary summary, RunCompositionOutcomeSummary composition)
+        {
+            if (summary == null || composition == null || !summary.RuleResolved || summary.DeterministicErrorCode != (int)RunSurvivalSummaryErrorCode.None)
+            {
+                return summary;
+            }
+
+            double ratio = Math.Max(0d, Math.Min(1d, summary.SurvivorRatio + composition.SurvivorRatioDelta));
+            int survivorCount = Math.Max(0, Math.Min(summary.PartySize, (int)Math.Round(summary.PartySize * ratio)));
+            summary.SurvivorCount = survivorCount;
+            summary.DeathCount = summary.PartySize - survivorCount;
+            summary.SurvivorRatio = summary.PartySize > 0 ? (double)survivorCount / summary.PartySize : 0d;
             return summary;
         }
 
@@ -216,6 +313,34 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return summary;
         }
 
+        private RunLootExtractionSummary ApplyCompositionToExtractionSummary(RunLootExtractionSummary summary, RunLootSummary lootSummary, RunCompositionOutcomeSummary composition)
+        {
+            if (summary == null || composition == null || !summary.RuleResolved)
+            {
+                return summary;
+            }
+
+            int generatedWorldValue = Math.Max(0, lootSummary?.TotalGeneratedWorldValue ?? 0);
+            summary.TotalExtractedWorldValue = Math.Min(
+                generatedWorldValue,
+                ScaleToInt(summary.TotalExtractedWorldValue, composition.ExtractedLootMultiplier));
+            summary.TotalExtractedTradeableWorldValue = Math.Min(
+                summary.TotalExtractedWorldValue,
+                ScaleToInt(summary.TotalExtractedTradeableWorldValue, composition.ExtractedLootMultiplier));
+            return summary;
+        }
+
+        private RunAdventurerAttractionSummary ApplyCompositionToAttractionSummary(RunAdventurerAttractionSummary summary, RunCompositionOutcomeSummary composition)
+        {
+            if (summary == null || composition == null || !summary.RuleResolved)
+            {
+                return summary;
+            }
+
+            summary.AttractionSignalValue += composition.AttractionSignalBonus;
+            return summary;
+        }
+
         private RunHeatDeltaSummary ApplyPostureToHeatDeltaSummary(RunHeatDeltaSummary summary, RunPostureConfig posture)
         {
             if (summary == null || posture == null || !summary.RuleResolved)
@@ -224,6 +349,23 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
 
             double adjusted = summary.FinalHeatDelta + posture.HeatDeltaOffset;
+            if (double.IsNaN(adjusted) || double.IsInfinity(adjusted))
+            {
+                return summary;
+            }
+
+            summary.FinalHeatDelta = Math.Max(_config.RunHeatDeltaMinimum, Math.Min(_config.RunHeatDeltaMaximum, adjusted));
+            return summary;
+        }
+
+        private RunHeatDeltaSummary ApplyCompositionToHeatDeltaSummary(RunHeatDeltaSummary summary, RunCompositionOutcomeSummary composition)
+        {
+            if (summary == null || composition == null || !summary.RuleResolved)
+            {
+                return summary;
+            }
+
+            double adjusted = summary.FinalHeatDelta + composition.HeatDeltaOffset;
             if (double.IsNaN(adjusted) || double.IsInfinity(adjusted))
             {
                 return summary;
@@ -254,7 +396,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return Math.Max(0, (int)Math.Round(scaled));
         }
 
-
         private static int ComputeResolverSeed(int runSequence, long tickStarted)
         {
             unchecked
@@ -269,9 +410,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
         }
 
-        private string[] BuildFeedbackTagKeys(StructureRuntimeState runtime, bool success)
+        private string[] BuildFeedbackTagKeys(StructureRuntimeState runtime, bool success, RunCompositionOutcomeSummary composition)
         {
-            System.Collections.Generic.List<string> tags = new System.Collections.Generic.List<string>(5);
+            System.Collections.Generic.List<string> tags = new System.Collections.Generic.List<string>(6);
             tags.Add(success ? "run.feedback.success" : "run.feedback.failure");
 
             if (runtime.Heat >= _config.HighHeatFeedbackThreshold)
@@ -279,7 +420,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 tags.Add("run.feedback.high_heat");
             }
 
-            if (runtime.ManaReserve <= _config.LowManaFeedbackThreshold)
+            double effectiveManaReserve = composition != null ? composition.EffectiveManaReserve : runtime.ManaReserve;
+            if (effectiveManaReserve <= _config.LowManaFeedbackThreshold)
             {
                 tags.Add("run.feedback.low_mana");
             }
@@ -289,7 +431,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 tags.Add("run.feedback.heat_crisis");
             }
 
-            if (runtime.ManaReserve >= _config.StrongManaReserveFeedbackThreshold)
+            if (effectiveManaReserve >= _config.StrongManaReserveFeedbackThreshold)
             {
                 tags.Add("run.feedback.strong_mana_reserve");
             }

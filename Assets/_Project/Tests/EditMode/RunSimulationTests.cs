@@ -1,5 +1,6 @@
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using TMPro;
@@ -118,6 +119,15 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
                 },
+                MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
+                MvpPlacementEffects = new[]
+                {
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.room.basic" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 3, ManaPressure = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.monster.skeleton" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.spike" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.basic" }
+                },
+                MvpCompositionOutcomeTuning = BuildCompositionTuning(),
                 RunPostures = new[]
                 {
                     new RunPostureConfig { Id = RunPostureResolver.CautiousId, DisplayNameKey = "run.posture.cautious.name", GeneratedLootWorldValueMultiplier = 0.8d, ExtractedLootWorldValueMultiplier = 0.8d, HeatDeltaOffset = -1d },
@@ -127,6 +137,23 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+
+        private static MvpCompositionOutcomeTuningConfig BuildCompositionTuning()
+        {
+            return new MvpCompositionOutcomeTuningConfig
+            {
+                RuleSourceId = "mvp.composition_outcome.rule.test",
+                SuccessChancePerPathCapacity = 0.02d,
+                SuccessChancePenaltyPerDanger = 0.015d,
+                ManaReserveCostPerManaPressure = 1d,
+                SurvivorRatioBonusPerPathCapacity = 0.03d,
+                SurvivorRatioPenaltyPerDanger = 0.04d,
+                GeneratedLootMultiplierPerLootBonus = 0.05d,
+                ExtractedLootMultiplierPerLootBonus = 0.05d,
+                HeatDeltaPerHeatPressure = 0.5d,
+                AttractionSignalPerAttraction = 1d
+            };
+        }
 
         private static void AssertNoPostureAdjustment(RunOutcomeRecord actual, RunOutcomeRecord expected)
         {
@@ -2563,6 +2590,196 @@ namespace DungeonBuilder.Tests.EditMode
                 Object.DestroyImmediate(overlayObject);
                 Object.DestroyImmediate(rootObject);
             }
+        }
+
+
+        [Test]
+        public void SimulateRunOnce_CompositionOutcome_ConsumesSaveMvpDungeonPlacements()
+        {
+            var go = new GameObject("GameRootCompositionOutcomeConsumesSavePlacements");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetContent(root, BuildRunDisplayContent());
+                SetPrivateField(root, "_runSimulationService", new RunSimulationService(BuildConfig(), BuildLootConfig()));
+                SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_composition_outcome.json", useAtomicWrites = false }));
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 0d);
+                SetSave(root, new SaveData
+                {
+                    totalTicks = 10,
+                    structureRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                    mvpDungeonPlacements = StarterPlacementState(),
+                    runHistory = new RunHistoryState { NextRunSequence = 1 }
+                });
+
+                bool ok = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+
+                Assert.That(ok, Is.True);
+                RunOutcomeRecord outcome = root.Save.runHistory.LatestOutcome;
+                Assert.That(outcome.CompositionOutcomeSummary, Is.Not.Null);
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(4));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.Danger, Is.EqualTo(5));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Has.Length.EqualTo(4));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void SimulateOnce_CompositionOutcome_SameInputsRemainDeterministic()
+        {
+            RunSimulationConfig config = BuildConfig();
+            MvpPlacementEffectsSummary effects = StarterPlacementEffects(config);
+            var firstService = new RunSimulationService(config, BuildLootConfig());
+            var secondService = new RunSimulationService(config, BuildLootConfig());
+            var firstRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+            var secondRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord first = firstService.SimulateOnce(firstRuntime, 50, 1, RunPostureResolver.BalancedId, effects);
+            RunOutcomeRecord second = secondService.SimulateOnce(secondRuntime, 50, 1, RunPostureResolver.BalancedId, effects);
+
+            Assert.That(second.Success, Is.EqualTo(first.Success));
+            Assert.That(second.Score, Is.EqualTo(first.Score));
+            Assert.That(second.FinalChance, Is.EqualTo(first.FinalChance).Within(1e-9));
+            Assert.That(second.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(first.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(second.LootExtractionSummary.TotalExtractedWorldValue, Is.EqualTo(first.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(second.SurvivalSummary.SurvivorCount, Is.EqualTo(first.SurvivalSummary.SurvivorCount));
+            Assert.That(second.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(first.RunHeatDeltaSummary.FinalHeatDelta).Within(1e-9));
+            Assert.That(second.CompositionOutcomeSummary.SuccessChanceDelta, Is.EqualTo(first.CompositionOutcomeSummary.SuccessChanceDelta).Within(1e-9));
+        }
+
+        [Test]
+        public void SimulateOnce_CompositionOutcome_DifferentPlacementsChangeRunFacingOutput()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+            var emptyRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+            var fullRuntime = new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false };
+
+            RunOutcomeRecord empty = service.SimulateOnce(emptyRuntime, 50, 1, RunPostureResolver.BalancedId, EmptyPlacementEffects(config));
+            RunOutcomeRecord full = service.SimulateOnce(fullRuntime, 50, 1, RunPostureResolver.BalancedId, StarterPlacementEffects(config));
+
+            Assert.That(full.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Has.Length.EqualTo(4));
+            Assert.That(full.FinalChance, Is.Not.EqualTo(empty.FinalChance));
+            Assert.That(full.LootSummary.TotalGeneratedWorldValue, Is.GreaterThan(empty.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(full.RunHeatDeltaSummary.FinalHeatDelta, Is.Not.EqualTo(empty.RunHeatDeltaSummary.FinalHeatDelta));
+        }
+
+        [Test]
+        public void SimulateOnce_CompositionOutcome_FullStarterCompositionAffectsLootAndPressure()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 5;
+            config.MaxPartySize = 5;
+            config.SuccessSurvivorRatio = 0.8d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord outcome = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                20,
+                6,
+                RunPostureResolver.BalancedId,
+                StarterPlacementEffects(config));
+
+            Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.PathCapacity, Is.EqualTo(2));
+            Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.Danger, Is.EqualTo(5));
+            Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.EqualTo(1));
+            Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(4));
+            Assert.That(outcome.CompositionOutcomeSummary.GeneratedLootMultiplier, Is.GreaterThan(1d));
+            Assert.That(outcome.LootSummary.TotalGeneratedWorldValue, Is.GreaterThan(0));
+            Assert.That(outcome.CompositionOutcomeSummary.ManaReservePressureCost, Is.GreaterThan(0d));
+            Assert.That(outcome.CompositionOutcomeSummary.HeatDeltaOffset, Is.GreaterThan(0d));
+        }
+
+        [Test]
+        public void SimulateOnce_CompositionOutcome_EmptyOrLegacyPlacementStateIsSafeAndDeterministic()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var firstService = new RunSimulationService(config, BuildLootConfig());
+            var secondService = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord first = firstService.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId, null);
+            RunOutcomeRecord second = secondService.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId, EmptyPlacementEffects(config));
+
+            Assert.That(first.CompositionOutcomeSummary, Is.Not.Null);
+            Assert.That(second.CompositionOutcomeSummary, Is.Not.Null);
+            Assert.That(first.FinalChance, Is.EqualTo(second.FinalChance).Within(1e-9));
+            Assert.That(first.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(second.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(first.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(second.RunHeatDeltaSummary.FinalHeatDelta).Within(1e-9));
+        }
+
+        [Test]
+        public void SimulateOnce_CompositionOutcome_TuningValuesAreConfigOwned()
+        {
+            RunSimulationConfig tunedConfig = BuildConfig();
+            RunSimulationConfig disabledConfig = BuildConfig();
+            disabledConfig.MvpCompositionOutcomeTuning = new MvpCompositionOutcomeTuningConfig { RuleSourceId = "mvp.composition_outcome.rule.disabled_for_test" };
+
+            MvpPlacementEffectsSummary effects = StarterPlacementEffects(tunedConfig);
+            RunOutcomeRecord tuned = new RunSimulationService(tunedConfig, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId, effects);
+            RunOutcomeRecord disabled = new RunSimulationService(disabledConfig, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId, effects);
+            RunOutcomeRecord empty = new RunSimulationService(disabledConfig, BuildLootConfig()).SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 2, RunPostureResolver.BalancedId, EmptyPlacementEffects(disabledConfig));
+
+            Assert.That(tuned.CompositionOutcomeSummary.GeneratedLootMultiplier, Is.GreaterThan(disabled.CompositionOutcomeSummary.GeneratedLootMultiplier));
+            Assert.That(disabled.FinalChance, Is.EqualTo(empty.FinalChance).Within(1e-9));
+            Assert.That(disabled.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(empty.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(GameRoot.IsValidRunSimulationConfig(disabledConfig), Is.True);
+        }
+
+        [Test]
+        public void PlacementEffectsPresenter_CompositionOutcomeUsesLocalizationKeysWithoutRawIds()
+        {
+            RunSimulationConfig config = BuildConfig();
+            MvpPlacementEffectsSummary effects = StarterPlacementEffects(config);
+            var requestedKeys = new List<string>();
+
+            string text = MvpPlacementEffectsPresenter.BuildEffectsText(effects, (key, fallback) =>
+            {
+                requestedKeys.Add(key);
+                return key == MvpPlacementEffectsPresenter.DetailSeparatorKey ? ", " : key;
+            });
+
+            Assert.That(requestedKeys, Does.Contain("ui.mvp_placement_effects.explanation.room.basic"));
+            Assert.That(requestedKeys, Does.Contain("ui.mvp_placement_effects.explanation.monster.skeleton"));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.SpikeTrapOptionId));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+        }
+
+        [Test]
+        public void RunOutcomeRecord_CompositionOutcomeSummary_LegacyMissingFieldDeserializesSafely()
+        {
+            RunOutcomeRecord outcome = JsonUtility.FromJson<RunOutcomeRecord>("{\"RunId\":\"run.legacy\",\"Success\":true}");
+
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome.RunId, Is.EqualTo("run.legacy"));
+            Assert.That(outcome.Success, Is.True);
+            Assert.That(outcome.CompositionOutcomeSummary, Is.Null);
+        }
+
+        private static MvpPlacementEffectsSummary StarterPlacementEffects(RunSimulationConfig config)
+        {
+            return MvpPlacementEffectsResolver.Resolve(StarterPlacementState(), config);
+        }
+
+        private static MvpPlacementEffectsSummary EmptyPlacementEffects(RunSimulationConfig config)
+        {
+            return MvpPlacementEffectsResolver.Resolve(new MvpDungeonPlacementState(), config);
+        }
+
+        private static MvpDungeonPlacementState StarterPlacementState()
+        {
+            return new MvpDungeonPlacementState
+            {
+                Entries = new List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 4)
+                },
+                NextRevision = 5
+            };
         }
 
     }
