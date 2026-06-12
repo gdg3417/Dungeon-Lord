@@ -64,6 +64,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(entry.CategoryId, Is.EqualTo(categoryId));
             Assert.That(entry.OptionId, Is.EqualTo(optionId));
             Assert.That(_root.Save.mvpDungeonPlacements.Entries.Count, Is.EqualTo(1));
+            MvpDungeonPlacementEntry[] nodePlacements = MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(_root.Save.mvpDungeonFloorLayout);
+            Assert.That(_root.Save.mvpDungeonFloorLayout.Nodes.Count, Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(nodePlacements, Has.Length.EqualTo(1));
+            Assert.That(nodePlacements[0].OptionId, Is.EqualTo(optionId));
         }
 
 
@@ -90,6 +94,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(prior.Revision, Is.EqualTo(firstRevision));
             Assert.That(second.Revision, Is.GreaterThan(prior.Revision));
             Assert.That(_root.Save.mvpDungeonPlacements.Entries.Count, Is.EqualTo(1));
+            MvpDungeonPlacementEntry[] nodePlacements = MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(_root.Save.mvpDungeonFloorLayout);
+            Assert.That(_root.Save.mvpDungeonFloorLayout.Nodes.Count, Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(nodePlacements, Has.Length.EqualTo(1));
+            Assert.That(nodePlacements[0].Revision, Is.EqualTo(second.Revision));
         }
 
 
@@ -134,6 +142,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(feedback, Does.Contain("Changed placement: Empty slot -> Room: Basic Room."));
             AssertNoRawPlacementIds(panel);
             AssertNoRawPlacementIds(feedback);
+        }
+
+
+        [Test]
+        public void NodeLayoutSummary_UsesLocalizationKeysWithoutRawIds()
+        {
+            _root.Save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            _root.Save.mvpDungeonFloorLayout = new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 0, "mvp.floor.00.node.00", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonNodeState(0, 1, "mvp.floor.00.node.01", MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2)
+                },
+                NextRevision = 3
+            };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(_root.Save);
+            string panel = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localized);
+
+            Assert.That(summary.DungeonPlacements, Has.Length.EqualTo(2));
+            Assert.That(panel, Does.Contain("Dungeon composition: Room: Basic Room; Monster: Skeleton"));
+            AssertNoRawPlacementIds(panel);
         }
 
         private void SetBackingField(string fieldName, object value)
