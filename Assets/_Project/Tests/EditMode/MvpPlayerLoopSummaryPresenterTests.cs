@@ -1,5 +1,6 @@
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
@@ -195,6 +196,62 @@ namespace DungeonBuilder.Tests.EditMode
             AssertSuggestion(repeat, MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey);
         }
 
+
+        [Test]
+        public void Resolve_UnresolvedCompositionOutcome_DoesNotShowStoredOrCurrentEffectsAsLatestRunImpact()
+        {
+            SaveData save = FullSave();
+            save.mvpDungeonPlacements = PlacementState(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId);
+            save.runHistory.LatestOutcome = RunWithLoot(generatedWorldValue: 10, extractedWorldValue: 8, extractedTradeableWorldValue: 3);
+            save.runHistory.LatestOutcome.CompositionOutcomeSummary = new RunCompositionOutcomeSummary
+            {
+                RuleResolved = false,
+                PlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    Danger = 9,
+                    EffectLocalizationKeys = new[] { "effect.stored" }
+                }
+            };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, PlacementEffectsConfig(), EligibilityConfig(), VerificationConfig());
+            string feedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                new MvpPlayerLoopSummary { RuleResolved = true },
+                summary,
+                didRun: true,
+                FeedbackLocalize);
+
+            Assert.That(MvpPlacementEffectsPresenter.HasAnyEffect(summary.PlacementEffects), Is.True);
+            Assert.That(summary.PlacementEffects.PathCapacity, Is.EqualTo(2));
+            Assert.That(summary.LatestRunPlacementEffects, Is.Not.Null);
+            Assert.That(summary.LatestRunPlacementEffects.RuleResolved, Is.True);
+            Assert.That(MvpPlacementEffectsPresenter.HasAnyEffect(summary.LatestRunPlacementEffects), Is.False);
+            Assert.That(feedback, Does.Not.Contain("stored danger"));
+            Assert.That(feedback, Does.Not.Contain("current room"));
+            Assert.That(feedback, Does.Not.Contain("Placement impact"));
+        }
+
+        [Test]
+        public void Resolve_LegacyRunWithoutCompositionOutcome_FallsBackToCurrentPlacementEffectsForLatestRunImpact()
+        {
+            SaveData save = FullSave();
+            save.mvpDungeonPlacements = PlacementState(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId);
+            save.runHistory.LatestOutcome = RunWithLoot(generatedWorldValue: 10, extractedWorldValue: 8, extractedTradeableWorldValue: 3);
+            save.runHistory.LatestOutcome.CompositionOutcomeSummary = null;
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, PlacementEffectsConfig(), EligibilityConfig(), VerificationConfig());
+            string feedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                new MvpPlayerLoopSummary { RuleResolved = true },
+                summary,
+                didRun: true,
+                FeedbackLocalize);
+
+            Assert.That(summary.LatestRunPlacementEffects, Is.SameAs(summary.PlacementEffects));
+            Assert.That(MvpPlacementEffectsPresenter.HasAnyEffect(summary.LatestRunPlacementEffects), Is.True);
+            Assert.That(feedback, Does.Contain("Placement impact"));
+            Assert.That(feedback, Does.Contain("current room"));
+        }
+
         private static void AssertSuggestion(SaveData save, string expectedKey)
         {
             string first = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig()).NextOptimizationSuggestionKey;
@@ -202,6 +259,71 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(first, Is.EqualTo(expectedKey));
             Assert.That(second, Is.EqualTo(first));
+        }
+
+
+        private static MvpDungeonPlacementState PlacementState(string categoryId, string optionId)
+        {
+            return new MvpDungeonPlacementState
+            {
+                Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(categoryId, optionId, 1)
+                },
+                NextRevision = 2
+            };
+        }
+
+        private static RunSimulationConfig PlacementEffectsConfig()
+        {
+            RunSimulationConfig config = HeatConfig();
+            config.MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test";
+            config.MvpPlacementEffects = new[]
+            {
+                new MvpPlacementEffectConfig
+                {
+                    CategoryId = MvpDungeonPlacementIds.RoomCategoryId,
+                    OptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    PathCapacity = 2,
+                    ExplanationKey = "effect.current"
+                }
+            };
+            return config;
+        }
+
+        private static string FeedbackLocalize(string key, string fallback)
+        {
+            switch (key)
+            {
+                case MvpRunResultFeedbackPresenter.SuccessStableHeatKey:
+                    return "stable";
+                case MvpRunResultFeedbackPresenter.SuccessHeatIncreasedKey:
+                    return "increased";
+                case MvpRunResultFeedbackPresenter.OutcomeCueHeatIncreasedKey:
+                    return "heat cue";
+                case MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey:
+                    return "loot cue";
+                case MvpRunResultFeedbackPresenter.OutcomeCueFormatKey:
+                    return "{0} {1}";
+                case MvpRunResultFeedbackPresenter.FormatKey:
+                    return "{0} loot {2}/{3}/{4} heat {5}->{6}.";
+                case MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey:
+                    return "{0} Placement impact: {1}.";
+                case MvpPlacementEffectsPresenter.DetailSeparatorKey:
+                    return ", ";
+                case MvpPlacementEffectsPresenter.PathCapacityFormatKey:
+                    return "path +{0}";
+                case MvpPlacementEffectsPresenter.DangerFormatKey:
+                    return "danger +{0}";
+                case MvpPlacementEffectsPresenter.ExplanationFormatKey:
+                    return "{0} ({1})";
+                case "effect.current":
+                    return "current room";
+                case "effect.stored":
+                    return "stored danger";
+                default:
+                    return fallback;
+            }
         }
 
         private static void AssertSafetyFlags(MvpPlayerLoopSummary summary)

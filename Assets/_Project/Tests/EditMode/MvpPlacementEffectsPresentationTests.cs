@@ -71,17 +71,8 @@ namespace DungeonBuilder.Tests.EditMode
                     new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
                     new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2)
                 },
-                PlacementEffects = new MvpPlacementEffectsSummary
-                {
-                    RuleResolved = true,
-                    PathCapacity = 2,
-                    Danger = 5,
-                    ManaPressure = 2,
-                    HeatPressure = 1,
-                    LootBonus = 4,
-                    Attraction = 2,
-                    EffectLocalizationKeys = new[] { "effect.room", "effect.monster" }
-                },
+                PlacementEffects = EffectsSummary(),
+                LatestRunPlacementEffects = EffectsSummary(),
                 HasRunOutcome = hasRun,
                 LatestRunId = "run-test",
                 RunSucceeded = true,
@@ -92,6 +83,21 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatBefore = 1d,
                 HeatAfter = 1d,
                 NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey
+            };
+        }
+
+        private static MvpPlacementEffectsSummary EffectsSummary()
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                PathCapacity = 2,
+                Danger = 5,
+                ManaPressure = 2,
+                HeatPressure = 1,
+                LootBonus = 4,
+                Attraction = 2,
+                EffectLocalizationKeys = new[] { "effect.room", "effect.monster" }
             };
         }
 

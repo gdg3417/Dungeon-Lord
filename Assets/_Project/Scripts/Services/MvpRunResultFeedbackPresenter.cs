@@ -99,8 +99,8 @@ namespace DungeonBuilder.M0
 
         private static string BuildPlacementEffectsImpact(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            return MvpPlacementEffectsPresenter.HasAnyEffect(summary?.PlacementEffects)
-                ? MvpPlacementEffectsPresenter.BuildEffectsText(summary.PlacementEffects, localize)
+            return MvpPlacementEffectsPresenter.HasAnyEffect(summary?.LatestRunPlacementEffects)
+                ? MvpPlacementEffectsPresenter.BuildEffectsText(summary.LatestRunPlacementEffects, localize)
                 : string.Empty;
         }
 

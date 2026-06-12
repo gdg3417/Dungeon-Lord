@@ -75,6 +75,7 @@ namespace DungeonBuilder.M0
                 SelectedStructureId = selectedSlot.HasValue ? selectedSlot.Value.StructureId ?? string.Empty : string.Empty,
                 DungeonPlacements = dungeonPlacements,
                 PlacementEffects = placementEffects,
+                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects),
                 HasRunOutcome = hasRunOutcome,
                 LatestRunId = latestRun?.RunId ?? string.Empty,
                 RunSucceeded = latestRun != null && latestRun.Success,
@@ -106,6 +107,33 @@ namespace DungeonBuilder.M0
 
             summary.NextOptimizationSuggestionKey = ChooseSuggestion(summary);
             return summary;
+        }
+
+        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
+        {
+            RunCompositionOutcomeSummary composition = latestRun?.CompositionOutcomeSummary;
+            if (composition == null)
+            {
+                return currentPlacementEffects;
+            }
+
+            MvpPlacementEffectsSummary stored = composition.PlacementEffects;
+            if (composition.RuleResolved && stored != null && stored.RuleResolved)
+            {
+                return stored;
+            }
+
+            return CreateEmptyResolvedPlacementEffects();
+        }
+
+        private static MvpPlacementEffectsSummary CreateEmptyResolvedPlacementEffects()
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                ContributingOptionIds = Array.Empty<string>(),
+                EffectLocalizationKeys = Array.Empty<string>()
+            };
         }
 
         private static MvpPlayerLoopSummary CreateError(MvpPlayerLoopSummaryErrorCode code)
