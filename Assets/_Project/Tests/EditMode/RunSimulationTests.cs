@@ -2754,7 +2754,20 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome, Is.Not.Null);
             Assert.That(outcome.RunId, Is.EqualTo("run.legacy"));
             Assert.That(outcome.Success, Is.True);
-            Assert.That(outcome.CompositionOutcomeSummary, Is.Null);
+
+            RunCompositionOutcomeSummary composition = outcome.CompositionOutcomeSummary;
+            if (composition != null)
+            {
+                Assert.That(composition.RuleResolved, Is.False);
+                Assert.That(MvpPlacementEffectsPresenter.HasAnyEffect(composition.PlacementEffects), Is.False);
+                Assert.That(composition.SuccessChanceDelta, Is.EqualTo(0d));
+                Assert.That(composition.ManaReservePressureCost, Is.EqualTo(0d));
+                Assert.That(composition.SurvivorRatioDelta, Is.EqualTo(0d));
+                Assert.That(composition.GeneratedLootMultiplier, Is.AnyOf(0d, 1d));
+                Assert.That(composition.ExtractedLootMultiplier, Is.AnyOf(0d, 1d));
+                Assert.That(composition.HeatDeltaOffset, Is.EqualTo(0d));
+                Assert.That(composition.AttractionSignalBonus, Is.EqualTo(0d));
+            }
         }
 
         private static MvpPlacementEffectsSummary StarterPlacementEffects(RunSimulationConfig config)
