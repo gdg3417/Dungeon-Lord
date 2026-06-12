@@ -2763,8 +2763,10 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(composition.SuccessChanceDelta, Is.EqualTo(0d));
                 Assert.That(composition.ManaReservePressureCost, Is.EqualTo(0d));
                 Assert.That(composition.SurvivorRatioDelta, Is.EqualTo(0d));
-                Assert.That(composition.GeneratedLootMultiplier, Is.AnyOf(0d, 1d));
-                Assert.That(composition.ExtractedLootMultiplier, Is.AnyOf(0d, 1d));
+                bool generatedMultiplierSafe = composition.GeneratedLootMultiplier == 0d || composition.GeneratedLootMultiplier == 1d;
+                bool extractedMultiplierSafe = composition.ExtractedLootMultiplier == 0d || composition.ExtractedLootMultiplier == 1d;
+                Assert.That(generatedMultiplierSafe, Is.True);
+                Assert.That(extractedMultiplierSafe, Is.True);
                 Assert.That(composition.HeatDeltaOffset, Is.EqualTo(0d));
                 Assert.That(composition.AttractionSignalBonus, Is.EqualTo(0d));
             }
