@@ -1,4 +1,5 @@
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -107,6 +108,65 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("structure.debug.raw"));
         }
 
+
+        [Test]
+        public void Feedback_UsesLatestRunPlacementEffectsInsteadOfCurrentPlacementEffects_WithoutRawIds()
+        {
+            MvpPlayerLoopSummary summary = Summary(
+                runSucceeded: true,
+                latestRunId: "run.raw.latest",
+                selectedStructureId: StructureSimulationPass.HeatRiskId,
+                mana: 12d,
+                generatedLoot: 7,
+                extractedLoot: 5,
+                tradeableLoot: 3,
+                heatBefore: 4d,
+                heatAfter: 4d,
+                partyClassIds: new[] { AdventurerPartyCompositionResolver.WarriorClassId });
+            summary.PlacementEffects = CurrentPlacementEffects();
+            summary.LatestRunPlacementEffects = LatestRunPlacementEffects();
+
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                summary,
+                didRun: true,
+                Localized,
+                MinimalMvpActionPanelPresenter.GreedyPostureKey);
+
+            Assert.That(text, Does.Contain("Placement impact: danger +3 (latest trap pressure)."));
+            Assert.That(text, Does.Not.Contain("current room capacity"));
+            AssertNoRawIdsOrKeys(text);
+        }
+
+        [Test]
+        public void Feedback_LegacyFallbackLatestRunEffects_ShowsCurrentEffectsSafelyWithoutRawIds()
+        {
+            MvpPlacementEffectsSummary fallbackEffects = CurrentPlacementEffects();
+            MvpPlayerLoopSummary summary = Summary(
+                runSucceeded: true,
+                latestRunId: "run.raw.legacy",
+                selectedStructureId: StructureSimulationPass.ManaGeneratorBasicId,
+                mana: 12d,
+                generatedLoot: 7,
+                extractedLoot: 5,
+                tradeableLoot: 3,
+                heatBefore: 4d,
+                heatAfter: 4d,
+                partyClassIds: new[] { AdventurerPartyCompositionResolver.RogueClassId });
+            summary.PlacementEffects = fallbackEffects;
+            summary.LatestRunPlacementEffects = fallbackEffects;
+
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+                Summary(hasRun: false),
+                summary,
+                didRun: true,
+                Localized,
+                MinimalMvpActionPanelPresenter.CautiousPostureKey);
+
+            Assert.That(text, Does.Contain("Placement impact: path +2 (current room capacity)."));
+            AssertNoRawIdsOrKeys(text);
+        }
+
         [Test]
         public void Feedback_RequestsLocalizationKeysInsteadOfHardcodedEnglish()
         {
@@ -126,6 +186,45 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain(MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey));
             Assert.That(requestedKeys, Does.Contain(MvpRunResultFeedbackPresenter.OutcomeCueFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpRunResultFeedbackPresenter.FormatKey));
+        }
+
+
+        private static MvpPlacementEffectsSummary CurrentPlacementEffects()
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                PathCapacity = 2,
+                ContributingOptionIds = new[] { MvpDungeonPlacementIds.BasicRoomOptionId },
+                EffectLocalizationKeys = new[] { "effect.current_room" }
+            };
+        }
+
+        private static MvpPlacementEffectsSummary LatestRunPlacementEffects()
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                Danger = 3,
+                ContributingOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
+                EffectLocalizationKeys = new[] { "effect.latest_trap" }
+            };
+        }
+
+        private static void AssertNoRawIdsOrKeys(string text)
+        {
+            Assert.That(text, Does.Not.Contain("ui.mvp_run_feedback"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_placement_effects"));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.SpikeTrapOptionId));
+            Assert.That(text, Does.Not.Contain(CurrentHeatTierResolver.NoticeTierId));
+            Assert.That(text, Does.Not.Contain(RunPostureResolver.CautiousId));
+            Assert.That(text, Does.Not.Contain(RunPostureResolver.GreedyId));
+            Assert.That(text, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
+            Assert.That(text, Does.Not.Contain(AdventurerPartyCompositionResolver.RogueClassId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatRiskId));
+            Assert.That(text, Does.Not.Contain("run.raw"));
         }
 
         private static MvpPlayerLoopSummary Summary(
@@ -176,6 +275,11 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.FormatWithPartyKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}",
                 [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Posture: {0}. {1}",
                 [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
+                [MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey] = "{0} Placement impact: {1}.",
+                [MvpPlacementEffectsPresenter.DetailSeparatorKey] = ", ",
+                [MvpPlacementEffectsPresenter.PathCapacityFormatKey] = "path +{0}",
+                [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger +{0}",
+                [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",
                 [MinimalMvpActionPanelPresenter.CautiousPostureKey] = "Cautious",
                 [MinimalMvpActionPanelPresenter.BalancedPostureKey] = "Balanced",
                 [MinimalMvpActionPanelPresenter.GreedyPostureKey] = "Greedy",
@@ -183,7 +287,9 @@ namespace DungeonBuilder.Tests.EditMode
                 ["adventurer.class.rogue.display_name"] = "Rogue",
                 ["adventurer.class.mage.display_name"] = "Mage",
                 ["adventurer.class.cleric.display_name"] = "Cleric",
-                ["adventurer.class.ranger.display_name"] = "Ranger"
+                ["adventurer.class.ranger.display_name"] = "Ranger",
+                ["effect.current_room"] = "current room capacity",
+                ["effect.latest_trap"] = "latest trap pressure"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;
