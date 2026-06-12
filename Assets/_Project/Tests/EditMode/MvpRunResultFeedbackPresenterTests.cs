@@ -115,7 +115,7 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = Summary(
                 runSucceeded: true,
                 latestRunId: "run.raw.latest",
-                selectedStructureId: StructureSimulationPass.HeatRiskId,
+                selectedStructureId: StructureSimulationPass.HeatScrubberBasicId,
                 mana: 12d,
                 generatedLoot: 7,
                 extractedLoot: 5,
@@ -223,7 +223,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Not.Contain(AdventurerPartyCompositionResolver.RogueClassId));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
-            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatRiskId));
+            Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
             Assert.That(text, Does.Not.Contain("run.raw"));
         }
 
