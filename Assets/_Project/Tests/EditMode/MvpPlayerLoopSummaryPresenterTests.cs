@@ -184,21 +184,59 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
-        public void Resolve_BasicRunAnalysisUnlock_SetsSpecificAdviceWithoutMutationOrRewards()
+        public void Resolve_BasicRunAnalysisUnlockedWithDominantDangerPlacementEffects_ReturnsReduceDangerAdvice()
         {
-            SaveData save = FullSave();
-            save.researchPending = null;
-            save.researchProgress = null;
-            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+            SaveData save = SaveWithBasicRunAnalysisUnlocked();
+            save.runHistory.LatestOutcome = RunWithLoot(generatedWorldValue: 10, extractedWorldValue: 8, extractedTradeableWorldValue: 3);
+            save.runHistory.LatestOutcome.CompositionOutcomeSummary = new RunCompositionOutcomeSummary
+            {
+                RuleResolved = true,
+                PlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    Danger = 7,
+                    PathCapacity = 2,
+                    HeatPressure = 1
+                }
+            };
+
+            AssertAnalysisAdviceFromResolve(save, MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey);
+        }
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithHeatIncrease_ReturnsReduceHeatAdviceWithoutMutationOrRewards()
+        {
+            SaveData save = SaveWithBasicRunAnalysisUnlocked();
             save.runHistory.LatestOutcome = RunWithHeatApplication(2d, 7d, CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierResolver.NoticeTierId);
-            string before = JsonUtility.ToJson(save);
 
-            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+            AssertAnalysisAdviceFromResolve(save, MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey);
+        }
 
-            Assert.That(summary.AnalysisUnlocked, Is.True);
-            Assert.That(summary.AnalysisAdviceKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey));
-            AssertSafetyFlags(summary);
-            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithPartialLootExtraction_ReturnsImproveExtractionAdvice()
+        {
+            SaveData save = SaveWithBasicRunAnalysisUnlocked();
+            save.runHistory.LatestOutcome = RunWithLootAndHeat(generatedWorldValue: 12, extractedWorldValue: 5, extractedTradeableWorldValue: 4, heatBefore: 6d, heatAfter: 6d);
+
+            AssertAnalysisAdviceFromResolve(save, MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey);
+        }
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithFullLootRecoveryAndStableHeat_ReturnsTestGreedierAdvice()
+        {
+            SaveData save = SaveWithBasicRunAnalysisUnlocked();
+            save.runHistory.LatestOutcome = RunWithLootAndHeat(generatedWorldValue: 9, extractedWorldValue: 9, extractedTradeableWorldValue: 6, heatBefore: 6d, heatAfter: 6d);
+
+            AssertAnalysisAdviceFromResolve(save, MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey);
+        }
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithNoRun_ReturnsRunForAnalysisAdvice()
+        {
+            SaveData save = SaveWithBasicRunAnalysisUnlocked();
+            save.runHistory = new RunHistoryState();
+
+            AssertAnalysisAdviceFromResolve(save, MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey);
         }
 
         [Test]
@@ -329,6 +367,19 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(feedback, Does.Contain("current room"));
         }
 
+
+        private static void AssertAnalysisAdviceFromResolve(SaveData save, string expectedAdviceKey)
+        {
+            string before = JsonUtility.ToJson(save);
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+
+            Assert.That(summary.AnalysisUnlocked, Is.True);
+            Assert.That(summary.AnalysisAdviceKey, Is.EqualTo(expectedAdviceKey));
+            AssertSafetyFlags(summary);
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+        }
+
         private static void AssertSuggestion(SaveData save, string expectedKey)
         {
             string first = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig()).NextOptimizationSuggestionKey;
@@ -440,6 +491,16 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+
+        private static SaveData SaveWithBasicRunAnalysisUnlocked()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+            return save;
+        }
+
         private static RunOutcomeRecord RunWithLoot(int generatedWorldValue, int extractedWorldValue, int extractedTradeableWorldValue)
         {
             return new RunOutcomeRecord
@@ -470,6 +531,20 @@ namespace DungeonBuilder.Tests.EditMode
                     TierAfter = CurrentHeatTierResolver.NoticeTierId
                 }
             };
+        }
+
+
+        private static RunOutcomeRecord RunWithLootAndHeat(int generatedWorldValue, int extractedWorldValue, int extractedTradeableWorldValue, double heatBefore, double heatAfter)
+        {
+            RunOutcomeRecord run = RunWithLoot(generatedWorldValue, extractedWorldValue, extractedTradeableWorldValue);
+            run.HeatAtStart = heatBefore;
+            run.RunHeatApplicationSummary.HeatBefore = heatBefore;
+            run.RunHeatApplicationSummary.AppliedDelta = heatAfter - heatBefore;
+            run.RunHeatApplicationSummary.HeatAfter = heatAfter;
+            run.RunHeatApplicationSummary.TierBefore = CurrentHeatTierResolver.NoticeTierId;
+            run.RunHeatApplicationSummary.TierAfter = CurrentHeatTierResolver.NoticeTierId;
+            run.RunHeatApplicationSummary.TierChanged = false;
+            return run;
         }
 
         private static RunOutcomeRecord RunWithHeatApplication(double heatBefore, double heatAfter, string tierBefore, string tierAfter)
