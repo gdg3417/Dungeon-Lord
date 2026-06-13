@@ -106,7 +106,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(Summary(hasRun: false), summary, didRun: true, Localized);
 
-            Assert.That(text, Does.Contain("Loot found: Test loot."));
+            Assert.That(text, Does.Contain("Loot found: 1x Test loot."));
             Assert.That(text, Does.Not.Contain("loot.item.raw"));
             Assert.That(text, Does.Not.Contain("loot.item.test.name"));
         }
