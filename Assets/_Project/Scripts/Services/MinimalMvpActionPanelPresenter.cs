@@ -118,9 +118,13 @@ namespace DungeonBuilder.M0
                 Localize(localize, MvpDungeonPlacementPresenter.TrapCategoryKey),
                 Localize(localize, MvpDungeonPlacementPresenter.LootNodeCategoryKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicRoomOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.NarrowHallOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SkeletonOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.GoblinOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SpikeTrapOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.SnareTrapOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicLootNodeOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.HiddenCacheOptionKey),
                 Localize(localize, ManaGeneratorSelectionKey),
                 Localize(localize, HeatScrubberSelectionKey),
                 Localize(localize, RiskLabSelectionKey),
@@ -175,9 +179,13 @@ namespace DungeonBuilder.M0
             string trapCategory,
             string lootNodeCategory,
             string basicRoomSelection,
+            string narrowHallSelection,
             string skeletonSelection,
+            string goblinSelection,
             string spikeTrapSelection,
+            string snareTrapSelection,
             string basicLootNodeSelection,
+            string hiddenCacheSelection,
             string manaGeneratorSelection,
             string heatScrubberSelection,
             string riskLabSelection,
@@ -202,9 +210,13 @@ namespace DungeonBuilder.M0
             TrapCategory = trapCategory;
             LootNodeCategory = lootNodeCategory;
             BasicRoomSelection = basicRoomSelection;
+            NarrowHallSelection = narrowHallSelection;
             SkeletonSelection = skeletonSelection;
+            GoblinSelection = goblinSelection;
             SpikeTrapSelection = spikeTrapSelection;
+            SnareTrapSelection = snareTrapSelection;
             BasicLootNodeSelection = basicLootNodeSelection;
+            HiddenCacheSelection = hiddenCacheSelection;
             ManaGeneratorSelection = manaGeneratorSelection;
             HeatScrubberSelection = heatScrubberSelection;
             RiskLabSelection = riskLabSelection;
@@ -230,9 +242,13 @@ namespace DungeonBuilder.M0
         public string TrapCategory { get; }
         public string LootNodeCategory { get; }
         public string BasicRoomSelection { get; }
+        public string NarrowHallSelection { get; }
         public string SkeletonSelection { get; }
+        public string GoblinSelection { get; }
         public string SpikeTrapSelection { get; }
+        public string SnareTrapSelection { get; }
         public string BasicLootNodeSelection { get; }
+        public string HiddenCacheSelection { get; }
         public string ManaGeneratorSelection { get; }
         public string HeatScrubberSelection { get; }
         public string RiskLabSelection { get; }

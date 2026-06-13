@@ -1177,20 +1177,40 @@ namespace DungeonBuilder.M0
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);
             }
+            if (GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.NarrowHallOptionId);
+            }
             if (GUILayout.Button(labels.SkeletonSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.SkeletonOptionId);
+            }
+            if (GUILayout.Button(labels.GoblinSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.GoblinOptionId);
             }
             if (GUILayout.Button(labels.SpikeTrapSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.SpikeTrapOptionId);
             }
+            if (GUILayout.Button(labels.SnareTrapSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.SnareTrapOptionId);
+            }
             if (GUILayout.Button(labels.BasicLootNodeSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId);
+            }
+            if (GUILayout.Button(labels.HiddenCacheSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.HiddenCacheOptionId);
             }
             if (GUILayout.Button(labels.CautiousPosture, compactButton, buttonHeight))
             {

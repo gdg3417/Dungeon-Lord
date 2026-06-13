@@ -16,13 +16,21 @@ namespace DungeonBuilder.M0
         public const string TrapCategoryKey = "placement.category.trap.display_name";
         public const string LootNodeCategoryKey = "placement.category.loot_node.display_name";
         public const string BasicRoomOptionKey = "placement.option.room.basic.display_name";
+        public const string NarrowHallOptionKey = "placement.option.room.narrow_hall.display_name";
         public const string SkeletonOptionKey = "placement.option.monster.skeleton.display_name";
+        public const string GoblinOptionKey = "placement.option.monster.goblin.display_name";
         public const string SpikeTrapOptionKey = "placement.option.trap.spike.display_name";
+        public const string SnareTrapOptionKey = "placement.option.trap.snare.display_name";
         public const string BasicLootNodeOptionKey = "placement.option.loot_node.basic.display_name";
+        public const string HiddenCacheOptionKey = "placement.option.loot_node.hidden_cache.display_name";
         public const string BasicRoomPreviewKey = "ui.mvp_placement_preview.room.basic";
+        public const string NarrowHallPreviewKey = "ui.mvp_placement_preview.room.narrow_hall";
         public const string SkeletonPreviewKey = "ui.mvp_placement_preview.monster.skeleton";
+        public const string GoblinPreviewKey = "ui.mvp_placement_preview.monster.goblin";
         public const string SpikeTrapPreviewKey = "ui.mvp_placement_preview.trap.spike";
+        public const string SnareTrapPreviewKey = "ui.mvp_placement_preview.trap.snare";
         public const string BasicLootNodePreviewKey = "ui.mvp_placement_preview.loot_node.basic";
+        public const string HiddenCachePreviewKey = "ui.mvp_placement_preview.loot_node.hidden_cache";
         public const string UnknownPreviewKey = "ui.mvp_placement_preview.unknown";
 
         public static string ResolveCategoryName(string categoryId, Func<string, string, string> localize)
@@ -101,14 +109,26 @@ namespace DungeonBuilder.M0
                 case MvpDungeonPlacementIds.BasicRoomOptionId:
                     key = BasicRoomOptionKey;
                     return true;
+                case MvpDungeonPlacementIds.NarrowHallOptionId:
+                    key = NarrowHallOptionKey;
+                    return true;
                 case MvpDungeonPlacementIds.SkeletonOptionId:
                     key = SkeletonOptionKey;
+                    return true;
+                case MvpDungeonPlacementIds.GoblinOptionId:
+                    key = GoblinOptionKey;
                     return true;
                 case MvpDungeonPlacementIds.SpikeTrapOptionId:
                     key = SpikeTrapOptionKey;
                     return true;
+                case MvpDungeonPlacementIds.SnareTrapOptionId:
+                    key = SnareTrapOptionKey;
+                    return true;
                 case MvpDungeonPlacementIds.BasicLootNodeOptionId:
                     key = BasicLootNodeOptionKey;
+                    return true;
+                case MvpDungeonPlacementIds.HiddenCacheOptionId:
+                    key = HiddenCacheOptionKey;
                     return true;
                 default:
                     key = string.Empty;
@@ -122,12 +142,20 @@ namespace DungeonBuilder.M0
             {
                 case MvpDungeonPlacementIds.BasicRoomOptionId:
                     return BasicRoomPreviewKey;
+                case MvpDungeonPlacementIds.NarrowHallOptionId:
+                    return NarrowHallPreviewKey;
                 case MvpDungeonPlacementIds.SkeletonOptionId:
                     return SkeletonPreviewKey;
+                case MvpDungeonPlacementIds.GoblinOptionId:
+                    return GoblinPreviewKey;
                 case MvpDungeonPlacementIds.SpikeTrapOptionId:
                     return SpikeTrapPreviewKey;
+                case MvpDungeonPlacementIds.SnareTrapOptionId:
+                    return SnareTrapPreviewKey;
                 case MvpDungeonPlacementIds.BasicLootNodeOptionId:
                     return BasicLootNodePreviewKey;
+                case MvpDungeonPlacementIds.HiddenCacheOptionId:
+                    return HiddenCachePreviewKey;
                 default:
                     return UnknownPreviewKey;
             }

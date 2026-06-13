@@ -139,6 +139,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
                 [MvpDungeonPlacementPresenter.BasicRoomOptionKey] = "Basic Room",
+                [MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall",
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0}: {1}",
                 [MvpDungeonPlacementPresenter.SeparatorKey] = "; ",

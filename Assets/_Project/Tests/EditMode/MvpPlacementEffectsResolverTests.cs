@@ -1,3 +1,4 @@
+using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
@@ -7,6 +8,19 @@ namespace DungeonBuilder.Tests.EditMode
 {
     public class MvpPlacementEffectsResolverTests
     {
+
+        [Test]
+        public void BootstrapConfig_DefinesEffectsForAllMvpPlacementOptions()
+        {
+            string path = Path.Combine(Application.dataPath, "_Project/Data/Bootstrap/run_simulation_config.json");
+            RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText(path));
+
+            foreach (string optionId in MvpDungeonPlacementIds.OrderedOptionIds)
+            {
+                Assert.That(System.Array.Exists(config.MvpPlacementEffects, effect => effect != null && effect.OptionId == optionId), Is.True, optionId);
+            }
+        }
+
         [Test]
         public void Resolve_NoPlacements_ReturnsSafeZeroDefaults()
         {
@@ -84,6 +98,40 @@ namespace DungeonBuilder.Tests.EditMode
             }));
         }
 
+
+        [Test]
+        public void Resolve_AllAlternativePlacements_CombinesDistinctContributionsDeterministically()
+        {
+            MvpDungeonPlacementState state = new MvpDungeonPlacementState
+            {
+                Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 2),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId, 3),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, 4)
+                }
+            };
+
+            MvpPlacementEffectsSummary first = MvpPlacementEffectsResolver.Resolve(state, Config());
+            MvpPlacementEffectsSummary second = MvpPlacementEffectsResolver.Resolve(state, Config());
+
+            Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
+            Assert.That(first.PathCapacity, Is.EqualTo(1));
+            Assert.That(first.Danger, Is.EqualTo(3));
+            Assert.That(first.ManaPressure, Is.EqualTo(1));
+            Assert.That(first.HeatPressure, Is.Zero);
+            Assert.That(first.LootBonus, Is.EqualTo(4));
+            Assert.That(first.Attraction, Is.EqualTo(2));
+            Assert.That(first.ContributingOptionIds, Is.EqualTo(new[]
+            {
+                MvpDungeonPlacementIds.NarrowHallOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId
+            }));
+        }
+
         [Test]
         public void Resolve_LegacyStateWithoutConfig_ReturnsSafeZeroDefaults()
         {
@@ -128,9 +176,13 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpPlacementEffects = new[]
                 {
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2, ExplanationKey = "effect.room" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.NarrowHallOptionId, PathCapacity = 1, ExplanationKey = "effect.hall" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 3, ManaPressure = 2, ExplanationKey = "effect.monster" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId, Danger = 2, ManaPressure = 1, LootBonus = 1, Attraction = 1, ExplanationKey = "effect.goblin" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "effect.trap" },
-                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "effect.loot" }
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SnareTrapOptionId, Danger = 1, ExplanationKey = "effect.snare" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "effect.loot" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "effect.cache" }
                 }
             };
         }
