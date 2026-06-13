@@ -939,6 +939,42 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_AttachesDeterministicLootBreakdown_WhenLootExtracts()
+        {
+            var firstService = new RunSimulationService(BuildConfig(), BuildLootConfig());
+            var secondService = new RunSimulationService(BuildConfig(), BuildLootConfig());
+
+            RunOutcomeRecord first = firstService.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 50, 1);
+            RunOutcomeRecord second = secondService.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 50, 1);
+
+            Assert.That(first.LootBreakdown, Has.Length.EqualTo(second.LootBreakdown.Length));
+            Assert.That(first.LootBreakdown, Is.Not.Empty);
+            for (int i = 0; i < first.LootBreakdown.Length; i++)
+            {
+                Assert.That(first.LootBreakdown[i].LootId, Is.EqualTo(second.LootBreakdown[i].LootId));
+                Assert.That(first.LootBreakdown[i].NameKey, Is.EqualTo(second.LootBreakdown[i].NameKey));
+                Assert.That(first.LootBreakdown[i].Quantity, Is.EqualTo(second.LootBreakdown[i].Quantity));
+                Assert.That(first.LootBreakdown[i].TotalWorldValue, Is.EqualTo(second.LootBreakdown[i].TotalWorldValue));
+            }
+            Assert.That(first.LootBreakdown[0].NameKey, Is.Not.Empty);
+            Assert.That(first.LootBreakdown.Sum(entry => entry.TotalWorldValue), Is.LessThanOrEqualTo(first.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(first.LootExtractionSummary.TotalExtractedWorldValue, Is.LessThanOrEqualTo(first.LootSummary.TotalGeneratedWorldValue));
+        }
+
+        [Test]
+        public void SimulateOnce_MissingLootConfig_FallsBackToNumericLootOnlyOutcome()
+        {
+            var service = new RunSimulationService(BuildConfig(), null);
+
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 10d, ManaReserve = 20d, IsHeatCrisisActive = false }, 50, 1);
+
+            Assert.That(outcome.LootSummary, Is.Not.Null);
+            Assert.That(outcome.LootSummary.ResolverSuccess, Is.False);
+            Assert.That(outcome.LootBreakdown, Is.Empty);
+            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
+        }
+
+        [Test]
         public void SimulateOnce_StoresResolverFailure_WithoutCrashing()
         {
             LootConfig invalid = BuildLootConfig();

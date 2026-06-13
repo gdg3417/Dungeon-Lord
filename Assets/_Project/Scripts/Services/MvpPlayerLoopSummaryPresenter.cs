@@ -83,6 +83,7 @@ namespace DungeonBuilder.M0
                 LootGeneratedWorldValue = generatedWorldValue,
                 LootExtractedWorldValue = extractedWorldValue,
                 LootExtractedTradeableWorldValue = extractedTradeableWorldValue,
+                LootBreakdown = CloneLootBreakdown(latestRun?.LootBreakdown),
                 HeatBefore = hasResolvedHeatApplication ? heatApplication.HeatBefore : latestRun?.HeatAtStart ?? currentHeat,
                 HeatAfter = hasResolvedHeatApplication ? heatApplication.HeatAfter : currentHeat,
                 HeatTierId = heatTierId,
@@ -134,6 +135,30 @@ namespace DungeonBuilder.M0
                 ContributingOptionIds = Array.Empty<string>(),
                 EffectLocalizationKeys = Array.Empty<string>()
             };
+        }
+
+        private static RunLootDropRecord[] CloneLootBreakdown(RunLootDropRecord[] source)
+        {
+            if (source == null || source.Length == 0)
+            {
+                return Array.Empty<RunLootDropRecord>();
+            }
+
+            var clone = new RunLootDropRecord[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                RunLootDropRecord entry = source[i];
+                clone[i] = entry == null ? null : new RunLootDropRecord
+                {
+                    LootId = entry.LootId,
+                    NameKey = entry.NameKey,
+                    Quantity = entry.Quantity,
+                    TotalWorldValue = entry.TotalWorldValue,
+                    TotalTradeableWorldValue = entry.TotalTradeableWorldValue
+                };
+            }
+
+            return clone;
         }
 
         private static MvpPlayerLoopSummary CreateError(MvpPlayerLoopSummaryErrorCode code)

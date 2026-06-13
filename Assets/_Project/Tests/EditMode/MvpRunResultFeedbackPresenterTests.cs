@@ -96,6 +96,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Feedback_WithNamedLoot_UsesLocalizedNamesWithoutRawLootIdsOrKeys()
+        {
+            MvpPlayerLoopSummary summary = Summary(runSucceeded: true, mana: 12d, generatedLoot: 7, extractedLoot: 5, tradeableLoot: 3, heatBefore: 4d, heatAfter: 4d);
+            summary.LootBreakdown = new[]
+            {
+                new RunLootDropRecord { LootId = "loot.item.raw", NameKey = "loot.item.test.name", Quantity = 1, TotalWorldValue = 5, TotalTradeableWorldValue = 3 }
+            };
+
+            string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(Summary(hasRun: false), summary, didRun: true, Localized);
+
+            Assert.That(text, Does.Contain("Loot found: 1x Test loot."));
+            Assert.That(text, Does.Not.Contain("loot.item.raw"));
+            Assert.That(text, Does.Not.Contain("loot.item.test.name"));
+        }
+
+        [Test]
         public void UnavailableRun_UsesLocalizedFallbackWithoutFormattingRawState()
         {
             string text = MvpRunResultFeedbackPresenter.BuildFeedbackText(
@@ -276,6 +292,9 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Posture: {0}. {1}",
                 [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
                 [MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey] = "{0} Placement impact: {1}.",
+                [MvpRunResultFeedbackPresenter.LootPreviewFormatKey] = "{0} Loot found: {1}.",
+                [MvpLoopSummaryPanelPresenter.LootEntryFormatKey] = "{0}x {1}",
+                ["loot.item.test.name"] = "Test loot",
                 [MvpPlacementEffectsPresenter.DetailSeparatorKey] = ", ",
                 [MvpPlacementEffectsPresenter.PathCapacityFormatKey] = "path +{0}",
                 [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger +{0}",

@@ -105,6 +105,31 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
+        public void BuildPanelText_WithLootBreakdown_UsesLocalizedNamedLootWithoutRawIdsOrKeys()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                LootGeneratedWorldValue = 9,
+                LootExtractedWorldValue = 5,
+                LootExtractedTradeableWorldValue = 5,
+                LootBreakdown = new[]
+                {
+                    new RunLootDropRecord { LootId = "loot.item.raw", NameKey = "loot.item.test.name", Quantity = 2, TotalWorldValue = 5, TotalTradeableWorldValue = 5 }
+                },
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[ui.mvp_loop.panel.loot_named_format]:9:5:5:LOC[ui.mvp_loop.panel.loot_entry_format]:2:LOC[loot.item.test.name]"));
+            Assert.That(text, Does.Not.Contain("loot.item.raw"));
+            Assert.That(text, Does.Not.Contain("loot.item.test.name:"));
+        }
+
+        [Test]
         public void BuildPanelText_UnknownResearchStatus_UsesSafeLocalizedFallbackInsteadOfRawProjectId()
         {
             MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
@@ -157,6 +182,10 @@ namespace DungeonBuilder.Tests.EditMode
                     return "LOC[" + key + "]:{0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey:
                     return "LOC[" + key + "]:{0}:{1}:{2}";
+                case MvpLoopSummaryPanelPresenter.LootNamedFormatKey:
+                    return "LOC[" + key + "]:{0}:{1}:{2}:{3}";
+                case MvpLoopSummaryPanelPresenter.LootEntryFormatKey:
+                    return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey:
                     return "LOC[" + key + "]:{0:0.##}:{1:0.##}:{2}";
                 default:

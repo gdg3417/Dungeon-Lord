@@ -1098,6 +1098,50 @@
     {
       "key": "ui.mvp_dungeon_layout.value.empty_available",
       "text": "Empty / available"
+    },
+    {
+      "key": "ui.mvp_loop.panel.loot_named_format",
+      "text": "Loot: generated {0}, extracted {1}, tradeable {2} ({3})"
+    },
+    {
+      "key": "ui.mvp_loop.panel.loot_entry_format",
+      "text": "{0}x {1}"
+    },
+    {
+      "key": "ui.mvp_run_feedback.loot_preview_format",
+      "text": "{0} Loot found: {1}."
+    },
+    {
+      "key": "loot.item.coin.chipped.name",
+      "text": "Chipped coins"
+    },
+    {
+      "key": "loot.item.coin.chipped.desc",
+      "text": "Low-value coins recovered from the dungeon."
+    },
+    {
+      "key": "loot.item.fang.goblin.name",
+      "text": "Goblin fangs"
+    },
+    {
+      "key": "loot.item.fang.goblin.desc",
+      "text": "Monster parts suitable for basic trade."
+    },
+    {
+      "key": "loot.item.salvage.trap.name",
+      "text": "Trap salvage"
+    },
+    {
+      "key": "loot.item.salvage.trap.desc",
+      "text": "Reusable pieces recovered from spent traps."
+    },
+    {
+      "key": "loot.item.relic.bronze.name",
+      "text": "Bronze relic"
+    },
+    {
+      "key": "loot.item.relic.bronze.desc",
+      "text": "A simple relic pulled from the dungeon."
     }
   ]
 }

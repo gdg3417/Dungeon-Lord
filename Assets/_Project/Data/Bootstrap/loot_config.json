@@ -3,14 +3,36 @@
   "schemaVersion": 1,
   "items": [
     {
-      "id": "loot.item.scrap.iron",
-      "tierId": "loot_tier.iron",
+      "id": "loot.item.coin.chipped",
+      "tierId": "loot_tier.common",
       "rarityId": "loot_rarity.common",
-      "categoryId": "loot_category.material",
+      "categoryId": "loot_category.treasure",
+      "worldValue": 2,
+      "reserveCost": 0,
+      "nameKey": "loot.item.coin.chipped.name",
+      "descriptionKey": "loot.item.coin.chipped.desc",
+      "isTradeable": true
+    },
+    {
+      "id": "loot.item.fang.goblin",
+      "tierId": "loot_tier.common",
+      "rarityId": "loot_rarity.common",
+      "categoryId": "loot_category.monster_part",
       "worldValue": 3,
       "reserveCost": 1,
-      "nameKey": "loot.item.scrap.iron.name",
-      "descriptionKey": "loot.item.scrap.iron.desc",
+      "nameKey": "loot.item.fang.goblin.name",
+      "descriptionKey": "loot.item.fang.goblin.desc",
+      "isTradeable": true
+    },
+    {
+      "id": "loot.item.salvage.trap",
+      "tierId": "loot_tier.common",
+      "rarityId": "loot_rarity.common",
+      "categoryId": "loot_category.salvage",
+      "worldValue": 4,
+      "reserveCost": 1,
+      "nameKey": "loot.item.salvage.trap.name",
+      "descriptionKey": "loot.item.salvage.trap.desc",
       "isTradeable": true
     },
     {
@@ -32,8 +54,22 @@
       "maxRollCount": 2,
       "allowEmptyPool": false,
       "pool": [
-        { "itemId": "loot.item.scrap.iron", "weight": 1.0 },
-        { "itemId": "loot.item.relic.bronze", "weight": 1.0 }
+        {
+          "itemId": "loot.item.coin.chipped",
+          "weight": 3.0
+        },
+        {
+          "itemId": "loot.item.fang.goblin",
+          "weight": 2.0
+        },
+        {
+          "itemId": "loot.item.salvage.trap",
+          "weight": 2.0
+        },
+        {
+          "itemId": "loot.item.relic.bronze",
+          "weight": 1.0
+        }
       ]
     }
   ]

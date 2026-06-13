@@ -362,6 +362,7 @@ namespace DungeonBuilder.M0
         public RunLootSummary LootSummary;
         public RunSurvivalSummary SurvivalSummary;
         public RunLootExtractionSummary LootExtractionSummary;
+        public RunLootDropRecord[] LootBreakdown = Array.Empty<RunLootDropRecord>();
         public RunLootHeatCoolingSummary LootHeatCoolingSummary;
         public RunAdventurerAttractionSummary AdventurerAttractionSummary;
         public RunAdventurerInterestForecastSummary AdventurerInterestForecastSummary;
@@ -413,6 +414,16 @@ namespace DungeonBuilder.M0
         public int TotalGeneratedWorldValue;
         public int TotalGeneratedReserveCost;
         public int TotalGeneratedTradeableWorldValue;
+    }
+
+    [Serializable]
+    public sealed class RunLootDropRecord
+    {
+        public string LootId;
+        public string NameKey;
+        public int Quantity;
+        public int TotalWorldValue;
+        public int TotalTradeableWorldValue;
     }
 
     [Serializable]
@@ -550,6 +561,7 @@ namespace DungeonBuilder.M0
         public int LootGeneratedWorldValue = 0;
         public int LootExtractedWorldValue = 0;
         public int LootExtractedTradeableWorldValue = 0;
+        public RunLootDropRecord[] LootBreakdown = Array.Empty<RunLootDropRecord>();
         public double HeatBefore = 0d;
         public double HeatAfter = 0d;
         public string HeatTierId;
