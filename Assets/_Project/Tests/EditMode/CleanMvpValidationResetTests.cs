@@ -297,7 +297,6 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
-            Assert.That(refreshed, Does.Contain("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
             Assert.That(refreshed, Does.Contain("Placement effects: none yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));

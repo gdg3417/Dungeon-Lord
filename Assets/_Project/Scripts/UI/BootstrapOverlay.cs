@@ -433,6 +433,7 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendMvpLoopSummaryPanel(builder);
             AppendPlayerFacingStatus(builder);
+            AppendMvpDungeonLayoutText(builder);
             return builder.ToString();
         }
 
@@ -636,8 +637,6 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, panelText);
             }
-
-            AppendMvpDungeonLayoutText(builder);
 
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
