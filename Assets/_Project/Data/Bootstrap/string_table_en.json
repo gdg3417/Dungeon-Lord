@@ -1142,6 +1142,22 @@
     {
       "key": "loot.item.relic.bronze.desc",
       "text": "A simple relic pulled from the dungeon."
+    },
+    {
+      "key": "ui.mvp_loop.panel.research_unlock_format",
+      "text": "Research unlock: {0}"
+    },
+    {
+      "key": "ui.research_unlock.none",
+      "text": "No research unlock yet"
+    },
+    {
+      "key": "ui.research_unlock.unavailable",
+      "text": "Research unlock unavailable"
+    },
+    {
+      "key": "ui.research_unlock.basic_run_analysis.summary",
+      "text": "Basic run analysis unlocked"
     }
   ]
 }

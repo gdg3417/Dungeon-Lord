@@ -112,7 +112,8 @@ namespace DungeonBuilder.M0
                 Save,
                 config,
                 GetResearchCompletionEligibilityScaffoldConfig(),
-                GetResearchVerificationScaffoldConfig());
+                GetResearchVerificationScaffoldConfig(),
+                GetResearchUnlockBridgeConfig());
         }
 
         public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)
@@ -1569,6 +1570,11 @@ namespace DungeonBuilder.M0
         private ResearchVerificationScaffoldConfig GetResearchVerificationScaffoldConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchVerificationScaffold : null;
+        }
+
+        private ResearchUnlockBridgeConfig GetResearchUnlockBridgeConfig()
+        {
+            return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchUnlockBridge : null;
         }
 
         private long GetActiveSessionElapsedSeconds()

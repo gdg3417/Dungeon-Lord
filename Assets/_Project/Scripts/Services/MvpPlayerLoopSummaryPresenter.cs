@@ -15,13 +15,15 @@ namespace DungeonBuilder.M0
         public const string SuggestVerifyResearchStatusKey = "mvp_loop.suggestion.verify_research_status";
         public const string SuggestRepeatOrImprovePlacementKey = "mvp_loop.suggestion.repeat_or_improve_placement";
         public const string ResearchVerificationRequiredKey = "ui.research.status.verification_required";
+        public const string ResearchCompletedKey = "ui.research.status.completed";
         public const string ResearchUnavailableKey = MvpPlayerFacingLabelResolver.ResearchUnavailableKey;
 
         public static MvpPlayerLoopSummary Resolve(
             SaveData save,
             RunSimulationConfig runConfig = null,
             ResearchCompletionEligibilityScaffoldConfig researchEligibilityConfig = null,
-            ResearchVerificationScaffoldConfig researchVerificationConfig = null)
+            ResearchVerificationScaffoldConfig researchVerificationConfig = null,
+            ResearchUnlockBridgeConfig researchUnlockConfig = null)
         {
             if (save == null)
             {
@@ -47,6 +49,9 @@ namespace DungeonBuilder.M0
                 save.completedResearch,
                 researchEligibilityConfig,
                 researchVerificationConfig);
+            ResearchUnlockSummary unlockSummary = ResearchUnlockSummaryPresenter.Resolve(
+                save.completedResearch,
+                researchUnlockConfig);
 
             CurrentHeatTierSummary heatTier = CurrentHeatTierResolver.Resolve(runConfig, currentHeat);
             RunHeatApplicationSummary heatApplication = latestRun?.RunHeatApplicationSummary;
@@ -58,6 +63,13 @@ namespace DungeonBuilder.M0
             bool hasResearchStatus = HasResearchSignal(researchStatus, verificationBoundary, save.researchPending, save.researchProgress, save.completedResearch);
             bool verificationActionable = IsVerificationActionable(researchStatus, verificationBoundary);
             string researchStatusKey = ResolveResearchStatusKey(researchStatus, verificationActionable);
+            if (unlockSummary != null &&
+                unlockSummary.RuleResolved &&
+                !HasActiveResearchSignal(save.researchPending, save.researchProgress) &&
+                IsUnavailableOrEmptyResearchStatus(researchStatusKey))
+            {
+                researchStatusKey = ResearchCompletedKey;
+            }
             string researchProjectId = FirstNonEmpty(verificationBoundary?.ProjectId, researchStatus?.ProjectId, save.researchProgress?.ProjectId, save.researchPending?.ProjectId);
             string heatTierId = FirstNonEmpty(heatTier.RuleResolved ? heatTier.TierId : null, heatApplication?.TierAfter);
             int generatedWorldValue = lootSummary?.TotalGeneratedWorldValue ?? 0;
@@ -90,6 +102,10 @@ namespace DungeonBuilder.M0
                 HasResearchStatus = hasResearchStatus,
                 ResearchProjectId = researchProjectId,
                 ResearchStatusKey = researchStatusKey,
+                HasResearchUnlock = unlockSummary != null && unlockSummary.RuleResolved,
+                ResearchUnlockId = unlockSummary?.UnlockId ?? string.Empty,
+                ResearchUnlockSummaryKey = unlockSummary?.SummaryLocalizationKey ?? ResearchUnlockSummaryPresenter.NoneKey,
+                ResearchUnlockDeterministicErrorCode = unlockSummary?.DeterministicErrorCode ?? (int)ResearchUnlockSummaryErrorCode.NoCompletedResearch,
                 ResearchVerificationRuleResolved = verificationBoundary != null && verificationBoundary.RuleResolved,
                 ResearchVerificationDeterministicErrorCode = verificationBoundary?.DeterministicErrorCode ?? (int)ResearchVerificationBoundarySummaryErrorCode.NoPendingResearch,
                 VerificationRequired = verificationActionable,
@@ -241,6 +257,18 @@ namespace DungeonBuilder.M0
             return verificationActionable
                 ? ResearchVerificationRequiredKey
                 : ResearchUnavailableKey;
+        }
+
+        private static bool IsUnavailableOrEmptyResearchStatus(string statusKey)
+        {
+            return string.IsNullOrWhiteSpace(statusKey) ||
+                   string.Equals(statusKey, ResearchUnavailableKey, StringComparison.Ordinal);
+        }
+
+        private static bool HasActiveResearchSignal(ResearchPendingState pending, ResearchProgressState progress)
+        {
+            return (pending != null && !string.IsNullOrWhiteSpace(pending.ProjectId)) ||
+                   (progress != null && !string.IsNullOrWhiteSpace(progress.ProjectId));
         }
 
         private static bool IsVerificationActionable(

@@ -384,6 +384,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
+            map["ui.mvp_loop.panel.research_unlock_format"] = "Research unlock: {0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
             map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
@@ -480,7 +481,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber";
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
+            map["ui.research.status.completed"] = "Research completed";
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
+            map["ui.research_unlock.none"] = "No research unlock yet";
+            map["ui.research_unlock.unavailable"] = "Research unlock unavailable";
+            map["ui.research_unlock.basic_run_analysis.summary"] = "Basic run analysis unlocked";
             return content;
         }
 
