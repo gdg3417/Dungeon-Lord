@@ -1564,6 +1564,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.run_status.succeeded"] = "Succeeded";
             map["ui.mvp_loop.run_status.failed"] = "Failed";
             map["ui.research.status.verification_required"] = "Verification required";
+            map["ui.research.status.completed"] = "Research completed";
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["ui.research_unlock.none"] = "No research unlock yet";
             map["ui.research_unlock.unavailable"] = "Research unlock unavailable";

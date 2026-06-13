@@ -149,6 +149,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_CompletedResearchWithResolvedUnlockAndUnavailableStatus_PresentsResearchCompleted()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), null, VerificationConfig(), UnlockConfig());
+
+            Assert.That(summary.HasResearchStatus, Is.True);
+            Assert.That(summary.ResearchStatusKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.ResearchCompletedKey));
+            Assert.That(summary.HasResearchUnlock, Is.True);
+            Assert.That(summary.ResearchUnlockSummaryKey, Is.EqualTo("ui.research_unlock.basic_run_analysis.summary"));
+        }
+
+        [Test]
         public void Resolve_UnknownCompletedResearch_UsesSafeUnlockFallbackWithoutRawId()
         {
             SaveData save = FullSave();

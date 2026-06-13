@@ -481,6 +481,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber";
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
+            map["ui.research.status.completed"] = "Research completed";
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["ui.research_unlock.none"] = "No research unlock yet";
             map["ui.research_unlock.unavailable"] = "Research unlock unavailable";

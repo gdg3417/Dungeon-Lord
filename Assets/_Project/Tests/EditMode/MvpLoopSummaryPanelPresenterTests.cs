@@ -140,6 +140,30 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.research_unlock.basic_run_analysis.summary:"));
         }
 
+        [Test]
+        public void BuildPanelText_CompletedResearchWithUnlock_ShowsCompletedStatusAndUnlockWithoutRawIdsOrKeys()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasResearchStatus = true,
+                ResearchProjectId = "research.project.mvp_loop",
+                ResearchStatusKey = MvpPlayerLoopSummaryPresenter.ResearchCompletedKey,
+                HasResearchUnlock = true,
+                ResearchUnlockId = "research.unlock.basic_run_analysis",
+                ResearchUnlockSummaryKey = "ui.research_unlock.basic_run_analysis.summary",
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Research: Research completed"));
+            Assert.That(text, Does.Contain("Research unlock: Basic run analysis unlocked"));
+            Assert.That(text, Does.Not.Contain("research.project."));
+            Assert.That(text, Does.Not.Contain("research.unlock."));
+            Assert.That(text, Does.Not.Contain("ui.research_unlock."));
+        }
+
 
         [Test]
         public void BuildPanelText_WithLootBreakdown_UsesLocalizedNamedLootWithoutRawIdsOrKeys()
@@ -228,6 +252,31 @@ namespace DungeonBuilder.Tests.EditMode
                     return "LOC[" + key + "]:{0:0.##}:{1:0.##}:{2}";
                 default:
                     return "LOC[" + key + "]";
+            }
+        }
+
+        private static string SmokeLocalize(string key, string fallback)
+        {
+            switch (key)
+            {
+                case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
+                case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
+                case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest run: {0}";
+                case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Placement effects: {0}";
+                case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
+                case MvpLoopSummaryPanelPresenter.LootFormatKey: return "Loot: generated {0}, extracted {1}, tradeable {2}";
+                case MvpLoopSummaryPanelPresenter.HeatFormatKey: return "Heat: {0:0.##} -> {1:0.##} ({2})";
+                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "Research: {0}";
+                case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Research unlock: {0}";
+                case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "Next: {0}";
+                case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
+                case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
+                case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
+                case MvpLoopSummaryPanelPresenter.ValueNoResearchKey: return "No research";
+                case MvpPlayerLoopSummaryPresenter.ResearchCompletedKey: return "Research completed";
+                case "ui.research_unlock.basic_run_analysis.summary": return "Basic run analysis unlocked";
+                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
+                default: return fallback;
             }
         }
     }
