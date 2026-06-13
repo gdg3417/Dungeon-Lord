@@ -497,19 +497,19 @@
     },
     {
       "key": "ui.mvp_loop.panel.loot_format",
-      "text": "Loot: generated {0}, extracted {1}, tradeable {2}"
+      "text": "Loot: {1}/{0} recovered; {2} tradeable."
     },
     {
       "key": "ui.mvp_loop.panel.heat_format",
-      "text": "Heat: {0:0.##} \u2192 {1:0.##} ({2})"
+      "text": "Heat: {0:0.##} \u2192 {1:0.##} ({2}). {3}"
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
-      "text": "Research: {0}"
+      "text": "{0}"
     },
     {
       "key": "ui.mvp_loop.panel.suggestion_format",
-      "text": "Next: {0}"
+      "text": "{0}"
     },
     {
       "key": "ui.mvp_loop.value.no_placement",
@@ -537,23 +537,23 @@
     },
     {
       "key": "mvp_loop.suggestion.run_dungeon",
-      "text": "Run the dungeon to observe the first outcome."
+      "text": "Next: run the dungeon to see what your first build does."
     },
     {
       "key": "mvp_loop.suggestion.reduce_heat_pressure",
-      "text": "Reduce heat pressure before pushing further."
+      "text": "Next: lower heat pressure before pushing farther."
     },
     {
       "key": "mvp_loop.suggestion.improve_survivability_or_layout",
-      "text": "Improve survivability or layout before the next run."
+      "text": "Next: improve survivability or layout so adventurers leave with loot."
     },
     {
       "key": "mvp_loop.suggestion.verify_research_status",
-      "text": "Verify research status before claiming progress."
+      "text": "Next: verify the completed research result."
     },
     {
       "key": "mvp_loop.suggestion.repeat_or_improve_placement",
-      "text": "Run again or improve placement based on the summary."
+      "text": "Next: run again or adjust one placement based on the report."
     },
     {
       "key": "ui.guided_mvp.panel.title",
@@ -1013,7 +1013,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.placement_effects_format",
-      "text": "Placement effects: {0}"
+      "text": "Effects: {0}"
     },
     {
       "key": "ui.mvp_placement_effects.empty",
@@ -1101,7 +1101,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.loot_named_format",
-      "text": "Loot: generated {0}, extracted {1}, tradeable {2} ({3})"
+      "text": "Loot: {1}/{0} recovered; {2} tradeable ({3})."
     },
     {
       "key": "ui.mvp_loop.panel.loot_entry_format",
@@ -1145,7 +1145,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.research_unlock_format",
-      "text": "Research unlock: {0}"
+      "text": "Unlocked: {0}"
     },
     {
       "key": "ui.research_unlock.none",
@@ -1158,6 +1158,94 @@
     {
       "key": "ui.research_unlock.basic_run_analysis.summary",
       "text": "Basic run analysis unlocked"
+    },
+    {
+      "key": "ui.mvp_loop.section.current_dungeon",
+      "text": "Current Dungeon"
+    },
+    {
+      "key": "ui.mvp_loop.section.why_it_happened",
+      "text": "Why It Happened"
+    },
+    {
+      "key": "ui.mvp_loop.section.rewards_and_risk",
+      "text": "Rewards and Risk"
+    },
+    {
+      "key": "ui.mvp_loop.section.research",
+      "text": "Research"
+    },
+    {
+      "key": "ui.mvp_loop.section.suggested_next_action",
+      "text": "Suggested Next Action"
+    },
+    {
+      "key": "ui.mvp_loop.panel.run_outcome_line_format",
+      "text": "{0}. Party: {1}"
+    },
+    {
+      "key": "ui.mvp_loop.why.no_run",
+      "text": "No run yet. Build or review the dungeon, then run it to learn what happens."
+    },
+    {
+      "key": "ui.mvp_loop.why.run_format",
+      "text": "Main reason: {0}."
+    },
+    {
+      "key": "ui.mvp_loop.risk.no_run",
+      "text": "Risk will be shown after a run."
+    },
+    {
+      "key": "ui.mvp_loop.risk.stable",
+      "text": "Risk stayed steady."
+    },
+    {
+      "key": "ui.mvp_loop.risk.increased",
+      "text": "Risk increased."
+    },
+    {
+      "key": "ui.mvp_loop.risk.reduced",
+      "text": "Risk went down."
+    },
+    {
+      "key": "ui.mvp_loop.section.latest_run",
+      "text": "Latest Run"
+    },
+    {
+      "key": "ui.mvp_loop.why.path_capacity",
+      "text": "path capacity shaped the run"
+    },
+    {
+      "key": "ui.mvp_loop.why.danger",
+      "text": "danger pressure drove the result"
+    },
+    {
+      "key": "ui.mvp_loop.why.mana_pressure",
+      "text": "mana pressure constrained the run"
+    },
+    {
+      "key": "ui.mvp_loop.why.heat_pressure",
+      "text": "heat pressure raised the risk"
+    },
+    {
+      "key": "ui.mvp_loop.why.loot_bonus",
+      "text": "loot placement improved the reward"
+    },
+    {
+      "key": "ui.mvp_loop.why.attraction",
+      "text": "attraction changed adventurer interest"
+    },
+    {
+      "key": "ui.mvp_loop.why.mixed",
+      "text": "the current placement mix shaped the result"
+    },
+    {
+      "key": "ui.mvp_loop.section.line_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_loop.inline_separator",
+      "text": " | "
     }
   ]
 }
