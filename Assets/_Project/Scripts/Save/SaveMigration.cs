@@ -44,13 +44,15 @@ namespace DungeonBuilder.M0
 
             if (root.primary.mvpDungeonFloorLayout == null)
             {
-                root.primary.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+                root.primary.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements);
             }
 
             if (root.primary.mvpDungeonFloorLayout.Nodes == null)
             {
-                root.primary.mvpDungeonFloorLayout.Nodes = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor().Nodes;
+                root.primary.mvpDungeonFloorLayout.Nodes = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements).Nodes;
             }
+
+            MvpDungeonLayoutResolver.BackfillMissingStarterNodesFromLegacy(root.primary.mvpDungeonFloorLayout, root.primary.mvpDungeonPlacements);
 
             if (root.primary.mvpDungeonFloorLayout.NextRevision < 1)
             {

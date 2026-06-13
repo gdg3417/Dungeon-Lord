@@ -121,6 +121,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.mvpDungeonPlacements, Is.Not.Null);
             Assert.That(save.mvpDungeonPlacements.Entries, Is.Empty);
             Assert.That(save.mvpDungeonPlacements.NextRevision, Is.EqualTo(1));
+            Assert.That(save.mvpDungeonFloorLayout, Is.Not.Null);
+            Assert.That(save.mvpDungeonFloorLayout.Nodes.Count, Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(save.mvpDungeonFloorLayout), Is.Empty);
             Assert.That(save.structureRuntime, Is.Not.Null);
             Assert.That(save.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(save.structureRuntime.Heat, Is.Zero);

@@ -2796,7 +2796,33 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
             Assert.That(migrated.primary.mvpDungeonFloorLayout, Is.Not.Null);
             Assert.That(migrated.primary.mvpDungeonFloorLayout.Nodes, Has.Count.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(migrated.primary.mvpDungeonFloorLayout), Has.Length.EqualTo(4));
             Assert.That(placements.Select(placement => placement.OptionId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+        }
+
+
+        [Test]
+        public void PlacementResolver_PartialNodeLayoutMergesWithLegacyPlacementsByCategory()
+        {
+            var layout = new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 0, "mvp.floor.00.node.00", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 9)
+                },
+                NextRevision = 10
+            };
+
+            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, StarterPlacementState());
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.Resolve(layout, StarterPlacementState(), BuildConfig());
+
+            Assert.That(placements, Has.Length.EqualTo(4));
+            Assert.That(placements.Select(placement => placement.CategoryId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds));
+            Assert.That(placements[0].Revision, Is.EqualTo(9));
+            Assert.That(placements[1].OptionId, Is.EqualTo(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(placements[2].OptionId, Is.EqualTo(MvpDungeonPlacementIds.SpikeTrapOptionId));
+            Assert.That(placements[3].OptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
         }
 
         [Test]

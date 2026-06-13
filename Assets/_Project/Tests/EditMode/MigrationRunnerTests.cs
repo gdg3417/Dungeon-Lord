@@ -1,4 +1,5 @@
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -152,6 +153,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.NotNull(migrated.primary.mvpDungeonPlacements.Entries);
             Assert.IsEmpty(migrated.primary.mvpDungeonPlacements.Entries);
             Assert.AreEqual(1, migrated.primary.mvpDungeonPlacements.NextRevision);
+            Assert.NotNull(migrated.primary.mvpDungeonFloorLayout);
+            Assert.NotNull(migrated.primary.mvpDungeonFloorLayout.Nodes);
+            Assert.AreEqual(MvpDungeonPlacementIds.OrderedCategoryIds.Length, migrated.primary.mvpDungeonFloorLayout.Nodes.Count);
             Assert.NotNull(migrated.primary.structureRuntime);
             Assert.AreEqual(SaveMigration.LatestSchemaVersion, migrated.schemaVersion);
         }
