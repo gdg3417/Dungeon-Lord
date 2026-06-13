@@ -37,6 +37,13 @@ namespace DungeonBuilder.M0
         public const string WhyLootBonusKey = "ui.mvp_loop.why.loot_bonus";
         public const string WhyAttractionKey = "ui.mvp_loop.why.attraction";
         public const string WhyMixedKey = "ui.mvp_loop.why.mixed";
+        public const string AnalysisRunFormatKey = "ui.mvp_loop.analysis.run_format";
+        public const string AnalysisNoRunKey = "ui.mvp_loop.analysis.no_run";
+        public const string AnalysisDangerKey = "ui.mvp_loop.analysis.danger";
+        public const string AnalysisHeatIncreasedKey = "ui.mvp_loop.analysis.heat_increased";
+        public const string AnalysisPartialLootKey = "ui.mvp_loop.analysis.partial_loot";
+        public const string AnalysisStrongLootStableHeatKey = "ui.mvp_loop.analysis.strong_loot_stable_heat";
+        public const string AnalysisMixedKey = "ui.mvp_loop.analysis.mixed";
         public const string RiskNoRunKey = "ui.mvp_loop.risk.no_run";
         public const string RiskStableKey = "ui.mvp_loop.risk.stable";
         public const string RiskIncreasedKey = "ui.mvp_loop.risk.increased";
@@ -57,7 +64,7 @@ namespace DungeonBuilder.M0
             AppendSectionLine(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
             AppendSectionLine(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));
             AppendSectionLine(builder, localize, ResearchSectionKey, BuildResearchLine(summary, localize));
-            AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+            AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(ResolveSuggestionKey(summary), localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             return builder.ToString();
         }
 
@@ -108,8 +115,30 @@ namespace DungeonBuilder.M0
 
         private static string ResolveWhyItHappened(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, WhyNoRunKey);
+            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, summary != null && summary.AnalysisUnlocked ? AnalysisNoRunKey : WhyNoRunKey);
+            if (summary.AnalysisUnlocked) return string.Format(Localize(localize, AnalysisRunFormatKey), Localize(localize, ResolveDominantCauseKey(summary.LatestRunPlacementEffects)), Localize(localize, ResolveAnalysisCauseKey(summary)));
             return string.Format(Localize(localize, WhyRunFormatKey), Localize(localize, ResolveDominantCauseKey(summary.LatestRunPlacementEffects)));
+        }
+
+
+        private static string ResolveAnalysisCauseKey(MvpPlayerLoopSummary summary)
+        {
+            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return AnalysisNoRunKey;
+            if (string.Equals(ResolveDominantCauseKey(summary.LatestRunPlacementEffects), WhyDangerKey, StringComparison.Ordinal)) return AnalysisDangerKey;
+            if (summary.HeatAfter > summary.HeatBefore) return AnalysisHeatIncreasedKey;
+            if (summary.LootGeneratedWorldValue > 0 && summary.LootExtractedWorldValue > 0 && summary.LootExtractedWorldValue < summary.LootGeneratedWorldValue) return AnalysisPartialLootKey;
+            if (summary.LootGeneratedWorldValue > 0 && summary.LootExtractedWorldValue >= summary.LootGeneratedWorldValue && summary.HeatAfter <= summary.HeatBefore) return AnalysisStrongLootStableHeatKey;
+            return AnalysisMixedKey;
+        }
+
+        private static string ResolveSuggestionKey(MvpPlayerLoopSummary summary)
+        {
+            if (summary == null || !summary.AnalysisUnlocked || string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey))
+            {
+                return summary?.NextOptimizationSuggestionKey;
+            }
+
+            return summary.AnalysisAdviceKey;
         }
 
         private static string ResolveDominantCauseKey(MvpPlacementEffectsSummary effects)

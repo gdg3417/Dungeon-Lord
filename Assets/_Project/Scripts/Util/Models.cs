@@ -589,6 +589,8 @@ namespace DungeonBuilder.M0
         public int AdventurerPartyPreviewDeterministicErrorCode = (int)AdventurerPartyCompositionSummaryErrorCode.None;
         public string AdventurerPartyPreviewRuleSourceId;
         public string NextOptimizationSuggestionKey;
+        public bool AnalysisUnlocked = false;
+        public string AnalysisAdviceKey;
         public bool WouldMutateState = false;
         public bool WouldGrantRewards = false;
         public bool WouldUnlockContent = false;
