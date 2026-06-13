@@ -6,7 +6,7 @@ namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
-        public const int LatestSchemaVersion = 3;
+        public const int LatestSchemaVersion = 4;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 
@@ -40,6 +40,23 @@ namespace DungeonBuilder.M0
             if (root.primary.mvpDungeonPlacements.NextRevision < 1)
             {
                 root.primary.mvpDungeonPlacements.NextRevision = 1;
+            }
+
+            if (root.primary.mvpDungeonFloorLayout == null)
+            {
+                root.primary.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements);
+            }
+
+            if (root.primary.mvpDungeonFloorLayout.Nodes == null)
+            {
+                root.primary.mvpDungeonFloorLayout.Nodes = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements).Nodes;
+            }
+
+            MvpDungeonLayoutResolver.BackfillMissingStarterNodesFromLegacy(root.primary.mvpDungeonFloorLayout, root.primary.mvpDungeonPlacements);
+
+            if (root.primary.mvpDungeonFloorLayout.NextRevision < 1)
+            {
+                root.primary.mvpDungeonFloorLayout.NextRevision = 1;
             }
 
             if (root.primary.structureRuntime == null)

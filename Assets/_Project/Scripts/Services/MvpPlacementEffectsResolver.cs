@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0
@@ -8,6 +7,11 @@ namespace DungeonBuilder.M0
     public static class MvpPlacementEffectsResolver
     {
         public static MvpPlacementEffectsSummary Resolve(MvpDungeonPlacementState placements, RunSimulationConfig config)
+        {
+            return Resolve(null, placements, config);
+        }
+
+        public static MvpPlacementEffectsSummary Resolve(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementState placements, RunSimulationConfig config)
         {
             var summary = new MvpPlacementEffectsSummary
             {
@@ -17,7 +21,8 @@ namespace DungeonBuilder.M0
                 EffectLocalizationKeys = Array.Empty<string>()
             };
 
-            if (placements == null || placements.Entries == null || placements.Entries.Count == 0 || config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
+            MvpDungeonPlacementEntry[] orderedPlacements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, placements);
+            if (orderedPlacements.Length == 0 || config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
             {
                 return summary;
             }
@@ -26,7 +31,7 @@ namespace DungeonBuilder.M0
             var contributingOptionIds = new List<string>();
             var localizationKeys = new List<string>();
 
-            foreach (MvpDungeonPlacementEntry placement in GetOrderedPlacements(placements))
+            foreach (MvpDungeonPlacementEntry placement in orderedPlacements)
             {
                 if (placement == null || string.IsNullOrWhiteSpace(placement.OptionId) || !effectsByOption.TryGetValue(placement.OptionId, out MvpPlacementEffectConfig effect))
                 {
@@ -83,16 +88,6 @@ namespace DungeonBuilder.M0
             }
 
             return lookup;
-        }
-
-        private static IEnumerable<MvpDungeonPlacementEntry> GetOrderedPlacements(MvpDungeonPlacementState placements)
-        {
-            return placements.Entries
-                .Where(entry => entry != null &&
-                    MvpDungeonPlacementIds.IsAllowedCategory(entry.CategoryId) &&
-                    MvpDungeonPlacementIds.IsAllowedOption(entry.OptionId))
-                .OrderBy(entry => Array.IndexOf(MvpDungeonPlacementIds.OrderedCategoryIds, entry.CategoryId))
-                .ThenBy(entry => entry.Revision);
         }
     }
 }

@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -841,6 +842,21 @@ namespace DungeonBuilder.M0
                 Save.mvpDungeonPlacements.Entries = new List<MvpDungeonPlacementEntry>();
             }
 
+            if (Save.mvpDungeonFloorLayout == null)
+            {
+                Save.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            }
+
+            if (Save.mvpDungeonFloorLayout.Nodes == null)
+            {
+                Save.mvpDungeonFloorLayout.Nodes = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor().Nodes;
+            }
+
+            if (Save.mvpDungeonFloorLayout.NextRevision < 1)
+            {
+                Save.mvpDungeonFloorLayout.NextRevision = 1;
+            }
+
             int existingIndex = Save.mvpDungeonPlacements.Entries.FindIndex(entry =>
                 entry != null && string.Equals(entry.CategoryId, categoryId, StringComparison.Ordinal));
             if (existingIndex >= 0)
@@ -858,8 +874,42 @@ namespace DungeonBuilder.M0
             }
 
             Save.mvpDungeonPlacements.NextRevision = Math.Max(newEntry.Revision + 1, Save.mvpDungeonPlacements.NextRevision + 1);
+            UpsertMvpDungeonNodePlacement(Save.mvpDungeonFloorLayout, newEntry);
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
+        }
+
+        private static void UpsertMvpDungeonNodePlacement(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementEntry placement)
+        {
+            if (layout == null || placement == null ||
+                !MvpDungeonPlacementIds.IsAllowedCategory(placement.CategoryId) ||
+                !MvpDungeonPlacementIds.IsAllowedOption(placement.OptionId))
+            {
+                return;
+            }
+
+            int nodeIndex = MvpDungeonLayoutResolver.ResolveNodeIndexForCategory(placement.CategoryId);
+            MvpDungeonNodeState node = layout.Nodes.FirstOrDefault(existing => existing != null && existing.FloorIndex == 0 && existing.NodeIndex == nodeIndex);
+            if (node == null)
+            {
+                node = new MvpDungeonNodeState
+                {
+                    FloorIndex = 0,
+                    NodeIndex = nodeIndex,
+                    SlotId = MvpDungeonLayoutResolver.ResolveSlotId(0, nodeIndex)
+                };
+                layout.Nodes.Add(node);
+            }
+
+            node.CategoryId = placement.CategoryId;
+            node.OptionId = placement.OptionId;
+            node.Revision = placement.Revision;
+            if (string.IsNullOrWhiteSpace(node.SlotId))
+            {
+                node.SlotId = MvpDungeonLayoutResolver.ResolveSlotId(node.FloorIndex, node.NodeIndex);
+            }
+
+            layout.NextRevision = Math.Max(placement.Revision + 1, layout.NextRevision + 1);
         }
 
         private bool TryPlaceSelectedStructure(string structureId, bool allowReplace, out string bannerKey)
@@ -948,6 +998,7 @@ namespace DungeonBuilder.M0
             save.lastResumedUtcUnix = 0;
             save.dungeonLayout = DungeonLayoutState.CreateEmpty(SaveMigration.DefaultFloorCount, SaveMigration.DefaultSlotsPerFloor);
             save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            save.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
             save.structureRuntime = new StructureRuntimeState();
             save.runHistory = new RunHistoryState();
             save.researchPending = null;
@@ -990,7 +1041,7 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(Save.mvpDungeonPlacements, _runSimulationService.Config);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(Save.mvpDungeonFloorLayout, Save.mvpDungeonPlacements, _runSimulationService.Config);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId, placementEffects);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;
