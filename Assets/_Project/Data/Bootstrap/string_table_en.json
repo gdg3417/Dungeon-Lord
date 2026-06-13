@@ -1358,6 +1358,42 @@
     {
       "key": "ui.mvp_action.group.loot",
       "text": "Loot:"
+    },
+    {
+      "key": "ui.mvp_placement_comparison.compared_with_format",
+      "text": "Compared with {0}: {1}"
+    },
+    {
+      "key": "ui.mvp_placement_comparison.room.basic_to_narrow_hall",
+      "text": "lower path capacity, better as a connector."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.room.narrow_hall_to_basic",
+      "text": "higher path capacity, better as a main room."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.monster.skeleton_to_goblin",
+      "text": "less danger and mana pressure, adds a small loot signal."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.monster.goblin_to_skeleton",
+      "text": "more danger and mana pressure, removes the loot signal."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.spike_to_snare",
+      "text": "less danger and no heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.snare_to_spike",
+      "text": "more danger and adds heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache",
+      "text": "subtler loot and lower attraction."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic",
+      "text": "stronger loot and higher attraction."
     }
   ]
 }

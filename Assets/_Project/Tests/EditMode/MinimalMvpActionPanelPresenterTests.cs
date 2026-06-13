@@ -110,6 +110,22 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo(MinimalMvpActionPanelPresenter.HideDiagnosticsButtonKey));
         }
 
+        [Test]
+        public void BuildPlacementLabels_IncludesLocalizedComparisonTextWhenProvided()
+        {
+            MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
+                Localized,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.RoomCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.NarrowHallOptionId,
+                StructureSimulationPass.ManaGeneratorBasicId,
+                MinimalMvpActionPanelPresenter.BalancedPostureKey,
+                "Compared with Basic Room: lower path capacity, better as a connector.");
+
+            Assert.That(labels.ComparisonText, Is.EqualTo("Compared with Basic Room: lower path capacity, better as a connector."));
+            Assert.That(labels.ComparisonText, Does.Not.Contain("placement.option"));
+            Assert.That(labels.ComparisonText, Does.Not.Contain("ui.mvp"));
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>

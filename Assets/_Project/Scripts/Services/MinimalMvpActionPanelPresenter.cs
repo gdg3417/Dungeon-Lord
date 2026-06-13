@@ -55,7 +55,8 @@ namespace DungeonBuilder.M0
                 string.Empty,
                 string.Format(postureFormat, selectedPostureName),
                 MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize),
-                MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize));
+                MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize),
+                string.Empty);
         }
 
         public static MinimalMvpActionPanelLabels BuildPlacementLabels(
@@ -74,6 +75,17 @@ namespace DungeonBuilder.M0
             string selectedStructureId,
             string selectedPostureNameKey)
         {
+            return BuildPlacementLabels(localize, selectedCategoryId, selectedOptionId, selectedStructureId, selectedPostureNameKey, string.Empty);
+        }
+
+        public static MinimalMvpActionPanelLabels BuildPlacementLabels(
+            Func<string, string, string> localize,
+            string selectedCategoryId,
+            string selectedOptionId,
+            string selectedStructureId,
+            string selectedPostureNameKey,
+            string comparisonText)
+        {
             string categoryLabel = string.Format(
                 Localize(localize, CategoryLabelKey),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(selectedCategoryId, localize));
@@ -84,7 +96,7 @@ namespace DungeonBuilder.M0
             string postureLabel = string.Format(Localize(localize, PostureLabelKey), selectedPostureName);
             string placementPreview = MvpDungeonPlacementPresenter.BuildPreviewText(selectedOptionId, localize);
             string runPlanPreview = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(selectedStructureId, selectedPostureNameKey, localize);
-            return CreateLabels(localize, selectedLabel, categoryLabel, postureLabel, placementPreview, runPlanPreview);
+            return CreateLabels(localize, selectedLabel, categoryLabel, postureLabel, placementPreview, runPlanPreview, comparisonText ?? string.Empty);
         }
 
         public static string BuildPanelText(Func<string, string, string> localize)
@@ -105,7 +117,8 @@ namespace DungeonBuilder.M0
             string categoryLabel,
             string postureLabel,
             string previewText,
-            string runPlanPreviewText)
+            string runPlanPreviewText,
+            string comparisonText)
         {
             return new MinimalMvpActionPanelLabels(
                 Localize(localize, TitleKey),
@@ -114,6 +127,7 @@ namespace DungeonBuilder.M0
                 postureLabel,
                 previewText,
                 runPlanPreviewText,
+                comparisonText,
                 Localize(localize, CautiousPostureKey),
                 Localize(localize, BalancedPostureKey),
                 Localize(localize, GreedyPostureKey),
@@ -179,6 +193,7 @@ namespace DungeonBuilder.M0
             string postureLabel,
             string previewText,
             string runPlanPreviewText,
+            string comparisonText,
             string cautiousPosture,
             string balancedPosture,
             string greedyPosture,
@@ -214,6 +229,7 @@ namespace DungeonBuilder.M0
             PostureLabel = postureLabel;
             PreviewText = previewText;
             RunPlanPreviewText = runPlanPreviewText;
+            ComparisonText = comparisonText;
             CautiousPosture = cautiousPosture;
             BalancedPosture = balancedPosture;
             GreedyPosture = greedyPosture;
@@ -250,6 +266,7 @@ namespace DungeonBuilder.M0
         public string PostureLabel { get; }
         public string PreviewText { get; }
         public string RunPlanPreviewText { get; }
+        public string ComparisonText { get; }
         public string CautiousPosture { get; }
         public string BalancedPosture { get; }
         public string GreedyPosture { get; }
