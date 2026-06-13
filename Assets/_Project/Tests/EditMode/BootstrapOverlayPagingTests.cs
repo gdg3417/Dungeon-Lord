@@ -1617,6 +1617,15 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.research_unlock.basic_run_analysis.summary"] = "Basic run analysis unlocked";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
+            map["ui.mvp_placement_comparison.compared_with_format"] = "Compared with {0}: {1}";
+            map["ui.mvp_placement_comparison.room.basic_to_narrow_hall"] = "lower path capacity, better as a connector.";
+            map["ui.mvp_placement_comparison.room.narrow_hall_to_basic"] = "higher path capacity, better as a main room.";
+            map["ui.mvp_placement_comparison.monster.skeleton_to_goblin"] = "less danger and mana pressure, adds a small loot signal.";
+            map["ui.mvp_placement_comparison.monster.goblin_to_skeleton"] = "more danger and mana pressure, removes the loot signal.";
+            map["ui.mvp_placement_comparison.trap.spike_to_snare"] = "less danger and no heat pressure.";
+            map["ui.mvp_placement_comparison.trap.snare_to_spike"] = "more danger and adds heat pressure.";
+            map["ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache"] = "subtler loot and lower attraction.";
+            map["ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic"] = "stronger loot and higher attraction.";
             map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next run.";
             map["mvp_loop.suggestion.verify_research_status"] = "Verify research status before claiming progress.";
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
@@ -1806,6 +1815,30 @@ namespace DungeonBuilder.Tests.EditMode
             map["heat_tier.notice"] = "Notice";
             map["heat_tier.concern"] = "Concern";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
+            map["ui.mvp_placement_comparison.compared_with_format"] = "Compared with {0}: {1}";
+            map["ui.mvp_placement_comparison.room.basic_to_narrow_hall"] = "lower path capacity, better as a connector.";
+            map["ui.mvp_placement_comparison.room.narrow_hall_to_basic"] = "higher path capacity, better as a main room.";
+            map["ui.mvp_placement_comparison.monster.skeleton_to_goblin"] = "less danger and mana pressure, adds a small loot signal.";
+            map["ui.mvp_placement_comparison.monster.goblin_to_skeleton"] = "more danger and mana pressure, removes the loot signal.";
+            map["ui.mvp_placement_comparison.trap.spike_to_snare"] = "less danger and no heat pressure.";
+            map["ui.mvp_placement_comparison.trap.snare_to_spike"] = "more danger and adds heat pressure.";
+            map["ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache"] = "subtler loot and lower attraction.";
+            map["ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic"] = "stronger loot and higher attraction.";
         }
+        [Test]
+        public void MinimalMvpActionPanel_SourceRendersComparisonLineInsideScrollablePanel()
+        {
+            string overlaySource = File.ReadAllText(Path.Combine(Application.dataPath, "_Project/Scripts/UI/BootstrapOverlay.cs"));
+
+            int panelStart = overlaySource.IndexOf("private void DrawMinimalMvpActionPanel", System.StringComparison.Ordinal);
+            int scrollStart = overlaySource.IndexOf("GUILayout.BeginScrollView", panelStart, System.StringComparison.Ordinal);
+            int comparisonLine = overlaySource.IndexOf("labels.ComparisonText", panelStart, System.StringComparison.Ordinal);
+            int scrollEnd = overlaySource.IndexOf("GUILayout.EndScrollView", panelStart, System.StringComparison.Ordinal);
+
+            Assert.That(scrollStart, Is.GreaterThan(panelStart));
+            Assert.That(comparisonLine, Is.GreaterThan(scrollStart));
+            Assert.That(comparisonLine, Is.LessThan(scrollEnd));
+        }
+
     }
 }

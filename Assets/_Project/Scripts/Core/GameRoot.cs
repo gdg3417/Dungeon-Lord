@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
         public ITelemetryService Telemetry { get; private set; }
         public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
+        public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
 
         public string BannerMessage { get; private set; } = string.Empty;
         public string PendingStateLine { get; private set; } = "Pending: None";

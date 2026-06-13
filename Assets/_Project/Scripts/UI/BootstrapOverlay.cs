@@ -1126,12 +1126,14 @@ namespace DungeonBuilder.M0
                 return;
             }
 
+            string placementComparisonText = BuildSelectedMvpPlacementComparisonText();
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
                 (key, fallback) => GetLocalizedString(key, fallback),
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId,
                 _selectedMvpStructureId,
-                GetSelectedMvpRunPostureNameKey());
+                GetSelectedMvpRunPostureNameKey(),
+                placementComparisonText);
             GUIStyle compactBox = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(6, 6, 4, 4)
@@ -1167,6 +1169,10 @@ namespace DungeonBuilder.M0
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            if (!string.IsNullOrWhiteSpace(labels.ComparisonText))
+            {
+                GUILayout.Label(labels.ComparisonText, compactLabel, labelHeight);
+            }
             GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
             GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
@@ -1245,6 +1251,22 @@ namespace DungeonBuilder.M0
             }
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private string BuildSelectedMvpPlacementComparisonText()
+        {
+            if (_root == null)
+            {
+                return string.Empty;
+            }
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
+                _root.Save != null ? _root.Save.mvpDungeonFloorLayout : null,
+                _root.Save != null ? _root.Save.mvpDungeonPlacements : null,
+                _root.RunSimulationConfig,
+                _selectedMvpPlacementCategoryId,
+                _selectedMvpPlacementOptionId);
+            return MvpPlacementComparisonPresenter.BuildComparisonText(preview, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         private void ShowPlayerPlacementBanner()
