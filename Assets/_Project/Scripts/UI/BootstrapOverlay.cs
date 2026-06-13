@@ -433,6 +433,7 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendMvpLoopSummaryPanel(builder);
             AppendPlayerFacingStatus(builder);
+            AppendMvpDungeonLayoutText(builder);
             return builder.ToString();
         }
 
@@ -463,6 +464,7 @@ namespace DungeonBuilder.M0
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
+            AppendMvpDungeonLayoutText(body);
             AppendCompactAdventurersFallbackIfMissing(body);
             AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
@@ -536,6 +538,7 @@ namespace DungeonBuilder.M0
             var body = new StringBuilder();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendMvpDungeonLayoutText(body);
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(guidedText))
@@ -614,6 +617,16 @@ namespace DungeonBuilder.M0
             string[] bodyLines = BuildCurrentPlayerFacingSmokeText().Split('\n');
             int maxOffset = Mathf.Max(0, bodyLines.Length - VisiblePlayerFacingLineCount);
             _playerFacingScrollOffset = Mathf.Clamp(requestedOffset, 0, maxOffset);
+        }
+
+
+        private void AppendMvpDungeonLayoutText(StringBuilder builder)
+        {
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(layoutText))
+            {
+                AppendLine(builder, layoutText);
+            }
         }
 
         private void AppendMvpLoopSummaryPanel(StringBuilder builder)
