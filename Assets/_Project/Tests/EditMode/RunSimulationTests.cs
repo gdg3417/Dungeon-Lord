@@ -2796,7 +2796,30 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
             Assert.That(migrated.primary.mvpDungeonFloorLayout, Is.Not.Null);
             Assert.That(migrated.primary.mvpDungeonFloorLayout.Nodes, Has.Count.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(migrated.primary.mvpDungeonFloorLayout), Has.Length.EqualTo(4));
             Assert.That(placements.Select(placement => placement.OptionId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+        }
+
+
+        [Test]
+        public void SaveMigration_BackfillsNullNodeListFromLegacyPlacements()
+        {
+            SaveRoot root = new SaveRoot
+            {
+                schemaVersion = 3,
+                primary = new SaveData
+                {
+                    mvpDungeonFloorLayout = new MvpDungeonFloorLayoutState { Nodes = null },
+                    mvpDungeonPlacements = StarterPlacementState(),
+                    structureRuntime = new StructureRuntimeState(),
+                    runHistory = new RunHistoryState()
+                }
+            };
+
+            SaveRoot migrated = SaveMigration.MigrateToLatest(root);
+
+            Assert.That(migrated.primary.mvpDungeonFloorLayout.Nodes, Has.Count.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(migrated.primary.mvpDungeonFloorLayout), Has.Length.EqualTo(4));
         }
 
         [Test]
@@ -2832,6 +2855,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(layout.Attraction, Is.EqualTo(legacy.Attraction));
             Assert.That(layout.ContributingOptionIds, Is.EqualTo(legacy.ContributingOptionIds));
             Assert.That(layout.EffectLocalizationKeys, Is.EqualTo(legacy.EffectLocalizationKeys));
+        }
+
+
+        [Test]
+        public void PlacementEffectsResolver_PartialNodeLayoutMergesWithLegacyByCategory()
+        {
+            var layout = new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 0, "node.0", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 10)
+                },
+                NextRevision = 11
+            };
+
+            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, StarterPlacementState());
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.Resolve(layout, StarterPlacementState(), BuildConfig());
+
+            Assert.That(placements, Has.Length.EqualTo(4));
+            Assert.That(placements.Select(placement => placement.OptionId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+            Assert.That(placements[0].Revision, Is.EqualTo(10));
+            Assert.That(placements[1].Revision, Is.EqualTo(2));
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
         }
 
         [Test]

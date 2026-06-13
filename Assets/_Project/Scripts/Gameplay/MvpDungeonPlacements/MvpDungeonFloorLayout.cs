@@ -45,6 +45,13 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
             return state;
         }
+
+        public static MvpDungeonFloorLayoutState CreateStarterFloorFromLegacyPlacements(MvpDungeonPlacementState legacyPlacements)
+        {
+            MvpDungeonFloorLayoutState state = CreateEmptyStarterFloor();
+            MvpDungeonLayoutResolver.BackfillMissingStarterNodesFromLegacy(state, legacyPlacements);
+            return state;
+        }
     }
 
     public static class MvpDungeonLayoutResolver
@@ -54,9 +61,35 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             MvpDungeonPlacementState legacyPlacements)
         {
             MvpDungeonPlacementEntry[] nodePlacements = ResolveOrderedNodePlacements(layout);
-            return nodePlacements.Length > 0
-                ? nodePlacements
-                : ResolveOrderedLegacyPlacements(legacyPlacements);
+            MvpDungeonPlacementEntry[] legacyOrderedPlacements = ResolveOrderedLegacyPlacements(legacyPlacements);
+            if (nodePlacements.Length == 0)
+            {
+                return legacyOrderedPlacements;
+            }
+
+            if (legacyOrderedPlacements.Length == 0)
+            {
+                return nodePlacements;
+            }
+
+            var placementsByCategory = new Dictionary<string, MvpDungeonPlacementEntry>(StringComparer.Ordinal);
+            foreach (MvpDungeonPlacementEntry legacyPlacement in legacyOrderedPlacements)
+            {
+                if (!placementsByCategory.ContainsKey(legacyPlacement.CategoryId))
+                {
+                    placementsByCategory.Add(legacyPlacement.CategoryId, legacyPlacement);
+                }
+            }
+
+            foreach (MvpDungeonPlacementEntry nodePlacement in nodePlacements)
+            {
+                placementsByCategory[nodePlacement.CategoryId] = nodePlacement;
+            }
+
+            return MvpDungeonPlacementIds.OrderedCategoryIds
+                .Where(placementsByCategory.ContainsKey)
+                .Select(categoryId => placementsByCategory[categoryId])
+                .ToArray();
         }
 
         public static MvpDungeonPlacementEntry[] ResolveOrderedNodePlacements(MvpDungeonFloorLayoutState layout)
@@ -96,6 +129,59 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 .ToArray();
         }
 
+        public static void BackfillMissingStarterNodesFromLegacy(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementState legacyPlacements)
+        {
+            if (layout == null)
+            {
+                return;
+            }
+
+            if (layout.Nodes == null)
+            {
+                layout.Nodes = new List<MvpDungeonNodeState>();
+            }
+
+            MvpDungeonPlacementEntry[] legacyOrderedPlacements = ResolveOrderedLegacyPlacements(legacyPlacements);
+            if (legacyOrderedPlacements.Length == 0)
+            {
+                EnsureEmptyStarterNodes(layout);
+                return;
+            }
+
+            foreach (MvpDungeonPlacementEntry legacyPlacement in legacyOrderedPlacements)
+            {
+                if (ResolveOrderedNodePlacements(layout).Any(nodePlacement => string.Equals(nodePlacement.CategoryId, legacyPlacement.CategoryId, StringComparison.Ordinal)))
+                {
+                    continue;
+                }
+
+                int nodeIndex = ResolveNodeIndexForCategory(legacyPlacement.CategoryId);
+                MvpDungeonNodeState node = layout.Nodes.FirstOrDefault(existing => existing != null && existing.FloorIndex == 0 && existing.NodeIndex == nodeIndex);
+                if (node == null)
+                {
+                    node = new MvpDungeonNodeState
+                    {
+                        FloorIndex = 0,
+                        NodeIndex = nodeIndex,
+                        SlotId = ResolveSlotId(0, nodeIndex)
+                    };
+                    layout.Nodes.Add(node);
+                }
+
+                node.CategoryId = legacyPlacement.CategoryId;
+                node.OptionId = legacyPlacement.OptionId;
+                node.Revision = legacyPlacement.Revision;
+                if (string.IsNullOrWhiteSpace(node.SlotId))
+                {
+                    node.SlotId = ResolveSlotId(node.FloorIndex, node.NodeIndex);
+                }
+
+                layout.NextRevision = Math.Max(layout.NextRevision, legacyPlacement.Revision + 1);
+            }
+
+            EnsureEmptyStarterNodes(layout);
+        }
+
         public static int ResolveNodeIndexForCategory(string categoryId)
         {
             int index = CategoryOrder(categoryId);
@@ -105,6 +191,29 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public static string ResolveSlotId(int floorIndex, int nodeIndex)
         {
             return $"mvp.floor.{floorIndex:D2}.node.{nodeIndex:D2}";
+        }
+
+        private static void EnsureEmptyStarterNodes(MvpDungeonFloorLayoutState layout)
+        {
+            if (layout == null)
+            {
+                return;
+            }
+
+            if (layout.Nodes == null)
+            {
+                layout.Nodes = new List<MvpDungeonNodeState>();
+            }
+
+            for (int nodeIndex = 0; nodeIndex < MvpDungeonPlacementIds.OrderedCategoryIds.Length; nodeIndex++)
+            {
+                if (layout.Nodes.Any(existing => existing != null && existing.FloorIndex == 0 && existing.NodeIndex == nodeIndex))
+                {
+                    continue;
+                }
+
+                layout.Nodes.Add(new MvpDungeonNodeState(0, nodeIndex, ResolveSlotId(0, nodeIndex), string.Empty, string.Empty, 0));
+            }
         }
 
         private static bool IsValidAssignedNode(MvpDungeonNodeState node)

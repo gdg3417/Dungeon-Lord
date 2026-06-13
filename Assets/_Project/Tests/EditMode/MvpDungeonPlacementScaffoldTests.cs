@@ -168,6 +168,33 @@ namespace DungeonBuilder.Tests.EditMode
             AssertNoRawPlacementIds(panel);
         }
 
+
+        [Test]
+        public void EditingOneCategoryOnMigratedLegacySave_KeepsOtherLegacyCategoriesVisible()
+        {
+            _root.Save.mvpDungeonPlacements = AllStarterPlacementState();
+            _root.Save.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            _root.Save.structureRuntime = new StructureRuntimeState();
+
+            bool modified = _root.TryMvpPlaceOrModifySelectedPlacement(
+                MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId,
+                out _,
+                out _,
+                out _);
+
+            MvpDungeonPlacementEntry[] resolved = MvpDungeonLayoutResolver.ResolveOrderedPlacements(_root.Save.mvpDungeonFloorLayout, _root.Save.mvpDungeonPlacements);
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.Resolve(_root.Save.mvpDungeonFloorLayout, _root.Save.mvpDungeonPlacements, PlacementEffectsConfig());
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(_root.Save, PlacementEffectsConfig());
+
+            Assert.That(modified, Is.True);
+            Assert.That(resolved, Has.Length.EqualTo(4));
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+            Assert.That(summary.DungeonPlacements, Has.Length.EqualTo(4));
+            Assert.That(summary.DungeonPlacements[0].CategoryId, Is.EqualTo(MvpDungeonPlacementIds.RoomCategoryId));
+            Assert.That(summary.DungeonPlacements[3].CategoryId, Is.EqualTo(MvpDungeonPlacementIds.LootNodeCategoryId));
+        }
+
         private void SetBackingField(string fieldName, object value)
         {
             typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_root, value);
@@ -184,6 +211,37 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 Assert.That(text, Does.Not.Contain(optionId));
             }
+        }
+
+
+        private static MvpDungeonPlacementState AllStarterPlacementState()
+        {
+            return new MvpDungeonPlacementState
+            {
+                Entries = new List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 4)
+                },
+                NextRevision = 5
+            };
+        }
+
+        private static RunSimulationConfig PlacementEffectsConfig()
+        {
+            return new RunSimulationConfig
+            {
+                MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
+                MvpPlacementEffects = new[]
+                {
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2, ExplanationKey = "effect.room" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 3, ManaPressure = 2, ExplanationKey = "effect.monster" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "effect.trap" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "effect.loot" }
+                }
+            };
         }
 
         private static string Localized(string key, string fallback)
