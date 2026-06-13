@@ -556,6 +556,26 @@
       "text": "Next: run again or adjust one placement based on the report."
     },
     {
+      "key": "mvp_loop.suggestion.analysis.run_for_analysis",
+      "text": "Next: run the dungeon so Basic Run Analysis can read the latest outcome."
+    },
+    {
+      "key": "mvp_loop.suggestion.analysis.reduce_danger",
+      "text": "Next: reduce danger or use a safer posture before pushing for more loot."
+    },
+    {
+      "key": "mvp_loop.suggestion.analysis.reduce_heat",
+      "text": "Next: lower heat pressure or use a cautious posture before the next run."
+    },
+    {
+      "key": "mvp_loop.suggestion.analysis.improve_extraction",
+      "text": "Next: improve survivability or reduce danger so generated loot is recovered."
+    },
+    {
+      "key": "mvp_loop.suggestion.analysis.test_greedier",
+      "text": "Next: repeat this setup or test slightly greedier pressure while heat is controlled."
+    },
+    {
       "key": "ui.guided_mvp.panel.title",
       "text": "Guided MVP Action"
     },
@@ -1238,6 +1258,34 @@
     {
       "key": "ui.mvp_loop.why.mixed",
       "text": "the current placement mix shaped the result"
+    },
+    {
+      "key": "ui.mvp_loop.analysis.run_format",
+      "text": "Main reason: {0}. Analysis: {1}"
+    },
+    {
+      "key": "ui.mvp_loop.analysis.no_run",
+      "text": "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.danger",
+      "text": "Danger was the largest pressure on this run."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.heat_increased",
+      "text": "Heat rose this run, increasing future risk."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.partial_loot",
+      "text": "Loot was generated but not fully recovered."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.strong_loot_stable_heat",
+      "text": "Loot recovery worked while heat stayed controlled."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.mixed",
+      "text": "The resolved run data does not point to a single extra pressure."
     },
     {
       "key": "ui.mvp_loop.section.line_format",

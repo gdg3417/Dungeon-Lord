@@ -182,6 +182,34 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlock_SetsSpecificAdviceWithoutMutationOrRewards()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+            save.runHistory.LatestOutcome = RunWithHeatApplication(2d, 7d, CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierResolver.NoticeTierId);
+            string before = JsonUtility.ToJson(save);
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+
+            Assert.That(summary.AnalysisUnlocked, Is.True);
+            Assert.That(summary.AnalysisAdviceKey, Is.EqualTo(MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey));
+            AssertSafetyFlags(summary);
+            Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void Resolve_WithoutBasicRunAnalysisUnlock_LeavesAnalysisAdviceEmpty()
+        {
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(FullSave(), HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+
+            Assert.That(summary.AnalysisUnlocked, Is.False);
+            Assert.That(summary.AnalysisAdviceKey, Is.Empty.Or.Null);
+        }
+
         [Test]
         public void Resolve_CompletionPendingWithUnavailableVerification_ReportsResearchUnavailableAndDoesNotSuggestVerify()
         {

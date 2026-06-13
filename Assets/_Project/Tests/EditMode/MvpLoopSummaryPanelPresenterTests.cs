@@ -256,6 +256,109 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.ResearchSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey + "]", System.StringComparison.Ordinal)));
         }
 
+
+        [Test]
+        public void BuildPanelText_LockedBasicRunAnalysis_PreservesConciseWhyAndSuggestion()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                AnalysisUnlocked = false,
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 6 },
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey,
+                AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[" + MvpLoopSummaryPanelPresenter.WhyRunFormatKey + "]:LOC[" + MvpLoopSummaryPanelPresenter.WhyDangerKey + "]"));
+            Assert.That(text, Does.Not.Contain("LOC[" + MvpLoopSummaryPanelPresenter.AnalysisRunFormatKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey + "]"));
+            Assert.That(text, Does.Not.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
+        }
+
+        [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_HighDangerAddsSpecificAnalysisAndAdvice()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary();
+            summary.LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 8, HeatPressure = 2 };
+            summary.AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey;
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[" + MvpLoopSummaryPanelPresenter.AnalysisRunFormatKey + "]:LOC[" + MvpLoopSummaryPanelPresenter.WhyDangerKey + "]:LOC[" + MvpLoopSummaryPanelPresenter.AnalysisDangerKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
+        }
+
+        [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_HeatIncreaseAddsSpecificAnalysisAndAdvice()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary();
+            summary.HeatBefore = 2d;
+            summary.HeatAfter = 5d;
+            summary.AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey;
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[" + MvpLoopSummaryPanelPresenter.AnalysisHeatIncreasedKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey + "]"));
+        }
+
+        [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_PartialLootAddsSpecificAnalysisAndAdvice()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary();
+            summary.LootGeneratedWorldValue = 10;
+            summary.LootExtractedWorldValue = 4;
+            summary.AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey;
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[" + MvpLoopSummaryPanelPresenter.AnalysisPartialLootKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey + "]"));
+        }
+
+        [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_NoRunYetUsesAnalysisPromptWithoutRawIdsOrKeys()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = false,
+                AnalysisUnlocked = true,
+                HasResearchUnlock = true,
+                ResearchUnlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId,
+                ResearchUnlockSummaryKey = "ui.research_unlock.basic_run_analysis.summary",
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey,
+                AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Basic Run Analysis is ready"));
+            Assert.That(text, Does.Contain("Basic Run Analysis can read"));
+            Assert.That(text, Does.Not.Contain("research.unlock."));
+            Assert.That(text, Does.Not.Contain("ui.research_unlock."));
+            Assert.That(text, Does.Not.Contain("mvp_loop.suggestion"));
+        }
+
+        private static MvpPlayerLoopSummary AnalysisSummary()
+        {
+            return new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                AnalysisUnlocked = true,
+                HeatBefore = 4d,
+                HeatAfter = 4d,
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true },
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey
+            };
+        }
+
         [Test]
         public void BuildPanelText_WithPartyPreview_UsesPlainPartyListWithoutNestedAdventurersLabel()
         {
@@ -321,6 +424,8 @@ namespace DungeonBuilder.Tests.EditMode
                     return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.WhyRunFormatKey:
                     return "LOC[" + key + "]:{0}";
+                case MvpLoopSummaryPanelPresenter.AnalysisRunFormatKey:
+                    return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.InlineSeparatorKey:
                     return "|";
                 default:
@@ -376,6 +481,8 @@ namespace DungeonBuilder.Tests.EditMode
                 case "ui.mvp_adventurer_party.class.unknown": return "Unknown adventurer";
                 case MvpPlayerLoopSummaryPresenter.ResearchCompletedKey: return "Research completed";
                 case "ui.research_unlock.basic_run_analysis.summary": return "Basic run analysis unlocked";
+                case MvpLoopSummaryPanelPresenter.AnalysisNoRunKey: return "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey: return "Next: run the dungeon so Basic Run Analysis can read the latest outcome.";
                 case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
                 default: return fallback;
             }
