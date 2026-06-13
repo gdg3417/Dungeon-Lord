@@ -12,6 +12,8 @@ namespace DungeonBuilder.M0
         public const string PlacementEffectsFormatKey = "ui.mvp_loop.panel.placement_effects_format";
         public const string ManaFormatKey = "ui.mvp_loop.panel.mana_format";
         public const string LootFormatKey = "ui.mvp_loop.panel.loot_format";
+        public const string LootNamedFormatKey = "ui.mvp_loop.panel.loot_named_format";
+        public const string LootEntryFormatKey = "ui.mvp_loop.panel.loot_entry_format";
         public const string HeatFormatKey = "ui.mvp_loop.panel.heat_format";
         public const string ResearchFormatKey = "ui.mvp_loop.panel.research_format";
         public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
@@ -39,11 +41,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(
                 Localize(localize, ManaFormatKey),
                 summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
-            AppendLine(builder, string.Format(
-                Localize(localize, LootFormatKey),
-                summary != null && summary.RuleResolved ? summary.LootGeneratedWorldValue : 0,
-                summary != null && summary.RuleResolved ? summary.LootExtractedWorldValue : 0,
-                summary != null && summary.RuleResolved ? summary.LootExtractedTradeableWorldValue : 0));
+            AppendLine(builder, BuildLootLine(summary, localize));
             AppendLine(builder, string.Format(
                 Localize(localize, HeatFormatKey),
                 summary != null && summary.RuleResolved ? summary.HeatBefore : 0d,
@@ -96,6 +94,48 @@ namespace DungeonBuilder.M0
             }
 
             return Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
+        }
+
+        public static string BuildNamedLootText(RunLootDropRecord[] lootBreakdown, Func<string, string, string> localize)
+        {
+            if (lootBreakdown == null || lootBreakdown.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var parts = new System.Collections.Generic.List<string>(lootBreakdown.Length);
+            for (int i = 0; i < lootBreakdown.Length; i++)
+            {
+                RunLootDropRecord entry = lootBreakdown[i];
+                if (entry == null || entry.Quantity <= 0 || string.IsNullOrWhiteSpace(entry.NameKey))
+                {
+                    continue;
+                }
+
+                string name = Localize(localize, entry.NameKey);
+                if (string.Equals(name, entry.NameKey, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                parts.Add(string.Format(Localize(localize, LootEntryFormatKey), entry.Quantity, name));
+            }
+
+            return parts.Count == 0 ? string.Empty : string.Join(", ", parts);
+        }
+
+        private static string BuildLootLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            int generated = summary != null && summary.RuleResolved ? summary.LootGeneratedWorldValue : 0;
+            int extracted = summary != null && summary.RuleResolved ? summary.LootExtractedWorldValue : 0;
+            int tradeable = summary != null && summary.RuleResolved ? summary.LootExtractedTradeableWorldValue : 0;
+            string namedLoot = summary != null && summary.RuleResolved ? BuildNamedLootText(summary.LootBreakdown, localize) : string.Empty;
+            if (!string.IsNullOrWhiteSpace(namedLoot))
+            {
+                return string.Format(Localize(localize, LootNamedFormatKey), generated, extracted, tradeable, namedLoot);
+            }
+
+            return string.Format(Localize(localize, LootFormatKey), generated, extracted, tradeable);
         }
 
         private static string ResolveResearch(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

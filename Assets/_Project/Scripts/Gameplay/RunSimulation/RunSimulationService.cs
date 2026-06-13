@@ -68,6 +68,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     _config.LootExtractionRuleSourceId), lootSummary, posture),
                 lootSummary,
                 compositionOutcome);
+            RunLootDropRecord[] lootBreakdown = RunLootBreakdownResolver.Resolve(_lootConfig, extractionSummary);
             RunAdventurerAttractionSummary attractionSummary = ApplyCompositionToAttractionSummary(AdventurerAttractionResolver.Resolve(
                 _config,
                 extractionSummary,
@@ -117,6 +118,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 LootSummary = lootSummary,
                 SurvivalSummary = survivalSummary,
                 LootExtractionSummary = extractionSummary,
+                LootBreakdown = lootBreakdown,
                 AdventurerAttractionSummary = attractionSummary,
                 AdventurerInterestForecastSummary = forecastSummary,
                 AdventurerDemandBudgetSummary = demandBudgetSummary,
