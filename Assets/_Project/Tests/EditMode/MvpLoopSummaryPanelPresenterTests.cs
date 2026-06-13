@@ -96,12 +96,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.LootFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.HeatFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.ResearchFormatKey));
-            Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey));
+            Assert.That(requestedKeys, Does.Not.Contain(MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.SuggestionFormatKey));
             Assert.That(requestedKeys, Does.Contain("structure.heat_scrubber.basic.display_name"));
             Assert.That(requestedKeys, Does.Contain(CurrentHeatTierResolver.NoticeTierId));
             Assert.That(requestedKeys, Does.Contain("ui.research.status.active_in_progress"));
             Assert.That(requestedKeys, Does.Contain(MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey));
+        }
+
+        [Test]
+        public void BuildPanelText_NoResearchUnlock_DoesNotAppendUnlockFallbackLine()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasResearchUnlock = false,
+                ResearchUnlockSummaryKey = ResearchUnlockSummaryPresenter.NoneKey,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Not.Contain("LOC[ui.mvp_loop.panel.research_unlock_format]"));
+            Assert.That(text, Does.Not.Contain("LOC[ui.research_unlock.none]"));
         }
 
         [Test]

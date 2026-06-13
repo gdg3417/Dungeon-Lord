@@ -1554,6 +1554,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
+            map["ui.mvp_loop.panel.research_unlock_format"] = "Research unlock: {0}";
             map["ui.mvp_loop.panel.adventurer_party_format"] = "{0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
             map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
@@ -1564,6 +1565,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.run_status.failed"] = "Failed";
             map["ui.research.status.verification_required"] = "Verification required";
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
+            map["ui.research_unlock.none"] = "No research unlock yet";
+            map["ui.research_unlock.unavailable"] = "Research unlock unavailable";
+            map["ui.research_unlock.basic_run_analysis.summary"] = "Basic run analysis unlocked";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
             AddGd10PlacementEffectsLocalization(map);
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";

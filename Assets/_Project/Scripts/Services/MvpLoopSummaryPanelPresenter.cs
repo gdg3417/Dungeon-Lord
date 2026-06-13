@@ -51,9 +51,12 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(
                 Localize(localize, ResearchFormatKey),
                 ResolveResearch(summary, localize)));
-            AppendLine(builder, string.Format(
-                Localize(localize, ResearchUnlockFormatKey),
-                ResolveResearchUnlock(summary, localize)));
+            if (summary != null && summary.RuleResolved && summary.HasResearchUnlock)
+            {
+                AppendLine(builder, string.Format(
+                    Localize(localize, ResearchUnlockFormatKey),
+                    ResolveResearchUnlock(summary, localize)));
+            }
             if (summary != null && summary.RuleResolved && summary.HasRunOutcome)
             {
                 string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
