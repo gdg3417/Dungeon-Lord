@@ -21,7 +21,8 @@ namespace DungeonBuilder.M0
             SaveData save,
             RunSimulationConfig runConfig = null,
             ResearchCompletionEligibilityScaffoldConfig researchEligibilityConfig = null,
-            ResearchVerificationScaffoldConfig researchVerificationConfig = null)
+            ResearchVerificationScaffoldConfig researchVerificationConfig = null,
+            ResearchUnlockBridgeConfig researchUnlockConfig = null)
         {
             if (save == null)
             {
@@ -47,6 +48,9 @@ namespace DungeonBuilder.M0
                 save.completedResearch,
                 researchEligibilityConfig,
                 researchVerificationConfig);
+            ResearchUnlockSummary unlockSummary = ResearchUnlockSummaryPresenter.Resolve(
+                save.completedResearch,
+                researchUnlockConfig);
 
             CurrentHeatTierSummary heatTier = CurrentHeatTierResolver.Resolve(runConfig, currentHeat);
             RunHeatApplicationSummary heatApplication = latestRun?.RunHeatApplicationSummary;
@@ -90,6 +94,10 @@ namespace DungeonBuilder.M0
                 HasResearchStatus = hasResearchStatus,
                 ResearchProjectId = researchProjectId,
                 ResearchStatusKey = researchStatusKey,
+                HasResearchUnlock = unlockSummary != null && unlockSummary.RuleResolved,
+                ResearchUnlockId = unlockSummary?.UnlockId ?? string.Empty,
+                ResearchUnlockSummaryKey = unlockSummary?.SummaryLocalizationKey ?? ResearchUnlockSummaryPresenter.NoneKey,
+                ResearchUnlockDeterministicErrorCode = unlockSummary?.DeterministicErrorCode ?? (int)ResearchUnlockSummaryErrorCode.NoCompletedResearch,
                 ResearchVerificationRuleResolved = verificationBoundary != null && verificationBoundary.RuleResolved,
                 ResearchVerificationDeterministicErrorCode = verificationBoundary?.DeterministicErrorCode ?? (int)ResearchVerificationBoundarySummaryErrorCode.NoPendingResearch,
                 VerificationRequired = verificationActionable,

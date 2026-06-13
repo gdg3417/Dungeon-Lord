@@ -91,6 +91,13 @@ namespace DungeonBuilder.M0
         None = 0,
         MissingSave = 1
     }
+    public enum ResearchUnlockSummaryErrorCode
+    {
+        None = 0,
+        NoCompletedResearch = 1,
+        MissingOrInvalidConfig = 2,
+        NoMatchingUnlock = 3
+    }
     public enum GuidedMvpActionPathErrorCode
     {
         None = 0,
@@ -568,6 +575,10 @@ namespace DungeonBuilder.M0
         public bool HasResearchStatus = false;
         public string ResearchProjectId;
         public string ResearchStatusKey;
+        public bool HasResearchUnlock = false;
+        public string ResearchUnlockId;
+        public string ResearchUnlockSummaryKey;
+        public int ResearchUnlockDeterministicErrorCode = (int)ResearchUnlockSummaryErrorCode.NoCompletedResearch;
         public bool ResearchVerificationRuleResolved = false;
         public int ResearchVerificationDeterministicErrorCode = (int)ResearchVerificationBoundarySummaryErrorCode.None;
         public bool VerificationRequired = false;
@@ -669,6 +680,22 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class ResearchUnlockBridgeConfig
+    {
+        public bool enabled;
+        public string ruleSourceId;
+        public ResearchUnlockDefinitionConfig[] unlocks = Array.Empty<ResearchUnlockDefinitionConfig>();
+    }
+
+    [Serializable]
+    public sealed class ResearchUnlockDefinitionConfig
+    {
+        public string researchProjectId;
+        public string unlockId;
+        public string summaryKey;
+    }
+
+    [Serializable]
     public sealed class ResearchProgressState
     {
         public string SlotId;
@@ -684,6 +711,21 @@ namespace DungeonBuilder.M0
         public string[] ProjectIds;
         public string LastCompletedProjectId;
         public string LastCompletionRuleSourceId;
+    }
+
+    [Serializable]
+    public sealed class ResearchUnlockSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)ResearchUnlockSummaryErrorCode.None;
+        public bool HasCompletedResearch = false;
+        public string MatchedProjectId;
+        public string UnlockId;
+        public string SummaryLocalizationKey;
+        public string RuleSourceIdUsed;
+        public bool WouldMutateState = false;
+        public bool WouldGrantRewards = false;
+        public bool WouldUnlockContent = false;
     }
 
     [Serializable]
@@ -972,6 +1014,7 @@ namespace DungeonBuilder.M0
         public ResearchCompletionEligibilityScaffoldConfig researchCompletionEligibilityScaffold;
         public ResearchCompletionClaimScaffoldConfig researchCompletionClaimScaffold;
         public ResearchVerificationScaffoldConfig researchVerificationScaffold;
+        public ResearchUnlockBridgeConfig researchUnlockBridge;
         public FeatureFlags featureFlags;
         public Tables tables;
     }

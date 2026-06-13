@@ -132,6 +132,39 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.CanClaimProduction, Is.False);
         }
 
+        [Test]
+        public void Resolve_CompletedResearch_ComposesUnlockSummary()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId } };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+
+            Assert.That(summary.HasResearchUnlock, Is.True);
+            Assert.That(summary.ResearchUnlockId, Is.EqualTo("research.unlock.basic_run_analysis"));
+            Assert.That(summary.ResearchUnlockSummaryKey, Is.EqualTo("ui.research_unlock.basic_run_analysis.summary"));
+            Assert.That(summary.ResearchUnlockDeterministicErrorCode, Is.EqualTo((int)ResearchUnlockSummaryErrorCode.None));
+        }
+
+        [Test]
+        public void Resolve_UnknownCompletedResearch_UsesSafeUnlockFallbackWithoutRawId()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { "research.project.unknown" } };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+            string serialized = JsonUtility.ToJson(summary);
+
+            Assert.That(summary.HasResearchUnlock, Is.False);
+            Assert.That(summary.ResearchUnlockSummaryKey, Is.EqualTo(ResearchUnlockSummaryPresenter.UnavailableKey));
+            Assert.That(summary.ResearchUnlockId, Is.Empty);
+            Assert.That(serialized, Does.Not.Contain("research.project.unknown"));
+        }
+
 
         [Test]
         public void Resolve_CompletionPendingWithUnavailableVerification_ReportsResearchUnavailableAndDoesNotSuggestVerify()
@@ -450,6 +483,24 @@ namespace DungeonBuilder.Tests.EditMode
                 enabled = true,
                 ruleSourceId = "test.research.verification",
                 verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode
+            };
+        }
+
+        private static ResearchUnlockBridgeConfig UnlockConfig()
+        {
+            return new ResearchUnlockBridgeConfig
+            {
+                enabled = true,
+                ruleSourceId = "test.research.unlock_bridge",
+                unlocks = new[]
+                {
+                    new ResearchUnlockDefinitionConfig
+                    {
+                        researchProjectId = ProjectId,
+                        unlockId = "research.unlock.basic_run_analysis",
+                        summaryKey = "ui.research_unlock.basic_run_analysis.summary"
+                    }
+                }
             };
         }
 

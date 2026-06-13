@@ -49,5 +49,16 @@
     "enabled": true,
     "ruleSourceId": "research.verification.rule.m7_c2_scaffold",
     "verificationMode": "unavailable"
+  },
+  "researchUnlockBridge": {
+    "enabled": true,
+    "ruleSourceId": "research.unlock_bridge.rule.gd15.v1",
+    "unlocks": [
+      {
+        "researchProjectId": "research.project.m7_a2_scaffold",
+        "unlockId": "research.unlock.basic_run_analysis",
+        "summaryKey": "ui.research_unlock.basic_run_analysis.summary"
+      }
+    ]
   }
 }

@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         public const string LootEntryFormatKey = "ui.mvp_loop.panel.loot_entry_format";
         public const string HeatFormatKey = "ui.mvp_loop.panel.heat_format";
         public const string ResearchFormatKey = "ui.mvp_loop.panel.research_format";
+        public const string ResearchUnlockFormatKey = "ui.mvp_loop.panel.research_unlock_format";
         public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
         public const string SuggestionFormatKey = "ui.mvp_loop.panel.suggestion_format";
         public const string ValueNoPlacementKey = "ui.mvp_loop.value.no_placement";
@@ -50,6 +51,9 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(
                 Localize(localize, ResearchFormatKey),
                 ResolveResearch(summary, localize)));
+            AppendLine(builder, string.Format(
+                Localize(localize, ResearchUnlockFormatKey),
+                ResolveResearchUnlock(summary, localize)));
             if (summary != null && summary.RuleResolved && summary.HasRunOutcome)
             {
                 string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
@@ -146,6 +150,19 @@ namespace DungeonBuilder.M0
             }
 
             return MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize);
+        }
+
+        private static string ResolveResearchUnlock(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.RuleResolved)
+            {
+                return Localize(localize, ResearchUnlockSummaryPresenter.NoneKey);
+            }
+
+            string key = summary.HasResearchUnlock
+                ? summary.ResearchUnlockSummaryKey
+                : ResearchUnlockSummaryPresenter.NoneKey;
+            return ResolveKeyOrFallback(key, localize, ResearchUnlockSummaryPresenter.NoneKey);
         }
 
         private static string ResolveKeyOrFallback(string key, Func<string, string, string> localize, string fallbackKey)
