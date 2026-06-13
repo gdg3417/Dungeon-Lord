@@ -316,10 +316,13 @@ namespace DungeonBuilder.Tests.EditMode
                     return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey:
                     return "LOC[" + key + "]:{0:0.##}:{1:0.##}:{2}:{3}";
+                case MvpLoopSummaryPanelPresenter.SectionLineFormatKey:
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey:
                     return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.WhyRunFormatKey:
                     return "LOC[" + key + "]:{0}";
+                case MvpLoopSummaryPanelPresenter.InlineSeparatorKey:
+                    return "|";
                 default:
                     return "LOC[" + key + "]";
             }
@@ -337,12 +340,13 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey: return "Loot: generated {0}, extracted {1}, tradeable {2}";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey: return "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
-                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "Research: {0}";
+                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "{0}";
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Unlocked: {0}";
-                case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "Next: {0}";
+                case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "{0}";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
                 case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
+                case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 case CurrentHeatTierResolver.NoticeTierId: return "Notice";
                 case MvpLoopSummaryPanelPresenter.ValueNoResearchKey: return "No research";
                 case MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey: return "Current Dungeon";
@@ -350,6 +354,8 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey: return "Rewards and Risk";
                 case MvpLoopSummaryPanelPresenter.ResearchSectionKey: return "Research";
                 case MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey: return "Suggested Next Action";
+                case MvpLoopSummaryPanelPresenter.SectionLineFormatKey: return "{0}: {1}";
+                case MvpLoopSummaryPanelPresenter.InlineSeparatorKey: return " | ";
                 case MvpLoopSummaryPanelPresenter.RiskNoRunKey: return "Risk will be shown after a run.";
                 case MvpLoopSummaryPanelPresenter.RiskStableKey: return "Risk stayed steady.";
                 case MvpLoopSummaryPanelPresenter.RiskIncreasedKey: return "Risk increased.";

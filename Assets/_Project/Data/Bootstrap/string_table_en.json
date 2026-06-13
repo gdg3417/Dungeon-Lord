@@ -505,11 +505,11 @@
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
-      "text": "Research: {0}"
+      "text": "{0}"
     },
     {
       "key": "ui.mvp_loop.panel.suggestion_format",
-      "text": "Next: {0}"
+      "text": "{0}"
     },
     {
       "key": "ui.mvp_loop.value.no_placement",
@@ -1238,6 +1238,14 @@
     {
       "key": "ui.mvp_loop.why.mixed",
       "text": "the current placement mix shaped the result"
+    },
+    {
+      "key": "ui.mvp_loop.section.line_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_loop.inline_separator",
+      "text": " | "
     }
   ]
 }

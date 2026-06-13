@@ -385,9 +385,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
             map["ui.mvp_loop.panel.loot_format"] = "Loot: {1}/{0} recovered; {2} tradeable.";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
-            map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
+            map["ui.mvp_loop.panel.research_format"] = "{0}";
             map["ui.mvp_loop.panel.research_unlock_format"] = "Unlocked: {0}";
-            map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
+            map["ui.mvp_loop.panel.suggestion_format"] = "{0}";
             map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
             map["ui.mvp_loop.value.no_research"] = "No research";
@@ -400,6 +400,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.rewards_and_risk"] = "Rewards and Risk";
             map["ui.mvp_loop.section.research"] = "Research";
             map["ui.mvp_loop.section.suggested_next_action"] = "Suggested Next Action";
+            map["ui.mvp_loop.section.line_format"] = "{0}: {1}";
+            map["ui.mvp_loop.inline_separator"] = " | ";
             map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
             map["ui.mvp_loop.why.no_run"] = "No run yet. Build or review the dungeon, then run it to learn what happens.";
             map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
@@ -533,6 +535,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.explanation.trap.spike"] = "Spike Trap adds danger and heat pressure";
             map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
             map["ui.mvp_run_feedback.placement_effects_impact_format"] = "{0} Placement effects: {1}.";
+            map["heat_tier.peace"] = "Peace";
             map["heat_tier.notice"] = "Notice";
             map["heat_tier.concern"] = "Concern";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";

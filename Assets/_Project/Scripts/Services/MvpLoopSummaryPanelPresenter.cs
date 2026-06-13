@@ -25,6 +25,8 @@ namespace DungeonBuilder.M0
         public const string RewardsAndRiskSectionKey = "ui.mvp_loop.section.rewards_and_risk";
         public const string ResearchSectionKey = "ui.mvp_loop.section.research";
         public const string SuggestedNextActionSectionKey = "ui.mvp_loop.section.suggested_next_action";
+        public const string SectionLineFormatKey = "ui.mvp_loop.section.line_format";
+        public const string InlineSeparatorKey = "ui.mvp_loop.inline_separator";
         public const string RunOutcomeLineFormatKey = "ui.mvp_loop.panel.run_outcome_line_format";
         public const string WhyNoRunKey = "ui.mvp_loop.why.no_run";
         public const string WhyRunFormatKey = "ui.mvp_loop.why.run_format";
@@ -50,24 +52,26 @@ namespace DungeonBuilder.M0
         {
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
-            AppendSection(builder, localize, CurrentDungeonSectionKey, string.Format(Localize(localize, CompositionFormatKey), ResolveComposition(summary, localize)));
-            AppendLine(builder, string.Format(Localize(localize, PlacementEffectsFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
-            AppendSection(builder, localize, LatestRunSectionKey, ResolveRun(summary, localize));
-            AppendSection(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
-            AppendSection(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));
-            AppendSection(builder, localize, ResearchSectionKey, ResolveResearch(summary, localize));
-            if (summary != null && summary.RuleResolved && summary.HasResearchUnlock)
-            {
-                AppendLine(builder, string.Format(Localize(localize, ResearchUnlockFormatKey), ResolveResearchUnlock(summary, localize)));
-            }
-            AppendSection(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+            AppendSectionLine(builder, localize, CurrentDungeonSectionKey, BuildCurrentDungeonLine(summary, localize));
+            AppendSectionLine(builder, localize, LatestRunSectionKey, ResolveRun(summary, localize));
+            AppendSectionLine(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
+            AppendSectionLine(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));
+            AppendSectionLine(builder, localize, ResearchSectionKey, BuildResearchLine(summary, localize));
+            AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             return builder.ToString();
         }
 
-        private static void AppendSection(StringBuilder builder, Func<string, string, string> localize, string headerKey, string body)
+        private static void AppendSectionLine(StringBuilder builder, Func<string, string, string> localize, string headerKey, string body)
         {
-            AppendLine(builder, Localize(localize, headerKey));
-            AppendLine(builder, body);
+            AppendLine(builder, string.Format(Localize(localize, SectionLineFormatKey), Localize(localize, headerKey), body));
+        }
+
+        private static string BuildCurrentDungeonLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            return JoinInline(
+                localize,
+                string.Format(Localize(localize, CompositionFormatKey), ResolveComposition(summary, localize)),
+                string.Format(Localize(localize, PlacementEffectsFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
         }
 
         private static string ResolveComposition(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -160,11 +164,11 @@ namespace DungeonBuilder.M0
 
         private static string BuildRewardsAndRisk(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            var builder = new StringBuilder();
-            AppendLine(builder, BuildLootLine(summary, localize));
-            AppendLine(builder, ResolveHeatLine(summary, localize));
-            AppendLine(builder, string.Format(Localize(localize, ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
-            return builder.ToString();
+            return JoinInline(
+                localize,
+                BuildLootLine(summary, localize),
+                ResolveHeatLine(summary, localize),
+                string.Format(Localize(localize, ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
         }
 
         private static string ResolveHeatLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -174,6 +178,20 @@ namespace DungeonBuilder.M0
             string tier = ResolveKeyOrFallback(summary?.HeatTierId, localize, ValueUnknownKey);
             string riskKey = summary == null || !summary.RuleResolved || !summary.HasRunOutcome ? RiskNoRunKey : after > before ? RiskIncreasedKey : after < before ? RiskReducedKey : RiskStableKey;
             return string.Format(Localize(localize, HeatFormatKey), before, after, tier, Localize(localize, riskKey));
+        }
+
+        private static string BuildResearchLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            string status = string.Format(Localize(localize, ResearchFormatKey), ResolveResearch(summary, localize));
+            if (summary == null || !summary.RuleResolved || !summary.HasResearchUnlock)
+            {
+                return status;
+            }
+
+            return JoinInline(
+                localize,
+                status,
+                string.Format(Localize(localize, ResearchUnlockFormatKey), ResolveResearchUnlock(summary, localize)));
         }
 
         private static string ResolveResearch(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -187,6 +205,33 @@ namespace DungeonBuilder.M0
             if (summary == null || !summary.RuleResolved) return Localize(localize, ResearchUnlockSummaryPresenter.NoneKey);
             string key = summary.HasResearchUnlock ? summary.ResearchUnlockSummaryKey : ResearchUnlockSummaryPresenter.NoneKey;
             return ResolveKeyOrFallback(key, localize, ResearchUnlockSummaryPresenter.NoneKey);
+        }
+
+        private static string JoinInline(Func<string, string, string> localize, params string[] parts)
+        {
+            if (parts == null || parts.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            string separator = Localize(localize, InlineSeparatorKey);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(parts[i]))
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append(separator);
+                }
+
+                builder.Append(parts[i]);
+            }
+
+            return builder.ToString();
         }
 
         private static string ResolveKeyOrFallback(string key, Func<string, string, string> localize, string fallbackKey)
