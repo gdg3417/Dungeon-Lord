@@ -461,6 +461,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
             map["ui.mvp_action.category.label"] = "Selected category: {0}";
+            map["ui.mvp_action.group.rooms"] = "Rooms:";
+            map["ui.mvp_action.group.monsters"] = "Monsters:";
+            map["ui.mvp_action.group.traps"] = "Traps:";
+            map["ui.mvp_action.group.loot"] = "Loot:";
             map["ui.mvp_action.posture.label"] = "Run posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";

@@ -1342,6 +1342,22 @@
     {
       "key": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache",
       "text": "Hidden Cache adds safer loot with a subtler attraction signal"
+    },
+    {
+      "key": "ui.mvp_action.group.rooms",
+      "text": "Rooms:"
+    },
+    {
+      "key": "ui.mvp_action.group.monsters",
+      "text": "Monsters:"
+    },
+    {
+      "key": "ui.mvp_action.group.traps",
+      "text": "Traps:"
+    },
+    {
+      "key": "ui.mvp_action.group.loot",
+      "text": "Loot:"
     }
   ]
 }

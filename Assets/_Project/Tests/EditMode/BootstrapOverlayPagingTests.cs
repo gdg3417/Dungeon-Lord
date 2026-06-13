@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -224,6 +225,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
+            Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
+            Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
+            Assert.That(labels.TrapsGroupHeader, Is.EqualTo("Traps:"));
+            Assert.That(labels.LootGroupHeader, Is.EqualTo("Loot:"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
             Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
@@ -233,7 +238,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlayerFacingMode_MinimalMvpActionPanelKeepsAllVerticalSelectorLabelsInCompactRect()
+        public void PlayerFacingMode_MinimalMvpActionPanelUsesScrollViewAndGroupedOptionLabels()
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
@@ -250,10 +255,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
             Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
-            Assert.That(labels.RoomCategory, Is.EqualTo("Room"));
-            Assert.That(labels.MonsterCategory, Is.EqualTo("Monster"));
-            Assert.That(labels.TrapCategory, Is.EqualTo("Trap"));
-            Assert.That(labels.LootNodeCategory, Is.EqualTo("Loot node"));
+            Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
+            Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
+            Assert.That(labels.TrapsGroupHeader, Is.EqualTo("Traps:"));
+            Assert.That(labels.LootGroupHeader, Is.EqualTo("Loot:"));
             Assert.That(labels.BasicRoomSelection, Is.EqualTo("Basic Room"));
             Assert.That(labels.NarrowHallSelection, Is.EqualTo("Narrow Hall"));
             Assert.That(labels.SkeletonSelection, Is.EqualTo("Skeleton"));
@@ -268,6 +273,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
+            Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
+
+            string overlaySource = File.ReadAllText(Path.Combine(Application.dataPath, "_Project/Scripts/UI/BootstrapOverlay.cs"));
+            Assert.That(overlaySource, Does.Contain("GUILayout.BeginScrollView"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.RoomCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.MonsterCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.TrapCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.LootNodeCategory"));
         }
 
         [Test]
@@ -1627,6 +1640,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
             map["ui.mvp_action.category.label"] = "Selected category: {0}";
+            map["ui.mvp_action.group.rooms"] = "Rooms:";
+            map["ui.mvp_action.group.monsters"] = "Monsters:";
+            map["ui.mvp_action.group.traps"] = "Traps:";
+            map["ui.mvp_action.group.loot"] = "Loot:";
             map["ui.mvp_action.posture.label"] = "Run posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
