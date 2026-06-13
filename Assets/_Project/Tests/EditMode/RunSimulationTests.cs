@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using TMPro;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -2772,6 +2773,138 @@ namespace DungeonBuilder.Tests.EditMode
             }
         }
 
+
+
+        [Test]
+        public void SaveMigration_BackfillsMissingMvpDungeonFloorLayoutWithoutChangingLegacyPlacements()
+        {
+            SaveRoot root = new SaveRoot
+            {
+                schemaVersion = 3,
+                primary = new SaveData
+                {
+                    mvpDungeonFloorLayout = null,
+                    mvpDungeonPlacements = StarterPlacementState(),
+                    structureRuntime = new StructureRuntimeState(),
+                    runHistory = new RunHistoryState()
+                }
+            };
+
+            SaveRoot migrated = SaveMigration.MigrateToLatest(root);
+            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(migrated.primary.mvpDungeonFloorLayout, migrated.primary.mvpDungeonPlacements);
+
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.primary.mvpDungeonFloorLayout, Is.Not.Null);
+            Assert.That(migrated.primary.mvpDungeonFloorLayout.Nodes, Has.Count.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(placements.Select(placement => placement.OptionId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+        }
+
+        [Test]
+        public void PlacementEffectsResolver_LegacyPlacementsStillResolveForSaveCompatibility()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.Resolve(null, StarterPlacementState(), config);
+
+            Assert.That(effects.RuleResolved, Is.True);
+            Assert.That(effects.PathCapacity, Is.EqualTo(2));
+            Assert.That(effects.Danger, Is.EqualTo(5));
+            Assert.That(effects.ManaPressure, Is.EqualTo(2));
+            Assert.That(effects.HeatPressure, Is.EqualTo(1));
+            Assert.That(effects.LootBonus, Is.EqualTo(4));
+            Assert.That(effects.Attraction, Is.EqualTo(2));
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+        }
+
+        [Test]
+        public void PlacementEffectsResolver_NodeLayoutMatchesLegacyStarterComposition()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            MvpPlacementEffectsSummary legacy = MvpPlacementEffectsResolver.Resolve(StarterPlacementState(), config);
+            MvpPlacementEffectsSummary layout = MvpPlacementEffectsResolver.Resolve(StarterNodeLayoutState(), new MvpDungeonPlacementState(), config);
+
+            Assert.That(layout.PathCapacity, Is.EqualTo(legacy.PathCapacity));
+            Assert.That(layout.Danger, Is.EqualTo(legacy.Danger));
+            Assert.That(layout.ManaPressure, Is.EqualTo(legacy.ManaPressure));
+            Assert.That(layout.HeatPressure, Is.EqualTo(legacy.HeatPressure));
+            Assert.That(layout.LootBonus, Is.EqualTo(legacy.LootBonus));
+            Assert.That(layout.Attraction, Is.EqualTo(legacy.Attraction));
+            Assert.That(layout.ContributingOptionIds, Is.EqualTo(legacy.ContributingOptionIds));
+            Assert.That(layout.EffectLocalizationKeys, Is.EqualTo(legacy.EffectLocalizationKeys));
+        }
+
+        [Test]
+        public void PlacementEffectsResolver_NodeOrderingIsDeterministicByFloorAndNode()
+        {
+            var layout = new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 3, "node.3", MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 4),
+                    new MvpDungeonNodeState(0, 1, "node.1", MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2),
+                    new MvpDungeonNodeState(0, 0, "node.0", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonNodeState(0, 2, "node.2", MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3)
+                }
+            };
+
+            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, null);
+
+            Assert.That(placements.Select(placement => placement.OptionId).ToArray(), Is.EqualTo(MvpDungeonPlacementIds.OrderedStarterOptionIds));
+        }
+
+        [Test]
+        public void PlacementEffectsResolver_EmptyOrMissingNodeLayoutFallsBackSafely()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            MvpPlacementEffectsSummary missingLayout = MvpPlacementEffectsResolver.Resolve(null, StarterPlacementState(), config);
+            MvpPlacementEffectsSummary emptyLayout = MvpPlacementEffectsResolver.Resolve(new MvpDungeonFloorLayoutState(), StarterPlacementState(), config);
+            MvpPlacementEffectsSummary emptySave = MvpPlacementEffectsResolver.Resolve(new MvpDungeonFloorLayoutState(), new MvpDungeonPlacementState(), config);
+
+            Assert.That(emptyLayout.ContributingOptionIds, Is.EqualTo(missingLayout.ContributingOptionIds));
+            Assert.That(emptySave.RuleResolved, Is.True);
+            Assert.That(emptySave.ContributingOptionIds, Is.Empty);
+        }
+
+        [Test]
+        public void PlacementEffectsResolver_DuplicateNodeAssignmentsNormalizeToOnePlacementPerNode()
+        {
+            var layout = new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 0, "node.0", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonNodeState(0, 0, "node.0", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 3),
+                    new MvpDungeonNodeState(0, 1, "node.1", MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2)
+                }
+            };
+
+            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, null);
+
+            Assert.That(placements, Has.Length.EqualTo(2));
+            Assert.That(placements[0].CategoryId, Is.EqualTo(MvpDungeonPlacementIds.RoomCategoryId));
+            Assert.That(placements[0].Revision, Is.EqualTo(3));
+            Assert.That(placements[1].CategoryId, Is.EqualTo(MvpDungeonPlacementIds.MonsterCategoryId));
+        }
+
+        [Test]
+        public void SimulateRunOnce_NodeLayoutCompositionMatchesLegacyRunOutcomeDeterministically()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+            MvpPlacementEffectsSummary legacyEffects = MvpPlacementEffectsResolver.Resolve(StarterPlacementState(), config);
+            MvpPlacementEffectsSummary layoutEffects = MvpPlacementEffectsResolver.Resolve(StarterNodeLayoutState(), null, config);
+
+            RunOutcomeRecord legacy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 1, RunPostureResolver.BalancedId, legacyEffects);
+            RunOutcomeRecord layout = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false }, 10, 1, RunPostureResolver.BalancedId, layoutEffects);
+
+            Assert.That(layout.Success, Is.EqualTo(legacy.Success));
+            Assert.That(layout.FinalChance, Is.EqualTo(legacy.FinalChance).Within(1e-9));
+            Assert.That(layout.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(legacy.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(layout.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Is.EqualTo(legacy.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds));
+        }
+
         private static MvpPlacementEffectsSummary StarterPlacementEffects(RunSimulationConfig config)
         {
             return MvpPlacementEffectsResolver.Resolve(StarterPlacementState(), config);
@@ -2780,6 +2913,23 @@ namespace DungeonBuilder.Tests.EditMode
         private static MvpPlacementEffectsSummary EmptyPlacementEffects(RunSimulationConfig config)
         {
             return MvpPlacementEffectsResolver.Resolve(new MvpDungeonPlacementState(), config);
+        }
+
+
+
+        private static MvpDungeonFloorLayoutState StarterNodeLayoutState()
+        {
+            return new MvpDungeonFloorLayoutState
+            {
+                Nodes = new List<MvpDungeonNodeState>
+                {
+                    new MvpDungeonNodeState(0, 0, "mvp.floor.00.node.00", MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                    new MvpDungeonNodeState(0, 1, "mvp.floor.00.node.01", MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2),
+                    new MvpDungeonNodeState(0, 2, "mvp.floor.00.node.02", MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3),
+                    new MvpDungeonNodeState(0, 3, "mvp.floor.00.node.03", MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 4)
+                },
+                NextRevision = 5
+            };
         }
 
         private static MvpDungeonPlacementState StarterPlacementState()

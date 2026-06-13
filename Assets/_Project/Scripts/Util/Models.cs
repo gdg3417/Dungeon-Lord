@@ -1194,6 +1194,7 @@ namespace DungeonBuilder.M0
 
         public DungeonLayoutState dungeonLayout;
         public MvpDungeonPlacementState mvpDungeonPlacements = new MvpDungeonPlacementState();
+        public MvpDungeonFloorLayoutState mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();
         public ResearchPendingState researchPending;
