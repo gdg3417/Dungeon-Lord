@@ -11,9 +11,13 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public const string LootNodeCategoryId = "placement.category.loot_node";
 
         public const string BasicRoomOptionId = "placement.option.room.basic";
+        public const string NarrowHallOptionId = "placement.option.room.narrow_hall";
         public const string SkeletonOptionId = "placement.option.monster.skeleton";
+        public const string GoblinOptionId = "placement.option.monster.goblin";
         public const string SpikeTrapOptionId = "placement.option.trap.spike";
+        public const string SnareTrapOptionId = "placement.option.trap.snare";
         public const string BasicLootNodeOptionId = "placement.option.loot_node.basic";
+        public const string HiddenCacheOptionId = "placement.option.loot_node.hidden_cache";
 
         public static readonly string[] OrderedCategoryIds =
         {
@@ -31,6 +35,18 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             BasicLootNodeOptionId
         };
 
+        public static readonly string[] OrderedOptionIds =
+        {
+            BasicRoomOptionId,
+            NarrowHallOptionId,
+            SkeletonOptionId,
+            GoblinOptionId,
+            SpikeTrapOptionId,
+            SnareTrapOptionId,
+            BasicLootNodeOptionId,
+            HiddenCacheOptionId
+        };
+
         public static bool IsAllowedCategory(string categoryId)
         {
             return string.Equals(categoryId, RoomCategoryId, StringComparison.Ordinal) ||
@@ -42,9 +58,13 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public static bool IsAllowedOption(string optionId)
         {
             return string.Equals(optionId, BasicRoomOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, NarrowHallOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, SkeletonOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, GoblinOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, SpikeTrapOptionId, StringComparison.Ordinal) ||
-                   string.Equals(optionId, BasicLootNodeOptionId, StringComparison.Ordinal);
+                   string.Equals(optionId, SnareTrapOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, BasicLootNodeOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, HiddenCacheOptionId, StringComparison.Ordinal);
         }
 
         public static bool TryGetCategoryForOption(string optionId, out string categoryId)
@@ -52,15 +72,19 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             switch (optionId)
             {
                 case BasicRoomOptionId:
+                case NarrowHallOptionId:
                     categoryId = RoomCategoryId;
                     return true;
                 case SkeletonOptionId:
+                case GoblinOptionId:
                     categoryId = MonsterCategoryId;
                     return true;
                 case SpikeTrapOptionId:
+                case SnareTrapOptionId:
                     categoryId = TrapCategoryId;
                     return true;
                 case BasicLootNodeOptionId:
+                case HiddenCacheOptionId:
                     categoryId = LootNodeCategoryId;
                     return true;
                 default:

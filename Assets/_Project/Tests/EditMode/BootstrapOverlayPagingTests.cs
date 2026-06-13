@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -224,6 +225,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
+            Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
+            Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
+            Assert.That(labels.TrapsGroupHeader, Is.EqualTo("Traps:"));
+            Assert.That(labels.LootGroupHeader, Is.EqualTo("Loot:"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
             Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
@@ -233,7 +238,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlayerFacingMode_MinimalMvpActionPanelKeepsAllVerticalSelectorLabelsInCompactRect()
+        public void PlayerFacingMode_MinimalMvpActionPanelUsesScrollViewAndGroupedOptionLabels()
         {
             MinimalMvpActionPanelLabels labels = MinimalMvpActionPanelPresenter.BuildPlacementLabels(
                 (key, fallback) => _root.Content.GetString(key, fallback),
@@ -250,20 +255,32 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
             Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
-            Assert.That(labels.RoomCategory, Is.EqualTo("Room"));
-            Assert.That(labels.MonsterCategory, Is.EqualTo("Monster"));
-            Assert.That(labels.TrapCategory, Is.EqualTo("Trap"));
-            Assert.That(labels.LootNodeCategory, Is.EqualTo("Loot node"));
+            Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
+            Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
+            Assert.That(labels.TrapsGroupHeader, Is.EqualTo("Traps:"));
+            Assert.That(labels.LootGroupHeader, Is.EqualTo("Loot:"));
             Assert.That(labels.BasicRoomSelection, Is.EqualTo("Basic Room"));
+            Assert.That(labels.NarrowHallSelection, Is.EqualTo("Narrow Hall"));
             Assert.That(labels.SkeletonSelection, Is.EqualTo("Skeleton"));
+            Assert.That(labels.GoblinSelection, Is.EqualTo("Goblin"));
             Assert.That(labels.SpikeTrapSelection, Is.EqualTo("Spike Trap"));
+            Assert.That(labels.SnareTrapSelection, Is.EqualTo("Snare Trap"));
             Assert.That(labels.BasicLootNodeSelection, Is.EqualTo("Basic Loot Node"));
+            Assert.That(labels.HiddenCacheSelection, Is.EqualTo("Hidden Cache"));
             Assert.That(labels.CautiousPosture, Is.EqualTo("Cautious"));
             Assert.That(labels.BalancedPosture, Is.EqualTo("Balanced"));
             Assert.That(labels.GreedyPosture, Is.EqualTo("Greedy"));
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
             Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
+            Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
+
+            string overlaySource = File.ReadAllText(Path.Combine(Application.dataPath, "_Project/Scripts/UI/BootstrapOverlay.cs"));
+            Assert.That(overlaySource, Does.Contain("GUILayout.BeginScrollView"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.RoomCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.MonsterCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.TrapCategory"));
+            Assert.That(overlaySource, Does.Not.Contain("GUILayout.Button(labels.LootNodeCategory"));
         }
 
         [Test]
@@ -1623,6 +1640,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
             map["ui.mvp_action.category.label"] = "Selected category: {0}";
+            map["ui.mvp_action.group.rooms"] = "Rooms:";
+            map["ui.mvp_action.group.monsters"] = "Monsters:";
+            map["ui.mvp_action.group.traps"] = "Traps:";
+            map["ui.mvp_action.group.loot"] = "Loot:";
             map["ui.mvp_action.posture.label"] = "Run posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
@@ -1639,9 +1660,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["placement.category.trap.display_name"] = "Trap";
             map["placement.category.loot_node.display_name"] = "Loot node";
             map["placement.option.room.basic.display_name"] = "Basic Room";
+            map["placement.option.room.narrow_hall.display_name"] = "Narrow Hall";
             map["placement.option.monster.skeleton.display_name"] = "Skeleton";
+            map["placement.option.monster.goblin.display_name"] = "Goblin";
             map["placement.option.trap.spike.display_name"] = "Spike Trap";
+            map["placement.option.trap.snare.display_name"] = "Snare Trap";
             map["placement.option.loot_node.basic.display_name"] = "Basic Loot Node";
+            map["placement.option.loot_node.hidden_cache.display_name"] = "Hidden Cache";
             map["ui.mvp_label.placement_category.unknown"] = "Unknown category";
             map["ui.mvp_label.placement_option.unknown"] = "Unknown placement";
             map["ui.mvp_composition.empty"] = "No dungeon placements yet";
@@ -1654,9 +1679,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_dungeon_layout.panel.node_separator"] = " -> ";
             map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
             map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
+            map["ui.mvp_placement_preview.room.narrow_hall"] = "Role: connects rooms with a lower-capacity hallway.";
             map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
+            map["ui.mvp_placement_preview.monster.goblin"] = "Role: adds lighter danger, lower mana pressure, and a small loot signal.";
             map["ui.mvp_placement_preview.trap.spike"] = "Role: adds danger, heat, and path pressure.";
+            map["ui.mvp_placement_preview.trap.snare"] = "Role: controls adventurers with lower danger and less heat pressure.";
             map["ui.mvp_placement_preview.loot_node.basic"] = "Role: adds loot and adventurer attraction context.";
+            map["ui.mvp_placement_preview.loot_node.hidden_cache"] = "Role: adds subtler loot with lower adventurer attraction.";
             map["ui.mvp_placement_preview.unknown"] = "Role unavailable.";
             map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
             map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
@@ -1765,9 +1794,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.attraction_format"] = "attraction +{0}";
             map["ui.mvp_placement_effects.explanation_format"] = "{0} ({1})";
             map["ui.mvp_placement_effects.explanation.room.basic"] = "Basic Room opens the run path and capacity context";
+            map["ui.mvp_placement_effects.explanation.room.narrow_hall"] = "Narrow Hall connects the route with lower path capacity than a Basic Room";
             map["ui.mvp_placement_effects.explanation.monster.skeleton"] = "Skeleton adds danger and mana upkeep pressure";
+            map["ui.mvp_placement_effects.explanation.monster.goblin"] = "Goblin adds lighter danger, lower mana upkeep, and a small loot signal";
             map["ui.mvp_placement_effects.explanation.trap.spike"] = "Spike Trap adds danger and heat pressure";
+            map["ui.mvp_placement_effects.explanation.trap.snare"] = "Snare Trap controls the path with lower danger and less heat pressure";
             map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
+            map["ui.mvp_placement_effects.explanation.loot_node.hidden_cache"] = "Hidden Cache adds safer loot with a subtler attraction signal";
             map["ui.mvp_run_feedback.placement_effects_impact_format"] = "{0} Placement effects: {1}.";
             map["heat_tier.peace"] = "Peace";
             map["heat_tier.notice"] = "Notice";

@@ -34,6 +34,7 @@ namespace DungeonBuilder.M0
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
+        private const float MinimalMvpActionPanelScrollBarWidth = 16f;
         private const float OverlayTextSafeLeftMargin = 24f;
         private const float OverlayTextSafeTopMargin = 14f;
         private const float OverlayTextSafeBottomMargin = 10f;
@@ -51,6 +52,7 @@ namespace DungeonBuilder.M0
         private int _fullDiagnosticsPage;
         private readonly int[] _fullDiagnosticsPageScrollOffsets = new int[DiagnosticsPageCount];
         private Vector2 _devPanelScrollPosition;
+        private Vector2 _minimalMvpActionPanelScrollPosition;
         private string _selectedMvpStructureId = DefaultMvpStructureId;
         private string _selectedMvpPlacementCategoryId = DefaultMvpPlacementCategoryId;
         private string _selectedMvpPlacementOptionId = DefaultMvpPlacementOptionId;
@@ -73,6 +75,7 @@ namespace DungeonBuilder.M0
         public bool DiagnosticsVisible => _diagnosticsVisible || _runDiagnosticsOnlyVisible;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
+        public Vector2 MinimalMvpActionPanelScrollPosition => _minimalMvpActionPanelScrollPosition;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
         public string SelectedMvpPlacementCategoryId => _selectedMvpPlacementCategoryId;
         public string SelectedMvpPlacementOptionId => _selectedMvpPlacementOptionId;
@@ -1145,52 +1148,69 @@ namespace DungeonBuilder.M0
                 margin = new RectOffset(0, 0, 1, 1),
                 padding = new RectOffset(4, 4, 1, 1)
             };
+            GUIStyle groupHeaderLabel = new GUIStyle(compactLabel)
+            {
+                fontStyle = FontStyle.Bold
+            };
             GUILayoutOption labelHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight);
             GUILayoutOption previewHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight * 2f);
             GUILayoutOption buttonHeight = GUILayout.Height(MinimalMvpActionPanelButtonHeight);
 
             GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
+            _minimalMvpActionPanelScrollPosition = GUILayout.BeginScrollView(
+                _minimalMvpActionPanelScrollPosition,
+                false,
+                true,
+                GUILayout.Width(MinimalMvpActionPanelWidth - MinimalMvpActionPanelScrollBarWidth));
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
             GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
             GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
-            if (GUILayout.Button(labels.RoomCategory, compactButton, buttonHeight))
-            {
-                SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
-            }
-            if (GUILayout.Button(labels.MonsterCategory, compactButton, buttonHeight))
-            {
-                SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
-            }
-            if (GUILayout.Button(labels.TrapCategory, compactButton, buttonHeight))
-            {
-                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
-            }
-            if (GUILayout.Button(labels.LootNodeCategory, compactButton, buttonHeight))
-            {
-                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
-            }
+            GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);
             }
+            if (GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.NarrowHallOptionId);
+            }
+            GUILayout.Label(labels.MonstersGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.SkeletonSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.SkeletonOptionId);
             }
+            if (GUILayout.Button(labels.GoblinSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.GoblinOptionId);
+            }
+            GUILayout.Label(labels.TrapsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.SpikeTrapSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.SpikeTrapOptionId);
             }
+            if (GUILayout.Button(labels.SnareTrapSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.SnareTrapOptionId);
+            }
+            GUILayout.Label(labels.LootGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicLootNodeSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId);
+            }
+            if (GUILayout.Button(labels.HiddenCacheSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.HiddenCacheOptionId);
             }
             if (GUILayout.Button(labels.CautiousPosture, compactButton, buttonHeight))
             {
@@ -1223,6 +1243,7 @@ namespace DungeonBuilder.M0
                 ToggleDiagnosticsVisibility();
                 RefreshOverlayText();
             }
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
         }
 

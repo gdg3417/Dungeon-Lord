@@ -1294,6 +1294,70 @@
     {
       "key": "ui.mvp_loop.inline_separator",
       "text": " | "
+    },
+    {
+      "key": "placement.option.room.narrow_hall.display_name",
+      "text": "Narrow Hall"
+    },
+    {
+      "key": "placement.option.monster.goblin.display_name",
+      "text": "Goblin"
+    },
+    {
+      "key": "placement.option.trap.snare.display_name",
+      "text": "Snare Trap"
+    },
+    {
+      "key": "placement.option.loot_node.hidden_cache.display_name",
+      "text": "Hidden Cache"
+    },
+    {
+      "key": "ui.mvp_placement_preview.room.narrow_hall",
+      "text": "Role: connects rooms with a lower-capacity hallway."
+    },
+    {
+      "key": "ui.mvp_placement_preview.monster.goblin",
+      "text": "Role: adds lighter danger, lower mana pressure, and a small loot signal."
+    },
+    {
+      "key": "ui.mvp_placement_preview.trap.snare",
+      "text": "Role: controls adventurers with lower danger and less heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_preview.loot_node.hidden_cache",
+      "text": "Role: adds subtler loot with lower adventurer attraction."
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.room.narrow_hall",
+      "text": "Narrow Hall connects the route with lower path capacity than a Basic Room"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.monster.goblin",
+      "text": "Goblin adds lighter danger, lower mana upkeep, and a small loot signal"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.trap.snare",
+      "text": "Snare Trap controls the path with lower danger and less heat pressure"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache",
+      "text": "Hidden Cache adds safer loot with a subtler attraction signal"
+    },
+    {
+      "key": "ui.mvp_action.group.rooms",
+      "text": "Rooms:"
+    },
+    {
+      "key": "ui.mvp_action.group.monsters",
+      "text": "Monsters:"
+    },
+    {
+      "key": "ui.mvp_action.group.traps",
+      "text": "Traps:"
+    },
+    {
+      "key": "ui.mvp_action.group.loot",
+      "text": "Loot:"
     }
   ]
 }

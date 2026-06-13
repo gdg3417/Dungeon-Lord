@@ -17,6 +17,10 @@ namespace DungeonBuilder.M0
         public const string SelectionLabelKey = "ui.mvp_action.selection.label";
         public const string PostureLabelKey = "ui.mvp_action.posture.label";
         public const string CategoryLabelKey = "ui.mvp_action.category.label";
+        public const string RoomsGroupHeaderKey = "ui.mvp_action.group.rooms";
+        public const string MonstersGroupHeaderKey = "ui.mvp_action.group.monsters";
+        public const string TrapsGroupHeaderKey = "ui.mvp_action.group.traps";
+        public const string LootGroupHeaderKey = "ui.mvp_action.group.loot";
         public const string CautiousPostureKey = "run.posture.cautious.name";
         public const string BalancedPostureKey = "run.posture.balanced.name";
         public const string GreedyPostureKey = "run.posture.greedy.name";
@@ -117,10 +121,18 @@ namespace DungeonBuilder.M0
                 Localize(localize, MvpDungeonPlacementPresenter.MonsterCategoryKey),
                 Localize(localize, MvpDungeonPlacementPresenter.TrapCategoryKey),
                 Localize(localize, MvpDungeonPlacementPresenter.LootNodeCategoryKey),
+                Localize(localize, RoomsGroupHeaderKey),
+                Localize(localize, MonstersGroupHeaderKey),
+                Localize(localize, TrapsGroupHeaderKey),
+                Localize(localize, LootGroupHeaderKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicRoomOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.NarrowHallOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SkeletonOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.GoblinOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SpikeTrapOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.SnareTrapOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicLootNodeOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.HiddenCacheOptionKey),
                 Localize(localize, ManaGeneratorSelectionKey),
                 Localize(localize, HeatScrubberSelectionKey),
                 Localize(localize, RiskLabSelectionKey),
@@ -174,10 +186,18 @@ namespace DungeonBuilder.M0
             string monsterCategory,
             string trapCategory,
             string lootNodeCategory,
+            string roomsGroupHeader,
+            string monstersGroupHeader,
+            string trapsGroupHeader,
+            string lootGroupHeader,
             string basicRoomSelection,
+            string narrowHallSelection,
             string skeletonSelection,
+            string goblinSelection,
             string spikeTrapSelection,
+            string snareTrapSelection,
             string basicLootNodeSelection,
+            string hiddenCacheSelection,
             string manaGeneratorSelection,
             string heatScrubberSelection,
             string riskLabSelection,
@@ -201,10 +221,18 @@ namespace DungeonBuilder.M0
             MonsterCategory = monsterCategory;
             TrapCategory = trapCategory;
             LootNodeCategory = lootNodeCategory;
+            RoomsGroupHeader = roomsGroupHeader;
+            MonstersGroupHeader = monstersGroupHeader;
+            TrapsGroupHeader = trapsGroupHeader;
+            LootGroupHeader = lootGroupHeader;
             BasicRoomSelection = basicRoomSelection;
+            NarrowHallSelection = narrowHallSelection;
             SkeletonSelection = skeletonSelection;
+            GoblinSelection = goblinSelection;
             SpikeTrapSelection = spikeTrapSelection;
+            SnareTrapSelection = snareTrapSelection;
             BasicLootNodeSelection = basicLootNodeSelection;
+            HiddenCacheSelection = hiddenCacheSelection;
             ManaGeneratorSelection = manaGeneratorSelection;
             HeatScrubberSelection = heatScrubberSelection;
             RiskLabSelection = riskLabSelection;
@@ -229,10 +257,18 @@ namespace DungeonBuilder.M0
         public string MonsterCategory { get; }
         public string TrapCategory { get; }
         public string LootNodeCategory { get; }
+        public string RoomsGroupHeader { get; }
+        public string MonstersGroupHeader { get; }
+        public string TrapsGroupHeader { get; }
+        public string LootGroupHeader { get; }
         public string BasicRoomSelection { get; }
+        public string NarrowHallSelection { get; }
         public string SkeletonSelection { get; }
+        public string GoblinSelection { get; }
         public string SpikeTrapSelection { get; }
+        public string SnareTrapSelection { get; }
         public string BasicLootNodeSelection { get; }
+        public string HiddenCacheSelection { get; }
         public string ManaGeneratorSelection { get; }
         public string HeatScrubberSelection { get; }
         public string RiskLabSelection { get; }

@@ -28,7 +28,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlacementModel_InitializesWithExactlyFourCategoriesAndStarterOptions()
+        public void PlacementModel_InitializesWithExactlyFourCategoriesAndEightValidOptions()
         {
             Assert.That(MvpDungeonPlacementIds.OrderedCategoryIds, Is.EqualTo(new[]
             {
@@ -44,12 +44,27 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpDungeonPlacementIds.SpikeTrapOptionId,
                 MvpDungeonPlacementIds.BasicLootNodeOptionId
             }));
+            Assert.That(MvpDungeonPlacementIds.OrderedOptionIds, Is.EqualTo(new[]
+            {
+                MvpDungeonPlacementIds.BasicRoomOptionId,
+                MvpDungeonPlacementIds.NarrowHallOptionId,
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId
+            }));
         }
 
         [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)]
+        [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId)]
         [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)]
+        [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId)]
         [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId)]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId)]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId)]
         public void PlayerCanPlaceStarterOptionForEachCategory(string categoryId, string optionId)
         {
             bool placed = _root.TryMvpPlaceOrModifySelectedPlacement(
@@ -207,7 +222,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(text, Does.Not.Contain(categoryId));
             }
 
-            foreach (string optionId in MvpDungeonPlacementIds.OrderedStarterOptionIds)
+            foreach (string optionId in MvpDungeonPlacementIds.OrderedOptionIds)
             {
                 Assert.That(text, Does.Not.Contain(optionId));
             }
@@ -290,9 +305,13 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap",
                 [MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node",
                 [MvpDungeonPlacementPresenter.BasicRoomOptionKey] = "Basic Room",
+                [MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall",
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
+                [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin",
                 [MvpDungeonPlacementPresenter.SpikeTrapOptionKey] = "Spike Trap",
+                [MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap",
                 [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node",
+                [MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0}: {1}",
                 [MvpDungeonPlacementPresenter.SeparatorKey] = "; ",
                 [MvpDungeonPlacementPresenter.BasicRoomPreviewKey] = "Role: adds room space and path context."

@@ -54,6 +54,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.BalancedPostureKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.CautiousPostureKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.GreedyPostureKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.RoomsGroupHeaderKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.MonstersGroupHeaderKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.TrapsGroupHeaderKey));
+            Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.LootGroupHeaderKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey));
             Assert.That(requestedKeys, Does.Contain(MinimalMvpActionPanelPresenter.RiskLabSelectionKey));
@@ -93,6 +97,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.CautiousPosture, Is.EqualTo(MinimalMvpActionPanelPresenter.CautiousPostureKey));
             Assert.That(labels.BalancedPosture, Is.EqualTo(MinimalMvpActionPanelPresenter.BalancedPostureKey));
             Assert.That(labels.GreedyPosture, Is.EqualTo(MinimalMvpActionPanelPresenter.GreedyPostureKey));
+            Assert.That(labels.RoomsGroupHeader, Is.EqualTo(MinimalMvpActionPanelPresenter.RoomsGroupHeaderKey));
+            Assert.That(labels.MonstersGroupHeader, Is.EqualTo(MinimalMvpActionPanelPresenter.MonstersGroupHeaderKey));
+            Assert.That(labels.TrapsGroupHeader, Is.EqualTo(MinimalMvpActionPanelPresenter.TrapsGroupHeaderKey));
+            Assert.That(labels.LootGroupHeader, Is.EqualTo(MinimalMvpActionPanelPresenter.LootGroupHeaderKey));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey));
             Assert.That(labels.RiskLabSelection, Is.EqualTo(MinimalMvpActionPanelPresenter.RiskLabSelectionKey));
