@@ -19,6 +19,18 @@ namespace DungeonBuilder.M0
         public const string ResearchUnlockFormatKey = "ui.mvp_loop.panel.research_unlock_format";
         public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
         public const string SuggestionFormatKey = "ui.mvp_loop.panel.suggestion_format";
+        public const string CurrentDungeonSectionKey = "ui.mvp_loop.section.current_dungeon";
+        public const string WhyItHappenedSectionKey = "ui.mvp_loop.section.why_it_happened";
+        public const string RewardsAndRiskSectionKey = "ui.mvp_loop.section.rewards_and_risk";
+        public const string ResearchSectionKey = "ui.mvp_loop.section.research";
+        public const string SuggestedNextActionSectionKey = "ui.mvp_loop.section.suggested_next_action";
+        public const string RunOutcomeLineFormatKey = "ui.mvp_loop.panel.run_outcome_line_format";
+        public const string WhyNoRunKey = "ui.mvp_loop.why.no_run";
+        public const string WhyRunFormatKey = "ui.mvp_loop.why.run_format";
+        public const string RiskNoRunKey = "ui.mvp_loop.risk.no_run";
+        public const string RiskStableKey = "ui.mvp_loop.risk.stable";
+        public const string RiskIncreasedKey = "ui.mvp_loop.risk.increased";
+        public const string RiskReducedKey = "ui.mvp_loop.risk.reduced";
         public const string ValueNoPlacementKey = "ui.mvp_loop.value.no_placement";
         public const string ValueNoRunKey = "ui.mvp_loop.value.no_run";
         public const string ValueUnknownKey = "ui.mvp_loop.value.unknown";
@@ -30,104 +42,61 @@ namespace DungeonBuilder.M0
         {
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
-            AppendLine(builder, string.Format(
-                Localize(localize, CompositionFormatKey),
-                ResolveComposition(summary, localize)));
-            AppendLine(builder, string.Format(
-                Localize(localize, LatestRunFormatKey),
-                ResolveRun(summary, localize)));
-            AppendLine(builder, string.Format(
-                Localize(localize, PlacementEffectsFormatKey),
-                MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
-            AppendLine(builder, string.Format(
-                Localize(localize, ManaFormatKey),
-                summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
-            AppendLine(builder, BuildLootLine(summary, localize));
-            AppendLine(builder, string.Format(
-                Localize(localize, HeatFormatKey),
-                summary != null && summary.RuleResolved ? summary.HeatBefore : 0d,
-                summary != null && summary.RuleResolved ? summary.HeatAfter : 0d,
-                ResolveKeyOrFallback(summary?.HeatTierId, localize, ValueUnknownKey)));
-            AppendLine(builder, string.Format(
-                Localize(localize, ResearchFormatKey),
-                ResolveResearch(summary, localize)));
+            AppendSection(builder, localize, CurrentDungeonSectionKey, string.Format(Localize(localize, CompositionFormatKey), ResolveComposition(summary, localize)));
+            AppendLine(builder, string.Format(Localize(localize, PlacementEffectsFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
+            AppendSection(builder, localize, LatestRunFormatKey, ResolveRun(summary, localize));
+            AppendSection(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
+            AppendSection(builder, localize, RewardsAndRiskSectionKey, BuildLootLine(summary, localize));
+            AppendLine(builder, ResolveHeatLine(summary, localize));
+            AppendSection(builder, localize, ResearchSectionKey, ResolveResearch(summary, localize));
             if (summary != null && summary.RuleResolved && summary.HasResearchUnlock)
             {
-                AppendLine(builder, string.Format(
-                    Localize(localize, ResearchUnlockFormatKey),
-                    ResolveResearchUnlock(summary, localize)));
+                AppendLine(builder, string.Format(Localize(localize, ResearchUnlockFormatKey), ResolveResearchUnlock(summary, localize)));
             }
-            if (summary != null && summary.RuleResolved && summary.HasRunOutcome)
-            {
-                string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
-                if (!string.IsNullOrEmpty(partyPreview))
-                {
-                    AppendLine(builder, string.Format(
-                        Localize(localize, AdventurerPartyFormatKey),
-                        partyPreview));
-                }
-            }
-            AppendLine(builder, string.Format(
-                Localize(localize, SuggestionFormatKey),
-                ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+            AppendSection(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(summary?.NextOptimizationSuggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             return builder.ToString();
+        }
+
+        private static void AppendSection(StringBuilder builder, Func<string, string, string> localize, string headerKey, string body)
+        {
+            AppendLine(builder, Localize(localize, headerKey));
+            AppendLine(builder, body);
         }
 
         private static string ResolveComposition(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved)
-            {
-                return Localize(localize, ValueNoPlacementKey);
-            }
-
-            if (summary.DungeonPlacements != null && summary.DungeonPlacements.Length > 0)
-            {
-                return MvpDungeonPlacementPresenter.BuildCompositionText(summary.DungeonPlacements, localize);
-            }
-
-            if (summary.HasPlacementContext && !string.IsNullOrWhiteSpace(summary.SelectedStructureId))
-            {
-                return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(summary.SelectedStructureId, localize);
-            }
-
+            if (summary == null || !summary.RuleResolved) return Localize(localize, ValueNoPlacementKey);
+            if (summary.DungeonPlacements != null && summary.DungeonPlacements.Length > 0) return MvpDungeonPlacementPresenter.BuildCompositionText(summary.DungeonPlacements, localize);
+            if (summary.HasPlacementContext && !string.IsNullOrWhiteSpace(summary.SelectedStructureId)) return MvpPlayerFacingLabelResolver.ResolveStructureDisplayName(summary.SelectedStructureId, localize);
             return Localize(localize, ValueNoPlacementKey);
         }
 
         private static string ResolveRun(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome)
-            {
-                return Localize(localize, ValueNoRunKey);
-            }
+            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, ValueNoRunKey);
+            string outcome = Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
+            string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
+            return string.IsNullOrEmpty(partyPreview) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyPreview);
+        }
 
-            return Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
+        private static string ResolveWhyItHappened(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, WhyNoRunKey);
+            return string.Format(Localize(localize, WhyRunFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary.LatestRunPlacementEffects, localize));
         }
 
         public static string BuildNamedLootText(RunLootDropRecord[] lootBreakdown, Func<string, string, string> localize)
         {
-            if (lootBreakdown == null || lootBreakdown.Length == 0)
-            {
-                return string.Empty;
-            }
-
+            if (lootBreakdown == null || lootBreakdown.Length == 0) return string.Empty;
             var parts = new System.Collections.Generic.List<string>(lootBreakdown.Length);
             for (int i = 0; i < lootBreakdown.Length; i++)
             {
                 RunLootDropRecord entry = lootBreakdown[i];
-                if (entry == null || entry.Quantity <= 0 || string.IsNullOrWhiteSpace(entry.NameKey))
-                {
-                    continue;
-                }
-
+                if (entry == null || entry.Quantity <= 0 || string.IsNullOrWhiteSpace(entry.NameKey)) continue;
                 string name = Localize(localize, entry.NameKey);
-                if (string.Equals(name, entry.NameKey, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
+                if (string.Equals(name, entry.NameKey, StringComparison.Ordinal)) continue;
                 parts.Add(string.Format(Localize(localize, LootEntryFormatKey), entry.Quantity, name));
             }
-
             return parts.Count == 0 ? string.Empty : string.Join(", ", parts);
         }
 
@@ -137,61 +106,46 @@ namespace DungeonBuilder.M0
             int extracted = summary != null && summary.RuleResolved ? summary.LootExtractedWorldValue : 0;
             int tradeable = summary != null && summary.RuleResolved ? summary.LootExtractedTradeableWorldValue : 0;
             string namedLoot = summary != null && summary.RuleResolved ? BuildNamedLootText(summary.LootBreakdown, localize) : string.Empty;
-            if (!string.IsNullOrWhiteSpace(namedLoot))
-            {
-                return string.Format(Localize(localize, LootNamedFormatKey), generated, extracted, tradeable, namedLoot);
-            }
+            return !string.IsNullOrWhiteSpace(namedLoot)
+                ? string.Format(Localize(localize, LootNamedFormatKey), generated, extracted, tradeable, namedLoot)
+                : string.Format(Localize(localize, LootFormatKey), generated, extracted, tradeable);
+        }
 
-            return string.Format(Localize(localize, LootFormatKey), generated, extracted, tradeable);
+        private static string ResolveHeatLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            double before = summary != null && summary.RuleResolved ? summary.HeatBefore : 0d;
+            double after = summary != null && summary.RuleResolved ? summary.HeatAfter : 0d;
+            string tier = ResolveKeyOrFallback(summary?.HeatTierId, localize, ValueUnknownKey);
+            string riskKey = summary == null || !summary.RuleResolved || !summary.HasRunOutcome ? RiskNoRunKey : after > before ? RiskIncreasedKey : after < before ? RiskReducedKey : RiskStableKey;
+            return string.Format(Localize(localize, HeatFormatKey), before, after, tier, Localize(localize, riskKey));
         }
 
         private static string ResolveResearch(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved || !summary.HasResearchStatus)
-            {
-                return Localize(localize, ValueNoResearchKey);
-            }
-
+            if (summary == null || !summary.RuleResolved || !summary.HasResearchStatus) return Localize(localize, ValueNoResearchKey);
             return MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize);
         }
 
         private static string ResolveResearchUnlock(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            if (summary == null || !summary.RuleResolved)
-            {
-                return Localize(localize, ResearchUnlockSummaryPresenter.NoneKey);
-            }
-
-            string key = summary.HasResearchUnlock
-                ? summary.ResearchUnlockSummaryKey
-                : ResearchUnlockSummaryPresenter.NoneKey;
+            if (summary == null || !summary.RuleResolved) return Localize(localize, ResearchUnlockSummaryPresenter.NoneKey);
+            string key = summary.HasResearchUnlock ? summary.ResearchUnlockSummaryKey : ResearchUnlockSummaryPresenter.NoneKey;
             return ResolveKeyOrFallback(key, localize, ResearchUnlockSummaryPresenter.NoneKey);
         }
 
         private static string ResolveKeyOrFallback(string key, Func<string, string, string> localize, string fallbackKey)
         {
-            return string.IsNullOrWhiteSpace(key)
-                ? Localize(localize, fallbackKey)
-                : Localize(localize, key);
+            return string.IsNullOrWhiteSpace(key) ? Localize(localize, fallbackKey) : Localize(localize, key);
         }
 
         private static string Localize(Func<string, string, string> localize, string key)
         {
-            if (localize == null)
-            {
-                return key;
-            }
-
-            return localize(key, key);
+            return localize == null ? key : localize(key, key);
         }
 
         private static void AppendLine(StringBuilder builder, string line)
         {
-            if (builder.Length > 0)
-            {
-                builder.Append('\n');
-            }
-
+            if (builder.Length > 0) builder.Append('\n');
             builder.Append(line ?? string.Empty);
         }
     }
