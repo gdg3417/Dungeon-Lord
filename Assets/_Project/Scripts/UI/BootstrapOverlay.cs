@@ -457,8 +457,45 @@ namespace DungeonBuilder.M0
                     return BuildLatestRunFeedbackSectionText();
                 case PlayerFacingSectionFull:
                 default:
-                    return BuildSectionText("ui.mvp_smoke.section.full", BuildFullPlayerFacingSmokeText());
+                    return BuildPlayableMvpScreenText();
             }
+        }
+
+        public string BuildPlayableMvpScreenText()
+        {
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            var builder = new StringBuilder();
+            AppendLine(builder, MvpPlayableScreenPresenter.BuildScreenText(
+                summary,
+                guidedPath,
+                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
+                GetSelectedMvpPlacementPreviewText(),
+                BuildSelectedMvpPlacementComparisonText(),
+                GetSelectedMvpRunPostureDisplayName(),
+                GetSelectedMvpRunPlanPreviewText(),
+                _mvpStructurePlacementFeedback,
+                _mvpRunResultFeedback,
+                (key, fallback) => GetLocalizedString(key, fallback)));
+            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(guidedText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, guidedText);
+            }
+            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(firstSessionText))
+            {
+                AppendLine(builder, firstSessionText);
+            }
+            AppendLine(builder, GetLocalizedString("ui.mvp_view.player_mode.status"));
+            if (!string.IsNullOrEmpty(_root.BannerMessage))
+            {
+                AppendLine(builder, _root.BannerMessage);
+            }
+            return builder.ToString();
         }
 
         public string BuildCompactSmokeText()
