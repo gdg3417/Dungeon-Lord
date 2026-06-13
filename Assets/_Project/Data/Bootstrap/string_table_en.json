@@ -1074,6 +1074,30 @@
     {
       "key": "ui.mvp_run_feedback.placement_effects_impact_format",
       "text": "{0} Placement effects: {1}."
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.panel.layout_format",
+      "text": "Dungeon layout: {0}"
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.panel.floor_format",
+      "text": "Floor {0}: {1}"
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.panel.assigned_node_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.panel.empty_node_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.panel.node_separator",
+      "text": " -> "
+    },
+    {
+      "key": "ui.mvp_dungeon_layout.value.empty_available",
+      "text": "Empty / available"
     }
   ]
 }

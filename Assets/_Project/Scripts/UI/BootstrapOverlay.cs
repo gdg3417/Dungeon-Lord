@@ -463,6 +463,7 @@ namespace DungeonBuilder.M0
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
+            AppendMvpDungeonLayoutText(body);
             AppendCompactAdventurersFallbackIfMissing(body);
             AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
@@ -536,6 +537,7 @@ namespace DungeonBuilder.M0
             var body = new StringBuilder();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendMvpDungeonLayoutText(body);
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(guidedText))
@@ -616,6 +618,16 @@ namespace DungeonBuilder.M0
             _playerFacingScrollOffset = Mathf.Clamp(requestedOffset, 0, maxOffset);
         }
 
+
+        private void AppendMvpDungeonLayoutText(StringBuilder builder)
+        {
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(layoutText))
+            {
+                AppendLine(builder, layoutText);
+            }
+        }
+
         private void AppendMvpLoopSummaryPanel(StringBuilder builder)
         {
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
@@ -624,6 +636,8 @@ namespace DungeonBuilder.M0
             {
                 AppendLine(builder, panelText);
             }
+
+            AppendMvpDungeonLayoutText(builder);
 
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
