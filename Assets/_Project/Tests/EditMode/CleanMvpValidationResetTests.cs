@@ -279,7 +279,8 @@ namespace DungeonBuilder.Tests.EditMode
             SetOverlayPrivateField("_mvpStructurePlacementFeedback", "stale placement feedback");
             SetOverlayPrivateField("_mvpRunResultFeedback", "stale run feedback");
             string dirtyText = RefreshText();
-            Assert.That(dirtyText, Does.Contain("Latest run: Succeeded"));
+            Assert.That(dirtyText, Does.Contain("Latest Run"));
+            Assert.That(dirtyText, Does.Contain("Succeeded"));
             Assert.That(dirtyText, Does.Contain("Mana reserve: 45"));
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
@@ -297,8 +298,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
-            Assert.That(refreshed, Does.Contain("Latest run: No run yet"));
-            Assert.That(refreshed, Does.Contain("Placement effects: none yet"));
+            Assert.That(refreshed, Does.Contain("Latest Run"));
+            Assert.That(refreshed, Does.Contain("No run yet"));
+            Assert.That(refreshed, Does.Contain("Effects: none yet"));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("First-session status: place one room, monster, trap, or loot node to start the loop."));
@@ -312,7 +314,7 @@ namespace DungeonBuilder.Tests.EditMode
             string copied = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copied, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
-            Assert.That(copied, Does.Contain("Placement effects: none yet"));
+            Assert.That(copied, Does.Contain("Effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
 
@@ -381,10 +383,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
             map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
             map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
-            map["ui.mvp_loop.panel.loot_format"] = "Loot: generated {0}, extracted {1}, tradeable {2}";
-            map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2})";
+            map["ui.mvp_loop.panel.loot_format"] = "Loot: {1}/{0} recovered; {2} tradeable.";
+            map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
             map["ui.mvp_loop.panel.research_format"] = "Research: {0}";
-            map["ui.mvp_loop.panel.research_unlock_format"] = "Research unlock: {0}";
+            map["ui.mvp_loop.panel.research_unlock_format"] = "Unlocked: {0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "Next: {0}";
             map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
             map["ui.mvp_loop.value.no_run"] = "No run yet";
@@ -392,7 +394,31 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.value.unknown"] = "Unknown";
             map["ui.mvp_loop.run_status.succeeded"] = "Succeeded";
             map["ui.mvp_loop.run_status.failed"] = "Failed";
+            map["ui.mvp_loop.section.current_dungeon"] = "Current Dungeon";
+            map["ui.mvp_loop.section.latest_run"] = "Latest Run";
+            map["ui.mvp_loop.section.why_it_happened"] = "Why It Happened";
+            map["ui.mvp_loop.section.rewards_and_risk"] = "Rewards and Risk";
+            map["ui.mvp_loop.section.research"] = "Research";
+            map["ui.mvp_loop.section.suggested_next_action"] = "Suggested Next Action";
+            map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
+            map["ui.mvp_loop.why.no_run"] = "No run yet. Build or review the dungeon, then run it to learn what happens.";
+            map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
+            map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the run";
+            map["ui.mvp_loop.why.danger"] = "danger pressure drove the result";
+            map["ui.mvp_loop.why.mana_pressure"] = "mana pressure constrained the run";
+            map["ui.mvp_loop.why.heat_pressure"] = "heat pressure raised the risk";
+            map["ui.mvp_loop.why.loot_bonus"] = "loot placement improved the reward";
+            map["ui.mvp_loop.why.attraction"] = "attraction changed adventurer interest";
+            map["ui.mvp_loop.why.mixed"] = "the current placement mix shaped the result";
+            map["ui.mvp_loop.risk.no_run"] = "Risk will be shown after a run.";
+            map["ui.mvp_loop.risk.stable"] = "Risk stayed steady.";
+            map["ui.mvp_loop.risk.increased"] = "Risk increased.";
+            map["ui.mvp_loop.risk.reduced"] = "Risk went down.";
             map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
+            map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
+            map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next run.";
+            map["mvp_loop.suggestion.verify_research_status"] = "Verify research status before claiming progress.";
+            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
             AddGd10PlacementEffectsLocalization(map);
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
@@ -491,7 +517,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static void AddGd10PlacementEffectsLocalization(Dictionary<string, string> map)
         {
-            map["ui.mvp_loop.panel.placement_effects_format"] = "Placement effects: {0}";
+            map["ui.mvp_loop.panel.placement_effects_format"] = "Effects: {0}";
             map["ui.mvp_placement_effects.empty"] = "none yet";
             map["ui.mvp_placement_effects.combined_format"] = "{0}";
             map["ui.mvp_placement_effects.detail_separator"] = ", ";
@@ -507,6 +533,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.explanation.trap.spike"] = "Spike Trap adds danger and heat pressure";
             map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
             map["ui.mvp_run_feedback.placement_effects_impact_format"] = "{0} Placement effects: {1}.";
+            map["heat_tier.notice"] = "Notice";
             map["heat_tier.concern"] = "Concern";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
         }

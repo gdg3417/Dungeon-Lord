@@ -481,7 +481,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.title",
-      "text": "Dungeon Report"
+      "text": "MVP Loop Summary"
     },
     {
       "key": "ui.mvp_loop.panel.placement_format",
@@ -489,7 +489,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.latest_run_format",
-      "text": "Latest Run"
+      "text": "Latest run: {0}"
     },
     {
       "key": "ui.mvp_loop.panel.mana_format",
@@ -505,11 +505,11 @@
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
-      "text": "{0}"
+      "text": "Research: {0}"
     },
     {
       "key": "ui.mvp_loop.panel.suggestion_format",
-      "text": "{0}"
+      "text": "Next: {0}"
     },
     {
       "key": "ui.mvp_loop.value.no_placement",
@@ -929,7 +929,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.composition_format",
-      "text": "Built: {0}"
+      "text": "Dungeon composition: {0}"
     },
     {
       "key": "ui.mvp_action.category.label",
@@ -1189,7 +1189,7 @@
     },
     {
       "key": "ui.mvp_loop.why.run_format",
-      "text": "Run was shaped by: {0}."
+      "text": "Main reason: {0}."
     },
     {
       "key": "ui.mvp_loop.risk.no_run",
@@ -1206,6 +1206,38 @@
     {
       "key": "ui.mvp_loop.risk.reduced",
       "text": "Risk went down."
+    },
+    {
+      "key": "ui.mvp_loop.section.latest_run",
+      "text": "Latest Run"
+    },
+    {
+      "key": "ui.mvp_loop.why.path_capacity",
+      "text": "path capacity shaped the run"
+    },
+    {
+      "key": "ui.mvp_loop.why.danger",
+      "text": "danger pressure drove the result"
+    },
+    {
+      "key": "ui.mvp_loop.why.mana_pressure",
+      "text": "mana pressure constrained the run"
+    },
+    {
+      "key": "ui.mvp_loop.why.heat_pressure",
+      "text": "heat pressure raised the risk"
+    },
+    {
+      "key": "ui.mvp_loop.why.loot_bonus",
+      "text": "loot placement improved the reward"
+    },
+    {
+      "key": "ui.mvp_loop.why.attraction",
+      "text": "attraction changed adventurer interest"
+    },
+    {
+      "key": "ui.mvp_loop.why.mixed",
+      "text": "the current placement mix shaped the result"
     }
   ]
 }

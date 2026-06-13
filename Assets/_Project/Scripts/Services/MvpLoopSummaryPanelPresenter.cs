@@ -20,6 +20,7 @@ namespace DungeonBuilder.M0
         public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
         public const string SuggestionFormatKey = "ui.mvp_loop.panel.suggestion_format";
         public const string CurrentDungeonSectionKey = "ui.mvp_loop.section.current_dungeon";
+        public const string LatestRunSectionKey = "ui.mvp_loop.section.latest_run";
         public const string WhyItHappenedSectionKey = "ui.mvp_loop.section.why_it_happened";
         public const string RewardsAndRiskSectionKey = "ui.mvp_loop.section.rewards_and_risk";
         public const string ResearchSectionKey = "ui.mvp_loop.section.research";
@@ -27,6 +28,13 @@ namespace DungeonBuilder.M0
         public const string RunOutcomeLineFormatKey = "ui.mvp_loop.panel.run_outcome_line_format";
         public const string WhyNoRunKey = "ui.mvp_loop.why.no_run";
         public const string WhyRunFormatKey = "ui.mvp_loop.why.run_format";
+        public const string WhyPathCapacityKey = "ui.mvp_loop.why.path_capacity";
+        public const string WhyDangerKey = "ui.mvp_loop.why.danger";
+        public const string WhyManaPressureKey = "ui.mvp_loop.why.mana_pressure";
+        public const string WhyHeatPressureKey = "ui.mvp_loop.why.heat_pressure";
+        public const string WhyLootBonusKey = "ui.mvp_loop.why.loot_bonus";
+        public const string WhyAttractionKey = "ui.mvp_loop.why.attraction";
+        public const string WhyMixedKey = "ui.mvp_loop.why.mixed";
         public const string RiskNoRunKey = "ui.mvp_loop.risk.no_run";
         public const string RiskStableKey = "ui.mvp_loop.risk.stable";
         public const string RiskIncreasedKey = "ui.mvp_loop.risk.increased";
@@ -44,10 +52,9 @@ namespace DungeonBuilder.M0
             AppendLine(builder, Localize(localize, TitleKey));
             AppendSection(builder, localize, CurrentDungeonSectionKey, string.Format(Localize(localize, CompositionFormatKey), ResolveComposition(summary, localize)));
             AppendLine(builder, string.Format(Localize(localize, PlacementEffectsFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
-            AppendSection(builder, localize, LatestRunFormatKey, ResolveRun(summary, localize));
+            AppendSection(builder, localize, LatestRunSectionKey, ResolveRun(summary, localize));
             AppendSection(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
-            AppendSection(builder, localize, RewardsAndRiskSectionKey, BuildLootLine(summary, localize));
-            AppendLine(builder, ResolveHeatLine(summary, localize));
+            AppendSection(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));
             AppendSection(builder, localize, ResearchSectionKey, ResolveResearch(summary, localize));
             if (summary != null && summary.RuleResolved && summary.HasResearchUnlock)
             {
@@ -75,14 +82,54 @@ namespace DungeonBuilder.M0
         {
             if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, ValueNoRunKey);
             string outcome = Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
-            string partyPreview = MvpRunResultFeedbackPresenter.BuildPartyPreview(summary, localize);
-            return string.IsNullOrEmpty(partyPreview) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyPreview);
+            string partyList = BuildPartyList(summary, localize);
+            return string.IsNullOrEmpty(partyList) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyList);
+        }
+
+        private static string BuildPartyList(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.AdventurerPartyPreviewResolved || summary.AdventurerPartyClassIds == null || summary.AdventurerPartyClassIds.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string[] labels = new string[summary.AdventurerPartyClassIds.Length];
+            for (int i = 0; i < summary.AdventurerPartyClassIds.Length; i++)
+            {
+                labels[i] = AdventurerPartyCompositionResolver.ResolveClassLabel(summary.AdventurerPartyClassIds[i], localize);
+            }
+
+            return string.Join(", ", labels);
         }
 
         private static string ResolveWhyItHappened(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, WhyNoRunKey);
-            return string.Format(Localize(localize, WhyRunFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary.LatestRunPlacementEffects, localize));
+            return string.Format(Localize(localize, WhyRunFormatKey), Localize(localize, ResolveDominantCauseKey(summary.LatestRunPlacementEffects)));
+        }
+
+        private static string ResolveDominantCauseKey(MvpPlacementEffectsSummary effects)
+        {
+            if (effects == null || !effects.RuleResolved || !MvpPlacementEffectsPresenter.HasAnyEffect(effects)) return WhyMixedKey;
+
+            int best = 0;
+            string key = WhyMixedKey;
+            SelectDominant(Math.Abs(effects.PathCapacity), WhyPathCapacityKey, ref best, ref key);
+            SelectDominant(Math.Abs(effects.Danger), WhyDangerKey, ref best, ref key);
+            SelectDominant(Math.Abs(effects.ManaPressure), WhyManaPressureKey, ref best, ref key);
+            SelectDominant(Math.Abs(effects.HeatPressure), WhyHeatPressureKey, ref best, ref key);
+            SelectDominant(Math.Abs(effects.LootBonus), WhyLootBonusKey, ref best, ref key);
+            SelectDominant(Math.Abs(effects.Attraction), WhyAttractionKey, ref best, ref key);
+            return key;
+        }
+
+        private static void SelectDominant(int value, string candidateKey, ref int bestValue, ref string selectedKey)
+        {
+            if (value > bestValue)
+            {
+                bestValue = value;
+                selectedKey = candidateKey;
+            }
         }
 
         public static string BuildNamedLootText(RunLootDropRecord[] lootBreakdown, Func<string, string, string> localize)
@@ -109,6 +156,15 @@ namespace DungeonBuilder.M0
             return !string.IsNullOrWhiteSpace(namedLoot)
                 ? string.Format(Localize(localize, LootNamedFormatKey), generated, extracted, tradeable, namedLoot)
                 : string.Format(Localize(localize, LootFormatKey), generated, extracted, tradeable);
+        }
+
+        private static string BuildRewardsAndRisk(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            var builder = new StringBuilder();
+            AppendLine(builder, BuildLootLine(summary, localize));
+            AppendLine(builder, ResolveHeatLine(summary, localize));
+            AppendLine(builder, string.Format(Localize(localize, ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
+            return builder.ToString();
         }
 
         private static string ResolveHeatLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

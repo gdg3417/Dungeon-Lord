@@ -94,7 +94,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.TitleKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.PlacementFormatKey));
-            Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.LatestRunFormatKey));
+            Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.LatestRunSectionKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey));
             Assert.That(requestedKeys, Does.Contain(MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey));
@@ -249,11 +249,30 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
 
-            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunFormatKey + "]", System.StringComparison.Ordinal)));
-            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunFormatKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey + "]", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunSectionKey + "]", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.ResearchSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.ResearchSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey + "]", System.StringComparison.Ordinal)));
+        }
+
+        [Test]
+        public void BuildPanelText_WithPartyPreview_UsesPlainPartyListWithoutNestedAdventurersLabel()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                AdventurerPartyPreviewResolved = true,
+                AdventurerPartyClassIds = new[] { AdventurerPartyCompositionResolver.WarriorClassId, AdventurerPartyCompositionResolver.RogueClassId, AdventurerPartyCompositionResolver.RangerClassId },
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Party: Warrior, Rogue, Ranger"));
+            Assert.That(text, Does.Not.Contain("Party: Adventurers:"));
         }
 
         [Test]
@@ -310,19 +329,21 @@ namespace DungeonBuilder.Tests.EditMode
         {
             switch (key)
             {
-                case MvpLoopSummaryPanelPresenter.TitleKey: return "Dungeon Report";
+                case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
                 case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
-                case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest Run";
-                case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Placement effects: {0}";
+                case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Run";
+                case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest run: {0}";
+                case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey: return "Loot: generated {0}, extracted {1}, tradeable {2}";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey: return "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
-                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "{0}";
+                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "Research: {0}";
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Unlocked: {0}";
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "Next: {0}";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
                 case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
+                case CurrentHeatTierResolver.NoticeTierId: return "Notice";
                 case MvpLoopSummaryPanelPresenter.ValueNoResearchKey: return "No research";
                 case MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey: return "Current Dungeon";
                 case MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey: return "Why It Happened";
@@ -334,8 +355,19 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.RiskIncreasedKey: return "Risk increased.";
                 case MvpLoopSummaryPanelPresenter.RiskReducedKey: return "Risk went down.";
                 case MvpLoopSummaryPanelPresenter.WhyNoRunKey: return "No run yet. Build or review the dungeon, then run it to learn what happens.";
-                case MvpLoopSummaryPanelPresenter.WhyRunFormatKey: return "Run was shaped by: {0}.";
+                case MvpLoopSummaryPanelPresenter.WhyRunFormatKey: return "Main reason: {0}.";
+                case MvpLoopSummaryPanelPresenter.WhyMixedKey: return "the current placement mix shaped the result";
+                case MvpLoopSummaryPanelPresenter.WhyDangerKey: return "danger pressure drove the result";
+                case MvpLoopSummaryPanelPresenter.WhyAttractionKey: return "attraction changed adventurer interest";
+                case MvpLoopSummaryPanelPresenter.WhyLootBonusKey: return "loot placement improved the reward";
+                case MvpLoopSummaryPanelPresenter.WhyHeatPressureKey: return "heat pressure raised the risk";
+                case MvpLoopSummaryPanelPresenter.WhyManaPressureKey: return "mana pressure constrained the run";
+                case MvpLoopSummaryPanelPresenter.WhyPathCapacityKey: return "path capacity shaped the run";
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey: return "{0}. Party: {1}";
+                case "adventurer.class.warrior.display_name": return "Warrior";
+                case "adventurer.class.rogue.display_name": return "Rogue";
+                case "adventurer.class.ranger.display_name": return "Ranger";
+                case "ui.mvp_adventurer_party.class.unknown": return "Unknown adventurer";
                 case MvpPlayerLoopSummaryPresenter.ResearchCompletedKey: return "Research completed";
                 case "ui.research_unlock.basic_run_analysis.summary": return "Basic run analysis unlocked";
                 case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
