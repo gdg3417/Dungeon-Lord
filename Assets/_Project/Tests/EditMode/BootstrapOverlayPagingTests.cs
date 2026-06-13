@@ -392,6 +392,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
             Assert.That(placementText, Does.Contain("Placed: Basic Room"));
             Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
+            Assert.That(placementText, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(placementText, Does.Contain("MVP Loop Summary"));
             Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -466,6 +467,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
             Assert.That(playerFacingText, Does.Contain("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
+            Assert.That(playerFacingText, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Skeleton -> Trap: Spike Trap -> Loot node: Empty / available"));
             Assert.That(playerFacingText, Does.Contain(_overlay.MvpRunResultFeedback));
             AssertNoPlayerFacingRawIds(playerFacingText);
             AssertNoPlayerFacingRawIds(_overlay.MvpStructurePlacementFeedback);
@@ -678,6 +680,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Adventurers: "));
             Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(text, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
         }
 
@@ -1259,6 +1262,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
+            Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Placement effects: none yet"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
@@ -1312,7 +1316,9 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
+            Assert.That(visible, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(visible, Does.Contain("Placement effects: none yet"));
+            Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Placement effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(visible);
             AssertNoRawPlayerFacingSmokeIds(copied);
@@ -1597,6 +1603,12 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_composition.empty"] = "No dungeon placements yet";
             map["ui.mvp_composition.entry_format"] = "{0}: {1}";
             map["ui.mvp_composition.separator"] = "; ";
+            map["ui.mvp_dungeon_layout.panel.layout_format"] = "Dungeon layout: {0}";
+            map["ui.mvp_dungeon_layout.panel.floor_format"] = "Floor {0}: {1}";
+            map["ui.mvp_dungeon_layout.panel.assigned_node_format"] = "{0}: {1}";
+            map["ui.mvp_dungeon_layout.panel.empty_node_format"] = "{0}: {1}";
+            map["ui.mvp_dungeon_layout.panel.node_separator"] = " -> ";
+            map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
             map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
             map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
             map["ui.mvp_placement_preview.trap.spike"] = "Role: adds danger, heat, and path pressure.";
