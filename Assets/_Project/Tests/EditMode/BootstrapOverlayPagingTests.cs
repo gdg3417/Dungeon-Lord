@@ -144,6 +144,30 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void PlayerFacingDefault_ShowsPlayableMvpScreenSectionsAndHidesDiagnostics()
+        {
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(text, Does.Contain("== Top Status =="));
+            Assert.That(text, Does.Contain("== Current Dungeon =="));
+            Assert.That(text, Does.Contain("== Build Choice =="));
+            Assert.That(text, Does.Contain("== Run Setup =="));
+            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("Selected category: Room"));
+            Assert.That(text, Does.Contain("Selected option: Basic Room"));
+            Assert.That(text, Does.Contain("Compared with Narrow Hall: lower path capacity, better as a connector."));
+            Assert.That(text, Does.Contain("Selected posture: Balanced"));
+            Assert.That(text, Does.Contain("No build change yet this session."));
+            Assert.That(text, Does.Contain("No run observed yet this session."));
+            Assert.That(text, Does.Contain("Path complete:"));
+            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
+            AssertNoPlayerFacingRawIds(text);
+        }
+
+        [Test]
         public void ToggleDiagnosticsVisibility_ShowsDiagnosticsPageOneHeaderBodyAndHints()
         {
             _overlay.CycleFullDiagnosticsPage();
@@ -1564,6 +1588,25 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
+            map["ui.mvp_screen.title"] = "Dungeon Command (MVP Loop Summary)";
+            map["ui.mvp_screen.section.top_status"] = "Top Status";
+            map["ui.mvp_screen.section.current_dungeon"] = "Current Dungeon";
+            map["ui.mvp_screen.section.build_choice"] = "Build Choice";
+            map["ui.mvp_screen.section.run_setup"] = "Run Setup";
+            map["ui.mvp_screen.section.latest_run"] = "Latest Run";
+            map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
+            map["ui.mvp_screen.section.header_format"] = "== {0} ==";
+            map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
+            map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
+            map["ui.mvp_screen.run_posture_format"] = "Selected posture: {0}";
+            map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
+            map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";
+            map["ui.mvp_screen.feedback.no_placement"] = "No build change yet this session.";
+            map["ui.mvp_screen.feedback.no_run"] = "No run observed yet this session.";
+            map["ui.mvp_screen.comparison.none"] = "Comparison: choose the other option in this category to compare tradeoffs.";
+            map["ui.mvp_screen.analysis.no_run"] = "Why it happened: run the dungeon to see the first result.";
+            map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
+            map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
             map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
