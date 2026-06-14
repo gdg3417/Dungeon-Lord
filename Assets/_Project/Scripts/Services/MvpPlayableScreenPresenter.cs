@@ -60,7 +60,6 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
-            AppendLine(builder, dungeonLayoutText);
 
             AppendSection(builder, localize, LatestRunKey);
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
@@ -81,7 +80,6 @@ namespace DungeonBuilder.M0
             AppendSection(builder, localize, RunSetupKey);
             AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
             AppendLine(builder, selectedRunPlanPreview);
-            AppendLine(builder, Localize(localize, RunPromptKey));
 
             AppendSection(builder, localize, BuildChoiceKey);
             AppendLine(builder, string.Format(Localize(localize, SelectedCategoryFormatKey), selectedCategoryName));
