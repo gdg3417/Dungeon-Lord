@@ -78,17 +78,17 @@ namespace DungeonBuilder.M0
                     localize,
                     MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
 
+            AppendSection(builder, localize, RunSetupKey);
+            AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
+            AppendLine(builder, selectedRunPlanPreview);
+            AppendLine(builder, Localize(localize, RunPromptKey));
+
             AppendSection(builder, localize, BuildChoiceKey);
             AppendLine(builder, string.Format(Localize(localize, SelectedCategoryFormatKey), selectedCategoryName));
             AppendLine(builder, string.Format(Localize(localize, SelectedOptionFormatKey), selectedOptionName));
             AppendLine(builder, selectedPlacementPreview);
             AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
             AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
-
-            AppendSection(builder, localize, RunSetupKey);
-            AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
-            AppendLine(builder, selectedRunPlanPreview);
-            AppendLine(builder, Localize(localize, RunPromptKey));
             return builder.ToString();
         }
 
