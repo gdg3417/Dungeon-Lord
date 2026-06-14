@@ -534,6 +534,7 @@ namespace DungeonBuilder.M0
                 config.AdventurerPartyCompositionMaxSize < config.AdventurerPartyCompositionMinSize ||
                 config.AdventurerPartyCompositionMaxAllowedSize < 1 ||
                 config.AdventurerPartyCompositionMaxSize > config.AdventurerPartyCompositionMaxAllowedSize ||
+                !HasValidCasualtyPressureConfig(config) ||
                 !HasConfiguredMvpAdventurerClasses(config.AdventurerPartyCompositionClassIds))
             {
                 return false;
@@ -545,6 +546,29 @@ namespace DungeonBuilder.M0
             }
 
             return true;
+        }
+
+        private static bool HasValidCasualtyPressureConfig(RunSimulationConfig config)
+        {
+            if (config == null || string.IsNullOrWhiteSpace(config.CasualtyPressureRuleSourceId))
+            {
+                return false;
+            }
+
+            return IsFiniteNonNegative(config.CasualtyPressurePerDanger) &&
+                   IsFiniteNonNegative(config.CasualtyPressureReductionPerPathCapacity) &&
+                   IsFiniteNonNegative(config.CasualtyPressurePerManaPressure) &&
+                   IsFiniteNonNegative(config.CautiousCasualtyPressureMultiplier) &&
+                   IsFiniteNonNegative(config.BalancedCasualtyPressureMultiplier) &&
+                   IsFiniteNonNegative(config.GreedyCasualtyPressureMultiplier) &&
+                   IsFiniteNonNegative(config.CasualtyPressureMinimum) &&
+                   IsFiniteNonNegative(config.CasualtyPressureMaximum) &&
+                   IsFiniteNonNegative(config.CasualtyLootExtractionPenaltyPerCasualty) &&
+                   IsFiniteNonNegative(config.CasualtyHeatDeltaPerCasualty) &&
+                   IsFiniteNonNegative(config.PartyWipeCasualtyPressureThreshold) &&
+                   config.CasualtyPressureMinimum <= config.CasualtyPressureMaximum &&
+                   config.CasualtyPressureMaximum <= 1d &&
+                   config.PartyWipeCasualtyPressureThreshold <= 1d;
         }
 
         private static bool HasValidMvpCompositionOutcomeTuningConfig(MvpCompositionOutcomeTuningConfig tuning)

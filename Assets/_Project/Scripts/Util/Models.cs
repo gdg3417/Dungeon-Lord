@@ -265,6 +265,18 @@ namespace DungeonBuilder.M0
         public int MaxAllowedPartySize;
         public double SuccessSurvivorRatio;
         public double FailureSurvivorRatio;
+        public string CasualtyPressureRuleSourceId;
+        public double CasualtyPressurePerDanger;
+        public double CasualtyPressureReductionPerPathCapacity;
+        public double CasualtyPressurePerManaPressure;
+        public double CautiousCasualtyPressureMultiplier;
+        public double BalancedCasualtyPressureMultiplier;
+        public double GreedyCasualtyPressureMultiplier;
+        public double CasualtyPressureMinimum;
+        public double CasualtyPressureMaximum;
+        public double CasualtyLootExtractionPenaltyPerCasualty;
+        public double CasualtyHeatDeltaPerCasualty;
+        public double PartyWipeCasualtyPressureThreshold;
         public string MvpPlacementEffectsRuleSourceId;
         public MvpPlacementEffectConfig[] MvpPlacementEffects = Array.Empty<MvpPlacementEffectConfig>();
         public MvpCompositionOutcomeTuningConfig MvpCompositionOutcomeTuning;
@@ -403,6 +415,9 @@ namespace DungeonBuilder.M0
         public int SurvivorCount;
         public int DeathCount;
         public double SurvivorRatio;
+        public double CasualtyPressure;
+        public double CasualtyLootExtractionPenalty;
+        public double CasualtyHeatDelta;
         public int DeterministicSeed;
         public bool RuleResolved;
         public int DeterministicErrorCode;
@@ -570,6 +585,9 @@ namespace DungeonBuilder.M0
         public int LootExtractedWorldValue = 0;
         public int LootExtractedTradeableWorldValue = 0;
         public RunLootDropRecord[] LootBreakdown = Array.Empty<RunLootDropRecord>();
+        public int LatestRunPartySize = 0;
+        public int LatestRunSurvivorCount = 0;
+        public int LatestRunDeathCount = 0;
         public double HeatBefore = 0d;
         public double HeatAfter = 0d;
         public string HeatTierId;

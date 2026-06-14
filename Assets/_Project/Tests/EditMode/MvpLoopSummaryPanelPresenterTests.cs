@@ -379,6 +379,26 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void BuildPanelText_WithCasualties_ShowsLocalizedSurvivorAndDeathCounts()
+        {
+            MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                LatestRunPartySize = 5,
+                LatestRunSurvivorCount = 3,
+                LatestRunDeathCount = 2,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestImproveSurvivabilityOrLayoutKey
+            };
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Survivors: 3/5; deaths: 2"));
+            Assert.That(text, Does.Not.Contain(MvpLoopSummaryPanelPresenter.CasualtyFormatKey));
+        }
+
+        [Test]
         public void BuildPanelText_DoesNotMutateSummaryOrSaveState()
         {
             SaveData save = new SaveData
@@ -422,6 +442,8 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.SectionLineFormatKey:
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey:
                     return "LOC[" + key + "]:{0}:{1}";
+                case MvpLoopSummaryPanelPresenter.CasualtyFormatKey:
+                    return "LOC[" + key + "]:{0}:{1}:{2}";
                 case MvpLoopSummaryPanelPresenter.WhyRunFormatKey:
                     return "LOC[" + key + "]:{0}";
                 case MvpLoopSummaryPanelPresenter.AnalysisRunFormatKey:
@@ -444,6 +466,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey: return "Loot: generated {0}, extracted {1}, tradeable {2}";
+                case MvpLoopSummaryPanelPresenter.CasualtyFormatKey: return "Survivors: {0}/{1}; deaths: {2}";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey: return "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
                 case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "{0}";
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Unlocked: {0}";
