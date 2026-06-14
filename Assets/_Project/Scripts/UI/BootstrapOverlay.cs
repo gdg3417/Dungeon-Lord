@@ -479,7 +479,6 @@ namespace DungeonBuilder.M0
                 _mvpStructurePlacementFeedback,
                 _mvpRunResultFeedback,
                 (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendLine(builder, GetLocalizedString("ui.mvp_view.player_mode.status"));
             if (!string.IsNullOrEmpty(_root.BannerMessage))
             {
                 AppendLine(builder, _root.BannerMessage);

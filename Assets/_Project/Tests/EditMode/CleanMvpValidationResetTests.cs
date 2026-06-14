@@ -398,6 +398,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.comparison.none"] = "Comparison: choose the other option in this category to compare tradeoffs.";
             map["ui.mvp_screen.analysis.no_run"] = "Why it happened: run the dungeon to see the first result.";
             map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
+            map["ui.mvp_screen.party.format"] = "Party: {0}";
+            map["ui.mvp_screen.research_format"] = "Research: {0}";
             map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";

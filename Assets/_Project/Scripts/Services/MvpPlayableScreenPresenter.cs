@@ -24,7 +24,10 @@ namespace DungeonBuilder.M0
         public const string NoComparisonKey = "ui.mvp_screen.comparison.none";
         public const string NoAnalysisKey = "ui.mvp_screen.analysis.no_run";
         public const string PartyUnavailableKey = "ui.mvp_screen.party.unavailable";
+        public const string PartyFormatKey = "ui.mvp_screen.party.format";
+        public const string ResearchFormatKey = "ui.mvp_screen.research_format";
         public const string AnalysisFormatKey = "ui.mvp_screen.analysis.format";
+        public const string PlayerViewStatusKey = "ui.mvp_view.player_mode.status";
 
         public static string BuildScreenText(
             MvpPlayerLoopSummary summary,
@@ -43,6 +46,7 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
             AppendSection(builder, localize, TopStatusKey);
+            AppendLine(builder, Localize(localize, PlayerViewStatusKey));
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
@@ -78,12 +82,9 @@ namespace DungeonBuilder.M0
                     : summary?.NextOptimizationSuggestionKey,
                     localize,
                     MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
-            if (guidedPath != null)
-            {
-                AppendLine(builder, string.Format(
-                    Localize(localize, GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
-                    Localize(localize, guidedPath.IsComplete ? GuidedMvpActionPathPanelPresenter.CompleteYesKey : GuidedMvpActionPathPanelPresenter.CompleteNoKey)));
-            }
+            AppendLine(builder, string.Format(
+                Localize(localize, GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
+                Localize(localize, guidedPath != null && guidedPath.IsComplete ? GuidedMvpActionPathPanelPresenter.CompleteYesKey : GuidedMvpActionPathPanelPresenter.CompleteNoKey)));
 
             return builder.ToString();
         }
@@ -125,7 +126,7 @@ namespace DungeonBuilder.M0
             string status = summary != null && summary.RuleResolved && summary.HasResearchStatus
                 ? MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize)
                 : Localize(localize, MvpLoopSummaryPanelPresenter.ValueNoResearchKey);
-            return string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ResearchFormatKey), status);
+            return string.Format(Localize(localize, ResearchFormatKey), status);
         }
 
         private static string ResolveRunOutcomeLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
@@ -151,7 +152,7 @@ namespace DungeonBuilder.M0
                 labels[i] = AdventurerPartyCompositionResolver.ResolveClassLabel(summary.AdventurerPartyClassIds[i], localize);
             }
 
-            return string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.AdventurerPartyFormatKey), string.Join(", ", labels));
+            return string.Format(Localize(localize, PartyFormatKey), string.Join(", ", labels));
         }
 
         private static string BuildLootLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

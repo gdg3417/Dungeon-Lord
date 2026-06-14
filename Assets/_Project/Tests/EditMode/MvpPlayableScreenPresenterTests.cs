@@ -54,7 +54,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Run Setup =="));
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
+            Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(text, Does.Contain("Selected category: Room"));
             Assert.That(text, Does.Contain("Selected option: Basic Room"));
@@ -90,6 +92,9 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No run observed yet this session.",
             [MvpPlayableScreenPresenter.NoAnalysisKey] = "Why it happened: run the dungeon to see the first result.",
             [MvpPlayableScreenPresenter.PartyUnavailableKey] = "Party: no adventurers observed yet.",
+            [MvpPlayableScreenPresenter.PartyFormatKey] = "Party: {0}",
+            [MvpPlayableScreenPresenter.ResearchFormatKey] = "Research: {0}",
+            [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
             [MvpLoopSummaryPanelPresenter.HeatFormatKey] = "Heat: {0:0.##} -> {1:0.##} ({2}). {3}",

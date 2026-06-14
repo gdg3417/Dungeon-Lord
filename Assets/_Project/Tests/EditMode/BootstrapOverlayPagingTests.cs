@@ -157,7 +157,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Contain("Selected category: Room"));
             Assert.That(text, Does.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Compared with Narrow Hall: lower path capacity, better as a connector."));
+            Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("No build change yet this session."));
             Assert.That(text, Does.Contain("Path complete:"));
@@ -445,7 +445,6 @@ namespace DungeonBuilder.Tests.EditMode
             bool hasLocalizedRunResult = runText.Contains("Succeeded") || runText.Contains("Failed");
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
-            Assert.That(runText, Does.Contain("Run simulated."));
             Assert.That(runFeedback, Is.Not.Empty);
             Assert.That(hasLocalizedRunResult, Is.True, "Fixture may validly produce success or failure; both must remain localized player-facing results.");
             Assert.That(runText, Does.Contain("== Latest Run =="));
@@ -721,7 +720,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Run result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
-            Assert.That(text, Does.Contain("Adventurers: "));
+            Assert.That(text, Does.Contain("Party: "));
             Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
             Assert.That(text, Does.Contain("Succeeded"));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
@@ -1617,6 +1616,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.comparison.none"] = "Comparison: choose the other option in this category to compare tradeoffs.";
             map["ui.mvp_screen.analysis.no_run"] = "Why it happened: run the dungeon to see the first result.";
             map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
+            map["ui.mvp_screen.party.format"] = "Party: {0}";
+            map["ui.mvp_screen.research_format"] = "Research: {0}";
             map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";

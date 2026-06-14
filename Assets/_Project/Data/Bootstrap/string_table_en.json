@@ -1474,6 +1474,14 @@
     {
       "key": "ui.mvp_screen.analysis.format",
       "text": "Why it happened: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.party.format",
+      "text": "Party: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.research_format",
+      "text": "Research: {0}"
     }
   ]
 }
