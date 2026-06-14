@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0
         public const string ResearchFormatKey = "ui.mvp_loop.panel.research_format";
         public const string ResearchUnlockFormatKey = "ui.mvp_loop.panel.research_unlock_format";
         public const string AdventurerPartyFormatKey = "ui.mvp_loop.panel.adventurer_party_format";
+        public const string AdventurerIntentSectionKey = "ui.mvp_loop.section.adventurer_intent";
         public const string SuggestionFormatKey = "ui.mvp_loop.panel.suggestion_format";
         public const string CurrentDungeonSectionKey = "ui.mvp_loop.section.current_dungeon";
         public const string LatestRunSectionKey = "ui.mvp_loop.section.latest_run";
@@ -61,6 +62,7 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
             AppendSectionLine(builder, localize, CurrentDungeonSectionKey, BuildCurrentDungeonLine(summary, localize));
+            AppendSectionLine(builder, localize, AdventurerIntentSectionKey, AdventurerRunIntentPresenter.BuildSummaryLine(summary?.AdventurerRunIntent, localize));
             AppendSectionLine(builder, localize, LatestRunSectionKey, ResolveRun(summary, localize));
             AppendSectionLine(builder, localize, WhyItHappenedSectionKey, ResolveWhyItHappened(summary, localize));
             AppendSectionLine(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));

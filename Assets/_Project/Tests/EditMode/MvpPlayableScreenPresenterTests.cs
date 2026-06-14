@@ -67,6 +67,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
+            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Reason: current dungeon signals are still forming"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
@@ -134,6 +135,9 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Effects: {0}",
             [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {1}/{0} recovered; {2} tradeable.",
             [MvpLoopSummaryPanelPresenter.SuggestionFormatKey] = "{0}",
+            [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
+            [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
+            ["run.posture.balanced.name"] = "Balanced",
             [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No run yet",
             [MvpLoopSummaryPanelPresenter.ValueUnknownKey] = "Unknown",
             [MvpLoopSummaryPanelPresenter.RiskNoRunKey] = "Risk will be shown after a run.",

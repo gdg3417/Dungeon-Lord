@@ -411,6 +411,14 @@ namespace DungeonBuilder.Tests.EditMode
                 });
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
+            map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
+            map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
+            map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
+            map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
+            map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
+            map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
+            map["ui.adventurer_intent.reason.danger"] = "danger pressure is high";
+            map["ui.adventurer_intent.reason.fallback"] = "current dungeon signals are still forming";
             map["ui.mvp_screen.title"] = "Dungeon Command (MVP Loop Summary)";
             map["ui.mvp_screen.section.top_status"] = "Top Status";
             map["ui.mvp_screen.section.current_dungeon"] = "Current Dungeon";

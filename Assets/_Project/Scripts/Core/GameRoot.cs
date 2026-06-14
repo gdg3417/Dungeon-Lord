@@ -535,6 +535,7 @@ namespace DungeonBuilder.M0
                 config.AdventurerPartyCompositionMaxAllowedSize < 1 ||
                 config.AdventurerPartyCompositionMaxSize > config.AdventurerPartyCompositionMaxAllowedSize ||
                 !HasValidCasualtyPressureConfig(config) ||
+                !HasValidAdventurerIntentConfig(config) ||
                 !HasConfiguredMvpAdventurerClasses(config.AdventurerPartyCompositionClassIds))
             {
                 return false;
@@ -546,6 +547,34 @@ namespace DungeonBuilder.M0
             }
 
             return true;
+        }
+
+
+        private static bool HasValidAdventurerIntentConfig(RunSimulationConfig config)
+        {
+            if (config == null || string.IsNullOrWhiteSpace(config.AdventurerIntentRuleSourceId))
+            {
+                return false;
+            }
+
+            return IsFinite(config.IntentGreedyScorePerLoot) &&
+                   IsFinite(config.IntentGreedyScorePerAttraction) &&
+                   IsFinite(config.IntentGreedyPenaltyPerHeatTierRank) &&
+                   IsFinite(config.IntentGreedyPenaltyPerRecentDeath) &&
+                   IsFinite(config.IntentGreedyPenaltyPerDanger) &&
+                   IsFinite(config.IntentCautiousScorePerDanger) &&
+                   IsFinite(config.IntentCautiousScorePerHeatPressure) &&
+                   IsFinite(config.IntentCautiousScorePerHeatTierRank) &&
+                   IsFinite(config.IntentCautiousScorePerRecentDeath) &&
+                   IsFinite(config.IntentCautiousReductionPerPathCapacity) &&
+                   IsFinite(config.IntentBalancedBaseScore) &&
+                   IsFinite(config.IntentBalancedPenaltyPerExtremeScoreDelta) &&
+                   IsFinite(config.IntentModerateRiskTarget) &&
+                   IsFinite(config.IntentModerateRewardTarget) &&
+                   IsFinite(config.IntentBalancedPenaltyPerModerateDistance) &&
+                   IsFinite(config.IntentMinimumScore) &&
+                   IsFinite(config.IntentMaximumScore) &&
+                   config.IntentMinimumScore <= config.IntentMaximumScore;
         }
 
         private static bool HasValidCasualtyPressureConfig(RunSimulationConfig config)
@@ -590,9 +619,14 @@ namespace DungeonBuilder.M0
                    IsFiniteNonNegative(tuning.AttractionSignalPerAttraction);
         }
 
+        private static bool IsFinite(double value)
+        {
+            return !double.IsNaN(value) && !double.IsInfinity(value);
+        }
+
         private static bool IsFiniteNonNegative(double value)
         {
-            return value >= 0d && !double.IsNaN(value) && !double.IsInfinity(value);
+            return value >= 0d && IsFinite(value);
         }
 
         private static bool HasValidMvpPlacementEffectsConfig(RunSimulationConfig config)

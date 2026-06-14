@@ -132,6 +132,24 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
                 },
+                AdventurerIntentRuleSourceId = "run.adventurer_intent.rule.test",
+                IntentGreedyScorePerLoot = 2d,
+                IntentGreedyScorePerAttraction = 1.5d,
+                IntentGreedyPenaltyPerHeatTierRank = 3d,
+                IntentGreedyPenaltyPerRecentDeath = 4d,
+                IntentGreedyPenaltyPerDanger = 0.75d,
+                IntentCautiousScorePerDanger = 1.5d,
+                IntentCautiousScorePerHeatPressure = 2d,
+                IntentCautiousScorePerHeatTierRank = 3d,
+                IntentCautiousScorePerRecentDeath = 4d,
+                IntentCautiousReductionPerPathCapacity = 0.75d,
+                IntentBalancedBaseScore = 7d,
+                IntentBalancedPenaltyPerExtremeScoreDelta = 0.2d,
+                IntentModerateRiskTarget = 4d,
+                IntentModerateRewardTarget = 4d,
+                IntentBalancedPenaltyPerModerateDistance = 0.6d,
+                IntentMinimumScore = 0d,
+                IntentMaximumScore = 20d,
                 MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
                 MvpPlacementEffects = new[]
                 {
@@ -1254,6 +1272,16 @@ namespace DungeonBuilder.Tests.EditMode
             bool isValid = GameRoot.IsValidRunSimulationConfig(config);
 
             Assert.That(isValid, Is.False);
+        }
+
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerIntentConfig()
+        {
+            var config = BuildConfig();
+            config.AdventurerIntentRuleSourceId = string.Empty;
+
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 
         [Test]

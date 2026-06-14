@@ -264,6 +264,10 @@ namespace DungeonBuilder.Tests.EditMode
             var map = new Dictionary<string, string>
             {
                 [MvpLoopSummaryPanelPresenter.TitleKey] = "MVP Loop Summary",
+                [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Adventurer intent",
+                [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
+                [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
+                ["run.posture.balanced.name"] = "Balanced",
                 [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
                 [MvpLoopSummaryPanelPresenter.LatestRunFormatKey] = "Latest run: {0}",
                 [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
