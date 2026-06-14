@@ -1394,6 +1394,98 @@
     {
       "key": "ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic",
       "text": "stronger loot and higher attraction."
+    },
+    {
+      "key": "ui.mvp_screen.title",
+      "text": "Dungeon Command (MVP Loop Summary)"
+    },
+    {
+      "key": "ui.mvp_screen.section.top_status",
+      "text": "Top Status"
+    },
+    {
+      "key": "ui.mvp_screen.section.current_dungeon",
+      "text": "Current Dungeon"
+    },
+    {
+      "key": "ui.mvp_screen.section.build_choice",
+      "text": "Build Choice"
+    },
+    {
+      "key": "ui.mvp_screen.section.run_setup",
+      "text": "Run Setup"
+    },
+    {
+      "key": "ui.mvp_screen.section.latest_run",
+      "text": "Latest Run"
+    },
+    {
+      "key": "ui.mvp_screen.section.analysis_next_action",
+      "text": "Analysis and Next Action"
+    },
+    {
+      "key": "ui.mvp_screen.section.header_format",
+      "text": "== {0} =="
+    },
+    {
+      "key": "ui.mvp_screen.line_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_screen.selected_category_format",
+      "text": "Selected category: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.selected_option_format",
+      "text": "Selected option: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.run_posture_format",
+      "text": "Selected posture: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.prompt.place_or_modify",
+      "text": "Next build step: choose an option, then place or modify it."
+    },
+    {
+      "key": "ui.mvp_screen.prompt.run_or_observe",
+      "text": "Next run step: run or observe the dungeon when ready."
+    },
+    {
+      "key": "ui.mvp_screen.feedback.no_placement",
+      "text": "No build change yet this session."
+    },
+    {
+      "key": "ui.mvp_screen.feedback.no_run",
+      "text": "No run observed yet this session."
+    },
+    {
+      "key": "ui.mvp_screen.comparison.none",
+      "text": "Comparison: choose the other option in this category to compare tradeoffs."
+    },
+    {
+      "key": "ui.mvp_screen.analysis.no_run",
+      "text": "Why it happened: run the dungeon to see the first result."
+    },
+    {
+      "key": "ui.mvp_screen.party.unavailable",
+      "text": "Party: no adventurers observed yet."
+    },
+    {
+      "key": "ui.mvp_screen.analysis.format",
+      "text": "Why it happened: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.party.format",
+      "text": "Party: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.research_format",
+      "text": "Research: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.path_complete_format",
+      "text": "Path complete: {0}"
     }
   ]
 }

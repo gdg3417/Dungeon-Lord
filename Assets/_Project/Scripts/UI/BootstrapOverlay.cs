@@ -457,8 +457,30 @@ namespace DungeonBuilder.M0
                     return BuildLatestRunFeedbackSectionText();
                 case PlayerFacingSectionFull:
                 default:
-                    return BuildSectionText("ui.mvp_smoke.section.full", BuildFullPlayerFacingSmokeText());
+                    return BuildPlayableMvpScreenText();
             }
+        }
+
+        public string BuildPlayableMvpScreenText()
+        {
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            var builder = new StringBuilder();
+            AppendLine(builder, MvpPlayableScreenPresenter.BuildScreenText(
+                summary,
+                guidedPath,
+                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
+                GetSelectedMvpPlacementPreviewText(),
+                BuildSelectedMvpPlacementComparisonText(),
+                GetSelectedMvpRunPostureDisplayName(),
+                GetSelectedMvpRunPlanPreviewText(),
+                _mvpStructurePlacementFeedback,
+                _mvpRunResultFeedback,
+                _root.BannerMessage,
+                (key, fallback) => GetLocalizedString(key, fallback)));
+            return builder.ToString();
         }
 
         public string BuildCompactSmokeText()
@@ -1278,18 +1300,18 @@ namespace DungeonBuilder.M0
                 out MvpDungeonPlacementEntry newEntry,
                 out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
-            string displayName = MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback));
-            _root.SetBanner(ok ? string.Format(message, displayName) : message);
             if (ok)
             {
                 _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
                     priorEntry,
                     newEntry,
                     (key, fallback) => GetLocalizedString(key, fallback));
+                _root.SetBanner(_mvpStructurePlacementFeedback);
             }
             else
             {
                 _mvpStructurePlacementFeedback = string.Empty;
+                _root.SetBanner(message);
             }
             RefreshOverlayText();
         }
