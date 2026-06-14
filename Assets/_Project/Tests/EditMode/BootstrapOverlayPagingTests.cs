@@ -1183,27 +1183,49 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlayerFacingPageUpPageDownChangesSmokeScrollWithoutChangingDiagnosticsPageNumber()
+        public void CompactDefaultPlayerFacingPageUpPageDownLeavesScrollAtTopWhenNoOverflow()
         {
-            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_scroll_feedback_test.json");
             string firstPage = RefreshText();
             int diagnosticsPage = _overlay.FullDiagnosticsPageNumber;
 
             _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
             string scrolled = RefreshText();
 
-            Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
-            Assert.That(scrolled, Is.Not.EqualTo(firstPage));
+            Assert.That(scrolled, Is.EqualTo(firstPage));
 
             _overlay.ScrollPlayerFacingTextLines(-VisiblePlayerFacingScrollPageSizeForTest());
             Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
         }
 
         [Test]
-        public void PlayerFacingHomeEndJumpToTopAndBottom()
+        public void CompactDefaultPlayerFacingHomeEndKeepsScrollAtTopWhenNoOverflow()
         {
-            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_home_end_feedback_test.json");
+            string firstPage = RefreshText();
+
+            _overlay.JumpPlayerFacingTextToBottom();
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+            Assert.That(RefreshText(), Is.EqualTo(firstPage));
+
+            _overlay.JumpPlayerFacingTextToTop();
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.Zero);
+        }
+
+        [Test]
+        public void OverflowPlayerFacingSection_PageDownEndAndHomeScrollWithinSection()
+        {
+            MakePlayerFacingSmokeTextScrollable("bootstrap_overlay_overflow_scroll_test.json");
+            _overlay.CyclePlayerFacingSmokeSection();
+            _overlay.CyclePlayerFacingSmokeSection();
+            _overlay.CyclePlayerFacingSmokeSection();
+            string firstPage = RefreshText();
+
+            _overlay.ScrollPlayerFacingTextLines(VisiblePlayerFacingScrollPageSizeForTest());
+            string scrolled = RefreshText();
+
+            Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
+            Assert.That(scrolled, Is.Not.EqualTo(firstPage));
 
             _overlay.JumpPlayerFacingTextToBottom();
             Assert.That(_overlay.PlayerFacingScrollOffset, Is.GreaterThan(0));
@@ -1394,7 +1416,12 @@ namespace DungeonBuilder.Tests.EditMode
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = saveFileName, useAtomicWrites = false }));
             _overlay.RunOrObserveDungeon();
-            SetOverlayBackingField("_mvpRunResultFeedback", _overlay.MvpRunResultFeedback + "\nExtra smoke line A.\nExtra smoke line B.\nExtra smoke line C.\nExtra smoke line D.\nExtra smoke line E.");
+            var feedback = new System.Text.StringBuilder(_overlay.MvpRunResultFeedback);
+            for (int i = 0; i < VisiblePlayerFacingScrollPageSizeForTest() + 4; i++)
+            {
+                feedback.Append('\n').Append("Extra smoke line ").Append(i + 1).Append('.');
+            }
+            SetOverlayBackingField("_mvpRunResultFeedback", feedback.ToString());
         }
 
         private static int VisiblePlayerFacingScrollPageSizeForTest() => 28;
