@@ -405,7 +405,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
             map["ui.mvp_first_contract.status.in_progress"] = "In progress";
             map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
+            map["ui.mvp_first_contract.status.unavailable"] = "Unavailable until objective config is fixed";
+            map["ui.mvp_first_contract.value.unavailable"] = "unavailable";
             map["ui.mvp_first_contract.compact.in_progress_format"] = "{0}: {1}. Loot {2} / {3}, {4}.";
+            map["ui.mvp_first_contract.compact.unavailable_format"] = "{0}: {1}.";
             map["ui.mvp_first_contract.compact.complete_format"] = "{0}: {1}";
             map["ui.mvp_first_contract.compact.path_complete"] = "path complete";
             map["ui.mvp_first_contract.compact.path_incomplete"] = "path incomplete";
