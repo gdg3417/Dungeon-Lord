@@ -1548,8 +1548,20 @@
       "text": "Complete. Try a riskier setup or improve loot recovery."
     },
     {
+      "key": "ui.mvp_first_contract.status.unavailable",
+      "text": "Unavailable until objective config is fixed"
+    },
+    {
+      "key": "ui.mvp_first_contract.value.unavailable",
+      "text": "unavailable"
+    },
+    {
       "key": "ui.mvp_first_contract.compact.in_progress_format",
       "text": "{0}: {1}. Loot {2} / {3}, {4}."
+    },
+    {
+      "key": "ui.mvp_first_contract.compact.unavailable_format",
+      "text": "{0}: {1}."
     },
     {
       "key": "ui.mvp_first_contract.compact.complete_format",
