@@ -69,15 +69,6 @@ namespace DungeonBuilder.M0
             AppendLine(builder, BuildPartyLine(summary, localize));
             AppendLine(builder, BuildLootLine(summary, localize));
             AppendLine(builder, BuildHeatLine(summary, localize));
-            if (!string.IsNullOrWhiteSpace(runFeedback))
-            {
-                AppendLine(builder, runFeedback);
-            }
-            else
-            {
-                AppendLine(builder, Localize(localize, NoRunFeedbackKey));
-            }
-
             AppendSection(builder, localize, AnalysisNextActionKey);
             AppendLine(builder, BuildAnalysisLine(summary, localize));
             AppendLine(builder, string.Format(
@@ -198,7 +189,6 @@ namespace DungeonBuilder.M0
 
         private static void AppendSection(StringBuilder builder, Func<string, string, string> localize, string titleKey)
         {
-            AppendLine(builder, string.Empty);
             AppendLine(builder, string.Format(Localize(localize, SectionHeaderFormatKey), Localize(localize, titleKey)));
         }
 

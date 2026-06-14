@@ -61,7 +61,6 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Effects: none yet"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("No run yet"));
-            Assert.That(text, Does.Contain("No run observed yet this session."));
             Assert.That(text, Does.Contain("Run the dungeon to observe the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
             Assert.That(text, Does.Not.Contain("placement.option"));

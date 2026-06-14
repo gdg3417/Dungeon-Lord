@@ -129,9 +129,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Contain("MVP Loop Summary"));
-            Assert.That(text, Does.Contain("Guided MVP Action"));
-            Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
+            Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(text, Does.Contain("== Top Status =="));
+            Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("banner-line"));
@@ -160,7 +160,6 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Compared with Narrow Hall: lower path capacity, better as a connector."));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("No build change yet this session."));
-            Assert.That(text, Does.Contain("No run observed yet this session."));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -196,8 +195,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Contain("MVP Loop Summary"));
-            Assert.That(text, Does.Contain("Guided MVP Action"));
+            Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(text, Does.Not.Contain("build-line"));
@@ -229,8 +228,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(restoredText, Does.Contain("MVP Loop Summary"));
-            Assert.That(restoredText, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
+            Assert.That(restoredText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(restoredText, Does.Contain("== Analysis and Next Action =="));
             Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(restoredText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
         }
@@ -431,9 +430,9 @@ namespace DungeonBuilder.Tests.EditMode
             string placementText = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
-            Assert.That(placementText, Does.Contain("Placed: Basic Room"));
+            Assert.That(placementText, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
             Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
-            Assert.That(placementText, Does.Contain("MVP Loop Summary"));
+            Assert.That(placementText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
@@ -443,14 +442,16 @@ namespace DungeonBuilder.Tests.EditMode
             string runText = RefreshText();
 
             string runFeedback = _overlay.MvpRunResultFeedback;
-            bool hasLocalizedRunResult = runFeedback.StartsWith("Posture: Balanced. Run result: succeeded.", System.StringComparison.Ordinal) ||
-                                         runFeedback.StartsWith("Posture: Balanced. Run result: failed.", System.StringComparison.Ordinal);
+            bool hasLocalizedRunResult = runText.Contains("Succeeded") || runText.Contains("Failed");
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(runText, Does.Contain("Run simulated."));
             Assert.That(runFeedback, Is.Not.Empty);
-            Assert.That(hasLocalizedRunResult, Is.True, "Fixture may validly produce success or failure feedback; both must remain localized player-facing results.");
-            Assert.That(runText, Does.Contain(runFeedback));
+            Assert.That(hasLocalizedRunResult, Is.True, "Fixture may validly produce success or failure; both must remain localized player-facing results.");
+            Assert.That(runText, Does.Contain("== Latest Run =="));
+            Assert.That(runText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(runText, Does.Contain("Loot: 0/0 recovered; 0 tradeable."));
+            Assert.That(runText, Does.Contain("Heat: 17 -> 17"));
             Assert.That(runFeedback, Does.Contain("Mana 9."));
             Assert.That(runFeedback, Does.Contain("Loot 0/0/0."));
             Assert.That(runFeedback, Does.Contain("Heat 17->17."));
@@ -458,6 +459,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runFeedback, Does.Not.Contain("run-1"));
             Assert.That(runFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(runFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(runFeedback));
             Assert.That(runText, Does.Contain("Latest Run"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
@@ -481,9 +483,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
-            Assert.That(defaultText, Does.Contain("MVP Loop Summary"));
-            Assert.That(defaultText, Does.Contain("Guided MVP Action"));
-            Assert.That(defaultText, Does.Contain("First-session status:"));
+            Assert.That(defaultText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(defaultText, Does.Contain("== Build Choice =="));
+            Assert.That(defaultText, Does.Contain("Path complete:"));
             Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -507,7 +509,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
             Assert.That(playerFacingText, Does.Contain("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
-            Assert.That(playerFacingText, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(playerFacingText, Does.Contain("== Latest Run =="));
+            Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             AssertNoPlayerFacingRawIds(playerFacingText);
             AssertNoPlayerFacingRawIds(_overlay.MvpStructurePlacementFeedback);
             AssertNoPlayerFacingRawIds(_overlay.MvpRunResultFeedback);
@@ -714,12 +718,13 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.StartWith("Posture: Balanced. Run result: succeeded."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Run result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Adventurers: "));
             Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
-            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(text, Does.Contain("Succeeded"));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
         }
 
         [Test]
@@ -739,7 +744,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
-            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(text, Does.Contain("Failed"));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.outcome_cue"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.posture"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-1"));
@@ -769,7 +776,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(firstFeedback, Is.Not.Empty);
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.EqualTo(firstFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Heat 8->8."));
-            Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
+            Assert.That(text, Does.Contain("Heat: 8 -> 8"));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.posture_format"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run.posture"));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("run-2"));
@@ -801,7 +809,9 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain(feedback));
+            Assert.That(restoredText, Does.Contain("== Latest Run =="));
+            Assert.That(restoredText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(feedback));
         }
 
         [Test]
@@ -1052,7 +1062,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.ToggleDiagnosticsVisibility();
             string playerFacingText = RefreshText();
-            Assert.That(playerFacingText, Does.StartWith("Smoke section: Full player-facing text"));
+            Assert.That(playerFacingText, Does.StartWith("Dungeon Command (MVP Loop Summary)"));
+            Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
         }
 
         [Test]

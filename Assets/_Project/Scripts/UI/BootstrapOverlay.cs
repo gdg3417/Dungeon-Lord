@@ -479,17 +479,6 @@ namespace DungeonBuilder.M0
                 _mvpStructurePlacementFeedback,
                 _mvpRunResultFeedback,
                 (key, fallback) => GetLocalizedString(key, fallback)));
-            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(guidedText))
-            {
-                AppendLine(builder, string.Empty);
-                AppendLine(builder, guidedText);
-            }
-            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(firstSessionText))
-            {
-                AppendLine(builder, firstSessionText);
-            }
             AppendLine(builder, GetLocalizedString("ui.mvp_view.player_mode.status"));
             if (!string.IsNullOrEmpty(_root.BannerMessage))
             {
