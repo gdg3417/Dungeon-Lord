@@ -56,8 +56,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Run Setup =="));
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
-            Assert.That(text, Does.Contain("== First Dungeon Contract =="));
-            Assert.That(text, Does.Contain("Loot recovered: 0 / 10"));
+            Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
+            Assert.That(text, Does.Not.Contain("Path built:"));
+            Assert.That(text, Does.Not.Contain("Run observed:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Status banner."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
@@ -66,6 +67,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected category: Room"));
             Assert.That(text, Does.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("No run yet"));
             Assert.That(text, Does.Contain("Run the dungeon to observe the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
@@ -103,6 +107,10 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpFirstSessionObjectivePresenter.AnalysisLockedKey] = "unlock Basic Run Analysis",
             [MvpFirstSessionObjectivePresenter.StatusInProgressKey] = "In progress",
             [MvpFirstSessionObjectivePresenter.StatusCompleteKey] = "Complete. Try a riskier setup or improve loot recovery.",
+            [MvpFirstSessionObjectivePresenter.CompactInProgressFormatKey] = "{0}: {1}. Loot {2} / {3}, {4}.",
+            [MvpFirstSessionObjectivePresenter.CompactCompleteFormatKey] = "{0}: {1}",
+            [MvpFirstSessionObjectivePresenter.CompactPathCompleteKey] = "path complete",
+            [MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey] = "path incomplete",
             [CurrentHeatTierResolver.PeaceTierId] = "Peace",
             [MvpPlayableScreenPresenter.SectionHeaderFormatKey] = "== {0} ==",
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",

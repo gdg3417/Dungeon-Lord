@@ -105,6 +105,27 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
         }
 
+
+        [Test]
+        public void BuildCompactStatusLine_UsesSingleLocalizedVisibleLine()
+        {
+            var summary = new MvpFirstSessionObjectiveSummary
+            {
+                RuleResolved = true,
+                PathComplete = false,
+                RecoveredLootValue = 0,
+                RequiredRecoveredLootValue = 10,
+                IsComplete = false
+            };
+
+            string text = MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(summary, Localize);
+
+            Assert.That(text, Is.EqualTo("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
+            Assert.That(text.Split('\n').Length, Is.EqualTo(1));
+            Assert.That(text, Does.Not.Contain("Path built:"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
+        }
+
         private static SaveData SaveWithPlacements(int count)
         {
             var save = new SaveData();
@@ -166,6 +187,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.AnalysisLockedKey: return "unlock Basic Run Analysis";
                 case MvpFirstSessionObjectivePresenter.StatusInProgressKey: return "In progress";
                 case MvpFirstSessionObjectivePresenter.StatusCompleteKey: return "Complete. Try a riskier setup or improve loot recovery.";
+                case MvpFirstSessionObjectivePresenter.CompactInProgressFormatKey: return "{0}: {1}. Loot {2} / {3}, {4}.";
+                case MvpFirstSessionObjectivePresenter.CompactCompleteFormatKey: return "{0}: {1}";
+                case MvpFirstSessionObjectivePresenter.CompactPathCompleteKey: return "path complete";
+                case MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey: return "path incomplete";
                 case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 default: return fallback;
             }

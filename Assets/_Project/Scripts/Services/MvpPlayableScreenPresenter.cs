@@ -60,8 +60,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
 
-            AppendSection(builder, localize, FirstContractKey);
-            AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildPanelText(firstSessionObjective, localize));
+            AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));

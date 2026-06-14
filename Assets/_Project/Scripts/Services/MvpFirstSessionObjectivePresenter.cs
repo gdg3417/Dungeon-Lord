@@ -20,6 +20,10 @@ namespace DungeonBuilder.M0
         public const string AnalysisLockedKey = "ui.mvp_first_contract.value.analysis_locked";
         public const string StatusInProgressKey = "ui.mvp_first_contract.status.in_progress";
         public const string StatusCompleteKey = "ui.mvp_first_contract.status.complete";
+        public const string CompactInProgressFormatKey = "ui.mvp_first_contract.compact.in_progress_format";
+        public const string CompactCompleteFormatKey = "ui.mvp_first_contract.compact.complete_format";
+        public const string CompactPathCompleteKey = "ui.mvp_first_contract.compact.path_complete";
+        public const string CompactPathIncompleteKey = "ui.mvp_first_contract.compact.path_incomplete";
 
         public static MvpFirstSessionObjectiveSummary Resolve(SaveData save, RunSimulationConfig config)
         {
@@ -80,6 +84,32 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(Localize(localize, AnalysisFormatKey), Localize(localize, summary.AnalysisComplete ? AnalysisUnlockedKey : AnalysisLockedKey)));
             AppendLine(builder, string.Format(Localize(localize, StatusFormatKey), Localize(localize, summary.IsComplete ? StatusCompleteKey : StatusInProgressKey)));
             return builder.ToString();
+        }
+
+        public static string BuildCompactStatusLine(MvpFirstSessionObjectiveSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.RuleResolved)
+            {
+                summary = new MvpFirstSessionObjectiveSummary();
+            }
+
+            string title = Localize(localize, TitleKey);
+            if (summary.IsComplete)
+            {
+                return string.Format(
+                    Localize(localize, CompactCompleteFormatKey),
+                    title,
+                    Localize(localize, StatusCompleteKey));
+            }
+
+            string pathStatus = Localize(localize, summary.PathComplete ? CompactPathCompleteKey : CompactPathIncompleteKey);
+            return string.Format(
+                Localize(localize, CompactInProgressFormatKey),
+                title,
+                Localize(localize, StatusInProgressKey),
+                summary.RecoveredLootValue,
+                summary.RequiredRecoveredLootValue,
+                pathStatus);
         }
 
         private static RunOutcomeRecord[] ResolveOutcomes(RunHistoryState history)

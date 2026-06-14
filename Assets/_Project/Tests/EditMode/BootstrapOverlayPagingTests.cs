@@ -459,7 +459,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copiedSmoke, Does.Contain(runFeedback));
+            Assert.That(copiedSmoke, Does.Contain("First-session"));
             Assert.That(copiedSmoke, Does.Contain("First Dungeon Contract"));
+            Assert.That(copiedSmoke, Does.Contain("Path built:"));
+            Assert.That(copiedSmoke, Does.Contain("Contract status:"));
             AssertNoRawPlayerFacingSmokeIds(copiedSmoke);
             Assert.That(runText, Does.Contain("Latest Run"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -487,8 +490,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(defaultText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(defaultText, Does.Contain("== Build Choice =="));
             Assert.That(defaultText, Does.Contain("Path complete:"));
-            Assert.That(defaultText, Does.Contain("First Dungeon Contract"));
-            Assert.That(defaultText, Does.Contain("Loot recovered: 0 / 10"));
+            Assert.That(defaultText, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
+            Assert.That(defaultText, Does.Not.Contain("Path built:"));
+            Assert.That(defaultText, Does.Not.Contain("Run observed:"));
             Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -1338,7 +1342,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
+            Assert.That(copied, Does.Contain("First-session"));
             Assert.That(copied, Does.Contain("First Dungeon Contract"));
+            Assert.That(copied, Does.Contain("Path built:"));
+            Assert.That(copied, Does.Contain("Run observed:"));
+            Assert.That(copied, Does.Contain("Loot recovered:"));
+            Assert.That(copied, Does.Contain("Heat target:"));
+            Assert.That(copied, Does.Contain("Analysis:"));
             Assert.That(copied, Does.Contain("Contract status:"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
@@ -1662,6 +1672,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
             map["ui.mvp_first_contract.status.in_progress"] = "In progress";
             map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
+            map["ui.mvp_first_contract.compact.in_progress_format"] = "{0}: {1}. Loot {2} / {3}, {4}.";
+            map["ui.mvp_first_contract.compact.complete_format"] = "{0}: {1}";
+            map["ui.mvp_first_contract.compact.path_complete"] = "path complete";
+            map["ui.mvp_first_contract.compact.path_incomplete"] = "path incomplete";
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";

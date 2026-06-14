@@ -491,7 +491,7 @@ namespace DungeonBuilder.M0
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
             AppendMvpDungeonLayoutText(body);
-            AppendLine(body, MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback)));
             AppendCompactAdventurersFallbackIfMissing(body);
             AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
@@ -573,11 +573,18 @@ namespace DungeonBuilder.M0
                 AppendLine(body, string.Empty);
                 AppendLine(body, guidedText);
             }
-            string firstSessionText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
+            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(firstSessionText))
             {
                 AppendLine(body, string.Empty);
                 AppendLine(body, firstSessionText);
+            }
+
+            string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(firstContractText))
+            {
+                AppendLine(body, string.Empty);
+                AppendLine(body, firstContractText);
             }
             return BuildSectionText("ui.mvp_smoke.section.loop_summary", body.ToString());
         }
@@ -673,11 +680,18 @@ namespace DungeonBuilder.M0
                 AppendLine(builder, guidedText);
             }
 
-            string firstSessionText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
+            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(firstSessionText))
             {
                 AppendLine(builder, string.Empty);
                 AppendLine(builder, firstSessionText);
+            }
+
+            string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
+            if (!string.IsNullOrEmpty(firstContractText))
+            {
+                AppendLine(builder, string.Empty);
+                AppendLine(builder, firstContractText);
             }
 
             AppendLine(builder, string.Empty);

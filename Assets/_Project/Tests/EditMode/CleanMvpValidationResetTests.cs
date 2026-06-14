@@ -316,6 +316,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
+            Assert.That(copied, Does.Contain("First-session"));
+            Assert.That(copied, Does.Contain("First Dungeon Contract"));
+            Assert.That(copied, Does.Contain("Path built:"));
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
 
@@ -387,6 +390,24 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.run_setup"] = "Run Setup";
             map["ui.mvp_screen.section.latest_run"] = "Latest Run";
             map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
+            map["ui.mvp_screen.section.first_contract"] = "First Dungeon Contract";
+            map["ui.mvp_first_contract.title"] = "First Dungeon Contract";
+            map["ui.mvp_first_contract.path_built_format"] = "Path built: {0}";
+            map["ui.mvp_first_contract.run_observed_format"] = "Run observed: {0}";
+            map["ui.mvp_first_contract.loot_recovered_format"] = "Loot recovered: {0} / {1}";
+            map["ui.mvp_first_contract.heat_target_format"] = "Heat target: {0} (current: {1})";
+            map["ui.mvp_first_contract.analysis_format"] = "Analysis: {0}";
+            map["ui.mvp_first_contract.status_format"] = "Contract status: {0}";
+            map["ui.mvp_first_contract.value.complete"] = "complete";
+            map["ui.mvp_first_contract.value.incomplete"] = "incomplete";
+            map["ui.mvp_first_contract.value.analysis_unlocked"] = "Basic Run Analysis unlocked";
+            map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
+            map["ui.mvp_first_contract.status.in_progress"] = "In progress";
+            map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
+            map["ui.mvp_first_contract.compact.in_progress_format"] = "{0}: {1}. Loot {2} / {3}, {4}.";
+            map["ui.mvp_first_contract.compact.complete_format"] = "{0}: {1}";
+            map["ui.mvp_first_contract.compact.path_complete"] = "path complete";
+            map["ui.mvp_first_contract.compact.path_incomplete"] = "path incomplete";
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";

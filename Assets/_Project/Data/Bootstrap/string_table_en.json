@@ -1542,6 +1542,22 @@
     {
       "key": "ui.mvp_first_contract.status.complete",
       "text": "Complete. Try a riskier setup or improve loot recovery."
+    },
+    {
+      "key": "ui.mvp_first_contract.compact.in_progress_format",
+      "text": "{0}: {1}. Loot {2} / {3}, {4}."
+    },
+    {
+      "key": "ui.mvp_first_contract.compact.complete_format",
+      "text": "{0}: {1}"
+    },
+    {
+      "key": "ui.mvp_first_contract.compact.path_complete",
+      "text": "path complete"
+    },
+    {
+      "key": "ui.mvp_first_contract.compact.path_incomplete",
+      "text": "path incomplete"
     }
   ]
 }
