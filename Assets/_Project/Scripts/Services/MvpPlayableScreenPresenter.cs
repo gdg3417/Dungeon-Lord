@@ -27,6 +27,7 @@ namespace DungeonBuilder.M0
         public const string PartyFormatKey = "ui.mvp_screen.party.format";
         public const string ResearchFormatKey = "ui.mvp_screen.research_format";
         public const string AnalysisFormatKey = "ui.mvp_screen.analysis.format";
+        public const string PathCompleteFormatKey = "ui.mvp_screen.path_complete_format";
         public const string PlayerViewStatusKey = "ui.mvp_view.player_mode.status";
 
         public static string BuildScreenText(
@@ -61,24 +62,12 @@ namespace DungeonBuilder.M0
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
             AppendLine(builder, dungeonLayoutText);
 
-            AppendSection(builder, localize, BuildChoiceKey);
-            AppendLine(builder, string.Format(Localize(localize, SelectedCategoryFormatKey), selectedCategoryName));
-            AppendLine(builder, string.Format(Localize(localize, SelectedOptionFormatKey), selectedOptionName));
-            AppendLine(builder, selectedPlacementPreview);
-            AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey), MvpPlacementEffectsPresenter.BuildEffectsText(summary?.PlacementEffects, localize)));
-            AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
-            AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
-
-            AppendSection(builder, localize, RunSetupKey);
-            AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
-            AppendLine(builder, selectedRunPlanPreview);
-            AppendLine(builder, Localize(localize, RunPromptKey));
-
             AppendSection(builder, localize, LatestRunKey);
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
             AppendLine(builder, BuildPartyLine(summary, localize));
             AppendLine(builder, BuildLootLine(summary, localize));
             AppendLine(builder, BuildHeatLine(summary, localize));
+
             AppendSection(builder, localize, AnalysisNextActionKey);
             AppendLine(builder, BuildAnalysisLine(summary, localize));
             AppendLine(builder, string.Format(
@@ -88,13 +77,25 @@ namespace DungeonBuilder.M0
                     : summary?.NextOptimizationSuggestionKey,
                     localize,
                     MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+
+            AppendSection(builder, localize, BuildChoiceKey);
+            AppendLine(builder, string.Format(Localize(localize, SelectedCategoryFormatKey), selectedCategoryName));
+            AppendLine(builder, string.Format(Localize(localize, SelectedOptionFormatKey), selectedOptionName));
+            AppendLine(builder, selectedPlacementPreview);
+            AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
+            AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
+
+            AppendSection(builder, localize, RunSetupKey);
+            AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
+            AppendLine(builder, selectedRunPlanPreview);
+            AppendLine(builder, Localize(localize, RunPromptKey));
             return builder.ToString();
         }
 
         private static string BuildPathCompleteLine(GuidedMvpActionPathSummary guidedPath, Func<string, string, string> localize)
         {
             return string.Format(
-                Localize(localize, GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
+                Localize(localize, PathCompleteFormatKey),
                 Localize(localize, guidedPath != null && guidedPath.IsComplete ? GuidedMvpActionPathPanelPresenter.CompleteYesKey : GuidedMvpActionPathPanelPresenter.CompleteNoKey));
         }
 

@@ -300,7 +300,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(refreshed, Does.Contain("Latest Run"));
             Assert.That(refreshed, Does.Contain("No run yet"));
-            Assert.That(refreshed, Does.Contain("Effects: none yet"));
+            Assert.That(refreshed, Does.Contain("== Build Choice =="));
             Assert.That(refreshed, Does.Contain("Mana reserve: 0"));
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("Path complete: No"));
@@ -400,6 +400,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
             map["ui.mvp_screen.party.format"] = "Party: {0}";
             map["ui.mvp_screen.research_format"] = "Research: {0}";
+            map["ui.mvp_screen.path_complete_format"] = "Path complete: {0}";
             map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";

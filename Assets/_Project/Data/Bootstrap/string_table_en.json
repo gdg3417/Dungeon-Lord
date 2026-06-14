@@ -1482,6 +1482,10 @@
     {
       "key": "ui.mvp_screen.research_format",
       "text": "Research: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.path_complete_format",
+      "text": "Path complete: {0}"
     }
   ]
 }

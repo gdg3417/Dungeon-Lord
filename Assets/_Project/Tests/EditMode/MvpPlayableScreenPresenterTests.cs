@@ -62,11 +62,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(text, Does.Contain("Selected category: Room"));
             Assert.That(text, Does.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Effects: none yet"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("No run yet"));
             Assert.That(text, Does.Contain("Run the dungeon to observe the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
+            Assert.That(text.IndexOf("== Latest Run ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
@@ -96,6 +97,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.PartyUnavailableKey] = "Party: no adventurers observed yet.",
             [MvpPlayableScreenPresenter.PartyFormatKey] = "Party: {0}",
             [MvpPlayableScreenPresenter.ResearchFormatKey] = "Research: {0}",
+            [MvpPlayableScreenPresenter.PathCompleteFormatKey] = "Path complete: {0}",
             [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
@@ -116,7 +118,6 @@ namespace DungeonBuilder.Tests.EditMode
             ["placement.option.room.basic.display_name"] = "Basic Room",
             ["ui.research.status.active_in_progress"] = "Research in progress",
             [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Run the dungeon to observe the first outcome.",
-            [GuidedMvpActionPathPanelPresenter.CompleteFormatKey] = "Path complete: {0}",
             [GuidedMvpActionPathPanelPresenter.CompleteNoKey] = "No"
         };
     }

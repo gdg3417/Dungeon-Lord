@@ -1363,7 +1363,7 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
-            Assert.That(visible, Does.Contain("Effects: none yet"));
+            Assert.That(visible, Does.Contain("== Build Choice =="));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(visible);
@@ -1617,6 +1617,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
             map["ui.mvp_screen.party.format"] = "Party: {0}";
             map["ui.mvp_screen.research_format"] = "Research: {0}";
+            map["ui.mvp_screen.path_complete_format"] = "Path complete: {0}";
             map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
