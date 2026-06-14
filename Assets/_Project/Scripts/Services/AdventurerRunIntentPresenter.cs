@@ -6,6 +6,7 @@ namespace DungeonBuilder.M0
     {
         public const string SummaryFormatKey = "ui.adventurer_intent.summary_format";
         public const string ScoreSummaryFormatKey = "ui.adventurer_intent.score_summary_format";
+        public const string DebugPostureFormatKey = "ui.adventurer_intent.debug_posture_format";
 
         public static string BuildSummaryLine(AdventurerRunIntentSummary summary, Func<string, string, string> localize)
         {
@@ -20,6 +21,13 @@ namespace DungeonBuilder.M0
             double balanced = summary != null && summary.RuleResolved ? summary.BalancedScore : 0d;
             double greedy = summary != null && summary.RuleResolved ? summary.GreedyScore : 0d;
             return string.Format(Localize(localize, ScoreSummaryFormatKey), cautious, balanced, greedy);
+        }
+
+        public static string BuildDebugPostureLine(AdventurerRunIntentSummary summary, string selectedRunPostureName, Func<string, string, string> localize)
+        {
+            string postureNameKey = ResolvePostureNameKey(summary?.IntentId);
+            string debugPosture = string.IsNullOrWhiteSpace(selectedRunPostureName) ? Localize(localize, "run.posture.balanced.name") : selectedRunPostureName;
+            return string.Format(Localize(localize, DebugPostureFormatKey), Localize(localize, postureNameKey), debugPosture);
         }
 
         private static string ResolvePostureNameKey(string postureId)

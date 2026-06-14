@@ -29,7 +29,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void Resolve_ModerateSignalsSelectBalanced()
         {
-            AdventurerRunIntentSummary summary = AdventurerRunIntentResolver.Resolve(Config(), Effects(2, 2, 2, 0, 1), 0d, Heat("heat_tier.peace"), null);
+            AdventurerRunIntentSummary summary = AdventurerRunIntentResolver.Resolve(Config(), Effects(1, 1, 1, 1, 1), 0d, Heat("heat_tier.peace"), null);
 
             Assert.That(summary.IntentId, Is.EqualTo(RunPostureResolver.BalancedId));
         }
@@ -38,7 +38,7 @@ namespace DungeonBuilder.Tests.EditMode
         public void Resolve_SameInputsAreDeterministic()
         {
             var config = Config();
-            var effects = Effects(2, 2, 2, 0, 1);
+            var effects = Effects(1, 1, 1, 1, 1);
             string first = JsonUtility.ToJson(AdventurerRunIntentResolver.Resolve(config, effects, 0d, Heat("heat_tier.peace"), null));
             string second = JsonUtility.ToJson(AdventurerRunIntentResolver.Resolve(config, effects, 0d, Heat("heat_tier.peace"), null));
 
@@ -51,7 +51,7 @@ namespace DungeonBuilder.Tests.EditMode
             var save = new SaveData { structureRuntime = new StructureRuntimeState { Heat = 4d, ManaReserve = 12d } };
             string before = JsonUtility.ToJson(save);
 
-            AdventurerRunIntentResolver.Resolve(Config(), Effects(2, 2, 2, 0, 1), save.structureRuntime.Heat, Heat("heat_tier.peace"), null);
+            AdventurerRunIntentResolver.Resolve(Config(), Effects(1, 1, 1, 1, 1), save.structureRuntime.Heat, Heat("heat_tier.peace"), null);
 
             Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
         }
@@ -95,11 +95,16 @@ namespace DungeonBuilder.Tests.EditMode
         {
             switch (key)
             {
-                case "run.posture.greedy.name": return "Greedy";
-                case "run.posture.balanced.name": return "Balanced";
                 case "run.posture.cautious.name": return "Cautious";
+                case "run.posture.balanced.name": return "Balanced";
+                case "run.posture.greedy.name": return "Greedy";
                 case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Selected debug posture: {1}.";
                 case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
+                case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
+                case AdventurerRunIntentResolver.ReasonModerateKey: return "risk and reward are both moderate";
+                case AdventurerRunIntentResolver.ReasonDangerKey: return "danger pressure is high";
+                case AdventurerRunIntentResolver.ReasonFallbackKey: return "current dungeon signals are still forming";
                 default: return fallback;
             }
         }

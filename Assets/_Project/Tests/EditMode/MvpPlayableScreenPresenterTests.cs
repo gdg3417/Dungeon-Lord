@@ -67,8 +67,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Reason: current dungeon signals are still forming"));
-            Assert.That(text, Does.Contain("Selected posture: Balanced"));
+            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Selected debug posture: Balanced."));
+            Assert.That(text, Does.Not.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
@@ -136,8 +136,15 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {1}/{0} recovered; {2} tradeable.",
             [MvpLoopSummaryPanelPresenter.SuggestionFormatKey] = "{0}",
             [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
+                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Adventurer intent: {0} likely. Selected debug posture: {1}.",
             [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
-            ["run.posture.balanced.name"] = "Balanced",
+                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
+                [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
+                [AdventurerRunIntentResolver.ReasonModerateKey] = "risk and reward are both moderate",
+                [AdventurerRunIntentResolver.ReasonDangerKey] = "danger pressure is high",
+            ["run.posture.cautious.name"] = "Cautious",
+                ["run.posture.balanced.name"] = "Balanced",
+                ["run.posture.greedy.name"] = "Greedy",
             [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No run yet",
             [MvpLoopSummaryPanelPresenter.ValueUnknownKey] = "Unknown",
             [MvpLoopSummaryPanelPresenter.RiskNoRunKey] = "Risk will be shown after a run.",

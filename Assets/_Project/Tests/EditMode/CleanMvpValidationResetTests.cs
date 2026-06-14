@@ -414,6 +414,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
+            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Selected debug posture: {1}.";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
             map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
