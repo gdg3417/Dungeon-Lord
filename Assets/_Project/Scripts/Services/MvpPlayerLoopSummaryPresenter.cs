@@ -66,6 +66,7 @@ namespace DungeonBuilder.M0
             RunSurvivalSummary survivalSummary = latestRun?.SurvivalSummary;
 
             AdventurerRunIntentSummary runIntent = AdventurerRunIntentResolver.Resolve(runConfig, placementEffects, currentHeat, heatTier, latestRun);
+            AdventurerArrivalPressureSummary arrivalPressure = AdventurerArrivalPressureResolver.Resolve(runConfig, placementEffects, heatTier, latestRun);
 
             bool hasRunOutcome = latestRun != null;
             bool hasResolvedHeatApplication = heatApplication != null && heatApplication.RuleResolved;
@@ -128,6 +129,7 @@ namespace DungeonBuilder.M0
                 AdventurerPartyPreviewDeterministicErrorCode = partyPreview != null ? partyPreview.DeterministicErrorCode : (int)AdventurerPartyCompositionSummaryErrorCode.None,
                 AdventurerPartyPreviewRuleSourceId = partyPreview != null ? partyPreview.RuleSourceId : string.Empty,
                 AdventurerRunIntent = runIntent,
+                AdventurerArrivalPressure = arrivalPressure,
                 WouldMutateState = false,
                 WouldGrantRewards = false,
                 WouldUnlockContent = false,

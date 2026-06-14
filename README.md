@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR 73 / M7-C2. The repository now contains M6 heat closeout evidence, M7 active research lifecycle scaffolding, and a read-only research verification boundary scaffold. Backend scaffolding is ahead of the original low-hour timeline, but the playable player-facing MVP has not yet been validated.
+Main is merged through PR 117 / GD23. The repository now contains the deterministic Adventurer Run Intent resolver and presenter; the next intended work is GD24 autonomous adventurer arrival pressure preview.
 
 ## Operating rules
 
@@ -28,4 +28,4 @@ VS4 first-session MVP smoke documentation:
 
 ## Next intended work
 
-The next phase is MVP vertical-slice integration, not deeper scaffold expansion. Upcoming PRs should compose existing structure placement, run simulation, mana, loot extraction, active heat, and single-slot research outputs into the smallest coherent player-facing loop before adding broader systems.
+The next intended PR is GD24 autonomous adventurer arrival pressure preview as a read-only, deterministic player-facing signal.

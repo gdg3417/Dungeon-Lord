@@ -67,6 +67,14 @@ namespace DungeonBuilder.M0
         InvalidHeatTier = 2,
         AggregateOverflow = 3
     }
+
+    public enum AdventurerArrivalPressureSummaryErrorCode
+    {
+        None = 0,
+        MissingOrInvalidConfig = 1,
+        InvalidHeatTier = 2,
+        AggregateOverflow = 3
+    }
     public enum RunHeatDeltaSummaryErrorCode
     {
         None = 0,
@@ -344,6 +352,24 @@ namespace DungeonBuilder.M0
         public double IntentBalancedPenaltyPerModerateDistance;
         public double IntentMinimumScore;
         public double IntentMaximumScore;
+        public string AdventurerArrivalPressureRuleSourceId;
+        public double ArrivalPressureScorePerLoot;
+        public double ArrivalPressureScorePerAttraction;
+        public double ArrivalPressureScorePerDanger;
+        public double ArrivalPressureScorePerHeatPressure;
+        public double ArrivalPressureScorePerRecentRecoveredLoot;
+        public double ArrivalPressureLatestSuccessBonus;
+        public double ArrivalPressureLatestFailurePenalty;
+        public double ArrivalPressurePathCompleteBonus;
+        public double ArrivalPressureIncompletePathPenalty;
+        public double ArrivalPressureHeatNoticePenalty;
+        public double ArrivalPressureHeatConcernPenalty;
+        public double ArrivalPressureRecentDeathPenalty;
+        public double ArrivalPressureNoneThreshold;
+        public double ArrivalPressureLowThreshold;
+        public double ArrivalPressureCautiousThreshold;
+        public double ArrivalPressureBuildingThreshold;
+        public double ArrivalPressureLikelySoonThreshold;
         public MvpFirstSessionObjectiveConfig MvpFirstSessionObjective;
     }
 
@@ -571,6 +597,27 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class AdventurerArrivalPressureSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)AdventurerArrivalPressureSummaryErrorCode.None;
+        public string RuleSourceId;
+        public string PressureBandId;
+        public string PrimaryReasonKey;
+        public double Score;
+        public bool WouldMutateState = false;
+        public bool PathComplete = false;
+        public int LootSignal = 0;
+        public int AttractionSignal = 0;
+        public int DangerSignal = 0;
+        public int HeatPressureSignal = 0;
+        public int RecentDeathCount = 0;
+        public int RecentRecoveredLoot = 0;
+        public string LatestRunOutcomeId;
+        public int HeatTierRank = 0;
+    }
+
+    [Serializable]
     public sealed class RunHeatDeltaSummary
     {
         public bool RuleResolved = false;
@@ -659,6 +706,7 @@ namespace DungeonBuilder.M0
         public bool WouldCallServer = false;
         public bool WouldProcessOfflineProgress = false;
         public AdventurerRunIntentSummary AdventurerRunIntent = new AdventurerRunIntentSummary();
+        public AdventurerArrivalPressureSummary AdventurerArrivalPressure = new AdventurerArrivalPressureSummary();
     }
 
     [Serializable]

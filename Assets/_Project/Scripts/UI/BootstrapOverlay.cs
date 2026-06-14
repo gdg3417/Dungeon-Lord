@@ -437,6 +437,7 @@ namespace DungeonBuilder.M0
             AppendMvpLoopSummaryPanel(builder);
             MvpPlayerLoopSummary smokeSummary = _root.ResolveMvpPlayerLoopSummary();
             AppendLine(builder, AdventurerRunIntentPresenter.BuildScoreSummaryLine(smokeSummary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendLine(builder, AdventurerArrivalPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerArrivalPressure, (key, fallback) => GetLocalizedString(key, fallback)));
             AppendPlayerFacingStatus(builder);
             AppendMvpDungeonLayoutText(builder);
             return builder.ToString();
@@ -495,6 +496,7 @@ namespace DungeonBuilder.M0
             AppendMvpDungeonLayoutText(body);
             AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback)));
             AppendLine(body, AdventurerRunIntentPresenter.BuildScoreSummaryLine(summary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendLine(body, AdventurerArrivalPressurePresenter.BuildDetailLine(summary?.AdventurerArrivalPressure, (key, fallback) => GetLocalizedString(key, fallback)));
             AppendCompactAdventurersFallbackIfMissing(body);
             AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))

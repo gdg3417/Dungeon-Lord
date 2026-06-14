@@ -60,6 +60,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
+            AppendLine(builder, AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize));
 
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
 

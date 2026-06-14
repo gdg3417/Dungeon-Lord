@@ -5,6 +5,7 @@ namespace DungeonBuilder.M0
     public static class AdventurerRunIntentPresenter
     {
         public const string SummaryFormatKey = "ui.adventurer_intent.summary_format";
+        public const string BodyFormatKey = "ui.adventurer_intent.body_format";
         public const string ScoreSummaryFormatKey = "ui.adventurer_intent.score_summary_format";
         public const string DebugPostureFormatKey = "ui.adventurer_intent.debug_posture_format";
 
@@ -13,6 +14,13 @@ namespace DungeonBuilder.M0
             string postureNameKey = ResolvePostureNameKey(summary?.IntentId);
             string reasonKey = summary != null && summary.RuleResolved && !string.IsNullOrWhiteSpace(summary.PrimaryReasonKey) ? summary.PrimaryReasonKey : AdventurerRunIntentResolver.ReasonFallbackKey;
             return string.Format(Localize(localize, SummaryFormatKey), Localize(localize, postureNameKey), Localize(localize, reasonKey));
+        }
+
+        public static string BuildBodyLine(AdventurerRunIntentSummary summary, Func<string, string, string> localize)
+        {
+            string postureNameKey = ResolvePostureNameKey(summary?.IntentId);
+            string reasonKey = summary != null && summary.RuleResolved && !string.IsNullOrWhiteSpace(summary.PrimaryReasonKey) ? summary.PrimaryReasonKey : AdventurerRunIntentResolver.ReasonFallbackKey;
+            return string.Format(Localize(localize, BodyFormatKey), Localize(localize, postureNameKey), Localize(localize, reasonKey));
         }
 
         public static string BuildScoreSummaryLine(AdventurerRunIntentSummary summary, Func<string, string, string> localize)
