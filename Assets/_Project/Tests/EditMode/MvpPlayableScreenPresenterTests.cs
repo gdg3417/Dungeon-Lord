@@ -46,6 +46,7 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 "Status banner.",
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RequiredRecoveredLootValue = 10, AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId },
                 Localize);
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -55,14 +56,21 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Run Setup =="));
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
+            Assert.That(text, Does.Not.Contain("Path built:"));
+            Assert.That(text, Does.Not.Contain("Run observed:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Status banner."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
-            Assert.That(text, Does.Contain("Selected category: Room"));
-            Assert.That(text, Does.Contain("Selected option: Basic Room"));
+            Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(text, Does.Not.Contain("Selected category: Room"));
+            Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("No run yet"));
             Assert.That(text, Does.Contain("Run the dungeon to observe the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
@@ -86,9 +94,29 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.RunSetupKey] = "Run Setup",
             [MvpPlayableScreenPresenter.LatestRunKey] = "Latest Run",
             [MvpPlayableScreenPresenter.AnalysisNextActionKey] = "Analysis and Next Action",
+            [MvpPlayableScreenPresenter.FirstContractKey] = "First Dungeon Contract",
+            [MvpFirstSessionObjectivePresenter.TitleKey] = "First Dungeon Contract",
+            [MvpFirstSessionObjectivePresenter.PathBuiltFormatKey] = "Path built: {0}",
+            [MvpFirstSessionObjectivePresenter.RunObservedFormatKey] = "Run observed: {0}",
+            [MvpFirstSessionObjectivePresenter.LootRecoveredFormatKey] = "Loot recovered: {0} / {1}",
+            [MvpFirstSessionObjectivePresenter.HeatTargetFormatKey] = "Heat target: {0} (current: {1})",
+            [MvpFirstSessionObjectivePresenter.AnalysisFormatKey] = "Analysis: {0}",
+            [MvpFirstSessionObjectivePresenter.StatusFormatKey] = "Contract status: {0}",
+            [MvpFirstSessionObjectivePresenter.CompleteKey] = "complete",
+            [MvpFirstSessionObjectivePresenter.IncompleteKey] = "incomplete",
+            [MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey] = "Basic Run Analysis unlocked",
+            [MvpFirstSessionObjectivePresenter.AnalysisLockedKey] = "unlock Basic Run Analysis",
+            [MvpFirstSessionObjectivePresenter.StatusInProgressKey] = "In progress",
+            [MvpFirstSessionObjectivePresenter.StatusCompleteKey] = "Complete. Try a riskier setup or improve loot recovery.",
+            [MvpFirstSessionObjectivePresenter.CompactInProgressFormatKey] = "{0}: {1}. Loot {2} / {3}, {4}.",
+            [MvpFirstSessionObjectivePresenter.CompactCompleteFormatKey] = "{0}: {1}",
+            [MvpFirstSessionObjectivePresenter.CompactPathCompleteKey] = "path complete",
+            [MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey] = "path incomplete",
+            [CurrentHeatTierResolver.PeaceTierId] = "Peace",
             [MvpPlayableScreenPresenter.SectionHeaderFormatKey] = "== {0} ==",
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",
+            [MvpPlayableScreenPresenter.SelectedPlacementFormatKey] = "Selected placement: {0} / {1}",
             [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Selected posture: {0}",
             [MvpPlayableScreenPresenter.PlacePromptKey] = "Next build step: choose an option, then place or modify it.",
             [MvpPlayableScreenPresenter.RunPromptKey] = "Next run step: run or observe the dungeon when ready.",

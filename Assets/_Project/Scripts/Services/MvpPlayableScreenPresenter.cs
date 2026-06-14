@@ -12,10 +12,12 @@ namespace DungeonBuilder.M0
         public const string RunSetupKey = "ui.mvp_screen.section.run_setup";
         public const string LatestRunKey = "ui.mvp_screen.section.latest_run";
         public const string AnalysisNextActionKey = "ui.mvp_screen.section.analysis_next_action";
+        public const string FirstContractKey = "ui.mvp_screen.section.first_contract";
         public const string SectionHeaderFormatKey = "ui.mvp_screen.section.header_format";
         public const string LineFormatKey = "ui.mvp_screen.line_format";
         public const string SelectedCategoryFormatKey = "ui.mvp_screen.selected_category_format";
         public const string SelectedOptionFormatKey = "ui.mvp_screen.selected_option_format";
+        public const string SelectedPlacementFormatKey = "ui.mvp_screen.selected_placement_format";
         public const string RunPostureFormatKey = "ui.mvp_screen.run_posture_format";
         public const string PlacePromptKey = "ui.mvp_screen.prompt.place_or_modify";
         public const string RunPromptKey = "ui.mvp_screen.prompt.run_or_observe";
@@ -43,6 +45,7 @@ namespace DungeonBuilder.M0
             string placementFeedback,
             string runFeedback,
             string bannerMessage,
+            MvpFirstSessionObjectiveSummary firstSessionObjective,
             Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
@@ -57,6 +60,8 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
+
+            AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
@@ -82,8 +87,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, selectedRunPlanPreview);
 
             AppendSection(builder, localize, BuildChoiceKey);
-            AppendLine(builder, string.Format(Localize(localize, SelectedCategoryFormatKey), selectedCategoryName));
-            AppendLine(builder, string.Format(Localize(localize, SelectedOptionFormatKey), selectedOptionName));
+            AppendLine(builder, string.Format(Localize(localize, SelectedPlacementFormatKey), selectedCategoryName, selectedOptionName));
             AppendLine(builder, selectedPlacementPreview);
             AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
             AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
