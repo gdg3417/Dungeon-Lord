@@ -319,6 +319,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("First-session"));
             Assert.That(copied, Does.Contain("First Dungeon Contract"));
             Assert.That(copied, Does.Contain("Path built:"));
+            Assert.That(copied, Does.Contain("Loot recovered: 0 / 10"));
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
 

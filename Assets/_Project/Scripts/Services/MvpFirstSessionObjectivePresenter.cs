@@ -20,7 +20,10 @@ namespace DungeonBuilder.M0
         public const string AnalysisLockedKey = "ui.mvp_first_contract.value.analysis_locked";
         public const string StatusInProgressKey = "ui.mvp_first_contract.status.in_progress";
         public const string StatusCompleteKey = "ui.mvp_first_contract.status.complete";
+        public const string StatusUnavailableKey = "ui.mvp_first_contract.status.unavailable";
+        public const string ValueUnavailableKey = "ui.mvp_first_contract.value.unavailable";
         public const string CompactInProgressFormatKey = "ui.mvp_first_contract.compact.in_progress_format";
+        public const string CompactUnavailableFormatKey = "ui.mvp_first_contract.compact.unavailable_format";
         public const string CompactCompleteFormatKey = "ui.mvp_first_contract.compact.complete_format";
         public const string CompactPathCompleteKey = "ui.mvp_first_contract.compact.path_complete";
         public const string CompactPathIncompleteKey = "ui.mvp_first_contract.compact.path_incomplete";
@@ -31,7 +34,7 @@ namespace DungeonBuilder.M0
             var summary = new MvpFirstSessionObjectiveSummary
             {
                 ObjectiveId = objective?.ObjectiveId ?? string.Empty,
-                RequiredRunCount = objective != null ? Math.Max(0, objective.RequiredRunCount) : 0,
+                RequiredRunCount = objective != null ? Math.Max(1, objective.RequiredRunCount) : 0,
                 RequiredRecoveredLootValue = objective != null ? Math.Max(0, objective.RequiredRecoveredLootValue) : 0,
                 RequiredCompletePath = objective != null && objective.RequiredCompletePath,
                 AllowedMaxHeatTierId = objective?.AllowedMaxHeatTierId ?? string.Empty,
@@ -42,7 +45,7 @@ namespace DungeonBuilder.M0
                 WouldCallServer = false
             };
 
-            if (save == null || objective == null || string.IsNullOrWhiteSpace(objective.ObjectiveId))
+            if (save == null || !IsObjectiveConfigValid(objective))
             {
                 return summary;
             }
@@ -79,10 +82,10 @@ namespace DungeonBuilder.M0
             AppendLine(builder, Localize(localize, TitleKey));
             AppendLine(builder, string.Format(Localize(localize, PathBuiltFormatKey), Localize(localize, summary.PathComplete ? CompleteKey : IncompleteKey)));
             AppendLine(builder, string.Format(Localize(localize, RunObservedFormatKey), Localize(localize, summary.RunObservedComplete ? CompleteKey : IncompleteKey)));
-            AppendLine(builder, string.Format(Localize(localize, LootRecoveredFormatKey), summary.RecoveredLootValue, summary.RequiredRecoveredLootValue));
+            AppendLine(builder, string.Format(Localize(localize, LootRecoveredFormatKey), summary.RecoveredLootValue, ResolveLootTargetLabel(summary, localize)));
             AppendLine(builder, string.Format(Localize(localize, HeatTargetFormatKey), ResolveHeatLabel(summary.AllowedMaxHeatTierId, localize), ResolveHeatLabel(summary.CurrentHeatTierId, localize)));
             AppendLine(builder, string.Format(Localize(localize, AnalysisFormatKey), Localize(localize, summary.AnalysisComplete ? AnalysisUnlockedKey : AnalysisLockedKey)));
-            AppendLine(builder, string.Format(Localize(localize, StatusFormatKey), Localize(localize, summary.IsComplete ? StatusCompleteKey : StatusInProgressKey)));
+            AppendLine(builder, string.Format(Localize(localize, StatusFormatKey), Localize(localize, ResolveStatusKey(summary))));
             return builder.ToString();
         }
 
@@ -94,6 +97,14 @@ namespace DungeonBuilder.M0
             }
 
             string title = Localize(localize, TitleKey);
+            if (!summary.RuleResolved)
+            {
+                return string.Format(
+                    Localize(localize, CompactUnavailableFormatKey),
+                    title,
+                    Localize(localize, StatusUnavailableKey));
+            }
+
             if (summary.IsComplete)
             {
                 return string.Format(
@@ -110,6 +121,24 @@ namespace DungeonBuilder.M0
                 summary.RecoveredLootValue,
                 summary.RequiredRecoveredLootValue,
                 pathStatus);
+        }
+
+        private static bool IsObjectiveConfigValid(MvpFirstSessionObjectiveConfig objective)
+        {
+            return objective != null
+                && !string.IsNullOrWhiteSpace(objective.ObjectiveId)
+                && objective.RequiredRecoveredLootValue > 0;
+        }
+
+        private static object ResolveLootTargetLabel(MvpFirstSessionObjectiveSummary summary, Func<string, string, string> localize)
+        {
+            return summary != null && summary.RuleResolved ? (object)summary.RequiredRecoveredLootValue : Localize(localize, ValueUnavailableKey);
+        }
+
+        private static string ResolveStatusKey(MvpFirstSessionObjectiveSummary summary)
+        {
+            if (summary == null || !summary.RuleResolved) return StatusUnavailableKey;
+            return summary.IsComplete ? StatusCompleteKey : StatusInProgressKey;
         }
 
         private static RunOutcomeRecord[] ResolveOutcomes(RunHistoryState history)

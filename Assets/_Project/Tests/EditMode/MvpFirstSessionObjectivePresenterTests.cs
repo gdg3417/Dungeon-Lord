@@ -1,11 +1,57 @@
+using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
 {
     public class MvpFirstSessionObjectivePresenterTests
     {
+
+        [Test]
+        public void BootstrapConfig_FirstSessionLootTarget_IsNonzero()
+        {
+            string path = Path.Combine(Application.dataPath, "_Project/Data/Bootstrap/run_simulation_config.json");
+            RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText(path));
+
+            Assert.That(config.MvpFirstSessionObjective, Is.Not.Null);
+            Assert.That(config.MvpFirstSessionObjective.RequiredRecoveredLootValue, Is.GreaterThan(0));
+            Assert.That(config.MvpFirstSessionObjective.RequiredRecoveredLootValue, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void Resolve_MissingObjectiveConfig_IsUnavailableAndIncomplete()
+        {
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(new SaveData(), new RunSimulationConfig());
+
+            Assert.That(summary.RuleResolved, Is.False);
+            Assert.That(summary.IsComplete, Is.False);
+
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(summary, Localize);
+            Assert.That(text, Does.Contain("Loot recovered: 0 / unavailable"));
+            Assert.That(text, Does.Contain("Contract status: Unavailable until objective config is fixed"));
+            Assert.That(text, Does.Not.Contain("0 / 0"));
+        }
+
+        [Test]
+        public void Resolve_ZeroOrInvalidLootTarget_IsUnavailableAndIncomplete()
+        {
+            RunSimulationConfig zeroTarget = Config();
+            zeroTarget.MvpFirstSessionObjective.RequiredRecoveredLootValue = 0;
+            RunSimulationConfig negativeTarget = Config();
+            negativeTarget.MvpFirstSessionObjective.RequiredRecoveredLootValue = -5;
+
+            MvpFirstSessionObjectiveSummary zero = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(99), zeroTarget);
+            MvpFirstSessionObjectiveSummary negative = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(99), negativeTarget);
+
+            Assert.That(zero.RuleResolved, Is.False);
+            Assert.That(zero.IsComplete, Is.False);
+            Assert.That(negative.RuleResolved, Is.False);
+            Assert.That(negative.IsComplete, Is.False);
+            Assert.That(MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(zero, Localize), Is.EqualTo("First Dungeon Contract: Unavailable until objective config is fixed."));
+        }
+
         [Test]
         public void Resolve_CleanSave_ShowsObjectiveFirstStepsWithoutMutation()
         {
@@ -79,6 +125,39 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(after, Is.EqualTo(before));
         }
 
+
+        [Test]
+        public void BuildPanelText_CleanSaveShowsConfiguredTarget()
+        {
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(new SaveData(), Config());
+
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("Loot recovered: 0 / 10"));
+            Assert.That(text, Does.Not.Contain("0 / 0"));
+        }
+
+        [Test]
+        public void Resolve_LootBelowTarget_RemainsIncomplete()
+        {
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(9), Config());
+
+            Assert.That(summary.RecoveredLootValue, Is.EqualTo(9));
+            Assert.That(summary.LootRecoveredComplete, Is.False);
+            Assert.That(summary.IsComplete, Is.False);
+        }
+
+        [Test]
+        public void Resolve_CompletionRequiresConfiguredLootTargetMet()
+        {
+            MvpFirstSessionObjectiveSummary below = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(9), Config());
+            MvpFirstSessionObjectiveSummary met = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(10), Config());
+
+            Assert.That(below.IsComplete, Is.False);
+            Assert.That(met.LootRecoveredComplete, Is.True);
+            Assert.That(met.IsComplete, Is.True);
+        }
+
         [Test]
         public void BuildPanelText_UsesLocalizedObjectiveOutputWithoutRawIds()
         {
@@ -124,6 +203,14 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text.Split('\n').Length, Is.EqualTo(1));
             Assert.That(text, Does.Not.Contain("Path built:"));
             Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
+        }
+
+        private static SaveData CompleteSaveWithLoot(int loot)
+        {
+            SaveData save = SaveWithPlacements(MvpDungeonPlacementIds.OrderedCategoryIds.Length);
+            save.runHistory = new RunHistoryState { RecentOutcomes = new[] { RunWithLoot(loot) } };
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { "research.project.basic_analysis" } };
+            return save;
         }
 
         private static SaveData SaveWithPlacements(int count)
@@ -187,7 +274,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.AnalysisLockedKey: return "unlock Basic Run Analysis";
                 case MvpFirstSessionObjectivePresenter.StatusInProgressKey: return "In progress";
                 case MvpFirstSessionObjectivePresenter.StatusCompleteKey: return "Complete. Try a riskier setup or improve loot recovery.";
+                case MvpFirstSessionObjectivePresenter.StatusUnavailableKey: return "Unavailable until objective config is fixed";
+                case MvpFirstSessionObjectivePresenter.ValueUnavailableKey: return "unavailable";
                 case MvpFirstSessionObjectivePresenter.CompactInProgressFormatKey: return "{0}: {1}. Loot {2} / {3}, {4}.";
+                case MvpFirstSessionObjectivePresenter.CompactUnavailableFormatKey: return "{0}: {1}.";
                 case MvpFirstSessionObjectivePresenter.CompactCompleteFormatKey: return "{0}: {1}";
                 case MvpFirstSessionObjectivePresenter.CompactPathCompleteKey: return "path complete";
                 case MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey: return "path incomplete";
