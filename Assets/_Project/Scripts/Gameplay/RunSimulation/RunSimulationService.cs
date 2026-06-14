@@ -322,6 +322,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return summary;
             }
 
+            int originalDeathCount = summary.DeathCount;
             int pressureDeaths = Math.Max(0, Math.Min(summary.PartySize, (int)Math.Round(summary.PartySize * pressure)));
             if (pressure < _config.PartyWipeCasualtyPressureThreshold && pressureDeaths >= summary.PartySize && summary.PartySize > 0)
             {
@@ -333,8 +334,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             summary.SurvivorCount = Math.Max(0, summary.PartySize - summary.DeathCount);
             summary.SurvivorRatio = summary.PartySize > 0 ? (double)summary.SurvivorCount / summary.PartySize : 0d;
             summary.CasualtyPressure = pressure;
-            summary.CasualtyLootExtractionPenalty = Math.Max(0d, summary.DeathCount * _config.CasualtyLootExtractionPenaltyPerCasualty);
-            summary.CasualtyHeatDelta = Math.Max(0d, summary.DeathCount * _config.CasualtyHeatDeltaPerCasualty);
+            int pressureCasualties = Math.Max(0, summary.DeathCount - originalDeathCount);
+            summary.CasualtyLootExtractionPenalty = Math.Max(0d, pressureCasualties * _config.CasualtyLootExtractionPenaltyPerCasualty);
+            summary.CasualtyHeatDelta = Math.Max(0d, pressureCasualties * _config.CasualtyHeatDeltaPerCasualty);
             summary.RuleSourceId = _config.CasualtyPressureRuleSourceId;
             return summary;
         }

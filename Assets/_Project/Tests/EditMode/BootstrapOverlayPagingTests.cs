@@ -1719,6 +1719,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.line_format"] = "{0}: {1}";
             map["ui.mvp_loop.inline_separator"] = " | ";
             map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
+            map["ui.mvp_loop.panel.casualty_format"] = "Survivors: {0}/{1}; deaths: {2}";
             map["ui.mvp_loop.why.no_run"] = "No run yet. Build or review the dungeon, then run it to learn what happens.";
             map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
             map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the run";
