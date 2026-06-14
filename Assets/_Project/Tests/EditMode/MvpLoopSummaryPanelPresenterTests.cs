@@ -249,7 +249,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
 
-            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunSectionKey + "]", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey + "]", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.LatestRunSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey + "]", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey + "]", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("LOC[" + MvpLoopSummaryPanelPresenter.ResearchSectionKey + "]", System.StringComparison.Ordinal)));
@@ -462,6 +463,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
                 case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
                 case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Run";
+                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Adventurer intent";
                 case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest run: {0}";
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
@@ -498,6 +500,16 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.WhyManaPressureKey: return "mana pressure constrained the run";
                 case MvpLoopSummaryPanelPresenter.WhyPathCapacityKey: return "path capacity shaped the run";
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey: return "{0}. Party: {1}";
+                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+                case AdventurerRunIntentResolver.ReasonFallbackKey: return "current dungeon signals are still forming";
+                case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
+                case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
+                case AdventurerRunIntentResolver.ReasonModerateKey: return "risk and reward are both moderate";
+                case AdventurerRunIntentResolver.ReasonDangerKey: return "danger pressure is high";
+                case "run.posture.cautious.name": return "Cautious";
+                case "run.posture.balanced.name": return "Balanced";
+                case "run.posture.greedy.name": return "Greedy";
                 case "adventurer.class.warrior.display_name": return "Warrior";
                 case "adventurer.class.rogue.display_name": return "Rogue";
                 case "adventurer.class.ranger.display_name": return "Ranger";

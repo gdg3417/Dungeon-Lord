@@ -59,6 +59,14 @@ namespace DungeonBuilder.M0
         MissingOrInvalidConfig = 1,
         NoAllowedMvpClasses = 2
     }
+
+    public enum AdventurerRunIntentSummaryErrorCode
+    {
+        None = 0,
+        MissingOrInvalidConfig = 1,
+        InvalidHeatTier = 2,
+        AggregateOverflow = 3
+    }
     public enum RunHeatDeltaSummaryErrorCode
     {
         None = 0,
@@ -318,6 +326,24 @@ namespace DungeonBuilder.M0
         public int AdventurerPartyCompositionMaxAllowedSize;
         public string[] AdventurerPartyCompositionClassIds = Array.Empty<string>();
         public RunPostureConfig[] RunPostures = Array.Empty<RunPostureConfig>();
+        public string AdventurerIntentRuleSourceId;
+        public double IntentGreedyScorePerLoot;
+        public double IntentGreedyScorePerAttraction;
+        public double IntentGreedyPenaltyPerHeatTierRank;
+        public double IntentGreedyPenaltyPerRecentDeath;
+        public double IntentGreedyPenaltyPerDanger;
+        public double IntentCautiousScorePerDanger;
+        public double IntentCautiousScorePerHeatPressure;
+        public double IntentCautiousScorePerHeatTierRank;
+        public double IntentCautiousScorePerRecentDeath;
+        public double IntentCautiousReductionPerPathCapacity;
+        public double IntentBalancedBaseScore;
+        public double IntentBalancedPenaltyPerExtremeScoreDelta;
+        public double IntentModerateRiskTarget;
+        public double IntentModerateRewardTarget;
+        public double IntentBalancedPenaltyPerModerateDistance;
+        public double IntentMinimumScore;
+        public double IntentMaximumScore;
         public MvpFirstSessionObjectiveConfig MvpFirstSessionObjective;
     }
 
@@ -528,6 +554,23 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class AdventurerRunIntentSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)AdventurerRunIntentSummaryErrorCode.None;
+        public string RuleSourceId;
+        public string IntentId;
+        public string PostureId;
+        public string PrimaryReasonKey;
+        public string SecondaryReasonKey;
+        public double CautiousScore;
+        public double BalancedScore;
+        public double GreedyScore;
+        public double ConfidenceScore;
+        public bool WouldMutateState = false;
+    }
+
+    [Serializable]
     public sealed class RunHeatDeltaSummary
     {
         public bool RuleResolved = false;
@@ -615,6 +658,7 @@ namespace DungeonBuilder.M0
         public bool WouldUnlockContent = false;
         public bool WouldCallServer = false;
         public bool WouldProcessOfflineProgress = false;
+        public AdventurerRunIntentSummary AdventurerRunIntent = new AdventurerRunIntentSummary();
     }
 
     [Serializable]

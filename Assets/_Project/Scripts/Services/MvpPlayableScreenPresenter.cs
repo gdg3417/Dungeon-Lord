@@ -83,7 +83,7 @@ namespace DungeonBuilder.M0
                     MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
 
             AppendSection(builder, localize, RunSetupKey);
-            AppendLine(builder, string.Format(Localize(localize, RunPostureFormatKey), selectedRunPostureName));
+            AppendLine(builder, AdventurerRunIntentPresenter.BuildDebugPostureLine(summary?.AdventurerRunIntent, selectedRunPostureName, localize));
             AppendLine(builder, selectedRunPlanPreview);
 
             AppendSection(builder, localize, BuildChoiceKey);

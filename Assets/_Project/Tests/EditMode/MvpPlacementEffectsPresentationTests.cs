@@ -106,6 +106,17 @@ namespace DungeonBuilder.Tests.EditMode
             var map = new Dictionary<string, string>
             {
                 [MvpLoopSummaryPanelPresenter.TitleKey] = "Loop",
+                [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Adventurer intent",
+                [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
+                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Adventurer intent: {0} likely. Selected debug posture: {1}.",
+                [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
+                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
+                [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
+                [AdventurerRunIntentResolver.ReasonModerateKey] = "risk and reward are both moderate",
+                [AdventurerRunIntentResolver.ReasonDangerKey] = "danger pressure is high",
+                ["run.posture.cautious.name"] = "Cautious",
+                ["run.posture.balanced.name"] = "Balanced",
+                ["run.posture.greedy.name"] = "Greedy",
                 [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Composition: {0}",
                 [MvpLoopSummaryPanelPresenter.LatestRunSectionKey] = "Latest Run",
                 [MvpLoopSummaryPanelPresenter.LatestRunFormatKey] = "Run: {0}",

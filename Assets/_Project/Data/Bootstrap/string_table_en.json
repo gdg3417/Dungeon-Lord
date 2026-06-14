@@ -1578,6 +1578,42 @@
     {
       "key": "ui.mvp_first_contract.compact.path_incomplete",
       "text": "path incomplete"
+    },
+    {
+      "key": "ui.mvp_loop.section.adventurer_intent",
+      "text": "Adventurer intent"
+    },
+    {
+      "key": "ui.adventurer_intent.summary_format",
+      "text": "Adventurer intent: {0} likely. Reason: {1}"
+    },
+    {
+      "key": "ui.adventurer_intent.score_summary_format",
+      "text": "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}"
+    },
+    {
+      "key": "ui.adventurer_intent.debug_posture_format",
+      "text": "Adventurer intent: {0} likely. Selected debug posture: {1}."
+    },
+    {
+      "key": "ui.adventurer_intent.reason.loot_high_heat_low",
+      "text": "loot signal is high and heat is low"
+    },
+    {
+      "key": "ui.adventurer_intent.reason.deaths_heat",
+      "text": "recent deaths and rising heat"
+    },
+    {
+      "key": "ui.adventurer_intent.reason.moderate",
+      "text": "risk and reward are both moderate"
+    },
+    {
+      "key": "ui.adventurer_intent.reason.danger",
+      "text": "danger pressure is high"
+    },
+    {
+      "key": "ui.adventurer_intent.reason.fallback",
+      "text": "current dungeon signals are still forming"
     }
   ]
 }

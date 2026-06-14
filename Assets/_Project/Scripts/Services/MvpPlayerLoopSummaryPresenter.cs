@@ -65,6 +65,8 @@ namespace DungeonBuilder.M0
             RunLootExtractionSummary extractionSummary = latestRun?.LootExtractionSummary;
             RunSurvivalSummary survivalSummary = latestRun?.SurvivalSummary;
 
+            AdventurerRunIntentSummary runIntent = AdventurerRunIntentResolver.Resolve(runConfig, placementEffects, currentHeat, heatTier, latestRun);
+
             bool hasRunOutcome = latestRun != null;
             bool hasResolvedHeatApplication = heatApplication != null && heatApplication.RuleResolved;
             bool hasResearchStatus = HasResearchSignal(researchStatus, verificationBoundary, save.researchPending, save.researchProgress, save.completedResearch);
@@ -125,6 +127,7 @@ namespace DungeonBuilder.M0
                 AdventurerPartyPreviewResolved = partyPreview != null && partyPreview.RuleResolved,
                 AdventurerPartyPreviewDeterministicErrorCode = partyPreview != null ? partyPreview.DeterministicErrorCode : (int)AdventurerPartyCompositionSummaryErrorCode.None,
                 AdventurerPartyPreviewRuleSourceId = partyPreview != null ? partyPreview.RuleSourceId : string.Empty,
+                AdventurerRunIntent = runIntent,
                 WouldMutateState = false,
                 WouldGrantRewards = false,
                 WouldUnlockContent = false,

@@ -159,7 +159,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
-            Assert.That(text, Does.Contain("Selected posture: Balanced"));
+            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Selected debug posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
@@ -1341,6 +1341,8 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
+            Assert.That(copied, Does.Contain("Adventurer intent:"));
+            Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
@@ -1653,6 +1655,15 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
+            map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
+            map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
+            map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
+            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+            map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
+            map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
+            map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
+            map["ui.adventurer_intent.reason.danger"] = "danger pressure is high";
+            map["ui.adventurer_intent.reason.fallback"] = "current dungeon signals are still forming";
             map["ui.mvp_screen.title"] = "Dungeon Command (MVP Loop Summary)";
             map["ui.mvp_screen.section.top_status"] = "Top Status";
             map["ui.mvp_screen.section.current_dungeon"] = "Current Dungeon";
@@ -1674,6 +1685,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
             map["ui.mvp_first_contract.status.in_progress"] = "In progress";
             map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
+            map["ui.mvp_first_contract.status.unavailable"] = "Unavailable until objective config is fixed";
+            map["ui.mvp_first_contract.value.unavailable"] = "unavailable";
+            map["ui.mvp_first_contract.compact.unavailable_format"] = "{0}: {1}.";
             map["ui.mvp_first_contract.compact.in_progress_format"] = "{0}: {1}. Loot {2} / {3}, {4}.";
             map["ui.mvp_first_contract.compact.complete_format"] = "{0}: {1}";
             map["ui.mvp_first_contract.compact.path_complete"] = "path complete";
