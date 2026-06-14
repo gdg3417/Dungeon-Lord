@@ -58,9 +58,8 @@ namespace DungeonBuilder.M0
             }
             AppendLine(builder, BuildPathCompleteLine(guidedPath, localize));
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
-            AppendLine(builder, BuildHeatLine(summary, localize));
+            AppendLine(builder, BuildHeatAndPressureLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
-            AppendLine(builder, AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize));
 
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
 
@@ -93,6 +92,14 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
             AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
             return builder.ToString();
+        }
+
+        private static string BuildHeatAndPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            return JoinInline(
+                localize,
+                BuildHeatLine(summary, localize),
+                AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize));
         }
 
         private static string BuildPathCompleteLine(GuidedMvpActionPathSummary guidedPath, Func<string, string, string> localize)
@@ -204,6 +211,29 @@ namespace DungeonBuilder.M0
         private static void AppendSection(StringBuilder builder, Func<string, string, string> localize, string titleKey)
         {
             AppendLine(builder, string.Format(Localize(localize, SectionHeaderFormatKey), Localize(localize, titleKey)));
+        }
+
+        private static string JoinInline(Func<string, string, string> localize, params string[] parts)
+        {
+            if (parts == null || parts.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string separator = Localize(localize, MvpLoopSummaryPanelPresenter.InlineSeparatorKey);
+            var builder = new StringBuilder();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(parts[i]))
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0) builder.Append(separator);
+                builder.Append(parts[i]);
+            }
+
+            return builder.ToString();
         }
 
         private static string ResolveKeyOrFallback(string key, Func<string, string, string> localize, string fallbackKey)

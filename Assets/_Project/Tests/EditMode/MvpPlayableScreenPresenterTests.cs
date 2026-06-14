@@ -130,6 +130,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
+            [MvpLoopSummaryPanelPresenter.InlineSeparatorKey] = " | ",
             [MvpLoopSummaryPanelPresenter.HeatFormatKey] = "Heat: {0:0.##} -> {1:0.##} ({2}). {3}",
             [MvpLoopSummaryPanelPresenter.ResearchFormatKey] = "{0}",
             [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Effects: {0}",

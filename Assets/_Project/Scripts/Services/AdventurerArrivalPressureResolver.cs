@@ -73,19 +73,19 @@ namespace DungeonBuilder.M0
             summary.RecentDeathCount = recentDeaths;
             summary.RecentRecoveredLoot = recoveredLoot;
             summary.LatestRunOutcomeId = latestRun == null ? string.Empty : latestRun.Success ? "run.outcome.success" : "run.outcome.failure";
-            summary.PressureBandId = ResolveBand(config, score, pathComplete);
+            summary.PressureBandId = ResolveBand(config, score, pathComplete, recentDeaths > 0 || heatRank > 0 || heatPressure > 0);
             summary.PrimaryReasonKey = ResolveReason(summary.PressureBandId, pathComplete, loot, attraction, recentDeaths, heatRank, heatPressure);
             summary.RuleResolved = true;
             summary.DeterministicErrorCode = (int)AdventurerArrivalPressureSummaryErrorCode.None;
             return summary;
         }
 
-        private static string ResolveBand(RunSimulationConfig config, double score, bool pathComplete)
+        private static string ResolveBand(RunSimulationConfig config, double score, bool pathComplete, bool hasRiskSignals)
         {
             if (!pathComplete) return score >= config.ArrivalPressureLowThreshold ? BandLowId : BandNotYetId;
+            if (hasRiskSignals && score >= config.ArrivalPressureCautiousThreshold) return BandCautiousId;
             if (score >= config.ArrivalPressureLikelySoonThreshold) return BandLikelySoonId;
             if (score >= config.ArrivalPressureBuildingThreshold) return BandBuildingId;
-            if (score >= config.ArrivalPressureCautiousThreshold) return BandCautiousId;
             if (score >= config.ArrivalPressureLowThreshold) return BandLowId;
             return BandNotYetId;
         }

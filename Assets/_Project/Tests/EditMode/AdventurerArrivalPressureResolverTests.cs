@@ -192,6 +192,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.CompositionFormatKey: return "Dungeon composition: {0}";
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
+                case MvpLoopSummaryPanelPresenter.InlineSeparatorKey: return " | ";
                 case MvpLoopSummaryPanelPresenter.HeatFormatKey: return "Heat: {0:0.##} -> {1:0.##} ({2}); risk {3}";
                 case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "Research: {0}";
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "Suggested next action: {0}";
