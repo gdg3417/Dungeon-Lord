@@ -64,8 +64,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
-            Assert.That(text, Does.Contain("Selected category: Room"));
-            Assert.That(text, Does.Contain("Selected option: Basic Room"));
+            Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(text, Does.Not.Contain("Selected category: Room"));
+            Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
@@ -115,6 +116,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.SectionHeaderFormatKey] = "== {0} ==",
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",
+            [MvpPlayableScreenPresenter.SelectedPlacementFormatKey] = "Selected placement: {0} / {1}",
             [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Selected posture: {0}",
             [MvpPlayableScreenPresenter.PlacePromptKey] = "Next build step: choose an option, then place or modify it.",
             [MvpPlayableScreenPresenter.RunPromptKey] = "Next run step: run or observe the dungeon when ready.",

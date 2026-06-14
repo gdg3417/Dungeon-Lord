@@ -1440,6 +1440,10 @@
       "text": "Selected option: {0}"
     },
     {
+      "key": "ui.mvp_screen.selected_placement_format",
+      "text": "Selected placement: {0} / {1}"
+    },
+    {
       "key": "ui.mvp_screen.run_posture_format",
       "text": "Selected posture: {0}"
     },

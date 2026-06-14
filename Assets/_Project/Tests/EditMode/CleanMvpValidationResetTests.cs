@@ -411,6 +411,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
+            map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
             map["ui.mvp_screen.run_posture_format"] = "Selected posture: {0}";
             map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
             map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";

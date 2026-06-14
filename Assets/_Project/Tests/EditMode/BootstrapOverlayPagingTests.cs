@@ -155,8 +155,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Run Setup =="));
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
-            Assert.That(text, Does.Contain("Selected category: Room"));
-            Assert.That(text, Does.Contain("Selected option: Basic Room"));
+            Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(text, Does.Not.Contain("Selected category: Room"));
+            Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
@@ -1679,6 +1680,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
+            map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
             map["ui.mvp_screen.run_posture_format"] = "Selected posture: {0}";
             map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
             map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";
