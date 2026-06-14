@@ -457,7 +457,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runFeedback, Does.Not.Contain("run-1"));
             Assert.That(runFeedback, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(runFeedback, Does.Not.Contain("run.heat_delta.rule.test"));
-            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(runFeedback));
+            string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
+            Assert.That(copiedSmoke, Does.Contain(runFeedback));
+            Assert.That(copiedSmoke, Does.Contain("First Dungeon Contract"));
+            AssertNoRawPlayerFacingSmokeIds(copiedSmoke);
             Assert.That(runText, Does.Contain("Latest Run"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
@@ -484,6 +487,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(defaultText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(defaultText, Does.Contain("== Build Choice =="));
             Assert.That(defaultText, Does.Contain("Path complete:"));
+            Assert.That(defaultText, Does.Contain("First Dungeon Contract"));
+            Assert.That(defaultText, Does.Contain("Loot recovered: 0 / 10"));
             Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -1333,6 +1338,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
+            Assert.That(copied, Does.Contain("First Dungeon Contract"));
+            Assert.That(copied, Does.Contain("Contract status:"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
             AssertNoRawPlayerFacingSmokeIds(copied);
@@ -1473,6 +1480,16 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.MageClassId,
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
+                },
+                MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
+                {
+                    ObjectiveId = "objective.first_dungeon_contract",
+                    RequiredCompletePath = true,
+                    RequiredRunCount = 1,
+                    RequiredRecoveredLootValue = 10,
+                    AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                    RequireResearchAnalysisUnlocked = true,
+                    AnalysisResearchProjectId = "research.project.m7_a2_scaffold"
                 }
             });
         }
@@ -1631,6 +1648,20 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.run_setup"] = "Run Setup";
             map["ui.mvp_screen.section.latest_run"] = "Latest Run";
             map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
+            map["ui.mvp_screen.section.first_contract"] = "First Dungeon Contract";
+            map["ui.mvp_first_contract.title"] = "First Dungeon Contract";
+            map["ui.mvp_first_contract.path_built_format"] = "Path built: {0}";
+            map["ui.mvp_first_contract.run_observed_format"] = "Run observed: {0}";
+            map["ui.mvp_first_contract.loot_recovered_format"] = "Loot recovered: {0} / {1}";
+            map["ui.mvp_first_contract.heat_target_format"] = "Heat target: {0} (current: {1})";
+            map["ui.mvp_first_contract.analysis_format"] = "Analysis: {0}";
+            map["ui.mvp_first_contract.status_format"] = "Contract status: {0}";
+            map["ui.mvp_first_contract.value.complete"] = "complete";
+            map["ui.mvp_first_contract.value.incomplete"] = "incomplete";
+            map["ui.mvp_first_contract.value.analysis_unlocked"] = "Basic Run Analysis unlocked";
+            map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
+            map["ui.mvp_first_contract.status.in_progress"] = "In progress";
+            map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";

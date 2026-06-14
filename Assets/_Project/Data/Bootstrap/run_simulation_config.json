@@ -184,5 +184,15 @@
     "ExtractedLootMultiplierPerLootBonus": 0.05,
     "HeatDeltaPerHeatPressure": 0.5,
     "AttractionSignalPerAttraction": 1.0
+  },
+  "MvpFirstSessionObjective": {
+    "ObjectiveId": "objective.first_dungeon_contract",
+    "RequiredCompletePath": true,
+    "RequiredRunCount": 1,
+    "RequiredRecoveredLootValue": 10,
+    "AllowedMaxHeatTierId": "heat_tier.peace",
+    "RequireResearchAnalysisUnlocked": true,
+    "AnalysisUnlockId": "research.unlock.basic_run_analysis",
+    "AnalysisResearchProjectId": "research.project.m7_a2_scaffold"
   }
 }

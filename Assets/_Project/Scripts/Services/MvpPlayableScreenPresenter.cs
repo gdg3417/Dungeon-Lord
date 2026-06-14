@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         public const string RunSetupKey = "ui.mvp_screen.section.run_setup";
         public const string LatestRunKey = "ui.mvp_screen.section.latest_run";
         public const string AnalysisNextActionKey = "ui.mvp_screen.section.analysis_next_action";
+        public const string FirstContractKey = "ui.mvp_screen.section.first_contract";
         public const string SectionHeaderFormatKey = "ui.mvp_screen.section.header_format";
         public const string LineFormatKey = "ui.mvp_screen.line_format";
         public const string SelectedCategoryFormatKey = "ui.mvp_screen.selected_category_format";
@@ -43,6 +44,7 @@ namespace DungeonBuilder.M0
             string placementFeedback,
             string runFeedback,
             string bannerMessage,
+            MvpFirstSessionObjectiveSummary firstSessionObjective,
             Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
@@ -57,6 +59,9 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
+
+            AppendSection(builder, localize, FirstContractKey);
+            AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildPanelText(firstSessionObjective, localize));
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));

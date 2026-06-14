@@ -1486,6 +1486,62 @@
     {
       "key": "ui.mvp_screen.path_complete_format",
       "text": "Path complete: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.section.first_contract",
+      "text": "First Dungeon Contract"
+    },
+    {
+      "key": "ui.mvp_first_contract.title",
+      "text": "First Dungeon Contract"
+    },
+    {
+      "key": "ui.mvp_first_contract.path_built_format",
+      "text": "Path built: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.run_observed_format",
+      "text": "Run observed: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.loot_recovered_format",
+      "text": "Loot recovered: {0} / {1}"
+    },
+    {
+      "key": "ui.mvp_first_contract.heat_target_format",
+      "text": "Heat target: {0} (current: {1})"
+    },
+    {
+      "key": "ui.mvp_first_contract.analysis_format",
+      "text": "Analysis: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.status_format",
+      "text": "Contract status: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.value.complete",
+      "text": "complete"
+    },
+    {
+      "key": "ui.mvp_first_contract.value.incomplete",
+      "text": "incomplete"
+    },
+    {
+      "key": "ui.mvp_first_contract.value.analysis_unlocked",
+      "text": "Basic Run Analysis unlocked"
+    },
+    {
+      "key": "ui.mvp_first_contract.value.analysis_locked",
+      "text": "unlock Basic Run Analysis"
+    },
+    {
+      "key": "ui.mvp_first_contract.status.in_progress",
+      "text": "In progress"
+    },
+    {
+      "key": "ui.mvp_first_contract.status.complete",
+      "text": "Complete. Try a riskier setup or improve loot recovery."
     }
   ]
 }

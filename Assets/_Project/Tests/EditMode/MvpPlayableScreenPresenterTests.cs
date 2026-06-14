@@ -46,6 +46,7 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 "Status banner.",
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RequiredRecoveredLootValue = 10, AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId },
                 Localize);
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -55,6 +56,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Run Setup =="));
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("== First Dungeon Contract =="));
+            Assert.That(text, Does.Contain("Loot recovered: 0 / 10"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Status banner."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
@@ -86,6 +89,21 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.RunSetupKey] = "Run Setup",
             [MvpPlayableScreenPresenter.LatestRunKey] = "Latest Run",
             [MvpPlayableScreenPresenter.AnalysisNextActionKey] = "Analysis and Next Action",
+            [MvpPlayableScreenPresenter.FirstContractKey] = "First Dungeon Contract",
+            [MvpFirstSessionObjectivePresenter.TitleKey] = "First Dungeon Contract",
+            [MvpFirstSessionObjectivePresenter.PathBuiltFormatKey] = "Path built: {0}",
+            [MvpFirstSessionObjectivePresenter.RunObservedFormatKey] = "Run observed: {0}",
+            [MvpFirstSessionObjectivePresenter.LootRecoveredFormatKey] = "Loot recovered: {0} / {1}",
+            [MvpFirstSessionObjectivePresenter.HeatTargetFormatKey] = "Heat target: {0} (current: {1})",
+            [MvpFirstSessionObjectivePresenter.AnalysisFormatKey] = "Analysis: {0}",
+            [MvpFirstSessionObjectivePresenter.StatusFormatKey] = "Contract status: {0}",
+            [MvpFirstSessionObjectivePresenter.CompleteKey] = "complete",
+            [MvpFirstSessionObjectivePresenter.IncompleteKey] = "incomplete",
+            [MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey] = "Basic Run Analysis unlocked",
+            [MvpFirstSessionObjectivePresenter.AnalysisLockedKey] = "unlock Basic Run Analysis",
+            [MvpFirstSessionObjectivePresenter.StatusInProgressKey] = "In progress",
+            [MvpFirstSessionObjectivePresenter.StatusCompleteKey] = "Complete. Try a riskier setup or improve loot recovery.",
+            [CurrentHeatTierResolver.PeaceTierId] = "Peace",
             [MvpPlayableScreenPresenter.SectionHeaderFormatKey] = "== {0} ==",
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",

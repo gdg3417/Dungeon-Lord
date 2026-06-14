@@ -306,6 +306,7 @@ namespace DungeonBuilder.M0
         public int AdventurerPartyCompositionMaxAllowedSize;
         public string[] AdventurerPartyCompositionClassIds = Array.Empty<string>();
         public RunPostureConfig[] RunPostures = Array.Empty<RunPostureConfig>();
+        public MvpFirstSessionObjectiveConfig MvpFirstSessionObjective;
     }
 
     [Serializable]

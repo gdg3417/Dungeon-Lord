@@ -479,6 +479,7 @@ namespace DungeonBuilder.M0
                 _mvpStructurePlacementFeedback,
                 _mvpRunResultFeedback,
                 _root.BannerMessage,
+                MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig),
                 (key, fallback) => GetLocalizedString(key, fallback)));
             return builder.ToString();
         }
@@ -490,6 +491,7 @@ namespace DungeonBuilder.M0
             string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
             AppendCompactLoopSummaryLines(body, panelText);
             AppendMvpDungeonLayoutText(body);
+            AppendLine(body, MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback)));
             AppendCompactAdventurersFallbackIfMissing(body);
             AppendSelectedPlacementAndRunPlanPreviews(body);
             if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
@@ -571,7 +573,7 @@ namespace DungeonBuilder.M0
                 AppendLine(body, string.Empty);
                 AppendLine(body, guidedText);
             }
-            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            string firstSessionText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(firstSessionText))
             {
                 AppendLine(body, string.Empty);
@@ -671,7 +673,7 @@ namespace DungeonBuilder.M0
                 AppendLine(builder, guidedText);
             }
 
-            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
+            string firstSessionText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
             if (!string.IsNullOrEmpty(firstSessionText))
             {
                 AppendLine(builder, string.Empty);
