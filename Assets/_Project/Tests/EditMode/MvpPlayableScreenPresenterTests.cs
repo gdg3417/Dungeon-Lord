@@ -45,6 +45,7 @@ namespace DungeonBuilder.Tests.EditMode
                 "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.",
                 string.Empty,
                 string.Empty,
+                "Status banner.",
                 Localize);
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -55,6 +56,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Contain("Status banner."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
@@ -87,7 +89,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",
             [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Selected posture: {0}",
-            [MvpPlayableScreenPresenter.PlacePromptKey] = "No build change yet this session.",
+            [MvpPlayableScreenPresenter.PlacePromptKey] = "Next build step: choose an option, then place or modify it.",
             [MvpPlayableScreenPresenter.RunPromptKey] = "Next run step: run or observe the dungeon when ready.",
             [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No run observed yet this session.",
             [MvpPlayableScreenPresenter.NoAnalysisKey] = "Why it happened: run the dungeon to see the first result.",

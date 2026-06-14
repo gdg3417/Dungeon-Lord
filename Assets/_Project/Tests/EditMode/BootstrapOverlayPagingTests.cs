@@ -159,7 +159,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
             Assert.That(text, Does.Contain("Selected posture: Balanced"));
-            Assert.That(text, Does.Contain("No build change yet this session."));
+            Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -429,7 +429,6 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
             string placementText = RefreshText();
 
-            Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
             Assert.That(placementText, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
             Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(placementText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -602,7 +601,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_root.BannerMessage, Is.EqualTo("Placed: Basic Room"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed placement: Empty slot -> Room: Basic Room"));
             Assert.That(_root.BannerMessage, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
@@ -626,9 +625,9 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_root.BannerMessage, Is.EqualTo($"Placed: {displayName}"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
             Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
-            Assert.That(text, Does.Contain($"Placed: {displayName}"));
+            Assert.That(text, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
             Assert.That(text, Does.Not.Contain(categoryId));
             Assert.That(text, Does.Not.Contain(optionId));
             Assert.That(_root.BannerMessage, Does.Not.Contain(optionId));

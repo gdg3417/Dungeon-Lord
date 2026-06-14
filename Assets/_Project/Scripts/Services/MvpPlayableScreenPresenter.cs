@@ -41,12 +41,18 @@ namespace DungeonBuilder.M0
             string selectedRunPlanPreview,
             string placementFeedback,
             string runFeedback,
+            string bannerMessage,
             Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
             AppendSection(builder, localize, TopStatusKey);
             AppendLine(builder, Localize(localize, PlayerViewStatusKey));
+            if (!string.IsNullOrWhiteSpace(bannerMessage))
+            {
+                AppendLine(builder, bannerMessage);
+            }
+            AppendLine(builder, BuildPathCompleteLine(guidedPath, localize));
             AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
             AppendLine(builder, BuildHeatLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
@@ -82,11 +88,14 @@ namespace DungeonBuilder.M0
                     : summary?.NextOptimizationSuggestionKey,
                     localize,
                     MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
-            AppendLine(builder, string.Format(
-                Localize(localize, GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
-                Localize(localize, guidedPath != null && guidedPath.IsComplete ? GuidedMvpActionPathPanelPresenter.CompleteYesKey : GuidedMvpActionPathPanelPresenter.CompleteNoKey)));
-
             return builder.ToString();
+        }
+
+        private static string BuildPathCompleteLine(GuidedMvpActionPathSummary guidedPath, Func<string, string, string> localize)
+        {
+            return string.Format(
+                Localize(localize, GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
+                Localize(localize, guidedPath != null && guidedPath.IsComplete ? GuidedMvpActionPathPanelPresenter.CompleteYesKey : GuidedMvpActionPathPanelPresenter.CompleteNoKey));
         }
 
         private static string BuildHeatLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

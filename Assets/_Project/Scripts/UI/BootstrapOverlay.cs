@@ -478,11 +478,8 @@ namespace DungeonBuilder.M0
                 GetSelectedMvpRunPlanPreviewText(),
                 _mvpStructurePlacementFeedback,
                 _mvpRunResultFeedback,
+                _root.BannerMessage,
                 (key, fallback) => GetLocalizedString(key, fallback)));
-            if (!string.IsNullOrEmpty(_root.BannerMessage))
-            {
-                AppendLine(builder, _root.BannerMessage);
-            }
             return builder.ToString();
         }
 
@@ -1303,18 +1300,18 @@ namespace DungeonBuilder.M0
                 out MvpDungeonPlacementEntry newEntry,
                 out string bannerKey);
             string message = _root.Content.GetString(bannerKey, bannerKey);
-            string displayName = MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback));
-            _root.SetBanner(ok ? string.Format(message, displayName) : message);
             if (ok)
             {
                 _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
                     priorEntry,
                     newEntry,
                     (key, fallback) => GetLocalizedString(key, fallback));
+                _root.SetBanner(_mvpStructurePlacementFeedback);
             }
             else
             {
                 _mvpStructurePlacementFeedback = string.Empty;
+                _root.SetBanner(message);
             }
             RefreshOverlayText();
         }
