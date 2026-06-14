@@ -97,7 +97,7 @@
     },
     {
       "key": "ui.dev.structure_status",
-      "text": "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
+      "text": "Structure Sim \u2014 Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
     },
     {
       "key": "ui.banner.place_success",
@@ -193,11 +193,11 @@
     },
     {
       "key": "ui.dev.offline_summary_format",
-      "text": "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
+      "text": "Offline Summary \u2014 resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
     {
       "key": "ui.dev.research_pending_format",
-      "text": "Research Pending — pending={0} slot={1} project={2}"
+      "text": "Research Pending \u2014 pending={0} slot={1} project={2}"
     },
     {
       "key": "ui.dev.banner.heading",
@@ -377,7 +377,7 @@
     },
     {
       "key": "ui.dev.research_pending_validation_format",
-      "text": "Research Pending Validation — resolved={0} error={1} ruleSource={2}"
+      "text": "Research Pending Validation \u2014 resolved={0} error={1} ruleSource={2}"
     },
     {
       "key": "ui.dev.button.set_research_pending",
@@ -401,27 +401,27 @@
     },
     {
       "key": "ui.dev.research_progress_format",
-      "text": "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
+      "text": "Research Progress Preview \u2014 resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
     },
     {
       "key": "ui.dev.research_progress_state_format",
-      "text": "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
+      "text": "Research Progress State \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
     },
     {
       "key": "ui.dev.research_completion_eligibility_format",
-      "text": "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Eligibility \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_pending_apply_format",
-      "text": "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Pending Apply \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_claim_readiness_format",
-      "text": "Research Completion Claim Readiness — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
+      "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.completed_research_state_format",
-      "text": "Completed Research State — resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
+      "text": "Completed Research State \u2014 resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
     },
     {
       "key": "ui.dev.button.claim_research_completion",
@@ -437,23 +437,23 @@
     },
     {
       "key": "ui.dev.research_completion_claim_apply_format",
-      "text": "Research Completion Claim Apply — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
+      "text": "Research Completion Claim Apply \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
     },
     {
       "key": "ui.dev.research_status_presentation_format",
-      "text": "Research Status Presentation — state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
+      "text": "Research Status Presentation \u2014 state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.research_status_safety_format",
-      "text": "Research Status Safety — canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Status Safety \u2014 canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.dev.research_verification_boundary_format",
-      "text": "Research Verification Boundary — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
+      "text": "Research Verification Boundary \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
     },
     {
       "key": "ui.dev.research_verification_safety_format",
-      "text": "Research Verification Safety — wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Verification Safety \u2014 wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.research.status.no_research",
@@ -501,7 +501,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.heat_format",
-      "text": "Heat: {0:0.##} → {1:0.##} ({2}). {3}"
+      "text": "Heat: {0:0.##} \u2192 {1:0.##} ({2}). {3}"
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
@@ -1614,24 +1614,78 @@
     {
       "key": "ui.adventurer_intent.reason.fallback",
       "text": "current dungeon signals are still forming"
+    },
+    {
+      "key": "ui.mvp_loop.section.adventurer_pressure",
+      "text": "Adventurer pressure"
+    },
+    {
+      "key": "ui.adventurer_pressure.summary_format",
+      "text": "Adventurer pressure: {0}. Reason: {1}."
+    },
+    {
+      "key": "ui.adventurer_pressure.detail_format",
+      "text": "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}."
+    },
+    {
+      "key": "ui.adventurer_pressure.band.not_yet",
+      "text": "not yet"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.low",
+      "text": "low"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.cautious_interest",
+      "text": "cautious interest"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.building_slowly",
+      "text": "building slowly"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.likely_soon",
+      "text": "likely soon"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.high_loot_low_heat",
+      "text": "high loot signal and low heat"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.modest_loot_low_attraction",
+      "text": "modest loot and low attraction"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.deaths_heat",
+      "text": "recent deaths and rising heat"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.incomplete_path_weak_loot",
+      "text": "incomplete path or weak loot signal"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.not_yet",
+      "text": "current dungeon signals are still forming"
+    },
+    {
+      "key": "ui.adventurer_intent.body_format",
+      "text": "{0} likely. Reason: {1}"
+    },
+    {
+      "key": "ui.adventurer_pressure.body_format",
+      "text": "{0}. Reason: {1}."
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.none",
+      "text": "none yet"
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.success",
+      "text": "success"
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.failure",
+      "text": "failure"
     }
-  ],
-  "ui.mvp_loop.section.adventurer_pressure": "Adventurer pressure",
-  "ui.adventurer_pressure.summary_format": "Adventurer pressure: {0}. Reason: {1}.",
-  "ui.adventurer_pressure.detail_format": "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}.",
-  "ui.adventurer_pressure.band.not_yet": "not yet",
-  "ui.adventurer_pressure.band.low": "low",
-  "ui.adventurer_pressure.band.cautious_interest": "cautious interest",
-  "ui.adventurer_pressure.band.building_slowly": "building slowly",
-  "ui.adventurer_pressure.band.likely_soon": "likely soon",
-  "ui.adventurer_pressure.reason.high_loot_low_heat": "high loot signal and low heat",
-  "ui.adventurer_pressure.reason.modest_loot_low_attraction": "modest loot and low attraction",
-  "ui.adventurer_pressure.reason.deaths_heat": "recent deaths and rising heat",
-  "ui.adventurer_pressure.reason.incomplete_path_weak_loot": "incomplete path or weak loot signal",
-  "ui.adventurer_pressure.reason.not_yet": "current dungeon signals are still forming",
-  "ui.adventurer_intent.body_format": "{0} likely. Reason: {1}",
-  "ui.adventurer_pressure.body_format": "{0}. Reason: {1}.",
-  "ui.adventurer_pressure.outcome.none": "none yet",
-  "ui.adventurer_pressure.outcome.success": "success",
-  "ui.adventurer_pressure.outcome.failure": "failure"
+  ]
 }

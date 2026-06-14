@@ -38,7 +38,18 @@ namespace DungeonBuilder.Tests.EditMode
         public void Resolve_IncompletePathProducesLowOrNonePressure()
         {
             var summary = AdventurerArrivalPressureResolver.Resolve(Config(), Effects(0, 2, 0, 0, 0), Heat("heat_tier.peace"), null);
-            Assert.That(summary.PressureBandId, Is.AnyOf(AdventurerArrivalPressureResolver.BandLowId, AdventurerArrivalPressureResolver.BandNotYetId));
+            Assert.That(
+                summary.PressureBandId == AdventurerArrivalPressureResolver.BandLowId ||
+                summary.PressureBandId == AdventurerArrivalPressureResolver.BandNotYetId,
+                Is.True);
+        }
+
+        [Test]
+        public void Resolve_HighLootIncompletePathCannotBecomeLikelySoon()
+        {
+            var summary = AdventurerArrivalPressureResolver.Resolve(Config(), Effects(0, 9, 4, 0, 0), Heat("heat_tier.peace"), null);
+
+            Assert.That(summary.PressureBandId, Is.Not.EqualTo(AdventurerArrivalPressureResolver.BandLikelySoonId));
         }
 
         [Test]
@@ -53,7 +64,10 @@ namespace DungeonBuilder.Tests.EditMode
         public void Resolve_ModestLootAndLowAttractionProducesBuildingSlowlyOrLow()
         {
             var summary = AdventurerArrivalPressureResolver.Resolve(Config(), Effects(0, 2, 0, 0, 1), Heat("heat_tier.peace"), null);
-            Assert.That(summary.PressureBandId, Is.AnyOf(AdventurerArrivalPressureResolver.BandBuildingId, AdventurerArrivalPressureResolver.BandLowId));
+            Assert.That(
+                summary.PressureBandId == AdventurerArrivalPressureResolver.BandBuildingId ||
+                summary.PressureBandId == AdventurerArrivalPressureResolver.BandLowId,
+                Is.True);
             Assert.That(summary.PrimaryReasonKey, Is.EqualTo(AdventurerArrivalPressureResolver.ReasonModestLootLowAttractionKey));
         }
 

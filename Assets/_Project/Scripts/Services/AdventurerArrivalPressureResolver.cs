@@ -52,7 +52,7 @@ namespace DungeonBuilder.M0
                            (danger * config.ArrivalPressureScorePerDanger) +
                            (heatPressure * config.ArrivalPressureScorePerHeatPressure) +
                            (recoveredLoot * config.ArrivalPressureScorePerRecentRecoveredLoot) +
-                           (pathComplete ? config.ArrivalPressurePathCompleteBonus : config.ArrivalPressureIncompletePathPenalty) -
+                           (pathComplete ? config.ArrivalPressurePathCompleteBonus : -config.ArrivalPressureIncompletePathPenalty) -
                            (recentDeaths * config.ArrivalPressureRecentDeathPenalty) -
                            ResolveHeatPenalty(config, heatRank) +
                            ResolveOutcomeAdjustment(config, latestRun);
@@ -82,7 +82,7 @@ namespace DungeonBuilder.M0
 
         private static string ResolveBand(RunSimulationConfig config, double score, bool pathComplete)
         {
-            if (!pathComplete && score < config.ArrivalPressureCautiousThreshold) return score >= config.ArrivalPressureLowThreshold ? BandLowId : BandNotYetId;
+            if (!pathComplete) return score >= config.ArrivalPressureLowThreshold ? BandLowId : BandNotYetId;
             if (score >= config.ArrivalPressureLikelySoonThreshold) return BandLikelySoonId;
             if (score >= config.ArrivalPressureBuildingThreshold) return BandBuildingId;
             if (score >= config.ArrivalPressureCautiousThreshold) return BandCautiousId;
