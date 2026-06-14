@@ -56,7 +56,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             RunLootSummary lootSummary = ApplyCompositionToLootSummary(
                 ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture),
                 compositionOutcome);
-            RunSurvivalSummary survivalSummary = ApplyCompositionToSurvivalSummary(BuildSurvivalSummary(runSequence, tickStarted, success), compositionOutcome);
+            RunSurvivalSummary survivalSummary = ApplyCasualtyPressureToSurvivalSummary(
+                ApplyCompositionToSurvivalSummary(BuildSurvivalSummary(runSequence, tickStarted, success), compositionOutcome),
+                compositionOutcome,
+                posture);
             int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
             RunLootExtractionSummary extractionSummary = ApplyCompositionToExtractionSummary(
                 ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(
@@ -68,6 +71,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     _config.LootExtractionRuleSourceId), lootSummary, posture),
                 lootSummary,
                 compositionOutcome);
+            ApplyCasualtyPressureToExtractionSummary(extractionSummary, lootSummary, survivalSummary);
             RunLootDropRecord[] lootBreakdown = RunLootBreakdownResolver.Resolve(_lootConfig, extractionSummary);
             RunAdventurerAttractionSummary attractionSummary = ApplyCompositionToAttractionSummary(AdventurerAttractionResolver.Resolve(
                 _config,
@@ -88,6 +92,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     extractionSummary,
                     resolverSeed), posture),
                 compositionOutcome);
+            ApplyCasualtyPressureToHeatDeltaSummary(heatDeltaSummary, survivalSummary);
             RunHeatApplicationSummary heatApplicationSummary = RunHeatStateApplyResolver.Resolve(
                 _config,
                 runtime.Heat,
@@ -298,6 +303,52 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return summary;
         }
 
+        private RunSurvivalSummary ApplyCasualtyPressureToSurvivalSummary(RunSurvivalSummary summary, RunCompositionOutcomeSummary composition, RunPostureConfig posture)
+        {
+            if (summary == null || composition == null || !summary.RuleResolved || summary.DeterministicErrorCode != (int)RunSurvivalSummaryErrorCode.None || string.IsNullOrWhiteSpace(_config.CasualtyPressureRuleSourceId))
+            {
+                return summary;
+            }
+
+            MvpPlacementEffectsSummary effects = composition.PlacementEffects;
+            double rawPressure =
+                ((effects?.Danger ?? 0) * _config.CasualtyPressurePerDanger) -
+                ((effects?.PathCapacity ?? 0) * _config.CasualtyPressureReductionPerPathCapacity) +
+                ((effects?.ManaPressure ?? 0) * _config.CasualtyPressurePerManaPressure);
+            double multiplier = ResolveCasualtyPressureMultiplier(posture);
+            double pressure = Math.Max(_config.CasualtyPressureMinimum, Math.Min(_config.CasualtyPressureMaximum, rawPressure * multiplier));
+            if (double.IsNaN(pressure) || double.IsInfinity(pressure))
+            {
+                return summary;
+            }
+
+            int originalDeathCount = summary.DeathCount;
+            int pressureDeaths = Math.Max(0, Math.Min(summary.PartySize, (int)Math.Round(summary.PartySize * pressure)));
+            if (pressure < _config.PartyWipeCasualtyPressureThreshold && pressureDeaths >= summary.PartySize && summary.PartySize > 0)
+            {
+                pressureDeaths = summary.PartySize - 1;
+            }
+
+            int deathCount = Math.Max(summary.DeathCount, pressureDeaths);
+            summary.DeathCount = Math.Max(0, Math.Min(summary.PartySize, deathCount));
+            summary.SurvivorCount = Math.Max(0, summary.PartySize - summary.DeathCount);
+            summary.SurvivorRatio = summary.PartySize > 0 ? (double)summary.SurvivorCount / summary.PartySize : 0d;
+            summary.CasualtyPressure = pressure;
+            int pressureCasualties = Math.Max(0, summary.DeathCount - originalDeathCount);
+            summary.CasualtyLootExtractionPenalty = Math.Max(0d, pressureCasualties * _config.CasualtyLootExtractionPenaltyPerCasualty);
+            summary.CasualtyHeatDelta = Math.Max(0d, pressureCasualties * _config.CasualtyHeatDeltaPerCasualty);
+            summary.RuleSourceId = _config.CasualtyPressureRuleSourceId;
+            return summary;
+        }
+
+        private double ResolveCasualtyPressureMultiplier(RunPostureConfig posture)
+        {
+            string postureId = posture?.Id;
+            if (string.Equals(postureId, RunPostureResolver.CautiousId, StringComparison.Ordinal)) return _config.CautiousCasualtyPressureMultiplier;
+            if (string.Equals(postureId, RunPostureResolver.GreedyId, StringComparison.Ordinal)) return _config.GreedyCasualtyPressureMultiplier;
+            return _config.BalancedCasualtyPressureMultiplier;
+        }
+
         private RunLootExtractionSummary ApplyPostureToExtractionSummary(RunLootExtractionSummary summary, RunLootSummary lootSummary, RunPostureConfig posture)
         {
             if (summary == null || posture == null || !summary.RuleResolved)
@@ -330,6 +381,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 summary.TotalExtractedWorldValue,
                 ScaleToInt(summary.TotalExtractedTradeableWorldValue, composition.ExtractedLootMultiplier));
             return summary;
+        }
+
+        private void ApplyCasualtyPressureToExtractionSummary(RunLootExtractionSummary summary, RunLootSummary lootSummary, RunSurvivalSummary survival)
+        {
+            if (summary == null || lootSummary == null || survival == null || !summary.RuleResolved || survival.DeathCount <= 0 || survival.CasualtyLootExtractionPenalty <= 0d)
+            {
+                return;
+            }
+
+            double multiplier = Math.Max(0d, 1d - survival.CasualtyLootExtractionPenalty);
+            summary.TotalExtractedWorldValue = Math.Min(lootSummary.TotalGeneratedWorldValue, ScaleToInt(summary.TotalExtractedWorldValue, multiplier));
+            summary.TotalExtractedTradeableWorldValue = Math.Min(summary.TotalExtractedWorldValue, ScaleToInt(summary.TotalExtractedTradeableWorldValue, multiplier));
         }
 
         private RunAdventurerAttractionSummary ApplyCompositionToAttractionSummary(RunAdventurerAttractionSummary summary, RunCompositionOutcomeSummary composition)
@@ -375,6 +438,23 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             summary.FinalHeatDelta = Math.Max(_config.RunHeatDeltaMinimum, Math.Min(_config.RunHeatDeltaMaximum, adjusted));
             return summary;
+        }
+
+        private void ApplyCasualtyPressureToHeatDeltaSummary(RunHeatDeltaSummary summary, RunSurvivalSummary survival)
+        {
+            if (summary == null || survival == null || !summary.RuleResolved || survival.CasualtyHeatDelta <= 0d)
+            {
+                return;
+            }
+
+            double adjusted = summary.FinalHeatDelta + survival.CasualtyHeatDelta;
+            if (double.IsNaN(adjusted) || double.IsInfinity(adjusted))
+            {
+                return;
+            }
+
+            summary.DeathHeatDelta += survival.CasualtyHeatDelta;
+            summary.FinalHeatDelta = Math.Max(_config.RunHeatDeltaMinimum, Math.Min(_config.RunHeatDeltaMaximum, adjusted));
         }
 
         private static int ScaleToInt(int value, double multiplier)

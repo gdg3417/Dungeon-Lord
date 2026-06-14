@@ -1204,6 +1204,10 @@
       "text": "{0}. Party: {1}"
     },
     {
+      "key": "ui.mvp_loop.panel.casualty_format",
+      "text": "Survivors: {0}/{1}; deaths: {2}"
+    },
+    {
       "key": "ui.mvp_loop.why.no_run",
       "text": "No run yet. Build or review the dungeon, then run it to learn what happens."
     },

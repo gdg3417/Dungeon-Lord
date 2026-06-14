@@ -63,6 +63,7 @@ namespace DungeonBuilder.M0
             RunHeatApplicationSummary heatApplication = latestRun?.RunHeatApplicationSummary;
             RunLootSummary lootSummary = latestRun?.LootSummary;
             RunLootExtractionSummary extractionSummary = latestRun?.LootExtractionSummary;
+            RunSurvivalSummary survivalSummary = latestRun?.SurvivalSummary;
 
             bool hasRunOutcome = latestRun != null;
             bool hasResolvedHeatApplication = heatApplication != null && heatApplication.RuleResolved;
@@ -102,6 +103,9 @@ namespace DungeonBuilder.M0
                 LootExtractedWorldValue = extractedWorldValue,
                 LootExtractedTradeableWorldValue = extractedTradeableWorldValue,
                 LootBreakdown = CloneLootBreakdown(latestRun?.LootBreakdown),
+                LatestRunPartySize = survivalSummary?.PartySize ?? 0,
+                LatestRunSurvivorCount = survivalSummary?.SurvivorCount ?? 0,
+                LatestRunDeathCount = survivalSummary?.DeathCount ?? 0,
                 HeatBefore = hasResolvedHeatApplication ? heatApplication.HeatBefore : latestRun?.HeatAtStart ?? currentHeat,
                 HeatAfter = hasResolvedHeatApplication ? heatApplication.HeatAfter : currentHeat,
                 HeatTierId = heatTierId,

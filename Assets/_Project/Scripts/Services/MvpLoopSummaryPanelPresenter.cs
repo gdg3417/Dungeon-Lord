@@ -28,6 +28,7 @@ namespace DungeonBuilder.M0
         public const string SectionLineFormatKey = "ui.mvp_loop.section.line_format";
         public const string InlineSeparatorKey = "ui.mvp_loop.inline_separator";
         public const string RunOutcomeLineFormatKey = "ui.mvp_loop.panel.run_outcome_line_format";
+        public const string CasualtyFormatKey = "ui.mvp_loop.panel.casualty_format";
         public const string WhyNoRunKey = "ui.mvp_loop.why.no_run";
         public const string WhyRunFormatKey = "ui.mvp_loop.why.run_format";
         public const string WhyPathCapacityKey = "ui.mvp_loop.why.path_capacity";
@@ -94,7 +95,19 @@ namespace DungeonBuilder.M0
             if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, ValueNoRunKey);
             string outcome = Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
             string partyList = BuildPartyList(summary, localize);
-            return string.IsNullOrEmpty(partyList) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyList);
+            string casualtyLine = BuildCasualtyLine(summary, localize);
+            string outcomeLine = string.IsNullOrEmpty(partyList) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyList);
+            return JoinInline(localize, outcomeLine, casualtyLine);
+        }
+
+        private static string BuildCasualtyLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.HasRunOutcome || summary.LatestRunPartySize <= 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Format(Localize(localize, CasualtyFormatKey), summary.LatestRunSurvivorCount, summary.LatestRunPartySize, summary.LatestRunDeathCount);
         }
 
         private static string BuildPartyList(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

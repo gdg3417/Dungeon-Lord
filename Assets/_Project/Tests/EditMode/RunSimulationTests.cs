@@ -76,6 +76,18 @@ namespace DungeonBuilder.Tests.EditMode
                 MaxAllowedPartySize = 100,
                 SuccessSurvivorRatio = 1d,
                 FailureSurvivorRatio = 0d,
+                CasualtyPressureRuleSourceId = "run.casualty_pressure.rule.test",
+                CasualtyPressurePerDanger = 0.08d,
+                CasualtyPressureReductionPerPathCapacity = 0.05d,
+                CasualtyPressurePerManaPressure = 0.02d,
+                CautiousCasualtyPressureMultiplier = 0.55d,
+                BalancedCasualtyPressureMultiplier = 1d,
+                GreedyCasualtyPressureMultiplier = 1.45d,
+                CasualtyPressureMinimum = 0d,
+                CasualtyPressureMaximum = 1d,
+                CasualtyLootExtractionPenaltyPerCasualty = 0.2d,
+                CasualtyHeatDeltaPerCasualty = 0.75d,
+                PartyWipeCasualtyPressureThreshold = 0.85d,
                 LootExtractionRoundingPolicyId = "loot_extraction.round_floor",
                 LootExtractionRuleSourceId = "run.loot_extraction.rule.v1",
                 LootHeatCoolingRuleSourceId = "run.loot_heat_cooling.rule.v1",
@@ -1380,6 +1392,27 @@ namespace DungeonBuilder.Tests.EditMode
 
             config = BuildConfig();
             config.AdventurerInterestScorePerAttractionSignal = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidCasualtyPressureConfig()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.CasualtyPressureRuleSourceId = " ";
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.CasualtyPressurePerDanger = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.CasualtyPressureMinimum = 0.8d;
+            config.CasualtyPressureMaximum = 0.2d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.CasualtyPressureMaximum = 1.1d;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 
@@ -2763,6 +2796,72 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_CasualtyPressure_HigherDangerProducesMoreCasualtiesThanSaferBuild()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 5;
+            config.MaxPartySize = 5;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord safe = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.BalancedId, SaferPlacementEffects(config));
+            RunOutcomeRecord risky = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.BalancedId, StarterPlacementEffects(config));
+
+            Assert.That(risky.SurvivalSummary.CasualtyPressure, Is.GreaterThan(safe.SurvivalSummary.CasualtyPressure));
+            Assert.That(risky.SurvivalSummary.DeathCount, Is.GreaterThanOrEqualTo(safe.SurvivalSummary.DeathCount));
+            Assert.That(risky.SurvivalSummary.SurvivorRatio, Is.LessThanOrEqualTo(safe.SurvivalSummary.SurvivorRatio));
+        }
+
+        [Test]
+        public void SimulateOnce_CasualtyPressure_GreedyIsRiskierThanCautious()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 5;
+            config.MaxPartySize = 5;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord cautious = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.CautiousId, StarterPlacementEffects(config));
+            RunOutcomeRecord greedy = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.GreedyId, StarterPlacementEffects(config));
+
+            Assert.That(greedy.SurvivalSummary.CasualtyPressure, Is.GreaterThan(cautious.SurvivalSummary.CasualtyPressure));
+            Assert.That(greedy.SurvivalSummary.DeathCount, Is.GreaterThan(cautious.SurvivalSummary.DeathCount));
+        }
+
+        [Test]
+        public void SimulateOnce_CasualtiesReduceLootAndIncreaseHeat()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 5;
+            config.MaxPartySize = 5;
+            config.RunHeatSurvivorCoolingPerSurvivor = 0d;
+            config.RunHeatLootCoolingPerExtractedValue = 0d;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord safe = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.BalancedId, SaferPlacementEffects(config));
+            RunOutcomeRecord risky = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.BalancedId, StarterPlacementEffects(config));
+
+            Assert.That(risky.SurvivalSummary.DeathCount, Is.GreaterThan(0));
+            Assert.That(risky.LootExtractionSummary.TotalExtractedWorldValue, Is.LessThan(risky.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(risky.LootExtractionSummary.TotalExtractedWorldValue, Is.LessThanOrEqualTo(safe.LootExtractionSummary.TotalExtractedWorldValue));
+            Assert.That(risky.RunHeatDeltaSummary.FinalHeatDelta, Is.GreaterThan(safe.RunHeatDeltaSummary.FinalHeatDelta));
+        }
+
+        [Test]
+        public void SimulateOnce_CasualtyPressure_SameInputsProduceSameCasualties()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MinPartySize = 5;
+            config.MaxPartySize = 5;
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord first = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.GreedyId, StarterPlacementEffects(config));
+            RunOutcomeRecord second = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 20d }, 10, 2, RunPostureResolver.GreedyId, StarterPlacementEffects(config));
+
+            Assert.That(second.SurvivalSummary.DeathCount, Is.EqualTo(first.SurvivalSummary.DeathCount));
+            Assert.That(second.SurvivalSummary.SurvivorCount, Is.EqualTo(first.SurvivalSummary.SurvivorCount));
+            Assert.That(second.SurvivalSummary.CasualtyPressure, Is.EqualTo(first.SurvivalSummary.CasualtyPressure).Within(1e-9));
+        }
+
+        [Test]
         public void PlacementEffectsPresenter_CompositionOutcomeUsesLocalizationKeysWithoutRawIds()
         {
             RunSimulationConfig config = BuildConfig();
@@ -2995,6 +3094,23 @@ namespace DungeonBuilder.Tests.EditMode
         private static MvpPlacementEffectsSummary EmptyPlacementEffects(RunSimulationConfig config)
         {
             return MvpPlacementEffectsResolver.Resolve(new MvpDungeonPlacementState(), config);
+        }
+
+        private static MvpPlacementEffectsSummary SaferPlacementEffects(RunSimulationConfig config)
+        {
+            return new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                RuleSourceId = config.MvpPlacementEffectsRuleSourceId,
+                PathCapacity = 2,
+                Danger = 1,
+                ManaPressure = 0,
+                HeatPressure = 0,
+                LootBonus = 3,
+                Attraction = 1,
+                ContributingOptionIds = new[] { MvpDungeonPlacementIds.BasicRoomOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId },
+                EffectLocalizationKeys = new[] { "ui.mvp_placement_effects.explanation.room.basic", "ui.mvp_placement_effects.explanation.trap.snare", "ui.mvp_placement_effects.explanation.loot_node.hidden_cache" }
+            };
         }
 
 
