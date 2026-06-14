@@ -247,6 +247,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.overlayText = _textObject.AddComponent<TextMeshProUGUI>();
             SetRootBackingField("<Content>k__BackingField", BuildOverlayContent(enableDevPanel: true));
             SetRootBackingField("<DevPanelEnabled>k__BackingField", true);
+            SetRootBackingField("_runSimulationService", new RunSimulationService(BuildOverlayRunSimulationConfig()));
             SetRootBackingField("<Save>k__BackingField", BuildOverlayDirtySave());
             _overlay.Bind(_root);
         }
@@ -370,6 +371,32 @@ namespace DungeonBuilder.Tests.EditMode
                     NextRunSequence = 3,
                     LatestOutcome = new RunOutcomeRecord { RunId = "run.dirty.latest", Success = true, HeatAtStart = 12d },
                     RecentOutcomes = new[] { new RunOutcomeRecord { RunId = "run.dirty.latest", Success = true, HeatAtStart = 12d } }
+                }
+            };
+        }
+
+
+        private static RunSimulationConfig BuildOverlayRunSimulationConfig()
+        {
+            return new RunSimulationConfig
+            {
+                HeatPeaceMinimum = 0d,
+                HeatPeaceMaximum = 9d,
+                HeatNoticeMinimum = 10d,
+                HeatNoticeMaximum = 24d,
+                HeatConcernMinimum = 25d,
+                HeatConcernMaximum = 49d,
+                RunHeatApplicationRuleSourceId = "test.heat",
+                MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
+                {
+                    ObjectiveId = "objective.first_dungeon_contract",
+                    RequiredCompletePath = true,
+                    RequiredRunCount = 1,
+                    RequiredRecoveredLootValue = 10,
+                    AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                    RequireResearchAnalysisUnlocked = true,
+                    AnalysisUnlockId = "research.unlock.basic_run_analysis",
+                    AnalysisResearchProjectId = "research.project.m7_a2_scaffold"
                 }
             };
         }
