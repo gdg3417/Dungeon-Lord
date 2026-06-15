@@ -43,7 +43,6 @@ namespace DungeonBuilder.M0
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
         private const string DefaultMvpPlacementCategoryId = MvpDungeonPlacementIds.RoomCategoryId;
         private const string DefaultMvpPlacementOptionId = MvpDungeonPlacementIds.BasicRoomOptionId;
-        private const string CompactSmokeAdventurersUnavailableKey = "ui.mvp_smoke.adventurers_unavailable";
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -439,18 +438,36 @@ namespace DungeonBuilder.M0
             return builder.ToString();
         }
 
+        private BootstrapSmokeTextComposer.Context BuildSmokeTextContext()
+        {
+            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
+            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            return new BootstrapSmokeTextComposer.Context(
+                summary,
+                guidedPath,
+                MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig),
+                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
+                GetSelectedMvpPlacementPreviewText(),
+                BuildSelectedMvpPlacementComparisonText(),
+                GetSelectedMvpRunPostureDisplayName(),
+                GetSelectedMvpRunPlanPreviewText(),
+                _mvpStructurePlacementFeedback,
+                _mvpRunResultFeedback,
+                _root.BannerMessage,
+                _lastRunIntentSummary,
+                _lastRunPostureUsedId,
+                _lastRunDebugPostureId,
+                _lastRunIntentFallbackUsed,
+                _smokeViewportStatusMessage,
+                _playerFacingSectionIndex,
+                PlayerFacingSectionCount);
+        }
+
         public string BuildFullPlayerFacingSmokeText()
         {
-            var builder = new StringBuilder();
-            AppendMvpLoopSummaryPanel(builder);
-            MvpPlayerLoopSummary smokeSummary = _root.ResolveMvpPlayerLoopSummary();
-            AppendLine(builder, AdventurerRunIntentPresenter.BuildScoreSummaryLine(smokeSummary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendLatestRunIntentEvidence(builder);
-            AppendLine(builder, AdventurerArrivalPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerArrivalPressure, (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendLine(builder, AdventurerTrafficPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerTrafficPressure, (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendPlayerFacingStatus(builder);
-            AppendMvpDungeonLayoutText(builder);
-            return builder.ToString();
+            return BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCurrentPlayerFacingSmokeText()
@@ -476,176 +493,27 @@ namespace DungeonBuilder.M0
 
         public string BuildPlayableMvpScreenText()
         {
-            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
-            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
-            var builder = new StringBuilder();
-            AppendLine(builder, MvpPlayableScreenPresenter.BuildScreenText(
-                summary,
-                guidedPath,
-                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback)),
-                MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
-                MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
-                GetSelectedMvpPlacementPreviewText(),
-                BuildSelectedMvpPlacementComparisonText(),
-                GetSelectedMvpRunPostureDisplayName(),
-                GetSelectedMvpRunPlanPreviewText(),
-                _mvpStructurePlacementFeedback,
-                _mvpRunResultFeedback,
-                _root.BannerMessage,
-                MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig),
-                (key, fallback) => GetLocalizedString(key, fallback)));
-            return builder.ToString();
+            return BootstrapSmokeTextComposer.BuildPlayableMvpScreenText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCompactSmokeText()
         {
-            var body = new StringBuilder();
-            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
-            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
-            AppendCompactLoopSummaryLines(body, panelText);
-            AppendMvpDungeonLayoutText(body);
-            AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendLine(body, AdventurerRunIntentPresenter.BuildScoreSummaryLine(summary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendCompactAdventurersFallbackIfMissing(body);
-            AppendSelectedPlacementAndRunPlanPreviews(body);
-            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
-            {
-                AppendLine(body, _mvpRunResultFeedback);
-            }
-            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
-            AppendLine(body, string.Format(
-                GetLocalizedString(GuidedMvpActionPathPanelPresenter.CompleteFormatKey),
-                GetLocalizedString(guidedPath != null && guidedPath.IsComplete
-                    ? GuidedMvpActionPathPanelPresenter.CompleteYesKey
-                    : GuidedMvpActionPathPanelPresenter.CompleteNoKey)));
-
-            return BuildSectionText("ui.mvp_smoke.section.compact", body.ToString());
-        }
-
-        private void AppendCompactLoopSummaryLines(StringBuilder builder, string panelText)
-        {
-            if (string.IsNullOrEmpty(panelText))
-            {
-                return;
-            }
-
-            string suggestionPrefix = GetLocalizedString(MvpLoopSummaryPanelPresenter.SuggestionFormatKey).Split('{')[0];
-            string title = GetLocalizedString(MvpLoopSummaryPanelPresenter.TitleKey);
-            string[] lines = panelText.Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (string.IsNullOrEmpty(line) || line == title || (!string.IsNullOrEmpty(suggestionPrefix) && line.StartsWith(suggestionPrefix)))
-                {
-                    continue;
-                }
-
-                AppendLine(builder, line);
-            }
-        }
-
-        private void AppendCompactAdventurersFallbackIfMissing(StringBuilder builder)
-        {
-            if (ContainsAdventurerLine(builder))
-            {
-                return;
-            }
-
-            AppendLine(builder, GetLocalizedString(CompactSmokeAdventurersUnavailableKey));
-        }
-
-        private bool ContainsAdventurerLine(StringBuilder builder)
-        {
-            string partyPreviewPrefix = GetLocalizedString(MvpRunResultFeedbackPresenter.PartyPreviewFormatKey).Split('{')[0];
-            if (string.IsNullOrEmpty(partyPreviewPrefix))
-            {
-                return false;
-            }
-
-            string[] lines = builder.ToString().Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (lines[i].StartsWith(partyPreviewPrefix))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return BootstrapSmokeTextComposer.BuildCompactSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         private string BuildLoopSummarySectionText()
         {
-            var body = new StringBuilder();
-            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
-            AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback)));
-            AppendMvpDungeonLayoutText(body);
-            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
-            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(guidedText))
-            {
-                AppendLine(body, string.Empty);
-                AppendLine(body, guidedText);
-            }
-            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(firstSessionText))
-            {
-                AppendLine(body, string.Empty);
-                AppendLine(body, firstSessionText);
-            }
-
-            string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(firstContractText))
-            {
-                AppendLine(body, string.Empty);
-                AppendLine(body, firstContractText);
-            }
-            return BuildSectionText("ui.mvp_smoke.section.loop_summary", body.ToString());
+            return BootstrapSmokeTextComposer.BuildLoopSummarySectionText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         private string BuildPlanAndActionSectionText()
         {
-            var body = new StringBuilder();
-            AppendSelectedPlacementAndRunPlanPreviews(body);
-            AppendLine(body, GetLocalizedString("ui.mvp_view.player_mode.status"));
-            if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
-            {
-                AppendLine(body, _mvpStructurePlacementFeedback);
-            }
-            return BuildSectionText("ui.mvp_smoke.section.plan_and_action", body.ToString());
+            return BootstrapSmokeTextComposer.BuildPlanAndActionSectionText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         private string BuildLatestRunFeedbackSectionText()
         {
-            var body = new StringBuilder();
-            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
-            {
-                AppendLine(body, _mvpRunResultFeedback);
-            }
-            else
-            {
-                AppendLine(body, GetLocalizedString("ui.mvp_run_feedback.unavailable"));
-            }
-            return BuildSectionText("ui.mvp_smoke.section.latest_run_feedback", body.ToString());
-        }
-
-        private string BuildSectionText(string sectionNameKey, string body)
-        {
-            var builder = new StringBuilder();
-            AppendLine(builder, string.Format(
-                GetLocalizedString("ui.mvp_smoke.section.status_format"),
-                GetLocalizedString(sectionNameKey),
-                _playerFacingSectionIndex + 1,
-                PlayerFacingSectionCount));
-            if (!string.IsNullOrEmpty(_smokeViewportStatusMessage))
-            {
-                AppendLine(builder, _smokeViewportStatusMessage);
-            }
-            if (!string.IsNullOrEmpty(body))
-            {
-                AppendLine(builder, body);
-            }
-            return builder.ToString();
+            return BootstrapSmokeTextComposer.BuildLatestRunFeedbackSectionText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         private void AppendScrolledPlayerFacingSmokeText(StringBuilder builder, string text)
@@ -667,15 +535,6 @@ namespace DungeonBuilder.M0
             _playerFacingScrollOffset = Mathf.Clamp(requestedOffset, 0, maxOffset);
         }
 
-
-        private void AppendMvpDungeonLayoutText(StringBuilder builder)
-        {
-            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(layoutText))
-            {
-                AppendLine(builder, layoutText);
-            }
-        }
 
         private void AppendMvpLoopSummaryPanel(StringBuilder builder)
         {
@@ -725,24 +584,6 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(runPlanPreviewText))
             {
                 AppendLine(builder, runPlanPreviewText);
-            }
-        }
-
-        private void AppendPlayerFacingStatus(StringBuilder builder)
-        {
-            AppendLine(builder, string.Empty);
-            AppendLine(builder, GetLocalizedString("ui.mvp_view.player_mode.status"));
-            if (!string.IsNullOrEmpty(_root.BannerMessage))
-            {
-                AppendLine(builder, _root.BannerMessage);
-            }
-            if (!string.IsNullOrEmpty(_mvpStructurePlacementFeedback))
-            {
-                AppendLine(builder, _mvpStructurePlacementFeedback);
-            }
-            if (!string.IsNullOrEmpty(_mvpRunResultFeedback))
-            {
-                AppendLine(builder, _mvpRunResultFeedback);
             }
         }
 
@@ -1375,21 +1216,6 @@ namespace DungeonBuilder.M0
                 ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
                 : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             RefreshOverlayText();
-        }
-
-        private void AppendLatestRunIntentEvidence(StringBuilder builder)
-        {
-            if (string.IsNullOrWhiteSpace(_lastRunPostureUsedId))
-            {
-                return;
-            }
-
-            AppendLine(builder, AdventurerRunIntentPresenter.BuildSmokeEvidenceLine(
-                _lastRunIntentSummary,
-                _lastRunPostureUsedId,
-                _lastRunDebugPostureId,
-                _lastRunIntentFallbackUsed,
-                (key, fallback) => GetLocalizedString(key, fallback)));
         }
 
         private static bool IsResolvedAllowedIntent(AdventurerRunIntentSummary intentSummary)

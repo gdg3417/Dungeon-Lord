@@ -1317,6 +1317,24 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void BuildCompactSmokeText_PreservesCompactSmokeComposition()
+        {
+            string compact = _overlay.BuildCompactSmokeText();
+
+            Assert.That(compact, Does.Contain("Smoke section: Compact Smoke View"));
+            Assert.That(compact, Does.Contain("Dungeon composition: Mana Generator"));
+            Assert.That(compact, Does.Contain("Mana reserve:"));
+            Assert.That(compact, Does.Contain("Loot:"));
+            Assert.That(compact, Does.Contain("Heat:"));
+            Assert.That(compact, Does.Contain("Research:"));
+            Assert.That(compact, Does.Contain("Adventurers:"));
+            Assert.That(compact, Does.Contain("Role: adds room space and path context."));
+            Assert.That(compact, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(compact, Does.Contain("Path complete:"));
+            AssertNoRawPlayerFacingSmokeIds(compact);
+        }
+
+        [Test]
         public void CompactSmokeViewIncludesLatestRunFeedbackAndOutcomeCueWhenPresent()
         {
             SetSave(new SaveData
@@ -1405,6 +1423,26 @@ namespace DungeonBuilder.Tests.EditMode
             AssertNoRawPlayerFacingSmokeIds(copied);
             Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
             Assert.That(visible, Does.Contain("Smoke text copied."));
+        }
+
+        [Test]
+        public void CopyFullSmokeTextToClipboard_PreservesFullSmokeComposition()
+        {
+            string built = _overlay.BuildFullPlayerFacingSmokeText();
+            string copied = _overlay.CopyFullSmokeTextToClipboard();
+
+            Assert.That(copied, Is.EqualTo(built));
+            Assert.That(copied, Does.Contain("MVP Loop Summary"));
+            Assert.That(copied, Does.Contain("Guided MVP Action"));
+            Assert.That(copied, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(copied, Does.Contain("Adventurer intent:"));
+            Assert.That(copied, Does.Contain("Intent scores:"));
+            Assert.That(copied, Does.Contain("Dungeon composition: Mana Generator"));
+            Assert.That(copied, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(copied, Does.Contain("banner-line"));
+            Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
+            AssertNoRawPlayerFacingSmokeIds(copied);
         }
 
         [Test]
