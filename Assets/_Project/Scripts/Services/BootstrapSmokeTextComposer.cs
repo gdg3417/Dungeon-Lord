@@ -244,8 +244,11 @@ namespace DungeonBuilder.M0
 
         private static void AppendLine(StringBuilder builder, string line)
         {
+            if (builder.Length > 0)
+            {
+                builder.Append('\n');
+            }
             builder.Append(line ?? string.Empty);
-            builder.Append('\n');
         }
     }
 }

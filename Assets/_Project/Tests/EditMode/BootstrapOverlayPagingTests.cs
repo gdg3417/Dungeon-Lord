@@ -1331,6 +1331,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(compact, Does.Contain("Role: adds room space and path context."));
             Assert.That(compact, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(compact, Does.Contain("Path complete:"));
+            AssertNoUnintendedTrailingNewline(compact);
+            AssertNoDuplicateBlankLineInflation(compact);
             AssertNoRawPlayerFacingSmokeIds(compact);
         }
 
@@ -1442,7 +1444,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(copied, Does.Contain("banner-line"));
             Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
+            AssertNoUnintendedTrailingNewline(copied);
+            AssertNoDuplicateBlankLineInflation(copied);
             AssertNoRawPlayerFacingSmokeIds(copied);
+        }
+
+        [Test]
+        public void SectionedPlayerFacingSmokeText_DoesNotInflateBlankLines()
+        {
+            AssertNoDuplicateBlankLineInflation(_overlay.BuildCurrentPlayerFacingSmokeText());
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            AssertNoDuplicateBlankLineInflation(_overlay.BuildCurrentPlayerFacingSmokeText());
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            AssertNoDuplicateBlankLineInflation(_overlay.BuildCurrentPlayerFacingSmokeText());
+
+            _overlay.CyclePlayerFacingSmokeSection();
+            AssertNoDuplicateBlankLineInflation(_overlay.BuildCurrentPlayerFacingSmokeText());
         }
 
         [Test]
@@ -1512,6 +1531,16 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("run-"));
             Assert.That(text, Does.Not.Contain("run.heat_delta.rule.test"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
+        }
+
+        private static void AssertNoUnintendedTrailingNewline(string text)
+        {
+            Assert.That(text, Does.Not.EndWith("\n"));
+        }
+
+        private static void AssertNoDuplicateBlankLineInflation(string text)
+        {
+            Assert.That(text, Does.Not.Contain("\n\n\n"));
         }
 
 
