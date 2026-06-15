@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR 119 / GD25. The repository now contains deterministic Adventurer Traffic Pressure preview; the next intended work is GD26 applying resolved adventurer intent to manual smoke runs.
+Main is merged through PR 120 / GD26. The repository now contains manual smoke runs using resolved adventurer intent after the GD20-GD26 gameplay prototype expansion.
 
 ## Operating rules
 
@@ -28,4 +28,6 @@ VS4 first-session MVP smoke documentation:
 
 ## Next intended work
 
-The next intended PR is GD26 applying resolved adventurer intent to the existing manual smoke run trigger.
+The next intended work is AR1 through AR4 architecture debt containment before GD27 gameplay resumes.
+
+- [AR1 architecture debt containment plan after GD26](docs/planning/architecture-debt-containment-plan-after-gd26.md)
