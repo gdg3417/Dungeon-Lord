@@ -537,6 +537,7 @@ namespace DungeonBuilder.M0
                 !HasValidCasualtyPressureConfig(config) ||
                 !HasValidAdventurerIntentConfig(config) ||
                 !HasValidAdventurerArrivalPressureConfig(config) ||
+                !HasValidAdventurerTrafficPressureConfig(config) ||
                 !HasConfiguredMvpAdventurerClasses(config.AdventurerPartyCompositionClassIds))
             {
                 return false;
@@ -606,6 +607,46 @@ namespace DungeonBuilder.M0
                    config.ArrivalPressureLowThreshold <= config.ArrivalPressureCautiousThreshold &&
                    config.ArrivalPressureCautiousThreshold <= config.ArrivalPressureBuildingThreshold &&
                    config.ArrivalPressureBuildingThreshold <= config.ArrivalPressureLikelySoonThreshold;
+        }
+
+        private static bool HasValidAdventurerTrafficPressureConfig(RunSimulationConfig config)
+        {
+            if (config == null || string.IsNullOrWhiteSpace(config.AdventurerTrafficPressureRuleSourceId))
+            {
+                return false;
+            }
+
+            return IsFinite(config.TrafficScoreWeightArrivalPressure) &&
+                   IsFinite(config.TrafficScoreWeightLootSignal) &&
+                   IsFinite(config.TrafficScoreWeightAttractionSignal) &&
+                   IsFinite(config.TrafficScoreWeightDangerSignal) &&
+                   IsFinite(config.TrafficScoreWeightHeatPressureSignal) &&
+                   IsFinite(config.TrafficScoreWeightRecentRecoveredLoot) &&
+                   IsFinite(config.TrafficPathCompleteBonus) &&
+                   IsFinite(config.TrafficIncompletePathPenalty) &&
+                   IsFinite(config.TrafficRecentDeathCautionModifier) &&
+                   IsFinite(config.TrafficHeatCautionModifier) &&
+                   IsFinite(config.TrafficNoneThreshold) &&
+                   IsFinite(config.TrafficLowThreshold) &&
+                   IsFinite(config.TrafficBuildingThreshold) &&
+                   IsFinite(config.TrafficSteadyThreshold) &&
+                   IsFinite(config.TrafficHeavyThreshold) &&
+                   IsFinite(config.TrafficDangerousChurnMinimumInterestScore) &&
+                   IsFinite(config.TrafficEstimatedPartyCountMultiplier) &&
+                   IsFinite(config.TrafficEstimatedPartyCountScoreDivisor) &&
+                   config.TrafficNoneThreshold <= config.TrafficLowThreshold &&
+                   config.TrafficLowThreshold <= config.TrafficBuildingThreshold &&
+                   config.TrafficBuildingThreshold <= config.TrafficSteadyThreshold &&
+                   config.TrafficSteadyThreshold <= config.TrafficHeavyThreshold &&
+                   config.TrafficDangerousChurnRecentDeathThreshold >= 1 &&
+                   config.TrafficDangerousChurnMinimumInterestScore >= config.TrafficLowThreshold &&
+                   config.TrafficEstimatedPartyCountScoreDivisor > 0d &&
+                   config.TrafficEstimatedPartyCountMultiplier >= 0d &&
+                   config.TrafficEstimatedPartyCountLowThreshold >= 1 &&
+                   config.TrafficEstimatedPartyCountMediumThreshold >= config.TrafficEstimatedPartyCountLowThreshold &&
+                   config.TrafficMinimumEstimatedConcurrentParties >= 0 &&
+                   config.TrafficMaximumEstimatedConcurrentParties >= config.TrafficMinimumEstimatedConcurrentParties &&
+                   config.TrafficMaximumEstimatedConcurrentParties > 0;
         }
 
         private static bool HasValidCasualtyPressureConfig(RunSimulationConfig config)
