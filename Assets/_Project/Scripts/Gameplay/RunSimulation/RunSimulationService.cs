@@ -129,7 +129,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 AdventurerDemandBudgetSummary = demandBudgetSummary,
                 RunHeatDeltaSummary = heatDeltaSummary,
                 RunHeatApplicationSummary = heatApplicationSummary,
-                CompositionOutcomeSummary = compositionOutcome
+                CompositionOutcomeSummary = compositionOutcome,
+                RunPostureId = posture?.Id
             };
         }
 

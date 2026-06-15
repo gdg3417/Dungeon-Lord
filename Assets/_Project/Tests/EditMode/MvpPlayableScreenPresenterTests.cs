@@ -67,7 +67,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Selected debug posture: Balanced."));
+            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Not.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
@@ -118,7 +118,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",
             [MvpPlayableScreenPresenter.SelectedPlacementFormatKey] = "Selected placement: {0} / {1}",
-            [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Selected posture: {0}",
+            [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Debug selected posture: {0}",
             [MvpPlayableScreenPresenter.PlacePromptKey] = "Next build step: choose an option, then place or modify it.",
             [MvpPlayableScreenPresenter.RunPromptKey] = "Next run step: run or observe the dungeon when ready.",
             [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No run observed yet this session.",
@@ -154,7 +154,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [AdventurerArrivalPressureResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
                 [AdventurerArrivalPressureResolver.ReasonIncompletePathWeakLootKey] = "incomplete path or weak loot signal",
                 [AdventurerRunIntentPresenter.BodyFormatKey] = "{0} likely. Reason: {1}",
-                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Adventurer intent: {0} likely. Selected debug posture: {1}.",
+                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Adventurer intent: {0} likely. Debug selected posture: {1}.",
             [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
                 [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
                 [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",

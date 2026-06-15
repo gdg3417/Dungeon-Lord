@@ -59,6 +59,10 @@ namespace DungeonBuilder.M0
         private string _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
         private string _mvpStructurePlacementFeedback = string.Empty;
         private string _mvpRunResultFeedback = string.Empty;
+        private AdventurerRunIntentSummary _lastRunIntentSummary;
+        private string _lastRunPostureUsedId = string.Empty;
+        private string _lastRunDebugPostureId = string.Empty;
+        private bool _lastRunIntentFallbackUsed;
         private int _playerFacingScrollOffset;
         private bool _compactSmokeViewEnabled;
         private int _playerFacingSectionIndex;
@@ -220,6 +224,10 @@ namespace DungeonBuilder.M0
             _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
             _mvpStructurePlacementFeedback = string.Empty;
             _mvpRunResultFeedback = string.Empty;
+            _lastRunIntentSummary = null;
+            _lastRunPostureUsedId = string.Empty;
+            _lastRunDebugPostureId = string.Empty;
+            _lastRunIntentFallbackUsed = false;
             _playerFacingScrollOffset = 0;
             _compactSmokeViewEnabled = false;
             _playerFacingSectionIndex = PlayerFacingSectionFull;
@@ -437,6 +445,7 @@ namespace DungeonBuilder.M0
             AppendMvpLoopSummaryPanel(builder);
             MvpPlayerLoopSummary smokeSummary = _root.ResolveMvpPlayerLoopSummary();
             AppendLine(builder, AdventurerRunIntentPresenter.BuildScoreSummaryLine(smokeSummary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendLatestRunIntentEvidence(builder);
             AppendLine(builder, AdventurerArrivalPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerArrivalPressure, (key, fallback) => GetLocalizedString(key, fallback)));
             AppendLine(builder, AdventurerTrafficPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerTrafficPressure, (key, fallback) => GetLocalizedString(key, fallback)));
             AppendPlayerFacingStatus(builder);
@@ -1340,18 +1349,54 @@ namespace DungeonBuilder.M0
         private void ShowPlayerRunBanner()
         {
             MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            bool didRun = _root.SimulateMvpActiveLoopOnce(out _, _selectedMvpRunPostureId);
+            AdventurerRunIntentSummary intentSummary = beforeRunSummary?.AdventurerRunIntent;
+            bool fallbackUsed = !IsResolvedAllowedIntent(intentSummary);
+            string runPostureId = fallbackUsed ? _selectedMvpRunPostureId : intentSummary.PostureId;
+            _lastRunIntentSummary = intentSummary;
+            _lastRunPostureUsedId = runPostureId;
+            _lastRunDebugPostureId = _selectedMvpRunPostureId;
+            _lastRunIntentFallbackUsed = fallbackUsed;
+            bool didRun = _root.SimulateMvpActiveLoopOnce(out _, runPostureId);
             MvpPlayerLoopSummary afterRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            _mvpRunResultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
+            string postureSource = AdventurerRunIntentPresenter.BuildRunPostureUsedLine(
+                intentSummary,
+                runPostureId,
+                _selectedMvpRunPostureId,
+                fallbackUsed,
+                (key, fallback) => GetLocalizedString(key, fallback));
+            string resultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
                 beforeRunSummary,
                 afterRunSummary,
                 didRun,
                 (key, fallback) => GetLocalizedString(key, fallback),
-                GetSelectedMvpRunPostureNameKey());
+                AdventurerRunIntentPresenter.ResolvePostureNameKey(runPostureId));
+            _mvpRunResultFeedback = string.Concat(postureSource, " ", resultFeedback);
             _root.SetBanner(didRun
                 ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
                 : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
             RefreshOverlayText();
+        }
+
+        private void AppendLatestRunIntentEvidence(StringBuilder builder)
+        {
+            if (string.IsNullOrWhiteSpace(_lastRunPostureUsedId))
+            {
+                return;
+            }
+
+            AppendLine(builder, AdventurerRunIntentPresenter.BuildSmokeEvidenceLine(
+                _lastRunIntentSummary,
+                _lastRunPostureUsedId,
+                _lastRunDebugPostureId,
+                _lastRunIntentFallbackUsed,
+                (key, fallback) => GetLocalizedString(key, fallback)));
+        }
+
+        private static bool IsResolvedAllowedIntent(AdventurerRunIntentSummary intentSummary)
+        {
+            return intentSummary != null &&
+                   intentSummary.RuleResolved &&
+                   IsAllowedMvpRunPosture(intentSummary.PostureId);
         }
 
         private void ShowPlacementBanner(string structureId)

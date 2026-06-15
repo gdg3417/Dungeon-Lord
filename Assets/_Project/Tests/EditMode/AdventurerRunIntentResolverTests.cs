@@ -100,7 +100,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case "run.posture.greedy.name": return "Greedy";
                 case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
                 case AdventurerRunIntentPresenter.BodyFormatKey: return "{0} likely. Reason: {1}";
-                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
                 case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
                 case AdventurerRunIntentResolver.ReasonModerateKey: return "risk and reward are both moderate";
