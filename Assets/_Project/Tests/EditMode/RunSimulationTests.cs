@@ -168,6 +168,30 @@ namespace DungeonBuilder.Tests.EditMode
                 ArrivalPressureCautiousThreshold = 5d,
                 ArrivalPressureBuildingThreshold = 8d,
                 ArrivalPressureLikelySoonThreshold = 12d,
+                AdventurerTrafficPressureRuleSourceId = "run.adventurer_traffic_pressure.rule.test",
+                TrafficScoreWeightArrivalPressure = 1d,
+                TrafficScoreWeightLootSignal = 0.75d,
+                TrafficScoreWeightAttractionSignal = 1d,
+                TrafficScoreWeightDangerSignal = 0.25d,
+                TrafficScoreWeightHeatPressureSignal = 0.25d,
+                TrafficScoreWeightRecentRecoveredLoot = 0.02d,
+                TrafficPathCompleteBonus = 1d,
+                TrafficIncompletePathPenalty = 3d,
+                TrafficRecentDeathCautionModifier = 1d,
+                TrafficHeatCautionModifier = 0.5d,
+                TrafficNoneThreshold = 0d,
+                TrafficLowThreshold = 2d,
+                TrafficBuildingThreshold = 8d,
+                TrafficSteadyThreshold = 14d,
+                TrafficHeavyThreshold = 20d,
+                TrafficDangerousChurnRecentDeathThreshold = 1,
+                TrafficDangerousChurnMinimumInterestScore = 8d,
+                TrafficEstimatedPartyCountMultiplier = 1d,
+                TrafficEstimatedPartyCountScoreDivisor = 8d,
+                TrafficEstimatedPartyCountLowThreshold = 1,
+                TrafficEstimatedPartyCountMediumThreshold = 3,
+                TrafficMinimumEstimatedConcurrentParties = 0,
+                TrafficMaximumEstimatedConcurrentParties = 4,
                 MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
                 MvpPlacementEffects = new[]
                 {
@@ -1292,6 +1316,30 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(isValid, Is.False);
         }
 
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerTrafficPressureConfig()
+        {
+            var config = BuildConfig();
+            config.AdventurerTrafficPressureRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.TrafficLowThreshold = 20d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.TrafficScoreWeightLootSignal = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.TrafficScoreWeightLootSignal = double.PositiveInfinity;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.TrafficMaximumEstimatedConcurrentParties = 0;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
 
         [Test]
         public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerIntentConfig()

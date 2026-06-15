@@ -35,7 +35,7 @@ namespace DungeonBuilder.M0
             return "ui.adventurer_pressure.outcome.none";
         }
 
-        private static string ResolveBandNameKey(string bandId)
+        public static string ResolveBandNameKey(string bandId)
         {
             if (string.Equals(bandId, AdventurerArrivalPressureResolver.BandLowId, StringComparison.Ordinal)) return "ui.adventurer_pressure.band.low";
             if (string.Equals(bandId, AdventurerArrivalPressureResolver.BandCautiousId, StringComparison.Ordinal)) return "ui.adventurer_pressure.band.cautious_interest";
@@ -43,6 +43,8 @@ namespace DungeonBuilder.M0
             if (string.Equals(bandId, AdventurerArrivalPressureResolver.BandLikelySoonId, StringComparison.Ordinal)) return "ui.adventurer_pressure.band.likely_soon";
             return "ui.adventurer_pressure.band.not_yet";
         }
+
+        public static string ResolveBandNameForTraffic(string bandId, Func<string, string, string> localize) => Localize(localize, ResolveBandNameKey(bandId));
 
         private static string Localize(Func<string, string, string> localize, string key) => localize == null ? key : localize(key, key);
     }

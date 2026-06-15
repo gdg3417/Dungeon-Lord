@@ -75,6 +75,15 @@ namespace DungeonBuilder.M0
         InvalidHeatTier = 2,
         AggregateOverflow = 3
     }
+
+    public enum AdventurerTrafficPressureSummaryErrorCode
+    {
+        None = 0,
+        MissingOrInvalidConfig = 1,
+        MissingArrivalPressure = 2,
+        MissingRunIntent = 3,
+        AggregateOverflow = 4
+    }
     public enum RunHeatDeltaSummaryErrorCode
     {
         None = 0,
@@ -370,6 +379,30 @@ namespace DungeonBuilder.M0
         public double ArrivalPressureCautiousThreshold;
         public double ArrivalPressureBuildingThreshold;
         public double ArrivalPressureLikelySoonThreshold;
+        public string AdventurerTrafficPressureRuleSourceId;
+        public double TrafficScoreWeightArrivalPressure;
+        public double TrafficScoreWeightLootSignal;
+        public double TrafficScoreWeightAttractionSignal;
+        public double TrafficScoreWeightDangerSignal;
+        public double TrafficScoreWeightHeatPressureSignal;
+        public double TrafficScoreWeightRecentRecoveredLoot;
+        public double TrafficPathCompleteBonus;
+        public double TrafficIncompletePathPenalty;
+        public double TrafficRecentDeathCautionModifier;
+        public double TrafficHeatCautionModifier;
+        public double TrafficNoneThreshold;
+        public double TrafficLowThreshold;
+        public double TrafficBuildingThreshold;
+        public double TrafficSteadyThreshold;
+        public double TrafficHeavyThreshold;
+        public int TrafficDangerousChurnRecentDeathThreshold;
+        public double TrafficDangerousChurnMinimumInterestScore;
+        public double TrafficEstimatedPartyCountMultiplier;
+        public double TrafficEstimatedPartyCountScoreDivisor;
+        public int TrafficEstimatedPartyCountLowThreshold;
+        public int TrafficEstimatedPartyCountMediumThreshold;
+        public int TrafficMinimumEstimatedConcurrentParties;
+        public int TrafficMaximumEstimatedConcurrentParties;
         public MvpFirstSessionObjectiveConfig MvpFirstSessionObjective;
     }
 
@@ -618,6 +651,29 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class AdventurerTrafficPressureSummary
+    {
+        public bool RuleResolved = false;
+        public int DeterministicErrorCode = (int)AdventurerTrafficPressureSummaryErrorCode.None;
+        public string RuleSourceId;
+        public string TrafficBandId;
+        public string PrimaryReasonKey;
+        public double TrafficScore = 0d;
+        public int EstimatedConcurrentPartyCount = 0;
+        public string EstimatedConcurrentPartyBandId;
+        public string PressureBandIdUsed;
+        public string IntentIdUsed;
+        public bool PathComplete = false;
+        public int LootSignal = 0;
+        public int AttractionSignal = 0;
+        public int DangerSignal = 0;
+        public int HeatPressureSignal = 0;
+        public int RecentDeathCount = 0;
+        public int RecentRecoveredLoot = 0;
+        public bool WouldMutateState = false;
+    }
+
+    [Serializable]
     public sealed class RunHeatDeltaSummary
     {
         public bool RuleResolved = false;
@@ -707,6 +763,7 @@ namespace DungeonBuilder.M0
         public bool WouldProcessOfflineProgress = false;
         public AdventurerRunIntentSummary AdventurerRunIntent = new AdventurerRunIntentSummary();
         public AdventurerArrivalPressureSummary AdventurerArrivalPressure = new AdventurerArrivalPressureSummary();
+        public AdventurerTrafficPressureSummary AdventurerTrafficPressure = new AdventurerTrafficPressureSummary();
     }
 
     [Serializable]

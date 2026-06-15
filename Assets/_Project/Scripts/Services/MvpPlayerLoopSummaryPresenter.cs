@@ -67,6 +67,7 @@ namespace DungeonBuilder.M0
 
             AdventurerRunIntentSummary runIntent = AdventurerRunIntentResolver.Resolve(runConfig, placementEffects, currentHeat, heatTier, latestRun);
             AdventurerArrivalPressureSummary arrivalPressure = AdventurerArrivalPressureResolver.Resolve(runConfig, placementEffects, heatTier, latestRun);
+            AdventurerTrafficPressureSummary trafficPressure = AdventurerTrafficPressureResolver.Resolve(runConfig, arrivalPressure, runIntent);
 
             bool hasRunOutcome = latestRun != null;
             bool hasResolvedHeatApplication = heatApplication != null && heatApplication.RuleResolved;
@@ -130,6 +131,7 @@ namespace DungeonBuilder.M0
                 AdventurerPartyPreviewRuleSourceId = partyPreview != null ? partyPreview.RuleSourceId : string.Empty,
                 AdventurerRunIntent = runIntent,
                 AdventurerArrivalPressure = arrivalPressure,
+                AdventurerTrafficPressure = trafficPressure,
                 WouldMutateState = false,
                 WouldGrantRewards = false,
                 WouldUnlockContent = false,

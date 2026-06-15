@@ -99,7 +99,8 @@ namespace DungeonBuilder.M0
             return JoinInline(
                 localize,
                 BuildHeatLine(summary, localize),
-                AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize));
+                AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize),
+                AdventurerTrafficPressurePresenter.BuildSummaryLine(summary?.AdventurerTrafficPressure, localize));
         }
 
         private static string BuildPathCompleteLine(GuidedMvpActionPathSummary guidedPath, Func<string, string, string> localize)

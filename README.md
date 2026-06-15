@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR 117 / GD23. The repository now contains the deterministic Adventurer Run Intent resolver and presenter; the next intended work is GD24 autonomous adventurer arrival pressure preview.
+Main is merged through PR 118 / GD24. The repository now contains the deterministic Adventurer Arrival Pressure preview; the next intended work is GD25 deterministic Adventurer Traffic Pressure preview.
 
 ## Operating rules
 
@@ -28,4 +28,4 @@ VS4 first-session MVP smoke documentation:
 
 ## Next intended work
 
-The next intended PR is GD24 autonomous adventurer arrival pressure preview as a read-only, deterministic player-facing signal.
+The next intended PR is GD25 deterministic Adventurer Traffic Pressure preview as a read-only, player-facing dungeon traffic signal.

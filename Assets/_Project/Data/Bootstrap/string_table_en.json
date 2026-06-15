@@ -1686,6 +1686,78 @@
     {
       "key": "ui.adventurer_pressure.outcome.failure",
       "text": "failure"
+    },
+    {
+      "key": "ui.adventurer_traffic.summary_format",
+      "text": "Adventurer traffic: {0}. Estimated active delves: {1}. Reason: {2}."
+    },
+    {
+      "key": "ui.adventurer_traffic.detail_format",
+      "text": "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; intent {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}."
+    },
+    {
+      "key": "ui.adventurer_traffic.band.none",
+      "text": "none"
+    },
+    {
+      "key": "ui.adventurer_traffic.band.low",
+      "text": "low"
+    },
+    {
+      "key": "ui.adventurer_traffic.band.building",
+      "text": "building"
+    },
+    {
+      "key": "ui.adventurer_traffic.band.steady",
+      "text": "steady"
+    },
+    {
+      "key": "ui.adventurer_traffic.band.heavy",
+      "text": "heavy"
+    },
+    {
+      "key": "ui.adventurer_traffic.band.dangerous_churn",
+      "text": "dangerous churn"
+    },
+    {
+      "key": "ui.adventurer_traffic.party_band.none",
+      "text": "none"
+    },
+    {
+      "key": "ui.adventurer_traffic.party_band.low",
+      "text": "low"
+    },
+    {
+      "key": "ui.adventurer_traffic.party_band.medium",
+      "text": "medium"
+    },
+    {
+      "key": "ui.adventurer_traffic.party_band.high",
+      "text": "high"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.incomplete_path_weak_loot",
+      "text": "weak loot signal and incomplete path"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.high_loot_low_heat",
+      "text": "high loot signal and low heat are attracting attention"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.balanced",
+      "text": "loot and danger are balanced enough to keep parties coming"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.deaths_caution",
+      "text": "parties are interested, but recent deaths are raising caution"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.strong_loot_attraction",
+      "text": "strong loot and high attraction are pulling in multiple delves"
+    },
+    {
+      "key": "ui.adventurer_traffic.reason.fallback",
+      "text": "current dungeon signals are still forming"
     }
   ]
 }
