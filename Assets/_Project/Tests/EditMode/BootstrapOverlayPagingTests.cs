@@ -481,15 +481,23 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId);
             _overlay.PlaceSelectedMvpStructure();
             _overlay.SelectMvpRunPosture(RunPostureResolver.CautiousId);
+            MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
+            string expectedResolvedPostureId = beforeRunSummary.AdventurerRunIntent.PostureId;
+            string expectedResolvedPostureNameKey = AdventurerRunIntentPresenter.ResolvePostureNameKey(expectedResolvedPostureId);
+            string expectedResolvedPostureName = _root.Content.GetString(expectedResolvedPostureNameKey, expectedResolvedPostureNameKey);
+
+            Assert.That(beforeRunSummary.AdventurerRunIntent.RuleResolved, Is.True);
+            Assert.That(expectedResolvedPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
 
             _overlay.RunOrObserveDungeon();
 
-            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(expectedResolvedPostureId));
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent: Greedy likely. Run posture used: Greedy. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Adventurer intent: {expectedResolvedPostureName} likely. Run posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("debug fallback"));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain("Intent evidence: resolved intent Greedy; run posture used Greedy; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
+            Assert.That(copiedSmoke, Does.Contain($"Latest run intent evidence: resolved intent {expectedResolvedPostureName}; run posture used {expectedResolvedPostureName}; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
         }
 
         [Test]
@@ -506,7 +514,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent unavailable. Run posture used: Greedy debug fallback. Debug selected posture: Greedy."));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain("Intent evidence: resolved intent Unavailable; run posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
+            Assert.That(copiedSmoke, Does.Contain("Latest run intent evidence: resolved intent Unavailable; run posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
         }
 
         [Test]
@@ -1723,7 +1731,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Debug selected posture: {1}.";
             map["ui.adventurer_intent.run_posture_used_format"] = "Adventurer intent: {0} likely. Run posture used: {1}. Debug selected posture: {2}.";
             map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Adventurer intent unavailable. Run posture used: {0} debug fallback. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.smoke_evidence_format"] = "Intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
+            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
             map["ui.adventurer_intent.unavailable"] = "Unavailable";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";

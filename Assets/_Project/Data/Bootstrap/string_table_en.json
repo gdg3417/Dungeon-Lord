@@ -1605,7 +1605,7 @@
     },
     {
       "key": "ui.adventurer_intent.smoke_evidence_format",
-      "text": "Intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
+      "text": "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
     },
     {
       "key": "ui.adventurer_intent.unavailable",
