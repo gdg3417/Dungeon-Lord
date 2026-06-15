@@ -159,7 +159,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
-            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Selected debug posture: Balanced."));
+            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
@@ -276,7 +276,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(rect.height, Is.EqualTo(420f));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
-            Assert.That(labels.PostureLabel, Is.EqualTo("Run posture: Balanced"));
+            Assert.That(labels.PostureLabel, Is.EqualTo("Debug posture: Balanced"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
             Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
@@ -469,6 +469,52 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(runText, Does.Contain("Latest Run"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+        }
+
+        [Test]
+        public void RunOrObserveDungeon_UsesResolvedIntentInsteadOfSelectedDebugPosture()
+        {
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_intent_posture_test.json", useAtomicWrites = false }));
+            _root.Save.structureRuntime.Heat = 0d;
+            _overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+            _overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId);
+            _overlay.PlaceSelectedMvpStructure();
+            _overlay.SelectMvpRunPosture(RunPostureResolver.CautiousId);
+            MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
+            string expectedResolvedPostureId = beforeRunSummary.AdventurerRunIntent.PostureId;
+            string expectedResolvedPostureNameKey = AdventurerRunIntentPresenter.ResolvePostureNameKey(expectedResolvedPostureId);
+            string expectedResolvedPostureName = _root.Content.GetString(expectedResolvedPostureNameKey, expectedResolvedPostureNameKey);
+
+            Assert.That(beforeRunSummary.AdventurerRunIntent.RuleResolved, Is.True);
+            Assert.That(expectedResolvedPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
+
+            _overlay.RunOrObserveDungeon();
+
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(expectedResolvedPostureId));
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
+            Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Adventurer intent: {expectedResolvedPostureName} likely. Run posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("debug fallback"));
+            string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
+            Assert.That(copiedSmoke, Does.Contain($"Latest run intent evidence: resolved intent {expectedResolvedPostureName}; run posture used {expectedResolvedPostureName}; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
+        }
+
+        [Test]
+        public void RunOrObserveDungeon_FallsBackToSelectedDebugPostureWhenIntentResolutionFails()
+        {
+            RunSimulationService service = BuildRunSimulationServiceForActionTest();
+            service.Config.AdventurerIntentRuleSourceId = string.Empty;
+            SetBackingField("_runSimulationService", service);
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_intent_fallback_test.json", useAtomicWrites = false }));
+            _overlay.SelectMvpRunPosture(RunPostureResolver.GreedyId);
+
+            _overlay.RunOrObserveDungeon();
+
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent unavailable. Run posture used: Greedy debug fallback. Debug selected posture: Greedy."));
+            string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
+            Assert.That(copiedSmoke, Does.Contain("Latest run intent evidence: resolved intent Unavailable; run posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
         }
 
         [Test]
@@ -1458,6 +1504,12 @@ namespace DungeonBuilder.Tests.EditMode
                 ManaReserveBonusPerPoint = 0.01d,
                 CrisisFailurePenalty = 0.3d,
                 SuccessThreshold = 0.5d,
+                RunPostures = new[]
+                {
+                    new RunPostureConfig { Id = RunPostureResolver.CautiousId, DisplayNameKey = "run.posture.cautious.name", GeneratedLootWorldValueMultiplier = 0.8d, ExtractedLootWorldValueMultiplier = 0.8d, HeatDeltaOffset = -1d },
+                    new RunPostureConfig { Id = RunPostureResolver.BalancedId, DisplayNameKey = "run.posture.balanced.name", GeneratedLootWorldValueMultiplier = 1d, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 0d },
+                    new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = "run.posture.greedy.name", GeneratedLootWorldValueMultiplier = 1.25d, ExtractedLootWorldValueMultiplier = 1.25d, HeatDeltaOffset = 1d }
+                },
                 BaseScoreOnSuccess = 100,
                 ScorePerManaPoint = 2,
                 MaxRunHistoryEntries = 10,
@@ -1484,6 +1536,24 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatConcernMaximum = 49d,
                 RunHeatApplicationRuleSourceId = "run.heat_application.rule.test",
                 AdventurerPartyCompositionRuleSourceId = "run.adventurer_party_composition.rule.test",
+                AdventurerIntentRuleSourceId = "run.adventurer_intent.rule.test",
+                IntentGreedyScorePerLoot = 2d,
+                IntentGreedyScorePerAttraction = 1.5d,
+                IntentGreedyPenaltyPerHeatTierRank = 3d,
+                IntentGreedyPenaltyPerRecentDeath = 4d,
+                IntentGreedyPenaltyPerDanger = 0.75d,
+                IntentCautiousScorePerDanger = 1.5d,
+                IntentCautiousScorePerHeatPressure = 2d,
+                IntentCautiousScorePerHeatTierRank = 3d,
+                IntentCautiousScorePerRecentDeath = 4d,
+                IntentCautiousReductionPerPathCapacity = 0.75d,
+                IntentBalancedBaseScore = 7d,
+                IntentBalancedPenaltyPerExtremeScoreDelta = 0.2d,
+                IntentModerateRiskTarget = 4d,
+                IntentModerateRewardTarget = 4d,
+                IntentBalancedPenaltyPerModerateDistance = 0.6d,
+                IntentMinimumScore = 0d,
+                IntentMaximumScore = 20d,
                 AdventurerPartyCompositionMinSize = 1,
                 AdventurerPartyCompositionMaxSize = 3,
                 AdventurerPartyCompositionMaxAllowedSize = 5,
@@ -1658,7 +1728,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
-            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.run_posture_used_format"] = "Adventurer intent: {0} likely. Run posture used: {1}. Debug selected posture: {2}.";
+            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Adventurer intent unavailable. Run posture used: {0} debug fallback. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
+            map["ui.adventurer_intent.unavailable"] = "Unavailable";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
             map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
@@ -1732,7 +1806,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
             map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
-            map["ui.mvp_screen.run_posture_format"] = "Selected posture: {0}";
+            map["ui.mvp_screen.run_posture_format"] = "Debug selected posture: {0}";
             map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
             map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";
             map["ui.mvp_screen.feedback.no_placement"] = "No build change yet this session.";
@@ -1834,7 +1908,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.group.monsters"] = "Monsters:";
             map["ui.mvp_action.group.traps"] = "Traps:";
             map["ui.mvp_action.group.loot"] = "Loot:";
-            map["ui.mvp_action.posture.label"] = "Run posture: {0}";
+            map["ui.mvp_action.posture.label"] = "Debug posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
             map["run.posture.greedy.name"] = "Greedy";

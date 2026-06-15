@@ -414,7 +414,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
-            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Debug selected posture: {1}.";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
             map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
@@ -488,7 +488,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
             map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
-            map["ui.mvp_screen.run_posture_format"] = "Selected posture: {0}";
+            map["ui.mvp_screen.run_posture_format"] = "Debug selected posture: {0}";
             map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
             map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";
             map["ui.mvp_screen.feedback.no_placement"] = "No build change yet this session.";
@@ -587,7 +587,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.group.monsters"] = "Monsters:";
             map["ui.mvp_action.group.traps"] = "Traps:";
             map["ui.mvp_action.group.loot"] = "Loot:";
-            map["ui.mvp_action.posture.label"] = "Run posture: {0}";
+            map["ui.mvp_action.posture.label"] = "Debug posture: {0}";
             map["run.posture.cautious.name"] = "Cautious";
             map["run.posture.balanced.name"] = "Balanced";
             map["run.posture.greedy.name"] = "Greedy";

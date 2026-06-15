@@ -749,7 +749,7 @@
     },
     {
       "key": "ui.mvp_action.posture.label",
-      "text": "Run posture: {0}"
+      "text": "Debug posture: {0}"
     },
     {
       "key": "run.posture.cautious.name",
@@ -1449,7 +1449,7 @@
     },
     {
       "key": "ui.mvp_screen.run_posture_format",
-      "text": "Selected posture: {0}"
+      "text": "Debug selected posture: {0}"
     },
     {
       "key": "ui.mvp_screen.prompt.place_or_modify",
@@ -1593,7 +1593,23 @@
     },
     {
       "key": "ui.adventurer_intent.debug_posture_format",
-      "text": "Adventurer intent: {0} likely. Selected debug posture: {1}."
+      "text": "Adventurer intent: {0} likely. Debug selected posture: {1}."
+    },
+    {
+      "key": "ui.adventurer_intent.run_posture_used_format",
+      "text": "Adventurer intent: {0} likely. Run posture used: {1}. Debug selected posture: {2}."
+    },
+    {
+      "key": "ui.adventurer_intent.fallback_run_posture_used_format",
+      "text": "Adventurer intent unavailable. Run posture used: {0} debug fallback. Debug selected posture: {1}."
+    },
+    {
+      "key": "ui.adventurer_intent.smoke_evidence_format",
+      "text": "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
+    },
+    {
+      "key": "ui.adventurer_intent.unavailable",
+      "text": "Unavailable"
     },
     {
       "key": "ui.adventurer_intent.reason.loot_high_heat_low",

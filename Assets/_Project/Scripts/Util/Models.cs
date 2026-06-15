@@ -475,6 +475,7 @@ namespace DungeonBuilder.M0
         public RunHeatDeltaSummary RunHeatDeltaSummary;
         public RunHeatApplicationSummary RunHeatApplicationSummary;
         public RunCompositionOutcomeSummary CompositionOutcomeSummary;
+        public string RunPostureId;
     }
 
     [Serializable]

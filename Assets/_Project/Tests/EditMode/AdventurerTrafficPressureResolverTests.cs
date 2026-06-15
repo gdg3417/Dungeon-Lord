@@ -147,7 +147,7 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpLoopSummaryPanelPresenter.SuggestionFormatKey) return "Suggested next action: {0}";
             if (key == MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey) return "run dungeon";
             if (key == MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey) return "no active research";
-            if (key == AdventurerRunIntentPresenter.DebugPostureFormatKey) return "Adventurer intent: {0} likely. Selected debug posture: {1}.";
+            if (key == AdventurerRunIntentPresenter.DebugPostureFormatKey) return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
             if (key == AdventurerRunIntentResolver.ReasonFallbackKey) return "intent reason";
             if (key == "run.posture.greedy.name") return "Greedy";
             if (key == "run.posture.balanced.name") return "Balanced";
