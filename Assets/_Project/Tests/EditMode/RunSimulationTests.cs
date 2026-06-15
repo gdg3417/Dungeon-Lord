@@ -150,6 +150,24 @@ namespace DungeonBuilder.Tests.EditMode
                 IntentBalancedPenaltyPerModerateDistance = 0.6d,
                 IntentMinimumScore = 0d,
                 IntentMaximumScore = 20d,
+                AdventurerArrivalPressureRuleSourceId = "run.adventurer_arrival_pressure.rule.test",
+                ArrivalPressureScorePerLoot = 2d,
+                ArrivalPressureScorePerAttraction = 1d,
+                ArrivalPressureScorePerDanger = 0.25d,
+                ArrivalPressureScorePerHeatPressure = 0.5d,
+                ArrivalPressureScorePerRecentRecoveredLoot = 0.05d,
+                ArrivalPressureLatestSuccessBonus = 1d,
+                ArrivalPressureLatestFailurePenalty = 1d,
+                ArrivalPressurePathCompleteBonus = 2d,
+                ArrivalPressureIncompletePathPenalty = 4d,
+                ArrivalPressureHeatNoticePenalty = 2d,
+                ArrivalPressureHeatConcernPenalty = 5d,
+                ArrivalPressureRecentDeathPenalty = 3d,
+                ArrivalPressureNoneThreshold = 0d,
+                ArrivalPressureLowThreshold = 2d,
+                ArrivalPressureCautiousThreshold = 5d,
+                ArrivalPressureBuildingThreshold = 8d,
+                ArrivalPressureLikelySoonThreshold = 12d,
                 MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
                 MvpPlacementEffects = new[]
                 {
@@ -1281,6 +1299,26 @@ namespace DungeonBuilder.Tests.EditMode
             var config = BuildConfig();
             config.AdventurerIntentRuleSourceId = string.Empty;
 
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+        }
+
+        [Test]
+        public void IsValidRunSimulationConfig_Rejects_InvalidAdventurerArrivalPressureConfig()
+        {
+            var config = BuildConfig();
+            config.AdventurerArrivalPressureRuleSourceId = string.Empty;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.ArrivalPressureLowThreshold = 20d;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.ArrivalPressureScorePerLoot = double.NaN;
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
+
+            config = BuildConfig();
+            config.ArrivalPressureScorePerLoot = double.PositiveInfinity;
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.False);
         }
 

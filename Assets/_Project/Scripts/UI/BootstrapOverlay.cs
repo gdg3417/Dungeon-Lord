@@ -437,6 +437,7 @@ namespace DungeonBuilder.M0
             AppendMvpLoopSummaryPanel(builder);
             MvpPlayerLoopSummary smokeSummary = _root.ResolveMvpPlayerLoopSummary();
             AppendLine(builder, AdventurerRunIntentPresenter.BuildScoreSummaryLine(smokeSummary?.AdventurerRunIntent, (key, fallback) => GetLocalizedString(key, fallback)));
+            AppendLine(builder, AdventurerArrivalPressurePresenter.BuildDetailLine(smokeSummary?.AdventurerArrivalPressure, (key, fallback) => GetLocalizedString(key, fallback)));
             AppendPlayerFacingStatus(builder);
             AppendMvpDungeonLayoutText(builder);
             return builder.ToString();

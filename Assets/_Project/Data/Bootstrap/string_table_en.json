@@ -1614,6 +1614,78 @@
     {
       "key": "ui.adventurer_intent.reason.fallback",
       "text": "current dungeon signals are still forming"
+    },
+    {
+      "key": "ui.mvp_loop.section.adventurer_pressure",
+      "text": "Adventurer pressure"
+    },
+    {
+      "key": "ui.adventurer_pressure.summary_format",
+      "text": "Adventurer pressure: {0}. Reason: {1}."
+    },
+    {
+      "key": "ui.adventurer_pressure.detail_format",
+      "text": "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}."
+    },
+    {
+      "key": "ui.adventurer_pressure.band.not_yet",
+      "text": "not yet"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.low",
+      "text": "low"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.cautious_interest",
+      "text": "cautious interest"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.building_slowly",
+      "text": "building slowly"
+    },
+    {
+      "key": "ui.adventurer_pressure.band.likely_soon",
+      "text": "likely soon"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.high_loot_low_heat",
+      "text": "high loot signal and low heat"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.modest_loot_low_attraction",
+      "text": "modest loot and low attraction"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.deaths_heat",
+      "text": "recent deaths and rising heat"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.incomplete_path_weak_loot",
+      "text": "incomplete path or weak loot signal"
+    },
+    {
+      "key": "ui.adventurer_pressure.reason.not_yet",
+      "text": "current dungeon signals are still forming"
+    },
+    {
+      "key": "ui.adventurer_intent.body_format",
+      "text": "{0} likely. Reason: {1}"
+    },
+    {
+      "key": "ui.adventurer_pressure.body_format",
+      "text": "{0}. Reason: {1}."
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.none",
+      "text": "none yet"
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.success",
+      "text": "success"
+    },
+    {
+      "key": "ui.adventurer_pressure.outcome.failure",
+      "text": "failure"
     }
   ]
 }

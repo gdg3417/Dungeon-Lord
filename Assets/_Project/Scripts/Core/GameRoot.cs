@@ -536,6 +536,7 @@ namespace DungeonBuilder.M0
                 config.AdventurerPartyCompositionMaxSize > config.AdventurerPartyCompositionMaxAllowedSize ||
                 !HasValidCasualtyPressureConfig(config) ||
                 !HasValidAdventurerIntentConfig(config) ||
+                !HasValidAdventurerArrivalPressureConfig(config) ||
                 !HasConfiguredMvpAdventurerClasses(config.AdventurerPartyCompositionClassIds))
             {
                 return false;
@@ -575,6 +576,36 @@ namespace DungeonBuilder.M0
                    IsFinite(config.IntentMinimumScore) &&
                    IsFinite(config.IntentMaximumScore) &&
                    config.IntentMinimumScore <= config.IntentMaximumScore;
+        }
+
+        private static bool HasValidAdventurerArrivalPressureConfig(RunSimulationConfig config)
+        {
+            if (config == null || string.IsNullOrWhiteSpace(config.AdventurerArrivalPressureRuleSourceId))
+            {
+                return false;
+            }
+
+            return IsFinite(config.ArrivalPressureScorePerLoot) &&
+                   IsFinite(config.ArrivalPressureScorePerAttraction) &&
+                   IsFinite(config.ArrivalPressureScorePerDanger) &&
+                   IsFinite(config.ArrivalPressureScorePerHeatPressure) &&
+                   IsFinite(config.ArrivalPressureScorePerRecentRecoveredLoot) &&
+                   IsFinite(config.ArrivalPressureLatestSuccessBonus) &&
+                   IsFinite(config.ArrivalPressureLatestFailurePenalty) &&
+                   IsFinite(config.ArrivalPressurePathCompleteBonus) &&
+                   IsFinite(config.ArrivalPressureIncompletePathPenalty) &&
+                   IsFinite(config.ArrivalPressureHeatNoticePenalty) &&
+                   IsFinite(config.ArrivalPressureHeatConcernPenalty) &&
+                   IsFinite(config.ArrivalPressureRecentDeathPenalty) &&
+                   IsFinite(config.ArrivalPressureNoneThreshold) &&
+                   IsFinite(config.ArrivalPressureLowThreshold) &&
+                   IsFinite(config.ArrivalPressureCautiousThreshold) &&
+                   IsFinite(config.ArrivalPressureBuildingThreshold) &&
+                   IsFinite(config.ArrivalPressureLikelySoonThreshold) &&
+                   config.ArrivalPressureNoneThreshold <= config.ArrivalPressureLowThreshold &&
+                   config.ArrivalPressureLowThreshold <= config.ArrivalPressureCautiousThreshold &&
+                   config.ArrivalPressureCautiousThreshold <= config.ArrivalPressureBuildingThreshold &&
+                   config.ArrivalPressureBuildingThreshold <= config.ArrivalPressureLikelySoonThreshold;
         }
 
         private static bool HasValidCasualtyPressureConfig(RunSimulationConfig config)
