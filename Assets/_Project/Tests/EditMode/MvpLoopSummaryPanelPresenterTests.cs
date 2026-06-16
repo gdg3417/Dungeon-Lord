@@ -1,5 +1,6 @@
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
@@ -304,6 +305,20 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_ShowsSelectedFitAfterAdjustmentTarget()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary();
+            summary.LatestRunDeathCount = 1;
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, MvpDungeonPlacementIds.MonsterCategoryId, Localize);
+            string targetLine = FindLineContaining(text, "LOC[" + BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey + "]");
+            string fitLine = FindLineContaining(text, "LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey + "]");
+
+            Assert.That(fitLine, Does.Contain("LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.MatchKey + "]"));
+            Assert.That(text.IndexOf(targetLine, System.StringComparison.Ordinal), Is.LessThan(text.IndexOf(fitLine, System.StringComparison.Ordinal)));
+        }
+
+        [Test]
         public void BuildPanelText_UnlockedBasicRunAnalysis_HighDangerAddsSpecificAnalysisAndAdvice()
         {
             MvpPlayerLoopSummary summary = AnalysisSummary();
@@ -469,7 +484,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey:
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey:
                 case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey:
+                case BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey:
                     return "LOC[" + key + "]:{0}";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey:
+                    return "LOC[" + key + "]:{0}:{1}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey:
                     return "LOC[" + key + "]:{0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey:
@@ -516,6 +534,20 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "{0}";
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
                 case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey: return "Adjustment target: {0}";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey: return "Selected placement fit: {0}";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MatchKey: return "Current selection matches the analysis target. Adjust this placement, then run again.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey: return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next run.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.BroadKey: return "Analysis target is broad. Change any one placement, then run again.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.NotReadyKey: return "Run analysis is not ready yet.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.RoomCategoryKey: return "a room";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MonsterCategoryKey: return "a monster";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.TrapCategoryKey: return "a trap";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.LootNodeCategoryKey: return "a loot node";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MonsterOrTrapTargetLabelKey: return "monster or trap";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.TrapOrLootTargetLabelKey: return "trap or loot node";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.RoomOrMonsterTargetLabelKey: return "room or monster";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.LootNodeTargetLabelKey: return "loot node";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.AnyOneTargetLabelKey: return "any one placement";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
                 case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";

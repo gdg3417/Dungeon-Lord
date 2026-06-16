@@ -460,6 +460,7 @@ namespace DungeonBuilder.M0
                 MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig),
                 MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, (key, fallback) => GetLocalizedString(key, fallback)),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                _selectedMvpPlacementCategoryId,
                 MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
                 GetSelectedMvpPlacementPreviewText(),
                 BuildSelectedMvpPlacementComparisonText(),
