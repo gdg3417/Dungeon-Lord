@@ -1306,6 +1306,64 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void BootstrapConfigValidationService_ValidRunConfig_ValidatesSuccessfully()
+        {
+            BootstrapConfigValidationResult result = BootstrapConfigValidationService.ValidateRunSimulationConfig(BuildConfig());
+
+            Assert.That(result.IsValid, Is.True);
+        }
+
+        [Test]
+        public void BootstrapConfigValidationService_NullRunConfig_FailsValidation()
+        {
+            BootstrapConfigValidationResult result = BootstrapConfigValidationService.ValidateRunSimulationConfig(null);
+            bool ok = BootstrapConfigValidationService.TryCreateRunSimulationService(string.Empty, string.Empty, out RunSimulationService service);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(ok, Is.False);
+            Assert.That(service, Is.Null);
+        }
+
+        [Test]
+        public void BootstrapConfigValidationService_InvalidPostureConfig_PreservesExistingValidationBehavior()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.RunPostures = new[]
+            {
+                new RunPostureConfig { Id = RunPostureResolver.GreedyId, DisplayNameKey = string.Empty, GeneratedLootWorldValueMultiplier = double.NaN, ExtractedLootWorldValueMultiplier = 1d, HeatDeltaOffset = 1d }
+            };
+
+            BootstrapConfigValidationResult result = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(result.IsValid, Is.True);
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(result.IsValid));
+        }
+
+        [Test]
+        public void BootstrapConfigValidationService_InvalidPlacementEffectConfig_FailsLikeGameRootWrapper()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MvpPlacementEffects[0].OptionId = MvpDungeonPlacementIds.SkeletonOptionId;
+
+            BootstrapConfigValidationResult result = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(result.IsValid));
+        }
+
+        [Test]
+        public void BootstrapConfigValidationService_InvalidCompositionTuningConfig_FailsLikeGameRootWrapper()
+        {
+            RunSimulationConfig config = BuildConfig();
+            config.MvpCompositionOutcomeTuning.RuleSourceId = string.Empty;
+
+            BootstrapConfigValidationResult result = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(result.IsValid));
+        }
+
+        [Test]
         public void IsValidRunSimulationConfig_Rejects_Invalid_Config()
         {
             var config = BuildConfig();
