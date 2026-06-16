@@ -181,7 +181,7 @@ namespace DungeonBuilder.M0
 
         public bool SelectMvpRunPosture(string postureId)
         {
-            if (!IsAllowedMvpRunPosture(postureId))
+            if (!BootstrapMvpActionHandler.IsAllowedMvpRunPosture(postureId))
             {
                 return false;
             }
@@ -202,12 +202,22 @@ namespace DungeonBuilder.M0
 
         public void PlaceSelectedMvpStructure()
         {
-            ShowPlayerPlacementBanner();
+            BootstrapMvpActionHandler.PlacementResult result = CreateMvpActionHandler().PlaceOrModifySelectedMvpPlacement(
+                _selectedMvpPlacementCategoryId,
+                _selectedMvpPlacementOptionId);
+            _mvpStructurePlacementFeedback = result.PlacementFeedback;
+            RefreshOverlayText();
         }
 
         public void RunOrObserveDungeon()
         {
-            ShowPlayerRunBanner();
+            BootstrapMvpActionHandler.RunResult result = CreateMvpActionHandler().RunOrObserveDungeon(_selectedMvpRunPostureId);
+            _mvpRunResultFeedback = result.RunFeedback;
+            _lastRunIntentSummary = result.IntentSummary;
+            _lastRunPostureUsedId = result.PostureUsedId;
+            _lastRunDebugPostureId = result.DebugPostureId;
+            _lastRunIntentFallbackUsed = result.IntentFallbackUsed;
+            RefreshOverlayText();
         }
 
         public bool ResetCleanMvpValidationSessionFromDevPanel()
@@ -1112,67 +1122,23 @@ namespace DungeonBuilder.M0
             return MvpPlacementComparisonPresenter.BuildComparisonText(preview, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
-        private void ShowPlayerPlacementBanner()
+        private BootstrapMvpActionHandler CreateMvpActionHandler()
         {
-            bool ok = _root.TryMvpPlaceOrModifySelectedPlacement(
-                _selectedMvpPlacementCategoryId,
-                _selectedMvpPlacementOptionId,
-                out MvpDungeonPlacementEntry priorEntry,
-                out MvpDungeonPlacementEntry newEntry,
-                out string bannerKey);
-            string message = _root.Content.GetString(bannerKey, bannerKey);
-            if (ok)
-            {
-                _mvpStructurePlacementFeedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
-                    priorEntry,
-                    newEntry,
-                    (key, fallback) => GetLocalizedString(key, fallback));
-                _root.SetBanner(_mvpStructurePlacementFeedback);
-            }
-            else
-            {
-                _mvpStructurePlacementFeedback = string.Empty;
-                _root.SetBanner(message);
-            }
-            RefreshOverlayText();
-        }
-
-        private void ShowPlayerRunBanner()
-        {
-            MvpPlayerLoopSummary beforeRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            AdventurerRunIntentSummary intentSummary = beforeRunSummary?.AdventurerRunIntent;
-            bool fallbackUsed = !IsResolvedAllowedIntent(intentSummary);
-            string runPostureId = fallbackUsed ? _selectedMvpRunPostureId : intentSummary.PostureId;
-            _lastRunIntentSummary = intentSummary;
-            _lastRunPostureUsedId = runPostureId;
-            _lastRunDebugPostureId = _selectedMvpRunPostureId;
-            _lastRunIntentFallbackUsed = fallbackUsed;
-            bool didRun = _root.SimulateMvpActiveLoopOnce(out _, runPostureId);
-            MvpPlayerLoopSummary afterRunSummary = _root.ResolveMvpPlayerLoopSummary();
-            string postureSource = AdventurerRunIntentPresenter.BuildRunPostureUsedLine(
-                intentSummary,
-                runPostureId,
-                _selectedMvpRunPostureId,
-                fallbackUsed,
-                (key, fallback) => GetLocalizedString(key, fallback));
-            string resultFeedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(
-                beforeRunSummary,
-                afterRunSummary,
-                didRun,
+            return new BootstrapMvpActionHandler(new BootstrapMvpActionHandler.Context(
                 (key, fallback) => GetLocalizedString(key, fallback),
-                AdventurerRunIntentPresenter.ResolvePostureNameKey(runPostureId));
-            _mvpRunResultFeedback = string.Concat(postureSource, " ", resultFeedback);
-            _root.SetBanner(didRun
-                ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
-                : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
-            RefreshOverlayText();
-        }
-
-        private static bool IsResolvedAllowedIntent(AdventurerRunIntentSummary intentSummary)
-        {
-            return intentSummary != null &&
-                   intentSummary.RuleResolved &&
-                   IsAllowedMvpRunPosture(intentSummary.PostureId);
+                (categoryId, optionId) =>
+                {
+                    bool ok = _root.TryMvpPlaceOrModifySelectedPlacement(
+                        categoryId,
+                        optionId,
+                        out MvpDungeonPlacementEntry priorEntry,
+                        out MvpDungeonPlacementEntry newEntry,
+                        out string bannerKey);
+                    return new BootstrapMvpActionHandler.PlacementAttempt(ok, priorEntry, newEntry, bannerKey);
+                },
+                () => _root.ResolveMvpPlayerLoopSummary(),
+                postureId => _root.SimulateMvpActiveLoopOnce(out _, postureId),
+                message => _root.SetBanner(message)));
         }
 
         private void ShowPlacementBanner(string structureId)
@@ -1187,13 +1153,6 @@ namespace DungeonBuilder.M0
             return structureId == StructureSimulationPass.ManaGeneratorBasicId ||
                    structureId == StructureSimulationPass.HeatScrubberBasicId ||
                    structureId == StructureSimulationPass.RiskLabBasicId;
-        }
-
-        private static bool IsAllowedMvpRunPosture(string postureId)
-        {
-            return postureId == RunPostureResolver.CautiousId ||
-                   postureId == RunPostureResolver.BalancedId ||
-                   postureId == RunPostureResolver.GreedyId;
         }
 
         private static string GetMvpRunPostureNameKey(string postureId)
