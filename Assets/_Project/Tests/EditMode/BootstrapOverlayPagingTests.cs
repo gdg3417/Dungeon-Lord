@@ -69,6 +69,7 @@ namespace DungeonBuilder.Tests.EditMode
             _root.SetBanner("banner-line");
             DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
             new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetSave(new SaveData
             {
                 dungeonLayout = layout,
@@ -1566,6 +1567,28 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static int VisiblePlayerFacingScrollPageSizeForTest() => 28;
 
+
+        private static MvpRoomSlotCapacityConfig[] BuildRoomSlotCapacities()
+        {
+            return new[]
+            {
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 0
+                },
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 1
+                }
+            };
+        }
+
         private static int VisibleScrollPageSizeForTest() => 4;
 
         private static RunSimulationService BuildRunSimulationServiceForActionTest()
@@ -1638,6 +1661,7 @@ namespace DungeonBuilder.Tests.EditMode
                     AdventurerPartyCompositionResolver.ClericClassId,
                     AdventurerPartyCompositionResolver.RangerClassId
                 },
+                MvpRoomSlotCapacities = BuildRoomSlotCapacities(),
                 MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
                 {
                     ObjectiveId = "objective.first_dungeon_contract",

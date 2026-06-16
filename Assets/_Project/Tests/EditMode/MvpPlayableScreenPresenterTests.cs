@@ -36,7 +36,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(
                 summary,
                 guided,
-                "Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available",
+                "Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)",
                 "Room",
                 "Basic Room",
                 "Role: adds room space and path context.",
@@ -64,6 +64,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
+            Assert.That(text, Does.Contain("Room slot layout: Floor 0: Room 1: Basic Room"));
+            Assert.That(text, Does.Not.Contain("Dungeon layout:"));
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
@@ -128,6 +130,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.ResearchFormatKey] = "Research: {0}",
             [MvpPlayableScreenPresenter.PathCompleteFormatKey] = "Path complete: {0}",
             [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
+            [MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey] = "Room slot layout: {0}",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
             [MvpLoopSummaryPanelPresenter.InlineSeparatorKey] = " | ",

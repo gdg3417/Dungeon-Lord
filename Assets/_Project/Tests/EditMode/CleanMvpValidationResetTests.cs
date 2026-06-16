@@ -387,6 +387,7 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatConcernMinimum = 25d,
                 HeatConcernMaximum = 49d,
                 RunHeatApplicationRuleSourceId = "test.heat",
+                MvpRoomSlotCapacities = BuildRoomSlotCapacities(),
                 MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
                 {
                     ObjectiveId = "objective.first_dungeon_contract",
@@ -397,6 +398,28 @@ namespace DungeonBuilder.Tests.EditMode
                     RequireResearchAnalysisUnlocked = true,
                     AnalysisUnlockId = "research.unlock.basic_run_analysis",
                     AnalysisResearchProjectId = "research.project.m7_a2_scaffold"
+                }
+            };
+        }
+
+
+        private static MvpRoomSlotCapacityConfig[] BuildRoomSlotCapacities()
+        {
+            return new[]
+            {
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 0
+                },
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 1
                 }
             };
         }

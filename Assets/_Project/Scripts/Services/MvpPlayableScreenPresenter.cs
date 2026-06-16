@@ -65,7 +65,7 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
-            if (!string.IsNullOrWhiteSpace(dungeonLayoutText)) AppendLine(builder, dungeonLayoutText);
+            AppendPlayableRoomSlotLayoutLine(builder, dungeonLayoutText, localize);
 
             AppendSection(builder, localize, LatestRunKey);
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
@@ -93,6 +93,24 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
             AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
             return builder.ToString();
+        }
+
+        private static void AppendPlayableRoomSlotLayoutLine(StringBuilder builder, string dungeonLayoutText, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(dungeonLayoutText))
+            {
+                return;
+            }
+
+            string roomSlotPrefix = Localize(localize, MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey).Split('{')[0];
+            foreach (string line in dungeonLayoutText.Split('\n'))
+            {
+                if (!string.IsNullOrWhiteSpace(roomSlotPrefix) && line.StartsWith(roomSlotPrefix, StringComparison.Ordinal))
+                {
+                    AppendLine(builder, line);
+                    return;
+                }
+            }
         }
 
         private static string BuildHeatAndPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
