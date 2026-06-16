@@ -287,6 +287,7 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = AnalysisSummary();
             summary.NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey;
             summary.AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey;
+            summary.LatestRunDeathCount = 1;
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
             string suggestedLine = FindLineContaining(text, "LOC[" + MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey + "]");
