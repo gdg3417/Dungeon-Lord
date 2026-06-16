@@ -295,8 +295,12 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(suggestedLine, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey + "]"));
             Assert.That(suggestedLine, Does.Not.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
+            string targetLine = FindLineContaining(text, "LOC[" + BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey + "]");
+
             Assert.That(recommendationLine, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
             Assert.That(recommendationLine, Is.Not.EqualTo(suggestedLine));
+            Assert.That(targetLine, Does.Contain("LOC[" + BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey + "]"));
+            Assert.That(text.IndexOf(recommendationLine, System.StringComparison.Ordinal), Is.LessThan(text.IndexOf(targetLine, System.StringComparison.Ordinal)));
         }
 
         [Test]
@@ -464,6 +468,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey:
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey:
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey:
+                case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey:
                     return "LOC[" + key + "]:{0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey:
                     return "LOC[" + key + "]:{0:0.##}";
@@ -510,6 +515,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Unlocked: {0}";
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "{0}";
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
+                case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey: return "Adjustment target: {0}";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
                 case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
@@ -576,6 +582,11 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next run.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey: return "Next: improve survivability or reduce danger so generated loot is recovered.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey: return "Next: repeat this setup or test slightly greedier pressure while heat is controlled.";
+                case BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey: return "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot.";
+                case BasicRunAnalysisPlacementTargetPresenter.ReduceHeatTargetKey: return "Trap or loot node first. Heat rose this run; reduce heat pressure before another greedy run.";
+                case BasicRunAnalysisPlacementTargetPresenter.ImproveExtractionTargetKey: return "Room or monster first. Loot was generated but not recovered; improve survivability or path support.";
+                case BasicRunAnalysisPlacementTargetPresenter.TestGreedierTargetKey: return "Loot node first. Loot recovery worked and heat stayed controlled; test a slightly greedier reward setup.";
+                case BasicRunAnalysisPlacementTargetPresenter.FallbackTargetKey: return "Any one placement. Make one small change, then run again.";
                 case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
                 default: return fallback;
             }

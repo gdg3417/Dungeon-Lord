@@ -580,6 +580,30 @@
       "text": "Analysis recommendation: {0}"
     },
     {
+      "key": "ui.mvp_loop.analysis.adjustment_target_format",
+      "text": "Adjustment target: {0}"
+    },
+    {
+      "key": "mvp_loop.analysis.target.reduce_danger",
+      "text": "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot."
+    },
+    {
+      "key": "mvp_loop.analysis.target.reduce_heat",
+      "text": "Trap or loot node first. Heat rose this run; reduce heat pressure before another greedy run."
+    },
+    {
+      "key": "mvp_loop.analysis.target.improve_extraction",
+      "text": "Room or monster first. Loot was generated but not recovered; improve survivability or path support."
+    },
+    {
+      "key": "mvp_loop.analysis.target.test_greedier",
+      "text": "Loot node first. Loot recovery worked and heat stayed controlled; test a slightly greedier reward setup."
+    },
+    {
+      "key": "mvp_loop.analysis.target.fallback",
+      "text": "Any one placement. Make one small change, then run again."
+    },
+    {
       "key": "ui.guided_mvp.panel.title",
       "text": "Guided MVP Action"
     },
