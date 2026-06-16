@@ -387,6 +387,7 @@ namespace DungeonBuilder.Tests.EditMode
                 HeatConcernMinimum = 25d,
                 HeatConcernMaximum = 49d,
                 RunHeatApplicationRuleSourceId = "test.heat",
+                MvpRoomSlotCapacities = BuildRoomSlotCapacities(),
                 MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
                 {
                     ObjectiveId = "objective.first_dungeon_contract",
@@ -397,6 +398,28 @@ namespace DungeonBuilder.Tests.EditMode
                     RequireResearchAnalysisUnlocked = true,
                     AnalysisUnlockId = "research.unlock.basic_run_analysis",
                     AnalysisResearchProjectId = "research.project.m7_a2_scaffold"
+                }
+            };
+        }
+
+
+        private static MvpRoomSlotCapacityConfig[] BuildRoomSlotCapacities()
+        {
+            return new[]
+            {
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 0
+                },
+                new MvpRoomSlotCapacityConfig
+                {
+                    RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    MonsterCapacity = 1,
+                    TrapCapacity = 1,
+                    LootCapacity = 1
                 }
             };
         }
@@ -617,6 +640,16 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_dungeon_layout.panel.empty_node_format"] = "{0}: {1}";
             map["ui.mvp_dungeon_layout.panel.node_separator"] = " -> ";
             map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
+            map["ui.mvp_room_slots.panel.layout_format"] = "Room slot layout: {0}";
+            map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";
+            map["ui.mvp_room_slots.panel.room_format"] = "Room {0}: {1} ({2}; {3}; {4})";
+            map["ui.mvp_room_slots.panel.monsters_format"] = "Monsters: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.traps_format"] = "Traps: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.loot_format"] = "Loot: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.empty"] = "empty";
+            map["ui.mvp_room_slots.panel.unavailable"] = "unavailable";
+            map["ui.mvp_room_slots.panel.assignment_separator"] = ", ";
+            map["ui.mvp_room_slots.panel.room_separator"] = " | ";
             map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
             map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
             map["ui.mvp_placement_preview.trap.spike"] = "Role: adds danger, heat, and path pressure.";

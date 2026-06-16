@@ -304,6 +304,7 @@ namespace DungeonBuilder.M0
         public double PartyWipeCasualtyPressureThreshold;
         public string MvpPlacementEffectsRuleSourceId;
         public MvpPlacementEffectConfig[] MvpPlacementEffects = Array.Empty<MvpPlacementEffectConfig>();
+        public MvpRoomSlotCapacityConfig[] MvpRoomSlotCapacities = Array.Empty<MvpRoomSlotCapacityConfig>();
         public MvpCompositionOutcomeTuningConfig MvpCompositionOutcomeTuning;
         public string LootExtractionRoundingPolicyId;
         public string LootExtractionRuleSourceId;
@@ -418,6 +419,15 @@ namespace DungeonBuilder.M0
         public int LootBonus;
         public int Attraction;
         public string ExplanationKey;
+    }
+
+    [Serializable]
+    public sealed class MvpRoomSlotCapacityConfig
+    {
+        public string RoomOptionId;
+        public int MonsterCapacity;
+        public int TrapCapacity;
+        public int LootCapacity;
     }
 
     [Serializable]

@@ -64,7 +64,7 @@ namespace DungeonBuilder.M0
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
 
             AppendSection(builder, localize, CurrentDungeonKey);
-            AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
+            AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));
 
             AppendSection(builder, localize, LatestRunKey);
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
@@ -92,6 +92,34 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
             AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
             return builder.ToString();
+        }
+
+        private static string BuildPlayableCurrentDungeonLine(MvpPlayerLoopSummary summary, string dungeonLayoutText, Func<string, string, string> localize)
+        {
+            string composition = BuildCurrentDungeonCompositionLine(summary, localize);
+            string roomSlotLayout = ExtractRoomSlotLayoutLine(dungeonLayoutText, localize);
+            return string.IsNullOrWhiteSpace(roomSlotLayout)
+                ? composition
+                : JoinInline(localize, composition, roomSlotLayout);
+        }
+
+        private static string ExtractRoomSlotLayoutLine(string dungeonLayoutText, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(dungeonLayoutText))
+            {
+                return string.Empty;
+            }
+
+            string roomSlotPrefix = Localize(localize, MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey).Split('{')[0];
+            foreach (string line in dungeonLayoutText.Split('\n'))
+            {
+                if (!string.IsNullOrWhiteSpace(roomSlotPrefix) && line.StartsWith(roomSlotPrefix, StringComparison.Ordinal))
+                {
+                    return line;
+                }
+            }
+
+            return string.Empty;
         }
 
         private static string BuildHeatAndPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
