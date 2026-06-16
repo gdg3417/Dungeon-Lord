@@ -245,6 +245,20 @@
       "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache"
     }
   ],
+  "MvpRoomSlotCapacities": [
+    {
+      "RoomOptionId": "placement.option.room.narrow_hall",
+      "MonsterCapacity": 1,
+      "TrapCapacity": 1,
+      "LootCapacity": 0
+    },
+    {
+      "RoomOptionId": "placement.option.room.basic",
+      "MonsterCapacity": 1,
+      "TrapCapacity": 1,
+      "LootCapacity": 1
+    }
+  ],
   "MvpCompositionOutcomeTuning": {
     "RuleSourceId": "mvp.composition_outcome.rule.gd11.v1",
     "SuccessChancePerPathCapacity": 0.02,

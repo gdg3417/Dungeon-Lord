@@ -1870,6 +1870,34 @@
     {
       "key": "ui.adventurer_traffic.reason.fallback",
       "text": "current dungeon signals are still forming"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.layout_format",
+      "text": "Room slot layout: {0}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.floor_format",
+      "text": "Floor {0}: {1}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.room_format",
+      "text": "Room {0}: {1} ({2}; {3}; {4})"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.monster_slots_format",
+      "text": "Monster slots: {0}/{1}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.trap_slots_format",
+      "text": "Trap slots: {0}/{1}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.loot_slots_format",
+      "text": "Loot slots: {0}/{1}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.room_separator",
+      "text": " | "
     }
   ]
 }

@@ -65,6 +65,7 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildCurrentDungeonCompositionLine(summary, localize));
+            if (!string.IsNullOrWhiteSpace(dungeonLayoutText)) AppendLine(builder, dungeonLayoutText);
 
             AppendSection(builder, localize, LatestRunKey);
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));

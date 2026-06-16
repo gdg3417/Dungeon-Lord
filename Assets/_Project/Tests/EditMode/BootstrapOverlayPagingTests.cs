@@ -2013,6 +2013,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_dungeon_layout.panel.empty_node_format"] = "{0}: {1}";
             map["ui.mvp_dungeon_layout.panel.node_separator"] = " -> ";
             map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
+            map["ui.mvp_room_slots.panel.layout_format"] = "Room slot layout: {0}";
+            map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";
+            map["ui.mvp_room_slots.panel.room_format"] = "Room {0}: {1} ({2}; {3}; {4})";
+            map["ui.mvp_room_slots.panel.monster_slots_format"] = "Monster slots: {0}/{1}";
+            map["ui.mvp_room_slots.panel.trap_slots_format"] = "Trap slots: {0}/{1}";
+            map["ui.mvp_room_slots.panel.loot_slots_format"] = "Loot slots: {0}/{1}";
+            map["ui.mvp_room_slots.panel.room_separator"] = " | ";
             map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
             map["ui.mvp_placement_preview.room.narrow_hall"] = "Role: connects rooms with a lower-capacity hallway.";
             map["ui.mvp_placement_preview.monster.skeleton"] = "Role: adds danger and mana pressure.";
