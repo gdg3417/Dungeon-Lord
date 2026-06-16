@@ -1436,8 +1436,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Is.EqualTo(built));
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
             Assert.That(copied, Does.Contain("Guided MVP Action"));
-            Assert.That(copied, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(copied, Does.Contain("Role: adds room space and path context."));
             Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(copied, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(copied, Does.Contain("Adventurer intent:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Mana Generator"));

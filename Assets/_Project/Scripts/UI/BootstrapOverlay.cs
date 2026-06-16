@@ -413,7 +413,9 @@ namespace DungeonBuilder.M0
             {
                 if (_diagnosticsVisible)
                 {
-                    AppendMvpLoopSummaryPanel(builder);
+                    AppendLine(builder, BootstrapSmokeTextComposer.BuildMvpLoopSummaryPanelText(
+                        BuildSmokeTextContext(),
+                        (key, fallback) => GetLocalizedString(key, fallback)));
                 }
                 else
                 {
@@ -533,58 +535,6 @@ namespace DungeonBuilder.M0
             string[] bodyLines = BuildCurrentPlayerFacingSmokeText().Split('\n');
             int maxOffset = Mathf.Max(0, bodyLines.Length - VisiblePlayerFacingLineCount);
             _playerFacingScrollOffset = Mathf.Clamp(requestedOffset, 0, maxOffset);
-        }
-
-
-        private void AppendMvpLoopSummaryPanel(StringBuilder builder)
-        {
-            MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
-            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(panelText))
-            {
-                AppendLine(builder, panelText);
-            }
-
-            GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
-            string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(guidedText))
-            {
-                AppendLine(builder, string.Empty);
-                AppendLine(builder, guidedText);
-            }
-
-            string firstSessionText = FirstSessionMvpCompletionPresenter.BuildStatusLine(summary, guidedPath, (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(firstSessionText))
-            {
-                AppendLine(builder, string.Empty);
-                AppendLine(builder, firstSessionText);
-            }
-
-            string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig), (key, fallback) => GetLocalizedString(key, fallback));
-            if (!string.IsNullOrEmpty(firstContractText))
-            {
-                AppendLine(builder, string.Empty);
-                AppendLine(builder, firstContractText);
-            }
-
-            AppendLine(builder, string.Empty);
-            AppendSelectedPlacementAndRunPlanPreviews(builder);
-        }
-
-
-        private void AppendSelectedPlacementAndRunPlanPreviews(StringBuilder builder)
-        {
-            string placementPreviewText = GetSelectedMvpPlacementPreviewText();
-            if (!string.IsNullOrEmpty(placementPreviewText))
-            {
-                AppendLine(builder, placementPreviewText);
-            }
-
-            string runPlanPreviewText = GetSelectedMvpRunPlanPreviewText();
-            if (!string.IsNullOrEmpty(runPlanPreviewText))
-            {
-                AppendLine(builder, runPlanPreviewText);
-            }
         }
 
         private void AppendHeader(StringBuilder builder)

@@ -88,6 +88,13 @@ namespace DungeonBuilder.M0
             return builder.ToString();
         }
 
+        public static string BuildMvpLoopSummaryPanelText(Context context, Func<string, string, string> localize)
+        {
+            var builder = new StringBuilder();
+            AppendMvpLoopSummaryPanel(builder, context, localize);
+            return builder.ToString();
+        }
+
         public static string BuildPlayableMvpScreenText(Context context, Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
