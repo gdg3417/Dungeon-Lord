@@ -132,6 +132,25 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_BasicRunAnalysisUnlocked_SuggestsApplyingAnalysisToPlacement()
+        {
+            SaveData save = FullSave();
+            save.researchPending = null;
+            save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState { ProjectIds = new[] { ProjectId }, LastCompletedProjectId = ProjectId };
+
+            MvpPlayerLoopSummary loopSummary = MvpPlayerLoopSummaryPresenter.Resolve(save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig());
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(save, loopSummary);
+
+            Assert.That(loopSummary.AnalysisUnlocked, Is.True);
+            Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepApplyRunAnalysisId));
+            Assert.That(summary.CurrentStepStatusKey, Is.EqualTo(GuidedMvpActionPathPresenter.StatusApplyRunAnalysisKey));
+            Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionApplyRunAnalysisKey));
+            Assert.That(summary.IsComplete, Is.True);
+            AssertSafetyFlags(summary);
+        }
+
+        [Test]
         public void Resolve_NoSaveOrMissingOptionalState_ReturnsSafeDeterministicGuidance()
         {
             GuidedMvpActionPathSummary missingSave = GuidedMvpActionPathPresenter.Resolve(null, null);
@@ -311,6 +330,24 @@ namespace DungeonBuilder.Tests.EditMode
                 verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode
             };
         }
+        private static ResearchUnlockBridgeConfig UnlockConfig()
+        {
+            return new ResearchUnlockBridgeConfig
+            {
+                enabled = true,
+                ruleSourceId = "test.research.unlock",
+                unlocks = new[]
+                {
+                    new ResearchUnlockDefinitionConfig
+                    {
+                        researchProjectId = ProjectId,
+                        unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId,
+                        summaryKey = "ui.research_unlock.basic_run_analysis.summary"
+                    }
+                }
+            };
+        }
+
 
         private static RunSimulationConfig HeatConfig()
         {

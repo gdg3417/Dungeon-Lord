@@ -644,6 +644,10 @@
       "text": "Repeat the loop or improve placement"
     },
     {
+      "key": "guided_mvp.step.apply_run_analysis",
+      "text": "Apply run analysis"
+    },
+    {
       "key": "guided_mvp.status.missing_save",
       "text": "Save state is not available yet."
     },
@@ -672,6 +676,10 @@
       "text": "Placement, run, mana, loot, heat, and research are visible in the summary."
     },
     {
+      "key": "guided_mvp.status.apply_run_analysis",
+      "text": "Basic run analysis is available; use the latest result to choose one placement improvement."
+    },
+    {
       "key": "guided_mvp.action.place_structure",
       "text": "Place one room, monster, trap, or loot node."
     },
@@ -694,6 +702,10 @@
     {
       "key": "guided_mvp.action.repeat_or_improve",
       "text": "Run again or adjust one placement based on the summary."
+    },
+    {
+      "key": "guided_mvp.action.apply_run_analysis",
+      "text": "Compare the selected placement, adjust one room, monster, trap, or loot node, then run again."
     },
     {
       "key": "ui.first_session.status.not_started",
