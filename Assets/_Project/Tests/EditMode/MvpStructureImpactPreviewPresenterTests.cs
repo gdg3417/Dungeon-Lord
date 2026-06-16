@@ -75,9 +75,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
-        [TestCase(MinimalMvpActionPanelPresenter.BalancedPostureKey, "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
-        [TestCase(MinimalMvpActionPanelPresenter.CautiousPostureKey, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
-        [TestCase(MinimalMvpActionPanelPresenter.GreedyPostureKey, "Plan: Mana Generator + Greedy run.\nExpected tradeoff: higher loot, higher heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.BalancedPostureKey, "Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.CautiousPostureKey, "Plan: Mana Generator + Cautious adventurer challenge.\nExpected tradeoff: lower loot, safer heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.GreedyPostureKey, "Plan: Mana Generator + Greedy adventurer challenge.\nExpected tradeoff: higher loot, higher heat pressure.")]
         public void RunPlanPreview_ResolvesPostureTradeoffThroughLocalization(string postureNameKey, string expected)
         {
             string text = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(
@@ -106,7 +106,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var map = new Dictionary<string, string>
             {
-                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} run.",
+                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} adventurer challenge.",
                 [MvpStructureImpactPreviewPresenter.RunTradeoffFormatKey] = "Expected tradeoff: {0}",
                 [MvpStructureImpactPreviewPresenter.RunPlanCombinedFormatKey] = "{0}\n{1}",
                 [MvpStructureImpactPreviewPresenter.CautiousRunTradeoffKey] = "lower loot, safer heat pressure.",

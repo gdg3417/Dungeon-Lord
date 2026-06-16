@@ -129,7 +129,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, Localized);
             Assert.That(text, Does.Contain("Adventurer pressure: likely soon. Reason: high loot signal and low heat."));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Run Setup =="));
+            Assert.That(text, Does.Contain("== Activity Setup =="));
             Assert.That(text, Does.Contain("== Build Choice =="));
         }
 
@@ -197,7 +197,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "Research: {0}";
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "Suggested next action: {0}";
                 case MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey: return "Current Dungeon";
-                case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Run";
+                case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Adventurer Visit";
                 case MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey: return "Why It Happened";
                 case MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey: return "Rewards and Risk";
                 case MvpLoopSummaryPanelPresenter.ResearchSectionKey: return "Research";
@@ -206,8 +206,8 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayableScreenPresenter.TopStatusKey: return "Top Status";
                 case MvpPlayableScreenPresenter.CurrentDungeonKey: return "Current Dungeon";
                 case MvpPlayableScreenPresenter.BuildChoiceKey: return "Build Choice";
-                case MvpPlayableScreenPresenter.RunSetupKey: return "Run Setup";
-                case MvpPlayableScreenPresenter.LatestRunKey: return "Latest Run";
+                case MvpPlayableScreenPresenter.RunSetupKey: return "Activity Setup";
+                case MvpPlayableScreenPresenter.LatestRunKey: return "Latest Adventurer Visit";
                 case MvpPlayableScreenPresenter.AnalysisNextActionKey: return "Analysis and Next Action";
                 case MvpPlayableScreenPresenter.SectionHeaderFormatKey: return "== {0} ==";
                 case MvpPlayableScreenPresenter.PlayerViewStatusKey: return "Player view: diagnostics hidden.";
@@ -215,7 +215,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayableScreenPresenter.SelectedPlacementFormatKey: return "Selected placement: {0} / {1}";
                 case MvpPlayableScreenPresenter.NoComparisonKey: return "No comparison.";
                 case MvpPlayableScreenPresenter.PlacePromptKey: return "Next build step: choose an option, then place or modify it.";
-                case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}.";
+                case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.";
                 case "ui.adventurer_pressure.band.not_yet": return "not yet";
                 case "ui.adventurer_pressure.band.low": return "low";
                 case "ui.adventurer_pressure.band.cautious_interest": return "cautious interest";
@@ -232,7 +232,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case "run.posture.greedy.name": return "Greedy";
                 case "run.posture.balanced.name": return "Balanced";
                 case GuidedMvpActionPathPanelPresenter.CompleteYesKey: return "yes";
-                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "run dungeon";
+                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "observe dungeon";
                 case MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey: return "no active research";
                 case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
                 default: return fallback;

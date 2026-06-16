@@ -82,7 +82,7 @@ namespace DungeonBuilder.Tests.EditMode
                 StructureSimulationPass.ManaGeneratorBasicId,
                 MinimalMvpActionPanelPresenter.CautiousPostureKey);
 
-            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Cautious adventurer challenge.\nExpected tradeoff: lower loot, safer heat pressure."));
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var map = new Dictionary<string, string>
             {
-                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} run.",
+                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} adventurer challenge.",
                 [MvpStructureImpactPreviewPresenter.RunTradeoffFormatKey] = "Expected tradeoff: {0}",
                 [MvpStructureImpactPreviewPresenter.RunPlanCombinedFormatKey] = "{0}\n{1}",
                 [MvpStructureImpactPreviewPresenter.CautiousRunTradeoffKey] = "lower loot, safer heat pressure.",

@@ -261,7 +261,7 @@
     },
     {
       "key": "ui.dev.button.run_latest",
-      "text": "Latest Run"
+      "text": "Latest Adventurer Visit"
     },
     {
       "key": "ui.dev.button.run_next",
@@ -489,7 +489,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.latest_run_format",
-      "text": "Latest run: {0}"
+      "text": "Latest adventurer visit: {0}"
     },
     {
       "key": "ui.mvp_loop.panel.mana_format",
@@ -517,7 +517,7 @@
     },
     {
       "key": "ui.mvp_loop.value.no_run",
-      "text": "No run yet"
+      "text": "No adventurer visit yet"
     },
     {
       "key": "ui.mvp_loop.value.unknown",
@@ -537,7 +537,7 @@
     },
     {
       "key": "mvp_loop.suggestion.run_dungeon",
-      "text": "Next: run the dungeon to see what your first build does."
+      "text": "Next: observe adventurer activity to see what your first build does."
     },
     {
       "key": "mvp_loop.suggestion.reduce_heat_pressure",
@@ -553,11 +553,11 @@
     },
     {
       "key": "mvp_loop.suggestion.repeat_or_improve_placement",
-      "text": "Next: run again or adjust one placement based on the report."
+      "text": "Next: adjust one placement before the next adventurer visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.run_for_analysis",
-      "text": "Next: run the dungeon so Basic Run Analysis can read the latest outcome."
+      "text": "Next: observe adventurer activity so Adventurer Activity Analysis can read the latest visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.reduce_danger",
@@ -565,7 +565,7 @@
     },
     {
       "key": "mvp_loop.suggestion.analysis.reduce_heat",
-      "text": "Next: lower heat pressure or use a cautious posture before the next run."
+      "text": "Next: lower heat pressure or use a cautious posture before the next adventurer visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.improve_extraction",
@@ -589,19 +589,19 @@
     },
     {
       "key": "mvp_loop.analysis.fit.match",
-      "text": "Current selection matches the analysis target. Adjust this placement, then run again."
+      "text": "Current selection matches the analysis target. Adjust this placement before the next adventurer visit."
     },
     {
       "key": "mvp_loop.analysis.fit.mismatch",
-      "text": "Current selection is {0}, but analysis recommends {1} first. Switch category before the next run."
+      "text": "Current selection is {0}, but analysis recommends {1} first. Switch category before the next adventurer visit."
     },
     {
       "key": "mvp_loop.analysis.fit.broad",
-      "text": "Analysis target is broad. Change any one placement, then run again."
+      "text": "Analysis target is broad. Change any one placement before the next adventurer visit."
     },
     {
       "key": "mvp_loop.analysis.fit.not_ready",
-      "text": "Run analysis is not ready yet."
+      "text": "Adventurer activity analysis is not ready yet."
     },
     {
       "key": "mvp_loop.analysis.category.room",
@@ -645,7 +645,7 @@
     },
     {
       "key": "mvp_loop.analysis.target.reduce_heat",
-      "text": "Trap or loot node first. Heat rose this run; reduce heat pressure before another greedy run."
+      "text": "Trap or loot node first. Heat rose during this adventurer visit; reduce heat pressure before another greedy challenge."
     },
     {
       "key": "mvp_loop.analysis.target.improve_extraction",
@@ -657,7 +657,7 @@
     },
     {
       "key": "mvp_loop.analysis.target.fallback",
-      "text": "Any one placement. Make one small change, then run again."
+      "text": "Any one placement. Make one small change before the next adventurer visit."
     },
     {
       "key": "ui.guided_mvp.panel.title",
@@ -673,7 +673,7 @@
     },
     {
       "key": "ui.mvp_action.button.run_or_observe",
-      "text": "Run or observe dungeon"
+      "text": "Observe Dungeon"
     },
     {
       "key": "ui.mvp_action.panel.compact_format",
@@ -709,7 +709,7 @@
     },
     {
       "key": "guided_mvp.step.run_or_observe",
-      "text": "Run or observe adventurers"
+      "text": "Observe adventurer activity"
     },
     {
       "key": "guided_mvp.step.reduce_heat_pressure",
@@ -729,7 +729,7 @@
     },
     {
       "key": "guided_mvp.step.apply_run_analysis",
-      "text": "Apply run analysis"
+      "text": "Apply activity analysis"
     },
     {
       "key": "guided_mvp.status.missing_save",
@@ -741,7 +741,7 @@
     },
     {
       "key": "guided_mvp.status.run_or_observe",
-      "text": "A dungeon placement is ready; no adventurer run has been observed yet."
+      "text": "A dungeon placement is ready; no adventurer activity has been observed yet."
     },
     {
       "key": "guided_mvp.status.heat_pressure",
@@ -749,7 +749,7 @@
     },
     {
       "key": "guided_mvp.status.poor_loot_extraction",
-      "text": "The latest run generated loot but extracted none."
+      "text": "The latest adventurer visit generated loot but extracted none."
     },
     {
       "key": "guided_mvp.status.research_completion_pending",
@@ -757,11 +757,11 @@
     },
     {
       "key": "guided_mvp.status.repeat_or_improve",
-      "text": "Placement, run, mana, loot, heat, and research are visible in the summary."
+      "text": "Placement, adventurer activity, mana, loot, heat, and research are visible in the summary."
     },
     {
       "key": "guided_mvp.status.apply_run_analysis",
-      "text": "Basic run analysis is available; use the latest result to choose one placement improvement."
+      "text": "Adventurer activity analysis is available; use the latest visit to choose one placement improvement."
     },
     {
       "key": "guided_mvp.action.place_structure",
@@ -769,7 +769,7 @@
     },
     {
       "key": "guided_mvp.action.run_dungeon",
-      "text": "Run the dungeon and watch the MVP Loop Summary update."
+      "text": "Observe adventurer activity and watch the MVP Loop Summary update."
     },
     {
       "key": "guided_mvp.action.reduce_heat_pressure",
@@ -777,7 +777,7 @@
     },
     {
       "key": "guided_mvp.action.improve_survivability_or_layout",
-      "text": "Improve survivability or layout, then run again."
+      "text": "Improve survivability or layout before the next adventurer visit."
     },
     {
       "key": "guided_mvp.action.verify_research_status",
@@ -785,11 +785,11 @@
     },
     {
       "key": "guided_mvp.action.repeat_or_improve",
-      "text": "Run again or adjust one placement based on the summary."
+      "text": "Adjust one placement before the next adventurer visit."
     },
     {
       "key": "guided_mvp.action.apply_run_analysis",
-      "text": "Compare the selected placement, adjust one room, monster, trap, or loot node, then run again."
+      "text": "Compare the selected placement, then adjust one room, monster, trap, or loot node before the next adventurer visit."
     },
     {
       "key": "ui.first_session.status.not_started",
@@ -801,7 +801,7 @@
     },
     {
       "key": "ui.first_session.status.run_dungeon",
-      "text": "First-session status: dungeon placement ready; run the dungeon next."
+      "text": "First-session status: dungeon placement ready; observe adventurer activity next."
     },
     {
       "key": "ui.first_session.status.observe_summary",
@@ -809,7 +809,7 @@
     },
     {
       "key": "ui.first_session.status.complete",
-      "text": "First-session loop complete: placement, run, mana, loot, heat, and research are visible."
+      "text": "First-session loop complete: placement, adventurer activity, mana, loot, heat, and research are visible."
     },
     {
       "key": "ui.mvp_action.button.show_diagnostics",
@@ -893,7 +893,7 @@
     },
     {
       "key": "ui.mvp_run_plan_preview.plan_format",
-      "text": "Plan: {0} + {1} run."
+      "text": "Plan: {0} + {1} adventurer challenge."
     },
     {
       "key": "ui.mvp_run_plan_preview.tradeoff_format",
@@ -917,7 +917,7 @@
     },
     {
       "key": "ui.mvp_run_plan_preview.tradeoff.unknown",
-      "text": "run tradeoff unavailable."
+      "text": "activity tradeoff unavailable."
     },
     {
       "key": "ui.mvp_structure_feedback.empty_slot",
@@ -929,27 +929,27 @@
     },
     {
       "key": "ui.mvp_run_feedback.success_stable_heat",
-      "text": "Run result: succeeded. Loot extracted, heat stable."
+      "text": "Adventurer visit result: succeeded. Loot extracted, heat stable."
     },
     {
       "key": "ui.mvp_run_feedback.success_heat_reduced",
-      "text": "Run result: succeeded. Loot extracted, heat reduced."
+      "text": "Adventurer visit result: succeeded. Loot extracted, heat reduced."
     },
     {
       "key": "ui.mvp_run_feedback.success_heat_increased",
-      "text": "Run result: succeeded. Loot extracted, heat increased."
+      "text": "Adventurer visit result: succeeded. Loot extracted, heat increased."
     },
     {
       "key": "ui.mvp_run_feedback.failed",
-      "text": "Run result: failed. Review placement and try again."
+      "text": "Adventurer visit result: failed. Review placement before the next challenge."
     },
     {
       "key": "ui.mvp_run_feedback.unavailable",
-      "text": "Run result unavailable."
+      "text": "Adventurer visit result unavailable."
     },
     {
       "key": "ui.mvp_run_feedback.outcome_cue.failed",
-      "text": "Outcome cue: the run failed, so reduce pressure before trying again."
+      "text": "Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."
     },
     {
       "key": "ui.mvp_run_feedback.outcome_cue.heat_increased",
@@ -1021,7 +1021,7 @@
     },
     {
       "key": "ui.mvp_smoke.section.latest_run_feedback",
-      "text": "Latest run feedback"
+      "text": "Latest adventurer visit feedback"
     },
     {
       "key": "ui.mvp_smoke.section.compact",
@@ -1173,7 +1173,7 @@
     },
     {
       "key": "ui.mvp_placement_effects.explanation.room.basic",
-      "text": "Basic Room opens the run path and capacity context"
+      "text": "Basic Room opens the adventurer path and capacity context"
     },
     {
       "key": "ui.mvp_placement_effects.explanation.monster.skeleton",
@@ -1273,7 +1273,7 @@
     },
     {
       "key": "ui.research_unlock.basic_run_analysis.summary",
-      "text": "Basic run analysis unlocked"
+      "text": "Adventurer activity analysis unlocked"
     },
     {
       "key": "ui.mvp_loop.section.current_dungeon",
@@ -1305,7 +1305,7 @@
     },
     {
       "key": "ui.mvp_loop.why.no_run",
-      "text": "No run yet. Build or review the dungeon, then run it to learn what happens."
+      "text": "No adventurer visit yet. Build or review the dungeon, then observe adventurer activity to learn what happens."
     },
     {
       "key": "ui.mvp_loop.why.run_format",
@@ -1313,7 +1313,7 @@
     },
     {
       "key": "ui.mvp_loop.risk.no_run",
-      "text": "Risk will be shown after a run."
+      "text": "Risk will be shown after an adventurer visit."
     },
     {
       "key": "ui.mvp_loop.risk.stable",
@@ -1329,11 +1329,11 @@
     },
     {
       "key": "ui.mvp_loop.section.latest_run",
-      "text": "Latest Run"
+      "text": "Latest Adventurer Visit"
     },
     {
       "key": "ui.mvp_loop.why.path_capacity",
-      "text": "path capacity shaped the run"
+      "text": "path capacity shaped the adventurer visit"
     },
     {
       "key": "ui.mvp_loop.why.danger",
@@ -1341,7 +1341,7 @@
     },
     {
       "key": "ui.mvp_loop.why.mana_pressure",
-      "text": "mana pressure constrained the run"
+      "text": "mana pressure constrained the adventurer visit"
     },
     {
       "key": "ui.mvp_loop.why.heat_pressure",
@@ -1365,15 +1365,15 @@
     },
     {
       "key": "ui.mvp_loop.analysis.no_run",
-      "text": "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome."
+      "text": "Adventurer Activity Analysis is ready. Observe adventurer activity to unlock analysis from the latest visit."
     },
     {
       "key": "ui.mvp_loop.analysis.danger",
-      "text": "Danger was the largest pressure on this run."
+      "text": "Danger was the largest pressure on this adventurer visit."
     },
     {
       "key": "ui.mvp_loop.analysis.heat_increased",
-      "text": "Heat rose this run, increasing future risk."
+      "text": "Heat rose during this adventurer visit, increasing future risk."
     },
     {
       "key": "ui.mvp_loop.analysis.partial_loot",
@@ -1385,7 +1385,7 @@
     },
     {
       "key": "ui.mvp_loop.analysis.mixed",
-      "text": "The resolved run data does not point to a single extra pressure."
+      "text": "The resolved adventurer visit data does not point to a single extra pressure."
     },
     {
       "key": "ui.mvp_loop.section.line_format",
@@ -1513,11 +1513,11 @@
     },
     {
       "key": "ui.mvp_screen.section.run_setup",
-      "text": "Run Setup"
+      "text": "Activity Setup"
     },
     {
       "key": "ui.mvp_screen.section.latest_run",
-      "text": "Latest Run"
+      "text": "Latest Adventurer Visit"
     },
     {
       "key": "ui.mvp_screen.section.analysis_next_action",
@@ -1553,7 +1553,7 @@
     },
     {
       "key": "ui.mvp_screen.prompt.run_or_observe",
-      "text": "Next run step: run or observe the dungeon when ready."
+      "text": "Next activity step: observe the dungeon when ready."
     },
     {
       "key": "ui.mvp_screen.feedback.no_placement",
@@ -1561,7 +1561,7 @@
     },
     {
       "key": "ui.mvp_screen.feedback.no_run",
-      "text": "No run observed yet this session."
+      "text": "No adventurer visit observed yet this session."
     },
     {
       "key": "ui.mvp_screen.comparison.none",
@@ -1569,7 +1569,7 @@
     },
     {
       "key": "ui.mvp_screen.analysis.no_run",
-      "text": "Why it happened: run the dungeon to see the first result."
+      "text": "Why it happened: observe adventurer activity to see the first result."
     },
     {
       "key": "ui.mvp_screen.party.unavailable",
@@ -1605,7 +1605,7 @@
     },
     {
       "key": "ui.mvp_first_contract.run_observed_format",
-      "text": "Run observed: {0}"
+      "text": "Visit observed: {0}"
     },
     {
       "key": "ui.mvp_first_contract.loot_recovered_format",
@@ -1633,11 +1633,11 @@
     },
     {
       "key": "ui.mvp_first_contract.value.analysis_unlocked",
-      "text": "Basic Run Analysis unlocked"
+      "text": "Adventurer Activity Analysis unlocked"
     },
     {
       "key": "ui.mvp_first_contract.value.analysis_locked",
-      "text": "unlock Basic Run Analysis"
+      "text": "unlock Adventurer Activity Analysis"
     },
     {
       "key": "ui.mvp_first_contract.status.in_progress",
@@ -1693,15 +1693,15 @@
     },
     {
       "key": "ui.adventurer_intent.run_posture_used_format",
-      "text": "Adventurer intent: {0} likely. Run posture used: {1}. Debug selected posture: {2}."
+      "text": "Adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}."
     },
     {
       "key": "ui.adventurer_intent.fallback_run_posture_used_format",
-      "text": "Adventurer intent unavailable. Run posture used: {0} debug fallback. Debug selected posture: {1}."
+      "text": "Adventurer intent unavailable. Challenge posture used: {0} debug fallback. Debug selected posture: {1}."
     },
     {
       "key": "ui.adventurer_intent.smoke_evidence_format",
-      "text": "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
+      "text": "Latest adventurer visit intent evidence: resolved intent {0}; challenge posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
     },
     {
       "key": "ui.adventurer_intent.unavailable",
@@ -1737,7 +1737,7 @@
     },
     {
       "key": "ui.adventurer_pressure.detail_format",
-      "text": "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}."
+      "text": "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}."
     },
     {
       "key": "ui.adventurer_pressure.band.not_yet",
