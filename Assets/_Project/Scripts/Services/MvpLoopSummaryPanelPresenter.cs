@@ -152,12 +152,9 @@ namespace DungeonBuilder.M0
 
         private static string ResolveSuggestionKey(MvpPlayerLoopSummary summary)
         {
-            if (summary == null || !summary.AnalysisUnlocked || string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey))
-            {
-                return summary?.NextOptimizationSuggestionKey;
-            }
-
-            return summary.AnalysisAdviceKey;
+            return string.IsNullOrWhiteSpace(summary?.NextOptimizationSuggestionKey)
+                ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+                : summary.NextOptimizationSuggestionKey;
         }
 
         private static string ResolveDominantCauseKey(MvpPlacementEffectsSummary effects)
