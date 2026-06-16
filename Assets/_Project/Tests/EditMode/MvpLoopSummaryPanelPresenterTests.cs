@@ -280,6 +280,25 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
         }
 
+
+        [Test]
+        public void BuildPanelText_UnlockedBasicRunAnalysis_ShowsBroadSuggestionAndLocalizedRecommendationWithoutDuplicateText()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary();
+            summary.NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey;
+            summary.AnalysisAdviceKey = MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey;
+            summary.LatestRunDeathCount = 1;
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, Localize);
+            string suggestedLine = FindLineContaining(text, "LOC[" + MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey + "]");
+            string recommendationLine = FindLineContaining(text, "LOC[" + BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey + "]");
+
+            Assert.That(suggestedLine, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey + "]"));
+            Assert.That(suggestedLine, Does.Not.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
+            Assert.That(recommendationLine, Does.Contain("LOC[" + MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey + "]"));
+            Assert.That(recommendationLine, Is.Not.EqualTo(suggestedLine));
+        }
+
         [Test]
         public void BuildPanelText_UnlockedBasicRunAnalysis_HighDangerAddsSpecificAnalysisAndAdvice()
         {
@@ -421,6 +440,21 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(JsonUtility.ToJson(summary), Is.EqualTo(summaryBefore));
         }
 
+
+        private static string FindLineContaining(string text, string value)
+        {
+            string[] lines = text.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].Contains(value))
+                {
+                    return lines[i];
+                }
+            }
+
+            return string.Empty;
+        }
+
         private static string Localize(string key, string fallback)
         {
             switch (key)
@@ -429,6 +463,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ResearchFormatKey:
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey:
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey:
+                case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey:
                     return "LOC[" + key + "]:{0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey:
                     return "LOC[" + key + "]:{0:0.##}";
@@ -474,6 +509,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "{0}";
                 case MvpLoopSummaryPanelPresenter.ResearchUnlockFormatKey: return "Unlocked: {0}";
                 case MvpLoopSummaryPanelPresenter.SuggestionFormatKey: return "{0}";
+                case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
                 case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
@@ -536,6 +572,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case "ui.research_unlock.basic_run_analysis.summary": return "Basic run analysis unlocked";
                 case MvpLoopSummaryPanelPresenter.AnalysisNoRunKey: return "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey: return "Next: run the dungeon so Basic Run Analysis can read the latest outcome.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey: return "Next: reduce danger or use a safer posture before pushing for more loot.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next run.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey: return "Next: improve survivability or reduce danger so generated loot is recovered.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey: return "Next: repeat this setup or test slightly greedier pressure while heat is controlled.";
                 case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
                 default: return fallback;
             }

@@ -70,6 +70,8 @@ namespace DungeonBuilder.M0
             AppendSectionLine(builder, localize, RewardsAndRiskSectionKey, BuildRewardsAndRisk(summary, localize));
             AppendSectionLine(builder, localize, ResearchSectionKey, BuildResearchLine(summary, localize));
             AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(ResolveSuggestionKey(summary), localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+            string recommendationLine = BasicRunAnalysisRecommendationPresenter.BuildRecommendationLine(summary, localize);
+            if (!string.IsNullOrEmpty(recommendationLine)) AppendLine(builder, recommendationLine);
             return builder.ToString();
         }
 
@@ -150,12 +152,9 @@ namespace DungeonBuilder.M0
 
         private static string ResolveSuggestionKey(MvpPlayerLoopSummary summary)
         {
-            if (summary == null || !summary.AnalysisUnlocked || string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey))
-            {
-                return summary?.NextOptimizationSuggestionKey;
-            }
-
-            return summary.AnalysisAdviceKey;
+            return string.IsNullOrWhiteSpace(summary?.NextOptimizationSuggestionKey)
+                ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+                : summary.NextOptimizationSuggestionKey;
         }
 
         private static string ResolveDominantCauseKey(MvpPlacementEffectsSummary effects)

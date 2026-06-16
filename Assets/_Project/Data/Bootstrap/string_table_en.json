@@ -576,6 +576,10 @@
       "text": "Next: repeat this setup or test slightly greedier pressure while heat is controlled."
     },
     {
+      "key": "ui.mvp_loop.analysis.recommendation_format",
+      "text": "Analysis recommendation: {0}"
+    },
+    {
       "key": "ui.guided_mvp.panel.title",
       "text": "Guided MVP Action"
     },
