@@ -14,11 +14,11 @@ namespace DungeonBuilder.M0
         public const string SuggestImproveSurvivabilityOrLayoutKey = "mvp_loop.suggestion.improve_survivability_or_layout";
         public const string SuggestVerifyResearchStatusKey = "mvp_loop.suggestion.verify_research_status";
         public const string SuggestRepeatOrImprovePlacementKey = "mvp_loop.suggestion.repeat_or_improve_placement";
-        public const string SuggestBasicAnalysisNoRunKey = "mvp_loop.suggestion.analysis.run_for_analysis";
-        public const string SuggestBasicAnalysisReduceDangerKey = "mvp_loop.suggestion.analysis.reduce_danger";
-        public const string SuggestBasicAnalysisReduceHeatKey = "mvp_loop.suggestion.analysis.reduce_heat";
-        public const string SuggestBasicAnalysisImproveExtractionKey = "mvp_loop.suggestion.analysis.improve_extraction";
-        public const string SuggestBasicAnalysisTestGreedierKey = "mvp_loop.suggestion.analysis.test_greedier";
+        public const string SuggestBasicAnalysisNoRunKey = BasicRunAnalysisRecommendationPresenter.RunForAnalysisKey;
+        public const string SuggestBasicAnalysisReduceDangerKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey;
+        public const string SuggestBasicAnalysisReduceHeatKey = BasicRunAnalysisRecommendationPresenter.ReduceHeatKey;
+        public const string SuggestBasicAnalysisImproveExtractionKey = BasicRunAnalysisRecommendationPresenter.ImproveExtractionKey;
+        public const string SuggestBasicAnalysisTestGreedierKey = BasicRunAnalysisRecommendationPresenter.TestGreedierKey;
         public const string BasicRunAnalysisUnlockId = "research.unlock.basic_run_analysis";
         public const string ResearchVerificationRequiredKey = "ui.research.status.verification_required";
         public const string ResearchCompletedKey = "ui.research.status.completed";
@@ -141,7 +141,7 @@ namespace DungeonBuilder.M0
 
             summary.NextOptimizationSuggestionKey = ChooseSuggestion(summary);
             summary.AnalysisUnlocked = HasBasicRunAnalysisUnlock(summary);
-            summary.AnalysisAdviceKey = ChooseAnalysisAdvice(summary);
+            summary.AnalysisAdviceKey = summary.AnalysisUnlocked ? BasicRunAnalysisRecommendationPresenter.ResolveKey(summary) : string.Empty;
             return summary;
         }
 
@@ -308,28 +308,6 @@ namespace DungeonBuilder.M0
             return summary != null &&
                    summary.HasResearchUnlock &&
                    string.Equals(summary.ResearchUnlockId, BasicRunAnalysisUnlockId, StringComparison.Ordinal);
-        }
-
-        private static string ChooseAnalysisAdvice(MvpPlayerLoopSummary summary)
-        {
-            if (summary == null || !summary.AnalysisUnlocked) return string.Empty;
-            if (!summary.HasRunOutcome) return SuggestBasicAnalysisNoRunKey;
-            if (DangerIsDominantPressure(summary.LatestRunPlacementEffects)) return SuggestBasicAnalysisReduceDangerKey;
-            if (summary.HeatAfter > summary.HeatBefore) return SuggestBasicAnalysisReduceHeatKey;
-            if (summary.LootGeneratedWorldValue > 0 && summary.LootExtractedWorldValue < summary.LootGeneratedWorldValue) return SuggestBasicAnalysisImproveExtractionKey;
-            if (summary.LootGeneratedWorldValue > 0 && summary.LootExtractedWorldValue >= summary.LootGeneratedWorldValue && summary.HeatAfter <= summary.HeatBefore) return SuggestBasicAnalysisTestGreedierKey;
-            return summary.NextOptimizationSuggestionKey;
-        }
-
-        private static bool DangerIsDominantPressure(MvpPlacementEffectsSummary effects)
-        {
-            if (effects == null || !effects.RuleResolved || effects.Danger <= 0) return false;
-            int danger = Math.Abs(effects.Danger);
-            return danger >= Math.Abs(effects.PathCapacity) &&
-                   danger >= Math.Abs(effects.ManaPressure) &&
-                   danger >= Math.Abs(effects.HeatPressure) &&
-                   danger >= Math.Abs(effects.LootBonus) &&
-                   danger >= Math.Abs(effects.Attraction);
         }
 
         private static string ChooseSuggestion(MvpPlayerLoopSummary summary)
