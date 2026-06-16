@@ -106,7 +106,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var map = new Dictionary<string, string>
             {
-                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} run.",
+                [MvpStructureImpactPreviewPresenter.RunPlanFormatKey] = "Plan: {0} + {1} adventurer challenge.",
                 [MvpStructureImpactPreviewPresenter.RunTradeoffFormatKey] = "Expected tradeoff: {0}",
                 [MvpStructureImpactPreviewPresenter.RunPlanCombinedFormatKey] = "{0}\n{1}",
                 [MvpStructureImpactPreviewPresenter.CautiousRunTradeoffKey] = "lower loot, safer heat pressure.",

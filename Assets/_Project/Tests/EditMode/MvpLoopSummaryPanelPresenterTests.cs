@@ -31,8 +31,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.value.no_placement]"));
             Assert.That(text, Does.Contain("LOC[ui.mvp_loop.value.no_run]"));
             Assert.That(text, Does.Contain("LOC[mvp_loop.suggestion.run_dungeon]"));
-            Assert.That(text, Does.Not.Contain("No run yet"));
-            Assert.That(text, Does.Not.Contain("Run the dungeon"));
+            Assert.That(text, Does.Not.Contain("No adventurer visit yet"));
+            Assert.That(text, Does.Not.Contain("Observe adventurer activity"));
         }
 
         [Test]
@@ -166,7 +166,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
 
             Assert.That(text, Does.Contain("Research completed"));
-            Assert.That(text, Does.Contain("Unlocked: Basic run analysis unlocked"));
+            Assert.That(text, Does.Contain("Unlocked: Adventurer activity analysis unlocked"));
             Assert.That(text, Does.Not.Contain("research.project."));
             Assert.That(text, Does.Not.Contain("research.unlock."));
             Assert.That(text, Does.Not.Contain("ui.research_unlock."));
@@ -376,8 +376,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
 
-            Assert.That(text, Does.Contain("Basic Run Analysis is ready"));
-            Assert.That(text, Does.Contain("Basic Run Analysis can read"));
+            Assert.That(text, Does.Contain("Adventurer Activity Analysis is ready"));
+            Assert.That(text, Does.Contain("Adventurer Activity Analysis can read"));
             Assert.That(text, Does.Not.Contain("research.unlock."));
             Assert.That(text, Does.Not.Contain("ui.research_unlock."));
             Assert.That(text, Does.Not.Contain("mvp_loop.suggestion"));
@@ -520,10 +520,10 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
                 case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
-                case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Run";
+                case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Adventurer Visit";
                 case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Adventurer intent";
                 case MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey: return "Adventurer pressure";
-                case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest run: {0}";
+                case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest adventurer visit: {0}";
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
                 case MvpLoopSummaryPanelPresenter.ManaFormatKey: return "Mana reserve: {0:0.##}";
                 case MvpLoopSummaryPanelPresenter.LootFormatKey: return "Loot: generated {0}, extracted {1}, tradeable {2}";
@@ -535,10 +535,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
                 case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey: return "Adjustment target: {0}";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey: return "Selected placement fit: {0}";
-                case BasicRunAnalysisSelectedPlacementFitPresenter.MatchKey: return "Current selection matches the analysis target. Adjust this placement, then run again.";
-                case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey: return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next run.";
-                case BasicRunAnalysisSelectedPlacementFitPresenter.BroadKey: return "Analysis target is broad. Change any one placement, then run again.";
-                case BasicRunAnalysisSelectedPlacementFitPresenter.NotReadyKey: return "Run analysis is not ready yet.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MatchKey: return "Current selection matches the analysis target. Adjust this placement, then adjust before the next adventurer visit.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey: return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next adventurer visit.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.BroadKey: return "Analysis target is broad. Change any one placement, then adjust before the next adventurer visit.";
+                case BasicRunAnalysisSelectedPlacementFitPresenter.NotReadyKey: return "Adventurer activity analysis is not ready yet.";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.RoomCategoryKey: return "a room";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.MonsterCategoryKey: return "a monster";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.TrapCategoryKey: return "a trap";
@@ -549,7 +549,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case BasicRunAnalysisSelectedPlacementFitPresenter.LootNodeTargetLabelKey: return "loot node";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.AnyOneTargetLabelKey: return "any one placement";
                 case MvpLoopSummaryPanelPresenter.ValueNoPlacementKey: return "No dungeon placements yet";
-                case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No run yet";
+                case MvpLoopSummaryPanelPresenter.ValueNoRunKey: return "No adventurer visit yet";
                 case MvpLoopSummaryPanelPresenter.ValueUnknownKey: return "Unknown";
                 case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 case CurrentHeatTierResolver.NoticeTierId: return "Notice";
@@ -561,24 +561,24 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey: return "Suggested Next Action";
                 case MvpLoopSummaryPanelPresenter.SectionLineFormatKey: return "{0}: {1}";
                 case MvpLoopSummaryPanelPresenter.InlineSeparatorKey: return " | ";
-                case MvpLoopSummaryPanelPresenter.RiskNoRunKey: return "Risk will be shown after a run.";
+                case MvpLoopSummaryPanelPresenter.RiskNoRunKey: return "Risk will be shown after an adventurer visit.";
                 case MvpLoopSummaryPanelPresenter.RiskStableKey: return "Risk stayed steady.";
                 case MvpLoopSummaryPanelPresenter.RiskIncreasedKey: return "Risk increased.";
                 case MvpLoopSummaryPanelPresenter.RiskReducedKey: return "Risk went down.";
-                case MvpLoopSummaryPanelPresenter.WhyNoRunKey: return "No run yet. Build or review the dungeon, then run it to learn what happens.";
+                case MvpLoopSummaryPanelPresenter.WhyNoRunKey: return "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.";
                 case MvpLoopSummaryPanelPresenter.WhyRunFormatKey: return "Main reason: {0}.";
                 case MvpLoopSummaryPanelPresenter.WhyMixedKey: return "the current placement mix shaped the result";
                 case MvpLoopSummaryPanelPresenter.WhyDangerKey: return "danger pressure drove the result";
                 case MvpLoopSummaryPanelPresenter.WhyAttractionKey: return "attraction changed adventurer interest";
                 case MvpLoopSummaryPanelPresenter.WhyLootBonusKey: return "loot placement improved the reward";
                 case MvpLoopSummaryPanelPresenter.WhyHeatPressureKey: return "heat pressure raised the risk";
-                case MvpLoopSummaryPanelPresenter.WhyManaPressureKey: return "mana pressure constrained the run";
-                case MvpLoopSummaryPanelPresenter.WhyPathCapacityKey: return "path capacity shaped the run";
+                case MvpLoopSummaryPanelPresenter.WhyManaPressureKey: return "mana pressure constrained the adventurer visit";
+                case MvpLoopSummaryPanelPresenter.WhyPathCapacityKey: return "path capacity shaped the adventurer visit";
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey: return "{0}. Party: {1}";
                 case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
                 case AdventurerArrivalPressurePresenter.SummaryFormatKey: return "Adventurer pressure: {0}. Reason: {1}.";
                 case AdventurerArrivalPressurePresenter.BodyFormatKey: return "{0}. Reason: {1}.";
-                case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}.";
+                case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.";
                 case "ui.adventurer_pressure.band.not_yet": return "not yet";
                 case "ui.adventurer_pressure.band.low": return "low";
                 case "ui.adventurer_pressure.band.cautious_interest": return "cautious interest";
@@ -607,19 +607,19 @@ namespace DungeonBuilder.Tests.EditMode
                 case "adventurer.class.ranger.display_name": return "Ranger";
                 case "ui.mvp_adventurer_party.class.unknown": return "Unknown adventurer";
                 case MvpPlayerLoopSummaryPresenter.ResearchCompletedKey: return "Research completed";
-                case "ui.research_unlock.basic_run_analysis.summary": return "Basic run analysis unlocked";
-                case MvpLoopSummaryPanelPresenter.AnalysisNoRunKey: return "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome.";
-                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey: return "Next: run the dungeon so Basic Run Analysis can read the latest outcome.";
+                case "ui.research_unlock.basic_run_analysis.summary": return "Adventurer activity analysis unlocked";
+                case MvpLoopSummaryPanelPresenter.AnalysisNoRunKey: return "Adventurer Activity Analysis is ready. Observe adventurer activity to unlock analysis from the latest visit.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey: return "Next: observe adventurer activity so Adventurer Activity Analysis can read the latest visit.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey: return "Next: reduce danger or use a safer posture before pushing for more loot.";
-                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next run.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next adventurer visit.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey: return "Next: improve survivability or reduce danger so generated loot is recovered.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey: return "Next: repeat this setup or test slightly greedier pressure while heat is controlled.";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey: return "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot.";
-                case BasicRunAnalysisPlacementTargetPresenter.ReduceHeatTargetKey: return "Trap or loot node first. Heat rose this run; reduce heat pressure before another greedy run.";
+                case BasicRunAnalysisPlacementTargetPresenter.ReduceHeatTargetKey: return "Trap or loot node first. Heat rose during this adventurer visit; reduce heat pressure before another greedy run.";
                 case BasicRunAnalysisPlacementTargetPresenter.ImproveExtractionTargetKey: return "Room or monster first. Loot was generated but not recovered; improve survivability or path support.";
                 case BasicRunAnalysisPlacementTargetPresenter.TestGreedierTargetKey: return "Loot node first. Loot recovery worked and heat stayed controlled; test a slightly greedier reward setup.";
-                case BasicRunAnalysisPlacementTargetPresenter.FallbackTargetKey: return "Any one placement. Make one small change, then run again.";
-                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Run the dungeon to observe the first outcome.";
+                case BasicRunAnalysisPlacementTargetPresenter.FallbackTargetKey: return "Any one placement. Make one small change, then adjust before the next adventurer visit.";
+                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Observe adventurer activity to observe the first outcome.";
                 default: return fallback;
             }
         }

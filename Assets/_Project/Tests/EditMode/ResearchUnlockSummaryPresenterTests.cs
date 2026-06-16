@@ -73,7 +73,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Config());
 
             Assert.That(summary.SummaryLocalizationKey, Does.StartWith("ui."));
-            Assert.That(summary.SummaryLocalizationKey, Is.Not.EqualTo("Basic run analysis unlocked"));
+            Assert.That(summary.SummaryLocalizationKey, Is.Not.EqualTo("Adventurer activity analysis unlocked"));
         }
 
         private static ResearchUnlockBridgeConfig Config()

@@ -80,7 +80,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, Localized);
             Assert.That(text, Does.Contain("Adventurer traffic:"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Run Setup =="));
+            Assert.That(text, Does.Contain("== Activity Setup =="));
         }
 
         [Test]
@@ -127,8 +127,8 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpPlayableScreenPresenter.TopStatusKey) return "Top Status";
             if (key == MvpPlayableScreenPresenter.CurrentDungeonKey) return "Current Dungeon";
             if (key == MvpPlayableScreenPresenter.BuildChoiceKey) return "Build Choice";
-            if (key == MvpPlayableScreenPresenter.RunSetupKey) return "Run Setup";
-            if (key == MvpPlayableScreenPresenter.LatestRunKey) return "Latest Run";
+            if (key == MvpPlayableScreenPresenter.RunSetupKey) return "Activity Setup";
+            if (key == MvpPlayableScreenPresenter.LatestRunKey) return "Latest Adventurer Visit";
             if (key == MvpPlayableScreenPresenter.AnalysisNextActionKey) return "Analysis and Next Action";
             if (key == MvpPlayableScreenPresenter.SectionHeaderFormatKey) return "== {0} ==";
             if (key == MvpPlayableScreenPresenter.PlayerViewStatusKey) return "Player view: diagnostics hidden.";
@@ -138,14 +138,14 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpPlayableScreenPresenter.PlacePromptKey) return "Next build step: choose an option, then place or modify it.";
             if (key == MvpPlayableScreenPresenter.PartyUnavailableKey) return "Party preview unavailable.";
             if (key == MvpPlayableScreenPresenter.NoAnalysisKey) return "Run once to unlock analysis.";
-            if (key == MvpLoopSummaryPanelPresenter.ValueNoRunKey) return "No run yet.";
+            if (key == MvpLoopSummaryPanelPresenter.ValueNoRunKey) return "No adventurer visit yet.";
             if (key == MvpLoopSummaryPanelPresenter.ValueNoPlacementKey) return "no placement";
             if (key == MvpLoopSummaryPanelPresenter.ValueNoResearchKey) return "no research";
             if (key == MvpLoopSummaryPanelPresenter.ValueUnknownKey) return "unknown";
             if (key == MvpLoopSummaryPanelPresenter.RiskNoRunKey) return "no run yet";
             if (key == MvpLoopSummaryPanelPresenter.LootFormatKey) return "Loot: generated {0}, recovered {1}, tradeable {2}";
             if (key == MvpLoopSummaryPanelPresenter.SuggestionFormatKey) return "Suggested next action: {0}";
-            if (key == MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey) return "run dungeon";
+            if (key == MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey) return "observe dungeon";
             if (key == MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey) return "no active research";
             if (key == AdventurerRunIntentPresenter.DebugPostureFormatKey) return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
             if (key == AdventurerRunIntentResolver.ReasonFallbackKey) return "intent reason";

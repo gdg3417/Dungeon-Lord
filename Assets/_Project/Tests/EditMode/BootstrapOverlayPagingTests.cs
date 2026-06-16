@@ -108,11 +108,11 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Guided MVP Action"));
             Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
             Assert.That(text, Does.Not.Contain("Dungeon composition: structure.mana_generator.basic"));
-            Assert.That(text, Does.Contain("Next action: Run again or adjust one placement based on the summary."));
-            Assert.That(text, Does.Contain("First-session loop complete: placement, run, mana, loot, heat, and research are visible."));
-            Assert.That(text, Does.Not.Contain("First-session status: dungeon placement ready; run the dungeon next."));
+            Assert.That(text, Does.Contain("Next action: Adjust one placement before the next adventurer visit."));
+            Assert.That(text, Does.Contain("First-session loop complete: placement, adventurer activity, mana, loot, heat, and research are visible."));
+            Assert.That(text, Does.Not.Contain("First-session status: dungeon placement ready; observe adventurer activity next."));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
-            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify selected placement] [Run or observe dungeon]"));
+            Assert.That(text, Does.Not.Contain("Minimal MVP Actions: [Place or modify selected placement] [Observe Dungeon]"));
             Assert.That(text, Does.Contain("Diagnostics: Runtime Summary Page 1/9\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page"));
             Assert.That(text, Does.Contain("build-line"));
             Assert.That(text, Does.Contain("Mouse wheel or PageUp PageDown scroll diagnostics"));
@@ -152,8 +152,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Current Dungeon =="));
             Assert.That(text, Does.Contain("== Build Choice =="));
-            Assert.That(text, Does.Contain("== Run Setup =="));
-            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(text, Does.Contain("== Activity Setup =="));
+            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
+            Assert.That(text, Does.Not.Contain("== Latest Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
@@ -161,6 +162,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
             Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
+            Assert.That(text, Does.Contain("observe adventurer activity").IgnoreCase);
+            Assert.That(text, Does.Not.Contain("Run dungeon"));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -197,7 +200,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
-            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(text, Does.Not.Contain("build-line"));
@@ -247,7 +250,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
-            Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
+            Assert.That(labels.RunButton, Is.EqualTo("Observe Dungeon"));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
             Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
             Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
@@ -295,7 +298,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.BalancedPosture, Is.EqualTo("Balanced"));
             Assert.That(labels.GreedyPosture, Is.EqualTo("Greedy"));
             Assert.That(labels.PlacementButton, Is.EqualTo("Place or modify selected placement"));
-            Assert.That(labels.RunButton, Is.EqualTo("Run or observe dungeon"));
+            Assert.That(labels.RunButton, Is.EqualTo("Observe Dungeon"));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
 
@@ -447,7 +450,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(runFeedback, Is.Not.Empty);
             Assert.That(hasLocalizedRunResult, Is.True, "Fixture may validly produce success or failure; both must remain localized player-facing results.");
-            Assert.That(runText, Does.Contain("== Latest Run =="));
+            Assert.That(runText, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(runText, Does.Contain("== Analysis and Next Action =="));
             Assert.That(runText, Does.Contain("Loot: 0/0 recovered; 0 tradeable."));
             Assert.That(runText, Does.Contain("Heat: 17 -> 17"));
@@ -466,7 +469,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copiedSmoke, Does.Contain("Loot recovered:"));
             Assert.That(copiedSmoke, Does.Contain("Contract status:"));
             AssertNoRawPlayerFacingSmokeIds(copiedSmoke);
-            Assert.That(runText, Does.Contain("Latest Run"));
+            Assert.That(runText, Does.Contain("Latest Adventurer Visit"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
         }
@@ -494,10 +497,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(expectedResolvedPostureId));
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Adventurer intent: {expectedResolvedPostureName} likely. Run posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Adventurer intent: {expectedResolvedPostureName} likely. Challenge posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("debug fallback"));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain($"Latest run intent evidence: resolved intent {expectedResolvedPostureName}; run posture used {expectedResolvedPostureName}; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
+            Assert.That(copiedSmoke, Does.Contain($"Latest adventurer visit intent evidence: resolved intent {expectedResolvedPostureName}; challenge posture used {expectedResolvedPostureName}; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
         }
 
         [Test]
@@ -512,9 +515,9 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.RunOrObserveDungeon();
 
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent unavailable. Run posture used: Greedy debug fallback. Debug selected posture: Greedy."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent unavailable. Challenge posture used: Greedy debug fallback. Debug selected posture: Greedy."));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain("Latest run intent evidence: resolved intent Unavailable; run posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
+            Assert.That(copiedSmoke, Does.Contain("Latest adventurer visit intent evidence: resolved intent Unavailable; challenge posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
         }
 
         [Test]
@@ -540,7 +543,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(defaultText, Does.Contain("Path complete:"));
             Assert.That(defaultText, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(defaultText, Does.Not.Contain("Path built:"));
-            Assert.That(defaultText, Does.Not.Contain("Run observed:"));
+            Assert.That(defaultText, Does.Not.Contain("Visit observed:"));
             Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
@@ -564,7 +567,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
             Assert.That(playerFacingText, Does.Contain("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
-            Assert.That(playerFacingText, Does.Contain("== Latest Run =="));
+            Assert.That(playerFacingText, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             AssertNoPlayerFacingRawIds(playerFacingText);
@@ -773,7 +776,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Run result: succeeded."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer visit result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Party: "));
@@ -798,8 +801,8 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
-            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."));
+            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(text, Does.Contain("Failed"));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.outcome_cue"));
@@ -864,7 +867,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain("== Latest Run =="));
+            Assert.That(restoredText, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(restoredText, Does.Contain("== Analysis and Next Action =="));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(feedback));
         }
@@ -1051,7 +1054,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Minimal MVP Actions"));
             Assert.That(focusedFromRuntimePage, Does.Not.Contain("Place or modify selected placement"));
-            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Run or observe dungeon"));
+            Assert.That(focusedFromRuntimePage, Does.Not.Contain("Observe Dungeon"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-history-line"));
             Assert.That(focusedFromRuntimePage, Does.Contain("run-loot-line"));
@@ -1302,7 +1305,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
             Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
             Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
-            Assert.That(text, Does.Contain("Latest Run"));
+            Assert.That(text, Does.Contain("Latest Adventurer Visit"));
             Assert.That(text, Does.Contain("Mana reserve:"));
             Assert.That(text, Does.Contain("Loot:"));
             Assert.That(text, Does.Contain("Heat:"));
@@ -1353,7 +1356,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(text, Does.Contain(_overlay.MvpRunResultFeedback));
-            Assert.That(text, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+            Assert.That(text, Does.Contain("Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."));
         }
 
         [Test]
@@ -1380,7 +1383,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.CyclePlayerFacingSmokeSection();
             string feedback = RefreshText();
             Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(4));
-            Assert.That(feedback, Does.Contain("Smoke section: Latest run feedback"));
+            Assert.That(feedback, Does.Contain("Smoke section: Latest adventurer visit feedback"));
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
 
             _overlay.CyclePlayerFacingSmokeSection();
@@ -1415,13 +1418,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("First-session"));
             Assert.That(copied, Does.Contain("First Dungeon Contract"));
             Assert.That(copied, Does.Contain("Path built:"));
-            Assert.That(copied, Does.Contain("Run observed:"));
+            Assert.That(copied, Does.Contain("Visit observed:"));
             Assert.That(copied, Does.Contain("Loot recovered:"));
             Assert.That(copied, Does.Contain("Heat target:"));
             Assert.That(copied, Does.Contain("Analysis:"));
             Assert.That(copied, Does.Contain("Contract status:"));
             Assert.That(copied, Does.Contain(_overlay.MvpRunResultFeedback));
-            Assert.That(copied, Does.Contain("Outcome cue: the run failed, so reduce pressure before trying again."));
+            Assert.That(copied, Does.Contain("Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."));
             AssertNoRawPlayerFacingSmokeIds(copied);
             Assert.That(GUIUtility.systemCopyBuffer, Is.EqualTo(copied));
             Assert.That(visible, Does.Contain("Smoke text copied."));
@@ -1797,9 +1800,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
             map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.run_posture_used_format"] = "Adventurer intent: {0} likely. Run posture used: {1}. Debug selected posture: {2}.";
-            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Adventurer intent unavailable. Run posture used: {0} debug fallback. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest run intent evidence: resolved intent {0}; run posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
+            map["ui.adventurer_intent.run_posture_used_format"] = "Adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}.";
+            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Adventurer intent unavailable. Challenge posture used: {0} debug fallback. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest adventurer visit intent evidence: resolved intent {0}; challenge posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
             map["ui.adventurer_intent.unavailable"] = "Unavailable";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
@@ -1810,7 +1813,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.section.adventurer_pressure"] = "Adventurer pressure";
             map["ui.adventurer_pressure.summary_format"] = "Adventurer pressure: {0}. Reason: {1}.";
             map["ui.adventurer_pressure.body_format"] = "{0}. Reason: {1}.";
-            map["ui.adventurer_pressure.detail_format"] = "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}.";
+            map["ui.adventurer_pressure.detail_format"] = "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.";
             map["ui.adventurer_pressure.band.not_yet"] = "not yet";
             map["ui.adventurer_pressure.band.low"] = "low";
             map["ui.adventurer_pressure.band.cautious_interest"] = "cautious interest";
@@ -1846,21 +1849,21 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.top_status"] = "Top Status";
             map["ui.mvp_screen.section.current_dungeon"] = "Current Dungeon";
             map["ui.mvp_screen.section.build_choice"] = "Build Choice";
-            map["ui.mvp_screen.section.run_setup"] = "Run Setup";
-            map["ui.mvp_screen.section.latest_run"] = "Latest Run";
+            map["ui.mvp_screen.section.run_setup"] = "Activity Setup";
+            map["ui.mvp_screen.section.latest_run"] = "Latest Adventurer Visit";
             map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
             map["ui.mvp_screen.section.first_contract"] = "First Dungeon Contract";
             map["ui.mvp_first_contract.title"] = "First Dungeon Contract";
             map["ui.mvp_first_contract.path_built_format"] = "Path built: {0}";
-            map["ui.mvp_first_contract.run_observed_format"] = "Run observed: {0}";
+            map["ui.mvp_first_contract.run_observed_format"] = "Visit observed: {0}";
             map["ui.mvp_first_contract.loot_recovered_format"] = "Loot recovered: {0} / {1}";
             map["ui.mvp_first_contract.heat_target_format"] = "Heat target: {0} (current: {1})";
             map["ui.mvp_first_contract.analysis_format"] = "Analysis: {0}";
             map["ui.mvp_first_contract.status_format"] = "Contract status: {0}";
             map["ui.mvp_first_contract.value.complete"] = "complete";
             map["ui.mvp_first_contract.value.incomplete"] = "incomplete";
-            map["ui.mvp_first_contract.value.analysis_unlocked"] = "Basic Run Analysis unlocked";
-            map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Basic Run Analysis";
+            map["ui.mvp_first_contract.value.analysis_unlocked"] = "Adventurer Activity Analysis unlocked";
+            map["ui.mvp_first_contract.value.analysis_locked"] = "unlock Adventurer Activity Analysis";
             map["ui.mvp_first_contract.status.in_progress"] = "In progress";
             map["ui.mvp_first_contract.status.complete"] = "Complete. Try a riskier setup or improve loot recovery.";
             map["ui.mvp_first_contract.status.unavailable"] = "Unavailable until objective config is fixed";
@@ -1876,11 +1879,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
             map["ui.mvp_screen.run_posture_format"] = "Debug selected posture: {0}";
             map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
-            map["ui.mvp_screen.prompt.run_or_observe"] = "Next run step: run or observe the dungeon when ready.";
+            map["ui.mvp_screen.prompt.run_or_observe"] = "Next activity step: observe the dungeon when ready.";
             map["ui.mvp_screen.feedback.no_placement"] = "No build change yet this session.";
-            map["ui.mvp_screen.feedback.no_run"] = "No run observed yet this session.";
+            map["ui.mvp_screen.feedback.no_run"] = "No adventurer visit observed yet this session.";
             map["ui.mvp_screen.comparison.none"] = "Comparison: choose the other option in this category to compare tradeoffs.";
-            map["ui.mvp_screen.analysis.no_run"] = "Why it happened: run the dungeon to see the first result.";
+            map["ui.mvp_screen.analysis.no_run"] = "Why it happened: observe adventurer activity to see the first result.";
             map["ui.mvp_screen.party.unavailable"] = "Party: no adventurers observed yet.";
             map["ui.mvp_screen.party.format"] = "Party: {0}";
             map["ui.mvp_screen.research_format"] = "Research: {0}";
@@ -1888,7 +1891,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.analysis.format"] = "Why it happened: {0}";
             map["ui.mvp_loop.panel.placement_format"] = "Placement: {0}";
             map["ui.mvp_loop.panel.composition_format"] = "Dungeon composition: {0}";
-            map["ui.mvp_loop.panel.latest_run_format"] = "Latest run: {0}";
+            map["ui.mvp_loop.panel.latest_run_format"] = "Latest adventurer visit: {0}";
             map["ui.mvp_loop.panel.mana_format"] = "Mana reserve: {0:0.##}";
             map["ui.mvp_loop.panel.loot_format"] = "Loot: {1}/{0} recovered; {2} tradeable.";
             map["ui.mvp_loop.panel.heat_format"] = "Heat: {0:0.##} -> {1:0.##} ({2}). {3}";
@@ -1897,13 +1900,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.panel.adventurer_party_format"] = "{0}";
             map["ui.mvp_loop.panel.suggestion_format"] = "{0}";
             map["ui.mvp_loop.value.no_placement"] = "No dungeon placements yet";
-            map["ui.mvp_loop.value.no_run"] = "No run yet";
+            map["ui.mvp_loop.value.no_run"] = "No adventurer visit yet";
             map["ui.mvp_loop.value.unknown"] = "Unknown";
             map["ui.mvp_loop.value.no_research"] = "No research";
             map["ui.mvp_loop.run_status.succeeded"] = "Succeeded";
             map["ui.mvp_loop.run_status.failed"] = "Failed";
             map["ui.mvp_loop.section.current_dungeon"] = "Current Dungeon";
-            map["ui.mvp_loop.section.latest_run"] = "Latest Run";
+            map["ui.mvp_loop.section.latest_run"] = "Latest Adventurer Visit";
             map["ui.mvp_loop.section.why_it_happened"] = "Why It Happened";
             map["ui.mvp_loop.section.rewards_and_risk"] = "Rewards and Risk";
             map["ui.mvp_loop.section.research"] = "Research";
@@ -1912,23 +1915,23 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.inline_separator"] = " | ";
             map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
             map["ui.mvp_loop.panel.casualty_format"] = "Survivors: {0}/{1}; deaths: {2}";
-            map["ui.mvp_loop.why.no_run"] = "No run yet. Build or review the dungeon, then run it to learn what happens.";
+            map["ui.mvp_loop.why.no_run"] = "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.";
             map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
-            map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the run";
+            map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the adventurer visit";
             map["ui.mvp_loop.why.danger"] = "danger pressure drove the result";
-            map["ui.mvp_loop.why.mana_pressure"] = "mana pressure constrained the run";
+            map["ui.mvp_loop.why.mana_pressure"] = "mana pressure constrained the adventurer visit";
             map["ui.mvp_loop.why.heat_pressure"] = "heat pressure raised the risk";
             map["ui.mvp_loop.why.loot_bonus"] = "loot placement improved the reward";
             map["ui.mvp_loop.why.attraction"] = "attraction changed adventurer interest";
             map["ui.mvp_loop.why.mixed"] = "the current placement mix shaped the result";
             map["ui.mvp_loop.analysis.run_format"] = "Main reason: {0}. Analysis: {1}";
-            map["ui.mvp_loop.analysis.no_run"] = "Basic Run Analysis is ready. Run the dungeon to unlock analysis from the latest outcome.";
-            map["ui.mvp_loop.analysis.danger"] = "Danger was the largest pressure on this run.";
-            map["ui.mvp_loop.analysis.heat_increased"] = "Heat rose this run, increasing future risk.";
+            map["ui.mvp_loop.analysis.no_run"] = "Adventurer Activity Analysis is ready. Observe adventurer activity to unlock analysis from the latest visit.";
+            map["ui.mvp_loop.analysis.danger"] = "Danger was the largest pressure on this adventurer visit.";
+            map["ui.mvp_loop.analysis.heat_increased"] = "Heat rose during this adventurer visit, increasing future risk.";
             map["ui.mvp_loop.analysis.partial_loot"] = "Loot was generated but not fully recovered.";
             map["ui.mvp_loop.analysis.strong_loot_stable_heat"] = "Loot recovery worked while heat stayed controlled.";
-            map["ui.mvp_loop.analysis.mixed"] = "The resolved run data does not point to a single extra pressure.";
-            map["ui.mvp_loop.risk.no_run"] = "Risk will be shown after a run.";
+            map["ui.mvp_loop.analysis.mixed"] = "The resolved adventurer visit data does not point to a single extra pressure.";
+            map["ui.mvp_loop.risk.no_run"] = "Risk will be shown after an adventurer visit.";
             map["ui.mvp_loop.risk.stable"] = "Risk stayed steady.";
             map["ui.mvp_loop.risk.increased"] = "Risk increased.";
             map["ui.mvp_loop.risk.reduced"] = "Risk went down.";
@@ -1937,8 +1940,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.research.status.blocked_or_invalid"] = "Research unavailable";
             map["ui.research_unlock.none"] = "No research unlock yet";
             map["ui.research_unlock.unavailable"] = "Research unlock unavailable";
-            map["ui.research_unlock.basic_run_analysis.summary"] = "Basic run analysis unlocked";
-            map["mvp_loop.suggestion.run_dungeon"] = "Run the dungeon to observe the first outcome.";
+            map["ui.research_unlock.basic_run_analysis.summary"] = "Adventurer activity analysis unlocked";
+            map["mvp_loop.suggestion.run_dungeon"] = "Observe adventurer activity to observe the first outcome.";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
             map["ui.mvp_placement_comparison.compared_with_format"] = "Compared with {0}: {1}";
             map["ui.mvp_placement_comparison.room.basic_to_narrow_hall"] = "lower path capacity, better as a connector.";
@@ -1949,25 +1952,25 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_comparison.trap.snare_to_spike"] = "more danger and adds heat pressure.";
             map["ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache"] = "subtler loot and lower attraction.";
             map["ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic"] = "stronger loot and higher attraction.";
-            map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next run.";
+            map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next adventurer visit.";
             map["mvp_loop.suggestion.verify_research_status"] = "Verify research status before claiming progress.";
-            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
-            map["mvp_loop.suggestion.analysis.run_for_analysis"] = "Run the dungeon so Basic Run Analysis can read the latest outcome.";
+            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Adjust placement before the next adventurer visit.";
+            map["mvp_loop.suggestion.analysis.run_for_analysis"] = "Observe adventurer activity so Adventurer Activity Analysis can read the latest visit.";
             map["mvp_loop.suggestion.analysis.reduce_danger"] = "Reduce danger or use a safer posture before pushing for more loot.";
-            map["mvp_loop.suggestion.analysis.reduce_heat"] = "Lower heat pressure or use a cautious posture before the next run.";
+            map["mvp_loop.suggestion.analysis.reduce_heat"] = "Lower heat pressure or use a cautious posture before the next adventurer visit.";
             map["mvp_loop.suggestion.analysis.improve_extraction"] = "Improve survivability or reduce danger so generated loot is recovered.";
             map["mvp_loop.suggestion.analysis.test_greedier"] = "Repeat this setup or test slightly greedier pressure while heat is controlled.";
             AddGd10PlacementEffectsLocalization(map);
-            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Run again or improve placement based on the summary.";
-            map["mvp_loop.suggestion.analysis.run_for_analysis"] = "Run the dungeon so Basic Run Analysis can read the latest outcome.";
+            map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Adjust placement before the next adventurer visit.";
+            map["mvp_loop.suggestion.analysis.run_for_analysis"] = "Observe adventurer activity so Adventurer Activity Analysis can read the latest visit.";
             map["mvp_loop.suggestion.analysis.reduce_danger"] = "Reduce danger or use a safer posture before pushing for more loot.";
-            map["mvp_loop.suggestion.analysis.reduce_heat"] = "Lower heat pressure or use a cautious posture before the next run.";
+            map["mvp_loop.suggestion.analysis.reduce_heat"] = "Lower heat pressure or use a cautious posture before the next adventurer visit.";
             map["mvp_loop.suggestion.analysis.improve_extraction"] = "Improve survivability or reduce danger so generated loot is recovered.";
             map["mvp_loop.suggestion.analysis.test_greedier"] = "Repeat this setup or test slightly greedier pressure while heat is controlled.";
             map["ui.guided_mvp.panel.title"] = "Guided MVP Action";
             map["ui.mvp_action.panel.title"] = "Minimal MVP Actions";
             map["ui.mvp_action.button.place_or_modify"] = "Place or modify selected placement";
-            map["ui.mvp_action.button.run_or_observe"] = "Run or observe dungeon";
+            map["ui.mvp_action.button.run_or_observe"] = "Observe Dungeon";
             map["ui.mvp_action.button.show_diagnostics"] = "Show diagnostics";
             map["ui.mvp_action.button.hide_diagnostics"] = "Hide diagnostics";
             map["ui.mvp_action.selection.label"] = "Selected placement: {0}";
@@ -2020,21 +2023,21 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_preview.loot_node.hidden_cache"] = "Role: adds subtler loot with lower adventurer attraction.";
             map["ui.mvp_placement_preview.unknown"] = "Role unavailable.";
             map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
-            map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} run.";
+            map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} adventurer challenge.";
             map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
             map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
             map["ui.mvp_run_plan_preview.tradeoff.cautious"] = "lower loot, safer heat pressure.";
             map["ui.mvp_run_plan_preview.tradeoff.balanced"] = "standard loot and heat pressure.";
             map["ui.mvp_run_plan_preview.tradeoff.greedy"] = "higher loot, higher heat pressure.";
-            map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "run tradeoff unavailable.";
+            map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "activity tradeoff unavailable.";
             map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
             map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
-            map["ui.mvp_run_feedback.success_stable_heat"] = "Run result: succeeded. Loot extracted, heat stable.";
-            map["ui.mvp_run_feedback.success_heat_reduced"] = "Run result: succeeded. Loot extracted, heat reduced.";
-            map["ui.mvp_run_feedback.success_heat_increased"] = "Run result: succeeded. Loot extracted, heat increased.";
-            map["ui.mvp_run_feedback.failed"] = "Run result: failed. Review placement and try again.";
-            map["ui.mvp_run_feedback.unavailable"] = "Run result unavailable.";
-            map["ui.mvp_run_feedback.outcome_cue.failed"] = "Outcome cue: the run failed, so reduce pressure before trying again.";
+            map["ui.mvp_run_feedback.success_stable_heat"] = "Adventurer visit result: succeeded. Loot extracted, heat stable.";
+            map["ui.mvp_run_feedback.success_heat_reduced"] = "Adventurer visit result: succeeded. Loot extracted, heat reduced.";
+            map["ui.mvp_run_feedback.success_heat_increased"] = "Adventurer visit result: succeeded. Loot extracted, heat increased.";
+            map["ui.mvp_run_feedback.failed"] = "Adventurer visit result: failed. Review placement before the next challenge.";
+            map["ui.mvp_run_feedback.unavailable"] = "Adventurer visit result unavailable.";
+            map["ui.mvp_run_feedback.outcome_cue.failed"] = "Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge.";
             map["ui.mvp_run_feedback.outcome_cue.heat_increased"] = "Outcome cue: heat pressure rose; consider a safer posture or heat control.";
             map["ui.mvp_run_feedback.outcome_cue.controlled_loot"] = "Outcome cue: loot landed while heat stayed controlled.";
             map["ui.mvp_run_feedback.outcome_cue.format"] = "{0} {1}";
@@ -2055,7 +2058,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_smoke.section.full"] = "Full player-facing text";
             map["ui.mvp_smoke.section.loop_summary"] = "Loop summary";
             map["ui.mvp_smoke.section.plan_and_action"] = "Plan and action";
-            map["ui.mvp_smoke.section.latest_run_feedback"] = "Latest run feedback";
+            map["ui.mvp_smoke.section.latest_run_feedback"] = "Latest adventurer visit feedback";
             map["ui.mvp_smoke.section.compact"] = "Compact Smoke View";
             map["ui.mvp_smoke.adventurers_unavailable"] = "Adventurers: unavailable";
             map["ui.mvp_smoke.copy.confirmation"] = "Smoke text copied.";
@@ -2063,9 +2066,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_action.button.expand_panel"] = "Expand actions (F7)";
             map["ui.first_session.status.not_started"] = "First-session status: waiting for MVP loop summary.";
             map["ui.first_session.status.place_structure"] = "First-session status: place one room, monster, trap, or loot node to start the loop.";
-            map["ui.first_session.status.run_dungeon"] = "First-session status: dungeon placement ready; run the dungeon next.";
+            map["ui.first_session.status.run_dungeon"] = "First-session status: dungeon placement ready; observe adventurer activity next.";
             map["ui.first_session.status.observe_summary"] = "First-session status: observe mana, loot, heat, research, and next action.";
-            map["ui.first_session.status.complete"] = "First-session loop complete: placement, run, mana, loot, heat, and research are visible.";
+            map["ui.first_session.status.complete"] = "First-session loop complete: placement, adventurer activity, mana, loot, heat, and research are visible.";
             map["ui.guided_mvp.panel.step_format"] = "Step: {0}";
             map["ui.guided_mvp.panel.status_format"] = "Status: {0}";
             map["ui.guided_mvp.panel.next_action_format"] = "Next action: {0}";
@@ -2073,24 +2076,24 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.guided_mvp.value.complete_yes"] = "Yes";
             map["ui.guided_mvp.value.complete_no"] = "No";
             map["guided_mvp.step.place_or_modify_structure"] = "Place or modify one dungeon placement";
-            map["guided_mvp.step.run_or_observe"] = "Run or observe adventurers";
+            map["guided_mvp.step.run_or_observe"] = "Observe adventurer activity";
             map["guided_mvp.step.reduce_heat_pressure"] = "Reduce heat pressure";
             map["guided_mvp.step.improve_survivability_or_layout"] = "Improve survivability or layout";
             map["guided_mvp.step.verify_research_status"] = "Verify research status";
             map["guided_mvp.step.repeat_or_improve"] = "Repeat the loop or improve placement";
             map["guided_mvp.status.missing_save"] = "Save state is not available yet.";
             map["guided_mvp.status.place_or_modify_structure"] = "No dungeon placement is visible in the current summary.";
-            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer run has been observed yet.";
+            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer adventurer activity has been observed yet.";
             map["guided_mvp.status.heat_pressure"] = "The latest summary shows heat pressure.";
-            map["guided_mvp.status.poor_loot_extraction"] = "The latest run generated loot but extracted none.";
+            map["guided_mvp.status.poor_loot_extraction"] = "The latest adventurer visit generated loot but extracted none.";
             map["guided_mvp.status.research_completion_pending"] = "Research completion is pending verification.";
             map["guided_mvp.status.repeat_or_improve"] = "Placement, run, mana, loot, heat, and research are visible in the summary.";
             map["guided_mvp.action.place_structure"] = "Place one room, monster, trap, or loot node.";
-            map["guided_mvp.action.run_dungeon"] = "Run the dungeon and watch the MVP Loop Summary update.";
+            map["guided_mvp.action.run_dungeon"] = "Observe adventurer activity and watch the MVP Loop Summary update.";
             map["guided_mvp.action.reduce_heat_pressure"] = "Improve placement toward lower heat pressure before pushing further.";
-            map["guided_mvp.action.improve_survivability_or_layout"] = "Improve survivability or layout, then run again.";
+            map["guided_mvp.action.improve_survivability_or_layout"] = "Improve survivability or layout, then adjust before the next adventurer visit.";
             map["guided_mvp.action.verify_research_status"] = "Check the research status line before claiming progress.";
-            map["guided_mvp.action.repeat_or_improve"] = "Run again or adjust one placement based on the summary.";
+            map["guided_mvp.action.repeat_or_improve"] = "Adjust one placement before the next adventurer visit.";
             if (includeDiagnosticsLocalization)
             {
                 map["ui.dev.hint.toggle_panel"] = "F1 toggles Dev Panel";
@@ -2125,7 +2128,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.loot_bonus_format"] = "loot +{0}";
             map["ui.mvp_placement_effects.attraction_format"] = "attraction +{0}";
             map["ui.mvp_placement_effects.explanation_format"] = "{0} ({1})";
-            map["ui.mvp_placement_effects.explanation.room.basic"] = "Basic Room opens the run path and capacity context";
+            map["ui.mvp_placement_effects.explanation.room.basic"] = "Basic Room opens the adventurer path and capacity context";
             map["ui.mvp_placement_effects.explanation.room.narrow_hall"] = "Narrow Hall connects the route with lower path capacity than a Basic Room";
             map["ui.mvp_placement_effects.explanation.monster.skeleton"] = "Skeleton adds danger and mana upkeep pressure";
             map["ui.mvp_placement_effects.explanation.monster.goblin"] = "Goblin adds lighter danger, lower mana upkeep, and a small loot signal";

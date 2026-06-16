@@ -179,7 +179,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("First Dungeon Contract"));
             Assert.That(text, Does.Contain("Path built: complete"));
             Assert.That(text, Does.Contain("Loot recovered: 7 / 10"));
-            Assert.That(text, Does.Contain("Analysis: Basic Run Analysis unlocked"));
+            Assert.That(text, Does.Contain("Analysis: Adventurer Activity Analysis unlocked"));
             Assert.That(text, Does.Not.Contain("research.unlock"));
             Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
         }
@@ -263,15 +263,15 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 case MvpFirstSessionObjectivePresenter.TitleKey: return "First Dungeon Contract";
                 case MvpFirstSessionObjectivePresenter.PathBuiltFormatKey: return "Path built: {0}";
-                case MvpFirstSessionObjectivePresenter.RunObservedFormatKey: return "Run observed: {0}";
+                case MvpFirstSessionObjectivePresenter.RunObservedFormatKey: return "Visit observed: {0}";
                 case MvpFirstSessionObjectivePresenter.LootRecoveredFormatKey: return "Loot recovered: {0} / {1}";
                 case MvpFirstSessionObjectivePresenter.HeatTargetFormatKey: return "Heat target: {0} (current: {1})";
                 case MvpFirstSessionObjectivePresenter.AnalysisFormatKey: return "Analysis: {0}";
                 case MvpFirstSessionObjectivePresenter.StatusFormatKey: return "Contract status: {0}";
                 case MvpFirstSessionObjectivePresenter.CompleteKey: return "complete";
                 case MvpFirstSessionObjectivePresenter.IncompleteKey: return "incomplete";
-                case MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey: return "Basic Run Analysis unlocked";
-                case MvpFirstSessionObjectivePresenter.AnalysisLockedKey: return "unlock Basic Run Analysis";
+                case MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey: return "Adventurer Activity Analysis unlocked";
+                case MvpFirstSessionObjectivePresenter.AnalysisLockedKey: return "unlock Adventurer Activity Analysis";
                 case MvpFirstSessionObjectivePresenter.StatusInProgressKey: return "In progress";
                 case MvpFirstSessionObjectivePresenter.StatusCompleteKey: return "Complete. Try a riskier setup or improve loot recovery.";
                 case MvpFirstSessionObjectivePresenter.StatusUnavailableKey: return "Unavailable until objective config is fixed";

@@ -87,7 +87,7 @@ namespace DungeonBuilder.M0.Tests
         {
             string line = BasicRunAnalysisSelectedPlacementFitPresenter.BuildFitLine(Summary(), BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey, MvpDungeonPlacementIds.LootNodeCategoryId, Localize);
 
-            Assert.That(line, Is.EqualTo("Selected placement fit: Current selection is LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.LootNodeCategoryKey + "], but analysis recommends LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.MonsterOrTrapTargetLabelKey + "] first. Switch category before the next run."));
+            Assert.That(line, Is.EqualTo("Selected placement fit: Current selection is LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.LootNodeCategoryKey + "], but analysis recommends LOC[" + BasicRunAnalysisSelectedPlacementFitPresenter.MonsterOrTrapTargetLabelKey + "] first. Switch category before the next adventurer visit."));
         }
 
         private static string Resolve(string targetKey, string selectedCategoryId)
@@ -112,7 +112,7 @@ namespace DungeonBuilder.M0.Tests
                 case BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey:
                     return "Selected placement fit: {0}";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey:
-                    return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next run.";
+                    return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next adventurer visit.";
                 default:
                     return "LOC[" + key + "]";
             }

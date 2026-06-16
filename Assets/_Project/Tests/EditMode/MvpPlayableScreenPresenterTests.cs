@@ -53,12 +53,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Current Dungeon =="));
             Assert.That(text, Does.Contain("== Build Choice =="));
-            Assert.That(text, Does.Contain("== Run Setup =="));
-            Assert.That(text, Does.Contain("== Latest Run =="));
+            Assert.That(text, Does.Contain("== Activity Setup =="));
+            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(text, Does.Not.Contain("Path built:"));
-            Assert.That(text, Does.Not.Contain("Run observed:"));
+            Assert.That(text, Does.Not.Contain("Visit observed:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Status banner."));
             Assert.That(text, Does.Contain("Mana reserve: 12"));
@@ -72,10 +72,10 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
-            Assert.That(text, Does.Contain("No run yet"));
-            Assert.That(text, Does.Contain("Run the dungeon to observe the first outcome."));
+            Assert.That(text, Does.Contain("No adventurer visit yet"));
+            Assert.That(text, Does.Contain("Observe adventurer activity to observe the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
-            Assert.That(text.IndexOf("== Latest Run ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
+            Assert.That(text.IndexOf("== Latest Adventurer Visit ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
@@ -92,21 +92,21 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",
             [MvpPlayableScreenPresenter.BuildChoiceKey] = "Build Choice",
-            [MvpPlayableScreenPresenter.RunSetupKey] = "Run Setup",
-            [MvpPlayableScreenPresenter.LatestRunKey] = "Latest Run",
+            [MvpPlayableScreenPresenter.RunSetupKey] = "Activity Setup",
+            [MvpPlayableScreenPresenter.LatestRunKey] = "Latest Adventurer Visit",
             [MvpPlayableScreenPresenter.AnalysisNextActionKey] = "Analysis and Next Action",
             [MvpPlayableScreenPresenter.FirstContractKey] = "First Dungeon Contract",
             [MvpFirstSessionObjectivePresenter.TitleKey] = "First Dungeon Contract",
             [MvpFirstSessionObjectivePresenter.PathBuiltFormatKey] = "Path built: {0}",
-            [MvpFirstSessionObjectivePresenter.RunObservedFormatKey] = "Run observed: {0}",
+            [MvpFirstSessionObjectivePresenter.RunObservedFormatKey] = "Visit observed: {0}",
             [MvpFirstSessionObjectivePresenter.LootRecoveredFormatKey] = "Loot recovered: {0} / {1}",
             [MvpFirstSessionObjectivePresenter.HeatTargetFormatKey] = "Heat target: {0} (current: {1})",
             [MvpFirstSessionObjectivePresenter.AnalysisFormatKey] = "Analysis: {0}",
             [MvpFirstSessionObjectivePresenter.StatusFormatKey] = "Contract status: {0}",
             [MvpFirstSessionObjectivePresenter.CompleteKey] = "complete",
             [MvpFirstSessionObjectivePresenter.IncompleteKey] = "incomplete",
-            [MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey] = "Basic Run Analysis unlocked",
-            [MvpFirstSessionObjectivePresenter.AnalysisLockedKey] = "unlock Basic Run Analysis",
+            [MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey] = "Adventurer Activity Analysis unlocked",
+            [MvpFirstSessionObjectivePresenter.AnalysisLockedKey] = "unlock Adventurer Activity Analysis",
             [MvpFirstSessionObjectivePresenter.StatusInProgressKey] = "In progress",
             [MvpFirstSessionObjectivePresenter.StatusCompleteKey] = "Complete. Try a riskier setup or improve loot recovery.",
             [MvpFirstSessionObjectivePresenter.CompactInProgressFormatKey] = "{0}: {1}. Loot {2} / {3}, {4}.",
@@ -120,9 +120,9 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.SelectedPlacementFormatKey] = "Selected placement: {0} / {1}",
             [MvpPlayableScreenPresenter.RunPostureFormatKey] = "Debug selected posture: {0}",
             [MvpPlayableScreenPresenter.PlacePromptKey] = "Next build step: choose an option, then place or modify it.",
-            [MvpPlayableScreenPresenter.RunPromptKey] = "Next run step: run or observe the dungeon when ready.",
-            [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No run observed yet this session.",
-            [MvpPlayableScreenPresenter.NoAnalysisKey] = "Why it happened: run the dungeon to see the first result.",
+            [MvpPlayableScreenPresenter.RunPromptKey] = "Next activity step: observe the dungeon when ready.",
+            [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No adventurer visit observed yet this session.",
+            [MvpPlayableScreenPresenter.NoAnalysisKey] = "Why it happened: observe adventurer activity to see the first result.",
             [MvpPlayableScreenPresenter.PartyUnavailableKey] = "Party: no adventurers observed yet.",
             [MvpPlayableScreenPresenter.PartyFormatKey] = "Party: {0}",
             [MvpPlayableScreenPresenter.ResearchFormatKey] = "Research: {0}",
@@ -139,7 +139,7 @@ namespace DungeonBuilder.Tests.EditMode
             [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
                 [AdventurerArrivalPressurePresenter.SummaryFormatKey] = "Adventurer pressure: {0}. Reason: {1}.",
                 [AdventurerArrivalPressurePresenter.BodyFormatKey] = "{0}. Reason: {1}.",
-                [AdventurerArrivalPressurePresenter.DetailFormatKey] = "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest outcome {11}.",
+                [AdventurerArrivalPressurePresenter.DetailFormatKey] = "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.",
                 ["ui.adventurer_pressure.band.not_yet"] = "not yet",
                 ["ui.adventurer_pressure.band.low"] = "low",
                 ["ui.adventurer_pressure.band.cautious_interest"] = "cautious interest",
@@ -163,9 +163,9 @@ namespace DungeonBuilder.Tests.EditMode
             ["run.posture.cautious.name"] = "Cautious",
                 ["run.posture.balanced.name"] = "Balanced",
                 ["run.posture.greedy.name"] = "Greedy",
-            [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No run yet",
+            [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No adventurer visit yet",
             [MvpLoopSummaryPanelPresenter.ValueUnknownKey] = "Unknown",
-            [MvpLoopSummaryPanelPresenter.RiskNoRunKey] = "Risk will be shown after a run.",
+            [MvpLoopSummaryPanelPresenter.RiskNoRunKey] = "Risk will be shown after an adventurer visit.",
             [MvpLoopSummaryPanelPresenter.ValueNoPlacementKey] = "No dungeon placements yet",
             [MvpPlacementEffectsPresenter.EmptyKey] = "none yet",
             [MvpPlacementEffectsPresenter.CombinedFormatKey] = "{0}",
@@ -174,7 +174,7 @@ namespace DungeonBuilder.Tests.EditMode
             ["placement.category.room.display_name"] = "Room",
             ["placement.option.room.basic.display_name"] = "Basic Room",
             ["ui.research.status.active_in_progress"] = "Research in progress",
-            [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Run the dungeon to observe the first outcome.",
+            [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to observe the first outcome.",
             [GuidedMvpActionPathPanelPresenter.CompleteNoKey] = "No"
         };
     }

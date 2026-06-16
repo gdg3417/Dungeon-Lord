@@ -17,7 +17,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: true,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
         }
 
         [Test]
@@ -29,7 +29,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: true,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result: succeeded. Loot extracted, heat reduced. Mana 8. Loot 6/4/2. Heat 9->6. Outcome cue: loot landed while heat stayed controlled."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result: succeeded. Loot extracted, heat reduced. Mana 8. Loot 6/4/2. Heat 9->6. Outcome cue: loot landed while heat stayed controlled."));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: true,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result: succeeded. Loot extracted, heat increased. Mana 5. Loot 9/6/4. Heat 7->11. Outcome cue: heat pressure rose; consider a safer posture or heat control."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result: succeeded. Loot extracted, heat increased. Mana 5. Loot 9/6/4. Heat 7->11. Outcome cue: heat pressure rose; consider a safer posture or heat control."));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: true,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result: failed. Review placement and try again. Mana 2. Loot 1/0/0. Heat 12->14. Outcome cue: the run failed, so reduce pressure before trying again."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result: failed. Review placement before the next challenge. Mana 2. Loot 1/0/0. Heat 12->14. Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."));
             Assert.That(text, Does.Not.Contain("run-debug-raw"));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.HeatScrubberBasicId));
@@ -76,7 +76,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: true,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Adventurers: Warrior, Rogue Outcome cue: loot landed while heat stayed controlled."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Adventurers: Warrior, Rogue Outcome cue: loot landed while heat stayed controlled."));
             Assert.That(text, Does.Not.Contain("adventurer.class."));
         }
 
@@ -90,7 +90,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Localized,
                 MinimalMvpActionPanelPresenter.GreedyPostureKey);
 
-            Assert.That(text, Is.EqualTo("Posture: Greedy. Run result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
+            Assert.That(text, Is.EqualTo("Posture: Greedy. Adventurer visit result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
             Assert.That(text, Does.Not.Contain(RunPostureResolver.GreedyId));
             Assert.That(text, Does.Not.Contain("run.posture"));
         }
@@ -120,7 +120,7 @@ namespace DungeonBuilder.Tests.EditMode
                 didRun: false,
                 Localized);
 
-            Assert.That(text, Is.EqualTo("Run result unavailable."));
+            Assert.That(text, Is.EqualTo("Adventurer visit result unavailable."));
             Assert.That(text, Does.Not.Contain("structure.debug.raw"));
         }
 
@@ -278,12 +278,12 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var map = new Dictionary<string, string>
             {
-                [MvpRunResultFeedbackPresenter.SuccessStableHeatKey] = "Run result: succeeded. Loot extracted, heat stable.",
-                [MvpRunResultFeedbackPresenter.SuccessHeatReducedKey] = "Run result: succeeded. Loot extracted, heat reduced.",
-                [MvpRunResultFeedbackPresenter.SuccessHeatIncreasedKey] = "Run result: succeeded. Loot extracted, heat increased.",
-                [MvpRunResultFeedbackPresenter.FailedKey] = "Run result: failed. Review placement and try again.",
-                [MvpRunResultFeedbackPresenter.UnavailableKey] = "Run result unavailable.",
-                [MvpRunResultFeedbackPresenter.OutcomeCueFailedKey] = "Outcome cue: the run failed, so reduce pressure before trying again.",
+                [MvpRunResultFeedbackPresenter.SuccessStableHeatKey] = "Adventurer visit result: succeeded. Loot extracted, heat stable.",
+                [MvpRunResultFeedbackPresenter.SuccessHeatReducedKey] = "Adventurer visit result: succeeded. Loot extracted, heat reduced.",
+                [MvpRunResultFeedbackPresenter.SuccessHeatIncreasedKey] = "Adventurer visit result: succeeded. Loot extracted, heat increased.",
+                [MvpRunResultFeedbackPresenter.FailedKey] = "Adventurer visit result: failed. Review placement before the next challenge.",
+                [MvpRunResultFeedbackPresenter.UnavailableKey] = "Adventurer visit result unavailable.",
+                [MvpRunResultFeedbackPresenter.OutcomeCueFailedKey] = "Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge.",
                 [MvpRunResultFeedbackPresenter.OutcomeCueHeatIncreasedKey] = "Outcome cue: heat pressure rose; consider a safer posture or heat control.",
                 [MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey] = "Outcome cue: loot landed while heat stayed controlled.",
                 [MvpRunResultFeedbackPresenter.OutcomeCueFormatKey] = "{0} {1}",
