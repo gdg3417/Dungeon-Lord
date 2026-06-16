@@ -42,7 +42,7 @@ namespace DungeonBuilder.Tests.EditMode
                 "Role: adds room space and path context.",
                 "Compared with Narrow Hall: lower path capacity, better as a connector.",
                 "Balanced",
-                "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.",
+                "Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.",
                 string.Empty,
                 string.Empty,
                 "Status banner.",
@@ -69,11 +69,11 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Not.Contain("Selected posture: Balanced"));
-            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("No adventurer visit yet"));
-            Assert.That(text, Does.Contain("Observe adventurer activity to observe the first outcome."));
+            Assert.That(text, Does.Contain("Observe adventurer activity to see the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
             Assert.That(text.IndexOf("== Latest Adventurer Visit ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
@@ -174,7 +174,7 @@ namespace DungeonBuilder.Tests.EditMode
             ["placement.category.room.display_name"] = "Room",
             ["placement.option.room.basic.display_name"] = "Basic Room",
             ["ui.research.status.active_in_progress"] = "Research in progress",
-            [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to observe the first outcome.",
+            [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to see the first outcome.",
             [GuidedMvpActionPathPanelPresenter.CompleteNoKey] = "No"
         };
     }

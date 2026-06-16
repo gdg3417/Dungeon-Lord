@@ -565,7 +565,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.RiskStableKey: return "Risk stayed steady.";
                 case MvpLoopSummaryPanelPresenter.RiskIncreasedKey: return "Risk increased.";
                 case MvpLoopSummaryPanelPresenter.RiskReducedKey: return "Risk went down.";
-                case MvpLoopSummaryPanelPresenter.WhyNoRunKey: return "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.";
+                case MvpLoopSummaryPanelPresenter.WhyNoRunKey: return "No adventurer visit yet. Build or review the dungeon, then observe adventurer activity to learn what happens.";
                 case MvpLoopSummaryPanelPresenter.WhyRunFormatKey: return "Main reason: {0}.";
                 case MvpLoopSummaryPanelPresenter.WhyMixedKey: return "the current placement mix shaped the result";
                 case MvpLoopSummaryPanelPresenter.WhyDangerKey: return "danger pressure drove the result";
@@ -619,7 +619,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case BasicRunAnalysisPlacementTargetPresenter.ImproveExtractionTargetKey: return "Room or monster first. Loot was generated but not recovered; improve survivability or path support.";
                 case BasicRunAnalysisPlacementTargetPresenter.TestGreedierTargetKey: return "Loot node first. Loot recovery worked and heat stayed controlled; test a slightly greedier reward setup.";
                 case BasicRunAnalysisPlacementTargetPresenter.FallbackTargetKey: return "Any one placement. Make one small change, then adjust before the next adventurer visit.";
-                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Observe adventurer activity to observe the first outcome.";
+                case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "Observe adventurer activity to see the first outcome.";
                 default: return fallback;
             }
         }

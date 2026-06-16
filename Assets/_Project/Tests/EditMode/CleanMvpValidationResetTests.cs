@@ -297,7 +297,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.BalancedId));
             Assert.That(_overlay.GetSelectedMvpRunPostureDisplayName(), Is.EqualTo("Balanced"));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
-            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(refreshed, Does.Contain("Latest Adventurer Visit"));
             Assert.That(refreshed, Does.Contain("No adventurer visit yet"));
@@ -306,7 +306,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(refreshed, Does.Contain("Heat: 0 -> 0"));
             Assert.That(refreshed, Does.Contain("Path complete: No"));
             Assert.That(refreshed, Does.Contain("Next build step: choose an option, then place or modify it."));
-            Assert.That(refreshed, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(refreshed, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(refreshed, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(refreshed, Does.Not.Contain("stale placement feedback"));
             Assert.That(refreshed, Does.Not.Contain("stale run feedback"));
@@ -525,7 +525,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.inline_separator"] = " | ";
             map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
             map["ui.mvp_loop.panel.casualty_format"] = "Survivors: {0}/{1}; deaths: {2}";
-            map["ui.mvp_loop.why.no_run"] = "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.";
+            map["ui.mvp_loop.why.no_run"] = "No adventurer visit yet. Build or review the dungeon, then observe adventurer activity to learn what happens.";
             map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
             map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the adventurer visit";
             map["ui.mvp_loop.why.danger"] = "danger pressure drove the result";
@@ -545,7 +545,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.risk.stable"] = "Risk stayed steady.";
             map["ui.mvp_loop.risk.increased"] = "Risk increased.";
             map["ui.mvp_loop.risk.reduced"] = "Risk went down.";
-            map["mvp_loop.suggestion.run_dungeon"] = "Observe adventurer activity to observe the first outcome.";
+            map["mvp_loop.suggestion.run_dungeon"] = "Observe adventurer activity to see the first outcome.";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
             map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next adventurer visit.";
             map["mvp_loop.suggestion.verify_research_status"] = "Verify research status before claiming progress.";

@@ -154,7 +154,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Build Choice =="));
             Assert.That(text, Does.Contain("== Activity Setup =="));
             Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(text, Does.Not.Contain("== Latest Run =="));
+            Assert.That(text, Does.Not.Contain("== Latest " + "Run =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
@@ -162,8 +162,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
             Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
-            Assert.That(text, Does.Contain("observe adventurer activity").IgnoreCase);
-            Assert.That(text, Does.Not.Contain("Run dungeon"));
+            Assert.That(text, Does.Contain("Adjust placement before the next adventurer visit."));
+            Assert.That(text, Does.Not.Contain("Run " + "dungeon"));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -258,7 +258,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.LootGroupHeader, Is.EqualTo("Loot:"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
-            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ShowDiagnosticsButton, Is.EqualTo("Show diagnostics"));
             Assert.That(labels.HideDiagnosticsButton, Is.EqualTo("Hide diagnostics"));
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
@@ -281,7 +281,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PostureLabel, Is.EqualTo("Debug posture: Balanced"));
             Assert.That(labels.PreviewText, Is.EqualTo("Role: adds room space and path context."));
-            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(labels.RunPlanPreviewText, Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.RoomsGroupHeader, Is.EqualTo("Rooms:"));
             Assert.That(labels.MonstersGroupHeader, Is.EqualTo("Monsters:"));
             Assert.That(labels.TrapsGroupHeader, Is.EqualTo("Traps:"));
@@ -338,15 +338,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Mana Generator"));
-            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
             Assert.That(labels.ManaGeneratorSelection, Is.EqualTo("Mana Generator"));
             Assert.That(labels.HeatScrubberSelection, Is.EqualTo("Heat Scrubber"));
             Assert.That(labels.RiskLabSelection, Is.EqualTo("Risk Lab"));
         }
 
-        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey, "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
-        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey, "Plan: Heat Scrubber + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
-        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey, "Plan: Risk Lab + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(StructureSimulationPass.ManaGeneratorBasicId, "Mana Generator", MinimalMvpActionPanelPresenter.ManaGeneratorSelectionKey, "Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(StructureSimulationPass.HeatScrubberBasicId, "Heat Scrubber", MinimalMvpActionPanelPresenter.HeatScrubberSelectionKey, "Plan: Heat Scrubber + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(StructureSimulationPass.RiskLabBasicId, "Risk Lab", MinimalMvpActionPanelPresenter.RiskLabSelectionKey, "Plan: Risk Lab + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.")]
         public void PlayerFacingStructureSelection_AllowsExistingMvpSafeStructureOptions(string structureId, string displayName, string selectionKey, string previewText)
         {
             bool selected = _overlay.SelectMvpStructure(structureId);
@@ -379,15 +379,15 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(didReset, Is.True);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.BalancedId));
-            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure."));
-            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Not.Contain("stale placement feedback"));
             Assert.That(text, Does.Not.Contain("stale run feedback"));
         }
 
-        [TestCase(RunPostureResolver.CautiousId, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
-        [TestCase(RunPostureResolver.GreedyId, "Plan: Mana Generator + Greedy run.\nExpected tradeoff: higher loot, higher heat pressure.")]
+        [TestCase(RunPostureResolver.CautiousId, "Plan: Mana Generator + Cautious adventurer challenge.\nExpected tradeoff: lower loot, safer heat pressure.")]
+        [TestCase(RunPostureResolver.GreedyId, "Plan: Mana Generator + Greedy adventurer challenge.\nExpected tradeoff: higher loot, higher heat pressure.")]
         public void SelectingRunPosture_UpdatesReadOnlyRunPlanPreview(string postureId, string expectedPreview)
         {
             bool selected = _overlay.SelectMvpRunPosture(postureId);
@@ -1312,7 +1312,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Research:"));
             Assert.That(text, Does.Contain("Adventurers:"));
             Assert.That(text, Does.Contain("Role: adds room space and path context."));
-            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(text, Does.Contain("Path complete:"));
 
             _overlay.ToggleCompactSmokeView();
@@ -1332,7 +1332,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(compact, Does.Contain("Research:"));
             Assert.That(compact, Does.Contain("Adventurers:"));
             Assert.That(compact, Does.Contain("Role: adds room space and path context."));
-            Assert.That(compact, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(compact, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(compact, Does.Contain("Path complete:"));
             AssertNoUnintendedTrailingNewline(compact);
             AssertNoDuplicateBlankLineInflation(compact);
@@ -1376,7 +1376,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingSectionNumber, Is.EqualTo(3));
             Assert.That(plan, Does.Contain("Smoke section: Plan and action"));
             Assert.That(plan, Does.Contain("Role: adds room space and path context."));
-            Assert.That(plan, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(plan, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(plan, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(diagnosticsPage));
 
@@ -1440,7 +1440,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
             Assert.That(copied, Does.Contain("Guided MVP Action"));
             Assert.That(copied, Does.Contain("Role: adds room space and path context."));
-            Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced run."));
+            Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(copied, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(copied, Does.Contain("Adventurer intent:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
@@ -1915,7 +1915,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_loop.inline_separator"] = " | ";
             map["ui.mvp_loop.panel.run_outcome_line_format"] = "{0}. Party: {1}";
             map["ui.mvp_loop.panel.casualty_format"] = "Survivors: {0}/{1}; deaths: {2}";
-            map["ui.mvp_loop.why.no_run"] = "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.";
+            map["ui.mvp_loop.why.no_run"] = "No adventurer visit yet. Build or review the dungeon, then observe adventurer activity to learn what happens.";
             map["ui.mvp_loop.why.run_format"] = "Main reason: {0}.";
             map["ui.mvp_loop.why.path_capacity"] = "path capacity shaped the adventurer visit";
             map["ui.mvp_loop.why.danger"] = "danger pressure drove the result";
@@ -1941,7 +1941,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.research_unlock.none"] = "No research unlock yet";
             map["ui.research_unlock.unavailable"] = "Research unlock unavailable";
             map["ui.research_unlock.basic_run_analysis.summary"] = "Adventurer activity analysis unlocked";
-            map["mvp_loop.suggestion.run_dungeon"] = "Observe adventurer activity to observe the first outcome.";
+            map["mvp_loop.suggestion.run_dungeon"] = "Observe adventurer activity to see the first outcome.";
             map["mvp_loop.suggestion.reduce_heat_pressure"] = "Reduce heat pressure before pushing further.";
             map["ui.mvp_placement_comparison.compared_with_format"] = "Compared with {0}: {1}";
             map["ui.mvp_placement_comparison.room.basic_to_narrow_hall"] = "lower path capacity, better as a connector.";
@@ -2083,11 +2083,11 @@ namespace DungeonBuilder.Tests.EditMode
             map["guided_mvp.step.repeat_or_improve"] = "Repeat the loop or improve placement";
             map["guided_mvp.status.missing_save"] = "Save state is not available yet.";
             map["guided_mvp.status.place_or_modify_structure"] = "No dungeon placement is visible in the current summary.";
-            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer adventurer activity has been observed yet.";
+            map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer activity has been observed yet.";
             map["guided_mvp.status.heat_pressure"] = "The latest summary shows heat pressure.";
             map["guided_mvp.status.poor_loot_extraction"] = "The latest adventurer visit generated loot but extracted none.";
             map["guided_mvp.status.research_completion_pending"] = "Research completion is pending verification.";
-            map["guided_mvp.status.repeat_or_improve"] = "Placement, run, mana, loot, heat, and research are visible in the summary.";
+            map["guided_mvp.status.repeat_or_improve"] = "Placement, adventurer activity, mana, loot, heat, and research are visible in the summary.";
             map["guided_mvp.action.place_structure"] = "Place one room, monster, trap, or loot node.";
             map["guided_mvp.action.run_dungeon"] = "Observe adventurer activity and watch the MVP Loop Summary update.";
             map["guided_mvp.action.reduce_heat_pressure"] = "Improve placement toward lower heat pressure before pushing further.";

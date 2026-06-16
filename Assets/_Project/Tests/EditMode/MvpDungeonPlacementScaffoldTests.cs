@@ -313,7 +313,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpLoopSummaryPanelPresenter.SectionLineFormatKey] = "{0}: {1}",
                 [MvpLoopSummaryPanelPresenter.InlineSeparatorKey] = " | ",
                 [MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey] = "{0}. Party: {1}",
-                [MvpLoopSummaryPanelPresenter.WhyNoRunKey] = "No adventurer visit yet. Build or review the dungeon, then run it to learn what happens.",
+                [MvpLoopSummaryPanelPresenter.WhyNoRunKey] = "No adventurer visit yet. Build or review the dungeon, then observe adventurer activity to learn what happens.",
                 [MvpLoopSummaryPanelPresenter.WhyRunFormatKey] = "Main reason: {0}.",
                 [MvpLoopSummaryPanelPresenter.WhyMixedKey] = "the current placement mix shaped the result",
                 [MvpLoopSummaryPanelPresenter.WhyPathCapacityKey] = "path capacity shaped the adventurer visit",

@@ -82,7 +82,7 @@ namespace DungeonBuilder.Tests.EditMode
                 StructureSimulationPass.ManaGeneratorBasicId,
                 MinimalMvpActionPanelPresenter.CautiousPostureKey);
 
-            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure."));
+            Assert.That(labels.PreviewText, Is.EqualTo("Plan: Mana Generator + Cautious adventurer challenge.\nExpected tradeoff: lower loot, safer heat pressure."));
         }
 
         [Test]

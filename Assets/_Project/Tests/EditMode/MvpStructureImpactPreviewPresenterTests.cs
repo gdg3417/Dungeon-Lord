@@ -75,9 +75,9 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
-        [TestCase(MinimalMvpActionPanelPresenter.BalancedPostureKey, "Plan: Mana Generator + Balanced run.\nExpected tradeoff: standard loot and heat pressure.")]
-        [TestCase(MinimalMvpActionPanelPresenter.CautiousPostureKey, "Plan: Mana Generator + Cautious run.\nExpected tradeoff: lower loot, safer heat pressure.")]
-        [TestCase(MinimalMvpActionPanelPresenter.GreedyPostureKey, "Plan: Mana Generator + Greedy run.\nExpected tradeoff: higher loot, higher heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.BalancedPostureKey, "Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.CautiousPostureKey, "Plan: Mana Generator + Cautious adventurer challenge.\nExpected tradeoff: lower loot, safer heat pressure.")]
+        [TestCase(MinimalMvpActionPanelPresenter.GreedyPostureKey, "Plan: Mana Generator + Greedy adventurer challenge.\nExpected tradeoff: higher loot, higher heat pressure.")]
         public void RunPlanPreview_ResolvesPostureTradeoffThroughLocalization(string postureNameKey, string expected)
         {
             string text = MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(
