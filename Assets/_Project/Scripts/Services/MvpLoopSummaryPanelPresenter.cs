@@ -60,6 +60,11 @@ namespace DungeonBuilder.M0
 
         public static string BuildPanelText(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
+            return BuildPanelText(summary, string.Empty, localize);
+        }
+
+        public static string BuildPanelText(MvpPlayerLoopSummary summary, string selectedPlacementCategoryId, Func<string, string, string> localize)
+        {
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
             AppendSectionLine(builder, localize, CurrentDungeonSectionKey, BuildCurrentDungeonLine(summary, localize));
@@ -72,8 +77,11 @@ namespace DungeonBuilder.M0
             AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(ResolveSuggestionKey(summary), localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             string recommendationLine = BasicRunAnalysisRecommendationPresenter.BuildRecommendationLine(summary, localize);
             if (!string.IsNullOrEmpty(recommendationLine)) AppendLine(builder, recommendationLine);
+            string placementTargetKey = BasicRunAnalysisPlacementTargetPresenter.ResolveTargetKey(summary);
             string placementTargetLine = BasicRunAnalysisPlacementTargetPresenter.BuildTargetLine(summary, localize);
             if (!string.IsNullOrEmpty(placementTargetLine)) AppendLine(builder, placementTargetLine);
+            string selectedFitLine = BasicRunAnalysisSelectedPlacementFitPresenter.BuildFitLine(summary, placementTargetKey, selectedPlacementCategoryId, localize);
+            if (!string.IsNullOrEmpty(selectedFitLine)) AppendLine(builder, selectedFitLine);
             return builder.ToString();
         }
 

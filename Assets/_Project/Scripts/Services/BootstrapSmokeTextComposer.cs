@@ -15,6 +15,7 @@ namespace DungeonBuilder.M0
                 MvpFirstSessionObjectiveSummary firstSessionObjective,
                 string dungeonLayoutText,
                 string selectedCategoryName,
+                string selectedPlacementCategoryId,
                 string selectedOptionName,
                 string selectedPlacementPreview,
                 string selectedPlacementComparison,
@@ -36,6 +37,7 @@ namespace DungeonBuilder.M0
                 FirstSessionObjective = firstSessionObjective;
                 DungeonLayoutText = dungeonLayoutText;
                 SelectedCategoryName = selectedCategoryName;
+                SelectedPlacementCategoryId = selectedPlacementCategoryId;
                 SelectedOptionName = selectedOptionName;
                 SelectedPlacementPreview = selectedPlacementPreview;
                 SelectedPlacementComparison = selectedPlacementComparison;
@@ -58,6 +60,7 @@ namespace DungeonBuilder.M0
             public MvpFirstSessionObjectiveSummary FirstSessionObjective { get; }
             public string DungeonLayoutText { get; }
             public string SelectedCategoryName { get; }
+            public string SelectedPlacementCategoryId { get; }
             public string SelectedOptionName { get; }
             public string SelectedPlacementPreview { get; }
             public string SelectedPlacementComparison { get; }
@@ -119,7 +122,7 @@ namespace DungeonBuilder.M0
         public static string BuildCompactSmokeText(Context context, Func<string, string, string> localize)
         {
             var body = new StringBuilder();
-            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, localize);
+            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, context.SelectedPlacementCategoryId, localize);
             AppendCompactLoopSummaryLines(body, panelText, localize);
             AppendMvpDungeonLayoutText(body, context);
             AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(context.FirstSessionObjective, localize));
@@ -145,7 +148,7 @@ namespace DungeonBuilder.M0
         public static string BuildLoopSummarySectionText(Context context, Func<string, string, string> localize)
         {
             var body = new StringBuilder();
-            AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, localize));
+            AppendLine(body, MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, context.SelectedPlacementCategoryId, localize));
             AppendMvpDungeonLayoutText(body, context);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(context.GuidedPath, localize);
             if (!string.IsNullOrEmpty(guidedText)) { AppendLine(body, string.Empty); AppendLine(body, guidedText); }
@@ -174,7 +177,7 @@ namespace DungeonBuilder.M0
 
         private static void AppendMvpLoopSummaryPanel(StringBuilder builder, Context context, Func<string, string, string> localize)
         {
-            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, localize);
+            string panelText = MvpLoopSummaryPanelPresenter.BuildPanelText(context.Summary, context.SelectedPlacementCategoryId, localize);
             if (!string.IsNullOrEmpty(panelText)) AppendLine(builder, panelText);
             string guidedText = GuidedMvpActionPathPanelPresenter.BuildPanelText(context.GuidedPath, localize);
             if (!string.IsNullOrEmpty(guidedText)) { AppendLine(builder, string.Empty); AppendLine(builder, guidedText); }

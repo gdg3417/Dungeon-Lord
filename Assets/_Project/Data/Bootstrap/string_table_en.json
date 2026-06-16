@@ -584,6 +584,62 @@
       "text": "Adjustment target: {0}"
     },
     {
+      "key": "ui.mvp_loop.analysis.selected_fit_format",
+      "text": "Selected placement fit: {0}"
+    },
+    {
+      "key": "mvp_loop.analysis.fit.match",
+      "text": "Current selection matches the analysis target. Adjust this placement, then run again."
+    },
+    {
+      "key": "mvp_loop.analysis.fit.mismatch",
+      "text": "Current selection is {0}, but analysis recommends {1} first. Switch category before the next run."
+    },
+    {
+      "key": "mvp_loop.analysis.fit.broad",
+      "text": "Analysis target is broad. Change any one placement, then run again."
+    },
+    {
+      "key": "mvp_loop.analysis.fit.not_ready",
+      "text": "Run analysis is not ready yet."
+    },
+    {
+      "key": "mvp_loop.analysis.category.room",
+      "text": "a room"
+    },
+    {
+      "key": "mvp_loop.analysis.category.monster",
+      "text": "a monster"
+    },
+    {
+      "key": "mvp_loop.analysis.category.trap",
+      "text": "a trap"
+    },
+    {
+      "key": "mvp_loop.analysis.category.loot_node",
+      "text": "a loot node"
+    },
+    {
+      "key": "mvp_loop.analysis.target_label.monster_or_trap",
+      "text": "monster or trap"
+    },
+    {
+      "key": "mvp_loop.analysis.target_label.trap_or_loot",
+      "text": "trap or loot node"
+    },
+    {
+      "key": "mvp_loop.analysis.target_label.room_or_monster",
+      "text": "room or monster"
+    },
+    {
+      "key": "mvp_loop.analysis.target_label.loot_node",
+      "text": "loot node"
+    },
+    {
+      "key": "mvp_loop.analysis.target_label.any_one",
+      "text": "any one placement"
+    },
+    {
       "key": "mvp_loop.analysis.target.reduce_danger",
       "text": "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot."
     },
