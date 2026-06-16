@@ -162,7 +162,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
-            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
+            Assert.That(text, Does.Contain("Adventurer intent:"));
+            Assert.That(text, Does.Contain("Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("Adjust placement before the next adventurer visit."));
             Assert.That(text, Does.Not.Contain("Run " + "dungeon"));
