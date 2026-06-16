@@ -1884,16 +1884,28 @@
       "text": "Room {0}: {1} ({2}; {3}; {4})"
     },
     {
-      "key": "ui.mvp_room_slots.panel.monster_slots_format",
-      "text": "Monster slots: {0}/{1}"
+      "key": "ui.mvp_room_slots.panel.monsters_format",
+      "text": "Monsters: {0} {1}/{2}"
     },
     {
-      "key": "ui.mvp_room_slots.panel.trap_slots_format",
-      "text": "Trap slots: {0}/{1}"
+      "key": "ui.mvp_room_slots.panel.traps_format",
+      "text": "Traps: {0} {1}/{2}"
     },
     {
-      "key": "ui.mvp_room_slots.panel.loot_slots_format",
-      "text": "Loot slots: {0}/{1}"
+      "key": "ui.mvp_room_slots.panel.loot_format",
+      "text": "Loot: {0} {1}/{2}"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.empty",
+      "text": "empty"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.unavailable",
+      "text": "unavailable"
+    },
+    {
+      "key": "ui.mvp_room_slots.panel.assignment_separator",
+      "text": ", "
     },
     {
       "key": "ui.mvp_room_slots.panel.room_separator",

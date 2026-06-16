@@ -14,7 +14,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Skeleton -> Trap: Spike Trap -> Loot node: Basic Loot Node\nRoom slot layout: Floor 0: Room 1: Basic Room (Monster slots: 1/1; Trap slots: 1/1; Loot slots: 1/1)"));
+            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Skeleton -> Trap: Spike Trap -> Loot node: Basic Loot Node\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: Spike Trap 1/1; Loot: Basic Loot Node 1/1)"));
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monster slots: 0/1; Trap slots: 0/1; Loot slots: 0/1)"));
+            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)"));
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(SaveWithLayout(layout), Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Spike Trap -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monster slots: 0/1; Trap slots: 1/1; Loot slots: 0/1)"));
+            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Spike Trap -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: Spike Trap 1/1; Loot: empty 0/1)"));
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Skeleton -> Trap: Empty / available -> Loot node: Basic Loot Node\nRoom slot layout: Floor 0: Room 1: Basic Room (Monster slots: 1/1; Trap slots: 0/1; Loot slots: 1/1)"));
+            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Skeleton -> Trap: Empty / available -> Loot node: Basic Loot Node\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
         }
 
         [Test]
@@ -72,6 +72,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("placement.category"));
             Assert.That(text, Does.Not.Contain("placement.option"));
             Assert.That(text, Does.Not.Contain("ui.mvp_dungeon_layout"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_room_slots"));
         }
 
         [Test]
@@ -106,9 +107,36 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(SaveWithLayout(layout), Config(), Localize);
 
-            Assert.That(text, Does.Contain("Room 1: Narrow Hall (Monster slots: 1/1; Trap slots: 1/1; Loot slots: 0/0)"));
-            Assert.That(text, Does.Contain("Room 2: Basic Room (Monster slots: 0/1; Trap slots: 0/1; Loot slots: 1/1)"));
+            Assert.That(text, Does.Contain("Room 1: Narrow Hall (Monsters: Goblin 1/1; Traps: Snare Trap 1/1; Loot: unavailable 0/0)"));
+            Assert.That(text, Does.Contain("Room 2: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: Hidden Cache 1/1)"));
             Assert.That(text, Does.Not.Contain("placement.option"));
+        }
+
+
+        [Test]
+        public void BuildRoomSlotLayoutText_JoinsMultipleAssignmentsWithLocalizedSeparator()
+        {
+            var layout = new MvpDungeonFloorSlotLayout
+            {
+                FloorIndex = 0,
+                Rooms = new[]
+                {
+                    new MvpDungeonRoomInstance
+                    {
+                        RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                        Capacity = new MvpRoomSlotCapacity { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 2, TrapCapacity = 1, LootCapacity = 1 },
+                        AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.GoblinOptionId },
+                        AssignedTrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
+                        AssignedLootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
+                    }
+                }
+            };
+
+            string text = MvpDungeonLayoutPresenter.BuildRoomSlotLayoutText(layout, Localize);
+
+            Assert.That(text, Does.Contain("Monsters: Skeleton, Goblin 2/2"));
+            Assert.That(text, Does.Not.Contain("placement.option"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_room_slots"));
         }
 
         private static SaveData SaveWithLayout(MvpDungeonFloorLayoutState layout)
@@ -159,9 +187,12 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey: return "Room slot layout: {0}";
                 case MvpDungeonLayoutPresenter.RoomSlotFloorFormatKey: return "Floor {0}: {1}";
                 case MvpDungeonLayoutPresenter.RoomSlotRoomFormatKey: return "Room {0}: {1} ({2}; {3}; {4})";
-                case MvpDungeonLayoutPresenter.MonsterSlotsFormatKey: return "Monster slots: {0}/{1}";
-                case MvpDungeonLayoutPresenter.TrapSlotsFormatKey: return "Trap slots: {0}/{1}";
-                case MvpDungeonLayoutPresenter.LootSlotsFormatKey: return "Loot slots: {0}/{1}";
+                case MvpDungeonLayoutPresenter.MonstersFormatKey: return "Monsters: {0} {1}/{2}";
+                case MvpDungeonLayoutPresenter.TrapsFormatKey: return "Traps: {0} {1}/{2}";
+                case MvpDungeonLayoutPresenter.LootFormatKey: return "Loot: {0} {1}/{2}";
+                case MvpDungeonLayoutPresenter.EmptyAssignmentKey: return "empty";
+                case MvpDungeonLayoutPresenter.UnavailableAssignmentKey: return "unavailable";
+                case MvpDungeonLayoutPresenter.AssignmentSeparatorKey: return ", ";
                 case MvpDungeonLayoutPresenter.RoomSlotSeparatorKey: return " | ";
                 case MvpDungeonPlacementPresenter.RoomCategoryKey: return "Room";
                 case MvpDungeonPlacementPresenter.MonsterCategoryKey: return "Monster";

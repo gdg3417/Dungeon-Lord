@@ -151,6 +151,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Current Dungeon =="));
+            Assert.That(text, Does.Contain("Room slot layout:"));
             Assert.That(text, Does.Contain("== Build Choice =="));
             Assert.That(text, Does.Contain("== Activity Setup =="));
             Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
@@ -1414,6 +1415,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(copied, Does.Contain("Room slot layout:"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             Assert.That(copied, Does.Contain("First-session"));
             Assert.That(copied, Does.Contain("First Dungeon Contract"));
@@ -2016,9 +2018,12 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_room_slots.panel.layout_format"] = "Room slot layout: {0}";
             map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";
             map["ui.mvp_room_slots.panel.room_format"] = "Room {0}: {1} ({2}; {3}; {4})";
-            map["ui.mvp_room_slots.panel.monster_slots_format"] = "Monster slots: {0}/{1}";
-            map["ui.mvp_room_slots.panel.trap_slots_format"] = "Trap slots: {0}/{1}";
-            map["ui.mvp_room_slots.panel.loot_slots_format"] = "Loot slots: {0}/{1}";
+            map["ui.mvp_room_slots.panel.monsters_format"] = "Monsters: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.traps_format"] = "Traps: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.loot_format"] = "Loot: {0} {1}/{2}";
+            map["ui.mvp_room_slots.panel.empty"] = "empty";
+            map["ui.mvp_room_slots.panel.unavailable"] = "unavailable";
+            map["ui.mvp_room_slots.panel.assignment_separator"] = ", ";
             map["ui.mvp_room_slots.panel.room_separator"] = " | ";
             map["ui.mvp_placement_preview.room.basic"] = "Role: adds room space and path context.";
             map["ui.mvp_placement_preview.room.narrow_hall"] = "Role: connects rooms with a lower-capacity hallway.";

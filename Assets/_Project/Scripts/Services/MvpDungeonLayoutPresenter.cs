@@ -16,9 +16,12 @@ namespace DungeonBuilder.M0
         public const string RoomSlotLayoutFormatKey = "ui.mvp_room_slots.panel.layout_format";
         public const string RoomSlotFloorFormatKey = "ui.mvp_room_slots.panel.floor_format";
         public const string RoomSlotRoomFormatKey = "ui.mvp_room_slots.panel.room_format";
-        public const string MonsterSlotsFormatKey = "ui.mvp_room_slots.panel.monster_slots_format";
-        public const string TrapSlotsFormatKey = "ui.mvp_room_slots.panel.trap_slots_format";
-        public const string LootSlotsFormatKey = "ui.mvp_room_slots.panel.loot_slots_format";
+        public const string MonstersFormatKey = "ui.mvp_room_slots.panel.monsters_format";
+        public const string TrapsFormatKey = "ui.mvp_room_slots.panel.traps_format";
+        public const string LootFormatKey = "ui.mvp_room_slots.panel.loot_format";
+        public const string EmptyAssignmentKey = "ui.mvp_room_slots.panel.empty";
+        public const string UnavailableAssignmentKey = "ui.mvp_room_slots.panel.unavailable";
+        public const string AssignmentSeparatorKey = "ui.mvp_room_slots.panel.assignment_separator";
         public const string RoomSlotSeparatorKey = "ui.mvp_room_slots.panel.room_separator";
 
         public static string BuildLayoutText(SaveData save, Func<string, string, string> localize)
@@ -92,13 +95,46 @@ namespace DungeonBuilder.M0
                     Localize(localize, RoomSlotRoomFormatKey),
                     i + 1,
                     roomName,
-                    string.Format(Localize(localize, MonsterSlotsFormatKey), Count(room.AssignedMonsterOptionIds), room.Capacity?.MonsterCapacity ?? 0),
-                    string.Format(Localize(localize, TrapSlotsFormatKey), Count(room.AssignedTrapOptionIds), room.Capacity?.TrapCapacity ?? 0),
-                    string.Format(Localize(localize, LootSlotsFormatKey), Count(room.AssignedLootNodeOptionIds), room.Capacity?.LootCapacity ?? 0)));
+                    BuildSlotText(MonstersFormatKey, room.AssignedMonsterOptionIds, room.Capacity?.MonsterCapacity ?? 0, localize),
+                    BuildSlotText(TrapsFormatKey, room.AssignedTrapOptionIds, room.Capacity?.TrapCapacity ?? 0, localize),
+                    BuildSlotText(LootFormatKey, room.AssignedLootNodeOptionIds, room.Capacity?.LootCapacity ?? 0, localize)));
             }
 
             string floor = string.Format(Localize(localize, RoomSlotFloorFormatKey), layout.FloorIndex, rooms.ToString());
             return string.Format(Localize(localize, RoomSlotLayoutFormatKey), floor);
+        }
+
+        private static string BuildSlotText(string formatKey, string[] assignedOptionIds, int capacity, Func<string, string, string> localize)
+        {
+            int assignedCount = Count(assignedOptionIds);
+            string assignmentText = capacity <= 0
+                ? Localize(localize, UnavailableAssignmentKey)
+                : assignedCount == 0
+                    ? Localize(localize, EmptyAssignmentKey)
+                    : BuildAssignedNames(assignedOptionIds, localize);
+
+            return string.Format(Localize(localize, formatKey), assignmentText, assignedCount, capacity);
+        }
+
+        private static string BuildAssignedNames(string[] assignedOptionIds, Func<string, string, string> localize)
+        {
+            if (assignedOptionIds == null || assignedOptionIds.Length == 0)
+            {
+                return Localize(localize, EmptyAssignmentKey);
+            }
+
+            var names = new List<string>();
+            for (int i = 0; i < assignedOptionIds.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(assignedOptionIds[i]))
+                {
+                    continue;
+                }
+
+                names.Add(MvpDungeonPlacementPresenter.ResolveOptionName(assignedOptionIds[i], localize));
+            }
+
+            return names.Count == 0 ? Localize(localize, EmptyAssignmentKey) : string.Join(Localize(localize, AssignmentSeparatorKey), names);
         }
 
         private static int Count(string[] values)
