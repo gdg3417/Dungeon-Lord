@@ -72,6 +72,8 @@ namespace DungeonBuilder.M0
             AppendSectionLine(builder, localize, SuggestedNextActionSectionKey, string.Format(Localize(localize, SuggestionFormatKey), ResolveKeyOrFallback(ResolveSuggestionKey(summary), localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             string recommendationLine = BasicRunAnalysisRecommendationPresenter.BuildRecommendationLine(summary, localize);
             if (!string.IsNullOrEmpty(recommendationLine)) AppendLine(builder, recommendationLine);
+            string placementTargetLine = BasicRunAnalysisPlacementTargetPresenter.BuildTargetLine(summary, localize);
+            if (!string.IsNullOrEmpty(placementTargetLine)) AppendLine(builder, placementTargetLine);
             return builder.ToString();
         }
 
