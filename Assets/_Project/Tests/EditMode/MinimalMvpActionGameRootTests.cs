@@ -128,6 +128,17 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpDungeonLayoutPresenter.EmptyAvailableKey: return "Empty / available";
                 case MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey: return "Room slot layout: {0}";
                 case MvpRoomSlotTargetPresenter.SelectedTargetFormatKey: return "Selected room target: Room {0}: {1}";
+                case MvpRoomSlotTargetPresenter.SelectedCapacityFormatKey: return "Selected room capacity: {0}";
+                case MvpRoomSlotTargetPresenter.SelectedCapacityCategoryFormatKey: return "{0} {1}/{2}";
+                case MvpRoomSlotTargetPresenter.SelectedCapacityUnavailableCategoryFormatKey: return "{0} unavailable {1}/{2}";
+                case MvpRoomSlotTargetPresenter.SelectedCapacitySeparatorKey: return "; ";
+                case MvpRoomSlotTargetPresenter.SelectedPlacementFitFormatKey: return "Selected placement fit: {0}";
+                case MvpRoomSlotTargetPresenter.SelectedPlacementFitsFormatKey: return "{0} fits Room {1}.";
+                case MvpRoomSlotTargetPresenter.SelectedPlacementCannotFitNoSlotFormatKey: return "{0} cannot fit Room {1} because this room has no {2}.";
+                case MvpRoomSlotTargetPresenter.CapacityMonstersLabelKey: return "Monsters";
+                case MvpRoomSlotTargetPresenter.CapacityTrapsLabelKey: return "Traps";
+                case MvpRoomSlotTargetPresenter.CapacityLootLabelKey: return "Loot";
+                case MvpRoomSlotTargetPresenter.LootSlotReasonLabelKey: return "loot slot";
                 case MvpRoomSlotTargetPresenter.NoValidSlotFormatKey: return "No valid {0} slot in Room {1}: {2}.";
                 case MvpDungeonLayoutPresenter.RoomSlotFloorFormatKey: return "Floor {0}: {1}";
                 case MvpDungeonLayoutPresenter.RoomSlotRoomFormatKey: return "Room {0}: {1} ({2}; {3}; {4})";

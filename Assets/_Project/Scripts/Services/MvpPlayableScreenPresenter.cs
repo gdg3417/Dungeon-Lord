@@ -98,8 +98,10 @@ namespace DungeonBuilder.M0
         {
             string composition = BuildCurrentDungeonCompositionLine(summary, localize);
             string selectedTarget = ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedTargetFormatKey, localize);
+            string selectedCapacity = ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedCapacityFormatKey, localize);
+            string selectedFit = ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedPlacementFitFormatKey, localize);
             string roomSlotLayout = ExtractLine(dungeonLayoutText, MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey, localize);
-            return JoinInline(localize, composition, selectedTarget, roomSlotLayout);
+            return JoinInline(localize, composition, selectedTarget, selectedCapacity, selectedFit, roomSlotLayout);
         }
 
         private static string ExtractLine(string dungeonLayoutText, string key, Func<string, string, string> localize)

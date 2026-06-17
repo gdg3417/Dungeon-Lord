@@ -1880,6 +1880,58 @@
       "text": "Selected room target: Room {0}: {1}"
     },
     {
+      "key": "ui.mvp_room_slots.selected_capacity_format",
+      "text": "Selected room capacity: {0}"
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_capacity_category_format",
+      "text": "{0} {1}/{2}"
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_capacity_unavailable_category_format",
+      "text": "{0} unavailable {1}/{2}"
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_capacity_separator",
+      "text": "; "
+    },
+    {
+      "key": "ui.mvp_room_slots.capacity.monsters",
+      "text": "Monsters"
+    },
+    {
+      "key": "ui.mvp_room_slots.capacity.traps",
+      "text": "Traps"
+    },
+    {
+      "key": "ui.mvp_room_slots.capacity.loot",
+      "text": "Loot"
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_placement_fit_format",
+      "text": "Selected placement fit: {0}"
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_placement_fits_format",
+      "text": "{0} fits Room {1}."
+    },
+    {
+      "key": "ui.mvp_room_slots.selected_placement_cannot_fit_no_slot_format",
+      "text": "{0} cannot fit Room {1} because this room has no {2}."
+    },
+    {
+      "key": "ui.mvp_room_slots.reason.monster_slot",
+      "text": "monster slot"
+    },
+    {
+      "key": "ui.mvp_room_slots.reason.trap_slot",
+      "text": "trap slot"
+    },
+    {
+      "key": "ui.mvp_room_slots.reason.loot_slot",
+      "text": "loot slot"
+    },
+    {
       "key": "ui.mvp_room_slots.no_valid_slot_format",
       "text": "No valid {0} slot in Room {1}: {2}."
     },
