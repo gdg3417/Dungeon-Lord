@@ -20,6 +20,7 @@ namespace DungeonBuilder.Tests.EditMode
             _rootObject = new GameObject("MvpDungeonPlacementScaffoldRootTest");
             _root = _rootObject.AddComponent<GameRoot>();
             SetBackingField("<Save>k__BackingField", new SaveData());
+            SetBackingField("<Content>k__BackingField", BuildContent());
         }
 
         [TearDown]
@@ -288,6 +289,27 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+
+        private static ContentService BuildContent()
+        {
+            var content = new ContentService();
+            var map = (Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(content);
+            if (map != null)
+            {
+                map[MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}";
+                map[MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.";
+                map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
+                map[MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node";
+                map[MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall";
+                map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
+                map[MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node";
+            }
+
+            return content;
+        }
+
         private void SetRunSimulationConfig(RunSimulationConfig config)
         {
             SetBackingField("_runSimulationService", new RunSimulationService(config));
@@ -391,7 +413,9 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Changed placement: {0} -> {1}: {2}. {3}",
+                [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
                 [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
+                ["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
                 [MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap",
