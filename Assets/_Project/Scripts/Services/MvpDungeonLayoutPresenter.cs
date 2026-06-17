@@ -33,7 +33,9 @@ namespace DungeonBuilder.M0
         {
             MvpDungeonFloorLayoutState layout = save?.mvpDungeonFloorLayout;
             MvpDungeonPlacementState legacyPlacements = save?.mvpDungeonPlacements;
-            MvpDungeonPlacementEntry[] resolvedPlacements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, legacyPlacements);
+            MvpDungeonPlacementEntry[] resolvedPlacements = config == null
+                ? MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, legacyPlacements)
+                : MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);
             var placementsByCategory = new Dictionary<string, MvpDungeonPlacementEntry>(StringComparer.Ordinal);
             foreach (MvpDungeonPlacementEntry placement in resolvedPlacements)
             {

@@ -564,7 +564,7 @@ namespace DungeonBuilder.M0
                 MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
                 int targetIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
                 MvpDungeonRoomInstance targetRoom = targetLayout?.Rooms != null && targetLayout.Rooms.Length > targetIndex ? targetLayout.Rooms[targetIndex] : null;
-                if (MvpRoomSlotTargetResolver.HasKnownCapacity(targetRoom) && !MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
+                if (!MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
                 {
                     bannerKey = "ui.banner.place_failed";
                     failureFeedback = MvpRoomSlotTargetPresenter.BuildNoValidSlotText(targetLayout, targetIndex, categoryId, (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);
@@ -597,6 +597,14 @@ namespace DungeonBuilder.M0
                 Save.mvpDungeonFloorLayout.NextRevision = 1;
             }
 
+            int selectedRoomSlotIndex = 0;
+            bool shouldPersistRoomSlotAssignment = enforceSelectedRoomTarget && !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal);
+            if (shouldPersistRoomSlotAssignment)
+            {
+                MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+                selectedRoomSlotIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
+            }
+
             int existingIndex = Save.mvpDungeonPlacements.Entries.FindIndex(entry =>
                 entry != null && string.Equals(entry.CategoryId, categoryId, StringComparison.Ordinal));
             if (existingIndex >= 0)
@@ -615,6 +623,20 @@ namespace DungeonBuilder.M0
 
             Save.mvpDungeonPlacements.NextRevision = Math.Max(newEntry.Revision + 1, Save.mvpDungeonPlacements.NextRevision + 1);
             UpsertMvpDungeonNodePlacement(Save.mvpDungeonFloorLayout, newEntry);
+            if (string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+                int roomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
+                MvpRoomSlotLayoutResolver.SetPersistedRoomOptionIfPresent(Save, _runSimulationService?.Config, roomIndex, optionId);
+            }
+
+            if (shouldPersistRoomSlotAssignment &&
+                !MvpRoomSlotLayoutResolver.TryAssignToPersistedRoom(Save, _runSimulationService?.Config, selectedRoomSlotIndex, categoryId, optionId))
+            {
+                bannerKey = "ui.banner.place_failed";
+                return false;
+            }
+
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
         }
@@ -781,7 +803,7 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(Save.mvpDungeonFloorLayout, Save.mvpDungeonPlacements, _runSimulationService.Config);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveForSave(Save, _runSimulationService.Config);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId, placementEffects);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;

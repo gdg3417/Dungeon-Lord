@@ -13,6 +13,16 @@ namespace DungeonBuilder.M0
 
         public static MvpPlacementEffectsSummary Resolve(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementState placements, RunSimulationConfig config)
         {
+            return Resolve(MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, placements), config);
+        }
+
+        public static MvpPlacementEffectsSummary ResolveForSave(SaveData save, RunSimulationConfig config)
+        {
+            return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config), config);
+        }
+
+        private static MvpPlacementEffectsSummary Resolve(MvpDungeonPlacementEntry[] orderedPlacements, RunSimulationConfig config)
+        {
             var summary = new MvpPlacementEffectsSummary
             {
                 RuleResolved = true,
@@ -21,8 +31,7 @@ namespace DungeonBuilder.M0
                 EffectLocalizationKeys = Array.Empty<string>()
             };
 
-            MvpDungeonPlacementEntry[] orderedPlacements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, placements);
-            if (orderedPlacements.Length == 0 || config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
+            if (orderedPlacements == null || orderedPlacements.Length == 0 || config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
             {
                 return summary;
             }

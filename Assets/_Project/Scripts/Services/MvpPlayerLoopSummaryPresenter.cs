@@ -39,8 +39,8 @@ namespace DungeonBuilder.M0
             StructureRuntimeState runtime = save.structureRuntime;
             RunOutcomeRecord latestRun = GetLatestRun(save.runHistory);
             DungeonSlot? selectedSlot = GetSelectedSlot(save.dungeonLayout);
-            MvpDungeonPlacementEntry[] dungeonPlacements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save.mvpDungeonFloorLayout, save.mvpDungeonPlacements);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(save.mvpDungeonFloorLayout, save.mvpDungeonPlacements, runConfig);
+            MvpDungeonPlacementEntry[] dungeonPlacements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, runConfig);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, runConfig);
             double currentMana = runtime?.ManaReserve ?? 0d;
             double currentHeat = runtime?.Heat ?? 0d;
 
