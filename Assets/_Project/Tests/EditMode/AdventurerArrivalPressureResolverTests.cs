@@ -138,7 +138,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(LoopSummary(), Localized);
             Assert.That(text, Does.Contain("Adventurer pressure: likely soon. Reason: high loot signal and low heat."));
-            Assert.That(text, Does.Not.Contain("Adventurer intent: Adventurer intent:"));
+            Assert.That(text, Does.Not.Contain("Expected next adventurer intent: Expected next adventurer intent:"));
             Assert.That(text, Does.Not.Contain("Adventurer pressure: Adventurer pressure:"));
         }
 
@@ -183,10 +183,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case AdventurerArrivalPressurePresenter.SummaryFormatKey: return "Adventurer pressure: {0}. Reason: {1}.";
                 case AdventurerArrivalPressurePresenter.BodyFormatKey: return "{0}. Reason: {1}.";
                 case AdventurerRunIntentPresenter.BodyFormatKey: return "{0} likely. Reason: {1}";
-                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
-                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
+                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Expected next adventurer intent: {0} likely. Reason: {1}";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
-                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Adventurer intent";
+                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected Next Adventurer Intent";
                 case MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey: return "Adventurer pressure";
                 case MvpLoopSummaryPanelPresenter.SectionLineFormatKey: return "{0}: {1}";
                 case MvpLoopSummaryPanelPresenter.CompositionFormatKey: return "Dungeon composition: {0}";

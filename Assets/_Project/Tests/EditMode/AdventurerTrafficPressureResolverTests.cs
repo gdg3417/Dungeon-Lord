@@ -89,6 +89,7 @@ namespace DungeonBuilder.Tests.EditMode
             string detail = AdventurerTrafficPressurePresenter.BuildDetailLine(AdventurerTrafficPressureResolver.Resolve(Config(), Arrival(6, 4, 0, 1, true, 14d), Intent()), Localized);
             Assert.That(detail, Does.Contain("score"));
             Assert.That(detail, Does.Contain("estimated active delves"));
+            Assert.That(detail, Does.Contain("traffic pressure intent input Greedy"));
             Assert.That(detail, Does.Contain("rule source run.adventurer_traffic_pressure.rule.test"));
             Assert.That(detail, Does.Not.Contain("ui.adventurer_traffic"));
         }
@@ -114,7 +115,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static string Localized(string key, string fallback)
         {
             if (key == AdventurerTrafficPressurePresenter.SummaryFormatKey) return "Adventurer traffic: {0}. Estimated active delves: {1}. Reason: {2}.";
-            if (key == AdventurerTrafficPressurePresenter.DetailFormatKey) return "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; intent {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}.";
+            if (key == AdventurerTrafficPressurePresenter.DetailFormatKey) return "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; traffic pressure intent input {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}.";
             if (key.StartsWith("ui.adventurer_traffic.band.")) return key.Substring(key.LastIndexOf('.') + 1).Replace('_', ' ');
             if (key.StartsWith("ui.adventurer_traffic.party_band.")) return key.Substring(key.LastIndexOf('.') + 1);
             if (key.StartsWith("ui.adventurer_traffic.reason.")) return "localized reason";
@@ -147,7 +148,7 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpLoopSummaryPanelPresenter.SuggestionFormatKey) return "Suggested next action: {0}";
             if (key == MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey) return "observe dungeon";
             if (key == MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey) return "no active research";
-            if (key == AdventurerRunIntentPresenter.DebugPostureFormatKey) return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
+            if (key == AdventurerRunIntentPresenter.DebugPostureFormatKey) return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
             if (key == AdventurerRunIntentResolver.ReasonFallbackKey) return "intent reason";
             if (key == "run.posture.greedy.name") return "Greedy";
             if (key == "run.posture.balanced.name") return "Balanced";

@@ -69,7 +69,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Adventurer intent: Balanced likely. Debug selected posture: Balanced."));
+            Assert.That(text, Does.Contain("Expected next adventurer intent: Balanced likely. Debug selected posture: Balanced."));
             Assert.That(text, Does.Not.Contain("Selected posture: Balanced"));
             Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
@@ -140,7 +140,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Effects: {0}",
             [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {1}/{0} recovered; {2} tradeable.",
             [MvpLoopSummaryPanelPresenter.SuggestionFormatKey] = "{0}",
-            [AdventurerRunIntentPresenter.SummaryFormatKey] = "Adventurer intent: {0} likely. Reason: {1}",
+            [AdventurerRunIntentPresenter.SummaryFormatKey] = "Expected next adventurer intent: {0} likely. Reason: {1}",
                 [AdventurerArrivalPressurePresenter.SummaryFormatKey] = "Adventurer pressure: {0}. Reason: {1}.",
                 [AdventurerArrivalPressurePresenter.BodyFormatKey] = "{0}. Reason: {1}.",
                 [AdventurerArrivalPressurePresenter.DetailFormatKey] = "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.",
@@ -158,7 +158,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [AdventurerArrivalPressureResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
                 [AdventurerArrivalPressureResolver.ReasonIncompletePathWeakLootKey] = "incomplete path or weak loot signal",
                 [AdventurerRunIntentPresenter.BodyFormatKey] = "{0} likely. Reason: {1}",
-                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Adventurer intent: {0} likely. Debug selected posture: {1}.",
+                [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.",
             [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
                 [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
                 [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",

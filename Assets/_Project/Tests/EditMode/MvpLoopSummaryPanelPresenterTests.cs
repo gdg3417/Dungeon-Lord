@@ -521,7 +521,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
                 case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
                 case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Adventurer Visit";
-                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Adventurer intent";
+                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected Next Adventurer Intent";
                 case MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey: return "Adventurer pressure";
                 case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest adventurer visit: {0}";
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";
@@ -575,7 +575,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.WhyManaPressureKey: return "mana pressure constrained the adventurer visit";
                 case MvpLoopSummaryPanelPresenter.WhyPathCapacityKey: return "path capacity shaped the adventurer visit";
                 case MvpLoopSummaryPanelPresenter.RunOutcomeLineFormatKey: return "{0}. Party: {1}";
-                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
+                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Expected next adventurer intent: {0} likely. Reason: {1}";
                 case AdventurerArrivalPressurePresenter.SummaryFormatKey: return "Adventurer pressure: {0}. Reason: {1}.";
                 case AdventurerArrivalPressurePresenter.BodyFormatKey: return "{0}. Reason: {1}.";
                 case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.";
@@ -593,7 +593,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case AdventurerArrivalPressureResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
                 case AdventurerArrivalPressureResolver.ReasonIncompletePathWeakLootKey: return "incomplete path or weak loot signal";
                 case AdventurerRunIntentPresenter.BodyFormatKey: return "{0} likely. Reason: {1}";
-                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case AdventurerRunIntentResolver.ReasonFallbackKey: return "current dungeon signals are still forming";
                 case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
                 case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";

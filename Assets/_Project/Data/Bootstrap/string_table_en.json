@@ -1677,11 +1677,11 @@
     },
     {
       "key": "ui.mvp_loop.section.adventurer_intent",
-      "text": "Adventurer intent"
+      "text": "Expected Next Adventurer Intent"
     },
     {
       "key": "ui.adventurer_intent.summary_format",
-      "text": "Adventurer intent: {0} likely. Reason: {1}"
+      "text": "Expected next adventurer intent: {0} likely. Reason: {1}"
     },
     {
       "key": "ui.adventurer_intent.score_summary_format",
@@ -1689,19 +1689,19 @@
     },
     {
       "key": "ui.adventurer_intent.debug_posture_format",
-      "text": "Adventurer intent: {0} likely. Debug selected posture: {1}."
+      "text": "Expected next adventurer intent: {0} likely. Debug selected posture: {1}."
     },
     {
       "key": "ui.adventurer_intent.run_posture_used_format",
-      "text": "Adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}."
+      "text": "Expected next adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}."
     },
     {
       "key": "ui.adventurer_intent.fallback_run_posture_used_format",
-      "text": "Adventurer intent unavailable. Challenge posture used: {0} debug fallback. Debug selected posture: {1}."
+      "text": "Expected next adventurer intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}."
     },
     {
       "key": "ui.adventurer_intent.smoke_evidence_format",
-      "text": "Latest adventurer visit intent evidence: resolved intent {0}; challenge posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}."
+      "text": "Latest visit intent: {0}; challenge posture used: {1}; debug selected posture: {2}; rule source: {3}; error code: {4}; fallback used: {5}."
     },
     {
       "key": "ui.adventurer_intent.unavailable",
@@ -1805,7 +1805,7 @@
     },
     {
       "key": "ui.adventurer_traffic.detail_format",
-      "text": "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; intent {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}."
+      "text": "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; traffic pressure intent input {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}."
     },
     {
       "key": "ui.adventurer_traffic.band.none",

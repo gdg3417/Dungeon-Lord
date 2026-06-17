@@ -62,7 +62,7 @@ namespace DungeonBuilder.Tests.EditMode
             var summary = AdventurerRunIntentResolver.Resolve(Config(), Effects(0, 8, 5, 0, 2), 0d, Heat("heat_tier.peace"), null);
             string line = AdventurerRunIntentPresenter.BuildSummaryLine(summary, Localized);
 
-            Assert.That(line, Is.EqualTo("Adventurer intent: Greedy likely. Reason: loot signal is high and heat is low"));
+            Assert.That(line, Is.EqualTo("Expected next adventurer intent: Greedy likely. Reason: loot signal is high and heat is low"));
             Assert.That(line, Does.Not.Contain("run.posture.greedy"));
             Assert.That(line, Does.Not.Contain("ui.adventurer_intent"));
         }
@@ -98,9 +98,9 @@ namespace DungeonBuilder.Tests.EditMode
                 case "run.posture.cautious.name": return "Cautious";
                 case "run.posture.balanced.name": return "Balanced";
                 case "run.posture.greedy.name": return "Greedy";
-                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Adventurer intent: {0} likely. Reason: {1}";
+                case AdventurerRunIntentPresenter.SummaryFormatKey: return "Expected next adventurer intent: {0} likely. Reason: {1}";
                 case AdventurerRunIntentPresenter.BodyFormatKey: return "{0} likely. Reason: {1}";
-                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Adventurer intent: {0} likely. Debug selected posture: {1}.";
+                case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
                 case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
                 case AdventurerRunIntentResolver.ReasonModerateKey: return "risk and reward are both moderate";
