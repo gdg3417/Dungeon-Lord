@@ -150,8 +150,7 @@ namespace DungeonBuilder.M0
                 beforeRunSummary,
                 afterRunSummary,
                 didRun,
-                Localize,
-                AdventurerRunIntentPresenter.ResolvePostureNameKey(runPostureId));
+                Localize);
             string feedback = string.Concat(postureSource, " ", resultFeedback);
             string banner = Localize(didRun ? "ui.banner.run_simulated" : "ui.banner.run_sim_failed");
             _context.SetBanner?.Invoke(banner);

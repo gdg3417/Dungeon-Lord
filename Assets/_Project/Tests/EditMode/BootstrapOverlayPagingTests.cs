@@ -500,7 +500,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(expectedResolvedPostureId));
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Expected next adventurer intent: {expectedResolvedPostureName} likely. Challenge posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Latest visit intent: {expectedResolvedPostureName}. Challenge posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("Expected next adventurer intent"));
+            Assert.That(_overlay.MvpRunResultFeedback.Split(new[] { "Challenge posture used:" }, System.StringSplitOptions.None).Length - 1, Is.EqualTo(1));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("debug fallback"));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copiedSmoke, Does.Contain($"Latest visit intent: {expectedResolvedPostureName}; challenge posture used: {expectedResolvedPostureName}; debug selected posture: Cautious; rule source: run.adventurer_intent.rule.test; error code: 0; fallback used: False."));
@@ -518,7 +520,9 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.RunOrObserveDungeon();
 
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Expected next adventurer intent unavailable. Challenge posture used debug fallback: Greedy. Debug selected posture: Greedy."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Latest visit intent unavailable. Challenge posture used debug fallback: Greedy. Debug selected posture: Greedy."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("Expected next adventurer intent"));
+            Assert.That(_overlay.MvpRunResultFeedback.Split(new[] { "Challenge posture used" }, System.StringSplitOptions.None).Length - 1, Is.EqualTo(1));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copiedSmoke, Does.Contain("Latest visit intent: Unavailable; challenge posture used: Greedy; debug selected posture: Greedy; rule source: ; error code: 1; fallback used: True."));
         }
@@ -1827,8 +1831,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.adventurer_intent.summary_format"] = "Expected next adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
             map["ui.adventurer_intent.debug_posture_format"] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.run_posture_used_format"] = "Expected next adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}.";
-            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Expected next adventurer intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.run_posture_used_format"] = "Latest visit intent: {0}. Challenge posture used: {1}. Debug selected posture: {2}.";
+            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Latest visit intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}.";
             map["ui.adventurer_intent.smoke_evidence_format"] = "Latest visit intent: {0}; challenge posture used: {1}; debug selected posture: {2}; rule source: {3}; error code: {4}; fallback used: {5}.";
             map["ui.adventurer_intent.unavailable"] = "Unavailable";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";

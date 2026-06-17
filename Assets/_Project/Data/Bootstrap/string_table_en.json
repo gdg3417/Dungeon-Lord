@@ -1693,11 +1693,11 @@
     },
     {
       "key": "ui.adventurer_intent.run_posture_used_format",
-      "text": "Expected next adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}."
+      "text": "Latest visit intent: {0}. Challenge posture used: {1}. Debug selected posture: {2}."
     },
     {
       "key": "ui.adventurer_intent.fallback_run_posture_used_format",
-      "text": "Expected next adventurer intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}."
+      "text": "Latest visit intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}."
     },
     {
       "key": "ui.adventurer_intent.smoke_evidence_format",
