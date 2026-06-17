@@ -693,7 +693,15 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
             Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
-            Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
+            if (string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
+            {
+                Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
+            }
+            else
+            {
+                Assert.That(text, Does.Contain($"Dungeon composition: Room: Basic Room; {categoryName}: {displayName}"));
+            }
+
             Assert.That(text, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
             Assert.That(text, Does.Not.Contain(categoryId));
             Assert.That(text, Does.Not.Contain(optionId));
@@ -1554,6 +1562,8 @@ namespace DungeonBuilder.Tests.EditMode
                 }
             });
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_f6_room_slot_consistency_test.json", useAtomicWrites = false }));
+            _overlay.RunOrObserveDungeon();
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
