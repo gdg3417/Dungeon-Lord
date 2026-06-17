@@ -52,6 +52,12 @@ namespace DungeonBuilder.M0
             return count <= 0 ? 0 : Math.Min(requested, count - 1);
         }
 
+        public static bool HasKnownCapacity(MvpDungeonRoomInstance room)
+        {
+            return room?.Capacity != null &&
+                   (room.Capacity.MonsterCapacity > 0 || room.Capacity.TrapCapacity > 0 || room.Capacity.LootCapacity > 0);
+        }
+
         public static bool CanAccept(MvpDungeonRoomInstance room, string categoryId)
         {
             if (room?.Capacity == null) return false;

@@ -521,10 +521,20 @@ namespace DungeonBuilder.M0
 
         public bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey)
         {
-            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out _);
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out _, false);
         }
 
         public bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback)
+        {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, false);
+        }
+
+        public bool TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback)
+        {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, true);
+        }
+
+        private bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback, bool enforceSelectedRoomTarget)
         {
             priorEntry = null;
             newEntry = null;
@@ -549,12 +559,12 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            if (!string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            if (enforceSelectedRoomTarget && !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
             {
                 MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
                 int targetIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
                 MvpDungeonRoomInstance targetRoom = targetLayout?.Rooms != null && targetLayout.Rooms.Length > targetIndex ? targetLayout.Rooms[targetIndex] : null;
-                if (!MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
+                if (MvpRoomSlotTargetResolver.HasKnownCapacity(targetRoom) && !MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
                 {
                     bannerKey = "ui.banner.place_failed";
                     failureFeedback = MvpRoomSlotTargetPresenter.BuildNoValidSlotText(targetLayout, targetIndex, categoryId, (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);

@@ -1135,7 +1135,7 @@ namespace DungeonBuilder.M0
                 (key, fallback) => GetLocalizedString(key, fallback),
                 (categoryId, optionId) =>
                 {
-                    bool ok = _root.TryMvpPlaceOrModifySelectedPlacement(
+                    bool ok = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
                         categoryId,
                         optionId,
                         out MvpDungeonPlacementEntry priorEntry,
