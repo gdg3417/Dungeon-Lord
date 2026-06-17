@@ -112,6 +112,49 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("placement.option"));
         }
 
+        [Test]
+        public void ResolveDefaultFloor_NarrowHallLootFallbackCreatesTwoRoomsInDeterministicOrder()
+        {
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                SaveWithLayout(NarrowHallHiddenCacheLayout()),
+                Config());
+
+            Assert.That(layout.FloorIndex, Is.EqualTo(0));
+            Assert.That(layout.Rooms, Has.Length.EqualTo(2));
+            Assert.That(layout.Rooms[0].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.NarrowHallOptionId));
+            Assert.That(layout.Rooms[0].Capacity.MonsterCapacity, Is.EqualTo(1));
+            Assert.That(layout.Rooms[0].Capacity.TrapCapacity, Is.EqualTo(1));
+            Assert.That(layout.Rooms[0].Capacity.LootCapacity, Is.EqualTo(0));
+            Assert.That(layout.Rooms[0].AssignedMonsterOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.GoblinOptionId }));
+            Assert.That(layout.Rooms[0].AssignedTrapOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.SnareTrapOptionId }));
+            Assert.That(layout.Rooms[0].AssignedLootNodeOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(layout.Rooms[1].Capacity.MonsterCapacity, Is.EqualTo(1));
+            Assert.That(layout.Rooms[1].Capacity.TrapCapacity, Is.EqualTo(1));
+            Assert.That(layout.Rooms[1].Capacity.LootCapacity, Is.EqualTo(1));
+            Assert.That(layout.Rooms[1].AssignedLootNodeOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }));
+        }
+
+        [Test]
+        public void ResolveDefaultFloor_DoesNotCreateFallbackRoomWhenNoLootCapacityExists()
+        {
+            var config = new RunSimulationConfig
+            {
+                MvpRoomSlotCapacities = new[]
+                {
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 },
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 }
+                }
+            };
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                SaveWithLayout(NarrowHallHiddenCacheLayout()),
+                config);
+
+            Assert.That(layout.Rooms, Has.Length.EqualTo(1));
+            Assert.That(layout.Rooms[0].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.NarrowHallOptionId));
+            Assert.That(layout.Rooms[0].AssignedLootNodeOptionIds, Is.Empty);
+        }
 
         [Test]
         public void BuildRoomSlotLayoutText_JoinsMultipleAssignmentsWithLocalizedSeparator()
@@ -158,6 +201,20 @@ namespace DungeonBuilder.Tests.EditMode
                     new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 2),
                     new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3),
                     new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 4)
+                }
+            });
+        }
+
+        private static MvpDungeonFloorLayoutState NarrowHallHiddenCacheLayout()
+        {
+            return MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(new MvpDungeonPlacementState
+            {
+                Entries = new List<MvpDungeonPlacementEntry>
+                {
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 2),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId, 3),
+                    new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, 4)
                 }
             });
         }
