@@ -162,7 +162,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
             Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
-            Assert.That(text, Does.Contain("Adventurer intent:"));
+            Assert.That(text, Does.Contain("Expected next adventurer intent:"));
             Assert.That(text, Does.Contain("Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("Adjust placement before the next adventurer visit."));
@@ -500,10 +500,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(expectedResolvedPostureId));
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.Not.EqualTo(_overlay.SelectedMvpRunPostureId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Adventurer intent: {expectedResolvedPostureName} likely. Challenge posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain($"Latest visit intent: {expectedResolvedPostureName}. Challenge posture used: {expectedResolvedPostureName}. Debug selected posture: Cautious."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("Expected next adventurer intent"));
+            Assert.That(_overlay.MvpRunResultFeedback.Split(new[] { "Challenge posture used:" }, System.StringSplitOptions.None).Length - 1, Is.EqualTo(1));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("debug fallback"));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain($"Latest adventurer visit intent evidence: resolved intent {expectedResolvedPostureName}; challenge posture used {expectedResolvedPostureName}; debug posture selected Cautious; rule source run.adventurer_intent.rule.test; error code 0; fallback used False."));
+            Assert.That(copiedSmoke, Does.Contain($"Latest visit intent: {expectedResolvedPostureName}; challenge posture used: {expectedResolvedPostureName}; debug selected posture: Cautious; rule source: run.adventurer_intent.rule.test; error code: 0; fallback used: False."));
         }
 
         [Test]
@@ -518,9 +520,11 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.RunOrObserveDungeon();
 
             Assert.That(_root.Save.runHistory.LatestOutcome.RunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
-            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer intent unavailable. Challenge posture used: Greedy debug fallback. Debug selected posture: Greedy."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Latest visit intent unavailable. Challenge posture used debug fallback: Greedy. Debug selected posture: Greedy."));
+            Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("Expected next adventurer intent"));
+            Assert.That(_overlay.MvpRunResultFeedback.Split(new[] { "Challenge posture used" }, System.StringSplitOptions.None).Length - 1, Is.EqualTo(1));
             string copiedSmoke = _overlay.CopyFullSmokeTextToClipboard();
-            Assert.That(copiedSmoke, Does.Contain("Latest adventurer visit intent evidence: resolved intent Unavailable; challenge posture used Greedy; debug posture selected Greedy; rule source ; error code 1; fallback used True."));
+            Assert.That(copiedSmoke, Does.Contain("Latest visit intent: Unavailable; challenge posture used: Greedy; debug selected posture: Greedy; rule source: ; error code: 1; fallback used: True."));
         }
 
         [Test]
@@ -1413,7 +1417,7 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
-            Assert.That(copied, Does.Contain("Adventurer intent:"));
+            Assert.That(copied, Does.Contain("Expected next adventurer intent:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
@@ -1446,7 +1450,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Role: adds room space and path context."));
             Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(copied, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
-            Assert.That(copied, Does.Contain("Adventurer intent:"));
+            Assert.That(copied, Does.Contain("Expected next adventurer intent:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Mana Generator"));
             Assert.That(copied, Does.Contain("Player view: diagnostics hidden."));
@@ -1823,13 +1827,13 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
-            map["ui.mvp_loop.section.adventurer_intent"] = "Adventurer intent";
-            map["ui.adventurer_intent.summary_format"] = "Adventurer intent: {0} likely. Reason: {1}";
+            map["ui.mvp_loop.section.adventurer_intent"] = "Expected next adventurer intent";
+            map["ui.adventurer_intent.summary_format"] = "Expected next adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
-            map["ui.adventurer_intent.debug_posture_format"] = "Adventurer intent: {0} likely. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.run_posture_used_format"] = "Adventurer intent: {0} likely. Challenge posture used: {1}. Debug selected posture: {2}.";
-            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Adventurer intent unavailable. Challenge posture used: {0} debug fallback. Debug selected posture: {1}.";
-            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest adventurer visit intent evidence: resolved intent {0}; challenge posture used {1}; debug posture selected {2}; rule source {3}; error code {4}; fallback used {5}.";
+            map["ui.adventurer_intent.debug_posture_format"] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.run_posture_used_format"] = "Latest visit intent: {0}. Challenge posture used: {1}. Debug selected posture: {2}.";
+            map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Latest visit intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}.";
+            map["ui.adventurer_intent.smoke_evidence_format"] = "Latest visit intent: {0}; challenge posture used: {1}; debug selected posture: {2}; rule source: {3}; error code: {4}; fallback used: {5}.";
             map["ui.adventurer_intent.unavailable"] = "Unavailable";
             map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
@@ -1855,7 +1859,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.adventurer_pressure.outcome.success"] = "success";
             map["ui.adventurer_pressure.outcome.failure"] = "failure";
             map["ui.adventurer_traffic.summary_format"] = "Adventurer traffic: {0}. Estimated active delves: {1}. Reason: {2}.";
-            map["ui.adventurer_traffic.detail_format"] = "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; intent {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}.";
+            map["ui.adventurer_traffic.detail_format"] = "Adventurer traffic detail: score {0:0.##}; band {1}; estimated active delves {2}; estimated delve band {3}; arrival pressure {4}; traffic pressure intent input {5}; rule source {6}; error {7}; loot {8}; attraction {9}; danger {10}; heat pressure {11}; recent deaths {12}; recovered loot {13}; path complete {14}.";
             map["ui.adventurer_traffic.band.none"] = "none";
             map["ui.adventurer_traffic.band.low"] = "low";
             map["ui.adventurer_traffic.band.building"] = "building";
@@ -2083,7 +2087,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_feedback.outcome_cue.format"] = "{0} {1}";
             map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
             map["ui.mvp_run_feedback.format_with_party"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}";
-            map["ui.mvp_run_feedback.posture_format"] = "Posture: {0}. {1}";
+            map["ui.mvp_run_feedback.posture_format"] = "Challenge posture used: {0}. {1}";
             map["ui.mvp_adventurer_party.preview_format"] = "Adventurers: {0}";
             map["ui.mvp_adventurer_party.class.unknown"] = "Unknown adventurer";
             map["adventurer.class.warrior.display_name"] = "Warrior";

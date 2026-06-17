@@ -77,7 +77,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(result.DebugPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
             Assert.That(result.IntentFallbackUsed, Is.False);
             Assert.That(_lastPosture, Is.EqualTo(RunPostureResolver.GreedyId));
-            Assert.That(result.RunFeedback, Does.Contain("Intent Greedy used Greedy while debug selected Cautious."));
+            Assert.That(result.RunFeedback, Does.Contain("Latest visit intent: Greedy. Challenge posture used: Greedy. Debug selected posture: Cautious."));
+            Assert.That(result.RunFeedback.Split(new[] { "Challenge posture used:" }, StringSplitOptions.None).Length - 1, Is.EqualTo(1));
         }
 
         [Test]
@@ -97,7 +98,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(result.DebugPostureId, Is.EqualTo(RunPostureResolver.CautiousId));
             Assert.That(result.IntentFallbackUsed, Is.True);
             Assert.That(_lastPosture, Is.EqualTo(RunPostureResolver.CautiousId));
-            Assert.That(result.RunFeedback, Does.Contain("Fallback Cautious used because debug selected Cautious."));
+            Assert.That(result.RunFeedback, Does.Contain("Latest visit intent unavailable. Challenge posture used debug fallback: Cautious. Debug selected posture: Cautious."));
+            Assert.That(result.RunFeedback.Split(new[] { "Challenge posture used" }, StringSplitOptions.None).Length - 1, Is.EqualTo(1));
         }
 
         [Test]
@@ -197,8 +199,8 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
                 [MvpDungeonPlacementPresenter.BasicRoomPreviewKey] = "Basic room anchors the route.",
                 [MvpDungeonPlacementPresenter.SkeletonPreviewKey] = "Skeleton guards the route.",
-                [AdventurerRunIntentPresenter.RunPostureUsedFormatKey] = "Intent {0} used {1} while debug selected {2}.",
-                [AdventurerRunIntentPresenter.FallbackRunPostureUsedFormatKey] = "Fallback {0} used because debug selected {1}.",
+                [AdventurerRunIntentPresenter.RunPostureUsedFormatKey] = "Latest visit intent: {0}. Challenge posture used: {1}. Debug selected posture: {2}.",
+                [AdventurerRunIntentPresenter.FallbackRunPostureUsedFormatKey] = "Latest visit intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}.",
                 [MvpRunResultFeedbackPresenter.FormatKey] = "Run feedback: {0}; mana {1}; loot {2}/{3}/{4}; heat {5}->{6}.",
                 [MvpRunResultFeedbackPresenter.SuccessHeatReducedKey] = "success",
                 [MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey] = "controlled loot",
