@@ -1028,6 +1028,12 @@ namespace DungeonBuilder.M0
                 GUILayout.Label(labels.ComparisonText, compactLabel, labelHeight);
             }
             GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
+            GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), compactLabel, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.mvp_room_slots.cycle_target_button"), compactButton, buttonHeight))
+            {
+                _root.CycleSelectedMvpRoomSlotTarget();
+                RefreshOverlayText();
+            }
             GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
             {
@@ -1129,13 +1135,14 @@ namespace DungeonBuilder.M0
                 (key, fallback) => GetLocalizedString(key, fallback),
                 (categoryId, optionId) =>
                 {
-                    bool ok = _root.TryMvpPlaceOrModifySelectedPlacement(
+                    bool ok = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
                         categoryId,
                         optionId,
                         out MvpDungeonPlacementEntry priorEntry,
                         out MvpDungeonPlacementEntry newEntry,
-                        out string bannerKey);
-                    return new BootstrapMvpActionHandler.PlacementAttempt(ok, priorEntry, newEntry, bannerKey);
+                        out string bannerKey,
+                        out string failureFeedback);
+                    return new BootstrapMvpActionHandler.PlacementAttempt(ok, priorEntry, newEntry, bannerKey, string.Empty, failureFeedback);
                 },
                 () => _root.ResolveMvpPlayerLoopSummary(),
                 postureId => _root.SimulateMvpActiveLoopOnce(out _, postureId),

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace DungeonBuilder.Tests.EditMode
             _rootObject = new GameObject("MvpDungeonPlacementScaffoldRootTest");
             _root = _rootObject.AddComponent<GameRoot>();
             SetBackingField("<Save>k__BackingField", new SaveData());
+            SetBackingField("<Content>k__BackingField", BuildContent());
         }
 
         [TearDown]
@@ -86,6 +88,48 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(nodePlacements[0].OptionId, Is.EqualTo(optionId));
         }
 
+
+
+        [Test]
+        public void SelectedRoomEnforcedPlacement_BasicRoomAcceptsMonster()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out _);
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                out _,
+                out MvpDungeonPlacementEntry entry,
+                out string bannerKey,
+                out string failureFeedback);
+
+            Assert.That(placed, Is.True);
+            Assert.That(entry.OptionId, Is.EqualTo(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(bannerKey, Is.EqualTo("ui.banner.place_success"));
+            Assert.That(failureFeedback, Is.Empty);
+        }
+
+        [Test]
+        public void SelectedRoomEnforcedPlacement_NarrowHallRejectsLootWithLocalizedFeedback()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, out _, out _, out _);
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId,
+                out _,
+                out _,
+                out string bannerKey,
+                out string failureFeedback);
+
+            Assert.That(placed, Is.False);
+            Assert.That(bannerKey, Is.EqualTo("ui.banner.place_failed"));
+            Assert.That(failureFeedback, Is.EqualTo("No valid Loot node slot in Room 1: Narrow Hall."));
+            Assert.That(failureFeedback, Does.Not.Contain("placement."));
+            Assert.That(failureFeedback, Does.Not.Contain("ui."));
+        }
 
         [Test]
         public void PlacingSameCategory_ModifiesExistingEntryDeterministically()
@@ -244,6 +288,45 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+
+
+        private static ContentService BuildContent()
+        {
+            var content = new ContentService();
+            var map = (Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(content);
+            if (map != null)
+            {
+                map[MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}";
+                map[MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.";
+                map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
+                map[MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node";
+                map[MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall";
+                map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
+                map[MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node";
+            }
+
+            return content;
+        }
+
+        private void SetRunSimulationConfig(RunSimulationConfig config)
+        {
+            SetBackingField("_runSimulationService", new RunSimulationService(config));
+        }
+
+        private static RunSimulationConfig RoomSlotConfig()
+        {
+            return new RunSimulationConfig
+            {
+                MvpRoomSlotCapacities = new[]
+                {
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 },
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 }
+                }
+            };
+        }
+
         private static RunSimulationConfig PlacementEffectsConfig()
         {
             return new RunSimulationConfig
@@ -294,6 +377,7 @@ namespace DungeonBuilder.Tests.EditMode
                 ["run.posture.balanced.name"] = "Balanced",
                 ["run.posture.greedy.name"] = "Greedy",
                 [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
+                [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Placement effects: {0}",
                 [MvpLoopSummaryPanelPresenter.LatestRunFormatKey] = "Latest adventurer visit: {0}",
                 [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
                 [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {1}/{0} recovered; {2} tradeable.",
@@ -329,6 +413,9 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Changed placement: {0} -> {1}: {2}. {3}",
+                [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
+                [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
+                ["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
                 [MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap",
@@ -343,7 +430,21 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0}: {1}",
                 [MvpDungeonPlacementPresenter.SeparatorKey] = "; ",
-                [MvpDungeonPlacementPresenter.BasicRoomPreviewKey] = "Role: adds room space and path context."
+                [MvpDungeonPlacementPresenter.BasicRoomPreviewKey] = "Role: adds room space and path context.",
+                [MvpPlacementEffectsPresenter.EmptyKey] = "No placement effects",
+                [MvpPlacementEffectsPresenter.CombinedFormatKey] = "{0}",
+                [MvpPlacementEffectsPresenter.DetailSeparatorKey] = "; ",
+                [MvpPlacementEffectsPresenter.PathCapacityFormatKey] = "path capacity {0}",
+                [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger {0}",
+                [MvpPlacementEffectsPresenter.ManaPressureFormatKey] = "mana pressure {0}",
+                [MvpPlacementEffectsPresenter.HeatPressureFormatKey] = "heat pressure {0}",
+                [MvpPlacementEffectsPresenter.LootBonusFormatKey] = "loot bonus {0}",
+                [MvpPlacementEffectsPresenter.AttractionFormatKey] = "attraction {0}",
+                [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",
+                ["effect.room"] = "room effect",
+                ["effect.monster"] = "monster effect",
+                ["effect.trap"] = "trap effect",
+                ["effect.loot"] = "loot effect"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;

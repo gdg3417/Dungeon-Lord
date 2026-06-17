@@ -31,17 +31,26 @@ namespace DungeonBuilder.M0
         public readonly struct PlacementAttempt
         {
             public PlacementAttempt(bool succeeded, MvpDungeonPlacementEntry priorEntry, MvpDungeonPlacementEntry newEntry, string bannerKey)
+                : this(succeeded, priorEntry, newEntry, bannerKey, string.Empty, string.Empty)
+            {
+            }
+
+            public PlacementAttempt(bool succeeded, MvpDungeonPlacementEntry priorEntry, MvpDungeonPlacementEntry newEntry, string bannerKey, string targetFeedback, string failureFeedback)
             {
                 Succeeded = succeeded;
                 PriorEntry = priorEntry;
                 NewEntry = newEntry;
                 BannerKey = bannerKey;
+                TargetFeedback = targetFeedback ?? string.Empty;
+                FailureFeedback = failureFeedback ?? string.Empty;
             }
 
             public bool Succeeded { get; }
             public MvpDungeonPlacementEntry PriorEntry { get; }
             public MvpDungeonPlacementEntry NewEntry { get; }
             public string BannerKey { get; }
+            public string TargetFeedback { get; }
+            public string FailureFeedback { get; }
         }
 
         public readonly struct PlacementResult
@@ -107,14 +116,18 @@ namespace DungeonBuilder.M0
             string message = Localize(attempt.BannerKey);
             if (!attempt.Succeeded)
             {
-                _context.SetBanner?.Invoke(message);
-                return new PlacementResult(false, string.Empty, message);
+                string failureFeedback = string.IsNullOrWhiteSpace(attempt.FailureFeedback) ? string.Empty : attempt.FailureFeedback;
+                _context.SetBanner?.Invoke(string.IsNullOrWhiteSpace(failureFeedback) ? message : failureFeedback);
+                return new PlacementResult(false, failureFeedback, string.IsNullOrWhiteSpace(failureFeedback) ? message : failureFeedback);
             }
 
-            string feedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
+            string changedFeedback = MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
                 attempt.PriorEntry,
                 attempt.NewEntry,
                 Localize);
+            string feedback = string.IsNullOrWhiteSpace(attempt.TargetFeedback)
+                ? changedFeedback
+                : string.Concat(attempt.TargetFeedback, "\n", changedFeedback);
             _context.SetBanner?.Invoke(feedback);
             return new PlacementResult(true, feedback, feedback);
         }

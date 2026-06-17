@@ -497,6 +497,23 @@ namespace DungeonBuilder.M0
             return TryPlaceSelectedStructure(structureId, allowReplace: false, out bannerKey);
         }
 
+
+        public void CycleSelectedMvpRoomSlotTarget()
+        {
+            if (Save == null) return;
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+            int count = layout?.Rooms == null ? 0 : layout.Rooms.Length;
+            if (count <= 0)
+            {
+                Save.mvpSelectedRoomSlotIndex = 0;
+            }
+            else
+            {
+                Save.mvpSelectedRoomSlotIndex = (MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, layout) + 1) % count;
+            }
+            SaveService?.Save(Save, SaveReason.ManualDev);
+        }
+
         public bool TryMvpPlaceOrModifySelectedStructure(string structureId, out string bannerKey)
         {
             return TryPlaceSelectedStructure(structureId, allowReplace: true, out bannerKey);
@@ -504,8 +521,24 @@ namespace DungeonBuilder.M0
 
         public bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey)
         {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out _, false);
+        }
+
+        public bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback)
+        {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, false);
+        }
+
+        public bool TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback)
+        {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, true);
+        }
+
+        private bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback, bool enforceSelectedRoomTarget)
+        {
             priorEntry = null;
             newEntry = null;
+            failureFeedback = string.Empty;
             bannerKey = "ui.banner.place_success";
             if (Save == null || !MvpDungeonPlacementIds.IsAllowedCategory(categoryId) || !MvpDungeonPlacementIds.IsAllowedOption(optionId))
             {
@@ -524,6 +557,19 @@ namespace DungeonBuilder.M0
             {
                 bannerKey = "ui.banner.place_blocked_heat_crisis";
                 return false;
+            }
+
+            if (enforceSelectedRoomTarget && !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+                int targetIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
+                MvpDungeonRoomInstance targetRoom = targetLayout?.Rooms != null && targetLayout.Rooms.Length > targetIndex ? targetLayout.Rooms[targetIndex] : null;
+                if (MvpRoomSlotTargetResolver.HasKnownCapacity(targetRoom) && !MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
+                {
+                    bannerKey = "ui.banner.place_failed";
+                    failureFeedback = MvpRoomSlotTargetPresenter.BuildNoValidSlotText(targetLayout, targetIndex, categoryId, (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);
+                    return false;
+                }
             }
 
             if (Save.mvpDungeonPlacements == null)

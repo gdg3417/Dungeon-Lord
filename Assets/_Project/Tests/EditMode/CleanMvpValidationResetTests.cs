@@ -641,6 +641,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_dungeon_layout.panel.node_separator"] = " -> ";
             map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
             map["ui.mvp_room_slots.panel.layout_format"] = "Room slot layout: {0}";
+            map["ui.mvp_room_slots.selected_target_format"] = "Selected room target: Room {0}: {1}";
+            map["ui.mvp_room_slots.no_valid_slot_format"] = "No valid {0} slot in Room {1}: {2}.";
+            map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
             map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";
             map["ui.mvp_room_slots.panel.room_format"] = "Room {0}: {1} ({2}; {3}; {4})";
             map["ui.mvp_room_slots.panel.monsters_format"] = "Monsters: {0} {1}/{2}";
