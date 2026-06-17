@@ -97,20 +97,19 @@ namespace DungeonBuilder.M0
         private static string BuildPlayableCurrentDungeonLine(MvpPlayerLoopSummary summary, string dungeonLayoutText, Func<string, string, string> localize)
         {
             string composition = BuildCurrentDungeonCompositionLine(summary, localize);
-            string roomSlotLayout = ExtractRoomSlotLayoutLine(dungeonLayoutText, localize);
-            return string.IsNullOrWhiteSpace(roomSlotLayout)
-                ? composition
-                : JoinInline(localize, composition, roomSlotLayout);
+            string selectedTarget = ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedTargetFormatKey, localize);
+            string roomSlotLayout = ExtractLine(dungeonLayoutText, MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey, localize);
+            return JoinInline(localize, composition, selectedTarget, roomSlotLayout);
         }
 
-        private static string ExtractRoomSlotLayoutLine(string dungeonLayoutText, Func<string, string, string> localize)
+        private static string ExtractLine(string dungeonLayoutText, string key, Func<string, string, string> localize)
         {
             if (string.IsNullOrWhiteSpace(dungeonLayoutText))
             {
                 return string.Empty;
             }
 
-            string roomSlotPrefix = Localize(localize, MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey).Split('{')[0];
+            string roomSlotPrefix = Localize(localize, key).Split('{')[0];
             foreach (string line in dungeonLayoutText.Split('\n'))
             {
                 if (!string.IsNullOrWhiteSpace(roomSlotPrefix) && line.StartsWith(roomSlotPrefix, StringComparison.Ordinal))

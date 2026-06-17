@@ -72,8 +72,13 @@ namespace DungeonBuilder.M0
 
             string floorText = string.Format(Localize(localize, FloorFormatKey), 0, nodes.ToString());
             string legacyLayout = string.Format(Localize(localize, LayoutFormatKey), floorText);
-            string roomSlotLayout = config == null ? string.Empty : BuildRoomSlotLayoutText(MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config), localize);
-            return string.IsNullOrWhiteSpace(roomSlotLayout) ? legacyLayout : legacyLayout + "\n" + roomSlotLayout;
+            MvpDungeonFloorSlotLayout slotLayout = config == null ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
+            string selectedTarget = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedTargetText(slotLayout, MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, slotLayout), localize);
+            string roomSlotLayout = slotLayout == null ? string.Empty : BuildRoomSlotLayoutText(slotLayout, localize);
+            var fullLayout = new StringBuilder(legacyLayout);
+            if (!string.IsNullOrWhiteSpace(selectedTarget)) fullLayout.Append('\n').Append(selectedTarget);
+            if (!string.IsNullOrWhiteSpace(roomSlotLayout)) fullLayout.Append('\n').Append(roomSlotLayout);
+            return fullLayout.ToString();
         }
 
         public static string BuildRoomSlotLayoutText(MvpDungeonFloorSlotLayout layout, Func<string, string, string> localize)

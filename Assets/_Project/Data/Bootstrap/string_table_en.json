@@ -1876,6 +1876,18 @@
       "text": "Room slot layout: {0}"
     },
     {
+      "key": "ui.mvp_room_slots.selected_target_format",
+      "text": "Selected room target: Room {0}: {1}"
+    },
+    {
+      "key": "ui.mvp_room_slots.no_valid_slot_format",
+      "text": "No valid {0} slot in Room {1}: {2}."
+    },
+    {
+      "key": "ui.mvp_room_slots.cycle_target_button",
+      "text": "Cycle room target"
+    },
+    {
       "key": "ui.mvp_room_slots.panel.floor_format",
       "text": "Floor {0}: {1}"
     },

@@ -131,6 +131,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.PathCompleteFormatKey] = "Path complete: {0}",
             [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
             [MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey] = "Room slot layout: {0}",
+            [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
             [MvpLoopSummaryPanelPresenter.InlineSeparatorKey] = " | ",
