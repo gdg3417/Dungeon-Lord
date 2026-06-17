@@ -6,7 +6,7 @@ namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
-        public const int LatestSchemaVersion = 4;
+        public const int LatestSchemaVersion = 5;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 
@@ -57,6 +57,21 @@ namespace DungeonBuilder.M0
             if (root.primary.mvpDungeonFloorLayout.NextRevision < 1)
             {
                 root.primary.mvpDungeonFloorLayout.NextRevision = 1;
+            }
+
+            if (root.primary.mvpRoomSlotAssignments == null)
+            {
+                root.primary.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
+            }
+
+            if (root.primary.mvpRoomSlotAssignments.Rooms == null)
+            {
+                root.primary.mvpRoomSlotAssignments.Rooms = new System.Collections.Generic.List<MvpRoomSlotAssignmentState>();
+            }
+
+            if (root.primary.mvpRoomSlotAssignments.NextRevision < 1)
+            {
+                root.primary.mvpRoomSlotAssignments.NextRevision = 1;
             }
 
             if (root.primary.structureRuntime == null)

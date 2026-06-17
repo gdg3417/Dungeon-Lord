@@ -28,10 +28,34 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public MvpDungeonRoomInstance[] Rooms = Array.Empty<MvpDungeonRoomInstance>();
     }
 
+    [Serializable]
+    public sealed class MvpRoomSlotAssignmentState
+    {
+        public int FloorIndex;
+        public int RoomIndex;
+        public string RoomOptionId;
+        public string[] MonsterOptionIds = Array.Empty<string>();
+        public string[] TrapOptionIds = Array.Empty<string>();
+        public string[] LootNodeOptionIds = Array.Empty<string>();
+    }
+
+    [Serializable]
+    public sealed class MvpRoomSlotAssignmentCollection
+    {
+        public List<MvpRoomSlotAssignmentState> Rooms = new List<MvpRoomSlotAssignmentState>();
+        public int NextRevision = 1;
+    }
+
     public static class MvpRoomSlotLayoutResolver
     {
         public static MvpDungeonFloorSlotLayout ResolveDefaultFloor(SaveData save, RunSimulationConfig config)
         {
+            MvpDungeonFloorSlotLayout persisted = ResolvePersistedDefaultFloor(save, config);
+            if (persisted != null)
+            {
+                return persisted;
+            }
+
             MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);
             Dictionary<string, MvpDungeonPlacementEntry> byCategory = placements
                 .Where(entry => entry != null)
@@ -64,6 +88,92 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             return new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms.ToArray() };
         }
 
+        public static bool TryAssignToPersistedRoom(SaveData save, RunSimulationConfig config, int roomIndex, string categoryId, string optionId)
+        {
+            if (save == null ||
+                string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal) ||
+                !MvpDungeonPlacementIds.IsAllowedCategory(categoryId) ||
+                !MvpDungeonPlacementIds.IsAllowedOption(optionId))
+            {
+                return false;
+            }
+
+            MvpDungeonFloorSlotLayout current = ResolveDefaultFloor(save, config);
+            int clampedIndex = current?.Rooms == null || current.Rooms.Length == 0
+                ? 0
+                : Math.Min(Math.Max(0, roomIndex), current.Rooms.Length - 1);
+            MvpDungeonRoomInstance target = current?.Rooms != null && current.Rooms.Length > clampedIndex ? current.Rooms[clampedIndex] : null;
+            if (target == null || !CanAccept(target, categoryId))
+            {
+                return false;
+            }
+
+            if (save.mvpRoomSlotAssignments == null)
+            {
+                save.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
+            }
+
+            if (save.mvpRoomSlotAssignments.Rooms == null)
+            {
+                save.mvpRoomSlotAssignments.Rooms = new List<MvpRoomSlotAssignmentState>();
+            }
+
+            MvpRoomSlotAssignmentState room = save.mvpRoomSlotAssignments.Rooms.FirstOrDefault(entry => entry != null && entry.FloorIndex == 0 && entry.RoomIndex == clampedIndex);
+            if (room == null)
+            {
+                room = new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = clampedIndex };
+                save.mvpRoomSlotAssignments.Rooms.Add(room);
+            }
+
+            room.RoomOptionId = string.IsNullOrWhiteSpace(target.RoomOptionId) ? MvpDungeonPlacementIds.BasicRoomOptionId : target.RoomOptionId;
+            room.MonsterOptionIds = Normalize(room.MonsterOptionIds);
+            room.TrapOptionIds = Normalize(room.TrapOptionIds);
+            room.LootNodeOptionIds = Normalize(room.LootNodeOptionIds);
+
+            switch (categoryId)
+            {
+                case MvpDungeonPlacementIds.MonsterCategoryId:
+                    room.MonsterOptionIds = new[] { optionId };
+                    break;
+                case MvpDungeonPlacementIds.TrapCategoryId:
+                    room.TrapOptionIds = new[] { optionId };
+                    break;
+                case MvpDungeonPlacementIds.LootNodeCategoryId:
+                    room.LootNodeOptionIds = new[] { optionId };
+                    break;
+            }
+
+            save.mvpRoomSlotAssignments.NextRevision = Math.Max(1, save.mvpRoomSlotAssignments.NextRevision + 1);
+            return true;
+        }
+
+        public static void SetPersistedRoomOptionIfPresent(SaveData save, RunSimulationConfig config, int roomIndex, string roomOptionId)
+        {
+            List<MvpRoomSlotAssignmentState> rooms = save?.mvpRoomSlotAssignments?.Rooms;
+            if (rooms == null ||
+                rooms.Count == 0 ||
+                !MvpDungeonPlacementIds.IsAllowedOption(roomOptionId) ||
+                !MvpDungeonPlacementIds.TryGetCategoryForOption(roomOptionId, out string categoryId) ||
+                !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            int clampedIndex = Math.Max(0, roomIndex);
+            MvpRoomSlotAssignmentState room = rooms.FirstOrDefault(entry => entry != null && entry.FloorIndex == 0 && entry.RoomIndex == clampedIndex);
+            if (room == null)
+            {
+                return;
+            }
+
+            room.RoomOptionId = roomOptionId;
+            MvpRoomSlotCapacity capacity = ResolveCapacity(roomOptionId, config);
+            room.MonsterOptionIds = Clamp(room.MonsterOptionIds, capacity.MonsterCapacity);
+            room.TrapOptionIds = Clamp(room.TrapOptionIds, capacity.TrapCapacity);
+            room.LootNodeOptionIds = Clamp(room.LootNodeOptionIds, capacity.LootCapacity);
+            save.mvpRoomSlotAssignments.NextRevision = Math.Max(1, save.mvpRoomSlotAssignments.NextRevision + 1);
+        }
+
         public static MvpRoomSlotCapacity ResolveCapacity(string roomOptionId, RunSimulationConfig config)
         {
             MvpRoomSlotCapacityConfig match = config?.MvpRoomSlotCapacities?.FirstOrDefault(entry => entry != null && string.Equals(entry.RoomOptionId, roomOptionId, StringComparison.Ordinal));
@@ -81,6 +191,59 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             room.AssignedMonsterOptionIds = !string.IsNullOrWhiteSpace(monsterId) && room.Capacity.MonsterCapacity > 0 ? new[] { monsterId } : Array.Empty<string>();
             room.AssignedTrapOptionIds = !string.IsNullOrWhiteSpace(trapId) && room.Capacity.TrapCapacity > 0 ? new[] { trapId } : Array.Empty<string>();
             room.AssignedLootNodeOptionIds = !string.IsNullOrWhiteSpace(lootId) && room.Capacity.LootCapacity > 0 ? new[] { lootId } : Array.Empty<string>();
+        }
+
+        private static MvpDungeonFloorSlotLayout ResolvePersistedDefaultFloor(SaveData save, RunSimulationConfig config)
+        {
+            List<MvpRoomSlotAssignmentState> assignedRooms = save?.mvpRoomSlotAssignments?.Rooms;
+            if (assignedRooms == null || assignedRooms.Count == 0)
+            {
+                return null;
+            }
+
+            MvpDungeonRoomInstance[] rooms = assignedRooms
+                .Where(room => room != null && room.FloorIndex == 0 && room.RoomIndex >= 0)
+                .GroupBy(room => room.RoomIndex)
+                .OrderBy(group => group.Key)
+                .Select(group => group.Last())
+                .Select(room =>
+                {
+                    string roomOptionId = string.IsNullOrWhiteSpace(room.RoomOptionId) ? MvpDungeonPlacementIds.BasicRoomOptionId : room.RoomOptionId;
+                    MvpRoomSlotCapacity capacity = ResolveCapacity(roomOptionId, config);
+                    return new MvpDungeonRoomInstance
+                    {
+                        RoomOptionId = roomOptionId,
+                        Capacity = capacity,
+                        AssignedMonsterOptionIds = Clamp(Normalize(room.MonsterOptionIds), capacity.MonsterCapacity),
+                        AssignedTrapOptionIds = Clamp(Normalize(room.TrapOptionIds), capacity.TrapCapacity),
+                        AssignedLootNodeOptionIds = Clamp(Normalize(room.LootNodeOptionIds), capacity.LootCapacity)
+                    };
+                })
+                .ToArray();
+
+            return rooms.Length == 0 ? null : new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms };
+        }
+
+        private static bool CanAccept(MvpDungeonRoomInstance room, string categoryId)
+        {
+            if (room?.Capacity == null) return false;
+            switch (categoryId)
+            {
+                case MvpDungeonPlacementIds.MonsterCategoryId: return room.Capacity.MonsterCapacity > 0;
+                case MvpDungeonPlacementIds.TrapCategoryId: return room.Capacity.TrapCapacity > 0;
+                case MvpDungeonPlacementIds.LootNodeCategoryId: return room.Capacity.LootCapacity > 0;
+                default: return false;
+            }
+        }
+
+        private static string[] Normalize(string[] optionIds)
+        {
+            return optionIds == null ? Array.Empty<string>() : optionIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
+        }
+
+        private static string[] Clamp(string[] optionIds, int capacity)
+        {
+            return capacity <= 0 ? Array.Empty<string>() : Normalize(optionIds).Take(capacity).ToArray();
         }
     }
 }

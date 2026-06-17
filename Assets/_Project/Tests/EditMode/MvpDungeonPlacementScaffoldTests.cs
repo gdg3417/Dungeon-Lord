@@ -108,6 +108,43 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(entry.OptionId, Is.EqualTo(MvpDungeonPlacementIds.SkeletonOptionId));
             Assert.That(bannerKey, Is.EqualTo("ui.banner.place_success"));
             Assert.That(failureFeedback, Is.Empty);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, RoomSlotConfig());
+            Assert.That(layout.Rooms[0].AssignedMonsterOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.SkeletonOptionId }));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void SelectedRoomEnforcedPlacement_RoomOnePersistsMonsterInRoomOne()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.Save.mvpRoomSlotAssignments.Rooms.Add(new MvpRoomSlotAssignmentState
+            {
+                FloorIndex = 0,
+                RoomIndex = 0,
+                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId
+            });
+            _root.Save.mvpRoomSlotAssignments.Rooms.Add(new MvpRoomSlotAssignmentState
+            {
+                FloorIndex = 0,
+                RoomIndex = 1,
+                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId
+            });
+            _root.Save.mvpSelectedRoomSlotIndex = 1;
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.GoblinOptionId,
+                out _,
+                out _,
+                out string bannerKey,
+                out string failureFeedback);
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, RoomSlotConfig());
+            Assert.That(placed, Is.True);
+            Assert.That(bannerKey, Is.EqualTo("ui.banner.place_success"));
+            Assert.That(failureFeedback, Is.Empty);
+            Assert.That(layout.Rooms[0].AssignedMonsterOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].AssignedMonsterOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.GoblinOptionId }));
         }
 
         [Test]
@@ -129,6 +166,125 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(failureFeedback, Is.EqualTo("No valid Loot node slot in Room 1: Narrow Hall."));
             Assert.That(failureFeedback, Does.Not.Contain("placement."));
             Assert.That(failureFeedback, Does.Not.Contain("ui."));
+        }
+
+        [Test]
+        public void RoomSlotLayout_UsesPersistedAssignmentsWhenPresent()
+        {
+            var save = new SaveData
+            {
+                mvpDungeonPlacements = AllStarterPlacementState(),
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId },
+                            TrapOptionIds = new[] { MvpDungeonPlacementIds.SnareTrapOptionId },
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }
+                        }
+                    }
+                }
+            };
+
+            string text = MvpDungeonLayoutPresenter.BuildRoomSlotLayoutText(MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, RoomSlotConfig()), Localized);
+
+            Assert.That(text, Does.Contain("Goblin"));
+            Assert.That(text, Does.Contain("Snare Trap"));
+            Assert.That(text, Does.Contain("Hidden Cache"));
+            Assert.That(text, Does.Not.Contain("Skeleton"));
+            AssertNoRawPlacementIds(text);
+        }
+
+        [Test]
+        public void RoomSlotLayout_FallsBackToLegacyPlacementsWhenPersistedAssignmentsAbsent()
+        {
+            var save = new SaveData { mvpDungeonPlacements = AllStarterPlacementState(), mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection() };
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, RoomSlotConfig());
+
+            Assert.That(layout.Rooms[0].AssignedMonsterOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.SkeletonOptionId }));
+            Assert.That(layout.Rooms[0].AssignedTrapOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.SpikeTrapOptionId }));
+            Assert.That(layout.Rooms[0].AssignedLootNodeOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }));
+        }
+
+        [Test]
+        public void LegacySave_BasicRoomGoblinSpikeTrapHiddenCache_ResolvesSameRoomSlotLayout()
+        {
+            var save = new SaveData
+            {
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 2),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 3),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, 4)
+                    },
+                    NextRevision = 5
+                },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection()
+            };
+
+            string text = MvpDungeonLayoutPresenter.BuildRoomSlotLayoutText(MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, RoomSlotConfig()), Localized);
+
+            Assert.That(text, Does.Contain("Goblin"));
+            Assert.That(text, Does.Contain("Spike Trap"));
+            Assert.That(text, Does.Contain("Hidden Cache"));
+            AssertNoRawPlacementIds(text);
+        }
+
+        [Test]
+        public void PersistedLootCapableFallbackRoom_ShowsLootInOwnSlot()
+        {
+            var save = new SaveData
+            {
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId },
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 1,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }
+                        }
+                    }
+                }
+            };
+
+            string text = MvpDungeonLayoutPresenter.BuildRoomSlotLayoutText(MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, RoomSlotConfig()), Localized);
+
+            Assert.That(text, Does.Contain("Room 2: Basic Room"));
+            Assert.That(text, Does.Contain("Hidden Cache"));
+            AssertNoRawPlacementIds(text);
+        }
+
+        [Test]
+        public void SelectedRoomTarget_ClampsWhenPersistedRoomCountShrinks()
+        {
+            var save = new SaveData
+            {
+                mvpSelectedRoomSlotIndex = 9,
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId }
+                    }
+                }
+            };
+
+            int index = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, RoomSlotConfig()));
+
+            Assert.That(index, Is.EqualTo(0));
         }
 
         [Test]
@@ -301,8 +457,16 @@ namespace DungeonBuilder.Tests.EditMode
                 map[MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}";
                 map[MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.";
                 map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
+                map[MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room";
+                map[MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster";
+                map[MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap";
                 map[MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node";
+                map[MvpDungeonPlacementPresenter.BasicRoomOptionKey] = "Basic Room";
                 map[MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall";
+                map[MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton";
+                map[MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin";
+                map[MvpDungeonPlacementPresenter.SpikeTrapOptionKey] = "Spike Trap";
+                map[MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap";
                 map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
                 map[MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node";
             }
@@ -416,6 +580,16 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
                 [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
                 ["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target",
+                [MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey] = "Room slot layout: {0}",
+                [MvpDungeonLayoutPresenter.RoomSlotFloorFormatKey] = "Floor {0}: {1}",
+                [MvpDungeonLayoutPresenter.RoomSlotRoomFormatKey] = "Room {0}: {1} — {2}; {3}; {4}",
+                [MvpDungeonLayoutPresenter.MonstersFormatKey] = "Monsters {1}/{2}: {0}",
+                [MvpDungeonLayoutPresenter.TrapsFormatKey] = "Traps {1}/{2}: {0}",
+                [MvpDungeonLayoutPresenter.LootFormatKey] = "Loot {1}/{2}: {0}",
+                [MvpDungeonLayoutPresenter.EmptyAssignmentKey] = "Empty",
+                [MvpDungeonLayoutPresenter.UnavailableAssignmentKey] = "Unavailable",
+                [MvpDungeonLayoutPresenter.AssignmentSeparatorKey] = ", ",
+                [MvpDungeonLayoutPresenter.RoomSlotSeparatorKey] = " | ",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
                 [MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap",
