@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             string lootId = byCategory.TryGetValue(MvpDungeonPlacementIds.LootNodeCategoryId, out MvpDungeonPlacementEntry loot) ? loot.OptionId : string.Empty;
 
             Assign(rooms[0], monsterId, trapId, lootId);
-            if (!string.IsNullOrWhiteSpace(lootId) && rooms[0].AssignedLootNodeOptionIds.Length == 0)
+            if (!string.IsNullOrWhiteSpace(lootId) && rooms[0].AssignedLootNodeOptionIds.Length == 0 && basicCapacity.LootCapacity > 0)
             {
                 var fallback = new MvpDungeonRoomInstance { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, Capacity = basicCapacity };
                 Assign(fallback, string.Empty, string.Empty, lootId);
