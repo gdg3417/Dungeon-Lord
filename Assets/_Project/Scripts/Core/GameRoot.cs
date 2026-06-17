@@ -564,7 +564,7 @@ namespace DungeonBuilder.M0
                 MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
                 int targetIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
                 MvpDungeonRoomInstance targetRoom = targetLayout?.Rooms != null && targetLayout.Rooms.Length > targetIndex ? targetLayout.Rooms[targetIndex] : null;
-                if (MvpRoomSlotTargetResolver.HasKnownCapacity(targetRoom) && !MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
+                if (!MvpRoomSlotTargetResolver.CanAccept(targetRoom, categoryId))
                 {
                     bannerKey = "ui.banner.place_failed";
                     failureFeedback = MvpRoomSlotTargetPresenter.BuildNoValidSlotText(targetLayout, targetIndex, categoryId, (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);
@@ -803,7 +803,7 @@ namespace DungeonBuilder.M0
 
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.Resolve(Save.mvpDungeonFloorLayout, Save.mvpDungeonPlacements, _runSimulationService.Config);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveForSave(Save, _runSimulationService.Config);
             RunOutcomeRecord outcome = _runSimulationService.SimulateOnce(Save.structureRuntime, tickStarted, sequence, postureId, placementEffects);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;

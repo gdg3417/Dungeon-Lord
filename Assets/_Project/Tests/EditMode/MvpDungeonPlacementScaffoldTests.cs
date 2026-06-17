@@ -169,6 +169,37 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void FailedLootPlacement_DoesNotRemainActiveInCompositionEffectsOrLayout()
+        {
+            RunSimulationConfig config = RoomSlotPlacementEffectsConfig();
+            SetRunSimulationConfig(config);
+            _root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, out _, out _, out _);
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                out _,
+                out _,
+                out _,
+                out _);
+
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, config, Localized);
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(_root.Save, config);
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(_root.Save, config);
+
+            Assert.That(placed, Is.False);
+            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
+            Assert.That(layoutText, Does.Contain("Loot 0/0: Unavailable"));
+            Assert.That(layoutText, Does.Not.Contain("Basic Loot Node"));
+            Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId));
+            Assert.That(effects.LootBonus, Is.EqualTo(0));
+            Assert.That(effects.Attraction, Is.EqualTo(0));
+            Assert.That(effects.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+            AssertNoRawPlacementIds(layoutText);
+        }
+
+        [Test]
         public void RoomSlotLayout_UsesPersistedAssignmentsWhenPresent()
         {
             var save = new SaveData
@@ -237,6 +268,76 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Spike Trap"));
             Assert.That(text, Does.Contain("Hidden Cache"));
             AssertNoRawPlacementIds(text);
+        }
+
+        [Test]
+        public void LegacyNarrowHallLoot_UsesFallbackBasicRoomAndKeepsCompositionEffectsConsistent()
+        {
+            RunSimulationConfig config = RoomSlotPlacementEffectsConfig();
+            var save = new SaveData
+            {
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 2)
+                    },
+                    NextRevision = 3
+                },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection()
+            };
+
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(save, config, Localized);
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
+
+            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Basic Loot Node"));
+            Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
+            Assert.That(layoutText, Does.Contain("Room 2: Basic Room"));
+            Assert.That(layoutText, Does.Contain("Loot 1/1: Basic Loot Node"));
+            Assert.That(summary.DungeonPlacements, Has.Some.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.BasicLootNodeOptionId));
+            Assert.That(effects.LootBonus, Is.EqualTo(5));
+            Assert.That(effects.Attraction, Is.EqualTo(3));
+            AssertNoRawPlacementIds(layoutText);
+        }
+
+        [Test]
+        public void PersistedRoomSlotAssignments_OverrideLegacyForCompositionAndEffects()
+        {
+            RunSimulationConfig config = RoomSlotPlacementEffectsConfig();
+            var save = new SaveData
+            {
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 2)
+                    },
+                    NextRevision = 3
+                },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId }
+                    }
+                }
+            };
+
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(save, config, Localized);
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
+
+            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(layoutText, Does.Contain("Loot 0/0: Unavailable"));
+            Assert.That(layoutText, Does.Not.Contain("Basic Loot Node"));
+            Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId));
+            Assert.That(effects.LootBonus, Is.EqualTo(0));
+            Assert.That(effects.Attraction, Is.EqualTo(0));
+            Assert.That(effects.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+            AssertNoRawPlacementIds(layoutText);
         }
 
         [Test]
@@ -506,6 +607,19 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+        private static RunSimulationConfig RoomSlotPlacementEffectsConfig()
+        {
+            RunSimulationConfig config = RoomSlotConfig();
+            config.MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test";
+            config.MvpPlacementEffects = new[]
+            {
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.NarrowHallOptionId, PathCapacity = 1, ExplanationKey = "effect.room.narrow_hall" },
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 5, Attraction = 3, ExplanationKey = "effect.loot.basic" }
+            };
+
+            return config;
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>
@@ -580,6 +694,12 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
                 [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
                 ["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target",
+                [MvpDungeonLayoutPresenter.LayoutFormatKey] = "Dungeon layout: {0}",
+                [MvpDungeonLayoutPresenter.FloorFormatKey] = "Floor {0}: {1}",
+                [MvpDungeonLayoutPresenter.AssignedNodeFormatKey] = "{0}: {1}",
+                [MvpDungeonLayoutPresenter.EmptyNodeFormatKey] = "{0}: {1}",
+                [MvpDungeonLayoutPresenter.NodeSeparatorKey] = " -> ",
+                [MvpDungeonLayoutPresenter.EmptyAvailableKey] = "Empty / available",
                 [MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey] = "Room slot layout: {0}",
                 [MvpDungeonLayoutPresenter.RoomSlotFloorFormatKey] = "Floor {0}: {1}",
                 [MvpDungeonLayoutPresenter.RoomSlotRoomFormatKey] = "Room {0}: {1} — {2}; {3}; {4}",

@@ -1528,6 +1528,47 @@ namespace DungeonBuilder.Tests.EditMode
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
 
+        [Test]
+        public void F6FullSmoke_DoesNotListPlacementThatRoomSlotLayoutMarksUnavailable()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 17d, ManaReserve = 9d },
+                runHistory = new RunHistoryState(),
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1),
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 2)
+                    },
+                    NextRevision = 3
+                },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId }
+                    }
+                }
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+
+            string copied = _overlay.CopyFullSmokeTextToClipboard();
+
+            Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall"));
+            Assert.That(copied, Does.Contain("Room slot layout: Floor 0: Room 1: Narrow Hall"));
+            Assert.That(copied, Does.Contain("Loot: unavailable 0/0"));
+            Assert.That(copied, Does.Not.Contain("Loot node: Basic Loot Node"));
+            Assert.That(copied, Does.Contain("Expected next adventurer intent"));
+            Assert.That(copied, Does.Contain("Latest visit intent"));
+            Assert.That(copied, Does.Contain("Challenge posture used"));
+            Assert.That(copied, Does.Contain("Debug selected posture"));
+            Assert.That(copied, Does.Contain("traffic pressure intent input"));
+            AssertNoRawPlayerFacingSmokeIds(copied);
+        }
+
         private static void AssertNoRawPlayerFacingSmokeIds(string text)
         {
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));

@@ -88,6 +88,35 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             return new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms.ToArray() };
         }
 
+        public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save, RunSimulationConfig config)
+        {
+            if (config == null)
+            {
+                return MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);
+            }
+
+            MvpDungeonFloorSlotLayout slotLayout = ResolveDefaultFloor(save, config);
+            if (slotLayout == null || slotLayout.Rooms == null || slotLayout.Rooms.Length == 0)
+            {
+                return MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);
+            }
+
+            var placements = new List<MvpDungeonPlacementEntry>();
+            bool hasPersistedRooms = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
+            bool hasExplicitRoomPlacement = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements)
+                .Any(placement => placement != null && string.Equals(placement.CategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal));
+            MvpDungeonRoomInstance primaryRoom = slotLayout.Rooms.FirstOrDefault(room => room != null && !string.IsNullOrWhiteSpace(room.RoomOptionId));
+            if (primaryRoom != null && (hasPersistedRooms || hasExplicitRoomPlacement))
+            {
+                placements.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, primaryRoom.RoomOptionId, 0));
+            }
+
+            AddFirstAssignedPlacement(placements, slotLayout, MvpDungeonPlacementIds.MonsterCategoryId, room => room.AssignedMonsterOptionIds);
+            AddFirstAssignedPlacement(placements, slotLayout, MvpDungeonPlacementIds.TrapCategoryId, room => room.AssignedTrapOptionIds);
+            AddFirstAssignedPlacement(placements, slotLayout, MvpDungeonPlacementIds.LootNodeCategoryId, room => room.AssignedLootNodeOptionIds);
+            return placements.ToArray();
+        }
+
         public static bool TryAssignToPersistedRoom(SaveData save, RunSimulationConfig config, int roomIndex, string categoryId, string optionId)
         {
             if (save == null ||
@@ -193,6 +222,29 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             room.AssignedLootNodeOptionIds = !string.IsNullOrWhiteSpace(lootId) && room.Capacity.LootCapacity > 0 ? new[] { lootId } : Array.Empty<string>();
         }
 
+        private static void AddFirstAssignedPlacement(
+            List<MvpDungeonPlacementEntry> placements,
+            MvpDungeonFloorSlotLayout slotLayout,
+            string categoryId,
+            Func<MvpDungeonRoomInstance, string[]> assignedOptionIds)
+        {
+            for (int i = 0; i < slotLayout.Rooms.Length; i++)
+            {
+                MvpDungeonRoomInstance room = slotLayout.Rooms[i];
+                if (room == null)
+                {
+                    continue;
+                }
+
+                string optionId = assignedOptionIds(room)?.FirstOrDefault(id => !string.IsNullOrWhiteSpace(id));
+                if (!string.IsNullOrWhiteSpace(optionId))
+                {
+                    placements.Add(new MvpDungeonPlacementEntry(categoryId, optionId, 0));
+                    return;
+                }
+            }
+        }
+
         private static MvpDungeonFloorSlotLayout ResolvePersistedDefaultFloor(SaveData save, RunSimulationConfig config)
         {
             List<MvpRoomSlotAssignmentState> assignedRooms = save?.mvpRoomSlotAssignments?.Rooms;
@@ -208,15 +260,15 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 .Select(group => group.Last())
                 .Select(room =>
                 {
-                    string roomOptionId = string.IsNullOrWhiteSpace(room.RoomOptionId) ? MvpDungeonPlacementIds.BasicRoomOptionId : room.RoomOptionId;
+                    string roomOptionId = ResolveValidRoomOptionId(room.RoomOptionId);
                     MvpRoomSlotCapacity capacity = ResolveCapacity(roomOptionId, config);
                     return new MvpDungeonRoomInstance
                     {
                         RoomOptionId = roomOptionId,
                         Capacity = capacity,
-                        AssignedMonsterOptionIds = Clamp(Normalize(room.MonsterOptionIds), capacity.MonsterCapacity),
-                        AssignedTrapOptionIds = Clamp(Normalize(room.TrapOptionIds), capacity.TrapCapacity),
-                        AssignedLootNodeOptionIds = Clamp(Normalize(room.LootNodeOptionIds), capacity.LootCapacity)
+                        AssignedMonsterOptionIds = Clamp(Normalize(room.MonsterOptionIds, MvpDungeonPlacementIds.MonsterCategoryId), capacity.MonsterCapacity),
+                        AssignedTrapOptionIds = Clamp(Normalize(room.TrapOptionIds, MvpDungeonPlacementIds.TrapCategoryId), capacity.TrapCapacity),
+                        AssignedLootNodeOptionIds = Clamp(Normalize(room.LootNodeOptionIds, MvpDungeonPlacementIds.LootNodeCategoryId), capacity.LootCapacity)
                     };
                 })
                 .ToArray();
@@ -236,9 +288,25 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             }
         }
 
+        private static string ResolveValidRoomOptionId(string roomOptionId)
+        {
+            return MvpDungeonPlacementIds.IsAllowedOption(roomOptionId) &&
+                   MvpDungeonPlacementIds.TryGetCategoryForOption(roomOptionId, out string categoryId) &&
+                   string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal)
+                ? roomOptionId
+                : MvpDungeonPlacementIds.BasicRoomOptionId;
+        }
+
         private static string[] Normalize(string[] optionIds)
         {
             return optionIds == null ? Array.Empty<string>() : optionIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
+        }
+
+        private static string[] Normalize(string[] optionIds, string expectedCategoryId)
+        {
+            return Normalize(optionIds)
+                .Where(id => MvpDungeonPlacementIds.TryGetCategoryForOption(id, out string categoryId) && string.Equals(categoryId, expectedCategoryId, StringComparison.Ordinal))
+                .ToArray();
         }
 
         private static string[] Clamp(string[] optionIds, int capacity)
