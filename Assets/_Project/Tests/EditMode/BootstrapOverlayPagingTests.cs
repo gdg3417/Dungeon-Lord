@@ -1823,7 +1823,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
-            map["ui.mvp_loop.section.adventurer_intent"] = "Expected Next Adventurer Intent";
+            map["ui.mvp_loop.section.adventurer_intent"] = "Expected next adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Expected next adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
             map["ui.adventurer_intent.debug_posture_format"] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
@@ -2083,7 +2083,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_feedback.outcome_cue.format"] = "{0} {1}";
             map["ui.mvp_run_feedback.format"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.";
             map["ui.mvp_run_feedback.format_with_party"] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}";
-            map["ui.mvp_run_feedback.posture_format"] = "Posture: {0}. {1}";
+            map["ui.mvp_run_feedback.posture_format"] = "Challenge posture used: {0}. {1}";
             map["ui.mvp_adventurer_party.preview_format"] = "Adventurers: {0}";
             map["ui.mvp_adventurer_party.class.unknown"] = "Unknown adventurer";
             map["adventurer.class.warrior.display_name"] = "Warrior";

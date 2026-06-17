@@ -90,7 +90,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Localized,
                 MinimalMvpActionPanelPresenter.GreedyPostureKey);
 
-            Assert.That(text, Is.EqualTo("Posture: Greedy. Adventurer visit result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
+            Assert.That(text, Is.EqualTo("Challenge posture used: Greedy. Adventurer visit result: succeeded. Loot extracted, heat stable. Mana 12. Loot 7/5/3. Heat 4->4. Outcome cue: loot landed while heat stayed controlled."));
             Assert.That(text, Does.Not.Contain(RunPostureResolver.GreedyId));
             Assert.That(text, Does.Not.Contain("run.posture"));
         }
@@ -289,7 +289,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpRunResultFeedbackPresenter.OutcomeCueFormatKey] = "{0} {1}",
                 [MvpRunResultFeedbackPresenter.FormatKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}.",
                 [MvpRunResultFeedbackPresenter.FormatWithPartyKey] = "{0} Mana {1:0.##}. Loot {2}/{3}/{4}. Heat {5:0.##}->{6:0.##}. {7}",
-                [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Posture: {0}. {1}",
+                [MvpRunResultFeedbackPresenter.PostureFormatKey] = "Challenge posture used: {0}. {1}",
                 [MvpRunResultFeedbackPresenter.PartyPreviewFormatKey] = "Adventurers: {0}",
                 [MvpRunResultFeedbackPresenter.PlacementEffectsImpactFormatKey] = "{0} Placement impact: {1}.",
                 [MvpRunResultFeedbackPresenter.LootPreviewFormatKey] = "{0} Loot found: {1}.",

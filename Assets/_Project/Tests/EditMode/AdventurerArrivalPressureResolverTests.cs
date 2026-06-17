@@ -186,7 +186,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case AdventurerRunIntentPresenter.SummaryFormatKey: return "Expected next adventurer intent: {0} likely. Reason: {1}";
                 case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
-                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected Next Adventurer Intent";
+                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected next adventurer intent";
                 case MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey: return "Adventurer pressure";
                 case MvpLoopSummaryPanelPresenter.SectionLineFormatKey: return "{0}: {1}";
                 case MvpLoopSummaryPanelPresenter.CompositionFormatKey: return "Dungeon composition: {0}";

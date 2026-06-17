@@ -521,7 +521,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.TitleKey: return "MVP Loop Summary";
                 case MvpLoopSummaryPanelPresenter.PlacementFormatKey: return "Dungeon composition: {0}";
                 case MvpLoopSummaryPanelPresenter.LatestRunSectionKey: return "Latest Adventurer Visit";
-                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected Next Adventurer Intent";
+                case MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey: return "Expected next adventurer intent";
                 case MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey: return "Adventurer pressure";
                 case MvpLoopSummaryPanelPresenter.LatestRunFormatKey: return "Latest adventurer visit: {0}";
                 case MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey: return "Effects: {0}";

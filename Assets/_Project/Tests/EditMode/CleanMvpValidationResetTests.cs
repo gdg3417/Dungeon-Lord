@@ -434,7 +434,7 @@ namespace DungeonBuilder.Tests.EditMode
                 });
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
-            map["ui.mvp_loop.section.adventurer_intent"] = "Expected Next Adventurer Intent";
+            map["ui.mvp_loop.section.adventurer_intent"] = "Expected next adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Expected next adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";
             map["ui.adventurer_intent.debug_posture_format"] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";

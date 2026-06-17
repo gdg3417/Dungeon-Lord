@@ -861,7 +861,7 @@
     },
     {
       "key": "ui.mvp_run_feedback.posture_format",
-      "text": "Posture: {0}. {1}"
+      "text": "Challenge posture used: {0}. {1}"
     },
     {
       "key": "ui.mvp_action.selection.mana_generator",
@@ -1677,7 +1677,7 @@
     },
     {
       "key": "ui.mvp_loop.section.adventurer_intent",
-      "text": "Expected Next Adventurer Intent"
+      "text": "Expected next adventurer intent"
     },
     {
       "key": "ui.adventurer_intent.summary_format",

@@ -347,7 +347,7 @@ namespace DungeonBuilder.Tests.EditMode
             var map = new Dictionary<string, string>
             {
                 [MvpLoopSummaryPanelPresenter.TitleKey] = "MVP Loop Summary",
-                [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Expected Next Adventurer Intent",
+                [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Expected next adventurer intent",
                 [MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey] = "Adventurer pressure",
                 [AdventurerRunIntentPresenter.SummaryFormatKey] = "Expected next adventurer intent: {0} likely. Reason: {1}",
                 [AdventurerArrivalPressurePresenter.SummaryFormatKey] = "Adventurer pressure: {0}. Reason: {1}.",
