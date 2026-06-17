@@ -36,7 +36,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(
                 summary,
                 guided,
-                "Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)",
+                "Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nSelected room target: Room 1: Basic Room\nSelected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1\nSelected placement fit: Loot node fits Room 1.\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)",
                 "Room",
                 "Basic Room",
                 "Role: adds room space and path context.",
@@ -64,6 +64,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
+            Assert.That(text, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1"));
+            Assert.That(text, Does.Contain("Selected placement fit: Loot node fits Room 1."));
             Assert.That(text, Does.Contain("Room slot layout: Floor 0: Room 1: Basic Room"));
             Assert.That(text, Does.Not.Contain("Dungeon layout:"));
             Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
@@ -132,6 +134,8 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.PlayerViewStatusKey] = "Player view: diagnostics hidden.",
             [MvpDungeonLayoutPresenter.RoomSlotLayoutFormatKey] = "Room slot layout: {0}",
             [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
+            [MvpRoomSlotTargetPresenter.SelectedCapacityFormatKey] = "Selected room capacity: {0}",
+            [MvpRoomSlotTargetPresenter.SelectedPlacementFitFormatKey] = "Selected placement fit: {0}",
             [MvpLoopSummaryPanelPresenter.CompositionFormatKey] = "Dungeon composition: {0}",
             [MvpLoopSummaryPanelPresenter.ManaFormatKey] = "Mana reserve: {0:0.##}",
             [MvpLoopSummaryPanelPresenter.InlineSeparatorKey] = " | ",

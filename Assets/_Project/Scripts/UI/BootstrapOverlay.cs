@@ -179,6 +179,30 @@ namespace DungeonBuilder.M0
             return MvpStructureImpactPreviewPresenter.BuildRunPlanPreviewText(_selectedMvpStructureId, GetSelectedMvpRunPostureNameKey(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
+        public string GetSelectedMvpRoomCapacityText()
+        {
+            if (_root == null)
+            {
+                return string.Empty;
+            }
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
+            return MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, selectedRoomIndex, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public string GetSelectedMvpPlacementFitText()
+        {
+            if (_root == null)
+            {
+                return string.Empty;
+            }
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
+            return MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, selectedRoomIndex, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
         public bool SelectMvpRunPosture(string postureId)
         {
             if (!BootstrapMvpActionHandler.IsAllowedMvpRunPosture(postureId))
@@ -1029,6 +1053,12 @@ namespace DungeonBuilder.M0
             }
             GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
             GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), compactLabel, labelHeight);
+            GUILayout.Label(GetSelectedMvpRoomCapacityText(), compactLabel, labelHeight);
+            string selectedPlacementFitText = GetSelectedMvpPlacementFitText();
+            if (!string.IsNullOrWhiteSpace(selectedPlacementFitText))
+            {
+                GUILayout.Label(selectedPlacementFitText, compactLabel, labelHeight);
+            }
             if (GUILayout.Button(GetLocalizedString("ui.mvp_room_slots.cycle_target_button"), compactButton, buttonHeight))
             {
                 _root.CycleSelectedMvpRoomSlotTarget();
