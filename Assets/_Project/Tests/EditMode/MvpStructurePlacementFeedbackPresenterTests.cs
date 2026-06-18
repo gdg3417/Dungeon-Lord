@@ -92,11 +92,27 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Is.EqualTo(MvpStructurePlacementFeedbackPresenter.ChangedFormatKey));
         }
 
+        [Test]
+        public void RoomTargetedPlacementFeedback_UsesRoomCategoryAndEmptyValue()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                1,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.LootNodeCategoryId,
+                string.Empty,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Changed Room 2 Loot node: Empty -> Basic Loot Node."));
+            Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.BasicLootNodeOptionId));
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>
             {
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
+                [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
                 [MvpStructurePlacementFeedbackPresenter.ChangedFormatKey] = "Changed: {0} -> {1}. {2}",
                 ["structure.mana_generator.basic.display_name"] = "Mana Generator",
                 ["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber",
@@ -105,7 +121,9 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructureImpactPreviewPresenter.ManaGeneratorPreviewKey] = "Role: improves mana reserve.",
                 [MvpStructureImpactPreviewPresenter.HeatScrubberPreviewKey] = "Role: lowers heat pressure.",
                 [MvpStructureImpactPreviewPresenter.RiskLabPreviewKey] = "Role: clarifies research risk.",
-                [MvpStructureImpactPreviewPresenter.UnknownPreviewKey] = "Role unavailable."
+                [MvpStructureImpactPreviewPresenter.UnknownPreviewKey] = "Role unavailable.",
+                [MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node",
+                [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;

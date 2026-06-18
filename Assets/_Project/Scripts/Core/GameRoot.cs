@@ -547,14 +547,25 @@ namespace DungeonBuilder.M0
 
         public bool TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback)
         {
-            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, true);
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, out _, true);
+        }
+
+        public bool TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback, out string targetFeedback)
+        {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, out targetFeedback, true);
         }
 
         private bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback, bool enforceSelectedRoomTarget)
         {
+            return TryMvpPlaceOrModifySelectedPlacement(categoryId, optionId, out priorEntry, out newEntry, out bannerKey, out failureFeedback, out _, enforceSelectedRoomTarget);
+        }
+
+        private bool TryMvpPlaceOrModifySelectedPlacement(string categoryId, string optionId, out MvpDungeonPlacementEntry priorEntry, out MvpDungeonPlacementEntry newEntry, out string bannerKey, out string failureFeedback, out string targetFeedback, bool enforceSelectedRoomTarget)
+        {
             priorEntry = null;
             newEntry = null;
             failureFeedback = string.Empty;
+            targetFeedback = string.Empty;
             bannerKey = "ui.banner.place_success";
             if (Save == null || !MvpDungeonPlacementIds.IsAllowedCategory(categoryId) || !MvpDungeonPlacementIds.IsAllowedOption(optionId))
             {
@@ -613,13 +624,10 @@ namespace DungeonBuilder.M0
                 Save.mvpDungeonFloorLayout.NextRevision = 1;
             }
 
-            int selectedRoomSlotIndex = 0;
+            MvpDungeonFloorSlotLayout feedbackTargetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+            int selectedRoomSlotIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, feedbackTargetLayout);
+            string priorRoomTargetOptionId = ResolveRoomTargetOptionId(feedbackTargetLayout, selectedRoomSlotIndex, categoryId);
             bool shouldPersistRoomSlotAssignment = enforceSelectedRoomTarget && !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal);
-            if (shouldPersistRoomSlotAssignment)
-            {
-                MvpDungeonFloorSlotLayout targetLayout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
-                selectedRoomSlotIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(Save, targetLayout);
-            }
 
             int existingIndex = Save.mvpDungeonPlacements.Entries.FindIndex(entry =>
                 entry != null && string.Equals(entry.CategoryId, categoryId, StringComparison.Ordinal));
@@ -653,8 +661,54 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (enforceSelectedRoomTarget)
+            {
+                targetFeedback = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                    selectedRoomSlotIndex,
+                    categoryId,
+                    priorRoomTargetOptionId,
+                    optionId,
+                    (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);
+            }
+
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
+        }
+
+        private static string ResolveRoomTargetOptionId(MvpDungeonFloorSlotLayout layout, int roomIndex, string categoryId)
+        {
+            if (layout?.Rooms == null || layout.Rooms.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            int clampedIndex = Math.Min(Math.Max(0, roomIndex), layout.Rooms.Length - 1);
+            MvpDungeonRoomInstance room = layout.Rooms[clampedIndex];
+            if (room == null)
+            {
+                return string.Empty;
+            }
+
+            if (string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                return room.RoomOptionId ?? string.Empty;
+            }
+
+            string[] assigned = null;
+            switch (categoryId)
+            {
+                case MvpDungeonPlacementIds.MonsterCategoryId:
+                    assigned = room.AssignedMonsterOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.TrapCategoryId:
+                    assigned = room.AssignedTrapOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.LootNodeCategoryId:
+                    assigned = room.AssignedLootNodeOptionIds;
+                    break;
+            }
+
+            return assigned != null && assigned.Length > 0 ? assigned[0] : string.Empty;
         }
 
         private static void UpsertMvpDungeonNodePlacement(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementEntry placement)

@@ -191,6 +191,8 @@ namespace DungeonBuilder.Tests.EditMode
                 ["ui.banner.run_simulated"] = "Run simulated.",
                 ["ui.banner.run_sim_failed"] = "Run failed.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
+                [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Placement changed from {0} to {1} / {2}. {3}",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0} / {1}",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",

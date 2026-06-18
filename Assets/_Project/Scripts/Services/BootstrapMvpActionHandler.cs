@@ -127,7 +127,7 @@ namespace DungeonBuilder.M0
                 Localize);
             string feedback = string.IsNullOrWhiteSpace(attempt.TargetFeedback)
                 ? changedFeedback
-                : string.Concat(attempt.TargetFeedback, "\n", changedFeedback);
+                : attempt.TargetFeedback;
             _context.SetBanner?.Invoke(feedback);
             return new PlacementResult(true, feedback, feedback);
         }

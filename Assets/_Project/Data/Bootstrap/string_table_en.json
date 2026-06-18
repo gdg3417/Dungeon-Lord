@@ -1128,6 +1128,14 @@
       "text": "Changed placement: {0} -> {1}: {2}. {3}"
     },
     {
+      "key": "ui.mvp_placement_feedback.empty_value",
+      "text": "Empty"
+    },
+    {
+      "key": "ui.mvp_placement_feedback.room_changed_format",
+      "text": "Changed Room {0} {1}: {2} -> {3}."
+    },
+    {
       "key": "ui.mvp_loop.panel.placement_effects_format",
       "text": "Effects: {0}"
     },

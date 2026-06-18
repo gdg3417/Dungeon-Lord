@@ -1293,8 +1293,9 @@ namespace DungeonBuilder.M0
                         out MvpDungeonPlacementEntry priorEntry,
                         out MvpDungeonPlacementEntry newEntry,
                         out string bannerKey,
-                        out string failureFeedback);
-                    return new BootstrapMvpActionHandler.PlacementAttempt(ok, priorEntry, newEntry, bannerKey, string.Empty, failureFeedback);
+                        out string failureFeedback,
+                        out string targetFeedback);
+                    return new BootstrapMvpActionHandler.PlacementAttempt(ok, priorEntry, newEntry, bannerKey, targetFeedback, failureFeedback);
                 },
                 () => _root.ResolveMvpPlayerLoopSummary(),
                 postureId => _root.SimulateMvpActiveLoopOnce(out _, postureId),

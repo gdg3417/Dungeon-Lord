@@ -8,6 +8,8 @@ namespace DungeonBuilder.M0
         public const string EmptySlotKey = "ui.mvp_structure_feedback.empty_slot";
         public const string ChangedFormatKey = "ui.mvp_structure_feedback.changed_format";
         public const string PlacementChangedFormatKey = "ui.mvp_placement_feedback.changed_format";
+        public const string RoomTargetedPlacementChangedFormatKey = "ui.mvp_placement_feedback.room_changed_format";
+        public const string EmptyPlacementValueKey = "ui.mvp_placement_feedback.empty_value";
 
         public static string BuildFeedbackText(
             string priorStructureId,
@@ -39,6 +41,30 @@ namespace DungeonBuilder.M0
                 : MvpDungeonPlacementPresenter.BuildPreviewText(string.Empty, localize);
             string format = Localize(localize, PlacementChangedFormatKey);
             return string.Format(format, priorLabel, categoryLabel, optionLabel, preview);
+        }
+
+        public static string BuildRoomTargetedPlacementFeedbackText(
+            int roomIndex,
+            string categoryId,
+            string priorOptionId,
+            string newOptionId,
+            Func<string, string, string> localize)
+        {
+            string categoryLabel = MvpDungeonPlacementPresenter.ResolveCategoryName(categoryId, localize);
+            string priorLabel = ResolvePlacementValueLabel(priorOptionId, localize);
+            string newLabel = ResolvePlacementValueLabel(newOptionId, localize);
+            string format = Localize(localize, RoomTargetedPlacementChangedFormatKey);
+            return string.Format(format, roomIndex + 1, categoryLabel, priorLabel, newLabel);
+        }
+
+        private static string ResolvePlacementValueLabel(string optionId, Func<string, string, string> localize)
+        {
+            if (string.IsNullOrWhiteSpace(optionId))
+            {
+                return Localize(localize, EmptyPlacementValueKey);
+            }
+
+            return MvpDungeonPlacementPresenter.ResolveOptionName(optionId, localize);
         }
 
         private static string ResolvePlacementEntryLabel(MvpDungeonPlacementEntry entry, Func<string, string, string> localize)
