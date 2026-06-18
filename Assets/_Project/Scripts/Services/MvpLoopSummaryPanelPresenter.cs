@@ -80,6 +80,8 @@ namespace DungeonBuilder.M0
             string placementTargetKey = BasicRunAnalysisPlacementTargetPresenter.ResolveTargetKey(summary);
             string placementTargetLine = BasicRunAnalysisPlacementTargetPresenter.BuildTargetLine(summary, localize);
             if (!string.IsNullOrEmpty(placementTargetLine)) AppendLine(builder, placementTargetLine);
+            string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
+            if (!string.IsNullOrEmpty(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
             string selectedFitLine = BasicRunAnalysisSelectedPlacementFitPresenter.BuildFitLine(summary, placementTargetKey, selectedPlacementCategoryId, localize);
             if (!string.IsNullOrEmpty(selectedFitLine)) AppendLine(builder, selectedFitLine);
             return builder.ToString();
@@ -162,9 +164,10 @@ namespace DungeonBuilder.M0
 
         private static string ResolveSuggestionKey(MvpPlayerLoopSummary summary)
         {
-            return string.IsNullOrWhiteSpace(summary?.NextOptimizationSuggestionKey)
+            string fallbackKey = string.IsNullOrWhiteSpace(summary?.NextOptimizationSuggestionKey)
                 ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
                 : summary.NextOptimizationSuggestionKey;
+            return BasicRunAnalysisAppliedAdjustmentPresenter.ResolveNextActionKey(summary, fallbackKey);
         }
 
         private static string ResolveDominantCauseKey(MvpPlacementEffectsSummary effects)
