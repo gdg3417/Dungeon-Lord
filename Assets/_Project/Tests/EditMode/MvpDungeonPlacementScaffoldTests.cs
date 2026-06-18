@@ -511,6 +511,92 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.DungeonPlacements[3].CategoryId, Is.EqualTo(MvpDungeonPlacementIds.LootNodeCategoryId));
         }
 
+        [Test]
+        public void AddSecondBasicRoomSlot_OnOneRoomSave_CreatesAndSelectsRoomTwo()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, out _, out _, out _);
+
+            bool added = _root.TryAddSecondMvpBasicRoomSlot();
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, RoomSlotConfig());
+            Assert.That(added, Is.True);
+            Assert.That(layout.Rooms, Has.Length.EqualTo(2));
+            Assert.That(layout.Rooms[0].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.NarrowHallOptionId));
+            Assert.That(layout.Rooms[1].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(_root.Save.mvpSelectedRoomSlotIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AddSecondBasicRoomSlot_PersistsRoomSlotAssignmentState()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+
+            bool added = _root.TryAddSecondMvpBasicRoomSlot();
+
+            Assert.That(added, Is.True);
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms, Has.Count.EqualTo(2));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms[1].FloorIndex, Is.EqualTo(0));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms[1].RoomIndex, Is.EqualTo(1));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms[1].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.NextRevision, Is.GreaterThan(1));
+        }
+
+        [Test]
+        public void AddSecondBasicRoomSlot_WhenRoomTwoAlreadyExists_FailsGracefully()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            Assert.That(_root.TryAddSecondMvpBasicRoomSlot(), Is.True);
+
+            bool addedAgain = _root.TryAddSecondMvpBasicRoomSlot();
+
+            Assert.That(addedAgain, Is.False);
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void CycleRoomTarget_ReachesRoomTwoAfterExpansion()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryAddSecondMvpBasicRoomSlot();
+            _root.Save.mvpSelectedRoomSlotIndex = 0;
+
+            _root.CycleSelectedMvpRoomSlotTarget();
+
+            Assert.That(_root.Save.mvpSelectedRoomSlotIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AddedRoomTwo_ShowsBasicRoomCapacityAndLootFit()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, out _, out _, out _);
+            _root.TryAddSecondMvpBasicRoomSlot();
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, RoomSlotConfig());
+            string capacity = MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, 1, Localized);
+            string fit = MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, 1, MvpDungeonPlacementIds.LootNodeCategoryId, Localized);
+            string roomOneFit = MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, 0, MvpDungeonPlacementIds.LootNodeCategoryId, Localized);
+
+            Assert.That(capacity, Does.Contain("Loot 0/1"));
+            Assert.That(fit, Is.EqualTo("Selected placement fit: Loot node fits Room 2."));
+            Assert.That(roomOneFit, Is.EqualTo("Selected placement fit: Loot node cannot fit Room 1 because this room has no loot slot."));
+        }
+
+        [Test]
+        public void F6SmokeLayout_IncludesRoomTwoAfterExpansionWithoutRawIds()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryAddSecondMvpBasicRoomSlot();
+
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, RoomSlotConfig(), MvpDungeonPlacementIds.LootNodeCategoryId, Localized);
+
+            Assert.That(layoutText, Does.Contain("Selected room target: Room 2: Basic Room"));
+            Assert.That(layoutText, Does.Contain("Selected placement fit: Loot node fits Room 2."));
+            Assert.That(layoutText, Does.Contain("Room 2: Basic Room"));
+            AssertNoRawPlacementIds(layoutText);
+        }
+
         private void SetBackingField(string fieldName, object value)
         {
             typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_root, value);
@@ -693,6 +779,19 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Changed placement: {0} -> {1}: {2}. {3}",
                 [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
                 [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
+                [MvpRoomSlotTargetPresenter.SelectedCapacityFormatKey] = "Selected room capacity: {0}",
+                [MvpRoomSlotTargetPresenter.SelectedCapacityCategoryFormatKey] = "{0} {1}/{2}",
+                [MvpRoomSlotTargetPresenter.SelectedCapacityUnavailableCategoryFormatKey] = "{0} unavailable {1}/{2}",
+                [MvpRoomSlotTargetPresenter.SelectedCapacitySeparatorKey] = "; ",
+                [MvpRoomSlotTargetPresenter.SelectedPlacementFitFormatKey] = "Selected placement fit: {0}",
+                [MvpRoomSlotTargetPresenter.SelectedPlacementFitsFormatKey] = "{0} fits Room {1}.",
+                [MvpRoomSlotTargetPresenter.SelectedPlacementCannotFitNoSlotFormatKey] = "{0} cannot fit Room {1} because this room has no {2}.",
+                [MvpRoomSlotTargetPresenter.CapacityMonstersLabelKey] = "Monsters",
+                [MvpRoomSlotTargetPresenter.CapacityTrapsLabelKey] = "Traps",
+                [MvpRoomSlotTargetPresenter.CapacityLootLabelKey] = "Loot",
+                [MvpRoomSlotTargetPresenter.MonsterSlotReasonLabelKey] = "monster slot",
+                [MvpRoomSlotTargetPresenter.TrapSlotReasonLabelKey] = "trap slot",
+                [MvpRoomSlotTargetPresenter.LootSlotReasonLabelKey] = "loot slot",
                 ["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target",
                 [MvpDungeonLayoutPresenter.LayoutFormatKey] = "Dungeon layout: {0}",
                 [MvpDungeonLayoutPresenter.FloorFormatKey] = "Floor {0}: {1}",

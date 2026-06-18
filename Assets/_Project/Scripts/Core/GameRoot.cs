@@ -514,6 +514,22 @@ namespace DungeonBuilder.M0
             SaveService?.Save(Save, SaveReason.ManualDev);
         }
 
+        public bool TryAddSecondMvpBasicRoomSlot()
+        {
+            if (Save == null)
+            {
+                return false;
+            }
+
+            bool added = MvpRoomSlotLayoutResolver.TryAddSecondBasicRoomSlot(Save, _runSimulationService?.Config);
+            if (added)
+            {
+                SaveService?.Save(Save, SaveReason.ManualDev);
+            }
+
+            return added;
+        }
+
         public bool TryMvpPlaceOrModifySelectedStructure(string structureId, out string bannerKey)
         {
             return TryPlaceSelectedStructure(structureId, allowReplace: true, out bannerKey);

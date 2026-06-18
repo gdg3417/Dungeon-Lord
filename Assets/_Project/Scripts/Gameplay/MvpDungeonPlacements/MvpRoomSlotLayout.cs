@@ -48,6 +48,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
     public static class MvpRoomSlotLayoutResolver
     {
+        public const int MvpSecondRoomSlotIndex = 1;
+
         public static MvpDungeonFloorSlotLayout ResolveDefaultFloor(SaveData save, RunSimulationConfig config)
         {
             MvpDungeonFloorSlotLayout persisted = ResolvePersistedDefaultFloor(save, config);
@@ -176,6 +178,50 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             return true;
         }
 
+        public static bool TryAddSecondBasicRoomSlot(SaveData save, RunSimulationConfig config)
+        {
+            if (save == null)
+            {
+                return false;
+            }
+
+            MvpDungeonFloorSlotLayout current = ResolveDefaultFloor(save, config);
+            if (current?.Rooms != null && current.Rooms.Length > MvpSecondRoomSlotIndex)
+            {
+                return false;
+            }
+
+            if (save.mvpRoomSlotAssignments?.Rooms != null &&
+                save.mvpRoomSlotAssignments.Rooms.Any(room => room != null && room.FloorIndex == 0 && room.RoomIndex == MvpSecondRoomSlotIndex))
+            {
+                return false;
+            }
+
+            if (save.mvpRoomSlotAssignments == null)
+            {
+                save.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
+            }
+
+            if (save.mvpRoomSlotAssignments.Rooms == null)
+            {
+                save.mvpRoomSlotAssignments.Rooms = new List<MvpRoomSlotAssignmentState>();
+            }
+
+            PersistRoomSnapshot(save, 0, current?.Rooms != null && current.Rooms.Length > 0 ? current.Rooms[0] : null, config);
+            save.mvpRoomSlotAssignments.Rooms.Add(new MvpRoomSlotAssignmentState
+            {
+                FloorIndex = 0,
+                RoomIndex = MvpSecondRoomSlotIndex,
+                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                MonsterOptionIds = Array.Empty<string>(),
+                TrapOptionIds = Array.Empty<string>(),
+                LootNodeOptionIds = Array.Empty<string>()
+            });
+            save.mvpSelectedRoomSlotIndex = MvpSecondRoomSlotIndex;
+            save.mvpRoomSlotAssignments.NextRevision = Math.Max(1, save.mvpRoomSlotAssignments.NextRevision + 1);
+            return true;
+        }
+
         public static void SetPersistedRoomOptionIfPresent(SaveData save, RunSimulationConfig config, int roomIndex, string roomOptionId)
         {
             List<MvpRoomSlotAssignmentState> rooms = save?.mvpRoomSlotAssignments?.Rooms;
@@ -201,6 +247,23 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             room.TrapOptionIds = Clamp(room.TrapOptionIds, capacity.TrapCapacity);
             room.LootNodeOptionIds = Clamp(room.LootNodeOptionIds, capacity.LootCapacity);
             save.mvpRoomSlotAssignments.NextRevision = Math.Max(1, save.mvpRoomSlotAssignments.NextRevision + 1);
+        }
+
+        private static void PersistRoomSnapshot(SaveData save, int roomIndex, MvpDungeonRoomInstance source, RunSimulationConfig config)
+        {
+            MvpRoomSlotAssignmentState room = save.mvpRoomSlotAssignments.Rooms.FirstOrDefault(entry => entry != null && entry.FloorIndex == 0 && entry.RoomIndex == roomIndex);
+            if (room == null)
+            {
+                room = new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = roomIndex };
+                save.mvpRoomSlotAssignments.Rooms.Add(room);
+            }
+
+            string roomOptionId = ResolveValidRoomOptionId(source?.RoomOptionId);
+            MvpRoomSlotCapacity capacity = ResolveCapacity(roomOptionId, config);
+            room.RoomOptionId = roomOptionId;
+            room.MonsterOptionIds = Clamp(source?.AssignedMonsterOptionIds, capacity.MonsterCapacity);
+            room.TrapOptionIds = Clamp(source?.AssignedTrapOptionIds, capacity.TrapCapacity);
+            room.LootNodeOptionIds = Clamp(source?.AssignedLootNodeOptionIds, capacity.LootCapacity);
         }
 
         public static MvpRoomSlotCapacity ResolveCapacity(string roomOptionId, RunSimulationConfig config)

@@ -43,6 +43,9 @@ namespace DungeonBuilder.M0
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
         private const string DefaultMvpPlacementCategoryId = MvpDungeonPlacementIds.RoomCategoryId;
         private const string DefaultMvpPlacementOptionId = MvpDungeonPlacementIds.BasicRoomOptionId;
+        private const string AddBasicRoomSlotButtonKey = "ui.mvp_room_slots.add_basic_room_slot_button";
+        private const string AddBasicRoomSlotSuccessKey = "ui.mvp_room_slots.add_basic_room_slot_success";
+        private const string AddBasicRoomSlotAlreadyExistsKey = "ui.mvp_room_slots.add_basic_room_slot_already_exists";
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -230,6 +233,14 @@ namespace DungeonBuilder.M0
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
             _mvpStructurePlacementFeedback = result.PlacementFeedback;
+            RefreshOverlayText();
+        }
+
+        public void AddMvpBasicRoomSlot()
+        {
+            bool added = _root != null && _root.TryAddSecondMvpBasicRoomSlot();
+            _mvpStructurePlacementFeedback = GetLocalizedString(added ? AddBasicRoomSlotSuccessKey : AddBasicRoomSlotAlreadyExistsKey);
+            _root?.SetBanner(_mvpStructurePlacementFeedback);
             RefreshOverlayText();
         }
 
@@ -1063,6 +1074,10 @@ namespace DungeonBuilder.M0
             {
                 _root.CycleSelectedMvpRoomSlotTarget();
                 RefreshOverlayText();
+            }
+            if (GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
+            {
+                AddMvpBasicRoomSlot();
             }
             GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))

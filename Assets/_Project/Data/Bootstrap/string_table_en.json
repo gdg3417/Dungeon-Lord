@@ -1940,6 +1940,18 @@
       "text": "Cycle room target"
     },
     {
+      "key": "ui.mvp_room_slots.add_basic_room_slot_button",
+      "text": "Add Basic Room slot"
+    },
+    {
+      "key": "ui.mvp_room_slots.add_basic_room_slot_success",
+      "text": "Added Room 2: Basic Room."
+    },
+    {
+      "key": "ui.mvp_room_slots.add_basic_room_slot_already_exists",
+      "text": "Room 2 already exists."
+    },
+    {
       "key": "ui.mvp_room_slots.panel.floor_format",
       "text": "Floor {0}: {1}"
     },
