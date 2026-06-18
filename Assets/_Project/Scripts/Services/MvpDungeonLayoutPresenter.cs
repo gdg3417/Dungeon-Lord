@@ -80,16 +80,21 @@ namespace DungeonBuilder.M0
             string floorText = string.Format(Localize(localize, FloorFormatKey), 0, nodes.ToString());
             string legacyLayout = string.Format(Localize(localize, LayoutFormatKey), floorText);
             MvpDungeonFloorSlotLayout slotLayout = config == null ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
-            int selectedRoomIndex = slotLayout == null ? 0 : MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, slotLayout);
-            string selectedTarget = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedTargetText(slotLayout, selectedRoomIndex, localize);
-            string selectedCapacity = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(slotLayout, selectedRoomIndex, localize);
-            string selectedFit = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(slotLayout, selectedRoomIndex, selectedPlacementCategoryId, localize);
-            string roomSlotLayout = slotLayout == null ? string.Empty : BuildRoomSlotLayoutText(slotLayout, localize);
-            var fullLayout = new StringBuilder(legacyLayout);
-            if (!string.IsNullOrWhiteSpace(selectedTarget)) fullLayout.Append('\n').Append(selectedTarget);
-            if (!string.IsNullOrWhiteSpace(selectedCapacity)) fullLayout.Append('\n').Append(selectedCapacity);
-            if (!string.IsNullOrWhiteSpace(selectedFit)) fullLayout.Append('\n').Append(selectedFit);
-            if (!string.IsNullOrWhiteSpace(roomSlotLayout)) fullLayout.Append('\n').Append(roomSlotLayout);
+            if (slotLayout == null)
+            {
+                return legacyLayout;
+            }
+
+            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, slotLayout);
+            string selectedTarget = MvpRoomSlotTargetPresenter.BuildSelectedTargetText(slotLayout, selectedRoomIndex, localize);
+            string selectedCapacity = MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(slotLayout, selectedRoomIndex, localize);
+            string selectedFit = MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(slotLayout, selectedRoomIndex, selectedPlacementCategoryId, localize);
+            string roomSlotLayout = BuildRoomSlotLayoutText(slotLayout, localize);
+            var fullLayout = new StringBuilder();
+            AppendLineIfPresent(fullLayout, selectedTarget);
+            AppendLineIfPresent(fullLayout, selectedCapacity);
+            AppendLineIfPresent(fullLayout, selectedFit);
+            AppendLineIfPresent(fullLayout, roomSlotLayout);
             return fullLayout.ToString();
         }
 
@@ -131,6 +136,21 @@ namespace DungeonBuilder.M0
                     : BuildAssignedNames(assignedOptionIds, localize);
 
             return string.Format(Localize(localize, formatKey), assignmentText, assignedCount, capacity);
+        }
+
+        private static void AppendLineIfPresent(StringBuilder builder, string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return;
+            }
+
+            if (builder.Length > 0)
+            {
+                builder.Append('\n');
+            }
+
+            builder.Append(line);
         }
 
         private static string BuildAssignedNames(string[] assignedOptionIds, Func<string, string, string> localize)

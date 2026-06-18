@@ -1496,7 +1496,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Expected next adventurer intent:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
-            Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
             Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1"));
             Assert.That(copied, Does.Contain("Room slot layout:"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
@@ -1599,14 +1599,14 @@ namespace DungeonBuilder.Tests.EditMode
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
             Assert.That(visible, Does.Contain("== Build Choice =="));
-            Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(visible);
             AssertNoRawPlayerFacingSmokeIds(copied);
         }
 
         [Test]
-        public void F6FullSmoke_DoesNotListPlacementThatRoomSlotLayoutMarksUnavailable()
+        public void F6FullSmoke_PrimaryDungeonViewUsesRoomSlotsForRoomTwoLoot()
         {
             SetSave(new SaveData
             {
@@ -1622,11 +1622,26 @@ namespace DungeonBuilder.Tests.EditMode
                     },
                     NextRevision = 3
                 },
+                mvpSelectedRoomSlotIndex = 1,
                 mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
                 {
                     Rooms = new List<MvpRoomSlotAssignmentState>
                     {
-                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId }
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId },
+                            TrapOptionIds = new[] { MvpDungeonPlacementIds.SnareTrapOptionId }
+                        },
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 1,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
+                        }
                     }
                 }
             });
@@ -1637,12 +1652,13 @@ namespace DungeonBuilder.Tests.EditMode
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
-            Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall"));
-            Assert.That(copied, Does.Contain("Room slot layout: Floor 0: Room 1: Narrow Hall"));
-            Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot unavailable 0/0"));
-            Assert.That(copied, Does.Contain("Selected placement fit: Loot node cannot fit Room 1 because this room has no loot slot."));
-            Assert.That(copied, Does.Contain("Loot: unavailable 0/0"));
-            Assert.That(copied, Does.Not.Contain("Loot node: Basic Loot Node"));
+            Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall, Monster: Goblin, Trap: Snare Trap, Loot node: Basic Loot Node"));
+            Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
+            Assert.That(copied, Does.Contain("Selected room target: Room 2: Basic Room"));
+            Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 1/1"));
+            Assert.That(copied, Does.Contain("Selected placement fit: Loot node fits Room 2."));
+            Assert.That(copied, Does.Contain("Room slot layout: Floor 0: Room 1: Narrow Hall (Monsters: Goblin 1/1; Traps: Snare Trap 1/1; Loot: unavailable 0/0) | Room 2: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
+            Assert.That(copied, Does.Not.Contain("Room: Narrow Hall -> Monster: Goblin -> Trap: Snare Trap -> Loot node: Basic Loot Node"));
             Assert.That(copied, Does.Contain("Expected next adventurer intent"));
             Assert.That(copied, Does.Contain("Latest visit intent"));
             Assert.That(copied, Does.Contain("Challenge posture used"));

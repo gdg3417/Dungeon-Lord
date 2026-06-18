@@ -8,27 +8,27 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpDungeonLayoutPresenterTests
     {
         [Test]
-        public void BuildLayoutText_FullStarterLayoutDisplaysFourNodesInDeterministicOrder()
+        public void BuildLayoutText_FullStarterLayoutDisplaysRoomSlotViewInDeterministicOrder()
         {
             SaveData save = SaveWithLayout(FullStarterLayout());
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Skeleton -> Trap: Spike Trap -> Loot node: Basic Loot Node\nSelected room target: Room 1: Basic Room\nSelected room capacity: Monsters 1/1; Traps 1/1; Loot 1/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: Spike Trap 1/1; Loot: Basic Loot Node 1/1)"));
+            Assert.That(text, Is.EqualTo("Selected room target: Room 1: Basic Room\nSelected room capacity: Monsters 1/1; Traps 1/1; Loot 1/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: Spike Trap 1/1; Loot: Basic Loot Node 1/1)"));
         }
 
         [Test]
-        public void BuildLayoutText_EmptyStarterLayoutDisplaysFourAvailableNodesSafely()
+        public void BuildLayoutText_EmptyStarterLayoutDisplaysRoomSlotViewSafely()
         {
             SaveData save = SaveWithLayout(MvpDungeonFloorLayoutState.CreateEmptyStarterFloor());
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available\nSelected room target: Room 1: Basic Room\nSelected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)"));
+            Assert.That(text, Is.EqualTo("Selected room target: Room 1: Basic Room\nSelected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: empty 0/1)"));
         }
 
         [Test]
-        public void BuildLayoutText_PartialLayoutDisplaysAssignedAndEmptyNodesSafely()
+        public void BuildLayoutText_PartialLayoutDisplaysRoomSlotViewSafely()
         {
             MvpDungeonFloorLayoutState layout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
             layout.Nodes[0].CategoryId = MvpDungeonPlacementIds.RoomCategoryId;
@@ -40,7 +40,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(SaveWithLayout(layout), Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Spike Trap -> Loot node: Empty / available\nSelected room target: Room 1: Basic Room\nSelected room capacity: Monsters 0/1; Traps 1/1; Loot 0/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: Spike Trap 1/1; Loot: empty 0/1)"));
+            Assert.That(text, Is.EqualTo("Selected room target: Room 1: Basic Room\nSelected room capacity: Monsters 0/1; Traps 1/1; Loot 0/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: empty 0/1; Traps: Spike Trap 1/1; Loot: empty 0/1)"));
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Is.EqualTo("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Skeleton -> Trap: Empty / available -> Loot node: Basic Loot Node\nSelected room target: Room 1: Basic Room\nSelected room capacity: Monsters 1/1; Traps 0/1; Loot 1/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
+            Assert.That(text, Is.EqualTo("Selected room target: Room 1: Basic Room\nSelected room capacity: Monsters 1/1; Traps 0/1; Loot 1/1\nRoom slot layout: Floor 0: Room 1: Basic Room (Monsters: Skeleton 1/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
         }
 
         [Test]
@@ -86,8 +86,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, Config(), Localize);
 
-            Assert.That(text, Does.Contain("Room: Empty / available"));
-            Assert.That(text, Does.Contain("Loot node: Empty / available"));
+            Assert.That(text, Does.Contain("Selected room target: Room 1: Basic Room"));
+            Assert.That(text, Does.Contain("Room slot layout: Floor 0: Room 1: Basic Room"));
+            Assert.That(text, Does.Not.Contain("Dungeon layout:"));
         }
 
 
@@ -107,6 +108,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpDungeonLayoutPresenter.BuildLayoutText(SaveWithLayout(layout), Config(), Localize);
 
+            Assert.That(text, Does.Not.Contain("Dungeon layout:"));
             Assert.That(text, Does.Contain("Room 1: Narrow Hall (Monsters: Goblin 1/1; Traps: Snare Trap 1/1; Loot: unavailable 0/0)"));
             Assert.That(text, Does.Contain("Room 2: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: Hidden Cache 1/1)"));
             Assert.That(text, Does.Not.Contain("placement.option"));
