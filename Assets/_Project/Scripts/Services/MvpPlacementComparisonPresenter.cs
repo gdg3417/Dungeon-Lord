@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0
                 return preview;
             }
 
-            if (!string.Equals(selectedCategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            if (HasPersistedRoomSlotAssignments(save))
             {
                 MvpDungeonFloorSlotLayout floor = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
                 int clampedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, floor);
@@ -64,10 +64,7 @@ namespace DungeonBuilder.M0
                     }
 
                     string roomBaselineOptionId = ResolveRoomSlotBaselineOptionId(room, selectedCategoryId);
-                    if (!string.IsNullOrWhiteSpace(roomBaselineOptionId))
-                    {
-                        return ResolveWithBaseline(config, selectedOptionId, roomBaselineOptionId, preview);
-                    }
+                    return ResolveWithBaseline(config, selectedOptionId, roomBaselineOptionId, preview);
                 }
             }
 
@@ -142,8 +139,18 @@ namespace DungeonBuilder.M0
             return preview;
         }
 
+        private static bool HasPersistedRoomSlotAssignments(SaveData save)
+        {
+            return save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
+        }
+
         private static string ResolveRoomSlotBaselineOptionId(MvpDungeonRoomInstance room, string selectedCategoryId)
         {
+            if (string.Equals(selectedCategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                return room?.RoomOptionId ?? string.Empty;
+            }
+
             string[] assigned = null;
             switch (selectedCategoryId)
             {

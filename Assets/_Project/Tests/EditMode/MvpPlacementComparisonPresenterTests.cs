@@ -65,6 +65,46 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+
+        [Test]
+        public void Resolve_RoomSlotComparison_UsesSelectedRoomBasicRoomBaseline()
+        {
+            SaveData save = SaveWithRoomSlots(0,
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, string.Empty, string.Empty, string.Empty));
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(save, Config(), 0, MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId);
+
+            Assert.That(preview.HasComparison, Is.True);
+            Assert.That(preview.BaselineOptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(preview.ComparisonSummaryKey, Is.EqualTo(MvpPlacementComparisonPresenter.BasicRoomToNarrowHallSummaryKey));
+            Assert.That(preview.DeltaPathCapacity, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void Resolve_RoomSlotComparison_UsesSelectedRoomNarrowHallBaseline()
+        {
+            SaveData save = SaveWithRoomSlots(0,
+                Room(MvpDungeonPlacementIds.NarrowHallOptionId, string.Empty, string.Empty, string.Empty));
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(save, Config(), 0, MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId);
+
+            Assert.That(preview.HasComparison, Is.True);
+            Assert.That(preview.BaselineOptionId, Is.EqualTo(MvpDungeonPlacementIds.NarrowHallOptionId));
+            Assert.That(preview.ComparisonSummaryKey, Is.EqualTo(MvpPlacementComparisonPresenter.NarrowHallToBasicRoomSummaryKey));
+            Assert.That(preview.DeltaPathCapacity, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_RoomSlotComparison_SameRoomToSameRoomReturnsNoComparison()
+        {
+            SaveData save = SaveWithRoomSlots(0,
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, string.Empty, string.Empty, string.Empty));
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(save, Config(), 0, MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId);
+
+            Assert.That(preview.HasComparison, Is.False);
+        }
+
         [Test]
         public void Resolve_RoomSlotComparison_UsesSelectedRoomOneMonsterBaseline()
         {
@@ -111,6 +151,37 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(preview.ComparisonSummaryKey, Is.EqualTo(MvpPlacementComparisonPresenter.BasicLootNodeToHiddenCacheSummaryKey));
             Assert.That(preview.DeltaLoot, Is.EqualTo(-1));
             Assert.That(preview.DeltaAttraction, Is.EqualTo(-1));
+        }
+
+
+        [Test]
+        public void Resolve_RoomSlotComparison_EmptySelectedRoomTwoMonsterSlotReturnsNoComparison()
+        {
+            SaveData save = SaveWithRoomSlots(1,
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, MvpDungeonPlacementIds.SkeletonOptionId, string.Empty, string.Empty),
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, string.Empty, string.Empty, string.Empty));
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 1));
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(save, Config(), 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+
+            Assert.That(preview.HasComparison, Is.False);
+            Assert.That(preview.BaselineOptionId, Is.Null.Or.Empty);
+        }
+
+        [Test]
+        public void Resolve_RoomSlotComparison_EmptySelectedRoomTwoLootSlotReturnsNoComparison()
+        {
+            SaveData save = SaveWithRoomSlots(1,
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, string.Empty, string.Empty, MvpDungeonPlacementIds.BasicLootNodeOptionId),
+                Room(MvpDungeonPlacementIds.BasicRoomOptionId, string.Empty, string.Empty, string.Empty));
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState();
+            save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 1));
+
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(save, Config(), 1, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+
+            Assert.That(preview.HasComparison, Is.False);
+            Assert.That(preview.BaselineOptionId, Is.Null.Or.Empty);
         }
 
         [Test]
