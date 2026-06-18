@@ -366,6 +366,22 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void AddMvpBasicRoomSlot_ShowsLocalizedSuccessThenBlockedFeedback()
+        {
+            _overlay.AddMvpBasicRoomSlot();
+
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Added Room 2: Basic Room."));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms, Has.Count.EqualTo(2));
+            Assert.That(_root.Save.mvpSelectedRoomSlotIndex, Is.EqualTo(1));
+
+            _overlay.AddMvpBasicRoomSlot();
+
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 2 already exists."));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms, Has.Count.EqualTo(2));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("ui.mvp_room_slots"));
+        }
+
+        [Test]
         public void OverlayTextSafeArea_KeepsPlayerFacingTextInsideLeftEdgeAndReservedFromActionPanel()
         {
             RefreshText();
@@ -2168,6 +2184,9 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_room_slots.reason.loot_slot"] = "loot slot";
             map["ui.mvp_room_slots.no_valid_slot_format"] = "No valid {0} slot in Room {1}: {2}.";
             map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
+            map["ui.mvp_room_slots.add_basic_room_slot_button"] = "Add Basic Room slot";
+            map["ui.mvp_room_slots.add_basic_room_slot_success"] = "Added Room 2: Basic Room.";
+            map["ui.mvp_room_slots.add_basic_room_slot_already_exists"] = "Room 2 already exists.";
             map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";
             map["ui.mvp_room_slots.panel.room_format"] = "Room {0}: {1} ({2}; {3}; {4})";
             map["ui.mvp_room_slots.panel.monsters_format"] = "Monsters: {0} {1}/{2}";
