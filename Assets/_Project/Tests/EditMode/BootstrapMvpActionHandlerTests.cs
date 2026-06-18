@@ -42,6 +42,23 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void PlaceOrModifySelectedMvpPlacement_WhenRoomTargetedFeedbackExists_DoesNotDuplicateFeedbackAsBanner()
+        {
+            var next = new MvpDungeonPlacementEntry { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId };
+            BootstrapMvpActionHandler handler = CreateHandler(place: (category, option) =>
+                new BootstrapMvpActionHandler.PlacementAttempt(true, null, next, "ui.banner.place_success", "Changed Room 1 Monster: Goblin -> Skeleton.", string.Empty));
+
+            BootstrapMvpActionHandler.PlacementResult result = handler.PlaceOrModifySelectedMvpPlacement(
+                MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId);
+
+            Assert.That(result.Succeeded, Is.True);
+            Assert.That(result.PlacementFeedback, Is.EqualTo("Changed Room 1 Monster: Goblin -> Skeleton."));
+            Assert.That(result.BannerMessage, Is.Empty);
+            Assert.That(_banner, Is.Empty);
+        }
+
+        [Test]
         public void PlaceOrModifySelectedMvpPlacement_WhenSelectionInvalid_RejectsWithoutRawIdLeakage()
         {
             BootstrapMvpActionHandler handler = CreateHandler(place: (category, option) =>
@@ -191,6 +208,8 @@ namespace DungeonBuilder.Tests.EditMode
                 ["ui.banner.run_simulated"] = "Run simulated.",
                 ["ui.banner.run_sim_failed"] = "Run failed.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
+                [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Placement changed from {0} to {1} / {2}. {3}",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0} / {1}",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",

@@ -407,10 +407,42 @@ namespace DungeonBuilder.Tests.EditMode
             _root.CycleSelectedMvpRoomSlotTarget();
             _overlay.PlaceSelectedMvpStructure();
 
+            const string expectedFeedback = "Changed Room 2 Loot node: Empty -> Basic Loot Node.";
+            string smokeText = _overlay.BuildFullPlayerFacingSmokeText();
+
             Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("No valid Loot node slot in Room 1: Narrow Hall."));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed placement: Empty slot -> Loot node: Basic Loot Node"));
-            Assert.That(_overlay.BuildFullPlayerFacingSmokeText(), Does.Contain("Room 2: Basic Room"));
-            Assert.That(_overlay.BuildFullPlayerFacingSmokeText(), Does.Contain("Loot: Basic Loot Node 1/1"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain(expectedFeedback));
+            Assert.That(CountOccurrences(smokeText, expectedFeedback), Is.EqualTo(1));
+            Assert.That(smokeText, Does.Contain("Room 2: Basic Room"));
+            Assert.That(smokeText, Does.Contain("Loot: Basic Loot Node 1/1"));
+        }
+
+        [Test]
+        public void ReplacingMonsterInRoomOne_ReportsRoomTargetedFeedback()
+        {
+            SetSave(NarrowHallTwoRoomSave(selectedRoomIndex: 0, includeRoomTwoLoot: false));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.SkeletonOptionId), Is.True);
+
+            _overlay.PlaceSelectedMvpStructure();
+
+            const string expectedFeedback = "Changed Room 1 Monster: Goblin -> Skeleton.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ReplacingTrapInRoomOne_ReportsRoomTargetedFeedback()
+        {
+            SetSave(NarrowHallTwoRoomSave(selectedRoomIndex: 0, includeRoomTwoLoot: false));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.SpikeTrapOptionId), Is.True);
+
+            _overlay.PlaceSelectedMvpStructure();
+
+            const string expectedFeedback = "Changed Room 1 Trap: Snare Trap -> Spike Trap.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
         }
 
         [Test]
@@ -552,7 +584,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
             string placementText = RefreshText();
 
-            Assert.That(placementText, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(placementText, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
             Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(placementText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -673,23 +705,23 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId), Is.True);
             Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds room space and path context."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
 
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
             Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds danger and mana pressure."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Monster: Empty -> Skeleton."));
 
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId), Is.True);
             Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds danger, heat, and path pressure."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Trap: Empty -> Spike Trap."));
 
             _overlay.RunOrObserveDungeon();
             string playerFacingText = RefreshText();
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
-            Assert.That(playerFacingText, Does.Contain("Changed placement: Empty slot -> Trap: Spike Trap. Role: adds danger, heat, and path pressure."));
+            Assert.That(playerFacingText, Does.Contain("Changed Room 1 Trap: Empty -> Spike Trap."));
             Assert.That(playerFacingText, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
@@ -705,7 +737,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(focusedText, Does.StartWith("Diagnostics: Run Diagnostics Focus"));
             Assert.That(focusedText, Does.Not.Contain("MVP Loop Summary"));
             Assert.That(focusedText, Does.Not.Contain("Minimal MVP Actions"));
-            Assert.That(focusedText, Does.Not.Contain("Changed placement: Empty slot -> Trap: Spike Trap"));
+            Assert.That(focusedText, Does.Not.Contain("Changed Room 1 Trap: Empty -> Spike Trap"));
             Assert.That(focusedText, Does.Not.Contain(_overlay.MvpRunResultFeedback));
 
             _overlay.ToggleRunDiagnosticsFocus();
@@ -784,16 +816,16 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed placement: Empty slot -> Room: Basic Room"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room"));
             Assert.That(_root.BannerMessage, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
 
-        [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, "Room", "Basic Room")]
-        [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, "Monster", "Skeleton")]
-        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, "Trap", "Spike Trap")]
-        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, "Loot node", "Basic Loot Node")]
-        public void MinimalMvpActionPlacement_UsesSelectedPlacementBannerAndLocalizedSummary(string categoryId, string optionId, string categoryName, string displayName)
+        [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, "Room", "Basic Room", "Basic Room")]
+        [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, "Monster", "Skeleton", "Empty")]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, "Trap", "Spike Trap", "Empty")]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, "Loot node", "Basic Loot Node", "Empty")]
+        public void MinimalMvpActionPlacement_UsesSelectedPlacementBannerAndLocalizedSummary(string categoryId, string optionId, string categoryName, string displayName, string priorName)
         {
             DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 1);
             SetSave(new SaveData
@@ -808,7 +840,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain($"Changed Room 1 {categoryName}: {priorName} -> {displayName}."));
             if (string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
             {
                 Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
@@ -818,7 +850,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(text, Does.Contain($"Dungeon composition: Room: Basic Room; {categoryName}: {displayName}"));
             }
 
-            Assert.That(text, Does.Contain($"Changed placement: Empty slot -> {categoryName}: {displayName}"));
+            Assert.That(text, Does.Contain($"Changed Room 1 {categoryName}: {priorName} -> {displayName}."));
             Assert.That(text, Does.Not.Contain(categoryId));
             Assert.That(text, Does.Not.Contain(optionId));
             Assert.That(_root.BannerMessage, Does.Not.Contain(optionId));
@@ -838,8 +870,8 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
-            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(text, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
             Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
@@ -854,18 +886,18 @@ namespace DungeonBuilder.Tests.EditMode
             });
 
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
 
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Room: Basic Room -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
 
             _overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
-            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Monster: Empty -> Skeleton."));
+            Assert.That(text, Does.Contain("Changed Room 1 Monster: Empty -> Skeleton."));
             Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
         }
 
@@ -884,7 +916,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
             string text = RefreshText();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Monster: Skeleton. Role: adds danger and mana pressure."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Monster: Empty -> Skeleton."));
             Assert.That(text, Does.Not.Contain("structure.debug.not_player_facing"));
         }
 
@@ -906,12 +938,12 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer visit result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Party: "));
-            Assert.That(text, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(text, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
             Assert.That(text, Does.Contain("Succeeded"));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
         }
@@ -1017,12 +1049,12 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedText = RefreshText();
 
-            Assert.That(focusedText, Does.Not.Contain("Changed placement: Empty slot -> Room: Basic Room"));
+            Assert.That(focusedText, Does.Not.Contain("Changed Room 1 Room: Basic Room -> Basic Room"));
 
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain("Changed placement: Empty slot -> Room: Basic Room. Role: adds room space and path context."));
+            Assert.That(restoredText, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
         }
 
         [Test]
@@ -1964,6 +1996,25 @@ namespace DungeonBuilder.Tests.EditMode
             }
         }
 
+
+        private static int CountOccurrences(string text, string value)
+        {
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(value))
+            {
+                return 0;
+            }
+
+            int count = 0;
+            int index = 0;
+            while ((index = text.IndexOf(value, index, System.StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += value.Length;
+            }
+
+            return count;
+        }
+
         private static void AssertNoPlayerFacingRawIds(string text)
         {
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
@@ -2321,6 +2372,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_run_plan_preview.tradeoff.greedy"] = "higher loot, higher heat pressure.";
             map["ui.mvp_run_plan_preview.tradeoff.unknown"] = "activity tradeoff unavailable.";
             map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
+            map["ui.mvp_placement_feedback.empty_value"] = "Empty";
+            map["ui.mvp_placement_feedback.room_changed_format"] = "Changed Room {0} {1}: {2} -> {3}.";
             map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
             map["ui.mvp_run_feedback.success_stable_heat"] = "Adventurer visit result: succeeded. Loot extracted, heat stable.";
             map["ui.mvp_run_feedback.success_heat_reduced"] = "Adventurer visit result: succeeded. Loot extracted, heat reduced.";

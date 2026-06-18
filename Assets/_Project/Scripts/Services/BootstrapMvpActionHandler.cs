@@ -125,11 +125,11 @@ namespace DungeonBuilder.M0
                 attempt.PriorEntry,
                 attempt.NewEntry,
                 Localize);
-            string feedback = string.IsNullOrWhiteSpace(attempt.TargetFeedback)
-                ? changedFeedback
-                : string.Concat(attempt.TargetFeedback, "\n", changedFeedback);
-            _context.SetBanner?.Invoke(feedback);
-            return new PlacementResult(true, feedback, feedback);
+            bool hasTargetFeedback = !string.IsNullOrWhiteSpace(attempt.TargetFeedback);
+            string feedback = hasTargetFeedback ? attempt.TargetFeedback : changedFeedback;
+            string bannerMessage = hasTargetFeedback ? string.Empty : feedback;
+            _context.SetBanner?.Invoke(bannerMessage);
+            return new PlacementResult(true, feedback, bannerMessage);
         }
 
         public RunResult RunOrObserveDungeon(string selectedDebugPostureId)

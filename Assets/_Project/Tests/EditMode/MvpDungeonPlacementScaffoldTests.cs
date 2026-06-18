@@ -848,6 +848,8 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpLoopSummaryPanelPresenter.RiskReducedKey] = "Risk went down.",
                 [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
+                [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Changed placement: {0} -> {1}: {2}. {3}",
                 [MvpRoomSlotTargetPresenter.SelectedTargetFormatKey] = "Selected room target: Room {0}: {1}",
                 [MvpRoomSlotTargetPresenter.NoValidSlotFormatKey] = "No valid {0} slot in Room {1}: {2}.",
