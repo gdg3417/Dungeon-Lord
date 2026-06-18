@@ -1176,10 +1176,12 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
-                _root.Save != null ? _root.Save.mvpDungeonFloorLayout : null,
-                _root.Save != null ? _root.Save.mvpDungeonPlacements : null,
+                _root.Save,
                 _root.RunSimulationConfig,
+                selectedRoomIndex,
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
             return MvpPlacementComparisonPresenter.BuildComparisonText(preview, (key, fallback) => GetLocalizedString(key, fallback));
