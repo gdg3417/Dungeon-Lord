@@ -369,6 +369,51 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void PersistedRoomSlotLayout_HidesExtraRoomTwoMonsterWhenActiveCompositionUsesRoomOneMonster()
+        {
+            RunSimulationConfig config = RoomSlotPlacementEffectsConfig();
+            var save = new SaveData
+            {
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId },
+                            TrapOptionIds = new[] { MvpDungeonPlacementIds.SnareTrapOptionId }
+                        },
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 1,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId },
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
+                        }
+                    }
+                },
+                mvpSelectedRoomSlotIndex = 1
+            };
+
+            string layoutText = MvpDungeonLayoutPresenter.BuildLayoutText(save, config, MvpDungeonPlacementIds.LootNodeCategoryId, Localized);
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
+
+            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Goblin -> Trap: Snare Trap -> Loot node: Basic Loot Node"));
+            Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
+            Assert.That(layoutText, Does.Contain("Room 2: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
+            Assert.That(layoutText, Does.Not.Contain("Skeleton"));
+            Assert.That(summary.DungeonPlacements, Has.Some.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.GoblinOptionId));
+            Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(effects.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
+            AssertNoRawPlacementIds(layoutText);
+        }
+
+        [Test]
         public void SelectedRoomTarget_ClampsWhenPersistedRoomCountShrinks()
         {
             var save = new SaveData
@@ -524,6 +569,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(layout.Rooms, Has.Length.EqualTo(2));
             Assert.That(layout.Rooms[0].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.NarrowHallOptionId));
             Assert.That(layout.Rooms[1].RoomOptionId, Is.EqualTo(MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(layout.Rooms[1].AssignedMonsterOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].AssignedTrapOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].AssignedLootNodeOptionIds, Is.Empty);
             Assert.That(_root.Save.mvpSelectedRoomSlotIndex, Is.EqualTo(1));
         }
 
@@ -581,6 +629,30 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(capacity, Does.Contain("Loot 0/1"));
             Assert.That(fit, Is.EqualTo("Selected placement fit: Loot node fits Room 2."));
             Assert.That(roomOneFit, Is.EqualTo("Selected placement fit: Loot node cannot fit Room 1 because this room has no loot slot."));
+        }
+
+        [Test]
+        public void PlacingLootIntoAddedRoomTwo_AssignsOnlyLootToRoomTwo()
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            _root.TryAddSecondMvpBasicRoomSlot();
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                out _,
+                out _,
+                out _,
+                out _);
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, RoomSlotConfig());
+            string capacity = MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, 1, Localized);
+
+            Assert.That(placed, Is.True);
+            Assert.That(layout.Rooms[1].AssignedMonsterOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].AssignedTrapOptionIds, Is.Empty);
+            Assert.That(layout.Rooms[1].AssignedLootNodeOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }));
+            Assert.That(capacity, Is.EqualTo("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 1/1"));
         }
 
         [Test]
