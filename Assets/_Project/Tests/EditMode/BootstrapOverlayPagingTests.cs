@@ -407,10 +407,14 @@ namespace DungeonBuilder.Tests.EditMode
             _root.CycleSelectedMvpRoomSlotTarget();
             _overlay.PlaceSelectedMvpStructure();
 
+            const string expectedFeedback = "Changed Room 2 Loot node: Empty -> Basic Loot Node.";
+            string smokeText = _overlay.BuildFullPlayerFacingSmokeText();
+
             Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("No valid Loot node slot in Room 1: Narrow Hall."));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed Room 2 Loot node: Empty -> Basic Loot Node."));
-            Assert.That(_overlay.BuildFullPlayerFacingSmokeText(), Does.Contain("Room 2: Basic Room"));
-            Assert.That(_overlay.BuildFullPlayerFacingSmokeText(), Does.Contain("Loot: Basic Loot Node 1/1"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain(expectedFeedback));
+            Assert.That(CountOccurrences(smokeText, expectedFeedback), Is.EqualTo(1));
+            Assert.That(smokeText, Does.Contain("Room 2: Basic Room"));
+            Assert.That(smokeText, Does.Contain("Loot: Basic Loot Node 1/1"));
         }
 
         [Test]
@@ -422,7 +426,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Monster: Goblin -> Skeleton."));
+            const string expectedFeedback = "Changed Room 1 Monster: Goblin -> Skeleton.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
         }
 
         [Test]
@@ -434,7 +440,9 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Trap: Snare Trap -> Spike Trap."));
+            const string expectedFeedback = "Changed Room 1 Trap: Snare Trap -> Spike Trap.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
         }
 
         [Test]
@@ -1986,6 +1994,25 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(index, Is.GreaterThan(previousIndex), $"Expected '{line}' after the preceding diagnostic line.");
                 previousIndex = index;
             }
+        }
+
+
+        private static int CountOccurrences(string text, string value)
+        {
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(value))
+            {
+                return 0;
+            }
+
+            int count = 0;
+            int index = 0;
+            while ((index = text.IndexOf(value, index, System.StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += value.Length;
+            }
+
+            return count;
         }
 
         private static void AssertNoPlayerFacingRawIds(string text)
