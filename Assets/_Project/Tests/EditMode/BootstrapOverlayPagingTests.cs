@@ -314,6 +314,58 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void PlayerFacingMode_MinimalMvpActionPanelSelectedRoomFeedbackUsesLocalizedHelpers()
+        {
+            Assert.That(_overlay.GetSelectedMvpRoomCapacityText(), Is.EqualTo("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1"));
+            Assert.That(_overlay.GetSelectedMvpPlacementFitText(), Is.EqualTo(string.Empty));
+
+            string overlaySource = File.ReadAllText(Path.Combine(Application.dataPath, "_Project/Scripts/UI/BootstrapOverlay.cs"));
+            int panelStart = overlaySource.IndexOf("private void DrawMinimalMvpActionPanel", System.StringComparison.Ordinal);
+            int selectedTarget = overlaySource.IndexOf("BuildSelectedTargetText", panelStart, System.StringComparison.Ordinal);
+            int selectedCapacity = overlaySource.IndexOf("GetSelectedMvpRoomCapacityText()", selectedTarget, System.StringComparison.Ordinal);
+            int selectedFit = overlaySource.IndexOf("GetSelectedMvpPlacementFitText()", selectedCapacity, System.StringComparison.Ordinal);
+            int cycleButton = overlaySource.IndexOf("ui.mvp_room_slots.cycle_target_button", selectedFit, System.StringComparison.Ordinal);
+
+            Assert.That(selectedTarget, Is.GreaterThan(panelStart));
+            Assert.That(selectedCapacity, Is.GreaterThan(selectedTarget));
+            Assert.That(selectedFit, Is.GreaterThan(selectedCapacity));
+            Assert.That(cycleButton, Is.GreaterThan(selectedFit));
+        }
+
+        [Test]
+        public void PlayerFacingMode_MinimalMvpActionPanelSelectedPlacementFitShowsNarrowHallLootBlock()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 17d, ManaReserve = 9d },
+                runHistory = new RunHistoryState(),
+                mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.NarrowHallOptionId, 1)
+                    },
+                    NextRevision = 2
+                },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId }
+                    }
+                }
+            });
+            SetOverlayBackingField("_selectedMvpPlacementCategoryId", MvpDungeonPlacementIds.LootNodeCategoryId);
+            SetOverlayBackingField("_selectedMvpPlacementOptionId", MvpDungeonPlacementIds.BasicLootNodeOptionId);
+
+            Assert.That(_overlay.GetSelectedMvpRoomCapacityText(), Is.EqualTo("Selected room capacity: Monsters 0/1; Traps 0/1; Loot unavailable 0/0"));
+            Assert.That(_overlay.GetSelectedMvpPlacementFitText(), Is.EqualTo("Selected placement fit: Loot node cannot fit Room 1 because this room has no loot slot."));
+            Assert.That(_overlay.GetSelectedMvpPlacementFitText(), Does.Not.Contain("ui.mvp_room_slots"));
+            Assert.That(_overlay.GetSelectedMvpPlacementFitText(), Does.Not.Contain("placement.category"));
+        }
+
+        [Test]
         public void OverlayTextSafeArea_KeepsPlayerFacingTextInsideLeftEdgeAndReservedFromActionPanel()
         {
             RefreshText();
@@ -1429,6 +1481,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1"));
             Assert.That(copied, Does.Contain("Room slot layout:"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             Assert.That(copied, Does.Contain("First-session"));
@@ -1563,12 +1616,15 @@ namespace DungeonBuilder.Tests.EditMode
             });
             SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
             SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_f6_room_slot_consistency_test.json", useAtomicWrites = false }));
+            SetOverlayBackingField("_selectedMvpPlacementCategoryId", MvpDungeonPlacementIds.LootNodeCategoryId);
             _overlay.RunOrObserveDungeon();
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall"));
             Assert.That(copied, Does.Contain("Room slot layout: Floor 0: Room 1: Narrow Hall"));
+            Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot unavailable 0/0"));
+            Assert.That(copied, Does.Contain("Selected placement fit: Loot node cannot fit Room 1 because this room has no loot slot."));
             Assert.That(copied, Does.Contain("Loot: unavailable 0/0"));
             Assert.That(copied, Does.Not.Contain("Loot node: Basic Loot Node"));
             Assert.That(copied, Does.Contain("Expected next adventurer intent"));
@@ -2097,6 +2153,19 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_dungeon_layout.value.empty_available"] = "Empty / available";
             map["ui.mvp_room_slots.panel.layout_format"] = "Room slot layout: {0}";
             map["ui.mvp_room_slots.selected_target_format"] = "Selected room target: Room {0}: {1}";
+            map["ui.mvp_room_slots.selected_capacity_format"] = "Selected room capacity: {0}";
+            map["ui.mvp_room_slots.selected_capacity_category_format"] = "{0} {1}/{2}";
+            map["ui.mvp_room_slots.selected_capacity_unavailable_category_format"] = "{0} unavailable {1}/{2}";
+            map["ui.mvp_room_slots.selected_capacity_separator"] = "; ";
+            map["ui.mvp_room_slots.selected_placement_fit_format"] = "Selected placement fit: {0}";
+            map["ui.mvp_room_slots.selected_placement_fits_format"] = "{0} fits Room {1}.";
+            map["ui.mvp_room_slots.selected_placement_cannot_fit_no_slot_format"] = "{0} cannot fit Room {1} because this room has no {2}.";
+            map["ui.mvp_room_slots.capacity.monsters"] = "Monsters";
+            map["ui.mvp_room_slots.capacity.traps"] = "Traps";
+            map["ui.mvp_room_slots.capacity.loot"] = "Loot";
+            map["ui.mvp_room_slots.reason.monster_slot"] = "monster slot";
+            map["ui.mvp_room_slots.reason.trap_slot"] = "trap slot";
+            map["ui.mvp_room_slots.reason.loot_slot"] = "loot slot";
             map["ui.mvp_room_slots.no_valid_slot_format"] = "No valid {0} slot in Room {1}: {2}.";
             map["ui.mvp_room_slots.cycle_target_button"] = "Cycle room target";
             map["ui.mvp_room_slots.panel.floor_format"] = "Floor {0}: {1}";

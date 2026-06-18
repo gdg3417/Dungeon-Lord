@@ -31,6 +31,11 @@ namespace DungeonBuilder.M0
 
         public static string BuildLayoutText(SaveData save, RunSimulationConfig config, Func<string, string, string> localize)
         {
+            return BuildLayoutText(save, config, string.Empty, localize);
+        }
+
+        public static string BuildLayoutText(SaveData save, RunSimulationConfig config, string selectedPlacementCategoryId, Func<string, string, string> localize)
+        {
             MvpDungeonFloorLayoutState layout = save?.mvpDungeonFloorLayout;
             MvpDungeonPlacementState legacyPlacements = save?.mvpDungeonPlacements;
             MvpDungeonPlacementEntry[] resolvedPlacements = config == null
@@ -75,10 +80,15 @@ namespace DungeonBuilder.M0
             string floorText = string.Format(Localize(localize, FloorFormatKey), 0, nodes.ToString());
             string legacyLayout = string.Format(Localize(localize, LayoutFormatKey), floorText);
             MvpDungeonFloorSlotLayout slotLayout = config == null ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
-            string selectedTarget = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedTargetText(slotLayout, MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, slotLayout), localize);
+            int selectedRoomIndex = slotLayout == null ? 0 : MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, slotLayout);
+            string selectedTarget = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedTargetText(slotLayout, selectedRoomIndex, localize);
+            string selectedCapacity = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(slotLayout, selectedRoomIndex, localize);
+            string selectedFit = slotLayout == null ? string.Empty : MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(slotLayout, selectedRoomIndex, selectedPlacementCategoryId, localize);
             string roomSlotLayout = slotLayout == null ? string.Empty : BuildRoomSlotLayoutText(slotLayout, localize);
             var fullLayout = new StringBuilder(legacyLayout);
             if (!string.IsNullOrWhiteSpace(selectedTarget)) fullLayout.Append('\n').Append(selectedTarget);
+            if (!string.IsNullOrWhiteSpace(selectedCapacity)) fullLayout.Append('\n').Append(selectedCapacity);
+            if (!string.IsNullOrWhiteSpace(selectedFit)) fullLayout.Append('\n').Append(selectedFit);
             if (!string.IsNullOrWhiteSpace(roomSlotLayout)) fullLayout.Append('\n').Append(roomSlotLayout);
             return fullLayout.ToString();
         }
