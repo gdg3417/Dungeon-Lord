@@ -1652,7 +1652,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
-            Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall, Monster: Goblin, Trap: Snare Trap, Loot node: Basic Loot Node"));
+            Assert.That(copied, Does.Contain("Dungeon composition: Room: Narrow Hall; Monster: Goblin; Trap: Snare Trap; Loot node: Basic Loot Node"));
             Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
             Assert.That(copied, Does.Contain("Selected room target: Room 2: Basic Room"));
             Assert.That(copied, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 1/1"));
