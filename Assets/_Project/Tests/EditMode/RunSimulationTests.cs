@@ -193,12 +193,21 @@ namespace DungeonBuilder.Tests.EditMode
                 TrafficMinimumEstimatedConcurrentParties = 0,
                 TrafficMaximumEstimatedConcurrentParties = 4,
                 MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
+                MvpRoomSlotCapacities = new[]
+                {
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 },
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 }
+                },
                 MvpPlacementEffects = new[]
                 {
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.room.basic" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.NarrowHallOptionId, PathCapacity = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.room.narrow_hall" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 3, ManaPressure = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.monster.skeleton" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId, Danger = 2, ManaPressure = 1, LootBonus = 1, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.monster.goblin" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.spike" },
-                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.basic" }
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SnareTrapOptionId, Danger = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.snare" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.basic" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.hidden_cache" }
                 },
                 MvpCompositionOutcomeTuning = BuildCompositionTuning(),
                 RunPostures = new[]
@@ -2862,6 +2871,62 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(4));
                 Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.Danger, Is.EqualTo(5));
                 Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Has.Length.EqualTo(4));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+
+        [Test]
+        public void SimulateRunOnce_CompositionOutcome_UsesPersistedRoomSlotPlacementsOverLegacyPlacements()
+        {
+            var go = new GameObject("GameRootCompositionOutcomeUsesPersistedRoomSlots");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                SetContent(root, BuildRunDisplayContent());
+                SetPrivateField(root, "_runSimulationService", new RunSimulationService(BuildConfig(), BuildLootConfig()));
+                SetPrivateField(root, "<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "run_sim_test_composition_persisted_slots.json", useAtomicWrites = false }));
+                SetPrivateField(root, "<CurrentHeat>k__BackingField", 0d);
+                SetSave(root, new SaveData
+                {
+                    totalTicks = 10,
+                    structureRuntime = new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                    mvpDungeonPlacements = StarterPlacementState(),
+                    mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                    {
+                        Rooms = new List<MvpRoomSlotAssignmentState>
+                        {
+                            new MvpRoomSlotAssignmentState
+                            {
+                                FloorIndex = 0,
+                                RoomIndex = 0,
+                                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                                MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId },
+                                TrapOptionIds = new[] { MvpDungeonPlacementIds.SnareTrapOptionId },
+                                LootNodeOptionIds = new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }
+                            }
+                        }
+                    },
+                    runHistory = new RunHistoryState { NextRunSequence = 1 }
+                });
+
+                bool ok = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+
+                Assert.That(ok, Is.True);
+                RunOutcomeRecord outcome = root.Save.runHistory.LatestOutcome;
+                Assert.That(outcome.CompositionOutcomeSummary, Is.Not.Null);
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Is.EqualTo(new[]
+                {
+                    MvpDungeonPlacementIds.BasicRoomOptionId,
+                    MvpDungeonPlacementIds.GoblinOptionId,
+                    MvpDungeonPlacementIds.SnareTrapOptionId,
+                    MvpDungeonPlacementIds.HiddenCacheOptionId
+                }));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.Danger, Is.EqualTo(3));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.ManaPressure, Is.EqualTo(1));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.Zero);
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(4));
+                Assert.That(outcome.CompositionOutcomeSummary.PlacementEffects.Attraction, Is.EqualTo(2));
             }
             finally { Object.DestroyImmediate(go); }
         }
