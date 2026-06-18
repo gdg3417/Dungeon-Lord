@@ -132,6 +132,109 @@ namespace DungeonBuilder.Tests.EditMode
             }));
         }
 
+
+        [Test]
+        public void ResolveForSave_PersistedRoomSlotAssignmentsWinOverLegacyGlobalPlacements()
+        {
+            SaveData save = SaveWithLegacyStarterPlacements();
+            save.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+            {
+                Rooms = new System.Collections.Generic.List<MvpRoomSlotAssignmentState>
+                {
+                    new MvpRoomSlotAssignmentState
+                    {
+                        FloorIndex = 0,
+                        RoomIndex = 0,
+                        RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                        MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId },
+                        TrapOptionIds = new[] { MvpDungeonPlacementIds.SnareTrapOptionId },
+                        LootNodeOptionIds = new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }
+                    }
+                }
+            };
+
+            MvpPlacementEffectsSummary first = MvpPlacementEffectsResolver.ResolveForSave(save, Config());
+            MvpPlacementEffectsSummary second = MvpPlacementEffectsResolver.ResolveForSave(save, Config());
+
+            Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
+            Assert.That(first.PathCapacity, Is.EqualTo(2));
+            Assert.That(first.Danger, Is.EqualTo(3));
+            Assert.That(first.ManaPressure, Is.EqualTo(1));
+            Assert.That(first.HeatPressure, Is.Zero);
+            Assert.That(first.LootBonus, Is.EqualTo(4));
+            Assert.That(first.Attraction, Is.EqualTo(2));
+            Assert.That(first.ContributingOptionIds, Is.EqualTo(new[]
+            {
+                MvpDungeonPlacementIds.BasicRoomOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId
+            }));
+            Assert.That(first.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(first.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.SpikeTrapOptionId));
+            Assert.That(first.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+        }
+
+        [Test]
+        public void ResolveForSave_RoomTwoLootContributesWhenRoomOneCannotHoldLoot()
+        {
+            SaveData save = new SaveData
+            {
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new System.Collections.Generic.List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId,
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.HiddenCacheOptionId }
+                        },
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0,
+                            RoomIndex = 1,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
+                        }
+                    }
+                }
+            };
+
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, Config());
+
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(new[]
+            {
+                MvpDungeonPlacementIds.NarrowHallOptionId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId
+            }));
+            Assert.That(effects.LootBonus, Is.EqualTo(4));
+            Assert.That(effects.Attraction, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ResolveForSave_LegacyGlobalPlacementsRemainFallbackWhenPersistedRoomSlotsAreAbsent()
+        {
+            SaveData save = SaveWithLegacyStarterPlacements();
+
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, Config());
+
+            Assert.That(effects.PathCapacity, Is.EqualTo(2));
+            Assert.That(effects.Danger, Is.EqualTo(5));
+            Assert.That(effects.ManaPressure, Is.EqualTo(2));
+            Assert.That(effects.HeatPressure, Is.EqualTo(1));
+            Assert.That(effects.LootBonus, Is.EqualTo(4));
+            Assert.That(effects.Attraction, Is.EqualTo(2));
+            Assert.That(effects.ContributingOptionIds, Is.EqualTo(new[]
+            {
+                MvpDungeonPlacementIds.BasicRoomOptionId,
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId
+            }));
+        }
+
         [Test]
         public void Resolve_LegacyStateWithoutConfig_ReturnsSafeZeroDefaults()
         {
@@ -154,6 +257,11 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+        private static SaveData SaveWithLegacyStarterPlacements()
+        {
+            return new SaveData { mvpDungeonPlacements = AllStarterState() };
+        }
+
         private static MvpDungeonPlacementState AllStarterState()
         {
             return new MvpDungeonPlacementState
@@ -173,6 +281,11 @@ namespace DungeonBuilder.Tests.EditMode
             return new RunSimulationConfig
             {
                 MvpPlacementEffectsRuleSourceId = "test.mvp_placement_effects",
+                MvpRoomSlotCapacities = new[]
+                {
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 },
+                    new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 }
+                },
                 MvpPlacementEffects = new[]
                 {
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2, ExplanationKey = "effect.room" },
