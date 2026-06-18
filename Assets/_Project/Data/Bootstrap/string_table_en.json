@@ -1136,6 +1136,10 @@
       "text": "Changed Room {0} {1}: {2} -> {3}."
     },
     {
+      "key": "ui.mvp_placement_feedback.room_already_set_format",
+      "text": "Room {0} {1} already set to {2}."
+    },
+    {
       "key": "ui.mvp_loop.panel.placement_effects_format",
       "text": "Effects: {0}"
     },

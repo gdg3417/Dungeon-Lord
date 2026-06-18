@@ -210,6 +210,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
                 [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementAlreadySetFormatKey] = "Room {0} {1} already set to {2}.",
                 [MvpStructurePlacementFeedbackPresenter.PlacementChangedFormatKey] = "Placement changed from {0} to {1} / {2}. {3}",
                 [MvpDungeonPlacementPresenter.EntryFormatKey] = "{0} / {1}",
                 [MvpDungeonPlacementPresenter.RoomCategoryKey] = "Room",

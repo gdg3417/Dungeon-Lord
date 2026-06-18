@@ -375,6 +375,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
 
             Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("No valid Loot node slot in Room 1: Narrow Hall."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("already set"));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("ui.mvp_room_slots"));
             Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Not.Contain("placement.category"));
             Assert.That(_overlay.BuildFullPlayerFacingSmokeText(), Does.Contain("No valid Loot node slot in Room 1: Narrow Hall."));
@@ -415,6 +416,50 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(CountOccurrences(smokeText, expectedFeedback), Is.EqualTo(1));
             Assert.That(smokeText, Does.Contain("Room 2: Basic Room"));
             Assert.That(smokeText, Does.Contain("Loot: Basic Loot Node 1/1"));
+        }
+
+
+        [Test]
+        public void SameMonsterPlacementInRoomOne_ReportsAlreadySetFeedbackOnceWithoutBannerDuplication()
+        {
+            SetSave(NarrowHallTwoRoomSave(selectedRoomIndex: 0, includeRoomTwoLoot: false));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.GoblinOptionId), Is.True);
+
+            _overlay.PlaceSelectedMvpStructure();
+
+            const string expectedFeedback = "Room 1 Monster already set to Goblin.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(_root.BannerMessage, Is.Empty);
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SameTrapPlacementInRoomOne_ReportsAlreadySetFeedbackOnce()
+        {
+            SetSave(NarrowHallTwoRoomSave(selectedRoomIndex: 0, includeRoomTwoLoot: false));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.SnareTrapOptionId), Is.True);
+
+            _overlay.PlaceSelectedMvpStructure();
+
+            const string expectedFeedback = "Room 1 Trap already set to Snare Trap.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SameLootPlacementInRoomTwo_ReportsAlreadySetFeedbackOnce()
+        {
+            SetSave(NarrowHallTwoRoomSave(selectedRoomIndex: 1, includeRoomTwoLoot: true));
+            Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId), Is.True);
+            Assert.That(_overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicLootNodeOptionId), Is.True);
+
+            _overlay.PlaceSelectedMvpStructure();
+
+            const string expectedFeedback = "Room 2 Loot node already set to Basic Loot Node.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(CountOccurrences(_overlay.BuildFullPlayerFacingSmokeText(), expectedFeedback), Is.EqualTo(1));
         }
 
         [Test]
@@ -584,7 +629,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.PlaceSelectedMvpStructure();
             string placementText = RefreshText();
 
-            Assert.That(placementText, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(placementText, Does.Contain("Room 1 Room already set to Basic Room."));
             Assert.That(placementText, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(placementText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(placementText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
@@ -705,7 +750,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId), Is.True);
             Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds room space and path context."));
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 1 Room already set to Basic Room."));
 
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
             Assert.That(_overlay.GetSelectedMvpPlacementPreviewText(), Is.EqualTo("Role: adds danger and mana pressure."));
@@ -816,7 +861,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             _overlay.PlaceSelectedMvpStructure();
 
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain("Room 1 Room already set to Basic Room"));
             Assert.That(_root.BannerMessage, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
@@ -840,7 +885,10 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain($"Changed Room 1 {categoryName}: {priorName} -> {displayName}."));
+            string expectedFeedback = string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal)
+                ? $"Room 1 {categoryName} already set to {displayName}."
+                : $"Changed Room 1 {categoryName}: {priorName} -> {displayName}.";
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Does.Contain(expectedFeedback));
             if (string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
             {
                 Assert.That(text, Does.Contain($"Dungeon composition: {categoryName}: {displayName}"));
@@ -850,7 +898,7 @@ namespace DungeonBuilder.Tests.EditMode
                 Assert.That(text, Does.Contain($"Dungeon composition: Room: Basic Room; {categoryName}: {displayName}"));
             }
 
-            Assert.That(text, Does.Contain($"Changed Room 1 {categoryName}: {priorName} -> {displayName}."));
+            Assert.That(text, Does.Contain(expectedFeedback));
             Assert.That(text, Does.Not.Contain(categoryId));
             Assert.That(text, Does.Not.Contain(optionId));
             Assert.That(_root.BannerMessage, Does.Not.Contain(optionId));
@@ -870,8 +918,8 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.GetSelectedSlotStructureId(), Is.Empty);
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
-            Assert.That(text, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 1 Room already set to Basic Room."));
+            Assert.That(text, Does.Contain("Room 1 Room already set to Basic Room."));
             Assert.That(text, Does.Not.Contain(MvpDungeonPlacementIds.BasicRoomOptionId));
         }
 
@@ -886,10 +934,10 @@ namespace DungeonBuilder.Tests.EditMode
             });
 
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 1 Room already set to Basic Room."));
 
             _overlay.PlaceSelectedMvpStructure();
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 1 Room already set to Basic Room."));
 
             _overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId);
             _overlay.PlaceSelectedMvpStructure();
@@ -938,12 +986,12 @@ namespace DungeonBuilder.Tests.EditMode
             string text = RefreshText();
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
-            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo("Room 1 Room already set to Basic Room."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurer visit result: succeeded."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Adventurers: "));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain(AdventurerPartyCompositionResolver.WarriorClassId));
             Assert.That(text, Does.Contain("Party: "));
-            Assert.That(text, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(text, Does.Contain("Room 1 Room already set to Basic Room."));
             Assert.That(text, Does.Contain("Succeeded"));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
         }
@@ -1049,12 +1097,12 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string focusedText = RefreshText();
 
-            Assert.That(focusedText, Does.Not.Contain("Changed Room 1 Room: Basic Room -> Basic Room"));
+            Assert.That(focusedText, Does.Not.Contain("Room 1 Room already set to Basic Room"));
 
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain("Changed Room 1 Room: Basic Room -> Basic Room."));
+            Assert.That(restoredText, Does.Contain("Room 1 Room already set to Basic Room."));
         }
 
         [Test]
@@ -2374,6 +2422,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_structure_feedback.empty_slot"] = "Empty slot";
             map["ui.mvp_placement_feedback.empty_value"] = "Empty";
             map["ui.mvp_placement_feedback.room_changed_format"] = "Changed Room {0} {1}: {2} -> {3}.";
+            map["ui.mvp_placement_feedback.room_already_set_format"] = "Room {0} {1} already set to {2}.";
             map["ui.mvp_structure_feedback.changed_format"] = "Changed: {0} -> {1}. {2}";
             map["ui.mvp_run_feedback.success_stable_heat"] = "Adventurer visit result: succeeded. Loot extracted, heat stable.";
             map["ui.mvp_run_feedback.success_heat_reduced"] = "Adventurer visit result: succeeded. Loot extracted, heat reduced.";

@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0
         public const string ChangedFormatKey = "ui.mvp_structure_feedback.changed_format";
         public const string PlacementChangedFormatKey = "ui.mvp_placement_feedback.changed_format";
         public const string RoomTargetedPlacementChangedFormatKey = "ui.mvp_placement_feedback.room_changed_format";
+        public const string RoomTargetedPlacementAlreadySetFormatKey = "ui.mvp_placement_feedback.room_already_set_format";
         public const string EmptyPlacementValueKey = "ui.mvp_placement_feedback.empty_value";
 
         public static string BuildFeedbackText(
@@ -53,6 +54,12 @@ namespace DungeonBuilder.M0
             string categoryLabel = MvpDungeonPlacementPresenter.ResolveCategoryName(categoryId, localize);
             string priorLabel = ResolvePlacementValueLabel(priorOptionId, localize);
             string newLabel = ResolvePlacementValueLabel(newOptionId, localize);
+            if (string.Equals(priorOptionId ?? string.Empty, newOptionId ?? string.Empty, StringComparison.Ordinal))
+            {
+                string alreadySetFormat = Localize(localize, RoomTargetedPlacementAlreadySetFormatKey);
+                return string.Format(alreadySetFormat, roomIndex + 1, categoryLabel, newLabel);
+            }
+
             string format = Localize(localize, RoomTargetedPlacementChangedFormatKey);
             return string.Format(format, roomIndex + 1, categoryLabel, priorLabel, newLabel);
         }

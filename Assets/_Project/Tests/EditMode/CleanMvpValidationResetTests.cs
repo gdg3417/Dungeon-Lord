@@ -674,6 +674,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
             map["ui.mvp_placement_feedback.empty_value"] = "Empty";
             map["ui.mvp_placement_feedback.room_changed_format"] = "Changed Room {0} {1}: {2} -> {3}.";
+            map["ui.mvp_placement_feedback.room_already_set_format"] = "Room {0} {1} already set to {2}.";
             map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} adventurer challenge.";
             map["ui.mvp_run_plan_preview.tradeoff_format"] = "Expected tradeoff: {0}";
             map["ui.mvp_run_plan_preview.combined_format"] = "{0}\n{1}";
