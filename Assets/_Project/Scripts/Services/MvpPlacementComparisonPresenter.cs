@@ -23,22 +23,93 @@ namespace DungeonBuilder.M0
             string selectedCategoryId,
             string selectedOptionId)
         {
-            var preview = new MvpPlacementComparisonPreview
-            {
-                HasComparison = false,
-                SelectedOptionId = selectedOptionId ?? string.Empty
-            };
-
-            if (!MvpDungeonPlacementIds.IsAllowedCategory(selectedCategoryId) ||
-                !MvpDungeonPlacementIds.IsAllowedOption(selectedOptionId) ||
-                !MvpDungeonPlacementIds.TryGetCategoryForOption(selectedOptionId, out string selectedOptionCategoryId) ||
-                !string.Equals(selectedCategoryId, selectedOptionCategoryId, StringComparison.Ordinal) ||
-                config == null || config.MvpPlacementEffects == null || config.MvpPlacementEffects.Length == 0)
+            var preview = CreateEmptyPreview(selectedOptionId);
+            if (!CanCompare(config, selectedCategoryId, selectedOptionId))
             {
                 return preview;
             }
 
             string baselineOptionId = ResolveBaselineOptionId(layout, placements, selectedCategoryId, selectedOptionId);
+            return ResolveWithBaseline(config, selectedOptionId, baselineOptionId, preview);
+        }
+
+        public static MvpPlacementComparisonPreview Resolve(
+            SaveData save,
+            RunSimulationConfig config,
+            int selectedRoomIndex,
+            string selectedCategoryId,
+            string selectedOptionId)
+        {
+            var preview = CreateEmptyPreview(selectedOptionId);
+            if (!CanCompare(config, selectedCategoryId, selectedOptionId))
+            {
+                return preview;
+            }
+
+            if (HasPersistedRoomSlotAssignments(save))
+            {
+                MvpDungeonFloorSlotLayout floor = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
+                int clampedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, floor);
+                if (floor?.Rooms != null && floor.Rooms.Length > 0)
+                {
+                    if (selectedRoomIndex >= 0 && selectedRoomIndex < floor.Rooms.Length)
+                    {
+                        clampedRoomIndex = selectedRoomIndex;
+                    }
+
+                    MvpDungeonRoomInstance room = floor.Rooms[clampedRoomIndex];
+                    if (!MvpRoomSlotTargetResolver.CanAccept(room, selectedCategoryId))
+                    {
+                        return preview;
+                    }
+
+                    string roomBaselineOptionId = ResolveRoomSlotBaselineOptionId(room, selectedCategoryId);
+                    return ResolveWithBaseline(config, selectedOptionId, roomBaselineOptionId, preview);
+                }
+            }
+
+            return Resolve(
+                save != null ? save.mvpDungeonFloorLayout : null,
+                save != null ? save.mvpDungeonPlacements : null,
+                config,
+                selectedCategoryId,
+                selectedOptionId);
+        }
+
+        public static string BuildComparisonText(MvpPlacementComparisonPreview preview, Func<string, string, string> localize)
+        {
+            if (!preview.HasComparison || string.IsNullOrWhiteSpace(preview.BaselineOptionId) || string.IsNullOrWhiteSpace(preview.ComparisonSummaryKey))
+            {
+                return string.Empty;
+            }
+
+            string format = Localize(localize, ComparedWithFormatKey);
+            string baselineName = MvpDungeonPlacementPresenter.ResolveOptionName(preview.BaselineOptionId, localize);
+            string summary = Localize(localize, preview.ComparisonSummaryKey);
+            return string.Format(format, baselineName, summary);
+        }
+
+        private static MvpPlacementComparisonPreview CreateEmptyPreview(string selectedOptionId)
+        {
+            return new MvpPlacementComparisonPreview
+            {
+                HasComparison = false,
+                SelectedOptionId = selectedOptionId ?? string.Empty
+            };
+        }
+
+        private static bool CanCompare(RunSimulationConfig config, string selectedCategoryId, string selectedOptionId)
+        {
+            return MvpDungeonPlacementIds.IsAllowedCategory(selectedCategoryId) &&
+                   MvpDungeonPlacementIds.IsAllowedOption(selectedOptionId) &&
+                   MvpDungeonPlacementIds.TryGetCategoryForOption(selectedOptionId, out string selectedOptionCategoryId) &&
+                   string.Equals(selectedCategoryId, selectedOptionCategoryId, StringComparison.Ordinal) &&
+                   config?.MvpPlacementEffects != null &&
+                   config.MvpPlacementEffects.Length > 0;
+        }
+
+        private static MvpPlacementComparisonPreview ResolveWithBaseline(RunSimulationConfig config, string selectedOptionId, string baselineOptionId, MvpPlacementComparisonPreview preview)
+        {
             if (string.IsNullOrWhiteSpace(baselineOptionId) || string.Equals(baselineOptionId, selectedOptionId, StringComparison.Ordinal))
             {
                 return preview;
@@ -68,17 +139,46 @@ namespace DungeonBuilder.M0
             return preview;
         }
 
-        public static string BuildComparisonText(MvpPlacementComparisonPreview preview, Func<string, string, string> localize)
+        private static bool HasPersistedRoomSlotAssignments(SaveData save)
         {
-            if (!preview.HasComparison || string.IsNullOrWhiteSpace(preview.BaselineOptionId) || string.IsNullOrWhiteSpace(preview.ComparisonSummaryKey))
+            return save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
+        }
+
+        private static string ResolveRoomSlotBaselineOptionId(MvpDungeonRoomInstance room, string selectedCategoryId)
+        {
+            if (string.Equals(selectedCategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+            {
+                return room?.RoomOptionId ?? string.Empty;
+            }
+
+            string[] assigned = null;
+            switch (selectedCategoryId)
+            {
+                case MvpDungeonPlacementIds.MonsterCategoryId:
+                    assigned = room?.AssignedMonsterOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.TrapCategoryId:
+                    assigned = room?.AssignedTrapOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.LootNodeCategoryId:
+                    assigned = room?.AssignedLootNodeOptionIds;
+                    break;
+            }
+
+            if (assigned == null)
             {
                 return string.Empty;
             }
 
-            string format = Localize(localize, ComparedWithFormatKey);
-            string baselineName = MvpDungeonPlacementPresenter.ResolveOptionName(preview.BaselineOptionId, localize);
-            string summary = Localize(localize, preview.ComparisonSummaryKey);
-            return string.Format(format, baselineName, summary);
+            for (int i = 0; i < assigned.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(assigned[i]))
+                {
+                    return assigned[i];
+                }
+            }
+
+            return string.Empty;
         }
 
         private static string ResolveBaselineOptionId(MvpDungeonFloorLayoutState layout, MvpDungeonPlacementState placements, string selectedCategoryId, string selectedOptionId)
