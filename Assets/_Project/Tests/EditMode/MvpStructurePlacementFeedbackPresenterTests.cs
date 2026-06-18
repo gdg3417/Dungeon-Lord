@@ -106,6 +106,36 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.BasicLootNodeOptionId));
         }
 
+
+        [Test]
+        public void RoomTargetedPlacementFeedback_WhenPriorAndNewOptionMatch_UsesAlreadySetFormat()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                0,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.MonsterCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Room 1 Monster already set to Skeleton."));
+            Assert.That(text, Does.Not.Contain("Changed Room"));
+            Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId));
+        }
+
+        [Test]
+        public void RoomTargetedPlacementFeedback_WhenPriorAndNewOptionDiffer_UsesChangedFormat()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                0,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.MonsterCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.GoblinOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Changed Room 1 Monster: Goblin -> Skeleton."));
+            Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId));
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>
@@ -113,6 +143,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
                 [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
+                [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementAlreadySetFormatKey] = "Room {0} {1} already set to {2}.",
                 [MvpStructurePlacementFeedbackPresenter.ChangedFormatKey] = "Changed: {0} -> {1}. {2}",
                 ["structure.mana_generator.basic.display_name"] = "Mana Generator",
                 ["structure.heat_scrubber.basic.display_name"] = "Heat Scrubber",
@@ -123,7 +154,10 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructureImpactPreviewPresenter.RiskLabPreviewKey] = "Role: clarifies research risk.",
                 [MvpStructureImpactPreviewPresenter.UnknownPreviewKey] = "Role unavailable.",
                 [MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node",
-                [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node"
+                [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
+                [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node",
+                [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
+                [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;
