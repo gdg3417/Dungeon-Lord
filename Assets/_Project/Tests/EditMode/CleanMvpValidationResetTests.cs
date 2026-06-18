@@ -315,7 +315,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string copied = _overlay.CopyFullSmokeTextToClipboard();
             Assert.That(copied, Does.Contain("Dungeon composition: No dungeon placements yet"));
-            Assert.That(copied, Does.Contain("Dungeon layout: Floor 0: Room: Empty / available -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             Assert.That(copied, Does.Contain("First-session"));
             Assert.That(copied, Does.Contain("First Dungeon Contract"));

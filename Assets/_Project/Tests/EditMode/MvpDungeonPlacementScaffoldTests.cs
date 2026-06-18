@@ -188,7 +188,7 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(_root.Save, config);
 
             Assert.That(placed, Is.False);
-            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(layoutText, Does.Not.Contain("Dungeon layout:"));
             Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
             Assert.That(layoutText, Does.Contain("Loot 0/0: Unavailable"));
             Assert.That(layoutText, Does.Not.Contain("Basic Loot Node"));
@@ -292,7 +292,7 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
             MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
 
-            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Basic Loot Node"));
+            Assert.That(layoutText, Does.Not.Contain("Dungeon layout:"));
             Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
             Assert.That(layoutText, Does.Contain("Room 2: Basic Room"));
             Assert.That(layoutText, Does.Contain("Loot 1/1: Basic Loot Node"));
@@ -330,7 +330,7 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
             MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
 
-            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Empty / available -> Trap: Empty / available -> Loot node: Empty / available"));
+            Assert.That(layoutText, Does.Not.Contain("Dungeon layout:"));
             Assert.That(layoutText, Does.Contain("Loot 0/0: Unavailable"));
             Assert.That(layoutText, Does.Not.Contain("Basic Loot Node"));
             Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId));
@@ -403,9 +403,9 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, config);
             MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
 
-            Assert.That(layoutText, Does.Contain("Dungeon layout: Floor 0: Room: Narrow Hall -> Monster: Goblin -> Trap: Snare Trap -> Loot node: Basic Loot Node"));
+            Assert.That(layoutText, Does.Not.Contain("Dungeon layout:"));
             Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
-            Assert.That(layoutText, Does.Contain("Room 2: Basic Room (Monsters: empty 0/1; Traps: empty 0/1; Loot: Basic Loot Node 1/1)"));
+            Assert.That(layoutText, Does.Contain("Room 2: Basic Room — Monsters 0/1: Empty; Traps 0/1: Empty; Loot 1/1: Basic Loot Node"));
             Assert.That(layoutText, Does.Not.Contain("Skeleton"));
             Assert.That(summary.DungeonPlacements, Has.Some.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.GoblinOptionId));
             Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.SkeletonOptionId));

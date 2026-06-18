@@ -56,7 +56,7 @@ namespace DungeonBuilder.Tests.EditMode
 
                 string text = MvpDungeonLayoutPresenter.BuildLayoutText(save, RoomSlotConfig(), Localize);
 
-                Assert.That(text, Does.Contain("Dungeon layout: Floor 0: Room: Basic Room -> Monster: Goblin -> Trap: Snare Trap -> Loot node: Hidden Cache"));
+                Assert.That(text, Does.Not.Contain("Dungeon layout:"));
                 Assert.That(text, Does.Contain("Room slot layout: Floor 0: Room 1: Basic Room (Monsters: Goblin 1/1; Traps: Snare Trap 1/1; Loot: Hidden Cache 1/1)"));
                 Assert.That(text, Does.Not.Contain("placement.option"));
                 Assert.That(text, Does.Not.Contain("ui.mvp_room_slots"));

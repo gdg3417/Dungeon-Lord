@@ -60,6 +60,7 @@ namespace DungeonBuilder.M0
         private string _selectedMvpPlacementOptionId = DefaultMvpPlacementOptionId;
         private string _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
         private string _mvpStructurePlacementFeedback = string.Empty;
+        private bool _roomSlotPlacementFailureIsLatestAction;
         private string _mvpRunResultFeedback = string.Empty;
         private AdventurerRunIntentSummary _lastRunIntentSummary;
         private string _lastRunPostureUsedId = string.Empty;
@@ -233,6 +234,7 @@ namespace DungeonBuilder.M0
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
             _mvpStructurePlacementFeedback = result.PlacementFeedback;
+            _roomSlotPlacementFailureIsLatestAction = !result.Succeeded && IsRoomSlotPlacementFailureFeedback();
             RefreshOverlayText();
         }
 
@@ -240,7 +242,15 @@ namespace DungeonBuilder.M0
         {
             bool added = _root != null && _root.TryAddSecondMvpBasicRoomSlot();
             _mvpStructurePlacementFeedback = GetLocalizedString(added ? AddBasicRoomSlotSuccessKey : AddBasicRoomSlotAlreadyExistsKey);
+            _roomSlotPlacementFailureIsLatestAction = false;
             _root?.SetBanner(_mvpStructurePlacementFeedback);
+            RefreshOverlayText();
+        }
+
+        public void CycleSelectedMvpRoomSlotTarget()
+        {
+            _root?.CycleSelectedMvpRoomSlotTarget();
+            ClearRoomSlotPlacementFailureFeedback();
             RefreshOverlayText();
         }
 
@@ -267,6 +277,7 @@ namespace DungeonBuilder.M0
             _selectedMvpPlacementOptionId = DefaultMvpPlacementOptionId;
             _selectedMvpRunPostureId = RunPostureResolver.BalancedId;
             _mvpStructurePlacementFeedback = string.Empty;
+            _roomSlotPlacementFailureIsLatestAction = false;
             _mvpRunResultFeedback = string.Empty;
             _lastRunIntentSummary = null;
             _lastRunPostureUsedId = string.Empty;
@@ -487,6 +498,7 @@ namespace DungeonBuilder.M0
 
         private BootstrapSmokeTextComposer.Context BuildSmokeTextContext()
         {
+            ClearStaleRoomSlotPlacementFailureFeedback();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             return new BootstrapSmokeTextComposer.Context(
@@ -1072,8 +1084,7 @@ namespace DungeonBuilder.M0
             }
             if (GUILayout.Button(GetLocalizedString("ui.mvp_room_slots.cycle_target_button"), compactButton, buttonHeight))
             {
-                _root.CycleSelectedMvpRoomSlotTarget();
-                RefreshOverlayText();
+                CycleSelectedMvpRoomSlotTarget();
             }
             if (GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
             {
@@ -1172,6 +1183,102 @@ namespace DungeonBuilder.M0
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
             return MvpPlacementComparisonPresenter.BuildComparisonText(preview, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        private void ClearStaleRoomSlotPlacementFailureFeedback()
+        {
+            if (!_roomSlotPlacementFailureIsLatestAction && IsRoomSlotPlacementFailureFeedback() && IsSelectedPlacementAssignedInValidRoomSlot())
+            {
+                _mvpStructurePlacementFeedback = string.Empty;
+                _roomSlotPlacementFailureIsLatestAction = false;
+            }
+        }
+
+        private void ClearRoomSlotPlacementFailureFeedback()
+        {
+            if (IsRoomSlotPlacementFailureFeedback())
+            {
+                _mvpStructurePlacementFeedback = string.Empty;
+            }
+
+            _roomSlotPlacementFailureIsLatestAction = false;
+        }
+
+        private bool IsRoomSlotPlacementFailureFeedback()
+        {
+            if (string.IsNullOrWhiteSpace(_mvpStructurePlacementFeedback))
+            {
+                return false;
+            }
+
+            string format = GetLocalizedString(MvpRoomSlotTargetPresenter.NoValidSlotFormatKey, MvpRoomSlotTargetPresenter.NoValidSlotFormatKey);
+            string prefix = format.Split('{')[0];
+            return !string.IsNullOrWhiteSpace(prefix) && _mvpStructurePlacementFeedback.StartsWith(prefix, System.StringComparison.Ordinal);
+        }
+
+        private bool IsSelectedPlacementAssignedInValidRoomSlot()
+        {
+            if (_root?.Save == null ||
+                string.IsNullOrWhiteSpace(_selectedMvpPlacementCategoryId) ||
+                string.IsNullOrWhiteSpace(_selectedMvpPlacementOptionId) ||
+                string.Equals(_selectedMvpPlacementCategoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            if (layout?.Rooms == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < layout.Rooms.Length; i++)
+            {
+                MvpDungeonRoomInstance room = layout.Rooms[i];
+                if (room == null || !MvpRoomSlotTargetResolver.CanAccept(room, _selectedMvpPlacementCategoryId))
+                {
+                    continue;
+                }
+
+                if (ContainsAssignedOption(room, _selectedMvpPlacementCategoryId, _selectedMvpPlacementOptionId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsAssignedOption(MvpDungeonRoomInstance room, string categoryId, string optionId)
+        {
+            string[] assigned = null;
+            switch (categoryId)
+            {
+                case MvpDungeonPlacementIds.MonsterCategoryId:
+                    assigned = room.AssignedMonsterOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.TrapCategoryId:
+                    assigned = room.AssignedTrapOptionIds;
+                    break;
+                case MvpDungeonPlacementIds.LootNodeCategoryId:
+                    assigned = room.AssignedLootNodeOptionIds;
+                    break;
+            }
+
+            if (assigned == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < assigned.Length; i++)
+            {
+                if (string.Equals(assigned[i], optionId, System.StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private BootstrapMvpActionHandler CreateMvpActionHandler()
