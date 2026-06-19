@@ -1728,6 +1728,22 @@
       "text": "path incomplete"
     },
     {
+      "key": "ui.mvp_first_contract.completion_format",
+      "text": "Completion: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.completion.first_contract_complete",
+      "text": "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis."
+    },
+    {
+      "key": "ui.mvp_first_contract.next_objective_format",
+      "text": "Next objective: {0}"
+    },
+    {
+      "key": "ui.mvp_first_contract.next_objective.greedier_reward_setup",
+      "text": "Test a greedier reward setup while keeping heat under control."
+    },
+    {
       "key": "ui.mvp_loop.section.adventurer_intent",
       "text": "Expected next adventurer intent"
     },

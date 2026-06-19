@@ -507,6 +507,10 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_first_contract.compact.complete_format"] = "{0}: {1}";
             map["ui.mvp_first_contract.compact.path_complete"] = "path complete";
             map["ui.mvp_first_contract.compact.path_incomplete"] = "path incomplete";
+            map["ui.mvp_first_contract.completion_format"] = "Completion: {0}";
+            map["ui.mvp_first_contract.completion.first_contract_complete"] = "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis.";
+            map["ui.mvp_first_contract.next_objective_format"] = "Next objective: {0}";
+            map["ui.mvp_first_contract.next_objective.greedier_reward_setup"] = "Test a greedier reward setup while keeping heat under control.";
             map["ui.mvp_screen.section.header_format"] = "== {0} ==";
             map["ui.mvp_screen.selected_category_format"] = "Selected category: {0}";
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";

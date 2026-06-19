@@ -185,6 +185,62 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+
+        [Test]
+        public void BuildPanelText_IncompleteContract_DoesNotShowCompletionPayoffOrNextObjective()
+        {
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(new SaveData(), Config());
+
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("Contract status: In progress"));
+            Assert.That(text, Does.Not.Contain("Completion:"));
+            Assert.That(text, Does.Not.Contain("Next objective:"));
+            Assert.That(text, Does.Not.Contain("First contract complete."));
+            Assert.That(text, Does.Not.Contain("greedier reward setup"));
+        }
+
+        [Test]
+        public void BuildPanelText_CompleteContract_ShowsCompletionPayoffAndNextObjective()
+        {
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(CompleteSaveWithLoot(10), Config());
+
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("Contract status: Complete. Try a riskier setup or improve loot recovery."));
+            Assert.That(text, Does.Contain("Completion: First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis."));
+            Assert.That(text, Does.Contain("Next objective: Test a greedier reward setup while keeping heat under control."));
+            Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
+        }
+
+        [Test]
+        public void BuildPanelText_NullSummary_RemainsSafeWithoutCompletionPayoffOrRawKeys()
+        {
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(null, Localize);
+
+            Assert.That(text, Does.Contain("Loot recovered: 0 / unavailable"));
+            Assert.That(text, Does.Contain("Contract status: Unavailable until objective config is fixed"));
+            Assert.That(text, Does.Not.Contain("Completion:"));
+            Assert.That(text, Does.Not.Contain("Next objective:"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_first_contract"));
+        }
+
+        [Test]
+        public void BootstrapStringTable_ResolvesCompletionPayoffKeys()
+        {
+            string path = Path.Combine(Application.dataPath, "_Project/Data/Bootstrap/string_table_en.json");
+            string json = File.ReadAllText(path);
+
+            Assert.That(json, Does.Contain(MvpFirstSessionObjectivePresenter.CompletionFormatKey));
+            Assert.That(json, Does.Contain(MvpFirstSessionObjectivePresenter.CompletionFirstContractCompleteKey));
+            Assert.That(json, Does.Contain(MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey));
+            Assert.That(json, Does.Contain(MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey));
+            Assert.That(json, Does.Contain("Completion: {0}"));
+            Assert.That(json, Does.Contain("First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis."));
+            Assert.That(json, Does.Contain("Next objective: {0}"));
+            Assert.That(json, Does.Contain("Test a greedier reward setup while keeping heat under control."));
+        }
+
         [Test]
         public void BuildCompactStatusLine_UsesSingleLocalizedVisibleLine()
         {
@@ -281,6 +337,10 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.CompactCompleteFormatKey: return "{0}: {1}";
                 case MvpFirstSessionObjectivePresenter.CompactPathCompleteKey: return "path complete";
                 case MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey: return "path incomplete";
+                case MvpFirstSessionObjectivePresenter.CompletionFormatKey: return "Completion: {0}";
+                case MvpFirstSessionObjectivePresenter.CompletionFirstContractCompleteKey: return "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis.";
+                case MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey: return "Next objective: {0}";
+                case MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey: return "Test a greedier reward setup while keeping heat under control.";
                 case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 default: return fallback;
             }

@@ -51,6 +51,58 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Path complete: Yes"));
         }
 
+
+        [Test]
+        public void BuildLoopSummarySectionText_CompleteFirstContractIncludesPayoffAndNextObjective()
+        {
+            var context = new BootstrapSmokeTextComposer.Context(
+                AnalysisSummary(),
+                new GuidedMvpActionPathSummary
+                {
+                    RuleResolved = true,
+                    CurrentStepId = GuidedMvpActionPathPresenter.StepRunOrObserveId,
+                    CurrentStepStatusKey = GuidedMvpActionPathPresenter.StatusRunOrObserveKey,
+                    NextActionKey = GuidedMvpActionPathPresenter.ActionRunDungeonKey,
+                    IsComplete = false
+                },
+                new MvpFirstSessionObjectiveSummary
+                {
+                    RuleResolved = true,
+                    PathComplete = true,
+                    RunObservedComplete = true,
+                    RecoveredLootValue = 52,
+                    RequiredRecoveredLootValue = 10,
+                    AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                    CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                    AnalysisComplete = true,
+                    IsComplete = true
+                },
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                null,
+                string.Empty,
+                string.Empty,
+                false,
+                string.Empty,
+                0,
+                1);
+
+            string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
+
+            Assert.That(text, Does.Contain("Contract status: Complete. Try a riskier setup or improve loot recovery."));
+            Assert.That(text, Does.Contain("Completion: First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis."));
+            Assert.That(text, Does.Contain("Next objective: Test a greedier reward setup while keeping heat under control."));
+        }
+
         private static MvpPlayerLoopSummary AnalysisSummary()
         {
             return new MvpPlayerLoopSummary
@@ -115,6 +167,24 @@ namespace DungeonBuilder.Tests.EditMode
                 case GuidedMvpActionPathPresenter.StepTestPlacementChangeId: return "Test placement change";
                 case GuidedMvpActionPathPresenter.StatusAppliedAnalysisAdjustmentKey: return "A relevant placement adjustment has been applied.";
                 case GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey: return "Run again to test the placement change.";
+                case GuidedMvpActionPathPresenter.StepRunOrObserveId: return "Observe adventurer visit";
+                case GuidedMvpActionPathPresenter.StatusRunOrObserveKey: return "Visit observed. Review activity analysis.";
+                case GuidedMvpActionPathPresenter.ActionRunDungeonKey: return "Review Adventurer Activity Analysis.";
+                case MvpFirstSessionObjectivePresenter.TitleKey: return "First Dungeon Contract";
+                case MvpFirstSessionObjectivePresenter.PathBuiltFormatKey: return "Path built: {0}";
+                case MvpFirstSessionObjectivePresenter.RunObservedFormatKey: return "Visit observed: {0}";
+                case MvpFirstSessionObjectivePresenter.LootRecoveredFormatKey: return "Loot recovered: {0} / {1}";
+                case MvpFirstSessionObjectivePresenter.HeatTargetFormatKey: return "Heat target: {0} (current: {1})";
+                case MvpFirstSessionObjectivePresenter.AnalysisFormatKey: return "Analysis: {0}";
+                case MvpFirstSessionObjectivePresenter.StatusFormatKey: return "Contract status: {0}";
+                case MvpFirstSessionObjectivePresenter.CompleteKey: return "complete";
+                case MvpFirstSessionObjectivePresenter.AnalysisUnlockedKey: return "Adventurer Activity Analysis unlocked";
+                case MvpFirstSessionObjectivePresenter.StatusCompleteKey: return "Complete. Try a riskier setup or improve loot recovery.";
+                case MvpFirstSessionObjectivePresenter.CompletionFormatKey: return "Completion: {0}";
+                case MvpFirstSessionObjectivePresenter.CompletionFirstContractCompleteKey: return "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis.";
+                case MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey: return "Next objective: {0}";
+                case MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey: return "Test a greedier reward setup while keeping heat under control.";
+                case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 default: return fallback;
             }
         }

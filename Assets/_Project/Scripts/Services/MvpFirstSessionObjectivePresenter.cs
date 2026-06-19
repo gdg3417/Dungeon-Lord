@@ -27,6 +27,10 @@ namespace DungeonBuilder.M0
         public const string CompactCompleteFormatKey = "ui.mvp_first_contract.compact.complete_format";
         public const string CompactPathCompleteKey = "ui.mvp_first_contract.compact.path_complete";
         public const string CompactPathIncompleteKey = "ui.mvp_first_contract.compact.path_incomplete";
+        public const string CompletionFormatKey = "ui.mvp_first_contract.completion_format";
+        public const string CompletionFirstContractCompleteKey = "ui.mvp_first_contract.completion.first_contract_complete";
+        public const string NextObjectiveFormatKey = "ui.mvp_first_contract.next_objective_format";
+        public const string NextObjectiveGreedierRewardSetupKey = "ui.mvp_first_contract.next_objective.greedier_reward_setup";
 
         public static MvpFirstSessionObjectiveSummary Resolve(SaveData save, RunSimulationConfig config)
         {
@@ -86,6 +90,11 @@ namespace DungeonBuilder.M0
             AppendLine(builder, string.Format(Localize(localize, HeatTargetFormatKey), ResolveHeatLabel(summary.AllowedMaxHeatTierId, localize), ResolveHeatLabel(summary.CurrentHeatTierId, localize)));
             AppendLine(builder, string.Format(Localize(localize, AnalysisFormatKey), Localize(localize, summary.AnalysisComplete ? AnalysisUnlockedKey : AnalysisLockedKey)));
             AppendLine(builder, string.Format(Localize(localize, StatusFormatKey), Localize(localize, ResolveStatusKey(summary))));
+            if (summary.IsComplete)
+            {
+                AppendLine(builder, string.Format(Localize(localize, CompletionFormatKey), Localize(localize, CompletionFirstContractCompleteKey)));
+                AppendLine(builder, string.Format(Localize(localize, NextObjectiveFormatKey), Localize(localize, NextObjectiveGreedierRewardSetupKey)));
+            }
             return builder.ToString();
         }
 
