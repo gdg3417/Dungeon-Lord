@@ -801,6 +801,8 @@ namespace DungeonBuilder.M0
         public string CurrentStepStatusKey;
         public string NextActionKey;
         public bool IsComplete = false;
+        public bool HasAppliedAnalysisAdjustment = false;
+        public string AppliedAnalysisAdjustmentKey;
         public bool WouldMutateState = false;
         public bool WouldGrantRewards = false;
         public bool WouldUnlockContent = false;

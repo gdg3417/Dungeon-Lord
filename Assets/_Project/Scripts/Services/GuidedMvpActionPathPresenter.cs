@@ -11,6 +11,7 @@ namespace DungeonBuilder.M0
         public const string StepVerifyResearchStatusId = "guided_mvp.step.verify_research_status";
         public const string StepRepeatOrImproveId = "guided_mvp.step.repeat_or_improve";
         public const string StepApplyRunAnalysisId = "guided_mvp.step.apply_run_analysis";
+        public const string StepTestPlacementChangeId = "guided_mvp.step.test_placement_change";
 
         public const string StatusMissingSaveKey = "guided_mvp.status.missing_save";
         public const string StatusPlaceOrModifyStructureKey = "guided_mvp.status.place_or_modify_structure";
@@ -20,6 +21,7 @@ namespace DungeonBuilder.M0
         public const string StatusResearchCompletionPendingKey = "guided_mvp.status.research_completion_pending";
         public const string StatusRepeatOrImproveKey = "guided_mvp.status.repeat_or_improve";
         public const string StatusApplyRunAnalysisKey = "guided_mvp.status.apply_run_analysis";
+        public const string StatusAppliedAnalysisAdjustmentKey = "guided_mvp.status.applied_analysis_adjustment";
 
         public const string ActionPlaceStructureKey = "guided_mvp.action.place_structure";
         public const string ActionRunDungeonKey = "guided_mvp.action.run_dungeon";
@@ -28,6 +30,7 @@ namespace DungeonBuilder.M0
         public const string ActionVerifyResearchStatusKey = "guided_mvp.action.verify_research_status";
         public const string ActionRepeatOrImproveKey = "guided_mvp.action.repeat_or_improve";
         public const string ActionApplyRunAnalysisKey = "guided_mvp.action.apply_run_analysis";
+        public const string ActionRunAgainToTestChangeKey = "guided_mvp.action.run_again_to_test_change";
 
         public static GuidedMvpActionPathSummary Resolve(SaveData save, MvpPlayerLoopSummary loopSummary)
         {
@@ -74,6 +77,20 @@ namespace DungeonBuilder.M0
                     statusKey: StatusResearchCompletionPendingKey,
                     nextActionKey: ActionVerifyResearchStatusKey,
                     isComplete: false);
+            }
+
+            BasicRunAnalysisAppliedAdjustmentResult appliedAdjustment = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(summary);
+            if (appliedAdjustment != null && appliedAdjustment.Applied)
+            {
+                return Create(
+                    ruleResolved: true,
+                    errorCode: GuidedMvpActionPathErrorCode.None,
+                    stepId: StepTestPlacementChangeId,
+                    statusKey: StatusAppliedAnalysisAdjustmentKey,
+                    nextActionKey: ActionRunAgainToTestChangeKey,
+                    isComplete: true,
+                    hasAppliedAnalysisAdjustment: true,
+                    appliedAnalysisAdjustmentKey: appliedAdjustment.AdjustmentKey);
             }
 
             if (string.Equals(summary.HeatTierId, CurrentHeatTierResolver.ConcernTierId, StringComparison.Ordinal))
@@ -124,7 +141,9 @@ namespace DungeonBuilder.M0
             string stepId,
             string statusKey,
             string nextActionKey,
-            bool isComplete)
+            bool isComplete,
+            bool hasAppliedAnalysisAdjustment = false,
+            string appliedAnalysisAdjustmentKey = null)
         {
             return new GuidedMvpActionPathSummary
             {
@@ -134,6 +153,8 @@ namespace DungeonBuilder.M0
                 CurrentStepStatusKey = statusKey,
                 NextActionKey = nextActionKey,
                 IsComplete = isComplete,
+                HasAppliedAnalysisAdjustment = hasAppliedAnalysisAdjustment,
+                AppliedAnalysisAdjustmentKey = appliedAnalysisAdjustmentKey,
                 WouldMutateState = false,
                 WouldGrantRewards = false,
                 WouldUnlockContent = false,

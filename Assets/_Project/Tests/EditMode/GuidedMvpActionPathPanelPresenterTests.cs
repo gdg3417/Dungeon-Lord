@@ -47,6 +47,28 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPanelPresenter.CompleteNoKey + "]"));
         }
 
+        [Test]
+        public void BuildPanelText_AppliedAdjustmentGuidance_UsesRunAgainLocalizationKeys()
+        {
+            var summary = new GuidedMvpActionPathSummary
+            {
+                RuleResolved = true,
+                CurrentStepId = GuidedMvpActionPathPresenter.StepTestPlacementChangeId,
+                CurrentStepStatusKey = GuidedMvpActionPathPresenter.StatusAppliedAnalysisAdjustmentKey,
+                NextActionKey = GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey,
+                IsComplete = true,
+                HasAppliedAnalysisAdjustment = true,
+                AppliedAnalysisAdjustmentKey = BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey
+            };
+
+            string text = GuidedMvpActionPathPanelPresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPresenter.StepTestPlacementChangeId + "]"));
+            Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPresenter.StatusAppliedAnalysisAdjustmentKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey + "]"));
+            Assert.That(text, Does.Contain("LOC[" + GuidedMvpActionPathPanelPresenter.CompleteYesKey + "]"));
+        }
+
         private static string Localize(string key, string fallback)
         {
             switch (key)
