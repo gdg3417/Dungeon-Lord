@@ -760,6 +760,10 @@
       "text": "Apply activity analysis"
     },
     {
+      "key": "guided_mvp.step.test_placement_change",
+      "text": "Test placement change"
+    },
+    {
       "key": "guided_mvp.status.missing_save",
       "text": "Save state is not available yet."
     },
@@ -792,6 +796,10 @@
       "text": "Adventurer activity analysis is available; use the latest visit to choose one placement improvement."
     },
     {
+      "key": "guided_mvp.status.applied_analysis_adjustment",
+      "text": "A relevant placement adjustment has been applied."
+    },
+    {
       "key": "guided_mvp.action.place_structure",
       "text": "Place one room, monster, trap, or loot node."
     },
@@ -818,6 +826,10 @@
     {
       "key": "guided_mvp.action.apply_run_analysis",
       "text": "Compare the selected placement, then adjust one room, monster, trap, or loot node before the next adventurer visit."
+    },
+    {
+      "key": "guided_mvp.action.run_again_to_test_change",
+      "text": "Run again to test the placement change."
     },
     {
       "key": "ui.first_session.status.not_started",

@@ -2473,6 +2473,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["guided_mvp.step.improve_survivability_or_layout"] = "Improve survivability or layout";
             map["guided_mvp.step.verify_research_status"] = "Verify research status";
             map["guided_mvp.step.repeat_or_improve"] = "Repeat the loop or improve placement";
+            map["guided_mvp.step.apply_run_analysis"] = "Apply activity analysis";
+            map["guided_mvp.step.test_placement_change"] = "Test placement change";
             map["guided_mvp.status.missing_save"] = "Save state is not available yet.";
             map["guided_mvp.status.place_or_modify_structure"] = "No dungeon placement is visible in the current summary.";
             map["guided_mvp.status.run_or_observe"] = "A dungeon placement is ready; no adventurer activity has been observed yet.";
@@ -2480,12 +2482,16 @@ namespace DungeonBuilder.Tests.EditMode
             map["guided_mvp.status.poor_loot_extraction"] = "The latest adventurer visit generated loot but extracted none.";
             map["guided_mvp.status.research_completion_pending"] = "Research completion is pending verification.";
             map["guided_mvp.status.repeat_or_improve"] = "Placement, adventurer activity, mana, loot, heat, and research are visible in the summary.";
+            map["guided_mvp.status.apply_run_analysis"] = "Adventurer activity analysis is available; use the latest visit to choose one placement improvement.";
+            map["guided_mvp.status.applied_analysis_adjustment"] = "A relevant placement adjustment has been applied.";
             map["guided_mvp.action.place_structure"] = "Place one room, monster, trap, or loot node.";
             map["guided_mvp.action.run_dungeon"] = "Observe adventurer activity and watch the MVP Loop Summary update.";
             map["guided_mvp.action.reduce_heat_pressure"] = "Improve placement toward lower heat pressure before pushing further.";
             map["guided_mvp.action.improve_survivability_or_layout"] = "Improve survivability or layout, then adjust before the next adventurer visit.";
             map["guided_mvp.action.verify_research_status"] = "Check the research status line before claiming progress.";
             map["guided_mvp.action.repeat_or_improve"] = "Adjust one placement before the next adventurer visit.";
+            map["guided_mvp.action.apply_run_analysis"] = "Compare the selected placement, then adjust one room, monster, trap, or loot node before the next adventurer visit.";
+            map["guided_mvp.action.run_again_to_test_change"] = "Run again to test the placement change.";
             if (includeDiagnosticsLocalization)
             {
                 map["ui.dev.hint.toggle_panel"] = "F1 toggles Dev Panel";

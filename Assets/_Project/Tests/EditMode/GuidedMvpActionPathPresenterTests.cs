@@ -151,6 +151,63 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithoutAppliedAdjustment_KeepsCompareAndAdjustGuidance()
+        {
+            MvpPlayerLoopSummary loopSummary = AnalysisSummary(
+                BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
+                currentDanger: 4,
+                latestDanger: 4);
+
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(new SaveData(), loopSummary);
+
+            Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepApplyRunAnalysisId));
+            Assert.That(summary.CurrentStepStatusKey, Is.EqualTo(GuidedMvpActionPathPresenter.StatusApplyRunAnalysisKey));
+            Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionApplyRunAnalysisKey));
+            Assert.That(summary.HasAppliedAnalysisAdjustment, Is.False);
+            Assert.That(summary.AppliedAnalysisAdjustmentKey, Is.Null);
+            Assert.That(summary.IsComplete, Is.True);
+            AssertSafetyFlags(summary);
+        }
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithReducedDangerAdjustment_ShiftsToRunAgainGuidance()
+        {
+            MvpPlayerLoopSummary loopSummary = AnalysisSummary(
+                BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
+                currentDanger: 3,
+                latestDanger: 4);
+
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(new SaveData(), loopSummary);
+
+            Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepTestPlacementChangeId));
+            Assert.That(summary.CurrentStepStatusKey, Is.EqualTo(GuidedMvpActionPathPresenter.StatusAppliedAnalysisAdjustmentKey));
+            Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey));
+            Assert.That(summary.HasAppliedAnalysisAdjustment, Is.True);
+            Assert.That(summary.AppliedAnalysisAdjustmentKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey));
+            Assert.That(summary.IsComplete, Is.True);
+            AssertSafetyFlags(summary);
+        }
+
+        [Test]
+        public void Resolve_BasicRunAnalysisUnlockedWithGenericAppliedAdjustment_ShiftsToRunAgainGuidance()
+        {
+            MvpPlayerLoopSummary loopSummary = AnalysisSummary(
+                "test.analysis.generic_advice",
+                currentDanger: 5,
+                latestDanger: 4);
+
+            GuidedMvpActionPathSummary summary = GuidedMvpActionPathPresenter.Resolve(new SaveData(), loopSummary);
+
+            Assert.That(summary.CurrentStepId, Is.EqualTo(GuidedMvpActionPathPresenter.StepTestPlacementChangeId));
+            Assert.That(summary.CurrentStepStatusKey, Is.EqualTo(GuidedMvpActionPathPresenter.StatusAppliedAnalysisAdjustmentKey));
+            Assert.That(summary.NextActionKey, Is.EqualTo(GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey));
+            Assert.That(summary.HasAppliedAnalysisAdjustment, Is.True);
+            Assert.That(summary.AppliedAnalysisAdjustmentKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.EffectsChangedKey));
+            Assert.That(summary.IsComplete, Is.True);
+            AssertSafetyFlags(summary);
+        }
+
+        [Test]
         public void Resolve_NoSaveOrMissingOptionalState_ReturnsSafeDeterministicGuidance()
         {
             GuidedMvpActionPathSummary missingSave = GuidedMvpActionPathPresenter.Resolve(null, null);
@@ -210,6 +267,32 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.WouldProcessOfflineResearch, Is.False);
             Assert.That(summary.WouldProcessOfflineHeat, Is.False);
             Assert.That(summary.WouldStartRaid, Is.False);
+        }
+
+        private static MvpPlayerLoopSummary AnalysisSummary(string adviceKey, int currentDanger, int latestDanger)
+        {
+            return new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasPlacementContext = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                AnalysisUnlocked = true,
+                AnalysisAdviceKey = adviceKey,
+                NextOptimizationSuggestionKey = GuidedMvpActionPathPresenter.ActionApplyRunAnalysisKey,
+                PlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    Danger = currentDanger,
+                    PathCapacity = 1
+                },
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    Danger = latestDanger,
+                    PathCapacity = 1
+                }
+            };
         }
 
         private static SaveData FullSave()
