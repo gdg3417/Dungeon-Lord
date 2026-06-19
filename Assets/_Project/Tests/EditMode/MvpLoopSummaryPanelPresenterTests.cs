@@ -479,9 +479,11 @@ namespace DungeonBuilder.Tests.EditMode
         {
             MvpPlayerLoopSummary summary = AnalysisSummary(4, 4);
 
-            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, MvpDungeonPlacementIds.MonsterCategoryId, SmokeLocalize);
 
             Assert.That(text, Does.Contain("Suggested Next Action: Next: adjust one placement before the next adventurer visit."));
+            Assert.That(text, Does.Contain("Selected placement fit: Current selection matches the analysis target."));
+            Assert.That(text, Does.Contain("Adjust this placement"));
             Assert.That(text, Does.Not.Contain("Applied adjustment:"));
         }
 
@@ -490,11 +492,26 @@ namespace DungeonBuilder.Tests.EditMode
         {
             MvpPlayerLoopSummary summary = AnalysisSummary(3, 4);
 
-            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, MvpDungeonPlacementIds.MonsterCategoryId, SmokeLocalize);
 
             Assert.That(text, Does.Contain("Suggested Next Action: Next: run again to test the placement change."));
             Assert.That(text, Does.Contain("Analysis recommendation: Next: reduce danger or use a safer posture before pushing for more loot."));
             Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
+            Assert.That(text, Does.Not.Contain("Selected placement fit:"));
+            Assert.That(text, Does.Not.Contain("Adjust this placement"));
+            Assert.That(text, Does.Not.Contain("Switch category before the next adventurer visit."));
+        }
+
+        [Test]
+        public void BuildPanelText_RevertedAppliedAnalysisChange_RestoresSelectedFitAdvice()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary(4, 4);
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, MvpDungeonPlacementIds.RoomCategoryId, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Suggested Next Action: Next: adjust one placement before the next adventurer visit."));
+            Assert.That(text, Does.Not.Contain("Applied adjustment:"));
+            Assert.That(text, Does.Contain("Selected placement fit: Current selection is a room, but analysis recommends monster or trap first. Switch category before the next adventurer visit."));
         }
 
         private static MvpPlayerLoopSummary AnalysisSummary(int currentDanger, int latestDanger)

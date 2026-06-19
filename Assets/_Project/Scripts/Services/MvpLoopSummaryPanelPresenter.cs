@@ -80,10 +80,14 @@ namespace DungeonBuilder.M0
             string placementTargetKey = BasicRunAnalysisPlacementTargetPresenter.ResolveTargetKey(summary);
             string placementTargetLine = BasicRunAnalysisPlacementTargetPresenter.BuildTargetLine(summary, localize);
             if (!string.IsNullOrEmpty(placementTargetLine)) AppendLine(builder, placementTargetLine);
-            string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
+            BasicRunAnalysisAppliedAdjustmentResult appliedAdjustment = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(summary);
+            string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(appliedAdjustment, localize);
             if (!string.IsNullOrEmpty(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
-            string selectedFitLine = BasicRunAnalysisSelectedPlacementFitPresenter.BuildFitLine(summary, placementTargetKey, selectedPlacementCategoryId, localize);
-            if (!string.IsNullOrEmpty(selectedFitLine)) AppendLine(builder, selectedFitLine);
+            if (appliedAdjustment == null || !appliedAdjustment.Applied)
+            {
+                string selectedFitLine = BasicRunAnalysisSelectedPlacementFitPresenter.BuildFitLine(summary, placementTargetKey, selectedPlacementCategoryId, localize);
+                if (!string.IsNullOrEmpty(selectedFitLine)) AppendLine(builder, selectedFitLine);
+            }
             return builder.ToString();
         }
 

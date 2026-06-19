@@ -61,6 +61,11 @@ namespace DungeonBuilder.M0
         public static string BuildAppliedAdjustmentLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             BasicRunAnalysisAppliedAdjustmentResult result = Resolve(summary);
+            return BuildAppliedAdjustmentLine(result, localize);
+        }
+
+        public static string BuildAppliedAdjustmentLine(BasicRunAnalysisAppliedAdjustmentResult result, Func<string, string, string> localize)
+        {
             if (result == null || !result.Applied || string.IsNullOrWhiteSpace(result.AdjustmentKey))
             {
                 return string.Empty;
