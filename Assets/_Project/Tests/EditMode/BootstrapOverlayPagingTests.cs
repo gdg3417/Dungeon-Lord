@@ -295,6 +295,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.GoblinSelection, Is.EqualTo("Goblin"));
             Assert.That(labels.SpikeTrapSelection, Is.EqualTo("Spike Trap"));
             Assert.That(labels.SnareTrapSelection, Is.EqualTo("Snare Trap"));
+            Assert.That(labels.ChillingSigilSelection, Is.EqualTo("Chilling Sigil"));
             Assert.That(labels.BasicLootNodeSelection, Is.EqualTo("Basic Loot Node"));
             Assert.That(labels.HiddenCacheSelection, Is.EqualTo("Hidden Cache"));
             Assert.That(labels.GlitteringHoardSelection, Is.EqualTo("Glittering Hoard"));
@@ -2367,6 +2368,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["placement.option.monster.goblin.display_name"] = "Goblin";
             map["placement.option.trap.spike.display_name"] = "Spike Trap";
             map["placement.option.trap.snare.display_name"] = "Snare Trap";
+            map["placement.option.trap.chilling_sigil.display_name"] = "Chilling Sigil";
             map["placement.option.loot_node.basic.display_name"] = "Basic Loot Node";
             map["placement.option.loot_node.hidden_cache.display_name"] = "Hidden Cache";
             map["placement.option.loot_node.glittering_hoard.display_name"] = "Glittering Hoard";
@@ -2532,6 +2534,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.danger_format"] = "danger +{0}";
             map["ui.mvp_placement_effects.mana_pressure_format"] = "mana pressure +{0}";
             map["ui.mvp_placement_effects.heat_pressure_format"] = "heat pressure +{0}";
+            map["ui.mvp_placement_effects.heat_relief_format"] = "heat relief +{0}";
             map["ui.mvp_placement_effects.loot_bonus_format"] = "loot +{0}";
             map["ui.mvp_placement_effects.attraction_format"] = "attraction +{0}";
             map["ui.mvp_placement_effects.explanation_format"] = "{0} ({1})";
@@ -2541,6 +2544,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.explanation.monster.goblin"] = "Goblin adds lighter danger, lower mana upkeep, and a small loot signal";
             map["ui.mvp_placement_effects.explanation.trap.spike"] = "Spike Trap adds danger and heat pressure";
             map["ui.mvp_placement_effects.explanation.trap.snare"] = "Snare Trap controls the path with lower danger and less heat pressure";
+            map["ui.mvp_placement_effects.explanation.trap.chilling_sigil"] = "Chilling Sigil cools the route by reducing heat pressure";
             map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
             map["ui.mvp_placement_effects.explanation.loot_node.hidden_cache"] = "Hidden Cache adds safer loot with a subtler attraction signal";
             map["ui.mvp_placement_effects.explanation.loot_node.glittering_hoard"] = "Glittering Hoard boosts loot and adventurer attraction while adding heat pressure";

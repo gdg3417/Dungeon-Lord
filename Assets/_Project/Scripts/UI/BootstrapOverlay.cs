@@ -1123,6 +1123,11 @@ namespace DungeonBuilder.M0
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.SnareTrapOptionId);
             }
+            if (GUILayout.Button(labels.ChillingSigilSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.ChillingSigilOptionId);
+            }
             GUILayout.Label(labels.LootGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicLootNodeSelection, compactButton, buttonHeight))
             {

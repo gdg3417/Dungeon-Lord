@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public const string GoblinOptionId = "placement.option.monster.goblin";
         public const string SpikeTrapOptionId = "placement.option.trap.spike";
         public const string SnareTrapOptionId = "placement.option.trap.snare";
+        public const string ChillingSigilOptionId = "placement.option.trap.chilling_sigil";
         public const string BasicLootNodeOptionId = "placement.option.loot_node.basic";
         public const string HiddenCacheOptionId = "placement.option.loot_node.hidden_cache";
         public const string GlitteringHoardOptionId = "placement.option.loot_node.glittering_hoard";
@@ -44,6 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             GoblinOptionId,
             SpikeTrapOptionId,
             SnareTrapOptionId,
+            ChillingSigilOptionId,
             BasicLootNodeOptionId,
             HiddenCacheOptionId,
             GlitteringHoardOptionId
@@ -65,6 +67,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                    string.Equals(optionId, GoblinOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, SpikeTrapOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, SnareTrapOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, ChillingSigilOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, BasicLootNodeOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, HiddenCacheOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, GlitteringHoardOptionId, StringComparison.Ordinal);
@@ -84,6 +87,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                     return true;
                 case SpikeTrapOptionId:
                 case SnareTrapOptionId:
+                case ChillingSigilOptionId:
                     categoryId = TrapCategoryId;
                     return true;
                 case BasicLootNodeOptionId:

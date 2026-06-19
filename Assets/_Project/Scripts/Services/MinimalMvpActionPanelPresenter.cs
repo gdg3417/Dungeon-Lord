@@ -145,6 +145,7 @@ namespace DungeonBuilder.M0
                 Localize(localize, MvpDungeonPlacementPresenter.GoblinOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SpikeTrapOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.SnareTrapOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.ChillingSigilOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicLootNodeOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.HiddenCacheOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.GlitteringHoardOptionKey),
@@ -212,6 +213,7 @@ namespace DungeonBuilder.M0
             string goblinSelection,
             string spikeTrapSelection,
             string snareTrapSelection,
+            string chillingSigilSelection,
             string basicLootNodeSelection,
             string hiddenCacheSelection,
             string glitteringHoardSelection,
@@ -249,6 +251,7 @@ namespace DungeonBuilder.M0
             GoblinSelection = goblinSelection;
             SpikeTrapSelection = spikeTrapSelection;
             SnareTrapSelection = snareTrapSelection;
+            ChillingSigilSelection = chillingSigilSelection;
             BasicLootNodeSelection = basicLootNodeSelection;
             HiddenCacheSelection = hiddenCacheSelection;
             GlitteringHoardSelection = glitteringHoardSelection;
@@ -287,6 +290,7 @@ namespace DungeonBuilder.M0
         public string GoblinSelection { get; }
         public string SpikeTrapSelection { get; }
         public string SnareTrapSelection { get; }
+        public string ChillingSigilSelection { get; }
         public string BasicLootNodeSelection { get; }
         public string HiddenCacheSelection { get; }
         public string GlitteringHoardSelection { get; }

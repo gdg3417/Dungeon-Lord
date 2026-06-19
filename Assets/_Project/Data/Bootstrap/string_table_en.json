@@ -1212,6 +1212,10 @@
       "text": "heat pressure +{0}"
     },
     {
+      "key": "ui.mvp_placement_effects.heat_relief_format",
+      "text": "heat relief +{0}"
+    },
+    {
       "key": "ui.mvp_placement_effects.loot_bonus_format",
       "text": "loot +{0}"
     },
@@ -1460,6 +1464,10 @@
       "text": "Snare Trap"
     },
     {
+      "key": "placement.option.trap.chilling_sigil.display_name",
+      "text": "Chilling Sigil"
+    },
+    {
       "key": "placement.option.loot_node.hidden_cache.display_name",
       "text": "Hidden Cache"
     },
@@ -1476,6 +1484,10 @@
       "text": "Role: controls adventurers with lower danger and less heat pressure."
     },
     {
+      "key": "ui.mvp_placement_preview.trap.chilling_sigil",
+      "text": "Role: reduces heat pressure with little direct danger."
+    },
+    {
       "key": "ui.mvp_placement_preview.loot_node.hidden_cache",
       "text": "Role: adds subtler loot with lower adventurer attraction."
     },
@@ -1490,6 +1502,10 @@
     {
       "key": "ui.mvp_placement_effects.explanation.trap.snare",
       "text": "Snare Trap controls the path with lower danger and less heat pressure"
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.trap.chilling_sigil",
+      "text": "Chilling Sigil cools the route by reducing heat pressure"
     },
     {
       "key": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache",
@@ -1538,6 +1554,22 @@
     {
       "key": "ui.mvp_placement_comparison.trap.snare_to_spike",
       "text": "more danger and adds heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.snare_to_chilling_sigil",
+      "text": "less danger and heat relief, but less stopping power."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.chilling_sigil_to_snare",
+      "text": "more danger and higher heat pressure than the relief option."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.spike_to_chilling_sigil",
+      "text": "much less danger and heat relief, but much less stopping power."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.trap.chilling_sigil_to_spike",
+      "text": "much more danger and adds heat pressure."
     },
     {
       "key": "ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache",

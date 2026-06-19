@@ -234,6 +234,17 @@
       "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.snare"
     },
     {
+      "CategoryId": "placement.category.trap",
+      "OptionId": "placement.option.trap.chilling_sigil",
+      "PathCapacity": 0,
+      "Danger": 0,
+      "ManaPressure": 0,
+      "HeatPressure": -1,
+      "LootBonus": 0,
+      "Attraction": 0,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.chilling_sigil"
+    },
+    {
       "CategoryId": "placement.category.loot_node",
       "OptionId": "placement.option.loot_node.hidden_cache",
       "PathCapacity": 0,

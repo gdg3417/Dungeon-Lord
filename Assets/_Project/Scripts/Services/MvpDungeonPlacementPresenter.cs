@@ -21,6 +21,7 @@ namespace DungeonBuilder.M0
         public const string GoblinOptionKey = "placement.option.monster.goblin.display_name";
         public const string SpikeTrapOptionKey = "placement.option.trap.spike.display_name";
         public const string SnareTrapOptionKey = "placement.option.trap.snare.display_name";
+        public const string ChillingSigilOptionKey = "placement.option.trap.chilling_sigil.display_name";
         public const string BasicLootNodeOptionKey = "placement.option.loot_node.basic.display_name";
         public const string HiddenCacheOptionKey = "placement.option.loot_node.hidden_cache.display_name";
         public const string GlitteringHoardOptionKey = "placement.option.loot_node.glittering_hoard.display_name";
@@ -30,6 +31,7 @@ namespace DungeonBuilder.M0
         public const string GoblinPreviewKey = "ui.mvp_placement_preview.monster.goblin";
         public const string SpikeTrapPreviewKey = "ui.mvp_placement_preview.trap.spike";
         public const string SnareTrapPreviewKey = "ui.mvp_placement_preview.trap.snare";
+        public const string ChillingSigilPreviewKey = "ui.mvp_placement_preview.trap.chilling_sigil";
         public const string BasicLootNodePreviewKey = "ui.mvp_placement_preview.loot_node.basic";
         public const string HiddenCachePreviewKey = "ui.mvp_placement_preview.loot_node.hidden_cache";
         public const string GlitteringHoardPreviewKey = "ui.mvp_placement_preview.loot_node.glittering_hoard";
@@ -126,6 +128,9 @@ namespace DungeonBuilder.M0
                 case MvpDungeonPlacementIds.SnareTrapOptionId:
                     key = SnareTrapOptionKey;
                     return true;
+                case MvpDungeonPlacementIds.ChillingSigilOptionId:
+                    key = ChillingSigilOptionKey;
+                    return true;
                 case MvpDungeonPlacementIds.BasicLootNodeOptionId:
                     key = BasicLootNodeOptionKey;
                     return true;
@@ -157,6 +162,8 @@ namespace DungeonBuilder.M0
                     return SpikeTrapPreviewKey;
                 case MvpDungeonPlacementIds.SnareTrapOptionId:
                     return SnareTrapPreviewKey;
+                case MvpDungeonPlacementIds.ChillingSigilOptionId:
+                    return ChillingSigilPreviewKey;
                 case MvpDungeonPlacementIds.BasicLootNodeOptionId:
                     return BasicLootNodePreviewKey;
                 case MvpDungeonPlacementIds.HiddenCacheOptionId:

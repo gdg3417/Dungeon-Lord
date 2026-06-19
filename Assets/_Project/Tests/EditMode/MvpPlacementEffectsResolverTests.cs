@@ -65,6 +65,16 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_ChillingSigil_ExposesHeatReliefContribution()
+        {
+            MvpPlacementEffectsSummary summary = MvpPlacementEffectsResolver.Resolve(State(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId), Config());
+
+            Assert.That(summary.Danger, Is.EqualTo(0));
+            Assert.That(summary.HeatPressure, Is.EqualTo(-1));
+            Assert.That(summary.ContributingOptionIds, Is.EqualTo(new[] { MvpDungeonPlacementIds.ChillingSigilOptionId }));
+        }
+
+        [Test]
         public void Resolve_BasicLootNode_ExposesLootAndAttractionContribution()
         {
             MvpPlacementEffectsSummary summary = MvpPlacementEffectsResolver.Resolve(State(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId), Config());
@@ -306,6 +316,7 @@ namespace DungeonBuilder.Tests.EditMode
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId, Danger = 2, ManaPressure = 1, LootBonus = 1, Attraction = 1, ExplanationKey = "effect.goblin" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "effect.trap" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SnareTrapOptionId, Danger = 1, ExplanationKey = "effect.snare" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.ChillingSigilOptionId, HeatPressure = -1, ExplanationKey = "effect.chilling_sigil" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "effect.loot" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "effect.cache" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.GlitteringHoardOptionId, HeatPressure = 1, LootBonus = 6, Attraction = 4, ExplanationKey = "effect.hoard" }
