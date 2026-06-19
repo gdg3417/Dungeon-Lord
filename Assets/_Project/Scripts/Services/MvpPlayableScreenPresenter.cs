@@ -74,13 +74,15 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, AnalysisNextActionKey);
             AppendLine(builder, BuildAnalysisLine(summary, localize));
+            string suggestionKey = summary?.AnalysisUnlocked == true && !string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey)
+                ? summary.AnalysisAdviceKey
+                : summary?.NextOptimizationSuggestionKey;
+            suggestionKey = BasicRunAnalysisAppliedAdjustmentPresenter.ResolveNextActionKey(summary, suggestionKey);
             AppendLine(builder, string.Format(
                 Localize(localize, MvpLoopSummaryPanelPresenter.SuggestionFormatKey),
-                ResolveKeyOrFallback(summary?.AnalysisUnlocked == true && !string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey)
-                    ? summary.AnalysisAdviceKey
-                    : summary?.NextOptimizationSuggestionKey,
-                    localize,
-                    MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+                ResolveKeyOrFallback(suggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
+            string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
+            if (!string.IsNullOrWhiteSpace(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
 
             AppendSection(builder, localize, RunSetupKey);
             AppendLine(builder, AdventurerRunIntentPresenter.BuildDebugPostureLine(summary?.AdventurerRunIntent, selectedRunPostureName, localize));

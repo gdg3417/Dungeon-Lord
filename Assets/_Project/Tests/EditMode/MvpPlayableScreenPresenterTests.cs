@@ -85,6 +85,44 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
+        [Test]
+        public void BuildScreenText_AfterAppliedAnalysisChange_ShowsRunAgainInstruction()
+        {
+            var summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                AnalysisUnlocked = true,
+                HasRunOutcome = true,
+                RunSucceeded = false,
+                LatestRunDeathCount = 1,
+                HeatTierId = CurrentHeatTierResolver.NoticeTierId,
+                AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey,
+                PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 3 },
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 }
+            };
+
+            string text = MvpPlayableScreenPresenter.BuildScreenText(
+                summary,
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty,
+                "Monster",
+                "Goblin",
+                string.Empty,
+                string.Empty,
+                "Balanced",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true },
+                Localize);
+
+            Assert.That(text, Does.Contain("Next: run again to test the placement change."));
+            Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
+            Assert.That(text, Does.Not.Contain("Next: adjust one placement before the next adventurer visit."));
+        }
+
         private static string Localize(string key, string fallback)
         {
             return Strings.TryGetValue(key, out string value) ? value : fallback;
@@ -144,6 +182,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpLoopSummaryPanelPresenter.PlacementEffectsFormatKey] = "Effects: {0}",
             [MvpLoopSummaryPanelPresenter.LootFormatKey] = "Loot: {1}/{0} recovered; {2} tradeable.",
             [MvpLoopSummaryPanelPresenter.SuggestionFormatKey] = "{0}",
+            [BasicRunAnalysisAppliedAdjustmentPresenter.AppliedAdjustmentFormatKey] = "Applied adjustment: {0}",
             [AdventurerRunIntentPresenter.SummaryFormatKey] = "Expected next adventurer intent: {0} likely. Reason: {1}",
                 [AdventurerArrivalPressurePresenter.SummaryFormatKey] = "Adventurer pressure: {0}. Reason: {1}.",
                 [AdventurerArrivalPressurePresenter.BodyFormatKey] = "{0}. Reason: {1}.",
@@ -183,6 +222,10 @@ namespace DungeonBuilder.Tests.EditMode
             ["placement.option.room.basic.display_name"] = "Basic Room",
             ["ui.research.status.active_in_progress"] = "Research in progress",
             [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to see the first outcome.",
+            [MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey] = "Next: adjust one placement before the next adventurer visit.",
+            [BasicRunAnalysisRecommendationPresenter.ReduceDangerKey] = "Next: reduce danger or use a safer posture before pushing for more loot.",
+            [BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey] = "Next: run again to test the placement change.",
+            [BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey] = "Danger is lower than the latest visit. Run again to test the change.",
             [GuidedMvpActionPathPanelPresenter.CompleteNoKey] = "No"
         };
     }

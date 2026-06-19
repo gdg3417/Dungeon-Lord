@@ -576,6 +576,34 @@
       "text": "Next: repeat this setup or test slightly greedier pressure while heat is controlled."
     },
     {
+      "key": "mvp_loop.suggestion.analysis.run_again_to_test_change",
+      "text": "Next: run again to test the placement change."
+    },
+    {
+      "key": "ui.mvp_loop.analysis.applied_adjustment_format",
+      "text": "Applied adjustment: {0}"
+    },
+    {
+      "key": "mvp_loop.analysis.applied_adjustment.danger_lower",
+      "text": "Danger is lower than the latest visit. Run again to test the change."
+    },
+    {
+      "key": "mvp_loop.analysis.applied_adjustment.heat_pressure_lower",
+      "text": "Heat pressure is lower than the latest visit. Run again to test the change."
+    },
+    {
+      "key": "mvp_loop.analysis.applied_adjustment.path_capacity_higher",
+      "text": "Path capacity is higher than the latest visit. Run again to test the change."
+    },
+    {
+      "key": "mvp_loop.analysis.applied_adjustment.loot_or_attraction_higher",
+      "text": "Loot or attraction is higher than the latest visit. Run again to test the change."
+    },
+    {
+      "key": "mvp_loop.analysis.applied_adjustment.effects_changed",
+      "text": "Current dungeon effects changed from the latest visit. Run again to test the change."
+    },
+    {
       "key": "ui.mvp_loop.analysis.recommendation_format",
       "text": "Analysis recommendation: {0}"
     },

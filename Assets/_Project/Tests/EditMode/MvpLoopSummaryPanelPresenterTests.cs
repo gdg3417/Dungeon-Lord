@@ -474,6 +474,46 @@ namespace DungeonBuilder.Tests.EditMode
             return string.Empty;
         }
 
+        [Test]
+        public void BuildPanelText_BeforeAppliedAnalysisChange_KeepsAdjustOnePlacementSuggestion()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary(4, 4);
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Suggested Next Action: Next: adjust one placement before the next adventurer visit."));
+            Assert.That(text, Does.Not.Contain("Applied adjustment:"));
+        }
+
+        [Test]
+        public void BuildPanelText_AfterAppliedAnalysisChange_UsesRunAgainSuggestionAndAppliedLine()
+        {
+            MvpPlayerLoopSummary summary = AnalysisSummary(3, 4);
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, SmokeLocalize);
+
+            Assert.That(text, Does.Contain("Suggested Next Action: Next: run again to test the placement change."));
+            Assert.That(text, Does.Contain("Analysis recommendation: Next: reduce danger or use a safer posture before pushing for more loot."));
+            Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
+        }
+
+        private static MvpPlayerLoopSummary AnalysisSummary(int currentDanger, int latestDanger)
+        {
+            return new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                AnalysisUnlocked = true,
+                HasRunOutcome = true,
+                RunSucceeded = false,
+                LatestRunDeathCount = 1,
+                HeatTierId = CurrentHeatTierResolver.NoticeTierId,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey,
+                AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
+                PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = currentDanger },
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = latestDanger }
+            };
+        }
+
         private static string Localize(string key, string fallback)
         {
             switch (key)
@@ -535,6 +575,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
                 case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey: return "Adjustment target: {0}";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.SelectedFitFormatKey: return "Selected placement fit: {0}";
+                case BasicRunAnalysisAppliedAdjustmentPresenter.AppliedAdjustmentFormatKey: return "Applied adjustment: {0}";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.MatchKey: return "Current selection matches the analysis target. Adjust this placement, then adjust before the next adventurer visit.";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.MismatchKey: return "Current selection is {0}, but analysis recommends {1} first. Switch category before the next adventurer visit.";
                 case BasicRunAnalysisSelectedPlacementFitPresenter.BroadKey: return "Analysis target is broad. Change any one placement, then adjust before the next adventurer visit.";
@@ -614,6 +655,9 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next adventurer visit.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey: return "Next: improve survivability or reduce danger so generated loot is recovered.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey: return "Next: repeat this setup or test slightly greedier pressure while heat is controlled.";
+                case MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey: return "Next: adjust one placement before the next adventurer visit.";
+                case BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey: return "Next: run again to test the placement change.";
+                case BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey: return "Danger is lower than the latest visit. Run again to test the change.";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey: return "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot.";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceHeatTargetKey: return "Trap or loot node first. Heat rose during this adventurer visit; reduce heat pressure before another greedy run.";
                 case BasicRunAnalysisPlacementTargetPresenter.ImproveExtractionTargetKey: return "Room or monster first. Loot was generated but not recovered; improve survivability or path support.";
