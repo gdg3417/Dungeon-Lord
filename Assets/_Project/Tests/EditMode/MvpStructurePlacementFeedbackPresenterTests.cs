@@ -136,6 +136,34 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SkeletonOptionId));
         }
 
+        [Test]
+        public void RoomTargetedPlacementFeedback_BasicLootNodeToGlitteringHoard_UsesLocalizedLabels()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                1,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.LootNodeCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.GlitteringHoardOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Changed Room 2 Loot node: Basic Loot Node -> Glittering Hoard."));
+            Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.GlitteringHoardOptionId));
+        }
+
+        [Test]
+        public void RoomTargetedPlacementFeedback_SameGlitteringHoard_UsesAlreadySetFormat()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                1,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.LootNodeCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.GlitteringHoardOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.GlitteringHoardOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Room 2 Loot node already set to Glittering Hoard."));
+            Assert.That(text, Does.Not.Contain("Changed Room"));
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>
@@ -156,6 +184,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
                 [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node",
+                [MvpDungeonPlacementPresenter.GlitteringHoardOptionKey] = "Glittering Hoard",
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
                 [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin"
             };

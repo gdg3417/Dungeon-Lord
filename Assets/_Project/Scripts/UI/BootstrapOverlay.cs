@@ -1134,6 +1134,11 @@ namespace DungeonBuilder.M0
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.HiddenCacheOptionId);
             }
+            if (GUILayout.Button(labels.GlitteringHoardSelection, compactButton, buttonHeight))
+            {
+                SelectMvpPlacementCategory(MvpDungeonPlacementIds.LootNodeCategoryId);
+                SelectMvpPlacementOption(MvpDungeonPlacementIds.GlitteringHoardOptionId);
+            }
             if (GUILayout.Button(labels.CautiousPosture, compactButton, buttonHeight))
             {
                 SelectMvpRunPosture(RunPostureResolver.CautiousId);

@@ -23,6 +23,7 @@ namespace DungeonBuilder.M0
         public const string SnareTrapOptionKey = "placement.option.trap.snare.display_name";
         public const string BasicLootNodeOptionKey = "placement.option.loot_node.basic.display_name";
         public const string HiddenCacheOptionKey = "placement.option.loot_node.hidden_cache.display_name";
+        public const string GlitteringHoardOptionKey = "placement.option.loot_node.glittering_hoard.display_name";
         public const string BasicRoomPreviewKey = "ui.mvp_placement_preview.room.basic";
         public const string NarrowHallPreviewKey = "ui.mvp_placement_preview.room.narrow_hall";
         public const string SkeletonPreviewKey = "ui.mvp_placement_preview.monster.skeleton";
@@ -31,6 +32,7 @@ namespace DungeonBuilder.M0
         public const string SnareTrapPreviewKey = "ui.mvp_placement_preview.trap.snare";
         public const string BasicLootNodePreviewKey = "ui.mvp_placement_preview.loot_node.basic";
         public const string HiddenCachePreviewKey = "ui.mvp_placement_preview.loot_node.hidden_cache";
+        public const string GlitteringHoardPreviewKey = "ui.mvp_placement_preview.loot_node.glittering_hoard";
         public const string UnknownPreviewKey = "ui.mvp_placement_preview.unknown";
 
         public static string ResolveCategoryName(string categoryId, Func<string, string, string> localize)
@@ -130,6 +132,9 @@ namespace DungeonBuilder.M0
                 case MvpDungeonPlacementIds.HiddenCacheOptionId:
                     key = HiddenCacheOptionKey;
                     return true;
+                case MvpDungeonPlacementIds.GlitteringHoardOptionId:
+                    key = GlitteringHoardOptionKey;
+                    return true;
                 default:
                     key = string.Empty;
                     return false;
@@ -156,6 +161,8 @@ namespace DungeonBuilder.M0
                     return BasicLootNodePreviewKey;
                 case MvpDungeonPlacementIds.HiddenCacheOptionId:
                     return HiddenCachePreviewKey;
+                case MvpDungeonPlacementIds.GlitteringHoardOptionId:
+                    return GlitteringHoardPreviewKey;
                 default:
                     return UnknownPreviewKey;
             }

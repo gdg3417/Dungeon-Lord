@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public const string SnareTrapOptionId = "placement.option.trap.snare";
         public const string BasicLootNodeOptionId = "placement.option.loot_node.basic";
         public const string HiddenCacheOptionId = "placement.option.loot_node.hidden_cache";
+        public const string GlitteringHoardOptionId = "placement.option.loot_node.glittering_hoard";
 
         public static readonly string[] OrderedCategoryIds =
         {
@@ -44,7 +45,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             SpikeTrapOptionId,
             SnareTrapOptionId,
             BasicLootNodeOptionId,
-            HiddenCacheOptionId
+            HiddenCacheOptionId,
+            GlitteringHoardOptionId
         };
 
         public static bool IsAllowedCategory(string categoryId)
@@ -64,7 +66,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                    string.Equals(optionId, SpikeTrapOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, SnareTrapOptionId, StringComparison.Ordinal) ||
                    string.Equals(optionId, BasicLootNodeOptionId, StringComparison.Ordinal) ||
-                   string.Equals(optionId, HiddenCacheOptionId, StringComparison.Ordinal);
+                   string.Equals(optionId, HiddenCacheOptionId, StringComparison.Ordinal) ||
+                   string.Equals(optionId, GlitteringHoardOptionId, StringComparison.Ordinal);
         }
 
         public static bool TryGetCategoryForOption(string optionId, out string categoryId)
@@ -85,6 +88,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                     return true;
                 case BasicLootNodeOptionId:
                 case HiddenCacheOptionId:
+                case GlitteringHoardOptionId:
                     categoryId = LootNodeCategoryId;
                     return true;
                 default:

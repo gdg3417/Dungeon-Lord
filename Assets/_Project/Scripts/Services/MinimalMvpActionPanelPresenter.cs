@@ -147,6 +147,7 @@ namespace DungeonBuilder.M0
                 Localize(localize, MvpDungeonPlacementPresenter.SnareTrapOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.BasicLootNodeOptionKey),
                 Localize(localize, MvpDungeonPlacementPresenter.HiddenCacheOptionKey),
+                Localize(localize, MvpDungeonPlacementPresenter.GlitteringHoardOptionKey),
                 Localize(localize, ManaGeneratorSelectionKey),
                 Localize(localize, HeatScrubberSelectionKey),
                 Localize(localize, RiskLabSelectionKey),
@@ -213,6 +214,7 @@ namespace DungeonBuilder.M0
             string snareTrapSelection,
             string basicLootNodeSelection,
             string hiddenCacheSelection,
+            string glitteringHoardSelection,
             string manaGeneratorSelection,
             string heatScrubberSelection,
             string riskLabSelection,
@@ -249,6 +251,7 @@ namespace DungeonBuilder.M0
             SnareTrapSelection = snareTrapSelection;
             BasicLootNodeSelection = basicLootNodeSelection;
             HiddenCacheSelection = hiddenCacheSelection;
+            GlitteringHoardSelection = glitteringHoardSelection;
             ManaGeneratorSelection = manaGeneratorSelection;
             HeatScrubberSelection = heatScrubberSelection;
             RiskLabSelection = riskLabSelection;
@@ -286,6 +289,7 @@ namespace DungeonBuilder.M0
         public string SnareTrapSelection { get; }
         public string BasicLootNodeSelection { get; }
         public string HiddenCacheSelection { get; }
+        public string GlitteringHoardSelection { get; }
         public string ManaGeneratorSelection { get; }
         public string HeatScrubberSelection { get; }
         public string RiskLabSelection { get; }

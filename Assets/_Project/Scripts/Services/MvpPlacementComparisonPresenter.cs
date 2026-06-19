@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0
         public const string SnareTrapToSpikeTrapSummaryKey = "ui.mvp_placement_comparison.trap.snare_to_spike";
         public const string BasicLootNodeToHiddenCacheSummaryKey = "ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache";
         public const string HiddenCacheToBasicLootNodeSummaryKey = "ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic";
+        public const string BasicLootNodeToGlitteringHoardSummaryKey = "ui.mvp_placement_comparison.loot_node.basic_to_glittering_hoard";
+        public const string GlitteringHoardToBasicLootNodeSummaryKey = "ui.mvp_placement_comparison.loot_node.glittering_hoard_to_basic";
 
         public static MvpPlacementComparisonPreview Resolve(
             MvpDungeonFloorLayoutState layout,
@@ -207,6 +209,8 @@ namespace DungeonBuilder.M0
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SpikeTrapOptionId, StringComparison.Ordinal)) key = SnareTrapToSpikeTrapSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId, StringComparison.Ordinal)) key = BasicLootNodeToHiddenCacheSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal)) key = HiddenCacheToBasicLootNodeSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId, StringComparison.Ordinal)) key = BasicLootNodeToGlitteringHoardSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal)) key = GlitteringHoardToBasicLootNodeSummaryKey;
             return !string.IsNullOrWhiteSpace(key);
         }
 

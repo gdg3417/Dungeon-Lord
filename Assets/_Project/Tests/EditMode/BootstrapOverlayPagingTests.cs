@@ -297,6 +297,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(labels.SnareTrapSelection, Is.EqualTo("Snare Trap"));
             Assert.That(labels.BasicLootNodeSelection, Is.EqualTo("Basic Loot Node"));
             Assert.That(labels.HiddenCacheSelection, Is.EqualTo("Hidden Cache"));
+            Assert.That(labels.GlitteringHoardSelection, Is.EqualTo("Glittering Hoard"));
             Assert.That(labels.CautiousPosture, Is.EqualTo("Cautious"));
             Assert.That(labels.BalancedPosture, Is.EqualTo("Balanced"));
             Assert.That(labels.GreedyPosture, Is.EqualTo("Greedy"));
@@ -2316,6 +2317,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_comparison.trap.snare_to_spike"] = "more danger and adds heat pressure.";
             map["ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache"] = "subtler loot and lower attraction.";
             map["ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic"] = "stronger loot and higher attraction.";
+            map["ui.mvp_placement_comparison.loot_node.basic_to_glittering_hoard"] = "more loot and attraction, but adds heat pressure.";
+            map["ui.mvp_placement_comparison.loot_node.glittering_hoard_to_basic"] = "less loot and attraction, with lower heat pressure.";
             map["mvp_loop.suggestion.improve_survivability_or_layout"] = "Improve survivability or layout before the next adventurer visit.";
             map["mvp_loop.suggestion.verify_research_status"] = "Verify research status before claiming progress.";
             map["mvp_loop.suggestion.repeat_or_improve_placement"] = "Adjust placement before the next adventurer visit.";
@@ -2366,6 +2369,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["placement.option.trap.snare.display_name"] = "Snare Trap";
             map["placement.option.loot_node.basic.display_name"] = "Basic Loot Node";
             map["placement.option.loot_node.hidden_cache.display_name"] = "Hidden Cache";
+            map["placement.option.loot_node.glittering_hoard.display_name"] = "Glittering Hoard";
             map["ui.mvp_label.placement_category.unknown"] = "Unknown category";
             map["ui.mvp_label.placement_option.unknown"] = "Unknown placement";
             map["ui.mvp_composition.empty"] = "No dungeon placements yet";
@@ -2414,6 +2418,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_preview.trap.snare"] = "Role: controls adventurers with lower danger and less heat pressure.";
             map["ui.mvp_placement_preview.loot_node.basic"] = "Role: adds loot and adventurer attraction context.";
             map["ui.mvp_placement_preview.loot_node.hidden_cache"] = "Role: adds subtler loot with lower adventurer attraction.";
+            map["ui.mvp_placement_preview.loot_node.glittering_hoard"] = "Role: adds a stronger loot signal and attraction, but increases heat pressure.";
             map["ui.mvp_placement_preview.unknown"] = "Role unavailable.";
             map["ui.mvp_placement_feedback.changed_format"] = "Changed placement: {0} -> {1}: {2}. {3}";
             map["ui.mvp_run_plan_preview.plan_format"] = "Plan: {0} + {1} adventurer challenge.";
@@ -2538,6 +2543,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_effects.explanation.trap.snare"] = "Snare Trap controls the path with lower danger and less heat pressure";
             map["ui.mvp_placement_effects.explanation.loot_node.basic"] = "Basic Loot Node increases loot and adventurer attraction context";
             map["ui.mvp_placement_effects.explanation.loot_node.hidden_cache"] = "Hidden Cache adds safer loot with a subtler attraction signal";
+            map["ui.mvp_placement_effects.explanation.loot_node.glittering_hoard"] = "Glittering Hoard boosts loot and adventurer attraction while adding heat pressure";
             map["ui.mvp_run_feedback.placement_effects_impact_format"] = "{0} Placement effects: {1}.";
             map["heat_tier.peace"] = "Peace";
             map["heat_tier.notice"] = "Notice";
@@ -2552,6 +2558,8 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_placement_comparison.trap.snare_to_spike"] = "more danger and adds heat pressure.";
             map["ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache"] = "subtler loot and lower attraction.";
             map["ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic"] = "stronger loot and higher attraction.";
+            map["ui.mvp_placement_comparison.loot_node.basic_to_glittering_hoard"] = "more loot and attraction, but adds heat pressure.";
+            map["ui.mvp_placement_comparison.loot_node.glittering_hoard_to_basic"] = "less loot and attraction, with lower heat pressure.";
         }
         [Test]
         public void MinimalMvpActionPanel_SourceRendersComparisonLineInsideScrollablePanel()

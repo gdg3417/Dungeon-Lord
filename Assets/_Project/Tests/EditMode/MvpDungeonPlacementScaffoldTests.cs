@@ -30,7 +30,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlacementModel_InitializesWithExactlyFourCategoriesAndEightValidOptions()
+        public void PlacementModel_InitializesWithExactlyFourCategoriesAndNineValidOptions()
         {
             Assert.That(MvpDungeonPlacementIds.OrderedCategoryIds, Is.EqualTo(new[]
             {
@@ -55,8 +55,10 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpDungeonPlacementIds.SpikeTrapOptionId,
                 MvpDungeonPlacementIds.SnareTrapOptionId,
                 MvpDungeonPlacementIds.BasicLootNodeOptionId,
-                MvpDungeonPlacementIds.HiddenCacheOptionId
+                MvpDungeonPlacementIds.HiddenCacheOptionId,
+                MvpDungeonPlacementIds.GlitteringHoardOptionId
             }));
+            Assert.That(MvpDungeonPlacementIds.OrderedStarterOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.GlitteringHoardOptionId));
         }
 
         [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)]
@@ -67,6 +69,7 @@ namespace DungeonBuilder.Tests.EditMode
         [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId)]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId)]
         public void PlayerCanPlaceStarterOptionForEachCategory(string categoryId, string optionId)
         {
             bool placed = _root.TryMvpPlaceOrModifySelectedPlacement(
@@ -728,6 +731,7 @@ namespace DungeonBuilder.Tests.EditMode
                 map[MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap";
                 map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
                 map[MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node";
+                map[MvpDungeonPlacementPresenter.GlitteringHoardOptionKey] = "Glittering Hoard";
             }
 
             return content;

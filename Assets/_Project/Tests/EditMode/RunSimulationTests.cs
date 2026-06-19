@@ -207,7 +207,8 @@ namespace DungeonBuilder.Tests.EditMode
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.spike" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SnareTrapOptionId, Danger = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.snare" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.basic" },
-                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.hidden_cache" }
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.hidden_cache" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.GlitteringHoardOptionId, HeatPressure = 1, LootBonus = 6, Attraction = 4, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard" }
                 },
                 MvpCompositionOutcomeTuning = BuildCompositionTuning(),
                 RunPostures = new[]
@@ -2972,6 +2973,34 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_GlitteringHoardGeneratesMoreLootSignalAndHeatThanBasicLootNode()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord basic = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                50,
+                1,
+                RunPostureResolver.BalancedId,
+                MvpPlacementEffectsResolver.Resolve(LootOnlyPlacementState(MvpDungeonPlacementIds.BasicLootNodeOptionId), config));
+            RunOutcomeRecord hoard = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                50,
+                1,
+                RunPostureResolver.BalancedId,
+                MvpPlacementEffectsResolver.Resolve(LootOnlyPlacementState(MvpDungeonPlacementIds.GlitteringHoardOptionId), config));
+
+            Assert.That(basic.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(4));
+            Assert.That(basic.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.EqualTo(0));
+            Assert.That(hoard.CompositionOutcomeSummary.PlacementEffects.LootBonus, Is.EqualTo(6));
+            Assert.That(hoard.CompositionOutcomeSummary.PlacementEffects.Attraction, Is.EqualTo(4));
+            Assert.That(hoard.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.EqualTo(1));
+            Assert.That(hoard.LootSummary.TotalGeneratedWorldValue, Is.GreaterThan(basic.LootSummary.TotalGeneratedWorldValue));
+            Assert.That(hoard.RunHeatDeltaSummary.FinalHeatDelta, Is.GreaterThan(basic.RunHeatDeltaSummary.FinalHeatDelta));
+        }
+
+        [Test]
         public void SimulateOnce_CompositionOutcome_FullStarterCompositionAffectsLootAndPressure()
         {
             RunSimulationConfig config = BuildConfig();
@@ -3321,6 +3350,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(layout.FinalChance, Is.EqualTo(legacy.FinalChance).Within(1e-9));
             Assert.That(layout.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(legacy.LootSummary.TotalGeneratedWorldValue));
             Assert.That(layout.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds, Is.EqualTo(legacy.CompositionOutcomeSummary.PlacementEffects.ContributingOptionIds));
+        }
+
+        private static MvpDungeonPlacementState LootOnlyPlacementState(string lootOptionId)
+        {
+            var state = new MvpDungeonPlacementState();
+            state.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, lootOptionId, 1));
+            return state;
         }
 
         private static MvpPlacementEffectsSummary StarterPlacementEffects(RunSimulationConfig config)

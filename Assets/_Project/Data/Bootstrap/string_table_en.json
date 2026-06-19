@@ -2054,6 +2054,26 @@
     {
       "key": "ui.mvp_room_slots.panel.room_separator",
       "text": " | "
+    },
+    {
+      "key": "placement.option.loot_node.glittering_hoard.display_name",
+      "text": "Glittering Hoard"
+    },
+    {
+      "key": "ui.mvp_placement_preview.loot_node.glittering_hoard",
+      "text": "Role: adds a stronger loot signal and attraction, but increases heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard",
+      "text": "Glittering Hoard boosts loot and adventurer attraction while adding heat pressure"
+    },
+    {
+      "key": "ui.mvp_placement_comparison.loot_node.basic_to_glittering_hoard",
+      "text": "more loot and attraction, but adds heat pressure."
+    },
+    {
+      "key": "ui.mvp_placement_comparison.loot_node.glittering_hoard_to_basic",
+      "text": "less loot and attraction, with lower heat pressure."
     }
   ]
 }

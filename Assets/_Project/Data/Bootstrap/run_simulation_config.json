@@ -243,6 +243,17 @@
       "LootBonus": 3,
       "Attraction": 1,
       "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache"
+    },
+    {
+      "CategoryId": "placement.category.loot_node",
+      "OptionId": "placement.option.loot_node.glittering_hoard",
+      "PathCapacity": 0,
+      "Danger": 0,
+      "ManaPressure": 0,
+      "HeatPressure": 1,
+      "LootBonus": 6,
+      "Attraction": 4,
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard"
     }
   ],
   "MvpRoomSlotCapacities": [
