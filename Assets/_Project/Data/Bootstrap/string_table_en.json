@@ -1608,6 +1608,46 @@
       "text": "Analysis and Next Action"
     },
     {
+      "key": "ui.mvp_primary_next_action.title",
+      "text": "Primary Next Action"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.action_format",
+      "text": "Do next: {0}"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source_format",
+      "text": "Priority source: {0}"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.first_contract",
+      "text": "First Dungeon Contract"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.greed_trial",
+      "text": "Post-Contract Greed Trial"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.applied_adjustment",
+      "text": "Applied activity-analysis change"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.activity_analysis",
+      "text": "Adventurer Activity Analysis"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.guided_path",
+      "text": "Guided MVP path"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.source.summary",
+      "text": "Dungeon loop summary"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.first_contract.incomplete",
+      "text": "Complete the First Dungeon Contract: finish the path, observe a visit, recover the required loot, and keep heat controlled."
+    },
+    {
       "key": "ui.mvp_screen.section.header_format",
       "text": "== {0} =="
     },
