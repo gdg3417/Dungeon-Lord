@@ -1350,6 +1350,25 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(result.IsValid));
         }
 
+
+        [Test]
+        public void BootstrapConfigValidationService_PlacementEffectAllowsSignedHeatPressureOnly()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            BootstrapConfigValidationResult validResult = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(validResult.IsValid, Is.True);
+            Assert.That(config.MvpPlacementEffects, Has.Some.Matches<MvpPlacementEffectConfig>(effect =>
+                effect.OptionId == MvpDungeonPlacementIds.ChillingSigilOptionId && effect.HeatPressure == -1));
+
+            config.MvpPlacementEffects[0].Danger = -1;
+            BootstrapConfigValidationResult invalidDangerResult = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(invalidDangerResult.IsValid, Is.False);
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(invalidDangerResult.IsValid));
+        }
+
         [Test]
         public void BootstrapConfigValidationService_InvalidPlacementEffectConfig_FailsLikeGameRootWrapper()
         {

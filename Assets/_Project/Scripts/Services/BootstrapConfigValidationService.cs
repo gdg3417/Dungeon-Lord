@@ -403,7 +403,6 @@ namespace DungeonBuilder.M0
                     effect.PathCapacity < 0 ||
                     effect.Danger < 0 ||
                     effect.ManaPressure < 0 ||
-                    effect.HeatPressure < 0 ||
                     effect.LootBonus < 0 ||
                     effect.Attraction < 0 ||
                     string.IsNullOrWhiteSpace(effect.ExplanationKey))
