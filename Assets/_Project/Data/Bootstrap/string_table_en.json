@@ -2106,6 +2106,62 @@
     {
       "key": "ui.mvp_placement_comparison.loot_node.glittering_hoard_to_basic",
       "text": "less loot and attraction, with lower heat pressure."
+    },
+    {
+      "key": "ui.mvp_greed_trial.title",
+      "text": "Post-Contract Greed Trial"
+    },
+    {
+      "key": "ui.mvp_greed_trial.greed_setup_format",
+      "text": "Greed setup tested: {0}"
+    },
+    {
+      "key": "ui.mvp_greed_trial.heat_stabilized_format",
+      "text": "Heat stabilized: {0}"
+    },
+    {
+      "key": "ui.mvp_greed_trial.risk_response_format",
+      "text": "Risk response: {0}"
+    },
+    {
+      "key": "ui.mvp_greed_trial.status_format",
+      "text": "Trial status: {0}"
+    },
+    {
+      "key": "ui.mvp_greed_trial.status.in_progress",
+      "text": "In progress"
+    },
+    {
+      "key": "ui.mvp_greed_trial.status.complete",
+      "text": "Complete. Greed pressure tested and stabilized."
+    },
+    {
+      "key": "ui.mvp_greed_trial.value.complete",
+      "text": "complete"
+    },
+    {
+      "key": "ui.mvp_greed_trial.value.incomplete",
+      "text": "incomplete"
+    },
+    {
+      "key": "ui.mvp_greed_trial.next_action_format",
+      "text": "Next action: {0}"
+    },
+    {
+      "key": "ui.mvp_greed_trial.next_action.test_greedier_setup",
+      "text": "Test a greedier loot setup."
+    },
+    {
+      "key": "ui.mvp_greed_trial.next_action.stabilize_heat",
+      "text": "Stabilize heat back to Peace while keeping the greed setup."
+    },
+    {
+      "key": "ui.mvp_greed_trial.next_action.add_counterplay",
+      "text": "Add heat-control counterplay while keeping the greed setup."
+    },
+    {
+      "key": "ui.mvp_greed_trial.next_action.complete",
+      "text": "Greed trial complete. Continue improving reward pressure without losing heat control."
     }
   ]
 }
