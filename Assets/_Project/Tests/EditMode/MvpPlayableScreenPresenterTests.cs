@@ -155,12 +155,16 @@ namespace DungeonBuilder.Tests.EditMode
                     RecentBestTradeableValue = 5,
                     LatestNamedLootTextAvailable = true,
                     LatestLootBreakdown = new[] { new RunLootDropRecord { NameKey = "loot.item.salvage.trap.name", Quantity = 1, TotalTradeableWorldValue = 5 } },
-                    TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey
+                    TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey,
+                    HasAppraisal = true,
+                    AppraisalKey = MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey,
+                    AppraisalArgumentNameKey = "loot.item.salvage.trap.name"
                 },
                 Localize);
 
             Assert.That(text, Does.Contain("Recent Spoils Ledger"));
             Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
+            Assert.That(text, Does.Contain("Appraisal: Trap salvage is a useful dungeon trade good."));
             Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
@@ -177,6 +181,9 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpRecentSpoilsLedgerPresenter.RecoveredValueFormatKey] = "Recovered value: {0} tradeable",
             [MvpRecentSpoilsLedgerPresenter.RecentBestFormatKey] = "Recent best haul: {0} tradeable",
             [MvpRecentSpoilsLedgerPresenter.TrendFormatKey] = "Spoils trend: {0}",
+            [MvpRecentSpoilsLedgerPresenter.AppraisalFormatKey] = "Appraisal: {0}",
+            [MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey] = "{0} is a useful dungeon trade good. Keep greed pressure stable to recover better hauls.",
+            [MvpRecentSpoilsLedgerPresenter.AppraisalValueOnlyKey] = "Recovered trade goods are ready for future merchant systems.",
             [MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey] = "Latest run produced the strongest recent haul.",
             [MvpLoopSummaryPanelPresenter.LootEntryFormatKey] = "{0}x {1}",
             ["loot.item.salvage.trap.name"] = "Trap salvage",

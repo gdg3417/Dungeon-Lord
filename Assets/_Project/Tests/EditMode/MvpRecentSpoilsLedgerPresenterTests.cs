@@ -29,6 +29,9 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpRecentSpoilsLedgerPresenter.BuildPanelText(summary, Localize);
             Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
             Assert.That(text, Does.Contain("Recovered value: 5 tradeable"));
+            Assert.That(text, Does.Contain("Appraisal: Trap salvage is a useful dungeon trade good."));
+            Assert.That(text, Does.Not.Contain("loot.item.salvage.trap.name"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
         [Test]
@@ -39,6 +42,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Latest haul:"));
             Assert.That(text, Does.Contain("Recovered value: 7 tradeable"));
             Assert.That(text, Does.Not.Contain("loot.item"));
+            Assert.That(text, Does.Contain("Appraisal: Recovered trade goods are ready for future merchant systems."));
+        }
+
+
+        [Test]
+        public void Resolve_MultipleItemStacksUsesMultiTradeGoodsAppraisal()
+        {
+            MvpRecentSpoilsLedgerSummary summary = MvpRecentSpoilsLedgerPresenter.Resolve(SaveWithRuns(Run(8,
+                Loot("loot.item.salvage.trap.name", 1, 5),
+                Loot("loot.item.fangs.goblin.name", 3, 3))), null);
+            string text = MvpRecentSpoilsLedgerPresenter.BuildPanelText(summary, Localize);
+            Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage, 3x Goblin fangs"));
+            Assert.That(text, Does.Contain("Appraisal: These trade goods are worth keeping. Better reward pressure can improve future hauls."));
+        }
+
+        [Test]
+        public void Resolve_GreedTrialCompletePrefersGreedStabilizedAppraisal()
+        {
+            var greed = new MvpPostContractGreedTrialSummary { IsComplete = true };
+            MvpRecentSpoilsLedgerSummary summary = MvpRecentSpoilsLedgerPresenter.Resolve(SaveWithRuns(Run(5, Loot("loot.item.salvage.trap.name", 1, 5))), greed);
+            string text = MvpRecentSpoilsLedgerPresenter.BuildPanelText(summary, Localize);
+            Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
+            Assert.That(text, Does.Contain("Appraisal: Greed pressure is stable. Continue improving reward pressure without losing heat control."));
         }
 
         [Test]
@@ -84,6 +110,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(summary.WouldGrantRewards, Is.False);
             Assert.That(summary.WouldUnlockContent, Is.False);
             Assert.That(summary.WouldCallServer, Is.False);
+            Assert.That(summary.HasAppraisal, Is.True);
+            Assert.That(summary.AppraisalKey, Is.EqualTo(MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey));
         }
 
         private static SaveData SaveWithRuns(params RunOutcomeRecord[] runs)
@@ -112,6 +140,11 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == "ui.mvp_spoils_ledger.recovered_value_format") return "Recovered value: {0} tradeable";
             if (key == "ui.mvp_spoils_ledger.recent_best_format") return "Recent best haul: {0} tradeable";
             if (key == "ui.mvp_spoils_ledger.trend_format") return "Spoils trend: {0}";
+            if (key == "ui.mvp_spoils_ledger.appraisal_format") return "Appraisal: {0}";
+            if (key == "ui.mvp_spoils_ledger.appraisal.item_trade_good") return "{0} is a useful dungeon trade good. Keep greed pressure stable to recover better hauls.";
+            if (key == "ui.mvp_spoils_ledger.appraisal.multi_trade_goods") return "These trade goods are worth keeping. Better reward pressure can improve future hauls.";
+            if (key == "ui.mvp_spoils_ledger.appraisal.value_only") return "Recovered trade goods are ready for future merchant systems.";
+            if (key == "ui.mvp_spoils_ledger.appraisal.greed_stabilized") return "Greed pressure is stable. Continue improving reward pressure without losing heat control.";
             if (key == "ui.mvp_spoils_ledger.value.none_yet") return "none yet";
             if (key == "ui.mvp_spoils_ledger.trend.run_dungeon") return "Run the dungeon to recover trade goods.";
             if (key == "ui.mvp_spoils_ledger.trend.latest_best") return "Latest run produced the strongest recent haul.";
@@ -120,6 +153,7 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == "ui.mvp_spoils_ledger.trend.steady") return "Recent hauls are steady.";
             if (key == "ui.mvp_loop.panel.loot_entry_format") return "{0}x {1}";
             if (key == "loot.item.salvage.trap.name") return "Trap salvage";
+            if (key == "loot.item.fangs.goblin.name") return "Goblin fangs";
             return fallback;
         }
     }

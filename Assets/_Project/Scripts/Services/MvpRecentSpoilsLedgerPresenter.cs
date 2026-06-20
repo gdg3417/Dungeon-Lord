@@ -16,6 +16,11 @@ namespace DungeonBuilder.M0
         public const string TrendGreedHeatWarningKey = "ui.mvp_spoils_ledger.trend.greed_heat_warning";
         public const string TrendGreedStabilizedKey = "ui.mvp_spoils_ledger.trend.greed_stabilized";
         public const string TrendSteadyKey = "ui.mvp_spoils_ledger.trend.steady";
+        public const string AppraisalFormatKey = "ui.mvp_spoils_ledger.appraisal_format";
+        public const string AppraisalItemTradeGoodKey = "ui.mvp_spoils_ledger.appraisal.item_trade_good";
+        public const string AppraisalMultiTradeGoodsKey = "ui.mvp_spoils_ledger.appraisal.multi_trade_goods";
+        public const string AppraisalValueOnlyKey = "ui.mvp_spoils_ledger.appraisal.value_only";
+        public const string AppraisalGreedStabilizedKey = "ui.mvp_spoils_ledger.appraisal.greed_stabilized";
 
         public static MvpRecentSpoilsLedgerSummary Resolve(SaveData save, MvpPostContractGreedTrialSummary greedTrial)
         {
@@ -41,6 +46,7 @@ namespace DungeonBuilder.M0
             summary.RecentBestTradeableValue = ResolveRecentBestTradeableValue(history, summary.LatestTradeableValue);
             summary.HasLootData = summary.LatestTradeableValue > 0 || summary.LatestNamedLootTextAvailable || summary.RecentBestTradeableValue > 0;
             summary.TrendKey = ResolveTrendKey(summary, greedTrial);
+            ResolveAppraisal(summary, greedTrial);
             summary.RuleResolved = true;
             return summary;
         }
@@ -62,9 +68,10 @@ namespace DungeonBuilder.M0
             string recoveredValueFormat = LocalizeRequired(localize, RecoveredValueFormatKey);
             string recentBestFormat = LocalizeRequired(localize, RecentBestFormatKey);
             string trendFormat = LocalizeRequired(localize, TrendFormatKey);
+            string appraisalFormat = LocalizeRequired(localize, AppraisalFormatKey);
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(latestHaulFormat) ||
                 string.IsNullOrEmpty(recoveredValueFormat) || string.IsNullOrEmpty(recentBestFormat) ||
-                string.IsNullOrEmpty(trendFormat))
+                string.IsNullOrEmpty(trendFormat) || string.IsNullOrEmpty(appraisalFormat))
             {
                 return string.Empty;
             }
@@ -95,7 +102,58 @@ namespace DungeonBuilder.M0
             string trend = LocalizeOptional(localize, string.IsNullOrWhiteSpace(summary.TrendKey) ? TrendRunDungeonKey : summary.TrendKey, string.Empty);
             if (string.IsNullOrWhiteSpace(trend)) return string.Empty;
             AppendLine(builder, string.Format(trendFormat, trend));
+
+            string appraisal = BuildAppraisalText(summary, localize);
+            if (!string.IsNullOrWhiteSpace(appraisal))
+            {
+                AppendLine(builder, string.Format(appraisalFormat, appraisal));
+            }
             return builder.ToString();
+        }
+
+        private static void ResolveAppraisal(MvpRecentSpoilsLedgerSummary summary, MvpPostContractGreedTrialSummary greedTrial)
+        {
+            if (summary == null || !summary.HasLootData) return;
+            if (greedTrial != null && greedTrial.IsComplete)
+            {
+                summary.HasAppraisal = true;
+                summary.AppraisalKey = AppraisalGreedStabilizedKey;
+                return;
+            }
+
+            int namedStackCount = CountLocalizableLootStacks(summary.LatestLootBreakdown);
+            if (namedStackCount > 1)
+            {
+                summary.HasAppraisal = true;
+                summary.AppraisalKey = AppraisalMultiTradeGoodsKey;
+                return;
+            }
+
+            if (namedStackCount == 1)
+            {
+                summary.HasAppraisal = true;
+                summary.AppraisalKey = AppraisalItemTradeGoodKey;
+                summary.AppraisalArgumentNameKey = ResolveFirstLootNameKey(summary.LatestLootBreakdown);
+                return;
+            }
+
+            if (summary.LatestTradeableValue > 0 || summary.RecentBestTradeableValue > 0)
+            {
+                summary.HasAppraisal = true;
+                summary.AppraisalKey = AppraisalValueOnlyKey;
+            }
+        }
+
+        private static string BuildAppraisalText(MvpRecentSpoilsLedgerSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.HasAppraisal || string.IsNullOrWhiteSpace(summary.AppraisalKey)) return string.Empty;
+            string appraisal = LocalizeOptional(localize, summary.AppraisalKey, string.Empty);
+            if (string.IsNullOrWhiteSpace(appraisal)) return string.Empty;
+            if (!string.Equals(summary.AppraisalKey, AppraisalItemTradeGoodKey, StringComparison.Ordinal)) return appraisal;
+
+            string itemName = LocalizeOptional(localize, summary.AppraisalArgumentNameKey, string.Empty);
+            if (string.IsNullOrWhiteSpace(itemName)) return LocalizeOptional(localize, AppraisalValueOnlyKey, string.Empty);
+            return string.Format(appraisal, itemName);
         }
 
         private static string ResolveTrendKey(MvpRecentSpoilsLedgerSummary summary, MvpPostContractGreedTrialSummary greedTrial)
@@ -130,6 +188,29 @@ namespace DungeonBuilder.M0
                 return total;
             }
             return 0;
+        }
+
+        private static int CountLocalizableLootStacks(RunLootDropRecord[] breakdown)
+        {
+            if (breakdown == null) return 0;
+            int count = 0;
+            for (int i = 0; i < breakdown.Length; i++)
+            {
+                RunLootDropRecord entry = breakdown[i];
+                if (entry != null && entry.Quantity > 0 && !string.IsNullOrWhiteSpace(entry.NameKey)) count++;
+            }
+            return count;
+        }
+
+        private static string ResolveFirstLootNameKey(RunLootDropRecord[] breakdown)
+        {
+            if (breakdown == null) return string.Empty;
+            for (int i = 0; i < breakdown.Length; i++)
+            {
+                RunLootDropRecord entry = breakdown[i];
+                if (entry != null && entry.Quantity > 0 && !string.IsNullOrWhiteSpace(entry.NameKey)) return entry.NameKey;
+            }
+            return string.Empty;
         }
 
         private static bool HasLocalizableLoot(RunLootDropRecord[] breakdown)
@@ -181,6 +262,9 @@ namespace DungeonBuilder.M0
         public bool LatestNamedLootTextAvailable;
         public RunLootDropRecord[] LatestLootBreakdown = Array.Empty<RunLootDropRecord>();
         public string TrendKey;
+        public bool HasAppraisal;
+        public string AppraisalKey;
+        public string AppraisalArgumentNameKey;
         public bool WouldMutateState;
         public bool WouldGrantRewards;
         public bool WouldUnlockContent;
