@@ -523,8 +523,8 @@ namespace DungeonBuilder.M0
                 _lastRunDebugPostureId,
                 _lastRunIntentFallbackUsed,
                 _smokeViewportStatusMessage,
-                _playerFacingSectionIndex,
-                PlayerFacingSectionCount);
+                playerFacingSectionIndex: _playerFacingSectionIndex,
+                playerFacingSectionCount: PlayerFacingSectionCount);
         }
 
         public string BuildFullPlayerFacingSmokeText()
