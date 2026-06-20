@@ -14,6 +14,7 @@ namespace DungeonBuilder.M0
                 GuidedMvpActionPathSummary guidedPath,
                 MvpFirstSessionObjectiveSummary firstSessionObjective,
                 MvpPostContractGreedTrialSummary greedTrial,
+                MvpRecentSpoilsLedgerSummary recentSpoilsLedger,
                 string dungeonLayoutText,
                 string selectedCategoryName,
                 string selectedPlacementCategoryId,
@@ -37,6 +38,7 @@ namespace DungeonBuilder.M0
                 GuidedPath = guidedPath;
                 FirstSessionObjective = firstSessionObjective;
                 GreedTrial = greedTrial;
+                RecentSpoilsLedger = recentSpoilsLedger;
                 DungeonLayoutText = dungeonLayoutText;
                 SelectedCategoryName = selectedCategoryName;
                 SelectedPlacementCategoryId = selectedPlacementCategoryId;
@@ -61,6 +63,7 @@ namespace DungeonBuilder.M0
             public GuidedMvpActionPathSummary GuidedPath { get; }
             public MvpFirstSessionObjectiveSummary FirstSessionObjective { get; }
             public MvpPostContractGreedTrialSummary GreedTrial { get; }
+            public MvpRecentSpoilsLedgerSummary RecentSpoilsLedger { get; }
             public string DungeonLayoutText { get; }
             public string SelectedCategoryName { get; }
             public string SelectedPlacementCategoryId { get; }
@@ -119,6 +122,7 @@ namespace DungeonBuilder.M0
                 context.BannerMessage,
                 context.FirstSessionObjective,
                 context.GreedTrial,
+                context.RecentSpoilsLedger,
                 localize));
             return builder.ToString();
         }
@@ -132,6 +136,8 @@ namespace DungeonBuilder.M0
             AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(context.FirstSessionObjective, localize));
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
             if (!string.IsNullOrEmpty(greedTrialText)) AppendLine(body, greedTrialText);
+            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(context.RecentSpoilsLedger, localize);
+            if (!string.IsNullOrEmpty(spoilsText)) AppendLine(body, spoilsText);
             AppendLine(body, AdventurerRunIntentPresenter.BuildScoreSummaryLine(context.Summary?.AdventurerRunIntent, localize));
             AppendCompactAdventurersFallbackIfMissing(body, localize);
             AppendSelectedPlacementAndRunPlanPreviews(body, context);
@@ -164,6 +170,8 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(firstContractText)) { AppendLine(body, string.Empty); AppendLine(body, firstContractText); }
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
             if (!string.IsNullOrEmpty(greedTrialText)) { AppendLine(body, string.Empty); AppendLine(body, greedTrialText); }
+            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(context.RecentSpoilsLedger, localize);
+            if (!string.IsNullOrEmpty(spoilsText)) { AppendLine(body, string.Empty); AppendLine(body, spoilsText); }
             return BuildSectionText("ui.mvp_smoke.section.loop_summary", body.ToString(), context, localize);
         }
 
@@ -195,6 +203,8 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(firstContractText)) { AppendLine(builder, string.Empty); AppendLine(builder, firstContractText); }
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
             if (!string.IsNullOrEmpty(greedTrialText)) { AppendLine(builder, string.Empty); AppendLine(builder, greedTrialText); }
+            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(context.RecentSpoilsLedger, localize);
+            if (!string.IsNullOrEmpty(spoilsText)) { AppendLine(builder, string.Empty); AppendLine(builder, spoilsText); }
             AppendLine(builder, string.Empty);
             AppendSelectedPlacementAndRunPlanPreviews(builder, context);
         }

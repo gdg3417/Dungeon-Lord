@@ -47,6 +47,7 @@ namespace DungeonBuilder.M0
             string bannerMessage,
             MvpFirstSessionObjectiveSummary firstSessionObjective,
             MvpPostContractGreedTrialSummary greedTrial,
+            MvpRecentSpoilsLedgerSummary recentSpoilsLedger,
             Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
@@ -73,6 +74,8 @@ namespace DungeonBuilder.M0
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
             AppendLine(builder, BuildPartyLine(summary, localize));
             AppendLine(builder, BuildLootLine(summary, localize));
+            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(recentSpoilsLedger, localize);
+            if (!string.IsNullOrWhiteSpace(spoilsText)) AppendLine(builder, spoilsText);
             AppendLine(builder, BuildHeatLine(summary, localize));
 
             AppendSection(builder, localize, AnalysisNextActionKey);

@@ -77,7 +77,7 @@ namespace DungeonBuilder.Tests.EditMode
         public void PlayableScreenIncludesCompactTrafficLine()
         {
             var summary = new MvpPlayerLoopSummary { RuleResolved = true, AdventurerTrafficPressure = AdventurerTrafficPressureResolver.Resolve(Config(), Arrival(6, 4, 0, 1, true, 14d), Intent()), AdventurerArrivalPressure = new AdventurerArrivalPressureSummary { RuleResolved = true }, AdventurerRunIntent = Intent(), ResearchStatusKey = MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey, NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey };
-            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, null, Localized);
+            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, null, null, Localized);
             Assert.That(text, Does.Contain("Adventurer traffic:"));
             Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Activity Setup =="));
