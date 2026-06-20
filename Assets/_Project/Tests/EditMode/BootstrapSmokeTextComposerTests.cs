@@ -102,17 +102,58 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_greed_trial"));
         }
 
+        [Test]
+        public void BuildFullPlayerFacingSmokeText_IncludesRecentSpoilsLedgerWhenLootHistoryExists()
+        {
+            var context = CreateContext(recentSpoilsLedger: new MvpRecentSpoilsLedgerSummary
+            {
+                RuleResolved = true,
+                HasRunHistory = true,
+                HasLootData = true,
+                LatestTradeableValue = 5,
+                RecentBestTradeableValue = 5,
+                LatestNamedLootTextAvailable = true,
+                LatestLootBreakdown = new[] { new RunLootDropRecord { NameKey = "loot.item.salvage.trap.name", Quantity = 1, TotalTradeableWorldValue = 5 } },
+                TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey
+            });
+
+            string text = BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(context, Localize);
+
+            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
+            Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
+            Assert.That(text, Does.Contain("Recent best haul: 5 tradeable"));
+        }
+
+        [Test]
+        public void BuildLoopSummarySectionText_EmptySpoilsLedgerIsSafeAndLocalized()
+        {
+            var context = CreateContext(recentSpoilsLedger: new MvpRecentSpoilsLedgerSummary
+            {
+                RuleResolved = true,
+                TrendKey = MvpRecentSpoilsLedgerPresenter.TrendRunDungeonKey
+            });
+
+            string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
+
+            Assert.That(text, Does.Contain("Latest haul: none yet"));
+            Assert.That(text, Does.Contain("Run the dungeon to recover trade goods."));
+            Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
+            Assert.That(text, Does.Contain("Loop Summary (1/1)"));
+        }
+
 
         private static BootstrapSmokeTextComposer.Context CreateContext(
             GuidedMvpActionPathSummary guidedPath = null,
             MvpFirstSessionObjectiveSummary firstSessionObjective = null,
-            MvpPostContractGreedTrialSummary greedTrial = null)
+            MvpPostContractGreedTrialSummary greedTrial = null,
+            MvpRecentSpoilsLedgerSummary recentSpoilsLedger = null)
         {
             return new BootstrapSmokeTextComposer.Context(
                 AnalysisSummary(),
                 guidedPath,
                 firstSessionObjective,
                 greedTrial,
+                recentSpoilsLedger,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -214,6 +255,17 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.CompletionFirstContractCompleteKey: return "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis.";
                 case MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey: return "Next objective: {0}";
                 case MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey: return "Test a greedier reward setup while keeping heat under control.";
+
+                case MvpRecentSpoilsLedgerPresenter.TitleKey: return "Recent Spoils Ledger";
+                case MvpRecentSpoilsLedgerPresenter.LatestHaulFormatKey: return "Latest haul: {0}";
+                case MvpRecentSpoilsLedgerPresenter.RecoveredValueFormatKey: return "Recovered value: {0} tradeable";
+                case MvpRecentSpoilsLedgerPresenter.RecentBestFormatKey: return "Recent best haul: {0} tradeable";
+                case MvpRecentSpoilsLedgerPresenter.TrendFormatKey: return "Spoils trend: {0}";
+                case MvpRecentSpoilsLedgerPresenter.NoneYetKey: return "none yet";
+                case MvpRecentSpoilsLedgerPresenter.TrendRunDungeonKey: return "Run the dungeon to recover trade goods.";
+                case MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey: return "Latest run produced the strongest recent haul.";
+                case MvpLoopSummaryPanelPresenter.LootEntryFormatKey: return "{0}x {1}";
+                case "loot.item.salvage.trap.name": return "Trap salvage";
                 case MvpPostContractGreedTrialPresenter.TitleKey: return "Post-Contract Greed Trial";
                 case MvpPostContractGreedTrialPresenter.GreedSetupFormatKey: return "Greed setup tested: {0}";
                 case MvpPostContractGreedTrialPresenter.HeatStabilizedFormatKey: return "Heat stabilized: {0}";

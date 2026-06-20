@@ -2162,6 +2162,50 @@
     {
       "key": "ui.mvp_greed_trial.next_action.complete",
       "text": "Greed trial complete. Continue improving reward pressure without losing heat control."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.title",
+      "text": "Recent Spoils Ledger"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.latest_haul_format",
+      "text": "Latest haul: {0}"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.recovered_value_format",
+      "text": "Recovered value: {0} tradeable"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.recent_best_format",
+      "text": "Recent best haul: {0} tradeable"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend_format",
+      "text": "Spoils trend: {0}"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.value.none_yet",
+      "text": "none yet"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend.run_dungeon",
+      "text": "Run the dungeon to recover trade goods."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend.latest_best",
+      "text": "Latest run produced the strongest recent haul."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend.greed_heat_warning",
+      "text": "Greed pressure is producing loot, but heat control still matters."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend.greed_stabilized",
+      "text": "Greed pressure is stabilized; continue improving reward pressure."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.trend.steady",
+      "text": "Recent hauls are steady."
     }
   ]
 }

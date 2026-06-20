@@ -48,6 +48,7 @@ namespace DungeonBuilder.Tests.EditMode
                 "Status banner.",
                 new MvpFirstSessionObjectiveSummary { RuleResolved = true, RequiredRecoveredLootValue = 10, AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId },
                 null,
+                null,
                 Localize);
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -118,11 +119,49 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 new MvpFirstSessionObjectiveSummary { RuleResolved = true },
                 null,
+                null,
                 Localize);
 
             Assert.That(text, Does.Contain("Next: run again to test the placement change."));
             Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
             Assert.That(text, Does.Not.Contain("Next: adjust one placement before the next adventurer visit."));
+        }
+
+
+        [Test]
+        public void BuildScreenText_IncludesRecentSpoilsLedgerPanel()
+        {
+            string text = MvpPlayableScreenPresenter.BuildScreenText(
+                new MvpPlayerLoopSummary { RuleResolved = true, HasResearchStatus = true, ResearchStatusKey = MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey, NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey },
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty,
+                "Loot",
+                "Basic Loot",
+                string.Empty,
+                string.Empty,
+                "Balanced",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true },
+                null,
+                new MvpRecentSpoilsLedgerSummary
+                {
+                    RuleResolved = true,
+                    HasRunHistory = true,
+                    HasLootData = true,
+                    LatestTradeableValue = 5,
+                    RecentBestTradeableValue = 5,
+                    LatestNamedLootTextAvailable = true,
+                    LatestLootBreakdown = new[] { new RunLootDropRecord { NameKey = "loot.item.salvage.trap.name", Quantity = 1, TotalTradeableWorldValue = 5 } },
+                    TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey
+                },
+                Localize);
+
+            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
+            Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
         private static string Localize(string key, string fallback)
@@ -132,6 +171,15 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
+
+            [MvpRecentSpoilsLedgerPresenter.TitleKey] = "Recent Spoils Ledger",
+            [MvpRecentSpoilsLedgerPresenter.LatestHaulFormatKey] = "Latest haul: {0}",
+            [MvpRecentSpoilsLedgerPresenter.RecoveredValueFormatKey] = "Recovered value: {0} tradeable",
+            [MvpRecentSpoilsLedgerPresenter.RecentBestFormatKey] = "Recent best haul: {0} tradeable",
+            [MvpRecentSpoilsLedgerPresenter.TrendFormatKey] = "Spoils trend: {0}",
+            [MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey] = "Latest run produced the strongest recent haul.",
+            [MvpLoopSummaryPanelPresenter.LootEntryFormatKey] = "{0}x {1}",
+            ["loot.item.salvage.trap.name"] = "Trap salvage",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",

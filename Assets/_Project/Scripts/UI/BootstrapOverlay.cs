@@ -502,11 +502,13 @@ namespace DungeonBuilder.M0
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             MvpFirstSessionObjectiveSummary firstSessionObjective = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig);
+            MvpPostContractGreedTrialSummary greedTrial = MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _root.RunSimulationConfig, firstSessionObjective);
             return new BootstrapSmokeTextComposer.Context(
                 summary,
                 guidedPath,
                 firstSessionObjective,
-                MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _root.RunSimulationConfig, firstSessionObjective),
+                greedTrial,
+                MvpRecentSpoilsLedgerPresenter.Resolve(_root.Save, greedTrial),
                 MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 _selectedMvpPlacementCategoryId,
