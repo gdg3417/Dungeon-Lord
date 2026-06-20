@@ -125,7 +125,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void BuildLoopSummarySectionText_EmptySpoilsLedgerIsSafeAndLocalized()
+        public void BuildLoopSummarySectionText_EmptySpoilsLedgerDoesNotRender()
         {
             var context = CreateContext(recentSpoilsLedger: new MvpRecentSpoilsLedgerSummary
             {
@@ -135,8 +135,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
 
-            Assert.That(text, Does.Contain("Latest haul: none yet"));
-            Assert.That(text, Does.Contain("Run the dungeon to recover trade goods."));
+            Assert.That(text, Does.Not.Contain("Recent Spoils Ledger"));
             Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
             Assert.That(text, Does.Contain("Loop Summary (1/1)"));
         }

@@ -52,25 +52,49 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            var builder = new StringBuilder();
-            AppendLine(builder, Localize(localize, TitleKey));
+            if (!summary.HasLootData && summary.LatestTradeableValue <= 0 && summary.RecentBestTradeableValue <= 0)
+            {
+                return string.Empty;
+            }
+
+            string title = LocalizeRequired(localize, TitleKey);
+            string latestHaulFormat = LocalizeRequired(localize, LatestHaulFormatKey);
+            string recoveredValueFormat = LocalizeRequired(localize, RecoveredValueFormatKey);
+            string recentBestFormat = LocalizeRequired(localize, RecentBestFormatKey);
+            string trendFormat = LocalizeRequired(localize, TrendFormatKey);
+            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(latestHaulFormat) ||
+                string.IsNullOrEmpty(recoveredValueFormat) || string.IsNullOrEmpty(recentBestFormat) ||
+                string.IsNullOrEmpty(trendFormat))
+            {
+                return string.Empty;
+            }
+
             string namedLoot = summary.LatestNamedLootTextAvailable
                 ? MvpLoopSummaryPanelPresenter.BuildNamedLootText(summary.LatestLootBreakdown, localize)
                 : string.Empty;
+            if (summary.LatestTradeableValue <= 0 && summary.RecentBestTradeableValue <= 0 && string.IsNullOrWhiteSpace(namedLoot))
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            AppendLine(builder, title);
             if (!string.IsNullOrWhiteSpace(namedLoot) || summary.LatestTradeableValue <= 0)
             {
-                string latestHaul = !string.IsNullOrWhiteSpace(namedLoot) ? namedLoot : Localize(localize, NoneYetKey);
-                AppendLine(builder, string.Format(Localize(localize, LatestHaulFormatKey), latestHaul));
+                string latestHaul = !string.IsNullOrWhiteSpace(namedLoot) ? namedLoot : LocalizeOptional(localize, NoneYetKey, "none yet");
+                AppendLine(builder, string.Format(latestHaulFormat, latestHaul));
             }
             if (summary.LatestTradeableValue > 0)
             {
-                AppendLine(builder, string.Format(Localize(localize, RecoveredValueFormatKey), summary.LatestTradeableValue));
+                AppendLine(builder, string.Format(recoveredValueFormat, summary.LatestTradeableValue));
             }
             if (summary.HasRunHistory || summary.RecentBestTradeableValue > 0)
             {
-                AppendLine(builder, string.Format(Localize(localize, RecentBestFormatKey), summary.RecentBestTradeableValue));
+                AppendLine(builder, string.Format(recentBestFormat, summary.RecentBestTradeableValue));
             }
-            AppendLine(builder, string.Format(Localize(localize, TrendFormatKey), Localize(localize, string.IsNullOrWhiteSpace(summary.TrendKey) ? TrendRunDungeonKey : summary.TrendKey)));
+            string trend = LocalizeOptional(localize, string.IsNullOrWhiteSpace(summary.TrendKey) ? TrendRunDungeonKey : summary.TrendKey, string.Empty);
+            if (string.IsNullOrWhiteSpace(trend)) return string.Empty;
+            AppendLine(builder, string.Format(trendFormat, trend));
             return builder.ToString();
         }
 
@@ -131,7 +155,18 @@ namespace DungeonBuilder.M0
             return clone;
         }
 
-        private static string Localize(Func<string, string, string> localize, string key) => localize == null ? key : localize(key, key);
+        private static string LocalizeRequired(Func<string, string, string> localize, string key)
+        {
+            string value = localize == null ? string.Empty : localize(key, key);
+            return string.Equals(value, key, StringComparison.Ordinal) ? string.Empty : value;
+        }
+
+        private static string LocalizeOptional(Func<string, string, string> localize, string key, string fallback)
+        {
+            string value = localize == null ? string.Empty : localize(key, key);
+            return string.Equals(value, key, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
         private static void AppendLine(StringBuilder builder, string line) { if (builder.Length > 0) builder.Append('\n'); builder.Append(line ?? string.Empty); }
     }
 

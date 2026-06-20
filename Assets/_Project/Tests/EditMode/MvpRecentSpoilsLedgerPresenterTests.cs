@@ -7,14 +7,19 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpRecentSpoilsLedgerPresenterTests
     {
         [Test]
-        public void Resolve_NoRunHistoryProducesSafeEmptyState()
+        public void Resolve_NoRunHistoryProducesNoPanel()
         {
             MvpRecentSpoilsLedgerSummary summary = MvpRecentSpoilsLedgerPresenter.Resolve(new SaveData(), null);
             string text = MvpRecentSpoilsLedgerPresenter.BuildPanelText(summary, Localize);
-            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
-            Assert.That(text, Does.Contain("Latest haul: none yet"));
-            Assert.That(text, Does.Contain("Run the dungeon to recover trade goods."));
-            Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
+            Assert.That(text, Is.Empty);
+        }
+
+        [Test]
+        public void BuildPanelText_MissingLedgerLocalizationReturnsNoRawKeys()
+        {
+            MvpRecentSpoilsLedgerSummary summary = MvpRecentSpoilsLedgerPresenter.Resolve(SaveWithRuns(Run(5, Loot("loot.item.salvage.trap.name", 1, 5))), null);
+            string text = MvpRecentSpoilsLedgerPresenter.BuildPanelText(summary, (key, fallback) => fallback);
+            Assert.That(text, Is.Empty);
         }
 
         [Test]

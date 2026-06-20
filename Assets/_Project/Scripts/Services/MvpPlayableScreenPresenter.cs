@@ -66,8 +66,6 @@ namespace DungeonBuilder.M0
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(greedTrial, localize);
             if (!string.IsNullOrWhiteSpace(greedTrialText)) AppendLine(builder, greedTrialText);
-            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(recentSpoilsLedger, localize);
-            if (!string.IsNullOrWhiteSpace(spoilsText)) AppendLine(builder, spoilsText);
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));
@@ -76,6 +74,8 @@ namespace DungeonBuilder.M0
             AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
             AppendLine(builder, BuildPartyLine(summary, localize));
             AppendLine(builder, BuildLootLine(summary, localize));
+            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(recentSpoilsLedger, localize);
+            if (!string.IsNullOrWhiteSpace(spoilsText)) AppendLine(builder, spoilsText);
             AppendLine(builder, BuildHeatLine(summary, localize));
 
             AppendSection(builder, localize, AnalysisNextActionKey);
