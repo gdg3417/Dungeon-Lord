@@ -21,6 +21,7 @@ namespace DungeonBuilder.Tests.EditMode
                     AppliedAnalysisAdjustmentKey = BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey
                 },
                 null,
+                null,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -77,6 +78,7 @@ namespace DungeonBuilder.Tests.EditMode
                     AnalysisComplete = true,
                     IsComplete = true
                 },
+                null,
                 string.Empty,
                 string.Empty,
                 string.Empty,
@@ -101,6 +103,50 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Contract status: Complete. Try a riskier setup or improve loot recovery."));
             Assert.That(text, Does.Contain("Completion: First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis."));
             Assert.That(text, Does.Contain("Next objective: Test a greedier reward setup while keeping heat under control."));
+        }
+
+
+        [Test]
+        public void BuildLoopSummarySectionText_IncompleteFirstContractOmitsGreedTrial()
+        {
+            var context = new BootstrapSmokeTextComposer.Context(
+                AnalysisSummary(),
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = false, RequiredRecoveredLootValue = 10 },
+                new MvpPostContractGreedTrialSummary { RuleResolved = false, IsActive = false },
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                null, string.Empty, string.Empty, false, string.Empty, 0, 1);
+
+            string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
+
+            Assert.That(text, Does.Not.Contain("Post-Contract Greed Trial"));
+        }
+
+        [Test]
+        public void BuildLoopSummarySectionText_CompleteFirstContractShowsCompleteGreedTrial()
+        {
+            var context = new BootstrapSmokeTextComposer.Context(
+                AnalysisSummary(),
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true, RequiredRecoveredLootValue = 10 },
+                new MvpPostContractGreedTrialSummary
+                {
+                    RuleResolved = true,
+                    IsActive = true,
+                    GreedSetupTestedComplete = true,
+                    HeatStabilizedComplete = true,
+                    RiskResponseComplete = true,
+                    IsComplete = true,
+                    NextActionKey = MvpPostContractGreedTrialPresenter.NextActionCompleteKey
+                },
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                null, string.Empty, string.Empty, false, string.Empty, 0, 1);
+
+            string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
+
+            Assert.That(text, Does.Contain("Post-Contract Greed Trial"));
+            Assert.That(text, Does.Contain("Trial status: Complete. Greed pressure tested and stabilized."));
+            Assert.That(text, Does.Not.Contain("ui.mvp_greed_trial"));
         }
 
         private static MvpPlayerLoopSummary AnalysisSummary()
@@ -184,6 +230,17 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.CompletionFirstContractCompleteKey: return "First contract complete. Your dungeon can attract adventurers, recover loot, control heat, and use analysis.";
                 case MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey: return "Next objective: {0}";
                 case MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey: return "Test a greedier reward setup while keeping heat under control.";
+                case MvpPostContractGreedTrialPresenter.TitleKey: return "Post-Contract Greed Trial";
+                case MvpPostContractGreedTrialPresenter.GreedSetupFormatKey: return "Greed setup tested: {0}";
+                case MvpPostContractGreedTrialPresenter.HeatStabilizedFormatKey: return "Heat stabilized: {0}";
+                case MvpPostContractGreedTrialPresenter.RiskResponseFormatKey: return "Risk response: {0}";
+                case MvpPostContractGreedTrialPresenter.StatusFormatKey: return "Trial status: {0}";
+                case MvpPostContractGreedTrialPresenter.StatusInProgressKey: return "In progress";
+                case MvpPostContractGreedTrialPresenter.StatusCompleteKey: return "Complete. Greed pressure tested and stabilized.";
+                case MvpPostContractGreedTrialPresenter.ValueCompleteKey: return "complete";
+                case MvpPostContractGreedTrialPresenter.ValueIncompleteKey: return "incomplete";
+                case MvpPostContractGreedTrialPresenter.NextActionFormatKey: return "Next action: {0}";
+                case MvpPostContractGreedTrialPresenter.NextActionCompleteKey: return "Greed trial complete. Continue improving reward pressure without losing heat control.";
                 case CurrentHeatTierResolver.PeaceTierId: return "Peace";
                 default: return fallback;
             }

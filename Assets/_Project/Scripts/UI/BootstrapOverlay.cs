@@ -501,10 +501,12 @@ namespace DungeonBuilder.M0
             ClearStaleRoomSlotPlacementFailureFeedback();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
+            MvpFirstSessionObjectiveSummary firstSessionObjective = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig);
             return new BootstrapSmokeTextComposer.Context(
                 summary,
                 guidedPath,
-                MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig),
+                firstSessionObjective,
+                MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _root.RunSimulationConfig, firstSessionObjective),
                 MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 _selectedMvpPlacementCategoryId,

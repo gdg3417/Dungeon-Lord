@@ -13,6 +13,7 @@ namespace DungeonBuilder.M0
                 MvpPlayerLoopSummary summary,
                 GuidedMvpActionPathSummary guidedPath,
                 MvpFirstSessionObjectiveSummary firstSessionObjective,
+                MvpPostContractGreedTrialSummary greedTrial,
                 string dungeonLayoutText,
                 string selectedCategoryName,
                 string selectedPlacementCategoryId,
@@ -35,6 +36,7 @@ namespace DungeonBuilder.M0
                 Summary = summary;
                 GuidedPath = guidedPath;
                 FirstSessionObjective = firstSessionObjective;
+                GreedTrial = greedTrial;
                 DungeonLayoutText = dungeonLayoutText;
                 SelectedCategoryName = selectedCategoryName;
                 SelectedPlacementCategoryId = selectedPlacementCategoryId;
@@ -58,6 +60,7 @@ namespace DungeonBuilder.M0
             public MvpPlayerLoopSummary Summary { get; }
             public GuidedMvpActionPathSummary GuidedPath { get; }
             public MvpFirstSessionObjectiveSummary FirstSessionObjective { get; }
+            public MvpPostContractGreedTrialSummary GreedTrial { get; }
             public string DungeonLayoutText { get; }
             public string SelectedCategoryName { get; }
             public string SelectedPlacementCategoryId { get; }
@@ -115,6 +118,7 @@ namespace DungeonBuilder.M0
                 context.RunFeedback,
                 context.BannerMessage,
                 context.FirstSessionObjective,
+                context.GreedTrial,
                 localize));
             return builder.ToString();
         }
@@ -126,6 +130,8 @@ namespace DungeonBuilder.M0
             AppendCompactLoopSummaryLines(body, panelText, localize);
             AppendMvpDungeonLayoutText(body, context);
             AppendLine(body, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(context.FirstSessionObjective, localize));
+            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
+            if (!string.IsNullOrEmpty(greedTrialText)) AppendLine(body, greedTrialText);
             AppendLine(body, AdventurerRunIntentPresenter.BuildScoreSummaryLine(context.Summary?.AdventurerRunIntent, localize));
             AppendCompactAdventurersFallbackIfMissing(body, localize);
             AppendSelectedPlacementAndRunPlanPreviews(body, context);
@@ -156,6 +162,8 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(firstSessionText)) { AppendLine(body, string.Empty); AppendLine(body, firstSessionText); }
             string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(context.FirstSessionObjective, localize);
             if (!string.IsNullOrEmpty(firstContractText)) { AppendLine(body, string.Empty); AppendLine(body, firstContractText); }
+            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
+            if (!string.IsNullOrEmpty(greedTrialText)) { AppendLine(body, string.Empty); AppendLine(body, greedTrialText); }
             return BuildSectionText("ui.mvp_smoke.section.loop_summary", body.ToString(), context, localize);
         }
 
@@ -185,6 +193,8 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(firstSessionText)) { AppendLine(builder, string.Empty); AppendLine(builder, firstSessionText); }
             string firstContractText = MvpFirstSessionObjectivePresenter.BuildPanelText(context.FirstSessionObjective, localize);
             if (!string.IsNullOrEmpty(firstContractText)) { AppendLine(builder, string.Empty); AppendLine(builder, firstContractText); }
+            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(context.GreedTrial, localize);
+            if (!string.IsNullOrEmpty(greedTrialText)) { AppendLine(builder, string.Empty); AppendLine(builder, greedTrialText); }
             AppendLine(builder, string.Empty);
             AppendSelectedPlacementAndRunPlanPreviews(builder, context);
         }

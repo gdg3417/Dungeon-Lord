@@ -46,6 +46,7 @@ namespace DungeonBuilder.M0
             string runFeedback,
             string bannerMessage,
             MvpFirstSessionObjectiveSummary firstSessionObjective,
+            MvpPostContractGreedTrialSummary greedTrial,
             Func<string, string, string> localize)
         {
             var builder = new StringBuilder();
@@ -62,6 +63,8 @@ namespace DungeonBuilder.M0
             AppendLine(builder, BuildResearchLine(summary, localize));
 
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
+            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(greedTrial, localize);
+            if (!string.IsNullOrWhiteSpace(greedTrialText)) AppendLine(builder, greedTrialText);
 
             AppendSection(builder, localize, CurrentDungeonKey);
             AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));

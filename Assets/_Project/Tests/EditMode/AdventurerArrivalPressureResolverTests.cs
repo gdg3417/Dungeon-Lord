@@ -126,7 +126,7 @@ namespace DungeonBuilder.Tests.EditMode
         public void PlayableScreenIncludesCompactPressureLineAndPreservesSections()
         {
             var summary = LoopSummary();
-            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, Localized);
+            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, null, Localized);
             Assert.That(text, Does.Contain("Adventurer pressure: likely soon. Reason: high loot signal and low heat."));
             Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Activity Setup =="));

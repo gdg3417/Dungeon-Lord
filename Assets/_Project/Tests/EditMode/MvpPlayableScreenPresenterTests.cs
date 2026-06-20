@@ -47,6 +47,7 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 "Status banner.",
                 new MvpFirstSessionObjectiveSummary { RuleResolved = true, RequiredRecoveredLootValue = 10, AllowedMaxHeatTierId = CurrentHeatTierResolver.PeaceTierId, CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId },
+                null,
                 Localize);
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
@@ -116,6 +117,7 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 new MvpFirstSessionObjectiveSummary { RuleResolved = true },
+                null,
                 Localize);
 
             Assert.That(text, Does.Contain("Next: run again to test the placement change."));
