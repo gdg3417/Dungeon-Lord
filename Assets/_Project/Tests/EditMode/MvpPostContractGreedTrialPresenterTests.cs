@@ -96,6 +96,7 @@ namespace DungeonBuilder.Tests.EditMode
             HeatNoticeMaximum = 24d,
             HeatConcernMinimum = 25d,
             HeatConcernMaximum = 49d,
+            RunHeatApplicationRuleSourceId = "test.heat_application.rule",
             MvpPlacementEffects = new[]
             {
                 new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.RoomCategoryId, OptionId = MvpDungeonPlacementIds.BasicRoomOptionId, PathCapacity = 2 },

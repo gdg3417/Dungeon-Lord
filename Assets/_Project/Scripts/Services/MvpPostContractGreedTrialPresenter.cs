@@ -45,9 +45,10 @@ namespace DungeonBuilder.M0
             summary.RuleResolved = true;
             summary.IsActive = true;
             summary.PlacementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
-            summary.CurrentHeatTierId = CurrentHeatTierResolver.Resolve(config, save.structureRuntime?.Heat ?? 0d).TierId ?? string.Empty;
+            CurrentHeatTierSummary heat = CurrentHeatTierResolver.Resolve(config, save.structureRuntime?.Heat ?? 0d);
+            summary.CurrentHeatTierId = heat.RuleResolved ? heat.TierId : string.Empty;
             summary.GreedSetupTestedComplete = HasGreedierLootSetup(summary.PlacementEffects, config);
-            summary.HeatStabilizedComplete = string.Equals(summary.CurrentHeatTierId, CurrentHeatTierResolver.PeaceTierId, StringComparison.Ordinal);
+            summary.HeatStabilizedComplete = heat.RuleResolved && string.Equals(summary.CurrentHeatTierId, CurrentHeatTierResolver.PeaceTierId, StringComparison.Ordinal);
             summary.RiskResponseComplete = summary.GreedSetupTestedComplete && summary.PlacementEffects != null && summary.PlacementEffects.RuleResolved && summary.PlacementEffects.HeatPressure <= 0;
             summary.IsComplete = summary.GreedSetupTestedComplete && summary.HeatStabilizedComplete && summary.RiskResponseComplete;
             summary.NextActionKey = ResolveNextActionKey(summary);
