@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         public const string DangerFormatKey = "ui.mvp_placement_effects.danger_format";
         public const string ManaPressureFormatKey = "ui.mvp_placement_effects.mana_pressure_format";
         public const string HeatPressureFormatKey = "ui.mvp_placement_effects.heat_pressure_format";
+        public const string HeatReliefFormatKey = "ui.mvp_placement_effects.heat_relief_format";
         public const string LootBonusFormatKey = "ui.mvp_placement_effects.loot_bonus_format";
         public const string AttractionFormatKey = "ui.mvp_placement_effects.attraction_format";
         public const string ExplanationFormatKey = "ui.mvp_placement_effects.explanation_format";
@@ -28,7 +29,7 @@ namespace DungeonBuilder.M0
             AppendEffect(builder, separator, localize, PathCapacityFormatKey, effects.PathCapacity);
             AppendEffect(builder, separator, localize, DangerFormatKey, effects.Danger);
             AppendEffect(builder, separator, localize, ManaPressureFormatKey, effects.ManaPressure);
-            AppendEffect(builder, separator, localize, HeatPressureFormatKey, effects.HeatPressure);
+            AppendHeatEffect(builder, separator, localize, effects.HeatPressure);
             AppendEffect(builder, separator, localize, LootBonusFormatKey, effects.LootBonus);
             AppendEffect(builder, separator, localize, AttractionFormatKey, effects.Attraction);
 
@@ -78,6 +79,18 @@ namespace DungeonBuilder.M0
             }
 
             return builder.ToString();
+        }
+
+        private static void AppendHeatEffect(StringBuilder builder, string separator, Func<string, string, string> localize, int value)
+        {
+            if (value == 0)
+            {
+                return;
+            }
+
+            string formatKey = value < 0 ? HeatReliefFormatKey : HeatPressureFormatKey;
+            int displayValue = value < 0 ? Math.Abs(value) : value;
+            AppendEffect(builder, separator, localize, formatKey, displayValue);
         }
 
         private static void AppendEffect(StringBuilder builder, string separator, Func<string, string, string> localize, string formatKey, int value)

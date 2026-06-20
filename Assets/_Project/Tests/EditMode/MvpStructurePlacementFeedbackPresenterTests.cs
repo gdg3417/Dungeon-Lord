@@ -164,6 +164,35 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Changed Room"));
         }
 
+
+        [Test]
+        public void RoomTargetedPlacementFeedback_SnareTrapToChillingSigil_UsesLocalizedLabels()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                0,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.TrapCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SnareTrapOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.ChillingSigilOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Changed Room 1 Trap: Snare Trap -> Chilling Sigil."));
+            Assert.That(text, Does.Not.Contain(DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.ChillingSigilOptionId));
+        }
+
+        [Test]
+        public void RoomTargetedPlacementFeedback_SameChillingSigil_UsesAlreadySetFormat()
+        {
+            string text = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                0,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.TrapCategoryId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.ChillingSigilOptionId,
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.ChillingSigilOptionId,
+                Localized);
+
+            Assert.That(text, Is.EqualTo("Room 1 Trap already set to Chilling Sigil."));
+            Assert.That(text, Does.Not.Contain("Changed Room"));
+        }
+
         private static string Localized(string key, string fallback)
         {
             var map = new Dictionary<string, string>
@@ -183,10 +212,13 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpStructureImpactPreviewPresenter.UnknownPreviewKey] = "Role unavailable.",
                 [MvpDungeonPlacementPresenter.LootNodeCategoryKey] = "Loot node",
                 [MvpDungeonPlacementPresenter.MonsterCategoryKey] = "Monster",
+                [MvpDungeonPlacementPresenter.TrapCategoryKey] = "Trap",
                 [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node",
                 [MvpDungeonPlacementPresenter.GlitteringHoardOptionKey] = "Glittering Hoard",
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
-                [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin"
+                [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin",
+                [MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap",
+                [MvpDungeonPlacementPresenter.ChillingSigilOptionKey] = "Chilling Sigil"
             };
 
             return map.TryGetValue(key, out string value) ? value : fallback;

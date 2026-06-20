@@ -13,6 +13,10 @@ namespace DungeonBuilder.M0
         public const string GoblinToSkeletonSummaryKey = "ui.mvp_placement_comparison.monster.goblin_to_skeleton";
         public const string SpikeTrapToSnareTrapSummaryKey = "ui.mvp_placement_comparison.trap.spike_to_snare";
         public const string SnareTrapToSpikeTrapSummaryKey = "ui.mvp_placement_comparison.trap.snare_to_spike";
+        public const string SnareTrapToChillingSigilSummaryKey = "ui.mvp_placement_comparison.trap.snare_to_chilling_sigil";
+        public const string ChillingSigilToSnareTrapSummaryKey = "ui.mvp_placement_comparison.trap.chilling_sigil_to_snare";
+        public const string SpikeTrapToChillingSigilSummaryKey = "ui.mvp_placement_comparison.trap.spike_to_chilling_sigil";
+        public const string ChillingSigilToSpikeTrapSummaryKey = "ui.mvp_placement_comparison.trap.chilling_sigil_to_spike";
         public const string BasicLootNodeToHiddenCacheSummaryKey = "ui.mvp_placement_comparison.loot_node.basic_to_hidden_cache";
         public const string HiddenCacheToBasicLootNodeSummaryKey = "ui.mvp_placement_comparison.loot_node.hidden_cache_to_basic";
         public const string BasicLootNodeToGlitteringHoardSummaryKey = "ui.mvp_placement_comparison.loot_node.basic_to_glittering_hoard";
@@ -207,6 +211,10 @@ namespace DungeonBuilder.M0
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.GoblinOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SkeletonOptionId, StringComparison.Ordinal)) key = GoblinToSkeletonSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.SpikeTrapOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, StringComparison.Ordinal)) key = SpikeTrapToSnareTrapSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SpikeTrapOptionId, StringComparison.Ordinal)) key = SnareTrapToSpikeTrapSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, StringComparison.Ordinal)) key = SnareTrapToChillingSigilSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, StringComparison.Ordinal)) key = ChillingSigilToSnareTrapSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.SpikeTrapOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, StringComparison.Ordinal)) key = SpikeTrapToChillingSigilSummaryKey;
+            else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.SpikeTrapOptionId, StringComparison.Ordinal)) key = ChillingSigilToSpikeTrapSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId, StringComparison.Ordinal)) key = BasicLootNodeToHiddenCacheSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal)) key = HiddenCacheToBasicLootNodeSummaryKey;
             else if (string.Equals(baselineOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, StringComparison.Ordinal) && string.Equals(selectedOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId, StringComparison.Ordinal)) key = BasicLootNodeToGlitteringHoardSummaryKey;

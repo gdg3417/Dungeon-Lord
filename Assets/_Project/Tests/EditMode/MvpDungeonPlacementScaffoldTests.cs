@@ -30,7 +30,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlacementModel_InitializesWithExactlyFourCategoriesAndNineValidOptions()
+        public void PlacementModel_InitializesWithExactlyFourCategoriesAndTenValidOptions()
         {
             Assert.That(MvpDungeonPlacementIds.OrderedCategoryIds, Is.EqualTo(new[]
             {
@@ -54,11 +54,13 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpDungeonPlacementIds.GoblinOptionId,
                 MvpDungeonPlacementIds.SpikeTrapOptionId,
                 MvpDungeonPlacementIds.SnareTrapOptionId,
+                MvpDungeonPlacementIds.ChillingSigilOptionId,
                 MvpDungeonPlacementIds.BasicLootNodeOptionId,
                 MvpDungeonPlacementIds.HiddenCacheOptionId,
                 MvpDungeonPlacementIds.GlitteringHoardOptionId
             }));
             Assert.That(MvpDungeonPlacementIds.OrderedStarterOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.GlitteringHoardOptionId));
+            Assert.That(MvpDungeonPlacementIds.OrderedStarterOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.ChillingSigilOptionId));
         }
 
         [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)]
@@ -67,6 +69,7 @@ namespace DungeonBuilder.Tests.EditMode
         [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId)]
         [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId)]
         [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId)]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId)]
@@ -727,6 +730,7 @@ namespace DungeonBuilder.Tests.EditMode
                 map[MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall";
                 map[MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton";
                 map[MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin";
+                map[MvpDungeonPlacementPresenter.ChillingSigilOptionKey] = "Chilling Sigil";
                 map[MvpDungeonPlacementPresenter.SpikeTrapOptionKey] = "Spike Trap";
                 map[MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap";
                 map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
@@ -896,6 +900,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpDungeonPlacementPresenter.NarrowHallOptionKey] = "Narrow Hall",
                 [MvpDungeonPlacementPresenter.SkeletonOptionKey] = "Skeleton",
                 [MvpDungeonPlacementPresenter.GoblinOptionKey] = "Goblin",
+                [MvpDungeonPlacementPresenter.ChillingSigilOptionKey] = "Chilling Sigil",
                 [MvpDungeonPlacementPresenter.SpikeTrapOptionKey] = "Spike Trap",
                 [MvpDungeonPlacementPresenter.SnareTrapOptionKey] = "Snare Trap",
                 [MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node",
@@ -910,6 +915,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger {0}",
                 [MvpPlacementEffectsPresenter.ManaPressureFormatKey] = "mana pressure {0}",
                 [MvpPlacementEffectsPresenter.HeatPressureFormatKey] = "heat pressure {0}",
+                [MvpPlacementEffectsPresenter.HeatReliefFormatKey] = "heat relief {0}",
                 [MvpPlacementEffectsPresenter.LootBonusFormatKey] = "loot bonus {0}",
                 [MvpPlacementEffectsPresenter.AttractionFormatKey] = "attraction {0}",
                 [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",

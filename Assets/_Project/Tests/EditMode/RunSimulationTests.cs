@@ -206,6 +206,7 @@ namespace DungeonBuilder.Tests.EditMode
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId, Danger = 2, ManaPressure = 1, LootBonus = 1, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.monster.goblin" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Danger = 2, HeatPressure = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.spike" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SnareTrapOptionId, Danger = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.snare" },
+                    new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.ChillingSigilOptionId, HeatPressure = -1, ExplanationKey = "ui.mvp_placement_effects.explanation.trap.chilling_sigil" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId, LootBonus = 4, Attraction = 2, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.basic" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId, LootBonus = 3, Attraction = 1, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.hidden_cache" },
                     new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId, OptionId = MvpDungeonPlacementIds.GlitteringHoardOptionId, HeatPressure = 1, LootBonus = 6, Attraction = 4, ExplanationKey = "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard" }
@@ -1347,6 +1348,25 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(result.IsValid, Is.True);
             Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(result.IsValid));
+        }
+
+
+        [Test]
+        public void BootstrapConfigValidationService_PlacementEffectAllowsSignedHeatPressureOnly()
+        {
+            RunSimulationConfig config = BuildConfig();
+
+            BootstrapConfigValidationResult validResult = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(validResult.IsValid, Is.True);
+            Assert.That(config.MvpPlacementEffects, Has.Some.Matches<MvpPlacementEffectConfig>(effect =>
+                effect.OptionId == MvpDungeonPlacementIds.ChillingSigilOptionId && effect.HeatPressure == -1));
+
+            config.MvpPlacementEffects[0].Danger = -1;
+            BootstrapConfigValidationResult invalidDangerResult = BootstrapConfigValidationService.ValidateRunSimulationConfig(config);
+
+            Assert.That(invalidDangerResult.IsValid, Is.False);
+            Assert.That(GameRoot.IsValidRunSimulationConfig(config), Is.EqualTo(invalidDangerResult.IsValid));
         }
 
         [Test]
@@ -3000,6 +3020,31 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(hoard.RunHeatDeltaSummary.FinalHeatDelta, Is.GreaterThan(basic.RunHeatDeltaSummary.FinalHeatDelta));
         }
 
+
+        [Test]
+        public void SimulateOnce_GlitteringHoardWithChillingSigilHasLowerHeatPressureThanSnareTrap()
+        {
+            RunSimulationConfig config = BuildConfig();
+            var service = new RunSimulationService(config, BuildLootConfig());
+
+            RunOutcomeRecord snare = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                50,
+                1,
+                RunPostureResolver.BalancedId,
+                MvpPlacementEffectsResolver.Resolve(TrapAndLootPlacementState(MvpDungeonPlacementIds.SnareTrapOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId), config));
+            RunOutcomeRecord sigil = service.SimulateOnce(
+                new StructureRuntimeState { Heat = 0d, ManaReserve = 20d, IsHeatCrisisActive = false },
+                50,
+                1,
+                RunPostureResolver.BalancedId,
+                MvpPlacementEffectsResolver.Resolve(TrapAndLootPlacementState(MvpDungeonPlacementIds.ChillingSigilOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId), config));
+
+            Assert.That(snare.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.EqualTo(1));
+            Assert.That(sigil.CompositionOutcomeSummary.PlacementEffects.HeatPressure, Is.EqualTo(0));
+            Assert.That(sigil.RunHeatDeltaSummary.FinalHeatDelta, Is.LessThan(snare.RunHeatDeltaSummary.FinalHeatDelta));
+        }
+
         [Test]
         public void SimulateOnce_CompositionOutcome_FullStarterCompositionAffectsLootAndPressure()
         {
@@ -3356,6 +3401,15 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var state = new MvpDungeonPlacementState();
             state.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, lootOptionId, 1));
+            return state;
+        }
+
+
+        private static MvpDungeonPlacementState TrapAndLootPlacementState(string trapOptionId, string lootOptionId)
+        {
+            var state = new MvpDungeonPlacementState();
+            state.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.TrapCategoryId, trapOptionId, 1));
+            state.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, lootOptionId, 2));
             return state;
         }
 

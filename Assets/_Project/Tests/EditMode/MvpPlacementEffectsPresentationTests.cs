@@ -60,6 +60,23 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(requestedKeys, Does.Contain("effect.monster"));
         }
 
+
+        [Test]
+        public void PlacementEffects_NegativeHeatPressureDisplaysAsHeatReliefWithoutAwkwardSign()
+        {
+            var effects = new MvpPlacementEffectsSummary
+            {
+                RuleResolved = true,
+                HeatPressure = -1,
+                EffectLocalizationKeys = new[] { "effect.chilling_sigil" }
+            };
+
+            string text = MvpPlacementEffectsPresenter.BuildEffectsText(effects, Localized);
+
+            Assert.That(text, Does.Contain("heat relief +1"));
+            Assert.That(text, Does.Not.Contain("+-"));
+        }
+
         private static MvpPlayerLoopSummary SummaryWithEffects(bool hasRun = false)
         {
             return new MvpPlayerLoopSummary
@@ -177,11 +194,13 @@ namespace DungeonBuilder.Tests.EditMode
                 [MvpPlacementEffectsPresenter.DangerFormatKey] = "danger +{0}",
                 [MvpPlacementEffectsPresenter.ManaPressureFormatKey] = "mana +{0}",
                 [MvpPlacementEffectsPresenter.HeatPressureFormatKey] = "heat +{0}",
+                [MvpPlacementEffectsPresenter.HeatReliefFormatKey] = "heat relief +{0}",
                 [MvpPlacementEffectsPresenter.LootBonusFormatKey] = "loot +{0}",
                 [MvpPlacementEffectsPresenter.AttractionFormatKey] = "attraction +{0}",
                 [MvpPlacementEffectsPresenter.ExplanationFormatKey] = "{0} ({1})",
                 ["effect.room"] = "Room path",
                 ["effect.monster"] = "Skeleton pressure",
+                ["effect.chilling_sigil"] = "Chilling Sigil cooling",
                 [MvpRunResultFeedbackPresenter.SuccessStableHeatKey] = "Adventurer visit result: stable.",
                 [MvpRunResultFeedbackPresenter.OutcomeCueControlledLootKey] = "Outcome: loot controlled.",
                 [MvpRunResultFeedbackPresenter.OutcomeCueFormatKey] = "{0} {1}",

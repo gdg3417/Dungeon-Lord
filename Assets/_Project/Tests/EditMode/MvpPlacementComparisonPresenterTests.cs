@@ -9,6 +9,9 @@ namespace DungeonBuilder.Tests.EditMode
         [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, MvpDungeonPlacementIds.NarrowHallOptionId, MvpPlacementComparisonPresenter.BasicRoomToNarrowHallSummaryKey, -1, 0, 0, 0, 0, 0)]
         [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.GoblinOptionId, MvpPlacementComparisonPresenter.SkeletonToGoblinSummaryKey, 0, -1, -1, 0, 1, 1)]
         [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, MvpPlacementComparisonPresenter.SpikeTrapToSnareTrapSummaryKey, 0, -1, 0, -1, 0, 0)]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, MvpPlacementComparisonPresenter.SnareTrapToChillingSigilSummaryKey, 0, -1, 0, -1, 0, 0)]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId, MvpDungeonPlacementIds.SnareTrapOptionId, MvpPlacementComparisonPresenter.ChillingSigilToSnareTrapSummaryKey, 0, 1, 0, 1, 0, 0)]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, MvpDungeonPlacementIds.ChillingSigilOptionId, MvpPlacementComparisonPresenter.SpikeTrapToChillingSigilSummaryKey, 0, -2, 0, -2, 0, 0)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, MvpDungeonPlacementIds.HiddenCacheOptionId, MvpPlacementComparisonPresenter.BasicLootNodeToHiddenCacheSummaryKey, 0, 0, 0, 0, -1, -1)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, MvpDungeonPlacementIds.GlitteringHoardOptionId, MvpPlacementComparisonPresenter.BasicLootNodeToGlitteringHoardSummaryKey, 0, 0, 0, 1, 2, 2)]
         [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId, MvpDungeonPlacementIds.BasicLootNodeOptionId, MvpPlacementComparisonPresenter.GlitteringHoardToBasicLootNodeSummaryKey, 0, 0, 0, -1, -2, -2)]
@@ -239,6 +242,7 @@ namespace DungeonBuilder.Tests.EditMode
                     Effect(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 0, 2, 1, 0, 1, 1),
                     Effect(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 0, 2, 0, 1, 0, 0),
                     Effect(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId, 0, 1, 0, 0, 0, 0),
+                    Effect(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId, 0, 0, 0, -1, 0, 0),
                     Effect(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 0, 0, 0, 0, 4, 2),
                     Effect(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, 0, 0, 0, 0, 3, 1),
                     Effect(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId, 0, 0, 0, 1, 6, 4)
