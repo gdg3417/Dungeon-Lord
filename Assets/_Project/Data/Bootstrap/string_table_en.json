@@ -2206,6 +2206,26 @@
     {
       "key": "ui.mvp_spoils_ledger.trend.steady",
       "text": "Recent hauls are steady."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.appraisal_format",
+      "text": "Appraisal: {0}"
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.appraisal.item_trade_good",
+      "text": "{0} is a useful dungeon trade good. Keep greed pressure stable to recover better hauls."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.appraisal.multi_trade_goods",
+      "text": "These trade goods are worth keeping. Better reward pressure can improve future hauls."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.appraisal.value_only",
+      "text": "Recovered trade goods are ready for future merchant systems."
+    },
+    {
+      "key": "ui.mvp_spoils_ledger.appraisal.greed_stabilized",
+      "text": "Greed pressure is stable. Continue improving reward pressure without losing heat control."
     }
   ]
 }

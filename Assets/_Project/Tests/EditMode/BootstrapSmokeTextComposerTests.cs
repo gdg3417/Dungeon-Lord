@@ -114,7 +114,10 @@ namespace DungeonBuilder.Tests.EditMode
                 RecentBestTradeableValue = 5,
                 LatestNamedLootTextAvailable = true,
                 LatestLootBreakdown = new[] { new RunLootDropRecord { NameKey = "loot.item.salvage.trap.name", Quantity = 1, TotalTradeableWorldValue = 5 } },
-                TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey
+                TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey,
+                HasAppraisal = true,
+                AppraisalKey = MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey,
+                AppraisalArgumentNameKey = "loot.item.salvage.trap.name"
             });
 
             string text = BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(context, Localize);
@@ -122,6 +125,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Recent Spoils Ledger"));
             Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
             Assert.That(text, Does.Contain("Recent best haul: 5 tradeable"));
+            Assert.That(text, Does.Contain("Appraisal: Trap salvage is a useful dungeon trade good."));
+            Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
         [Test]
@@ -260,6 +265,9 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpRecentSpoilsLedgerPresenter.RecoveredValueFormatKey: return "Recovered value: {0} tradeable";
                 case MvpRecentSpoilsLedgerPresenter.RecentBestFormatKey: return "Recent best haul: {0} tradeable";
                 case MvpRecentSpoilsLedgerPresenter.TrendFormatKey: return "Spoils trend: {0}";
+                case MvpRecentSpoilsLedgerPresenter.AppraisalFormatKey: return "Appraisal: {0}";
+                case MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey: return "{0} is a useful dungeon trade good. Keep greed pressure stable to recover better hauls.";
+                case MvpRecentSpoilsLedgerPresenter.AppraisalValueOnlyKey: return "Recovered trade goods are ready for future merchant systems.";
                 case MvpRecentSpoilsLedgerPresenter.NoneYetKey: return "none yet";
                 case MvpRecentSpoilsLedgerPresenter.TrendRunDungeonKey: return "Run the dungeon to recover trade goods.";
                 case MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey: return "Latest run produced the strongest recent haul.";
