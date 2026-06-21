@@ -2214,6 +2214,14 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.run_setup"] = "Activity Setup";
             map["ui.mvp_screen.section.latest_run"] = "Latest Adventurer Visit";
             map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
+            map["ui.mvp_primary_next_action.compact_format"] = "Next: {0} ({1})";
+            map["ui.mvp_primary_next_action.source.first_contract"] = "First Dungeon Contract";
+            map["ui.mvp_primary_next_action.source.greed_trial"] = "Post-Contract Greed Trial";
+            map["ui.mvp_primary_next_action.source.applied_adjustment"] = "Applied activity-analysis change";
+            map["ui.mvp_primary_next_action.source.activity_analysis"] = "Adventurer Activity Analysis";
+            map["ui.mvp_primary_next_action.source.guided_path"] = "Guided MVP path";
+            map["ui.mvp_primary_next_action.source.summary"] = "Dungeon loop summary";
+            map["ui.mvp_primary_next_action.first_contract.incomplete"] = "Complete the First Dungeon Contract.";
             map["ui.mvp_screen.section.first_contract"] = "First Dungeon Contract";
             map["ui.mvp_first_contract.title"] = "First Dungeon Contract";
             map["ui.mvp_first_contract.path_built_format"] = "Path built: {0}";

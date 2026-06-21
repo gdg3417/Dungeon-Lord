@@ -58,9 +58,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Activity Setup =="));
             Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
-            Assert.That(text, Does.Contain("Primary Next Action"));
-            Assert.That(text, Does.Contain("Do next: Complete the First Dungeon Contract."));
-            Assert.That(text, Does.Contain("Priority source: First Dungeon Contract"));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(text, Does.Not.Contain("Path built:"));
             Assert.That(text, Does.Not.Contain("Visit observed:"));
@@ -120,8 +118,8 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 string.Empty,
-                new MvpFirstSessionObjectiveSummary { RuleResolved = true },
-                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true },
+                new MvpPostContractGreedTrialSummary { RuleResolved = true, IsActive = true, IsComplete = true },
                 null,
                 Localize);
 
@@ -194,9 +192,8 @@ namespace DungeonBuilder.Tests.EditMode
                 Localize);
 
             Assert.That(text, Does.Contain("Recent Spoils Ledger"));
-            Assert.That(text, Does.Contain("Do next: Complete the First Dungeon Contract."));
-            Assert.That(text, Does.Contain("Priority source: First Dungeon Contract"));
-            Assert.That(text, Does.Not.Contain("Do next: Latest run produced the strongest recent haul."));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
+            Assert.That(text, Does.Not.Contain("Next: Latest run produced the strongest recent haul."));
         }
 
         private static string Localize(string key, string fallback)
@@ -207,9 +204,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
 
-            [MvpPrimaryNextActionPresenter.TitleKey] = "Primary Next Action",
-            [MvpPrimaryNextActionPresenter.ActionFormatKey] = "Do next: {0}",
-            [MvpPrimaryNextActionPresenter.SourceFormatKey] = "Priority source: {0}",
+            [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
             [MvpPrimaryNextActionPresenter.SourceGreedTrialKey] = "Post-Contract Greed Trial",
             [MvpPrimaryNextActionPresenter.SourceAppliedAdjustmentKey] = "Applied activity-analysis change",

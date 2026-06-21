@@ -17,9 +17,7 @@ namespace DungeonBuilder.M0
         public const string SourceGuidedPath = "guided_path";
         public const string SourceSummary = "summary";
 
-        public const string TitleKey = "ui.mvp_primary_next_action.title";
-        public const string ActionFormatKey = "ui.mvp_primary_next_action.action_format";
-        public const string SourceFormatKey = "ui.mvp_primary_next_action.source_format";
+        public const string CompactLineFormatKey = "ui.mvp_primary_next_action.compact_format";
         public const string SourceFirstContractKey = "ui.mvp_primary_next_action.source.first_contract";
         public const string SourceGreedTrialKey = "ui.mvp_primary_next_action.source.greed_trial";
         public const string SourceAppliedAdjustmentKey = "ui.mvp_primary_next_action.source.applied_adjustment";
@@ -71,9 +69,7 @@ namespace DungeonBuilder.M0
             if (summary == null) summary = Resolve(null, null, null, null);
             string action = Localize(localize, string.IsNullOrWhiteSpace(summary.PrimaryActionKey) ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey : summary.PrimaryActionKey);
             string source = Localize(localize, string.IsNullOrWhiteSpace(summary.PrimaryActionSourceLabelKey) ? SourceSummaryKey : summary.PrimaryActionSourceLabelKey);
-            return Localize(localize, TitleKey) + "\n" +
-                   string.Format(Localize(localize, ActionFormatKey), action) + "\n" +
-                   string.Format(Localize(localize, SourceFormatKey), source);
+            return string.Format(Localize(localize, CompactLineFormatKey), action, source);
         }
 
         private static MvpPrimaryNextActionSummary Create(string rule, string actionKey, string source, string sourceLabelKey, string detailKey = null)

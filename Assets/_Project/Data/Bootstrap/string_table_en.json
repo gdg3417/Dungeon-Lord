@@ -1608,16 +1608,8 @@
       "text": "Analysis and Next Action"
     },
     {
-      "key": "ui.mvp_primary_next_action.title",
-      "text": "Primary Next Action"
-    },
-    {
-      "key": "ui.mvp_primary_next_action.action_format",
-      "text": "Do next: {0}"
-    },
-    {
-      "key": "ui.mvp_primary_next_action.source_format",
-      "text": "Priority source: {0}"
+      "key": "ui.mvp_primary_next_action.compact_format",
+      "text": "Next: {0} ({1})"
     },
     {
       "key": "ui.mvp_primary_next_action.source.first_contract",

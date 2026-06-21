@@ -69,9 +69,7 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpPrimaryNextActionPresenter.Resolve(null, null, new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = false }, null),
                 Localize);
 
-            Assert.That(text, Does.Contain("Primary Next Action"));
-            Assert.That(text, Does.Contain("Do next: Complete the First Dungeon Contract."));
-            Assert.That(text, Does.Contain("Priority source: First Dungeon Contract"));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
@@ -102,9 +100,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
-            [MvpPrimaryNextActionPresenter.TitleKey] = "Primary Next Action",
-            [MvpPrimaryNextActionPresenter.ActionFormatKey] = "Do next: {0}",
-            [MvpPrimaryNextActionPresenter.SourceFormatKey] = "Priority source: {0}",
+            [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
             [MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey] = "Complete the First Dungeon Contract."
         };
