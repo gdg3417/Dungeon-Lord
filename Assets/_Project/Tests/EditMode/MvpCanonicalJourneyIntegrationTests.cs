@@ -119,12 +119,13 @@ namespace DungeonBuilder.Tests.EditMode
             AssertPrimaryNot(MvpPrimaryNextActionPresenter.SourceFirstContract);
 
             MvpPlayerLoopSummary beforeAdjustment = _root.ResolveMvpPlayerLoopSummary();
+            bool hasExpectedRecommendation =
+                string.Equals(beforeAdjustment.AnalysisAdviceKey, BasicRunAnalysisRecommendationPresenter.ReduceDangerKey, StringComparison.Ordinal) ||
+                string.Equals(beforeAdjustment.AnalysisAdviceKey, BasicRunAnalysisRecommendationPresenter.ReduceHeatKey, StringComparison.Ordinal);
             Assert.That(
-                beforeAdjustment.AnalysisAdviceKey,
-                Is.AnyOf(
-                    BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
-                    BasicRunAnalysisRecommendationPresenter.ReduceHeatKey),
-                "The Notice-risk phase should recommend reducing either casualty danger or heat pressure.");
+                hasExpectedRecommendation,
+                Is.True,
+                "The Notice-risk phase should recommend reducing either casualty danger or heat pressure. Actual: " + beforeAdjustment.AnalysisAdviceKey);
             Assert.That(_root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId, out _, out _, out _, out _), Is.True);
             MvpPlayerLoopSummary afterAdjustment = _root.ResolveMvpPlayerLoopSummary();
             BasicRunAnalysisAppliedAdjustmentResult applied = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(afterAdjustment);
