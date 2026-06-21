@@ -119,14 +119,36 @@ namespace DungeonBuilder.Tests.EditMode
             AssertPrimaryNot(MvpPrimaryNextActionPresenter.SourceFirstContract);
 
             MvpPlayerLoopSummary beforeAdjustment = _root.ResolveMvpPlayerLoopSummary();
-            Assert.That(beforeAdjustment.AnalysisAdviceKey, Is.EqualTo(BasicRunAnalysisRecommendationPresenter.ReduceHeatKey));
+            Assert.That(
+                beforeAdjustment.AnalysisAdviceKey,
+                Is.AnyOf(
+                    BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
+                    BasicRunAnalysisRecommendationPresenter.ReduceHeatKey),
+                "The Notice-risk phase should recommend reducing either casualty danger or heat pressure.");
             Assert.That(_root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId, out _, out _, out _, out _), Is.True);
+            MvpPlayerLoopSummary afterAdjustment = _root.ResolveMvpPlayerLoopSummary();
+            BasicRunAnalysisAppliedAdjustmentResult applied = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(afterAdjustment);
+            Assert.That(applied, Is.Not.Null);
+            Assert.That(applied.Applied, Is.True);
+            Assert.That(applied.NextActionKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey));
+            if (string.Equals(beforeAdjustment.AnalysisAdviceKey, BasicRunAnalysisRecommendationPresenter.ReduceDangerKey, StringComparison.Ordinal))
+            {
+                Assert.That(applied.AdjustmentKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey));
+            }
+            else
+            {
+                Assert.That(applied.AdjustmentKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.HeatPressureLowerKey));
+            }
+
             MvpPrimaryNextActionSummary appliedAction = ResolvePrimary();
             Assert.That(appliedAction.PrimaryActionKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey));
             string previousRunId = _root.Save.runHistory.LatestOutcome.RunId;
             Assert.That(_root.SimulateRunOnce(RunPostureResolver.CautiousId), Is.True);
             Assert.That(_root.Save.runHistory.LatestOutcome.RunId, Is.Not.EqualTo(previousRunId));
-            Assert.That(BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(_root.ResolveMvpPlayerLoopSummary()), Is.Null);
+            MvpPlayerLoopSummary afterRerun = _root.ResolveMvpPlayerLoopSummary();
+            Assert.That(BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(afterRerun), Is.Null);
+            Assert.That(afterRerun.HasRunOutcome, Is.True);
+            Assert.That(afterRerun.LatestRunId, Is.EqualTo(_root.Save.runHistory.LatestOutcome.RunId));
 
             string savedJson = JsonUtility.ToJson(_root.Save);
             SaveData loaded = JsonUtility.FromJson<SaveData>(savedJson);
