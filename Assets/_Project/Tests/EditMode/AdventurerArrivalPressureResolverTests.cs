@@ -234,7 +234,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case GuidedMvpActionPathPanelPresenter.CompleteYesKey: return "yes";
                 case MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey: return "observe dungeon";
                 case MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey: return "no active research";
-                case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
+                case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot attraction is high and route heat pressure is low";
                 default: return fallback;
             }
         }

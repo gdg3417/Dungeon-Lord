@@ -1014,8 +1014,24 @@ namespace DungeonBuilder.M0
 
         public Rect GetMinimalMvpActionPanelRect()
         {
-            float x = Mathf.Max(MinimalMvpActionPanelMargin, Screen.width - MinimalMvpActionPanelWidth - MinimalMvpActionPanelMargin);
-            return new Rect(x, MinimalMvpActionPanelMargin, MinimalMvpActionPanelWidth, MinimalMvpActionPanelHeight);
+            return CalculateMinimalMvpActionPanelRect(Screen.width, Screen.height);
+        }
+
+        public static Rect CalculateMinimalMvpActionPanelRect(float viewportWidth, float viewportHeight)
+        {
+            float height = Mathf.Min(MinimalMvpActionPanelHeight, Mathf.Max(220f, viewportHeight - (MinimalMvpActionPanelMargin * 2f)));
+            float x = Mathf.Max(MinimalMvpActionPanelMargin, viewportWidth - MinimalMvpActionPanelWidth - MinimalMvpActionPanelMargin);
+            return new Rect(x, MinimalMvpActionPanelMargin, MinimalMvpActionPanelWidth, height);
+        }
+
+        public static Rect CalculateOverlayTextSafeArea(float viewportWidth, float viewportHeight, bool actionPanelCollapsed)
+        {
+            float rightReserve = actionPanelCollapsed ? OverlayTextRightCollapsedActionPanelReserve : OverlayTextRightActionPanelReserve;
+            return new Rect(
+                OverlayTextSafeLeftMargin,
+                OverlayTextSafeTopMargin,
+                Mathf.Max(1f, viewportWidth - OverlayTextSafeLeftMargin - rightReserve),
+                Mathf.Max(1f, viewportHeight - OverlayTextSafeTopMargin - OverlayTextSafeBottomMargin));
         }
 
         private void DrawMinimalMvpActionPanel()
@@ -1094,6 +1110,15 @@ namespace DungeonBuilder.M0
             {
                 AddMvpBasicRoomSlot();
             }
+            if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
+            {
+                PlaceSelectedMvpStructure();
+            }
+
+            if (GUILayout.Button(labels.RunButton, compactButton, buttonHeight))
+            {
+                RunOrObserveDungeon();
+            }
             GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
             {
@@ -1163,16 +1188,6 @@ namespace DungeonBuilder.M0
             GUILayout.Label(GetLocalizedString(_diagnosticsVisible
                 ? "ui.mvp_view.diagnostics_mode.status"
                 : "ui.mvp_view.player_mode.status"), compactLabel, labelHeight);
-            if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
-            {
-                PlaceSelectedMvpStructure();
-            }
-
-            if (GUILayout.Button(labels.RunButton, compactButton, buttonHeight))
-            {
-                RunOrObserveDungeon();
-            }
-
             string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
             if (GUILayout.Button(diagnosticsButton, compactButton, buttonHeight))
             {

@@ -53,39 +53,33 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Current Dungeon =="));
-            Assert.That(text, Does.Contain("== Build Choice =="));
-            Assert.That(text, Does.Contain("== Activity Setup =="));
-            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("== Top Status =="));
+            Assert.That(text, Does.Contain("== Action Controls =="));
+            Assert.That(text, Does.Contain("== Action Controls =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(text, Does.Not.Contain("Path built:"));
             Assert.That(text, Does.Not.Contain("Visit observed:"));
-            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
             Assert.That(text, Does.Contain("Status banner."));
-            Assert.That(text, Does.Contain("Mana reserve: 12"));
             Assert.That(text, Does.Contain("Research: Research in progress"));
             Assert.That(text, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(text, Does.Contain("Selected room capacity: Monsters 0/1; Traps 0/1; Loot 0/1"));
-            Assert.That(text, Does.Contain("Selected placement fit: Loot node fits Room 1."));
             Assert.That(text, Does.Contain("Room slot layout: Floor 0: Room 1: Basic Room"));
             Assert.That(text, Does.Not.Contain("Dungeon layout:"));
-            Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(text, Does.Contain("Placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Expected next adventurer intent: Balanced likely. Debug selected posture: Balanced."));
+            Assert.That(text, Does.Contain("Run posture: Balanced"));
             Assert.That(text, Does.Not.Contain("Selected posture: Balanced"));
-            Assert.That(text, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
-            Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
-            Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
-            Assert.That(text, Does.Contain("No adventurer visit yet"));
+            Assert.That(text, Does.Contain("No adventurer visit yet. Use Run / observe dungeon after the path is ready."));
             Assert.That(text, Does.Not.Contain("Observe adventurer activity to see the first outcome."));
-            Assert.That(text, Does.Contain("Path complete: No"));
-            Assert.That(text.IndexOf("== Latest Adventurer Visit ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
-            Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text, Does.Not.Contain("placement.option"));
-            Assert.That(text, Does.Not.Contain("ui.mvp_"));
+            Assert.That(CountOccurrences(text, "Next:"), Is.EqualTo(1));
+            Assert.That(text.Split('\n')[1], Does.StartWith("Next:"));
+            Assert.That(text, Does.Contain("Action button: Run / observe dungeon"));
+            Assert.That(text, Does.Contain("Action button: Place / modify selected placement"));
         }
 
         [Test]
@@ -130,7 +124,7 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
-        public void BuildScreenText_IncludesRecentSpoilsLedgerPanel()
+        public void BuildScreenText_RelegatesRecentSpoilsLedgerPanelFromDefault()
         {
             string text = MvpPlayableScreenPresenter.BuildScreenText(
                 new MvpPlayerLoopSummary { RuleResolved = true, HasResearchStatus = true, ResearchStatusKey = MvpPlayerLoopSummaryPresenter.ResearchUnavailableKey, NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey },
@@ -163,9 +157,9 @@ namespace DungeonBuilder.Tests.EditMode
                 },
                 Localize);
 
-            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
-            Assert.That(text, Does.Contain("Latest haul: 1x Trap salvage"));
-            Assert.That(text, Does.Contain("Appraisal: Trap salvage is a useful dungeon trade good."));
+            Assert.That(text, Does.Not.Contain("Recent Spoils Ledger"));
+            Assert.That(text, Does.Not.Contain("Latest haul: 1x Trap salvage"));
+            Assert.That(text, Does.Contain("Details: press F5"));
             Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
@@ -191,9 +185,21 @@ namespace DungeonBuilder.Tests.EditMode
                 new MvpRecentSpoilsLedgerSummary { RuleResolved = true, HasRunHistory = true, HasLootData = true, LatestTradeableValue = 5, RecentBestTradeableValue = 5, TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey },
                 Localize);
 
-            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
+            Assert.That(text, Does.Not.Contain("Recent Spoils Ledger"));
             Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Not.Contain("Next: Latest run produced the strongest recent haul."));
+        }
+
+        private static int CountOccurrences(string text, string value)
+        {
+            int count = 0;
+            int index = 0;
+            while ((index = text.IndexOf(value, index, System.StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += value.Length;
+            }
+            return count;
         }
 
         private static string Localize(string key, string fallback)
@@ -232,6 +238,16 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPostContractGreedTrialPresenter.NextActionTestGreedierSetupKey] = "Try a greedier reward setup.",
             [MvpLoopSummaryPanelPresenter.LootEntryFormatKey] = "{0}x {1}",
             ["loot.item.salvage.trap.name"] = "Trap salvage",
+            [MvpPlayableScreenPresenter.ActionControlsKey] = "Action Controls",
+            [MvpPlayableScreenPresenter.LatestResultKey] = "Latest Result",
+            [MvpPlayableScreenPresenter.DetailsHintKey] = "Details: press F5 to cycle focused sections, F6 to copy full smoke evidence, or show diagnostics from the action panel.",
+            [MvpPlayableScreenPresenter.RoomTargetControlFormatKey] = "Room target: {0}; {1}",
+            [MvpPlayableScreenPresenter.PlacementControlFormatKey] = "Placement: {0} / {1}",
+            [MvpPlayableScreenPresenter.PlaceButtonControlKey] = "Action button: Place / modify selected placement",
+            [MvpPlayableScreenPresenter.RunPostureControlFormatKey] = "Run posture: {0}",
+            [MvpPlayableScreenPresenter.RunButtonControlKey] = "Action button: Run / observe dungeon",
+            [MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}",
+            [MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.. Use Run / observe dungeon after the path is ready.",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",
@@ -305,14 +321,14 @@ namespace DungeonBuilder.Tests.EditMode
                 [AdventurerRunIntentPresenter.BodyFormatKey] = "{0} likely. Reason: {1}",
                 [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.",
             [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
-                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
+                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot attraction is high and route heat pressure is low",
                 [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
                 [AdventurerRunIntentResolver.ReasonModerateKey] = "risk and reward are both moderate",
                 [AdventurerRunIntentResolver.ReasonDangerKey] = "danger pressure is high",
             ["run.posture.cautious.name"] = "Cautious",
                 ["run.posture.balanced.name"] = "Balanced",
                 ["run.posture.greedy.name"] = "Greedy",
-            [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No adventurer visit yet",
+            [MvpLoopSummaryPanelPresenter.ValueNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.",
             [MvpLoopSummaryPanelPresenter.ValueUnknownKey] = "Unknown",
             [MvpLoopSummaryPanelPresenter.RiskNoRunKey] = "Risk will be shown after an adventurer visit.",
             [MvpLoopSummaryPanelPresenter.ValueNoPlacementKey] = "No dungeon placements yet",

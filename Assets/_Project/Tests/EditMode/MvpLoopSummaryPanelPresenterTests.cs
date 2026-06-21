@@ -653,7 +653,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case AdventurerRunIntentPresenter.BodyFormatKey: return "{0} likely. Reason: {1}";
                 case AdventurerRunIntentPresenter.DebugPostureFormatKey: return "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.";
                 case AdventurerRunIntentResolver.ReasonFallbackKey: return "current dungeon signals are still forming";
-                case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot signal is high and heat is low";
+                case AdventurerRunIntentResolver.ReasonLootHighHeatLowKey: return "loot attraction is high and route heat pressure is low";
                 case AdventurerRunIntentResolver.ReasonDeathsHeatKey: return "recent deaths and rising heat";
                 case AdventurerRunIntentResolver.ReasonModerateKey: return "risk and reward are both moderate";
                 case AdventurerRunIntentResolver.ReasonDangerKey: return "danger pressure is high";

@@ -1841,7 +1841,7 @@
     },
     {
       "key": "ui.adventurer_intent.reason.loot_high_heat_low",
-      "text": "loot signal is high and heat is low"
+      "text": "loot attraction is high and route heat pressure is low"
     },
     {
       "key": "ui.adventurer_intent.reason.deaths_heat",
@@ -2258,6 +2258,46 @@
     {
       "key": "ui.mvp_spoils_ledger.appraisal.greed_stabilized",
       "text": "Greed pressure is stable. Continue improving reward pressure without losing heat control."
+    },
+    {
+      "key": "ui.mvp_screen.section.action_controls",
+      "text": "Action Controls"
+    },
+    {
+      "key": "ui.mvp_screen.section.latest_result",
+      "text": "Latest Result"
+    },
+    {
+      "key": "ui.mvp_screen.details_hint",
+      "text": "Details: press F5 to cycle focused sections, F6 to copy full smoke evidence, or show diagnostics from the action panel."
+    },
+    {
+      "key": "ui.mvp_screen.control.room_target_format",
+      "text": "Room target: {0}; {1}"
+    },
+    {
+      "key": "ui.mvp_screen.control.placement_format",
+      "text": "Placement: {0} / {1}"
+    },
+    {
+      "key": "ui.mvp_screen.control.place_button",
+      "text": "Action button: Place / modify selected placement"
+    },
+    {
+      "key": "ui.mvp_screen.control.run_posture_format",
+      "text": "Run posture: {0}"
+    },
+    {
+      "key": "ui.mvp_screen.control.run_button",
+      "text": "Action button: Run / observe dungeon"
+    },
+    {
+      "key": "ui.mvp_screen.latest_result_format",
+      "text": "{0}; {1}; {2}; {3}; {4}"
+    },
+    {
+      "key": "ui.mvp_screen.latest_result.no_run",
+      "text": "No adventurer visit yet. Use Run / observe dungeon after the path is ready."
     }
   ]
 }

@@ -526,6 +526,25 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.overlayText.alignment, Is.EqualTo(TextAlignmentOptions.TopLeft));
         }
 
+
+        [TestCase(1280f, 720f)]
+        [TestCase(720f, 1280f)]
+        [TestCase(960f, 540f)]
+        public void PlayerFacingLayout_TargetViewportsReserveTextBesideUsableActionPanel(float width, float height)
+        {
+            Rect panel = BootstrapOverlay.CalculateMinimalMvpActionPanelRect(width, height);
+            Rect text = BootstrapOverlay.CalculateOverlayTextSafeArea(width, height, actionPanelCollapsed: false);
+
+            Assert.That(panel.xMin, Is.GreaterThanOrEqualTo(10f));
+            Assert.That(panel.xMax, Is.LessThanOrEqualTo(width));
+            Assert.That(panel.yMax, Is.LessThanOrEqualTo(height));
+            Assert.That(panel.height, Is.GreaterThanOrEqualTo(220f));
+            Assert.That(text.xMin, Is.EqualTo(24f));
+            Assert.That(text.xMax, Is.LessThanOrEqualTo(panel.xMin - 10f));
+            Assert.That(text.yMin, Is.EqualTo(14f));
+            Assert.That(text.yMax, Is.LessThanOrEqualTo(height - 10f));
+        }
+
         [Test]
         public void PlayerFacingStructureSelection_DefaultsToManaGeneratorAndExposesLocalizedChoices()
         {
@@ -2167,7 +2186,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.adventurer_intent.fallback_run_posture_used_format"] = "Latest visit intent unavailable. Challenge posture used debug fallback: {0}. Debug selected posture: {1}.";
             map["ui.adventurer_intent.smoke_evidence_format"] = "Latest visit intent: {0}; challenge posture used: {1}; debug selected posture: {2}; rule source: {3}; error code: {4}; fallback used: {5}.";
             map["ui.adventurer_intent.unavailable"] = "Unavailable";
-            map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot signal is high and heat is low";
+            map["ui.adventurer_intent.reason.loot_high_heat_low"] = "loot attraction is high and route heat pressure is low";
             map["ui.adventurer_intent.reason.deaths_heat"] = "recent deaths and rising heat";
             map["ui.adventurer_intent.reason.moderate"] = "risk and reward are both moderate";
             map["ui.adventurer_intent.reason.danger"] = "danger pressure is high";
