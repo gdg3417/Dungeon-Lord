@@ -897,6 +897,14 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class CompletedObjectiveState
+    {
+        public string[] ObjectiveIds;
+        public string LastCompletedObjectiveId;
+        public string LastCompletionRuleSourceId;
+    }
+
+    [Serializable]
     public sealed class ResearchUnlockSummary
     {
         public bool RuleResolved = false;
@@ -1440,6 +1448,7 @@ namespace DungeonBuilder.M0
         public ResearchPendingState researchPending;
         public ResearchProgressState researchProgress;
         public CompletedResearchState completedResearch;
+        public CompletedObjectiveState completedObjectives = new CompletedObjectiveState();
         public OfflineSummary lastOfflineSummary;
 
         public string[] integrityFlags = Array.Empty<string>();

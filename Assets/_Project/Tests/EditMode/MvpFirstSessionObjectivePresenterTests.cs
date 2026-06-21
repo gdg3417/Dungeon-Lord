@@ -126,6 +126,83 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
 
+
+        [Test]
+        public void Resolve_CleanSaveAtNoticeBeforeCompletion_RemainsIncomplete()
+        {
+            SaveData save = new SaveData();
+            save.structureRuntime.Heat = 10d;
+
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+
+            Assert.That(summary.CurrentHeatTierId, Is.EqualTo(CurrentHeatTierResolver.NoticeTierId));
+            Assert.That(summary.CompletionRecorded, Is.False);
+            Assert.That(summary.IsComplete, Is.False);
+        }
+
+        [Test]
+        public void ApplyIfComplete_RecordsStableObjectiveId_WhenRequirementsAreMet()
+        {
+            SaveData save = CompleteSaveWithLoot(10);
+
+            bool applied = MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save, Config());
+
+            Assert.That(applied, Is.True);
+            Assert.That(save.completedObjectives, Is.Not.Null);
+            Assert.That(save.completedObjectives.ObjectiveIds, Does.Contain("objective.first_dungeon_contract"));
+            Assert.That(save.completedObjectives.LastCompletedObjectiveId, Is.EqualTo("objective.first_dungeon_contract"));
+        }
+
+        [Test]
+        public void Resolve_RecordedCompletion_DoesNotRegressWhenHeatLaterRises()
+        {
+            SaveData save = CompleteSaveWithLoot(10);
+            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save, Config()), Is.True);
+            save.structureRuntime.Heat = 10d;
+
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+            string text = MvpFirstSessionObjectivePresenter.BuildPanelText(summary, Localize);
+
+            Assert.That(summary.CompletionRecorded, Is.True);
+            Assert.That(summary.CurrentHeatTierId, Is.EqualTo(CurrentHeatTierResolver.NoticeTierId));
+            Assert.That(summary.HeatTargetComplete, Is.False);
+            Assert.That(summary.IsComplete, Is.True);
+            Assert.That(text, Does.Contain("Heat target: Peace (current: Notice)"));
+            Assert.That(text, Does.Contain("Completion: First contract complete."));
+            Assert.That(text, Does.Contain("Next objective: Test a greedier reward setup while keeping heat under control."));
+        }
+
+        [Test]
+        public void Resolve_RecordedCompletion_SurvivesSaveLoad()
+        {
+            SaveData save = CompleteSaveWithLoot(10);
+            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save, Config()), Is.True);
+
+            SaveData loaded = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(save));
+            MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(loaded, Config());
+
+            Assert.That(summary.CompletionRecorded, Is.True);
+            Assert.That(summary.IsComplete, Is.True);
+        }
+
+        [Test]
+        public void GreedTrialAndPrimaryAction_DoNotRegressToFirstContractAfterRecordedCompletionHeatRise()
+        {
+            SaveData save = CompleteSaveWithLoot(10);
+            save.mvpDungeonFloorLayout.Nodes[3].CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId;
+            save.mvpDungeonFloorLayout.Nodes[3].OptionId = MvpDungeonPlacementIds.GlitteringHoardOptionId;
+            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save, Config()), Is.True);
+            save.structureRuntime.Heat = 10d;
+
+            MvpFirstSessionObjectiveSummary first = MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+            MvpPostContractGreedTrialSummary greed = MvpPostContractGreedTrialPresenter.Resolve(save, Config(), first);
+            MvpPrimaryNextActionSummary action = MvpPrimaryNextActionPresenter.Resolve(new MvpPlayerLoopSummary { RuleResolved = true }, null, first, greed);
+
+            Assert.That(first.IsComplete, Is.True);
+            Assert.That(greed.IsActive, Is.True);
+            Assert.That(action.ResolvedRule, Is.Not.EqualTo(MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete));
+        }
+
         [Test]
         public void BuildPanelText_CleanSaveShowsConfiguredTarget()
         {
@@ -342,6 +419,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpFirstSessionObjectivePresenter.NextObjectiveFormatKey: return "Next objective: {0}";
                 case MvpFirstSessionObjectivePresenter.NextObjectiveGreedierRewardSetupKey: return "Test a greedier reward setup while keeping heat under control.";
                 case CurrentHeatTierResolver.PeaceTierId: return "Peace";
+                case CurrentHeatTierResolver.NoticeTierId: return "Notice";
                 default: return fallback;
             }
         }

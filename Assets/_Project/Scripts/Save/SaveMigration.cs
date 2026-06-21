@@ -6,7 +6,7 @@ namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
-        public const int LatestSchemaVersion = 5;
+        public const int LatestSchemaVersion = 6;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 
@@ -82,6 +82,16 @@ namespace DungeonBuilder.M0
             if (root.primary.runHistory == null)
             {
                 root.primary.runHistory = new RunHistoryState();
+            }
+
+            if (root.primary.completedObjectives == null)
+            {
+                root.primary.completedObjectives = new CompletedObjectiveState();
+            }
+
+            if (root.primary.completedObjectives.ObjectiveIds == null)
+            {
+                root.primary.completedObjectives.ObjectiveIds = System.Array.Empty<string>();
             }
 
             RunHistoryState history = root.primary.runHistory;

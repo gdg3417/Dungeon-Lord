@@ -147,6 +147,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
 
             Assert.NotNull(migrated.primary.runHistory);
+            Assert.NotNull(migrated.primary.completedObjectives);
+            Assert.NotNull(migrated.primary.completedObjectives.ObjectiveIds);
+            Assert.IsEmpty(migrated.primary.completedObjectives.ObjectiveIds);
             Assert.NotNull(migrated.primary.dungeonLayout);
             Assert.NotNull(migrated.primary.mvpDungeonPlacements);
             Assert.NotNull(migrated.primary.mvpDungeonPlacements.Entries);

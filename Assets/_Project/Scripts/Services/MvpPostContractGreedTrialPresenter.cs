@@ -72,6 +72,22 @@ namespace DungeonBuilder.M0
             return builder.ToString();
         }
 
+        public static string BuildStatusPanelText(MvpPostContractGreedTrialSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.IsActive)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            AppendLine(builder, Localize(localize, TitleKey));
+            AppendLine(builder, string.Format(Localize(localize, GreedSetupFormatKey), Localize(localize, summary.GreedSetupTestedComplete ? ValueCompleteKey : ValueIncompleteKey)));
+            AppendLine(builder, string.Format(Localize(localize, HeatStabilizedFormatKey), Localize(localize, summary.HeatStabilizedComplete ? ValueCompleteKey : ValueIncompleteKey)));
+            AppendLine(builder, string.Format(Localize(localize, RiskResponseFormatKey), Localize(localize, summary.RiskResponseComplete ? ValueCompleteKey : ValueIncompleteKey)));
+            AppendLine(builder, string.Format(Localize(localize, StatusFormatKey), Localize(localize, summary.IsComplete ? StatusCompleteKey : StatusInProgressKey)));
+            return builder.ToString();
+        }
+
         private static bool HasGreedierLootSetup(MvpPlacementEffectsSummary effects, RunSimulationConfig config)
         {
             if (effects == null || !effects.RuleResolved)

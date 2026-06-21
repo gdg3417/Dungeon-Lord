@@ -58,6 +58,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("== Activity Setup =="));
             Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
             Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(text, Does.Not.Contain("Path built:"));
             Assert.That(text, Does.Not.Contain("Visit observed:"));
@@ -79,7 +80,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("No adventurer visit yet"));
-            Assert.That(text, Does.Contain("Observe adventurer activity to see the first outcome."));
+            Assert.That(text, Does.Not.Contain("Observe adventurer activity to see the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
             Assert.That(text.IndexOf("== Latest Adventurer Visit ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
@@ -117,8 +118,8 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 string.Empty,
-                new MvpFirstSessionObjectiveSummary { RuleResolved = true },
-                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true },
+                new MvpPostContractGreedTrialSummary { RuleResolved = true, IsActive = true, IsComplete = true },
                 null,
                 Localize);
 
@@ -168,6 +169,33 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_spoils_ledger"));
         }
 
+
+        [Test]
+        public void BuildScreenText_SpoilsLedgerDoesNotOverridePrimaryAction()
+        {
+            string text = MvpPlayableScreenPresenter.BuildScreenText(
+                new MvpPlayerLoopSummary { RuleResolved = true, AnalysisUnlocked = true, HasRunOutcome = true, AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey, PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true }, LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true } },
+                new GuidedMvpActionPathSummary { RuleResolved = true, NextActionKey = GuidedMvpActionPathPanelPresenter.FallbackActionKey },
+                string.Empty,
+                "Loot",
+                "Basic Loot",
+                string.Empty,
+                string.Empty,
+                "Balanced",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = false, RequiredRecoveredLootValue = 10 },
+                new MvpPostContractGreedTrialSummary { RuleResolved = true, IsActive = true, IsComplete = false, NextActionKey = MvpPostContractGreedTrialPresenter.NextActionTestGreedierSetupKey },
+                new MvpRecentSpoilsLedgerSummary { RuleResolved = true, HasRunHistory = true, HasLootData = true, LatestTradeableValue = 5, RecentBestTradeableValue = 5, TrendKey = MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey },
+                Localize);
+
+            Assert.That(text, Does.Contain("Recent Spoils Ledger"));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
+            Assert.That(text, Does.Not.Contain("Next: Latest run produced the strongest recent haul."));
+        }
+
         private static string Localize(string key, string fallback)
         {
             return Strings.TryGetValue(key, out string value) ? value : fallback;
@@ -176,6 +204,14 @@ namespace DungeonBuilder.Tests.EditMode
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
 
+            [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
+            [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
+            [MvpPrimaryNextActionPresenter.SourceGreedTrialKey] = "Post-Contract Greed Trial",
+            [MvpPrimaryNextActionPresenter.SourceAppliedAdjustmentKey] = "Applied activity-analysis change",
+            [MvpPrimaryNextActionPresenter.SourceAnalysisKey] = "Adventurer Activity Analysis",
+            [MvpPrimaryNextActionPresenter.SourceGuidedPathKey] = "Guided MVP path",
+            [MvpPrimaryNextActionPresenter.SourceSummaryKey] = "Dungeon loop summary",
+            [MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey] = "Complete the First Dungeon Contract.",
             [MvpRecentSpoilsLedgerPresenter.TitleKey] = "Recent Spoils Ledger",
             [MvpRecentSpoilsLedgerPresenter.LatestHaulFormatKey] = "Latest haul: {0}",
             [MvpRecentSpoilsLedgerPresenter.RecoveredValueFormatKey] = "Recovered value: {0} tradeable",
@@ -185,6 +221,15 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpRecentSpoilsLedgerPresenter.AppraisalItemTradeGoodKey] = "{0} is a useful dungeon trade good. Keep greed pressure stable to recover better hauls.",
             [MvpRecentSpoilsLedgerPresenter.AppraisalValueOnlyKey] = "Recovered trade goods are ready for future merchant systems.",
             [MvpRecentSpoilsLedgerPresenter.TrendLatestBestKey] = "Latest run produced the strongest recent haul.",
+            [MvpPostContractGreedTrialPresenter.TitleKey] = "Post-Contract Greed Trial",
+            [MvpPostContractGreedTrialPresenter.GreedSetupFormatKey] = "Greedier reward setup: {0}",
+            [MvpPostContractGreedTrialPresenter.HeatStabilizedFormatKey] = "Heat stabilized: {0}",
+            [MvpPostContractGreedTrialPresenter.RiskResponseFormatKey] = "Counterplay response: {0}",
+            [MvpPostContractGreedTrialPresenter.StatusFormatKey] = "Trial status: {0}",
+            [MvpPostContractGreedTrialPresenter.StatusInProgressKey] = "In progress",
+            [MvpPostContractGreedTrialPresenter.ValueCompleteKey] = "complete",
+            [MvpPostContractGreedTrialPresenter.ValueIncompleteKey] = "incomplete",
+            [MvpPostContractGreedTrialPresenter.NextActionTestGreedierSetupKey] = "Try a greedier reward setup.",
             [MvpLoopSummaryPanelPresenter.LootEntryFormatKey] = "{0}x {1}",
             ["loot.item.salvage.trap.name"] = "Trap salvage",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",

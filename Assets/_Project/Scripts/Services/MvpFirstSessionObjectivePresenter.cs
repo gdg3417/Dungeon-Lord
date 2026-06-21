@@ -71,7 +71,9 @@ namespace DungeonBuilder.M0
             summary.HeatTargetComplete = IsHeatAllowed(summary.CurrentHeatTierId, summary.AllowedMaxHeatTierId);
             summary.AnalysisUnlocked = HasAnalysisUnlock(save.completedResearch, config);
             summary.AnalysisComplete = !summary.RequireResearchAnalysisUnlocked || summary.AnalysisUnlocked;
-            summary.IsComplete = summary.PathComplete && summary.RunObservedComplete && summary.LootRecoveredComplete && summary.HeatTargetComplete && summary.AnalysisComplete;
+            summary.CompletionRecorded = CompletedObjectiveStateResolver.HasCompletedObjective(save.completedObjectives, summary.ObjectiveId);
+            summary.CurrentRequirementsComplete = summary.PathComplete && summary.RunObservedComplete && summary.LootRecoveredComplete && summary.HeatTargetComplete && summary.AnalysisComplete;
+            summary.IsComplete = summary.CompletionRecorded || summary.CurrentRequirementsComplete;
             return summary;
         }
 
@@ -221,6 +223,8 @@ namespace DungeonBuilder.M0
         public bool RequireResearchAnalysisUnlocked;
         public bool AnalysisUnlocked;
         public bool AnalysisComplete;
+        public bool CurrentRequirementsComplete;
+        public bool CompletionRecorded;
         public bool IsComplete;
         public bool WouldMutateState;
         public bool WouldGrantRewards;

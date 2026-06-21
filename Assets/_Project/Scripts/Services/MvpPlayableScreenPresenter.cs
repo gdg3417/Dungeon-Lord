@@ -63,8 +63,9 @@ namespace DungeonBuilder.M0
             AppendLine(builder, BuildHeatAndPressureLine(summary, localize));
             AppendLine(builder, BuildResearchLine(summary, localize));
 
+            AppendLine(builder, MvpPrimaryNextActionPresenter.BuildPanelText(MvpPrimaryNextActionPresenter.Resolve(summary, guidedPath, firstSessionObjective, greedTrial), localize));
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
-            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildPanelText(greedTrial, localize);
+            string greedTrialText = MvpPostContractGreedTrialPresenter.BuildStatusPanelText(greedTrial, localize);
             if (!string.IsNullOrWhiteSpace(greedTrialText)) AppendLine(builder, greedTrialText);
 
             AppendSection(builder, localize, CurrentDungeonKey);
@@ -80,13 +81,6 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, AnalysisNextActionKey);
             AppendLine(builder, BuildAnalysisLine(summary, localize));
-            string suggestionKey = summary?.AnalysisUnlocked == true && !string.IsNullOrWhiteSpace(summary.AnalysisAdviceKey)
-                ? summary.AnalysisAdviceKey
-                : summary?.NextOptimizationSuggestionKey;
-            suggestionKey = BasicRunAnalysisAppliedAdjustmentPresenter.ResolveNextActionKey(summary, suggestionKey);
-            AppendLine(builder, string.Format(
-                Localize(localize, MvpLoopSummaryPanelPresenter.SuggestionFormatKey),
-                ResolveKeyOrFallback(suggestionKey, localize, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey)));
             string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
             if (!string.IsNullOrWhiteSpace(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
 
