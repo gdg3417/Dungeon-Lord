@@ -165,10 +165,15 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
             AssertCleanStart();
+            Assert.That(_root.Save.completedObjectives.ObjectiveIds, Is.Null.Or.Empty);
             Assert.That(_root.Save.completedResearch.ProjectIds, Is.Null.Or.Empty);
             PlaceStarterDungeon();
             Assert.That(_root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
-            Assert.That(_root.Save.runHistory.LatestOutcome.RunId, Does.Contain("run_0001"));
+            RunOutcomeRecord restartedOutcome = _root.Save.runHistory.LatestOutcome;
+            Assert.That(restartedOutcome, Is.Not.Null);
+            Assert.That(restartedOutcome.RunId, Is.EqualTo("run-1"));
+            Assert.That(_root.Save.runHistory.RecentOutcomes, Has.Length.EqualTo(1));
+            Assert.That(_root.Save.runHistory.NextRunSequence, Is.EqualTo(2));
         }
 
         private void PlaceStarterDungeon()
