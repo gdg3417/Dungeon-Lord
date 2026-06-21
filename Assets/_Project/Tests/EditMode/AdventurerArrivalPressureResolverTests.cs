@@ -129,8 +129,8 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, null, null, Localized);
             Assert.That(text, Does.Contain("Adventurer pressure: likely soon. Reason: high loot signal and low heat."));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Activity Setup =="));
-            Assert.That(text, Does.Contain("== Build Choice =="));
+            Assert.That(text, Does.Contain("== Action Controls =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
         }
 
         [Test]
@@ -215,6 +215,21 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayableScreenPresenter.SelectedPlacementFormatKey: return "Selected placement: {0} / {1}";
                 case MvpPlayableScreenPresenter.NoComparisonKey: return "No comparison.";
                 case MvpPlayableScreenPresenter.PlacePromptKey: return "Next build step: choose an option, then place or modify it.";
+                case MvpPlayableScreenPresenter.ActionControlsKey: return "Action Controls";
+                case MvpPlayableScreenPresenter.LatestResultKey: return "Latest Result";
+                case MvpPlayableScreenPresenter.DetailsHintKey: return "Details: press F5 to cycle focused sections, F6 to copy full smoke evidence, or show diagnostics from the action panel.";
+                case MvpPlayableScreenPresenter.RoomTargetControlFormatKey: return "Room target: {0}; {1}";
+                case MvpPlayableScreenPresenter.PlacementControlFormatKey: return "Placement: {0} / {1}";
+                case MvpPlayableScreenPresenter.PlaceButtonControlKey: return "Action button: Place / modify selected placement";
+                case MvpPlayableScreenPresenter.RunPostureControlFormatKey: return "Run posture: {0}";
+                case MvpPlayableScreenPresenter.RunButtonControlKey: return "Action button: Run / observe dungeon";
+                case MvpPlayableScreenPresenter.LatestResultFormatKey: return "{0}; {1}; {2}; {3}; {4}";
+                case MvpPlayableScreenPresenter.LatestResultNoRunKey: return "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
+                case MvpPlayableScreenPresenter.PartyUnavailableKey: return "Party: no adventurers observed yet.";
+                case MvpPlayableScreenPresenter.PartyFormatKey: return "Party: {0}";
+                case MvpPlayableScreenPresenter.ResearchFormatKey: return "Research: {0}";
+                case MvpPlayableScreenPresenter.AnalysisFormatKey: return "Why it happened: {0}";
+                case MvpPlayableScreenPresenter.NoAnalysisKey: return "Why it happened: observe adventurer activity to see the first result.";
                 case AdventurerArrivalPressurePresenter.DetailFormatKey: return "Adventurer pressure detail: score {0:0.##}; band {1}; rule source {2}; error {3}; loot {4}; attraction {5}; danger {6}; heat pressure {7}; recent deaths {8}; recovered loot {9}; path complete {10}; latest visit {11}.";
                 case "ui.adventurer_pressure.band.not_yet": return "not yet";
                 case "ui.adventurer_pressure.band.low": return "low";

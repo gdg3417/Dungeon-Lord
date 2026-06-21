@@ -53,10 +53,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("== Action Controls =="));
-            Assert.That(text, Does.Contain("== Action Controls =="));
-            Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
@@ -76,10 +73,18 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("No adventurer visit yet. Use Run / observe dungeon after the path is ready."));
             Assert.That(text, Does.Not.Contain("Observe adventurer activity to see the first outcome."));
             Assert.That(text, Does.Not.Contain("placement.option"));
+            int nextIndex = text.IndexOf("Next:", System.StringComparison.Ordinal);
+            int controlsIndex = text.IndexOf("== Action Controls ==", System.StringComparison.Ordinal);
+            int resultIndex = text.IndexOf("== Latest Result ==", System.StringComparison.Ordinal);
+
             Assert.That(CountOccurrences(text, "Next:"), Is.EqualTo(1));
             Assert.That(text.Split('\n')[1], Does.StartWith("Next:"));
+            Assert.That(nextIndex, Is.GreaterThanOrEqualTo(0));
+            Assert.That(nextIndex, Is.LessThan(controlsIndex));
+            Assert.That(controlsIndex, Is.LessThan(resultIndex));
             Assert.That(text, Does.Contain("Action button: Run / observe dungeon"));
             Assert.That(text, Does.Contain("Action button: Place / modify selected placement"));
+            Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
         [Test]
@@ -247,7 +252,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.RunPostureControlFormatKey] = "Run posture: {0}",
             [MvpPlayableScreenPresenter.RunButtonControlKey] = "Action button: Run / observe dungeon",
             [MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}",
-            [MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.. Use Run / observe dungeon after the path is ready.",
+            [MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",

@@ -132,9 +132,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Not.Contain(StructureSimulationPass.ManaGeneratorBasicId));
-            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Contain("banner-line"));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(text, Does.Not.Contain("build-line"));
@@ -151,25 +151,21 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Current Dungeon =="));
             Assert.That(text, Does.Contain("Room slot layout:"));
-            Assert.That(text, Does.Contain("== Build Choice =="));
-            Assert.That(text, Does.Contain("== Activity Setup =="));
-            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
+            Assert.That(text, Does.Contain("== Action Controls =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Not.Contain("== Latest " + "Run =="));
-            Assert.That(text, Does.Contain("== Analysis and Next Action =="));
-            Assert.That(text, Does.Contain("Selected placement: Room / Basic Room"));
+            Assert.That(text, Does.Contain("== Latest Result =="));
+            Assert.That(text, Does.Contain("Placement: Room / Basic Room"));
             Assert.That(text, Does.Not.Contain("Selected category: Room"));
             Assert.That(text, Does.Not.Contain("Selected option: Basic Room"));
-            Assert.That(text, Does.Contain("Comparison: choose the other option in this category to compare tradeoffs."));
-            Assert.That(text, Does.Contain("Expected next adventurer intent:"));
-            Assert.That(text, Does.Contain("Debug selected posture: Balanced."));
-            Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
+            Assert.That(text, Does.Contain("Run posture:"));
+            Assert.That(text, Does.Contain("Run posture: Balanced"));
+            Assert.That(text, Does.Contain("Action button: Place / modify selected placement"));
             Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
             Assert.That(text, Does.Not.Contain("Adjust placement before the next adventurer visit."));
             Assert.That(text, Does.Not.Contain("Run " + "dungeon"));
-            Assert.That(text, Does.Contain("Path complete:"));
-            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             AssertNoPlayerFacingRawIds(text);
         }
@@ -204,8 +200,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(text, Does.Contain("Dungeon Command (MVP Loop Summary)"));
-            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(text, Does.Contain("== Latest Result =="));
+            Assert.That(text, Does.Contain("== Top Status =="));
             Assert.That(text, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(text, Does.Not.Contain("build-line"));
             Assert.That(text, Does.Not.Contain("F1 toggles Dev Panel"));
@@ -237,8 +233,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(restoredText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
-            Assert.That(restoredText, Does.Contain("== Analysis and Next Action =="));
-            Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(restoredText, Does.Contain("== Latest Result =="));
+            Assert.That(restoredText, Does.Contain("== Top Status =="));
             Assert.That(restoredText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
         }
 
@@ -668,8 +664,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(runFeedback, Is.Not.Empty);
             Assert.That(hasLocalizedRunResult, Is.True, "Fixture may validly produce success or failure; both must remain localized player-facing results.");
-            Assert.That(runText, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(runText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(runText, Does.Contain("== Latest Result =="));
             Assert.That(runText, Does.Contain("Loot: 0/0 recovered; 0 tradeable."));
             Assert.That(runText, Does.Contain("Heat: 17 -> 17"));
             Assert.That(runFeedback, Does.Contain("Mana 9."));
@@ -687,7 +682,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copiedSmoke, Does.Contain("Loot recovered:"));
             Assert.That(copiedSmoke, Does.Contain("Contract status:"));
             AssertNoRawPlayerFacingSmokeIds(copiedSmoke);
-            Assert.That(runText, Does.Contain("Latest Adventurer Visit"));
+            Assert.That(runText, Does.Contain("Latest Result"));
             Assert.That(runText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
         }
@@ -761,12 +756,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
             Assert.That(defaultText, Does.Contain("Dungeon Command (MVP Loop Summary)"));
-            Assert.That(defaultText, Does.Contain("== Build Choice =="));
-            Assert.That(defaultText, Does.Contain("Path complete:"));
+            Assert.That(defaultText, Does.Contain("== Action Controls =="));
+            Assert.That(defaultText, Does.Contain("== Top Status =="));
             Assert.That(defaultText, Does.Contain("First Dungeon Contract: In progress. Loot 0 / 10, path incomplete."));
             Assert.That(defaultText, Does.Not.Contain("Path built:"));
             Assert.That(defaultText, Does.Not.Contain("Visit observed:"));
-            Assert.That(defaultText, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(defaultText, Does.Contain("== Top Status =="));
             Assert.That(defaultText, Does.Not.Contain("Diagnostics: Runtime Summary Page 1/9"));
 
             Assert.That(_overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId), Is.True);
@@ -789,8 +784,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_overlay.MvpRunResultFeedback, Is.Not.Empty);
             Assert.That(playerFacingText, Does.Contain("Changed Room 1 Trap: Empty -> Spike Trap."));
-            Assert.That(playerFacingText, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(playerFacingText, Does.Contain("== Latest Result =="));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             AssertNoPlayerFacingRawIds(playerFacingText);
             AssertNoPlayerFacingRawIds(_overlay.MvpStructurePlacementFeedback);
@@ -814,7 +808,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.PlayerFacingPanelsVisible, Is.True);
             Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
             Assert.That(restoredText, Does.Contain("MVP Loop Summary"));
-            Assert.That(restoredText, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(restoredText, Does.Contain("== Top Status =="));
             AssertNoPlayerFacingRawIds(restoredText);
 
             _root.TryMvpPlaceOrModifySelectedStructure(StructureSimulationPass.RiskLabBasicId, out _);
@@ -1035,7 +1029,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.BannerMessage, Is.EqualTo("Run simulated."));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Contain("Outcome cue: the adventurer visit failed, so reduce pressure before the next challenge."));
-            Assert.That(text, Does.Contain("== Latest Adventurer Visit =="));
+            Assert.That(text, Does.Contain("== Latest Result =="));
             Assert.That(text, Does.Contain("Failed"));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(_overlay.MvpRunResultFeedback));
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("ui.mvp_run_feedback.outcome_cue"));
@@ -1100,8 +1094,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleRunDiagnosticsFocus();
             string restoredText = RefreshText();
 
-            Assert.That(restoredText, Does.Contain("== Latest Adventurer Visit =="));
-            Assert.That(restoredText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(restoredText, Does.Contain("== Latest Result =="));
             Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Does.Contain(feedback));
         }
 
@@ -1196,7 +1189,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.DiagnosticsVisible, Is.False);
             Assert.That(_overlay.FullDiagnosticsPageNumber, Is.EqualTo(2));
             Assert.That(after, Is.EqualTo(before));
-            Assert.That(after, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(after, Does.Contain("== Top Status =="));
             Assert.That(after, Does.Not.Contain("Diagnostics: Run Diagnostics Page 2/9"));
         }
 
@@ -1354,7 +1347,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.ToggleDiagnosticsVisibility();
             string playerFacingText = RefreshText();
             Assert.That(playerFacingText, Does.StartWith("Dungeon Command (MVP Loop Summary)"));
-            Assert.That(playerFacingText, Does.Contain("== Analysis and Next Action =="));
+            Assert.That(playerFacingText, Does.Contain("== Latest Result =="));
         }
 
         [Test]
@@ -1538,7 +1531,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
             Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
             Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
-            Assert.That(text, Does.Contain("Latest Adventurer Visit"));
+            Assert.That(text, Does.Contain("Latest Result"));
             Assert.That(text, Does.Contain("Mana reserve:"));
             Assert.That(text, Does.Contain("Loot:"));
             Assert.That(text, Does.Contain("Heat:"));
@@ -1643,7 +1636,7 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
-            Assert.That(copied, Does.Contain("Expected next adventurer intent:"));
+            Assert.That(copied, Does.Contain("Run posture:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
@@ -1677,7 +1670,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Role: adds room space and path context."));
             Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(copied, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
-            Assert.That(copied, Does.Contain("Expected next adventurer intent:"));
+            Assert.That(copied, Does.Contain("Run posture:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Mana Generator"));
             Assert.That(copied, Does.Contain("Player view: diagnostics hidden."));
@@ -1728,7 +1721,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(after, Is.EqualTo(before));
             Assert.That(after, Does.Contain("MVP Loop Summary"));
-            Assert.That(after, Does.Contain("Player view: diagnostics hidden."));
+            Assert.That(after, Does.Contain("== Top Status =="));
         }
 
         [Test]
@@ -1748,8 +1741,13 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
             string copied = _overlay.CopyFullSmokeTextToClipboard();
 
-            Assert.That(visible, Does.Contain("== Build Choice =="));
-            Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
+            Assert.That(visible, Does.Contain("== Action Controls =="));
+            Assert.That(visible, Does.Contain("== Latest Result =="));
+            Assert.That(copied, Does.Contain("MVP Loop Summary"));
+            Assert.That(copied, Does.Contain("Guided MVP Action"));
+            Assert.That(copied, Does.Contain("First Dungeon Contract"));
+            Assert.That(copied, Does.Contain("Room slot layout:"));
+            Assert.That(copied, Does.Contain("Adventurer pressure"));
             Assert.That(copied, Does.Contain("Effects: none yet"));
             AssertNoRawPlayerFacingSmokeIds(visible);
             AssertNoRawPlayerFacingSmokeIds(copied);
@@ -2234,6 +2232,16 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.section.run_setup"] = "Activity Setup";
             map["ui.mvp_screen.section.latest_run"] = "Latest Adventurer Visit";
             map["ui.mvp_screen.section.analysis_next_action"] = "Analysis and Next Action";
+            map[MvpPlayableScreenPresenter.ActionControlsKey] = "Action Controls";
+            map[MvpPlayableScreenPresenter.LatestResultKey] = "Latest Result";
+            map[MvpPlayableScreenPresenter.DetailsHintKey] = "Details: press F5 to cycle focused sections, F6 to copy full smoke evidence, or show diagnostics from the action panel.";
+            map[MvpPlayableScreenPresenter.RoomTargetControlFormatKey] = "Room target: {0}; {1}";
+            map[MvpPlayableScreenPresenter.PlacementControlFormatKey] = "Placement: {0} / {1}";
+            map[MvpPlayableScreenPresenter.PlaceButtonControlKey] = "Action button: Place / modify selected placement";
+            map[MvpPlayableScreenPresenter.RunPostureControlFormatKey] = "Run posture: {0}";
+            map[MvpPlayableScreenPresenter.RunButtonControlKey] = "Action button: Run / observe dungeon";
+            map[MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}";
+            map[MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
             map["ui.mvp_primary_next_action.compact_format"] = "Next: {0} ({1})";
             map["ui.mvp_primary_next_action.source.first_contract"] = "First Dungeon Contract";
             map["ui.mvp_primary_next_action.source.greed_trial"] = "Post-Contract Greed Trial";
@@ -2272,7 +2280,7 @@ namespace DungeonBuilder.Tests.EditMode
             map["ui.mvp_screen.selected_option_format"] = "Selected option: {0}";
             map["ui.mvp_screen.selected_placement_format"] = "Selected placement: {0} / {1}";
             map["ui.mvp_screen.run_posture_format"] = "Debug selected posture: {0}";
-            map["ui.mvp_screen.prompt.place_or_modify"] = "Next build step: choose an option, then place or modify it.";
+            map["ui.mvp_screen.prompt.place_or_modify"] = "Action button: Place / modify selected placement";
             map["ui.mvp_screen.prompt.run_or_observe"] = "Next activity step: observe the dungeon when ready.";
             map["ui.mvp_screen.feedback.no_placement"] = "No build change yet this session.";
             map["ui.mvp_screen.feedback.no_run"] = "No adventurer visit observed yet this session.";
