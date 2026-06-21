@@ -49,6 +49,21 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_AppliedAdjustment_BeatsIncompleteGreedTrialSoChangeCanBeTested()
+        {
+            MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
+                AppliedDangerAdjustmentSummary(),
+                null,
+                CompleteContract(),
+                new MvpPostContractGreedTrialSummary { IsActive = true, IsComplete = false, NextActionKey = MvpPostContractGreedTrialPresenter.NextActionStabilizeHeatKey });
+
+            Assert.That(result.ResolvedRule, Is.EqualTo(MvpPrimaryNextActionPresenter.RuleAppliedAdjustment));
+            Assert.That(result.PrimaryActionSource, Is.EqualTo(MvpPrimaryNextActionPresenter.SourceAppliedAdjustment));
+            Assert.That(result.PrimaryActionKey, Is.EqualTo(BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey));
+        }
+
+
+        [Test]
         public void Resolve_AnalysisRecommendation_BeatsGuidedFallbackAfterGreedTrialComplete()
         {
             MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
