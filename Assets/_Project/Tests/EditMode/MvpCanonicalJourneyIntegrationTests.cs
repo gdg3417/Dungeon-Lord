@@ -19,12 +19,17 @@ namespace DungeonBuilder.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
-            _config = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            string runConfigJson = File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json");
+            string lootConfigJson = File.ReadAllText("Assets/_Project/Data/Bootstrap/loot_config.json");
+            Assert.That(
+                GameRoot.TryCreateRunSimulationService(runConfigJson, lootConfigJson, out RunSimulationService runService),
+                Is.True);
+            _config = runService.Config;
             _rootObject = new GameObject("MvpCanonicalJourneyIntegrationRoot");
             _root = _rootObject.AddComponent<GameRoot>();
             SetRoot("<DevPanelEnabled>k__BackingField", true);
             SetRoot("<Content>k__BackingField", BuildContent());
-            SetRoot("_runSimulationService", new RunSimulationService(_config));
+            SetRoot("_runSimulationService", runService);
             SetRoot("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "mvp_canonical_journey_test.json", useAtomicWrites = false }));
             SetRoot("<Save>k__BackingField", new SaveData());
         }
@@ -58,14 +63,16 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
             MvpPlayerLoopSummary afterFirstRun = _root.ResolveMvpPlayerLoopSummary();
             RunOutcomeRecord firstOutcome = _root.Save.runHistory.LatestOutcome;
-            Assert.That(firstOutcome, Is.Not.Null);
-            Assert.That(afterFirstRun.HasRunOutcome, Is.True);
-            Assert.That(firstOutcome.LootSummary, Is.Not.Null);
-            Assert.That(firstOutcome.LootSummary.ResolverSuccess, Is.True);
-            Assert.That(firstOutcome.LootExtractionSummary, Is.Not.Null);
-            Assert.That(firstOutcome.LootExtractionSummary.RuleResolved, Is.True);
-            Assert.That(afterFirstRun.LootGeneratedWorldValue, Is.GreaterThanOrEqualTo(0));
-            Assert.That(afterFirstRun.LootExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
+            string firstRunDiagnostics = FirstRunDiagnostics(firstOutcome);
+            Assert.That(firstOutcome, Is.Not.Null, firstRunDiagnostics);
+            Assert.That(afterFirstRun.RuleResolved, Is.True, firstRunDiagnostics);
+            Assert.That(afterFirstRun.HasRunOutcome, Is.True, firstRunDiagnostics);
+            Assert.That(firstOutcome.LootSummary, Is.Not.Null, firstRunDiagnostics);
+            Assert.That(firstOutcome.LootSummary.ResolverSuccess, Is.True, firstRunDiagnostics);
+            Assert.That(firstOutcome.LootExtractionSummary, Is.Not.Null, firstRunDiagnostics);
+            Assert.That(firstOutcome.LootExtractionSummary.RuleResolved, Is.True, firstRunDiagnostics);
+            Assert.That(afterFirstRun.LootGeneratedWorldValue, Is.GreaterThanOrEqualTo(0), firstRunDiagnostics);
+            Assert.That(afterFirstRun.LootExtractedWorldValue, Is.GreaterThanOrEqualTo(0), firstRunDiagnostics);
             Assert.That(afterFirstRun.LatestRunPartySize, Is.GreaterThan(0));
             Assert.That(afterFirstRun.AdventurerPartyClassIds, Is.Not.Empty);
             Assert.That(afterFirstRun.NextOptimizationSuggestionKey, Is.Not.Empty);
@@ -159,6 +166,18 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.ClaimResearchCompletionScaffold(), Is.True);
         }
 
+        private string FirstRunDiagnostics(RunOutcomeRecord outcome)
+        {
+            int historyCount = _root.Save?.runHistory?.RecentOutcomes != null ? _root.Save.runHistory.RecentOutcomes.Length : 0;
+            return string.Format(
+                "runId={0} lootTable={1} lootError={2} extractionError={3} runHistoryCount={4}",
+                outcome?.RunId ?? "<null>",
+                outcome?.LootSummary?.LootTableId ?? "<null>",
+                outcome?.LootSummary != null ? outcome.LootSummary.ResolverErrorCode : -1,
+                outcome?.LootExtractionSummary != null ? outcome.LootExtractionSummary.DeterministicErrorCode : -1,
+                historyCount);
+        }
+
         private void RunUntilFirstContractRequirementsComplete()
         {
             const int maxRuns = 20;
@@ -183,14 +202,15 @@ namespace DungeonBuilder.Tests.EditMode
 
             MvpFirstSessionObjectiveSummary final = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config);
             Assert.Fail(
-                "First Dungeon Contract requirements were not complete after {0} bounded real runs. runCount={1} recoveredLoot={2}/{3} heatTier={4} pathComplete={5} analysisComplete={6}",
+                "First Dungeon Contract requirements were not complete after {0} bounded real runs. runCount={1} recoveredLoot={2}/{3} heatTier={4} pathComplete={5} analysisComplete={6} analysisUnlocked={7}",
                 maxRuns,
                 final.RunCount,
                 final.RecoveredLootValue,
                 final.RequiredRecoveredLootValue,
                 final.CurrentHeatTierId,
                 final.PathComplete,
-                final.AnalysisComplete);
+                final.AnalysisComplete,
+                final.AnalysisUnlocked);
         }
 
         private void RunUntilNotice()

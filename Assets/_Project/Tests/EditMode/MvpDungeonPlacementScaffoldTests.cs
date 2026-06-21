@@ -774,6 +774,9 @@ namespace DungeonBuilder.Tests.EditMode
                 map[MvpDungeonPlacementPresenter.HiddenCacheOptionKey] = "Hidden Cache";
                 map[MvpDungeonPlacementPresenter.BasicLootNodeOptionKey] = "Basic Loot Node";
                 map[MvpDungeonPlacementPresenter.GlitteringHoardOptionKey] = "Glittering Hoard";
+                map[MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty";
+                map[MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.";
+                map[MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementAlreadySetFormatKey] = "Room {0} {1} already set to {2}.";
             }
 
             return content;
