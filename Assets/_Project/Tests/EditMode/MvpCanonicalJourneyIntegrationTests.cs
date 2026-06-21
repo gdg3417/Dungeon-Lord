@@ -82,11 +82,19 @@ namespace DungeonBuilder.Tests.EditMode
 
             CompleteResearchThroughRootBoundary();
             RunUntilFirstContractRequirementsComplete();
-            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(_root.Save, _config), Is.True);
             MvpFirstSessionObjectiveSummary completedContract = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config);
-            Assert.That(_root.Save.completedObjectives.ObjectiveIds, Does.Contain(_config.MvpFirstSessionObjective.ObjectiveId));
+            Assert.That(completedContract.CurrentRequirementsComplete, Is.True);
             Assert.That(completedContract.IsComplete, Is.True);
             Assert.That(completedContract.CompletionRecorded, Is.True);
+            Assert.That(_root.Save.completedObjectives.ObjectiveIds, Does.Contain(_config.MvpFirstSessionObjective.ObjectiveId));
+            int completedObjectiveCount = _root.Save.completedObjectives.ObjectiveIds.Length;
+            string completedObjectivesBeforeIdempotencyCheck = JsonUtility.ToJson(_root.Save.completedObjectives);
+            Assert.That(
+                MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(_root.Save, _config),
+                Is.False,
+                "Completion should already have been recorded by the qualifying run.");
+            Assert.That(_root.Save.completedObjectives.ObjectiveIds.Length, Is.EqualTo(completedObjectiveCount));
+            Assert.That(JsonUtility.ToJson(_root.Save.completedObjectives), Is.EqualTo(completedObjectivesBeforeIdempotencyCheck));
             AssertPrimaryNot(MvpPrimaryNextActionPresenter.SourceFirstContract);
             MvpPostContractGreedTrialSummary activeGreed = MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _config, completedContract);
             Assert.That(activeGreed.IsActive, Is.True);
