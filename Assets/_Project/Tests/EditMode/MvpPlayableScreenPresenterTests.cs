@@ -80,7 +80,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
             Assert.That(text, Does.Contain("No adventurer visit yet"));
-            Assert.That(text, Does.Contain("Observe adventurer activity to see the first outcome."));
+            Assert.That(text, Does.Not.Contain("Observe adventurer activity to see the first outcome."));
             Assert.That(text, Does.Contain("Path complete: No"));
             Assert.That(text.IndexOf("== Latest Adventurer Visit ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));
             Assert.That(text.IndexOf("== Analysis and Next Action ==", System.StringComparison.Ordinal), Is.LessThan(text.IndexOf("== Build Choice ==", System.StringComparison.Ordinal)));

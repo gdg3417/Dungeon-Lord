@@ -165,7 +165,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Expected next adventurer intent:"));
             Assert.That(text, Does.Contain("Debug selected posture: Balanced."));
             Assert.That(text, Does.Contain("Next build step: choose an option, then place or modify it."));
-            Assert.That(text, Does.Contain("Adjust placement before the next adventurer visit."));
+            Assert.That(text, Does.Contain("Next: Complete the First Dungeon Contract. (First Dungeon Contract)"));
+            Assert.That(text, Does.Not.Contain("Adjust placement before the next adventurer visit."));
             Assert.That(text, Does.Not.Contain("Run " + "dungeon"));
             Assert.That(text, Does.Contain("Path complete:"));
             Assert.That(text, Does.Contain("Player view: diagnostics hidden."));
