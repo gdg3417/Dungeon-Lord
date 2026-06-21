@@ -57,16 +57,24 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
             MvpPlayerLoopSummary afterFirstRun = _root.ResolveMvpPlayerLoopSummary();
-            Assert.That(_root.Save.runHistory.LatestOutcome, Is.Not.Null);
+            RunOutcomeRecord firstOutcome = _root.Save.runHistory.LatestOutcome;
+            Assert.That(firstOutcome, Is.Not.Null);
             Assert.That(afterFirstRun.HasRunOutcome, Is.True);
-            Assert.That(afterFirstRun.LootGeneratedWorldValue, Is.GreaterThan(0));
+            Assert.That(firstOutcome.LootSummary, Is.Not.Null);
+            Assert.That(firstOutcome.LootSummary.ResolverSuccess, Is.True);
+            Assert.That(firstOutcome.LootExtractionSummary, Is.Not.Null);
+            Assert.That(firstOutcome.LootExtractionSummary.RuleResolved, Is.True);
+            Assert.That(afterFirstRun.LootGeneratedWorldValue, Is.GreaterThanOrEqualTo(0));
+            Assert.That(afterFirstRun.LootExtractedWorldValue, Is.GreaterThanOrEqualTo(0));
             Assert.That(afterFirstRun.LatestRunPartySize, Is.GreaterThan(0));
             Assert.That(afterFirstRun.AdventurerPartyClassIds, Is.Not.Empty);
             Assert.That(afterFirstRun.NextOptimizationSuggestionKey, Is.Not.Empty);
-            Assert.That(_root.Save.runHistory.LatestOutcome.ReasonKey, Is.Not.Empty);
+            Assert.That(firstOutcome.ReasonKey, Is.Not.Empty);
+            Assert.That(_root.Save.runHistory.RecentOutcomes, Does.Contain(firstOutcome));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
 
             CompleteResearchThroughRootBoundary();
+            RunUntilFirstContractRequirementsComplete();
             Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(_root.Save, _config), Is.True);
             MvpFirstSessionObjectiveSummary completedContract = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config);
             Assert.That(_root.Save.completedObjectives.ObjectiveIds, Does.Contain(_config.MvpFirstSessionObjective.ObjectiveId));
@@ -85,6 +93,7 @@ namespace DungeonBuilder.Tests.EditMode
             AssertPrimaryNot(MvpPrimaryNextActionPresenter.SourceFirstContract);
             AssertPrimaryNot("recent_spoils_ledger");
 
+            Place(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
             RunUntilNotice();
             Assert.That(MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config).IsComplete, Is.True);
             Assert.That(_root.Save.completedObjectives.ObjectiveIds, Does.Contain(_config.MvpFirstSessionObjective.ObjectiveId));
@@ -148,6 +157,40 @@ namespace DungeonBuilder.Tests.EditMode
             _root.Save.researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId };
             _root.Save.researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ProgressUnits = 1d, CompletionPending = true };
             Assert.That(_root.ClaimResearchCompletionScaffold(), Is.True);
+        }
+
+        private void RunUntilFirstContractRequirementsComplete()
+        {
+            const int maxRuns = 20;
+            for (int i = 0; i < maxRuns; i++)
+            {
+                MvpFirstSessionObjectiveSummary summary = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config);
+                if (summary.CurrentRequirementsComplete)
+                {
+                    return;
+                }
+
+                if (!summary.HeatTargetComplete)
+                {
+                    Place(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId);
+                    Assert.That(_root.SimulateRunOnce(RunPostureResolver.CautiousId), Is.True);
+                }
+                else
+                {
+                    Assert.That(_root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
+                }
+            }
+
+            MvpFirstSessionObjectiveSummary final = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _config);
+            Assert.Fail(
+                "First Dungeon Contract requirements were not complete after {0} bounded real runs. runCount={1} recoveredLoot={2}/{3} heatTier={4} pathComplete={5} analysisComplete={6}",
+                maxRuns,
+                final.RunCount,
+                final.RecoveredLootValue,
+                final.RequiredRecoveredLootValue,
+                final.CurrentHeatTierId,
+                final.PathComplete,
+                final.AnalysisComplete);
         }
 
         private void RunUntilNotice()

@@ -468,6 +468,44 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(nodePlacements[0].Revision, Is.EqualTo(firstRevision));
         }
 
+        [TestCase(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId, "Room 1 Room already set to Basic Room.")]
+        [TestCase(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, "Room 1 Monster already set to Goblin.")]
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId, "Room 1 Trap already set to Snare Trap.")]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, "Room 1 Loot node already set to Basic Loot Node.")]
+        public void RoomTargetedSameToSamePlacement_IsNoOpWithLocalizedAlreadySetFeedback(string categoryId, string optionId, string expectedFeedback)
+        {
+            SetRunSimulationConfig(RoomSlotConfig());
+            PlaceForRoomTarget(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId);
+            if (!string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
+            {
+                PlaceForRoomTarget(categoryId, optionId);
+            }
+
+            int placementRevision = _root.Save.mvpDungeonPlacements.NextRevision;
+            int assignmentRevision = _root.Save.mvpRoomSlotAssignments.NextRevision;
+            int roomAssignmentCount = _root.Save.mvpRoomSlotAssignments.Rooms.Count;
+
+            bool placed = _root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                categoryId,
+                optionId,
+                out MvpDungeonPlacementEntry prior,
+                out MvpDungeonPlacementEntry current,
+                out string bannerKey,
+                out string failureFeedback,
+                out string targetFeedback);
+
+            Assert.That(placed, Is.True);
+            Assert.That(bannerKey, Is.EqualTo("ui.banner.place_success"));
+            Assert.That(failureFeedback, Is.Empty);
+            Assert.That(targetFeedback, Is.EqualTo(expectedFeedback));
+            Assert.That(prior.OptionId, Is.EqualTo(optionId));
+            Assert.That(current.OptionId, Is.EqualTo(optionId));
+            Assert.That(current.Revision, Is.EqualTo(prior.Revision));
+            Assert.That(_root.Save.mvpDungeonPlacements.NextRevision, Is.EqualTo(placementRevision));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.NextRevision, Is.EqualTo(assignmentRevision));
+            Assert.That(_root.Save.mvpRoomSlotAssignments.Rooms.Count, Is.EqualTo(roomAssignmentCount));
+        }
+
 
         [Test]
         public void RunSummaryResolvesAfterAllStarterPlacementsExist()
@@ -744,6 +782,18 @@ namespace DungeonBuilder.Tests.EditMode
         private void SetRunSimulationConfig(RunSimulationConfig config)
         {
             SetBackingField("_runSimulationService", new RunSimulationService(config));
+        }
+
+        private void PlaceForRoomTarget(string categoryId, string optionId)
+        {
+            Assert.That(_root.TryMvpPlaceOrModifySelectedPlacementEnforcingRoomTarget(
+                categoryId,
+                optionId,
+                out _,
+                out _,
+                out _,
+                out _,
+                out _), Is.True);
         }
 
         private static RunSimulationConfig RoomSlotConfig()

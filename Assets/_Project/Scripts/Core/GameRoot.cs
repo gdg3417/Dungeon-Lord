@@ -638,7 +638,17 @@ namespace DungeonBuilder.M0
                 if (string.Equals(existing.OptionId, optionId, StringComparison.Ordinal) &&
                     (!shouldPersistRoomSlotAssignment || string.Equals(priorRoomTargetOptionId, optionId, StringComparison.Ordinal)))
                 {
-                    newEntry = existing;
+                    newEntry = new MvpDungeonPlacementEntry(existing.CategoryId, existing.OptionId, existing.Revision);
+                    if (enforceSelectedRoomTarget)
+                    {
+                        targetFeedback = MvpStructurePlacementFeedbackPresenter.BuildRoomTargetedPlacementFeedbackText(
+                            selectedRoomSlotIndex,
+                            categoryId,
+                            priorRoomTargetOptionId,
+                            optionId,
+                            (key, fallback) => Content != null ? Content.GetString(key, fallback) : fallback);
+                    }
+
                     bannerKey = "ui.banner.place_success";
                     return true;
                 }
