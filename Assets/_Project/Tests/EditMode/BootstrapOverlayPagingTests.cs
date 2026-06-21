@@ -1531,7 +1531,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.CompactSmokeViewEnabled, Is.True);
             Assert.That(text, Does.Contain("Smoke section: Compact Smoke View"));
             Assert.That(text, Does.Contain("Dungeon composition: Mana Generator"));
-            Assert.That(text, Does.Contain("Latest Result"));
+            Assert.That(text, Does.Contain("Latest Adventurer Visit:"));
             Assert.That(text, Does.Contain("Mana reserve:"));
             Assert.That(text, Does.Contain("Loot:"));
             Assert.That(text, Does.Contain("Heat:"));
@@ -1636,7 +1636,8 @@ namespace DungeonBuilder.Tests.EditMode
             string visible = RefreshText();
 
             Assert.That(copied, Does.Contain("MVP Loop Summary"));
-            Assert.That(copied, Does.Contain("Run posture:"));
+            Assert.That(copied, Does.Contain("Latest visit intent:"));
+            Assert.That(copied, Does.Contain("challenge posture used:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Room: Basic Room"));
             Assert.That(copied, Does.Not.Contain("Dungeon layout:"));
@@ -1670,7 +1671,6 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(copied, Does.Contain("Role: adds room space and path context."));
             Assert.That(copied, Does.Contain("Plan: Mana Generator + Balanced adventurer challenge."));
             Assert.That(copied, Does.Contain("Expected tradeoff: standard loot and heat pressure."));
-            Assert.That(copied, Does.Contain("Run posture:"));
             Assert.That(copied, Does.Contain("Intent scores:"));
             Assert.That(copied, Does.Contain("Dungeon composition: Mana Generator"));
             Assert.That(copied, Does.Contain("Player view: diagnostics hidden."));

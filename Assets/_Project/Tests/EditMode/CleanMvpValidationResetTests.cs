@@ -284,9 +284,13 @@ namespace DungeonBuilder.Tests.EditMode
             SetOverlayPrivateField("_mvpStructurePlacementFeedback", "stale placement feedback");
             SetOverlayPrivateField("_mvpRunResultFeedback", "stale run feedback");
             string dirtyText = RefreshText();
-            Assert.That(dirtyText, Does.Contain("Latest Result"));
+            Assert.That(dirtyText, Does.Contain("== Latest Result =="));
             Assert.That(dirtyText, Does.Contain("Succeeded"));
-            Assert.That(dirtyText, Does.Contain("Mana reserve: 45"));
+            Assert.That(dirtyText, Does.Contain("Heat: 12 -> 12 (Notice)"));
+            Assert.That(dirtyText, Does.Contain("Dungeon composition: Risk Lab"));
+            Assert.That(dirtyText, Does.Contain("Run posture: Greedy"));
+            Assert.That(dirtyText, Does.Contain("stale placement feedback"));
+            Assert.That(_root.Save.structureRuntime.ManaReserve, Is.EqualTo(45d));
             Assert.That(_overlay.SelectedMvpStructureId, Is.EqualTo(StructureSimulationPass.RiskLabBasicId));
             Assert.That(_overlay.SelectedMvpRunPostureId, Is.EqualTo(RunPostureResolver.GreedyId));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Risk Lab"));
@@ -302,6 +306,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.GetSelectedMvpRunPostureDisplayName(), Is.EqualTo("Balanced"));
             Assert.That(_overlay.GetSelectedMvpStructureDisplayName(), Is.EqualTo("Mana Generator"));
             Assert.That(_overlay.GetSelectedMvpRunPlanPreviewText(), Is.EqualTo("Plan: Mana Generator + Balanced adventurer challenge.\nExpected tradeoff: standard loot and heat pressure."));
+            Assert.That(_root.Save.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(refreshed, Does.Contain("Dungeon composition: No dungeon placements yet"));
             Assert.That(refreshed, Does.Contain("== Latest Result =="));
             Assert.That(refreshed, Does.Contain("No adventurer visit yet. Use Run / observe dungeon after the path is ready."));
