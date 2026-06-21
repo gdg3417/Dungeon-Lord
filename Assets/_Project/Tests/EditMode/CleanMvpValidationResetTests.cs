@@ -59,7 +59,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.ManaLine, Is.EqualTo("Mana: 0.00"));
             Assert.That(_root.HeatLine, Is.EqualTo("Heat: 0.00"));
             Assert.That(_root.RunLine, Is.EqualTo("ui.run.none"));
-            Assert.That(_root.Save.completedResearch.ProjectIds, Is.EqualTo(new[] { "research.project.preexisting" }));
+            Assert.That(_root.Save.completedResearch.ProjectIds, Is.Null.Or.Empty);
         }
 
         [Test]
@@ -80,8 +80,6 @@ namespace DungeonBuilder.Tests.EditMode
         public void ResetCleanMvpValidationSession_DoesNotClaimResearchGrantRewardsUnlocksOrOfflineProgression()
         {
             SaveData save = _root.Save;
-            string completedBefore = JsonUtility.ToJson(save.completedResearch);
-
             bool didReset = _root.ResetCleanMvpValidationSession();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             GuidedMvpActionPathSummary guided = _root.ResolveGuidedMvpActionPath(summary);
@@ -89,7 +87,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(didReset, Is.True);
             Assert.That(save.researchPending, Is.Null);
             Assert.That(save.researchProgress, Is.Null);
-            Assert.That(JsonUtility.ToJson(save.completedResearch), Is.EqualTo(completedBefore));
+            Assert.That(save.completedResearch.ProjectIds, Is.Null.Or.Empty);
             Assert.That(summary.CanClaimProduction, Is.False);
             Assert.That(summary.WouldGrantRewards, Is.False);
             Assert.That(summary.WouldUnlockContent, Is.False);
@@ -121,6 +119,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.mvpDungeonPlacements, Is.Not.Null);
             Assert.That(save.mvpDungeonPlacements.Entries, Is.Empty);
             Assert.That(save.mvpDungeonPlacements.NextRevision, Is.EqualTo(1));
+            Assert.That(save.mvpRoomSlotAssignments, Is.Not.Null);
+            Assert.That(save.mvpRoomSlotAssignments.Rooms, Is.Empty);
+            Assert.That(save.mvpRoomSlotAssignments.NextRevision, Is.EqualTo(1));
             Assert.That(save.structureRuntime, Is.Not.Null);
             Assert.That(save.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(save.structureRuntime.Heat, Is.Zero);

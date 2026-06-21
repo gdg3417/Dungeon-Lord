@@ -440,7 +440,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PlacingSameCategory_ModifiesExistingEntryDeterministically()
+        public void PlacingSameCategoryWithSameOption_IsDeterministicNoOp()
         {
             _root.TryMvpPlaceOrModifySelectedPlacement(
                 MvpDungeonPlacementIds.RoomCategoryId,
@@ -460,12 +460,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(modified, Is.True);
             Assert.That(prior, Is.Not.Null);
             Assert.That(prior.Revision, Is.EqualTo(firstRevision));
-            Assert.That(second.Revision, Is.GreaterThan(prior.Revision));
+            Assert.That(second.Revision, Is.EqualTo(prior.Revision));
             Assert.That(_root.Save.mvpDungeonPlacements.Entries.Count, Is.EqualTo(1));
             MvpDungeonPlacementEntry[] nodePlacements = MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(_root.Save.mvpDungeonFloorLayout);
             Assert.That(_root.Save.mvpDungeonFloorLayout.Nodes.Count, Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
             Assert.That(nodePlacements, Has.Length.EqualTo(1));
-            Assert.That(nodePlacements[0].Revision, Is.EqualTo(second.Revision));
+            Assert.That(nodePlacements[0].Revision, Is.EqualTo(firstRevision));
         }
 
 

@@ -37,18 +37,18 @@ namespace DungeonBuilder.M0
                 return Create(RuleFirstContractIncomplete, FirstContractIncompleteActionKey, SourceFirstContract, SourceFirstContractKey);
             }
 
+            BasicRunAnalysisAppliedAdjustmentResult applied = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(loopSummary);
+            if (applied != null && applied.Applied && !string.IsNullOrWhiteSpace(applied.NextActionKey))
+            {
+                return Create(RuleAppliedAdjustment, applied.NextActionKey, SourceAppliedAdjustment, SourceAppliedAdjustmentKey, applied.AdjustmentKey);
+            }
+
             if (greedTrial != null && greedTrial.IsActive && !greedTrial.IsComplete)
             {
                 string actionKey = string.IsNullOrWhiteSpace(greedTrial.NextActionKey)
                     ? MvpPostContractGreedTrialPresenter.NextActionTestGreedierSetupKey
                     : greedTrial.NextActionKey;
                 return Create(RuleGreedTrialIncomplete, actionKey, SourceGreedTrial, SourceGreedTrialKey);
-            }
-
-            BasicRunAnalysisAppliedAdjustmentResult applied = BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(loopSummary);
-            if (applied != null && applied.Applied && !string.IsNullOrWhiteSpace(applied.NextActionKey))
-            {
-                return Create(RuleAppliedAdjustment, applied.NextActionKey, SourceAppliedAdjustment, SourceAppliedAdjustmentKey, applied.AdjustmentKey);
             }
 
             if (loopSummary != null && loopSummary.AnalysisUnlocked && !string.IsNullOrWhiteSpace(loopSummary.AnalysisAdviceKey))

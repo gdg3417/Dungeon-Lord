@@ -635,6 +635,14 @@ namespace DungeonBuilder.M0
             {
                 MvpDungeonPlacementEntry existing = Save.mvpDungeonPlacements.Entries[existingIndex];
                 priorEntry = new MvpDungeonPlacementEntry(existing.CategoryId, existing.OptionId, existing.Revision);
+                if (string.Equals(existing.OptionId, optionId, StringComparison.Ordinal) &&
+                    (!shouldPersistRoomSlotAssignment || string.Equals(priorRoomTargetOptionId, optionId, StringComparison.Ordinal)))
+                {
+                    newEntry = existing;
+                    bannerKey = "ui.banner.place_success";
+                    return true;
+                }
+
                 existing.OptionId = optionId;
                 existing.Revision = Math.Max(1, Save.mvpDungeonPlacements.NextRevision);
                 newEntry = existing;
@@ -831,11 +839,13 @@ namespace DungeonBuilder.M0
             save.dungeonLayout = DungeonLayoutState.CreateEmpty(SaveMigration.DefaultFloorCount, SaveMigration.DefaultSlotsPerFloor);
             save.mvpDungeonPlacements = new MvpDungeonPlacementState();
             save.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            save.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
             save.structureRuntime = new StructureRuntimeState();
             save.runHistory = new RunHistoryState();
             save.completedObjectives = new CompletedObjectiveState();
             save.researchPending = null;
             save.researchProgress = null;
+            save.completedResearch = new CompletedResearchState();
             save.lastOfflineSummary = null;
         }
 
