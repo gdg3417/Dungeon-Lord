@@ -833,6 +833,7 @@ namespace DungeonBuilder.M0
             save.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
             save.structureRuntime = new StructureRuntimeState();
             save.runHistory = new RunHistoryState();
+            save.completedObjectives = new CompletedObjectiveState();
             save.researchPending = null;
             save.researchProgress = null;
             save.lastOfflineSummary = null;
@@ -892,6 +893,7 @@ namespace DungeonBuilder.M0
 
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, config);
             SelectLatestRunOutcome();
             RefreshRunLine();
             SaveService.Save(Save, SaveReason.ManualDev);
@@ -1069,6 +1071,7 @@ namespace DungeonBuilder.M0
             completed.LastCompletedProjectId = summary.ProjectId;
             completed.LastCompletionRuleSourceId = summary.RuleSourceIdUsed;
             Save.completedResearch = completed;
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
             Save.researchPending = null;
             Save.researchProgress = null;
             SaveService?.Save(Save, SaveReason.ManualDev);

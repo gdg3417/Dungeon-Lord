@@ -132,6 +132,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(1));
             Assert.That(save.runHistory.LatestOutcome, Is.Null);
             Assert.That(save.runHistory.RecentOutcomes, Is.Empty);
+            Assert.That(save.completedObjectives, Is.Not.Null);
+            Assert.That(save.completedObjectives.ObjectiveIds, Is.Null.Or.Empty);
             Assert.That(save.researchPending, Is.Null);
             Assert.That(save.researchProgress, Is.Null);
         }
@@ -187,6 +189,7 @@ namespace DungeonBuilder.Tests.EditMode
                     CompletionPending = true
                 },
                 completedResearch = new CompletedResearchState { ProjectIds = new[] { "research.project.preexisting" } },
+                completedObjectives = new CompletedObjectiveState { ObjectiveIds = new[] { "objective.first_dungeon_contract" }, LastCompletedObjectiveId = "objective.first_dungeon_contract" },
                 lastOfflineSummary = new OfflineSummary
                 {
                     RuleResolved = true,
