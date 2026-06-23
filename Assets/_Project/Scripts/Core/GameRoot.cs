@@ -166,6 +166,22 @@ namespace DungeonBuilder.M0
             ApplyPauseState(pause);
         }
 
+        private void OnApplicationQuit()
+        {
+            ApplyApplicationQuit();
+        }
+
+        public void ApplyApplicationQuit()
+        {
+            if (SaveService == null || Save == null)
+            {
+                return;
+            }
+
+            SaveService.Save(Save, SaveReason.AppQuit);
+            SaveLine = "Save: AppQuit";
+        }
+
         public void ApplyPauseState(bool pause)
         {
             if (pause)

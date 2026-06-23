@@ -14,6 +14,11 @@ namespace DungeonBuilder.M0
         public string SavePath { get; private set; }
 
         public SaveService(SimpleLogger logger, SaveConfig saveConfig)
+            : this(logger, saveConfig, Application.persistentDataPath)
+        {
+        }
+
+        public SaveService(SimpleLogger logger, SaveConfig saveConfig, string persistentDataDirectory)
         {
             _logger = logger;
             _saveConfig = saveConfig;
@@ -22,7 +27,11 @@ namespace DungeonBuilder.M0
                 ? saveConfig.fileName
                 : "save_primary.json";
 
-            SavePath = Path.Combine(Application.persistentDataPath, fileName);
+            string baseDirectory = !string.IsNullOrEmpty(persistentDataDirectory)
+                ? persistentDataDirectory
+                : Application.persistentDataPath;
+
+            SavePath = Path.Combine(baseDirectory, fileName);
         }
 
         public SaveData LoadOrCreate(string contentVersion, out string banner)
