@@ -10,14 +10,14 @@ namespace DungeonBuilder.Tests.EditMode
     {
 
         [Test]
-        public void BootstrapConfig_FirstSessionLootTarget_IsNonzero()
+        public void BootstrapConfig_FirstSessionLootTarget_MatchesTunedValue()
         {
             string path = Path.Combine(Application.dataPath, "_Project/Data/Bootstrap/run_simulation_config.json");
             RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText(path));
 
             Assert.That(config.MvpFirstSessionObjective, Is.Not.Null);
             Assert.That(config.MvpFirstSessionObjective.RequiredRecoveredLootValue, Is.GreaterThan(0));
-            Assert.That(config.MvpFirstSessionObjective.RequiredRecoveredLootValue, Is.EqualTo(10));
+            Assert.That(config.MvpFirstSessionObjective.RequiredRecoveredLootValue, Is.EqualTo(8));
         }
 
         [Test]

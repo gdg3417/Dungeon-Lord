@@ -257,12 +257,36 @@ namespace DungeonBuilder.M0
         public void RunOrObserveDungeon()
         {
             BootstrapMvpActionHandler.RunResult result = CreateMvpActionHandler().RunOrObserveDungeon(_selectedMvpRunPostureId);
+            ApplyRunResultFeedback(result);
+            RefreshOverlayText();
+        }
+
+        public bool SimulateRunOnceFromDevPanel()
+        {
+            if (_root == null)
+            {
+                return false;
+            }
+
+            bool didRun = _root.SimulateRunOnce();
+            _mvpRunResultFeedback = string.Empty;
+            _lastRunIntentSummary = null;
+            _lastRunPostureUsedId = string.Empty;
+            _lastRunDebugPostureId = string.Empty;
+            _lastRunIntentFallbackUsed = false;
+            string bannerKey = didRun ? "ui.banner.run_simulated" : "ui.banner.run_sim_failed";
+            _root.SetBanner(_root.Content != null ? _root.Content.GetString(bannerKey, bannerKey) : bannerKey);
+            RefreshOverlayText();
+            return didRun;
+        }
+
+        private void ApplyRunResultFeedback(BootstrapMvpActionHandler.RunResult result)
+        {
             _mvpRunResultFeedback = result.RunFeedback;
             _lastRunIntentSummary = result.IntentSummary;
             _lastRunPostureUsedId = result.PostureUsedId;
             _lastRunDebugPostureId = result.DebugPostureId;
             _lastRunIntentFallbackUsed = result.IntentFallbackUsed;
-            RefreshOverlayText();
         }
 
         public bool ResetCleanMvpValidationSessionFromDevPanel()
@@ -956,10 +980,7 @@ namespace DungeonBuilder.M0
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_run_once", "ui.dev.button.sim_run_once")))
             {
-                bool didRun = _root.SimulateRunOnce();
-                _root.SetBanner(didRun
-                    ? _root.Content.GetString("ui.banner.run_simulated", "ui.banner.run_simulated")
-                    : _root.Content.GetString("ui.banner.run_sim_failed", "ui.banner.run_sim_failed"));
+                SimulateRunOnceFromDevPanel();
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.run_previous", "ui.dev.button.run_previous")))

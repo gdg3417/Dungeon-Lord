@@ -297,7 +297,7 @@
     "ObjectiveId": "objective.first_dungeon_contract",
     "RequiredCompletePath": true,
     "RequiredRunCount": 1,
-    "RequiredRecoveredLootValue": 10,
+    "RequiredRecoveredLootValue": 8,
     "AllowedMaxHeatTierId": "heat_tier.peace",
     "RequireResearchAnalysisUnlocked": true,
     "AnalysisUnlockId": "research.unlock.basic_run_analysis",

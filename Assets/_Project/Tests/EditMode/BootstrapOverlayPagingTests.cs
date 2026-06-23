@@ -1072,6 +1072,35 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.MvpRunResultFeedback, Does.Not.Contain("adventurer.class."));
         }
 
+
+        [Test]
+        public void DevPanelRunClearsCachedActionFeedbackSoF6LatestResultIsCoherent()
+        {
+            SetSave(new SaveData
+            {
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+                structureRuntime = new StructureRuntimeState { Heat = 4d, ManaReserve = 6d },
+                runHistory = new RunHistoryState()
+            });
+            SetBackingField("_runSimulationService", BuildRunSimulationServiceForActionTest());
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "bootstrap_overlay_dev_run_feedback_clear_test.json", useAtomicWrites = false }));
+
+            _overlay.RunOrObserveDungeon();
+            string firstFeedback = _overlay.MvpRunResultFeedback;
+            Assert.That(firstFeedback, Is.Not.Empty);
+
+            _root.Save.structureRuntime.Heat = 8d;
+            Assert.That(_overlay.SimulateRunOnceFromDevPanel(), Is.True);
+            string smokeText = _overlay.CopyFullSmokeTextToClipboard();
+
+            Assert.That(_root.Save.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
+            Assert.That(_overlay.MvpRunResultFeedback, Is.Empty);
+            Assert.That(smokeText, Does.Contain("Latest Adventurer Visit:"));
+            Assert.That(smokeText, Does.Contain("Run simulated."));
+            Assert.That(smokeText, Does.Contain("Heat: 8 -> 8"));
+            Assert.That(smokeText, Does.Not.Contain(firstFeedback));
+        }
+
         [Test]
         public void RunDiagnosticsFocus_HidesRunFeedbackAndRestoresSafely()
         {
