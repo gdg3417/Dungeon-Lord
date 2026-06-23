@@ -88,6 +88,27 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
+
+        [TestCase(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey, MvpPrimaryNextActionPresenter.SourceFirstContractKey, "Next: Complete the First Dungeon Contract. (First Dungeon Contract)")]
+        [TestCase(MvpPostContractGreedTrialPresenter.NextActionStabilizeHeatKey, MvpPrimaryNextActionPresenter.SourceGreedTrialKey, "Next: Stabilize heat back to Peace while keeping the greed setup. (Post-Contract Greed Trial)")]
+        [TestCase(BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey, MvpPrimaryNextActionPresenter.SourceAppliedAdjustmentKey, "Next: Run again to test the placement change. (Applied activity-analysis change)")]
+        [TestCase(BasicRunAnalysisRecommendationPresenter.ReduceDangerKey, MvpPrimaryNextActionPresenter.SourceAnalysisKey, "Next: Reduce danger or use a safer posture before pushing for more loot. (Adventurer Activity Analysis)")]
+        public void BuildPanelText_PrimaryPresenterOwnsSingleNextPrefix(string actionKey, string sourceKey, string expected)
+        {
+            string text = MvpPrimaryNextActionPresenter.BuildPanelText(
+                new MvpPrimaryNextActionSummary
+                {
+                    RuleResolved = true,
+                    PrimaryActionKey = actionKey,
+                    PrimaryActionSourceLabelKey = sourceKey
+                },
+                Localize);
+
+            Assert.That(text, Is.EqualTo(expected));
+            Assert.That(CountOccurrences(text, "Next:"), Is.EqualTo(1));
+            Assert.That(text, Does.Not.Contain("Next: Next:"));
+        }
+
         private static MvpFirstSessionObjectiveSummary CompleteContract() => new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true };
         private static MvpPostContractGreedTrialSummary CompleteGreedTrial() => new MvpPostContractGreedTrialSummary { RuleResolved = true, IsActive = true, IsComplete = true };
 
@@ -111,13 +132,31 @@ namespace DungeonBuilder.Tests.EditMode
             LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 2 }
         };
 
+        private static int CountOccurrences(string text, string value)
+        {
+            int count = 0;
+            int index = 0;
+            while ((index = text.IndexOf(value, index, System.StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += value.Length;
+            }
+            return count;
+        }
+
         private static string Localize(string key, string fallback) => Strings.TryGetValue(key, out string value) ? value : fallback;
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
             [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
-            [MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey] = "Complete the First Dungeon Contract."
+            [MvpPrimaryNextActionPresenter.SourceGreedTrialKey] = "Post-Contract Greed Trial",
+            [MvpPrimaryNextActionPresenter.SourceAppliedAdjustmentKey] = "Applied activity-analysis change",
+            [MvpPrimaryNextActionPresenter.SourceAnalysisKey] = "Adventurer Activity Analysis",
+            [MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey] = "Complete the First Dungeon Contract.",
+            [MvpPostContractGreedTrialPresenter.NextActionStabilizeHeatKey] = "Stabilize heat back to Peace while keeping the greed setup.",
+            [BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey] = "Next: Run again to test the placement change.",
+            [BasicRunAnalysisRecommendationPresenter.ReduceDangerKey] = "Next: Reduce danger or use a safer posture before pushing for more loot."
         };
     }
 }

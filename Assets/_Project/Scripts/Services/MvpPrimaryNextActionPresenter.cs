@@ -67,7 +67,8 @@ namespace DungeonBuilder.M0
         public static string BuildPanelText(MvpPrimaryNextActionSummary summary, Func<string, string, string> localize)
         {
             if (summary == null) summary = Resolve(null, null, null, null);
-            string action = Localize(localize, string.IsNullOrWhiteSpace(summary.PrimaryActionKey) ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey : summary.PrimaryActionKey);
+            string actionKey = string.IsNullOrWhiteSpace(summary.PrimaryActionKey) ? MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey : summary.PrimaryActionKey;
+            string action = NormalizePrimaryActionText(actionKey, Localize(localize, actionKey));
             string source = Localize(localize, string.IsNullOrWhiteSpace(summary.PrimaryActionSourceLabelKey) ? SourceSummaryKey : summary.PrimaryActionSourceLabelKey);
             return string.Format(Localize(localize, CompactLineFormatKey), action, source);
         }
@@ -83,6 +84,36 @@ namespace DungeonBuilder.M0
                 PrimaryActionSourceLabelKey = sourceLabelKey,
                 SupportingDetailKey = detailKey
             };
+        }
+
+        private static string NormalizePrimaryActionText(string actionKey, string action)
+        {
+            if (string.IsNullOrWhiteSpace(action) || !PrimaryActionBodyMayHaveLegacyNextPrefix(actionKey))
+            {
+                return action;
+            }
+
+            const string nextPrefix = "Next:";
+            return action.StartsWith(nextPrefix, StringComparison.Ordinal)
+                ? action.Substring(nextPrefix.Length).TrimStart()
+                : action;
+        }
+
+        private static bool PrimaryActionBodyMayHaveLegacyNextPrefix(string actionKey)
+        {
+            return string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.RunForAnalysisKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.ReduceDangerKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.ReduceHeatKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.ImproveExtractionKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.TestGreedierKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisRecommendationPresenter.AdjustAndRunAgainKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, MvpPlayerLoopSummaryPresenter.SuggestReduceHeatPressureKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, MvpPlayerLoopSummaryPresenter.SuggestImproveSurvivabilityOrLayoutKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, MvpPlayerLoopSummaryPresenter.SuggestVerifyResearchStatusKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey, StringComparison.Ordinal) ||
+                   string.Equals(actionKey, GuidedMvpActionPathPresenter.ActionRunAgainToTestChangeKey, StringComparison.Ordinal);
         }
 
         private static string Localize(Func<string, string, string> localize, string key) => localize == null ? key : localize(key, key);

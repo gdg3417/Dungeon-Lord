@@ -866,7 +866,7 @@ namespace DungeonBuilder.Tests.EditMode
                 [AdventurerRunIntentPresenter.BodyFormatKey] = "{0} likely. Reason: {1}",
                 [AdventurerRunIntentPresenter.DebugPostureFormatKey] = "Expected next adventurer intent: {0} likely. Debug selected posture: {1}.",
                 [AdventurerRunIntentResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
-                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot signal is high and heat is low",
+                [AdventurerRunIntentResolver.ReasonLootHighHeatLowKey] = "loot attraction is high and route heat pressure is low",
                 [AdventurerRunIntentResolver.ReasonDeathsHeatKey] = "recent deaths and rising heat",
                 [AdventurerRunIntentResolver.ReasonModerateKey] = "risk and reward are both moderate",
                 [AdventurerRunIntentResolver.ReasonDangerKey] = "danger pressure is high",

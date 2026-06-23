@@ -13,6 +13,17 @@ namespace DungeonBuilder.M0
         public const string LatestRunKey = "ui.mvp_screen.section.latest_run";
         public const string AnalysisNextActionKey = "ui.mvp_screen.section.analysis_next_action";
         public const string FirstContractKey = "ui.mvp_screen.section.first_contract";
+        public const string ActionControlsKey = "ui.mvp_screen.section.action_controls";
+        public const string LatestResultKey = "ui.mvp_screen.section.latest_result";
+        public const string DetailsHintKey = "ui.mvp_screen.details_hint";
+        public const string RoomTargetControlFormatKey = "ui.mvp_screen.control.room_target_format";
+        public const string PlacementControlFormatKey = "ui.mvp_screen.control.placement_format";
+        public const string PlaceButtonControlKey = "ui.mvp_screen.control.place_button";
+        public const string RunPostureControlFormatKey = "ui.mvp_screen.control.run_posture_format";
+        public const string RunButtonControlKey = "ui.mvp_screen.control.run_button";
+        public const string LatestResultFormatKey = "ui.mvp_screen.latest_result_format";
+        public const string LatestResultNoRunKey = "ui.mvp_screen.latest_result.no_run";
+        public const string CurrentHeatFormatKey = "ui.mvp_screen.current_heat_format";
         public const string SectionHeaderFormatKey = "ui.mvp_screen.section.header_format";
         public const string LineFormatKey = "ui.mvp_screen.line_format";
         public const string SelectedCategoryFormatKey = "ui.mvp_screen.selected_category_format";
@@ -52,47 +63,33 @@ namespace DungeonBuilder.M0
         {
             var builder = new StringBuilder();
             AppendLine(builder, Localize(localize, TitleKey));
-            AppendSection(builder, localize, TopStatusKey);
-            AppendLine(builder, Localize(localize, PlayerViewStatusKey));
-            if (!string.IsNullOrWhiteSpace(bannerMessage))
-            {
-                AppendLine(builder, bannerMessage);
-            }
-            AppendLine(builder, BuildPathCompleteLine(guidedPath, localize));
-            AppendLine(builder, string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.ManaFormatKey), summary != null && summary.RuleResolved ? summary.ManaReserve : 0d));
-            AppendLine(builder, BuildHeatAndPressureLine(summary, localize));
-            AppendLine(builder, BuildResearchLine(summary, localize));
-
             AppendLine(builder, MvpPrimaryNextActionPresenter.BuildPanelText(MvpPrimaryNextActionPresenter.Resolve(summary, guidedPath, firstSessionObjective, greedTrial), localize));
+            if (!string.IsNullOrWhiteSpace(bannerMessage)) AppendLine(builder, bannerMessage);
+
+            AppendSection(builder, localize, TopStatusKey);
+            AppendLine(builder, BuildCurrentHeatStatusLine(summary, localize));
+            AppendLine(builder, BuildPressureLine(summary, localize));
+            AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildStatusPanelText(greedTrial, localize);
             if (!string.IsNullOrWhiteSpace(greedTrialText)) AppendLine(builder, greedTrialText);
+            string researchLine = BuildResearchLine(summary, localize);
+            if (summary != null && summary.HasResearchStatus) AppendLine(builder, researchLine);
 
-            AppendSection(builder, localize, CurrentDungeonKey);
-            AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));
+            AppendSection(builder, localize, ActionControlsKey);
+            AppendLine(builder, string.Format(Localize(localize, RoomTargetControlFormatKey), ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedTargetFormatKey, localize), ExtractLine(dungeonLayoutText, MvpRoomSlotTargetPresenter.SelectedCapacityFormatKey, localize)));
+            AppendLine(builder, string.Format(Localize(localize, PlacementControlFormatKey), selectedCategoryName, selectedOptionName));
+            AppendLine(builder, Localize(localize, PlaceButtonControlKey));
+            AppendLine(builder, string.Format(Localize(localize, RunPostureControlFormatKey), selectedRunPostureName));
+            if (!string.IsNullOrWhiteSpace(selectedRunPlanPreview)) AppendLine(builder, selectedRunPlanPreview);
+            AppendLine(builder, Localize(localize, RunButtonControlKey));
+            if (!string.IsNullOrWhiteSpace(placementFeedback)) AppendLine(builder, placementFeedback);
 
-            AppendSection(builder, localize, LatestRunKey);
-            AppendLine(builder, ResolveRunOutcomeLine(summary, localize));
-            AppendLine(builder, BuildPartyLine(summary, localize));
-            AppendLine(builder, BuildLootLine(summary, localize));
-            string spoilsText = MvpRecentSpoilsLedgerPresenter.BuildPanelText(recentSpoilsLedger, localize);
-            if (!string.IsNullOrWhiteSpace(spoilsText)) AppendLine(builder, spoilsText);
-            AppendLine(builder, BuildHeatLine(summary, localize));
-
-            AppendSection(builder, localize, AnalysisNextActionKey);
-            AppendLine(builder, BuildAnalysisLine(summary, localize));
+            AppendSection(builder, localize, LatestResultKey);
+            AppendLine(builder, BuildLatestResultLine(summary, localize));
             string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
             if (!string.IsNullOrWhiteSpace(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
-
-            AppendSection(builder, localize, RunSetupKey);
-            AppendLine(builder, AdventurerRunIntentPresenter.BuildDebugPostureLine(summary?.AdventurerRunIntent, selectedRunPostureName, localize));
-            AppendLine(builder, selectedRunPlanPreview);
-
-            AppendSection(builder, localize, BuildChoiceKey);
-            AppendLine(builder, string.Format(Localize(localize, SelectedPlacementFormatKey), selectedCategoryName, selectedOptionName));
-            AppendLine(builder, selectedPlacementPreview);
-            AppendLine(builder, string.IsNullOrWhiteSpace(selectedPlacementComparison) ? Localize(localize, NoComparisonKey) : selectedPlacementComparison);
-            AppendLine(builder, string.IsNullOrWhiteSpace(placementFeedback) ? Localize(localize, PlacePromptKey) : placementFeedback);
+            AppendLine(builder, Localize(localize, DetailsHintKey));
             return builder.ToString();
         }
 
@@ -125,11 +122,20 @@ namespace DungeonBuilder.M0
             return string.Empty;
         }
 
-        private static string BuildHeatAndPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        private static string BuildCurrentHeatStatusLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            double currentHeat = summary != null && summary.RuleResolved ? summary.CurrentHeat : 0d;
+            string tierId = summary != null && summary.RuleResolved && !string.IsNullOrWhiteSpace(summary.CurrentHeatTierId)
+                ? summary.CurrentHeatTierId
+                : summary?.HeatTierId;
+            string tier = ResolveKeyOrFallback(tierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
+            return string.Format(Localize(localize, CurrentHeatFormatKey), currentHeat, tier);
+        }
+
+        private static string BuildPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             return JoinInline(
                 localize,
-                BuildHeatLine(summary, localize),
                 AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize),
                 AdventurerTrafficPressurePresenter.BuildSummaryLine(summary?.AdventurerTrafficPressure, localize));
         }
@@ -145,7 +151,8 @@ namespace DungeonBuilder.M0
         {
             double before = summary != null && summary.RuleResolved ? summary.HeatBefore : 0d;
             double after = summary != null && summary.RuleResolved ? summary.HeatAfter : 0d;
-            string tier = ResolveKeyOrFallback(summary?.HeatTierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
+            string tierId = !string.IsNullOrWhiteSpace(summary?.LatestRunHeatTierId) ? summary.LatestRunHeatTierId : summary?.HeatTierId;
+            string tier = ResolveKeyOrFallback(tierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
             string riskKey = summary == null || !summary.RuleResolved || !summary.HasRunOutcome ? MvpLoopSummaryPanelPresenter.RiskNoRunKey : after > before ? MvpLoopSummaryPanelPresenter.RiskIncreasedKey : after < before ? MvpLoopSummaryPanelPresenter.RiskReducedKey : MvpLoopSummaryPanelPresenter.RiskStableKey;
             return string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.HeatFormatKey), before, after, tier, Localize(localize, riskKey));
         }
@@ -179,6 +186,22 @@ namespace DungeonBuilder.M0
                 ? MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize)
                 : Localize(localize, MvpLoopSummaryPanelPresenter.ValueNoResearchKey);
             return string.Format(Localize(localize, ResearchFormatKey), status);
+        }
+
+        private static string BuildLatestResultLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome)
+            {
+                return Localize(localize, LatestResultNoRunKey);
+            }
+
+            return string.Format(
+                Localize(localize, LatestResultFormatKey),
+                ResolveRunOutcomeLine(summary, localize),
+                BuildPartyLine(summary, localize),
+                BuildLootLine(summary, localize),
+                BuildHeatLine(summary, localize),
+                BuildAnalysisLine(summary, localize));
         }
 
         private static string ResolveRunOutcomeLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

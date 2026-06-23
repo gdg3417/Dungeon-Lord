@@ -80,7 +80,7 @@ namespace DungeonBuilder.Tests.EditMode
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { IsComplete = true }, string.Empty, "Room", "Basic", string.Empty, string.Empty, "Balanced", "Plan", string.Empty, string.Empty, string.Empty, null, null, null, Localized);
             Assert.That(text, Does.Contain("Adventurer traffic:"));
             Assert.That(text, Does.Contain("== Top Status =="));
-            Assert.That(text, Does.Contain("== Activity Setup =="));
+            Assert.That(text, Does.Contain("== Action Controls =="));
         }
 
         [Test]
@@ -137,6 +137,20 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpPlayableScreenPresenter.SelectedPlacementFormatKey) return "Selected placement: {0} / {1}";
             if (key == MvpPlayableScreenPresenter.NoComparisonKey) return "No comparison.";
             if (key == MvpPlayableScreenPresenter.PlacePromptKey) return "Next build step: choose an option, then place or modify it.";
+            if (key == MvpPlayableScreenPresenter.ActionControlsKey) return "Action Controls";
+            if (key == MvpPlayableScreenPresenter.LatestResultKey) return "Latest Result";
+            if (key == MvpPlayableScreenPresenter.DetailsHintKey) return "Details: press F5 to cycle focused sections, F6 to copy full smoke evidence, or show diagnostics from the action panel.";
+            if (key == MvpPlayableScreenPresenter.RoomTargetControlFormatKey) return "Room target: {0}; {1}";
+            if (key == MvpPlayableScreenPresenter.PlacementControlFormatKey) return "Placement: {0} / {1}";
+            if (key == MvpPlayableScreenPresenter.PlaceButtonControlKey) return "Action button: Place / modify selected placement";
+            if (key == MvpPlayableScreenPresenter.RunPostureControlFormatKey) return "Run posture: {0}";
+            if (key == MvpPlayableScreenPresenter.RunButtonControlKey) return "Action button: Run / observe dungeon";
+            if (key == MvpPlayableScreenPresenter.LatestResultFormatKey) return "{0}; {1}; {2}; {3}; {4}";
+            if (key == MvpPlayableScreenPresenter.LatestResultNoRunKey) return "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
+            if (key == MvpPlayableScreenPresenter.CurrentHeatFormatKey) return "Current heat: {0:0.##} ({1}).";
+            if (key == MvpPlayableScreenPresenter.PartyFormatKey) return "Party: {0}";
+            if (key == MvpPlayableScreenPresenter.ResearchFormatKey) return "Research: {0}";
+            if (key == MvpPlayableScreenPresenter.AnalysisFormatKey) return "Why it happened: {0}";
             if (key == MvpPlayableScreenPresenter.PartyUnavailableKey) return "Party preview unavailable.";
             if (key == MvpPlayableScreenPresenter.NoAnalysisKey) return "Run once to unlock analysis.";
             if (key == MvpLoopSummaryPanelPresenter.ValueNoRunKey) return "No adventurer visit yet.";

@@ -22,7 +22,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = BootstrapSmokeTextComposer.BuildLoopSummarySectionText(context, Localize);
 
-            Assert.That(text, Does.Contain("Suggested Next Action: Next: run again to test the placement change."));
+            Assert.That(text, Does.Contain("Suggested Next Action: Run again to test the placement change."));
             Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
             Assert.That(text, Does.Contain("Guided MVP Action"));
             Assert.That(text, Does.Contain("Step: Test placement change"));
@@ -226,9 +226,9 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpLoopSummaryPanelPresenter.RiskStableKey: return "Risk stayed steady.";
                 case CurrentHeatTierResolver.NoticeTierId: return "Notice";
                 case MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey: return "Next: adjust one placement before the next adventurer visit.";
-                case BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey: return "Next: run again to test the placement change.";
+                case BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey: return "Run again to test the placement change.";
                 case BasicRunAnalysisRecommendationPresenter.RecommendationFormatKey: return "Analysis recommendation: {0}";
-                case BasicRunAnalysisRecommendationPresenter.ReduceDangerKey: return "Next: reduce danger or use a safer posture before pushing for more loot.";
+                case BasicRunAnalysisRecommendationPresenter.ReduceDangerKey: return "Reduce danger or use a safer posture before pushing for more loot.";
                 case BasicRunAnalysisPlacementTargetPresenter.AdjustmentTargetFormatKey: return "Adjustment target: {0}";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey: return "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot.";
                 case BasicRunAnalysisAppliedAdjustmentPresenter.AppliedAdjustmentFormatKey: return "Applied adjustment: {0}";
