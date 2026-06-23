@@ -1095,7 +1095,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(_root.Save.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
             Assert.That(_overlay.MvpRunResultFeedback, Is.Empty);
-            Assert.That(smokeText, Does.Contain("Latest run: run-2"));
+            Assert.That(smokeText, Does.Contain("Latest Adventurer Visit:"));
+            Assert.That(smokeText, Does.Contain("Run simulated."));
             Assert.That(smokeText, Does.Contain("Heat: 8 -> 8"));
             Assert.That(smokeText, Does.Not.Contain(firstFeedback));
         }
