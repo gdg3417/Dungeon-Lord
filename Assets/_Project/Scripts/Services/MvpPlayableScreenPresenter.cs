@@ -23,6 +23,7 @@ namespace DungeonBuilder.M0
         public const string RunButtonControlKey = "ui.mvp_screen.control.run_button";
         public const string LatestResultFormatKey = "ui.mvp_screen.latest_result_format";
         public const string LatestResultNoRunKey = "ui.mvp_screen.latest_result.no_run";
+        public const string CurrentHeatFormatKey = "ui.mvp_screen.current_heat_format";
         public const string SectionHeaderFormatKey = "ui.mvp_screen.section.header_format";
         public const string LineFormatKey = "ui.mvp_screen.line_format";
         public const string SelectedCategoryFormatKey = "ui.mvp_screen.selected_category_format";
@@ -66,7 +67,8 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrWhiteSpace(bannerMessage)) AppendLine(builder, bannerMessage);
 
             AppendSection(builder, localize, TopStatusKey);
-            AppendLine(builder, BuildHeatAndPressureLine(summary, localize));
+            AppendLine(builder, BuildCurrentHeatStatusLine(summary, localize));
+            AppendLine(builder, BuildPressureLine(summary, localize));
             AppendLine(builder, BuildPlayableCurrentDungeonLine(summary, dungeonLayoutText, localize));
             AppendLine(builder, MvpFirstSessionObjectivePresenter.BuildCompactStatusLine(firstSessionObjective, localize));
             string greedTrialText = MvpPostContractGreedTrialPresenter.BuildStatusPanelText(greedTrial, localize);
@@ -120,11 +122,20 @@ namespace DungeonBuilder.M0
             return string.Empty;
         }
 
-        private static string BuildHeatAndPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        private static string BuildCurrentHeatStatusLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
+        {
+            double currentHeat = summary != null && summary.RuleResolved ? summary.CurrentHeat : 0d;
+            string tierId = summary != null && summary.RuleResolved && !string.IsNullOrWhiteSpace(summary.CurrentHeatTierId)
+                ? summary.CurrentHeatTierId
+                : summary?.HeatTierId;
+            string tier = ResolveKeyOrFallback(tierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
+            return string.Format(Localize(localize, CurrentHeatFormatKey), currentHeat, tier);
+        }
+
+        private static string BuildPressureLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             return JoinInline(
                 localize,
-                BuildHeatLine(summary, localize),
                 AdventurerArrivalPressurePresenter.BuildSummaryLine(summary?.AdventurerArrivalPressure, localize),
                 AdventurerTrafficPressurePresenter.BuildSummaryLine(summary?.AdventurerTrafficPressure, localize));
         }
@@ -140,7 +151,8 @@ namespace DungeonBuilder.M0
         {
             double before = summary != null && summary.RuleResolved ? summary.HeatBefore : 0d;
             double after = summary != null && summary.RuleResolved ? summary.HeatAfter : 0d;
-            string tier = ResolveKeyOrFallback(summary?.HeatTierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
+            string tierId = !string.IsNullOrWhiteSpace(summary?.LatestRunHeatTierId) ? summary.LatestRunHeatTierId : summary?.HeatTierId;
+            string tier = ResolveKeyOrFallback(tierId, localize, MvpLoopSummaryPanelPresenter.ValueUnknownKey);
             string riskKey = summary == null || !summary.RuleResolved || !summary.HasRunOutcome ? MvpLoopSummaryPanelPresenter.RiskNoRunKey : after > before ? MvpLoopSummaryPanelPresenter.RiskIncreasedKey : after < before ? MvpLoopSummaryPanelPresenter.RiskReducedKey : MvpLoopSummaryPanelPresenter.RiskStableKey;
             return string.Format(Localize(localize, MvpLoopSummaryPanelPresenter.HeatFormatKey), before, after, tier, Localize(localize, riskKey));
         }

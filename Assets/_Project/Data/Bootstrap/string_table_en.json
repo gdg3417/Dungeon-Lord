@@ -537,47 +537,47 @@
     },
     {
       "key": "mvp_loop.suggestion.run_dungeon",
-      "text": "Next: observe adventurer activity to see what your first build does."
+      "text": "Observe adventurer activity to see what your first build does."
     },
     {
       "key": "mvp_loop.suggestion.reduce_heat_pressure",
-      "text": "Next: lower heat pressure before pushing farther."
+      "text": "Lower heat pressure before pushing farther."
     },
     {
       "key": "mvp_loop.suggestion.improve_survivability_or_layout",
-      "text": "Next: improve survivability or layout so adventurers leave with loot."
+      "text": "Improve survivability or layout so adventurers leave with loot."
     },
     {
       "key": "mvp_loop.suggestion.verify_research_status",
-      "text": "Next: verify the completed research result."
+      "text": "Verify the completed research result."
     },
     {
       "key": "mvp_loop.suggestion.repeat_or_improve_placement",
-      "text": "Next: adjust one placement before the next adventurer visit."
+      "text": "Adjust placement before the next adventurer visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.run_for_analysis",
-      "text": "Next: observe adventurer activity so Adventurer Activity Analysis can read the latest visit."
+      "text": "Observe adventurer activity so Adventurer Activity Analysis can read the latest visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.reduce_danger",
-      "text": "Next: reduce danger or use a safer posture before pushing for more loot."
+      "text": "Reduce danger or use a safer posture before pushing for more loot."
     },
     {
       "key": "mvp_loop.suggestion.analysis.reduce_heat",
-      "text": "Next: lower heat pressure or use a cautious posture before the next adventurer visit."
+      "text": "Lower heat pressure or use a cautious posture before the next adventurer visit."
     },
     {
       "key": "mvp_loop.suggestion.analysis.improve_extraction",
-      "text": "Next: improve survivability or reduce danger so generated loot is recovered."
+      "text": "Improve survivability or reduce danger so generated loot is recovered."
     },
     {
       "key": "mvp_loop.suggestion.analysis.test_greedier",
-      "text": "Next: repeat this setup or test slightly greedier pressure while heat is controlled."
+      "text": "Repeat this setup or test slightly greedier pressure while heat is controlled."
     },
     {
       "key": "mvp_loop.suggestion.analysis.run_again_to_test_change",
-      "text": "Next: run again to test the placement change."
+      "text": "Run again to test the placement change."
     },
     {
       "key": "ui.mvp_loop.analysis.applied_adjustment_format",
@@ -2298,6 +2298,10 @@
     {
       "key": "ui.mvp_screen.latest_result.no_run",
       "text": "No adventurer visit yet. Use Run / observe dungeon after the path is ready."
+    },
+    {
+      "key": "ui.mvp_screen.current_heat_format",
+      "text": "Current heat: {0:0.##} ({1})."
     }
   ]
 }

@@ -2242,6 +2242,7 @@ namespace DungeonBuilder.Tests.EditMode
             map[MvpPlayableScreenPresenter.RunButtonControlKey] = "Action button: Run / observe dungeon";
             map[MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}";
             map[MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
+            map[MvpPlayableScreenPresenter.CurrentHeatFormatKey] = "Current heat: {0:0.##} ({1}).";
             map["ui.mvp_primary_next_action.compact_format"] = "Next: {0} ({1})";
             map["ui.mvp_primary_next_action.source.first_contract"] = "First Dungeon Contract";
             map["ui.mvp_primary_next_action.source.greed_trial"] = "Post-Contract Greed Trial";

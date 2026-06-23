@@ -225,6 +225,7 @@ namespace DungeonBuilder.Tests.EditMode
                 case MvpPlayableScreenPresenter.RunButtonControlKey: return "Action button: Run / observe dungeon";
                 case MvpPlayableScreenPresenter.LatestResultFormatKey: return "{0}; {1}; {2}; {3}; {4}";
                 case MvpPlayableScreenPresenter.LatestResultNoRunKey: return "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
+                case MvpPlayableScreenPresenter.CurrentHeatFormatKey: return "Current heat: {0:0.##} ({1}).";
                 case MvpPlayableScreenPresenter.PartyUnavailableKey: return "Party: no adventurers observed yet.";
                 case MvpPlayableScreenPresenter.PartyFormatKey: return "Party: {0}";
                 case MvpPlayableScreenPresenter.ResearchFormatKey: return "Research: {0}";

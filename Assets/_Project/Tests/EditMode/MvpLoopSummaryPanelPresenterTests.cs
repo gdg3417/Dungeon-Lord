@@ -494,8 +494,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, MvpDungeonPlacementIds.MonsterCategoryId, SmokeLocalize);
 
-            Assert.That(text, Does.Contain("Suggested Next Action: Next: run again to test the placement change."));
-            Assert.That(text, Does.Contain("Analysis recommendation: Next: reduce danger or use a safer posture before pushing for more loot."));
+            Assert.That(text, Does.Contain("Suggested Next Action: Run again to test the placement change."));
+            Assert.That(text, Does.Contain("Analysis recommendation: Reduce danger or use a safer posture before pushing for more loot."));
             Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
             Assert.That(text, Does.Not.Contain("Selected placement fit:"));
             Assert.That(text, Does.Not.Contain("Adjust this placement"));
@@ -668,12 +668,12 @@ namespace DungeonBuilder.Tests.EditMode
                 case "ui.research_unlock.basic_run_analysis.summary": return "Adventurer activity analysis unlocked";
                 case MvpLoopSummaryPanelPresenter.AnalysisNoRunKey: return "Adventurer Activity Analysis is ready. Observe adventurer activity to unlock analysis from the latest visit.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisNoRunKey: return "Next: observe adventurer activity so Adventurer Activity Analysis can read the latest visit.";
-                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey: return "Next: reduce danger or use a safer posture before pushing for more loot.";
+                case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceDangerKey: return "Reduce danger or use a safer posture before pushing for more loot.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisReduceHeatKey: return "Next: lower heat pressure or use a cautious posture before the next adventurer visit.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisImproveExtractionKey: return "Next: improve survivability or reduce danger so generated loot is recovered.";
                 case MvpPlayerLoopSummaryPresenter.SuggestBasicAnalysisTestGreedierKey: return "Next: repeat this setup or test slightly greedier pressure while heat is controlled.";
                 case MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey: return "Next: adjust one placement before the next adventurer visit.";
-                case BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey: return "Next: run again to test the placement change.";
+                case BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey: return "Run again to test the placement change.";
                 case BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey: return "Danger is lower than the latest visit. Run again to test the change.";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceDangerTargetKey: return "Monster or trap first. Danger drove the recommendation; lower danger before pushing for more loot.";
                 case BasicRunAnalysisPlacementTargetPresenter.ReduceHeatTargetKey: return "Trap or loot node first. Heat rose during this adventurer visit; reduce heat pressure before another greedy run.";

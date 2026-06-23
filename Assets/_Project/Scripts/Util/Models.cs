@@ -748,6 +748,9 @@ namespace DungeonBuilder.M0
         public double HeatBefore = 0d;
         public double HeatAfter = 0d;
         public string HeatTierId;
+        public double CurrentHeat = 0d;
+        public string CurrentHeatTierId;
+        public string LatestRunHeatTierId;
         public bool HasResearchStatus = false;
         public string ResearchProjectId;
         public string ResearchStatusKey;

@@ -147,6 +147,7 @@ namespace DungeonBuilder.Tests.EditMode
             if (key == MvpPlayableScreenPresenter.RunButtonControlKey) return "Action button: Run / observe dungeon";
             if (key == MvpPlayableScreenPresenter.LatestResultFormatKey) return "{0}; {1}; {2}; {3}; {4}";
             if (key == MvpPlayableScreenPresenter.LatestResultNoRunKey) return "No adventurer visit yet. Use Run / observe dungeon after the path is ready.";
+            if (key == MvpPlayableScreenPresenter.CurrentHeatFormatKey) return "Current heat: {0:0.##} ({1}).";
             if (key == MvpPlayableScreenPresenter.PartyFormatKey) return "Party: {0}";
             if (key == MvpPlayableScreenPresenter.ResearchFormatKey) return "Research: {0}";
             if (key == MvpPlayableScreenPresenter.AnalysisFormatKey) return "Why it happened: {0}";

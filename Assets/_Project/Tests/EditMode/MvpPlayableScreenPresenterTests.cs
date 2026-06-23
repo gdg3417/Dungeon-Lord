@@ -122,7 +122,7 @@ namespace DungeonBuilder.Tests.EditMode
                 null,
                 Localize);
 
-            Assert.That(text, Does.Contain("Next: run again to test the placement change."));
+            Assert.That(text, Does.Contain("Next: Run again to test the placement change."));
             Assert.That(text, Does.Contain("Applied adjustment: Danger is lower than the latest visit. Run again to test the change."));
             Assert.That(text, Does.Not.Contain("Next: adjust one placement before the next adventurer visit."));
         }
@@ -195,6 +195,49 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("Next: Latest run produced the strongest recent haul."));
         }
 
+
+        [Test]
+        public void BuildScreenText_SeparatesCurrentHeatFromLatestRunHeatMovement()
+        {
+            var summary = new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasRunOutcome = true,
+                RunSucceeded = true,
+                HeatBefore = 8.9d,
+                HeatAfter = 11.45d,
+                CurrentHeat = 4d,
+                CurrentHeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                LatestRunHeatTierId = CurrentHeatTierResolver.NoticeTierId,
+                HeatTierId = CurrentHeatTierResolver.PeaceTierId,
+                PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true },
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true }
+            };
+
+            string text = MvpPlayableScreenPresenter.BuildScreenText(
+                summary,
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty,
+                "Loot",
+                "Basic Loot",
+                string.Empty,
+                string.Empty,
+                "Balanced",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true },
+                new MvpPostContractGreedTrialSummary { RuleResolved = true, IsActive = true, IsComplete = true },
+                null,
+                Localize);
+
+            Assert.That(text, Does.Contain("Current heat: 4 (Peace)."));
+            Assert.That(text, Does.Contain("Heat: 8.9 -> 11.45 (Notice). Risk increased."));
+            Assert.That(text, Does.Not.Contain("Heat: 8.9 -> 11.45 (Peace)"));
+            Assert.That(text, Does.Not.Contain("Current heat: 4 (Notice)"));
+        }
+
         private static int CountOccurrences(string text, string value)
         {
             int count = 0;
@@ -253,6 +296,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.RunButtonControlKey] = "Action button: Run / observe dungeon",
             [MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}",
             [MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.",
+            [MvpPlayableScreenPresenter.CurrentHeatFormatKey] = "Current heat: {0:0.##} ({1}).",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",
@@ -346,8 +390,8 @@ namespace DungeonBuilder.Tests.EditMode
             ["ui.research.status.active_in_progress"] = "Research in progress",
             [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to see the first outcome.",
             [MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey] = "Next: adjust one placement before the next adventurer visit.",
-            [BasicRunAnalysisRecommendationPresenter.ReduceDangerKey] = "Next: reduce danger or use a safer posture before pushing for more loot.",
-            [BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey] = "Next: run again to test the placement change.",
+            [BasicRunAnalysisRecommendationPresenter.ReduceDangerKey] = "Reduce danger or use a safer posture before pushing for more loot.",
+            [BasicRunAnalysisAppliedAdjustmentPresenter.RunAgainToTestChangeKey] = "Run again to test the placement change.",
             [BasicRunAnalysisAppliedAdjustmentPresenter.DangerLowerKey] = "Danger is lower than the latest visit. Run again to test the change.",
             [GuidedMvpActionPathPanelPresenter.CompleteNoKey] = "No"
         };
