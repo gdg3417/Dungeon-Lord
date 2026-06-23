@@ -11,9 +11,14 @@ namespace DungeonBuilder.M0
         public event Action<long> OnTick;
 
         public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds)
+            : this(logger, tickSeconds, detectClockSkewSeconds, new SystemTimeSource())
+        {
+        }
+
+        public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds, ITimeSource timeSource)
         {
             _logger = logger;
-            _clock = new SimulationClock(tickSeconds, detectClockSkewSeconds, new SystemTimeSource());
+            _clock = new SimulationClock(tickSeconds, detectClockSkewSeconds, timeSource);
         }
 
         public void AttachSave(SaveData save)
