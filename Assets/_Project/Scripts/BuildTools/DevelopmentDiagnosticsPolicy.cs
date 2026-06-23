@@ -9,7 +9,7 @@ namespace DungeonBuilder.M0
 
         public static bool IsCurrentBuildDevelopment()
         {
-            return UnityEngine.Debug.isDebugBuild;
+            return UnityEngine.Application.isEditor || UnityEngine.Debug.isDebugBuild;
         }
     }
 }

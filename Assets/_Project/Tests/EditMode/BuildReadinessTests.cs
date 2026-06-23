@@ -57,6 +57,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
 
+
+        [Test]
+        public void DevelopmentDiagnosticsPolicy_CurrentEditorContext_IsDevelopmentContext()
+        {
+            Assert.True(Application.isEditor, "This regression must run in the Unity Editor EditMode test runner.");
+            Assert.True(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment());
+        }
+
         [Test]
         public void ActiveBuildTargetValidation_RequiresExactRequestedTarget()
         {
