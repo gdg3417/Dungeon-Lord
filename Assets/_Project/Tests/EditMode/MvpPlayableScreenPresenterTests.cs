@@ -236,6 +236,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Heat: 8.9 -> 11.45 (Notice). Risk increased."));
             Assert.That(text, Does.Not.Contain("Heat: 8.9 -> 11.45 (Peace)"));
             Assert.That(text, Does.Not.Contain("Current heat: 4 (Notice)"));
+            Assert.That(text, Does.Not.Contain("heat_tier."));
+            Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
         private static int CountOccurrences(string text, string value)
@@ -323,6 +325,13 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpFirstSessionObjectivePresenter.CompactPathCompleteKey] = "path complete",
             [MvpFirstSessionObjectivePresenter.CompactPathIncompleteKey] = "path incomplete",
             [CurrentHeatTierResolver.PeaceTierId] = "Peace",
+            [CurrentHeatTierResolver.NoticeTierId] = "Notice",
+            [MvpLoopSummaryPanelPresenter.RunSucceededKey] = "Succeeded",
+            [MvpLoopSummaryPanelPresenter.RunFailedKey] = "Failed",
+            [MvpLoopSummaryPanelPresenter.RiskIncreasedKey] = "Risk increased.",
+            [MvpLoopSummaryPanelPresenter.RiskStableKey] = "Risk stayed steady.",
+            [MvpLoopSummaryPanelPresenter.RiskReducedKey] = "Risk went down.",
+            [MvpPostContractGreedTrialPresenter.StatusCompleteKey] = "Complete. Greed pressure tested and stabilized.",
             [MvpPlayableScreenPresenter.SectionHeaderFormatKey] = "== {0} ==",
             [MvpPlayableScreenPresenter.SelectedCategoryFormatKey] = "Selected category: {0}",
             [MvpPlayableScreenPresenter.SelectedOptionFormatKey] = "Selected option: {0}",
