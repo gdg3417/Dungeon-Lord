@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using DungeonBuilder.M0.EditorTools;
 using NUnit.Framework;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -100,19 +100,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BootstrapScene_HasNoMissingScriptsAndInputModuleUsesCurrentActionsAsset()
         {
+            Assert.True(File.Exists(DevelopmentBuildUtility.BootstrapScenePath), "Bootstrap scene asset must exist on disk.");
+            var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(DevelopmentBuildUtility.BootstrapScenePath);
+            Assert.NotNull(sceneAsset, "Bootstrap scene must load as a SceneAsset through AssetDatabase.");
+
             string sceneText = File.ReadAllText(DevelopmentBuildUtility.BootstrapScenePath);
             string inputActionsGuid = AssetDatabase.AssetPathToGUID("Assets/InputSystem_Actions.inputactions");
             StringAssert.Contains($"m_ActionsAsset: {{fileID: -944628639613478452, guid: {inputActionsGuid}, type: 3}}", sceneText);
             Assert.False(sceneText.Contains("guid: ca9f5fa95ffab41fb9a615ab714db018"), "Bootstrap scene must not reference the stale input actions GUID.");
+            Assert.False(sceneText.Contains("m_Script: {fileID: 0}"), "Bootstrap scene must not contain missing MonoBehaviour script references.");
 
-            var scene = EditorSceneManager.OpenScene(DevelopmentBuildUtility.BootstrapScenePath, OpenSceneMode.Single);
-            foreach (GameObject root in scene.GetRootGameObjects())
+            foreach (Match match in Regex.Matches(sceneText, @"m_Script: \{fileID: 11500000, guid: ([a-f0-9]{32}), type: 3\}"))
             {
-                foreach (Component component in root.GetComponentsInChildren<Component>(true))
-                {
-                    Assert.NotNull(component, $"Missing script or unresolved required component reference under {root.name}.");
-                }
+                string scriptPath = AssetDatabase.GUIDToAssetPath(match.Groups[1].Value);
+                Assert.False(string.IsNullOrEmpty(scriptPath), $"Script GUID {match.Groups[1].Value} referenced by Bootstrap scene must resolve through AssetDatabase.");
             }
+
+            Assert.DoesNotThrow(() => DevelopmentBuildUtility.ValidateBootstrapOnlySceneAllowlist(DevelopmentBuildUtility.GetEnabledScenePathsFromEditorBuildSettings()));
         }
     }
 }

@@ -24,6 +24,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlayObject = new GameObject("ResearchCompletionEligibilityDiagnosticsOverlayTest");
             _textObject = new GameObject("ResearchCompletionEligibilityDiagnosticsTextTest");
             _root = _rootObject.AddComponent<GameRoot>();
+            TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
             SetBackingField("<Content>k__BackingField", BuildContent());
             SetBackingField("<Save>k__BackingField", BuildSave());
             _root.RefreshOfflineSummaryLines();
