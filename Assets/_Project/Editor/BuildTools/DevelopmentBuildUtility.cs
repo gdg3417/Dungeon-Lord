@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.EditorTools
         public static void BuildDevelopment(BuildTarget target, string outputPath)
         {
             ValidateBuildSupport(target);
+            EnsureActiveBuildTarget(target);
             ValidateProjectIdentity(PlayerSettings.companyName, PlayerSettings.productName, PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Standalone));
             if (target == BuildTarget.Android)
             {
@@ -103,6 +104,49 @@ namespace DungeonBuilder.M0.EditorTools
             if (!BuildPipeline.IsBuildTargetSupported(group, target))
             {
                 throw new InvalidOperationException($"Unity build support is not installed for {target} ({group}).");
+            }
+        }
+
+        public static void EnsureActiveBuildTarget(BuildTarget target)
+        {
+            BuildTarget currentTarget = EditorUserBuildSettings.activeBuildTarget;
+            if (IsRequestedBuildTargetActive(currentTarget, target))
+            {
+                return;
+            }
+
+            BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
+            if (Application.isBatchMode)
+            {
+                throw new InvalidOperationException($"Active Unity build target is {currentTarget}, but {target} was requested. Restart Unity batch mode with -buildTarget {GetCommandLineBuildTarget(target)} before invoking this build method.");
+            }
+
+            if (!EditorUserBuildSettings.SwitchActiveBuildTarget(group, target))
+            {
+                throw new InvalidOperationException($"Failed to switch active Unity build target from {currentTarget} to {target} ({group}). Switch the target in Build Settings and retry.");
+            }
+
+            if (!IsRequestedBuildTargetActive(EditorUserBuildSettings.activeBuildTarget, target))
+            {
+                throw new InvalidOperationException($"Active Unity build target is {EditorUserBuildSettings.activeBuildTarget} after switch, but {target} was requested. Build aborted.");
+            }
+        }
+
+        public static bool IsRequestedBuildTargetActive(BuildTarget activeTarget, BuildTarget requestedTarget)
+        {
+            return activeTarget == requestedTarget;
+        }
+
+        public static string GetCommandLineBuildTarget(BuildTarget target)
+        {
+            switch (target)
+            {
+                case BuildTarget.StandaloneWindows64:
+                    return "StandaloneWindows64";
+                case BuildTarget.Android:
+                    return "Android";
+                default:
+                    return target.ToString();
             }
         }
 

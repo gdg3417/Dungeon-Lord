@@ -56,6 +56,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.AreEqual(expected, DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(developmentBuild, flagEnabled));
         }
 
+
+        [Test]
+        public void ActiveBuildTargetValidation_RequiresExactRequestedTarget()
+        {
+            Assert.True(DevelopmentBuildUtility.IsRequestedBuildTargetActive(BuildTarget.StandaloneWindows64, BuildTarget.StandaloneWindows64));
+            Assert.True(DevelopmentBuildUtility.IsRequestedBuildTargetActive(BuildTarget.Android, BuildTarget.Android));
+            Assert.False(DevelopmentBuildUtility.IsRequestedBuildTargetActive(BuildTarget.Android, BuildTarget.StandaloneWindows64));
+            Assert.False(DevelopmentBuildUtility.IsRequestedBuildTargetActive(BuildTarget.StandaloneWindows64, BuildTarget.Android));
+        }
+
+        [Test]
+        public void ActiveBuildTargetValidation_ReportsCommandLineBuildTargetNames()
+        {
+            Assert.AreEqual("StandaloneWindows64", DevelopmentBuildUtility.GetCommandLineBuildTarget(BuildTarget.StandaloneWindows64));
+            Assert.AreEqual("Android", DevelopmentBuildUtility.GetCommandLineBuildTarget(BuildTarget.Android));
+        }
+
         [Test]
         public void BuildReportFormatting_ContainsRequiredFields()
         {
