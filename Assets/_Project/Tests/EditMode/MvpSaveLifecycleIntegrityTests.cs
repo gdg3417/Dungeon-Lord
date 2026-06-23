@@ -2,11 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace DungeonBuilder.Tests.EditMode
 {
@@ -58,7 +60,23 @@ namespace DungeonBuilder.Tests.EditMode
                     MvpDungeonPlacementIds.ChillingSigilOptionId,
                     out _, out _, out _, out _),
                 Is.True);
-            Assert.That(BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(original.Root.ResolveMvpPlayerLoopSummary()), Is.Not.Null);
+            MvpPlayerLoopSummary adjustedSummary = original.Root.ResolveMvpPlayerLoopSummary();
+            Assert.That(
+                EffectsDiffer(adjustedSummary.PlacementEffects, adjustedSummary.LatestRunPlacementEffects),
+                Is.True,
+                Snapshot.Capture(original.Root, _config).Describe());
+            Assert.That(
+                adjustedSummary.PlacementEffects.Danger < adjustedSummary.LatestRunPlacementEffects.Danger ||
+                adjustedSummary.PlacementEffects.HeatPressure < adjustedSummary.LatestRunPlacementEffects.HeatPressure,
+                Is.True,
+                Snapshot.Capture(original.Root, _config).Describe());
+            BasicRunAnalysisAppliedAdjustmentResult adjustment =
+                BasicRunAnalysisAppliedAdjustmentPresenter.Resolve(adjustedSummary);
+            Assert.That(
+                adjustment,
+                Is.Not.Null,
+                Snapshot.Capture(original.Root, _config).Describe());
+            Assert.That(adjustment.Applied, Is.True);
             string latestBeforeAdjustmentRunId = original.Root.Save.runHistory.LatestOutcome.RunId;
             Assert.That(original.Root.SimulateRunOnce(RunPostureResolver.CautiousId), Is.True);
             Assert.That(original.Root.Save.runHistory.LatestOutcome.RunId, Is.Not.EqualTo(latestBeforeAdjustmentRunId));
@@ -160,6 +178,9 @@ namespace DungeonBuilder.Tests.EditMode
             var service = new SaveService(new SimpleLogger(false), config, _tempDir);
             File.WriteAllText(Path.Combine(_tempDir, "unrelated.txt"), "keep");
             File.WriteAllText(service.SavePath, "{ not valid json");
+            LogAssert.Expect(
+                LogType.Error,
+                new Regex(@"\[ERROR\] Save load failed\. Exception:.*"));
             SaveData recovered = service.LoadOrCreate("gd56", out string corruptBanner);
             Assert.That(recovered, Is.Not.Null);
             Assert.That(corruptBanner, Does.Contain("Created a new save"));
@@ -268,7 +289,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static void PlaceGreedTrialDungeon(GameRoot root)
         {
-            Place(root, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId);
+            Place(root, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
             Place(root, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId);
         }
 
@@ -346,6 +367,18 @@ namespace DungeonBuilder.Tests.EditMode
         {
             string[] safe = ids ?? Array.Empty<string>();
             Assert.That(safe.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(safe.Length), label + ": " + string.Join(",", safe));
+        }
+
+        private static bool EffectsDiffer(MvpPlacementEffectsSummary current, MvpPlacementEffectsSummary latest)
+        {
+            return current != null &&
+                   latest != null &&
+                   (current.PathCapacity != latest.PathCapacity ||
+                    current.Danger != latest.Danger ||
+                    current.ManaPressure != latest.ManaPressure ||
+                    current.HeatPressure != latest.HeatPressure ||
+                    current.LootBonus != latest.LootBonus ||
+                    current.Attraction != latest.Attraction);
         }
 
         private static void SetRoot(GameRoot root, string field, object value) => typeof(GameRoot).GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(root, value);
