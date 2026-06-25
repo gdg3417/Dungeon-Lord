@@ -2,6 +2,8 @@
 
 Use this runbook to validate that the Editor-validated MVP journey starts and operates in built Unity players without adding production release scope.
 
+> Workspace note: keep Unity build workspaces on fully local storage. Do not place generated `Library/` or PackageCache files in OneDrive Files On-Demand, iCloud placeholder storage, or equivalent cloud-placeholder folders; clone outside those locations before running builds.
+
 ## Build creation: Windows development player
 
 1. Start from a clean repository and confirm no build outputs are tracked.
