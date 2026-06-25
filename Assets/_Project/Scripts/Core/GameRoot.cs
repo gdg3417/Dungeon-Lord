@@ -291,9 +291,12 @@ namespace DungeonBuilder.M0
             string env = Content.BuildConfig != null ? Content.BuildConfig.environment : "unknown";
             BuildLine = $"Build: {Application.version}  Env: {env}";
 
-            DevPanelEnabled = Content.Bootstrap != null &&
-                              Content.Bootstrap.featureFlags != null &&
-                              Content.Bootstrap.featureFlags.enableDevPanel;
+            bool devFeatureFlagEnabled = Content.Bootstrap != null &&
+                                         Content.Bootstrap.featureFlags != null &&
+                                         Content.Bootstrap.featureFlags.enableDevPanel;
+            DevPanelEnabled = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
+                DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(),
+                devFeatureFlagEnabled);
 
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);

@@ -2383,6 +2383,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = rootObject.AddComponent<GameRoot>();
+                TestDiagnosticsHelper.EnableDevelopmentDiagnostics(root);
                 SetSave(root, new SaveData
                 {
                     structureRuntime = runtime,
@@ -2813,6 +2814,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = rootObject.AddComponent<GameRoot>();
+                TestDiagnosticsHelper.EnableDevelopmentDiagnostics(root);
                 typeof(GameRoot).GetField("<RunHeatCoolingLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(root, "cooling-line");
                 typeof(GameRoot).GetField("<RunHeatDeltaLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)

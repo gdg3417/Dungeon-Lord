@@ -125,6 +125,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = rootObject.AddComponent<GameRoot>();
+                TestDiagnosticsHelper.EnableDevelopmentDiagnostics(root);
                 SetBackingField(root, "<HeatLine>k__BackingField", "heat-line");
                 SetBackingField(root, "<CurrentHeatTierLine>k__BackingField", "current-tier-line");
                 SetBackingField(root, "<TickLine>k__BackingField", "tick-line");
