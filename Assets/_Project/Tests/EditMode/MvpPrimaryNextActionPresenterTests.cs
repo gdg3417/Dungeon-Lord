@@ -8,6 +8,26 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpPrimaryNextActionPresenterTests
     {
         [Test]
+        public void Resolve_UnresolvedResearchAuthority_UsesFirstContractFallback()
+        {
+            MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary
+                {
+                    PlayerResearchAuthority = new PlayerResearchAuthoritySummary
+                    {
+                        RuleResolved = false,
+                        State = PlayerResearchAuthorityState.Blocked,
+                        FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+                    }
+                },
+                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false },
+                null);
+
+            Assert.That(result.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey));
+        }
+
+        [Test]
         public void Resolve_FirstContractIncomplete_OwnsPrimaryAction()
         {
             MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(

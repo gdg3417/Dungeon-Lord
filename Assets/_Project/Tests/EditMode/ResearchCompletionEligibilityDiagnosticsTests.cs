@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +29,16 @@ namespace DungeonBuilder.Tests.EditMode
             TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
             SetBackingField("<Content>k__BackingField", BuildContent());
             SetBackingField("<Save>k__BackingField", BuildSave());
+            SetBackingField("_runSimulationService", new RunSimulationService(new RunSimulationConfig
+            {
+                MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
+                {
+                    ObjectiveId = "test.first_contract",
+                    RequiredRecoveredLootValue = 1,
+                    RequireResearchAnalysisUnlocked = true,
+                    AnalysisResearchProjectId = "research.project.scaffold"
+                }
+            }));
             _root.RefreshOfflineSummaryLines();
 
             _overlay = _overlayObject.AddComponent<BootstrapOverlay>();
@@ -133,7 +144,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void ActiveTickProgressApply_EnoughProgressMakesEligibilityTrueWithoutCompletionMutationOrAdjacentRewards()
+        public void ActiveTicks_ReachReadyStateWithoutCompletionOrAdjacentRewards()
         {
             SaveData save = _root.Save;
             double heatBefore = save.structureRuntime.Heat;
@@ -141,20 +152,22 @@ namespace DungeonBuilder.Tests.EditMode
             string historyBefore = JsonUtility.ToJson(save.runHistory);
             string offlineBefore = JsonUtility.ToJson(save.lastOfflineSummary);
 
-            InvokeResearchProgressApply();
+            PlayerResearchActionResult firstTick = InvokeResearchProgressApply();
+            Assert.That(firstTick.StateChanged, Is.True);
             _root.RefreshOfflineSummaryLines();
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=1 required=2 remaining=1 eligible=False"));
             Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("progress=1 required=2 completionPending=False eligible=False readyForClaim=False"));
-            InvokeResearchProgressApply();
+            PlayerResearchActionResult secondTick = InvokeResearchProgressApply();
             _root.RefreshOfflineSummaryLines();
 
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
-            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("progress=2 required=2 completionPending=False eligible=True readyForClaim=False wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False"));
-            Assert.That(_root.ResearchStatusPresentationLine, Does.Contain("state=ActiveCompletionPending pending=True"));
+            Assert.That(_root.ResearchCompletionClaimReadinessLine, Does.Contain("progress=2 required=2 completionPending=True eligible=True readyForClaim=True wouldComplete=False wouldGrantRewards=False wouldUnlockContent=False wouldClearPending=False"));
+            Assert.That(secondTick.StateChanged, Is.True);
+            Assert.That(secondTick.Authority.State, Is.EqualTo(PlayerResearchAuthorityState.ReadyForLocalMvpClaim));
             Assert.That(_root.ResearchStatusSafetyLine, Does.Contain("canClaimProduction=False"));
             Assert.That(_root.ResearchVerificationBoundaryLine, Does.Contain("verificationSatisfied=False canClaimProduction=False"));
             Assert.That(_root.ResearchVerificationSafetyLine, Does.Contain("wouldCallServer=False"));
-            Assert.That(save.researchProgress.CompletionPending, Is.False);
+            Assert.That(save.researchProgress.CompletionPending, Is.True);
             Assert.That(save.completedResearch, Is.Null);
             Assert.That(save.researchPending, Is.Not.Null);
             Assert.That(save.researchPending.ProjectId, Is.EqualTo("research.project.scaffold"));
@@ -166,7 +179,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void CompletionPendingApply_AfterThresholdShowsResolvedEligibilityAndAlreadyPendingWithoutCompletionOrAdjacentRewards()
+        public void RepeatedTickAfterReadyShowsAlreadyPendingWithoutCompletionOrAdjacentRewards()
         {
             SaveData save = _root.Save;
             double heatBefore = save.structureRuntime.Heat;
@@ -178,11 +191,12 @@ namespace DungeonBuilder.Tests.EditMode
 
             InvokeResearchProgressApply();
             InvokeResearchProgressApply();
-            InvokeResearchCompletionPendingApply();
+            PlayerResearchActionResult repeatedTick = InvokeResearchProgressApply();
             _root.RefreshOfflineSummaryLines();
 
             Assert.That(save.researchProgress.ProgressUnits, Is.EqualTo(2d));
             Assert.That(save.researchProgress.CompletionPending, Is.True);
+            Assert.That(repeatedTick.StateChanged, Is.False);
             Assert.That(save.completedResearch, Is.Null);
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("resolved=True error=0 pending=True hasState=True"));
             Assert.That(_root.ResearchCompletionEligibilityLine, Does.Contain("progress=2 required=2 remaining=0 eligible=True wouldSetCompletionPending=False wouldComplete=False"));
@@ -204,14 +218,19 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void ClaimResearchCompletionScaffold_ReadyStateRefreshesDiagnosticsWithoutStaleActiveProject()
+        public void ClaimConfiguredPlayerResearch_ReadyStateRefreshesDiagnosticsWithoutStaleActiveProject()
         {
             InvokeResearchProgressApply();
             InvokeResearchProgressApply();
-            InvokeResearchCompletionPendingApply();
             _root.RefreshOfflineSummaryLines();
 
-            Assert.That(_root.ClaimResearchCompletionScaffold(), Is.True);
+            PlayerResearchActionResult claim = _root.ClaimConfiguredPlayerResearch();
+            Assert.That(claim.Succeeded, Is.True);
+            Assert.That(claim.CanClaimProduction, Is.False);
+            Assert.That(claim.WouldCallServer, Is.False);
+            Assert.That(claim.WouldGrantRewards, Is.False);
+            Assert.That(claim.WouldChargeCosts, Is.False);
+            Assert.That(claim.WouldProcessOfflineProgress, Is.False);
 
             Assert.That(_root.ResearchPendingLine, Does.Contain("pending=False slot= project="));
             Assert.That(_root.ResearchProgressStateLine, Does.Contain("pending=False hasState=False slot= project="));
@@ -224,6 +243,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.ResearchVerificationBoundaryLine, Does.Not.Contain("project=research.project.scaffold"));
             Assert.That(_root.ResearchVerificationSafetyLine, Does.Contain("wouldCallServer=False"));
             Assert.That(_root.Save.lastOfflineSummary.WouldProcessOfflineProgress, Is.False);
+            Assert.That(_root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.True);
         }
 
         [Test]
@@ -407,16 +427,9 @@ namespace DungeonBuilder.Tests.EditMode
             _overlay.RefreshOverlayText();
         }
 
-        private void InvokeResearchProgressApply()
+        private PlayerResearchActionResult InvokeResearchProgressApply()
         {
-            typeof(GameRoot).GetMethod("ApplyResearchProgressForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(_root, null);
-        }
-
-        private void InvokeResearchCompletionPendingApply()
-        {
-            typeof(GameRoot).GetMethod("ApplyResearchCompletionPendingForActiveTick", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(_root, null);
+            return _root.ApplyConfiguredPlayerResearchActiveTick(10);
         }
 
         private void SetBackingField(string name, object value)
@@ -460,13 +473,28 @@ namespace DungeonBuilder.Tests.EditMode
                     researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig
                     {
                         enabled = true,
-                        ruleSourceId = "research.completion_claim.rule.test"
+                        ruleSourceId = "research.completion_claim.rule.test",
+                        claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode
                     },
                     researchVerificationScaffold = new ResearchVerificationScaffoldConfig
                     {
                         enabled = true,
                         ruleSourceId = "research.verification.rule.test",
                         verificationMode = "unavailable"
+                    },
+                    researchUnlockBridge = new ResearchUnlockBridgeConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.unlock.rule.test",
+                        unlocks = new[]
+                        {
+                            new ResearchUnlockDefinitionConfig
+                            {
+                                researchProjectId = "research.project.scaffold",
+                                unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId,
+                                summaryKey = "ui.research_unlock.basic_run_analysis.summary"
+                            }
+                        }
                     },
                     timeRules = new TimeRules
                     {

@@ -39,7 +39,7 @@ namespace DungeonBuilder.M0
             if (firstContract == null || !firstContract.RuleResolved || !firstContract.IsComplete)
             {
                 PlayerResearchAuthoritySummary research = loopSummary?.PlayerResearchAuthority;
-                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && research != null)
+                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && research != null && research.RuleResolved)
                 {
                     if (research.State == PlayerResearchAuthorityState.Available && research.CanStart)
                     {

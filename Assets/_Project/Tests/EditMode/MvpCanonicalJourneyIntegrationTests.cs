@@ -45,7 +45,7 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void CleanSaveMvpJourney_RemainsRepeatableAcrossBuildRunResearchGreedRiskAdjustmentSaveLoadAndReset()
         {
-            Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+            GameRoot.ApplyCleanMvpValidationBaseline(_root.Save);
             AssertCleanStart();
             Assert.That(_root.StartConfiguredPlayerResearch().Succeeded, Is.False);
             Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
@@ -171,7 +171,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.completedResearch.ProjectIds, Does.Contain(_config.MvpFirstSessionObjective.AnalysisResearchProjectId));
             Assert.That(ResolvePrimary().PrimaryActionSource, Is.Not.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
 
-            Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+            GameRoot.ApplyCleanMvpValidationBaseline(_root.Save);
             AssertCleanStart();
             Assert.That(_root.Save.completedObjectives.ObjectiveIds, Is.Null.Or.Empty);
             Assert.That(_root.Save.completedResearch.ProjectIds, Is.Null.Or.Empty);

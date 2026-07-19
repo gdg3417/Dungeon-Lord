@@ -75,7 +75,8 @@ namespace DungeonBuilder.M0
             bool hasResearchStatus = HasResearchSignal(researchStatus, verificationBoundary, save.researchPending, save.researchProgress, save.completedResearch);
             bool verificationActionable = IsVerificationActionable(researchStatus, verificationBoundary);
             string researchStatusKey = ResolveResearchStatusKey(researchStatus, verificationActionable);
-            if (playerResearchAuthority != null)
+            bool hasResolvedPlayerResearchAuthority = playerResearchAuthority != null && playerResearchAuthority.RuleResolved;
+            if (hasResolvedPlayerResearchAuthority)
             {
                 hasResearchStatus = true;
                 researchStatusKey = playerResearchAuthority.FeedbackLocalizationKey;
@@ -134,9 +135,9 @@ namespace DungeonBuilder.M0
                 VerificationRequired = verificationActionable,
                 VerificationAvailable = verificationBoundary != null && verificationBoundary.VerificationAvailable,
                 CanClaimProduction = (researchStatus != null && researchStatus.CanClaimProduction) || (verificationBoundary != null && verificationBoundary.CanClaimProduction),
-                CanClaimLocalMvp = playerResearchAuthority != null && playerResearchAuthority.CanClaimLocalMvp,
-                UsesLocalMvpClaimAuthority = playerResearchAuthority != null && playerResearchAuthority.UsesLocalMvpAuthority,
-                PlayerResearchAuthority = playerResearchAuthority,
+                CanClaimLocalMvp = hasResolvedPlayerResearchAuthority && playerResearchAuthority.CanClaimLocalMvp,
+                UsesLocalMvpClaimAuthority = hasResolvedPlayerResearchAuthority && playerResearchAuthority.UsesLocalMvpAuthority,
+                PlayerResearchAuthority = hasResolvedPlayerResearchAuthority ? playerResearchAuthority : null,
                 AdventurerPartyClassIds = partyPreview != null && partyPreview.ClassIds != null ? partyPreview.ClassIds : System.Array.Empty<string>(),
                 AdventurerPartyPreviewResolved = partyPreview != null && partyPreview.RuleResolved,
                 AdventurerPartyPreviewDeterministicErrorCode = partyPreview != null ? partyPreview.DeterministicErrorCode : (int)AdventurerPartyCompositionSummaryErrorCode.None,

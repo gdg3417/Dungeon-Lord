@@ -11,6 +11,25 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpPlayerLoopSummaryPresenterTests
     {
         [Test]
+        public void Resolve_UnresolvedPlayerAuthority_PreservesExistingVerificationPresentation()
+        {
+            SaveData save = FullSave();
+            PlayerResearchAuthoritySummary unresolved = new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = false,
+                State = PlayerResearchAuthorityState.Blocked,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+            };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(
+                save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig(), unresolved);
+
+            Assert.That(summary.PlayerResearchAuthority, Is.Null);
+            Assert.That(summary.ResearchStatusKey, Is.Not.EqualTo(PlayerResearchActionHandler.BlockedInvalidKey));
+            Assert.That(summary.HasResearchStatus, Is.True);
+        }
+
+        [Test]
         public void Resolve_SharedLocalAuthorityOverridesPlayerStatusWithoutClaimingProductionVerification()
         {
             PlayerResearchAuthoritySummary authority = new PlayerResearchAuthoritySummary

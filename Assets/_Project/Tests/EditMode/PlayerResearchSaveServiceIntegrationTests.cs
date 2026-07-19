@@ -56,6 +56,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(Create(readyLoaded).Claim().Succeeded, Is.True);
             Assert.That(_saveCount, Is.EqualTo(4), "Start, partial progress, ready transition, and claim each own exactly one save.");
+            string claimedJson = File.ReadAllText(_service.SavePath);
+            TestContext.WriteLine("Claimed research JSON: " + claimedJson);
             SaveData completedLoaded = _service.LoadOrCreate("gd59", out _);
             Assert.That(completedLoaded.completedResearch.ProjectIds, Is.EqualTo(new[] { ProjectId }));
             Assert.That(completedLoaded.researchPending, Is.Null);
@@ -66,6 +68,53 @@ namespace DungeonBuilder.Tests.EditMode
             MvpFirstSessionObjectiveSummary contract = MvpFirstSessionObjectivePresenter.Resolve(completedLoaded, RunConfig());
             Assert.That(contract.AnalysisComplete, Is.True);
             Assert.That(contract.CurrentRequirementsComplete, Is.False, "Research persists coherently without fabricating unrelated contract requirements.");
+        }
+
+        [Test]
+        public void EmptyResearchSerializationShells_NormalizeToNull()
+        {
+            SaveData save = NewSave();
+            save.researchPending = new ResearchPendingState();
+            save.researchProgress = new ResearchProgressState();
+
+            SaveMigration.MigrateToLatest(new SaveRoot { primary = save });
+
+            Assert.That(save.researchPending, Is.Null);
+            Assert.That(save.researchProgress, Is.Null);
+        }
+
+        [Test]
+        public void PartiallyPopulatedAndMismatchedResearchState_IsPreserved()
+        {
+            AssertPendingPreserved(new ResearchPendingState { SlotId = "slot" });
+            AssertPendingPreserved(new ResearchPendingState { ProjectId = ProjectId });
+            AssertProgressPreserved(new ResearchProgressState { SlotId = "slot" });
+            AssertProgressPreserved(new ResearchProgressState { ProjectId = ProjectId });
+            AssertProgressPreserved(new ResearchProgressState { ProgressUnits = 0.25d });
+
+            SaveData mismatch = NewSave();
+            mismatch.researchPending = new ResearchPendingState { SlotId = "slot", ProjectId = ProjectId };
+            mismatch.researchProgress = new ResearchProgressState { SlotId = "other", ProjectId = ProjectId };
+            SaveMigration.MigrateToLatest(new SaveRoot { primary = mismatch });
+            Assert.That(mismatch.researchPending, Is.Not.Null);
+            Assert.That(mismatch.researchProgress, Is.Not.Null);
+            Assert.That(mismatch.researchProgress.SlotId, Is.EqualTo("other"));
+        }
+
+        private static void AssertPendingPreserved(ResearchPendingState pending)
+        {
+            SaveData save = NewSave();
+            save.researchPending = pending;
+            SaveMigration.MigrateToLatest(new SaveRoot { primary = save });
+            Assert.That(save.researchPending, Is.SameAs(pending));
+        }
+
+        private static void AssertProgressPreserved(ResearchProgressState progress)
+        {
+            SaveData save = NewSave();
+            save.researchProgress = progress;
+            SaveMigration.MigrateToLatest(new SaveRoot { primary = save });
+            Assert.That(save.researchProgress, Is.SameAs(progress));
         }
 
         private PlayerResearchActionHandler Create(SaveData save) => new PlayerResearchActionHandler(

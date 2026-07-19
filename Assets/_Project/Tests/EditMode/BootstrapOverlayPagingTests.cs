@@ -858,6 +858,9 @@ namespace DungeonBuilder.Tests.EditMode
         {
             const string projectId = "research.project.panel_config";
             SetContent(BuildContentWithResearchScaffold(projectId));
+            RunSimulationService runService = BuildRunSimulationServiceForActionTest();
+            runService.Config.MvpFirstSessionObjective.AnalysisResearchProjectId = projectId;
+            SetBackingField("_runSimulationService", runService);
             SetSave(new SaveData
             {
                 structureRuntime = new StructureRuntimeState { Heat = 3d, ManaReserve = 14d },
@@ -876,10 +879,14 @@ namespace DungeonBuilder.Tests.EditMode
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             string text = RefreshText();
 
-            Assert.That(summary.ResearchStatusKey, Is.EqualTo("ui.research.status.verification_required"));
-            Assert.That(summary.ResearchVerificationRuleResolved, Is.True);
-            Assert.That(text, Does.Contain("Research: Verification required"));
+            Assert.That(summary.PlayerResearchAuthority.RuleResolved, Is.True);
+            Assert.That(summary.PlayerResearchAuthority.State, Is.EqualTo(PlayerResearchAuthorityState.ReadyForLocalMvpClaim));
+            Assert.That(summary.CanClaimLocalMvp, Is.True);
+            Assert.That(summary.CanClaimProduction, Is.False);
+            Assert.That(summary.PlayerResearchAuthority.WouldCallServer, Is.False);
+            Assert.That(text, Does.Contain("Research: Adventurer Activity Analysis is ready to claim."));
             Assert.That(text, Does.Not.Contain("Research: Research unavailable"));
+            Assert.That(text, Does.Not.Contain("production verification succeeded"));
         }
 
 
@@ -2181,6 +2188,20 @@ namespace DungeonBuilder.Tests.EditMode
             typeof(ContentService).GetField("<Bootstrap>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.SetValue(content, new ContentBootstrap
                 {
+                    researchPendingScaffold = new ResearchPendingScaffoldConfig
+                    {
+                        enabled = true,
+                        slotId = "research.slot.primary",
+                        projectId = projectId,
+                        ruleSourceId = "research.pending.rule.test"
+                    },
+                    researchProgressScaffold = new ResearchProgressScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.progress.rule.test",
+                        progressPerActiveSecond = 0.1d,
+                        maxActiveSessionElapsedSeconds = 600
+                    },
                     researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig
                     {
                         enabled = true,
@@ -2188,13 +2209,22 @@ namespace DungeonBuilder.Tests.EditMode
                         projectId = projectId,
                         requiredProgressUnits = 2d
                     },
+                    researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig
+                    {
+                        enabled = true,
+                        ruleSourceId = "research.claim.rule.test",
+                        claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode
+                    },
                     researchVerificationScaffold = new ResearchVerificationScaffoldConfig
                     {
                         enabled = true,
                         ruleSourceId = "research.verification.rule.test",
-                        verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode
+                        verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode
                     }
                 });
+            var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
+            map[PlayerResearchActionHandler.ReadyToClaimKey] = "Adventurer Activity Analysis is ready to claim.";
+            map[PlayerResearchActionHandler.BlockedInvalidKey] = "Research unavailable";
             return content;
         }
 
