@@ -840,6 +840,7 @@ namespace DungeonBuilder.M0
         private void AppendResearchStatusPresentationDiagnostics(StringBuilder builder)
         {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
+            AppendLine(builder, _root.PlayerResearchAuthorityLine);
         }
 
         private void AppendResearchStatusSafetyDiagnostics(StringBuilder builder)

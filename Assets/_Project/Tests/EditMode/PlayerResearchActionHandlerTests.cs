@@ -14,6 +14,8 @@ namespace DungeonBuilder.Tests.EditMode
         private bool _online;
         private bool _verificationPending;
         private int _saveCount;
+        private bool _allowLocalClaim;
+        private bool _includeGate;
 
         [SetUp]
         public void SetUp()
@@ -23,6 +25,8 @@ namespace DungeonBuilder.Tests.EditMode
             _online = true;
             _verificationPending = false;
             _saveCount = 0;
+            _allowLocalClaim = true;
+            _includeGate = true;
         }
 
         [Test]
@@ -69,6 +73,7 @@ namespace DungeonBuilder.Tests.EditMode
             handler.Start();
             PlayerResearchActionResult first = handler.ApplyActiveTick(5);
             Assert.That(first.State, Is.EqualTo(PlayerResearchState.InProgress));
+            Assert.That(first.StateChanged, Is.True);
             Assert.That(_save.researchProgress.ProgressUnits, Is.EqualTo(0.5d));
             PlayerResearchActionResult second = handler.ApplyActiveTick(5);
             Assert.That(second.State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
@@ -79,6 +84,31 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(repeated.State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
             Assert.That(repeated.StateChanged, Is.False);
             Assert.That(_saveCount, Is.EqualTo(savesAfterPending));
+        }
+
+        [Test]
+        public void ActiveTick_ZeroNegativeDisabledReadyAndCompletedDoNotReportMutation()
+        {
+            _hasRun = true;
+            PlayerResearchActionHandler handler = Create();
+            handler.Start();
+            Assert.That(handler.ApplyActiveTick(0).StateChanged, Is.False);
+            Assert.That(handler.ApplyActiveTick(-1).StateChanged, Is.False);
+            handler.ApplyActiveTick(10);
+            Assert.That(handler.ApplyActiveTick(10).StateChanged, Is.False);
+            handler.Claim();
+            Assert.That(handler.ApplyActiveTick(10).StateChanged, Is.False);
+        }
+
+        [Test]
+        public void ActiveTick_ClampsElapsedTimeToConfiguredMaximum()
+        {
+            _hasRun = true;
+            PlayerResearchActionHandler handler = Create();
+            handler.Start();
+            PlayerResearchActionResult result = handler.ApplyActiveTick(1000);
+            Assert.That(result.ProgressUnits, Is.EqualTo(10d));
+            Assert.That(result.StateChanged, Is.True);
         }
 
         [Test]
@@ -114,6 +144,55 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(claimed.WouldGrantRewards, Is.False);
             Assert.That(claimed.WouldChargeCosts, Is.False);
             Assert.That(claimed.WouldProcessOfflineProgress, Is.False);
+        }
+
+        [Test]
+        public void ResolveState_ClaimPolicyDisabledOrGateMissingBlocksLocalClaimWithoutProductionAuthority()
+        {
+            _hasRun = true;
+            PlayerResearchActionHandler handler = Create();
+            handler.Start();
+            handler.ApplyActiveTick(10);
+            _allowLocalClaim = false;
+            PlayerResearchActionResult disabled = Create().ResolveState();
+            Assert.That(disabled.State, Is.EqualTo(PlayerResearchState.Blocked));
+            Assert.That(disabled.CanClaimLocalMvp, Is.False);
+            Assert.That(disabled.CanClaimProduction, Is.False);
+
+            _allowLocalClaim = true;
+            _includeGate = false;
+            PlayerResearchActionResult missingGate = Create().ResolveState();
+            Assert.That(missingGate.State, Is.EqualTo(PlayerResearchState.Blocked));
+            Assert.That(missingGate.CanClaimLocalMvp, Is.False);
+        }
+
+        [TestCase("orphan_progress")]
+        [TestCase("pending_without_progress")]
+        [TestCase("slot_mismatch")]
+        [TestCase("project_mismatch")]
+        [TestCase("other_project")]
+        public void MalformedResearchState_IsBlockedAndPreserved(string malformedCase)
+        {
+            _hasRun = true;
+            _save.researchPending = new ResearchPendingState { SlotId = "slot", ProjectId = ProjectId };
+            _save.researchProgress = new ResearchProgressState { SlotId = "slot", ProjectId = ProjectId, ProgressUnits = 0.25d, RuleSourceIdUsed = "test.progress" };
+            switch (malformedCase)
+            {
+                case "orphan_progress": _save.researchPending = null; break;
+                case "pending_without_progress": _save.researchProgress = null; break;
+                case "slot_mismatch": _save.researchProgress.SlotId = "other.slot"; break;
+                case "project_mismatch": _save.researchProgress.ProjectId = "other.project"; break;
+                case "other_project": _save.researchPending.ProjectId = _save.researchProgress.ProjectId = "other.project"; break;
+            }
+            string before = UnityEngine.JsonUtility.ToJson(_save);
+            PlayerResearchActionHandler handler = Create();
+            PlayerResearchActionResult state = handler.ResolveState();
+            Assert.That(state.State, Is.EqualTo(PlayerResearchState.Blocked));
+            Assert.That(handler.Start().Succeeded, Is.False);
+            Assert.That(handler.ApplyActiveTick(10).StateChanged, Is.False);
+            Assert.That(UnityEngine.JsonUtility.ToJson(_save), Is.EqualTo(before));
+            PlayerResearchPanelPresentation panel = PlayerResearchPanelPresenter.Present(state, (key, fallback) => "Localized blocked state");
+            Assert.That(panel.ShowAction, Is.False);
         }
 
         [Test]
@@ -162,9 +241,10 @@ namespace DungeonBuilder.Tests.EditMode
                 new ResearchPendingScaffoldConfig { enabled = true, slotId = "slot", projectId = ProjectId, ruleSourceId = "test.pending" },
                 new ResearchProgressScaffoldConfig { enabled = true, ruleSourceId = "test.progress", progressPerActiveSecond = 0.1d, maxActiveSessionElapsedSeconds = 100 },
                 new ResearchCompletionEligibilityScaffoldConfig { enabled = true, projectId = ProjectId, requiredProgressUnits = 1d, ruleSourceId = "test.eligibility" },
-                new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "test.claim" },
+                new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "test.claim", claimAuthorityMode = _allowLocalClaim ? PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode : "disabled" },
+                new ResearchVerificationScaffoldConfig { enabled = true, ruleSourceId = "test.verification", verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode },
                 ProjectId,
-                new RestrictedActionGateService(),
+                _includeGate ? (IRestrictedActionGate)new RestrictedActionGateService() : null,
                 () => _hasRun,
                 () => _online,
                 () => _verificationPending,

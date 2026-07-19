@@ -43,6 +43,8 @@ namespace DungeonBuilder.Tests.EditMode
         {
             Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
             AssertCleanStart();
+            Assert.That(_root.StartConfiguredPlayerResearch().Succeeded, Is.False);
+            Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
 
             PlaceStarterDungeon();
@@ -206,12 +208,24 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(started.Succeeded, Is.True);
             Assert.That(started.StateChanged, Is.True);
             Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ContinueResearchActionKey));
+            Assert.That(_root.ResolveMvpPlayerLoopSummary().ResearchStatusKey, Is.EqualTo(PlayerResearchActionHandler.InProgressFormatKey));
+            Assert.That(_root.Save.researchPending, Is.Not.Null);
             for (int i = 0; i < 10 && _root.ResolvePlayerResearchState().State != PlayerResearchState.ReadyToClaim; i++)
             {
                 _root.ApplyConfiguredPlayerResearchActiveTick(10);
             }
             Assert.That(_root.Save.researchProgress.CompletionPending, Is.True);
             Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
+            Assert.That(_root.ResolvePlayerResearchState().CanClaimLocalMvp, Is.True);
+            Assert.That(_root.ResolvePlayerResearchState().CanClaimProduction, Is.False);
+            PlayerResearchPanelPresentation panel = PlayerResearchPanelPresenter.Present(_root.ResolvePlayerResearchState(), (key, fallback) => key);
+            Assert.That(panel.ShowAction, Is.True);
+            Assert.That(panel.ActionClaimsResearch, Is.True);
+            ResearchVerificationBoundarySummary productionVerification = ResearchVerificationBoundaryResolver.Resolve(
+                _root.Save.researchPending, _root.Save.researchProgress, _root.Save.completedResearch,
+                _root.Content.Bootstrap.researchCompletionEligibilityScaffold, _root.Content.Bootstrap.researchVerificationScaffold);
+            Assert.That(productionVerification.CanClaimProduction, Is.False);
+            Assert.That(productionVerification.WouldCallServer, Is.False);
             Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ClaimResearchActionKey));
             PlayerResearchActionResult claimed = _root.ClaimConfiguredPlayerResearch();
             Assert.That(claimed.Succeeded, Is.True);
@@ -304,8 +318,8 @@ namespace DungeonBuilder.Tests.EditMode
                 researchPendingScaffold = new ResearchPendingScaffoldConfig { enabled = true, slotId = "research.slot.primary", projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ruleSourceId = "research.pending.canonical" },
                 researchProgressScaffold = new ResearchProgressScaffoldConfig { enabled = true, progressPerActiveSecond = 0.01d, maxActiveSessionElapsedSeconds = 86400, ruleSourceId = "research.progress.canonical" },
                 researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig { enabled = true, projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, requiredProgressUnits = 1d, ruleSourceId = "research.eligibility.canonical" },
-                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.canonical" },
-                researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode, ruleSourceId = "research.verification.canonical" },
+                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.canonical", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode },
+                researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode, ruleSourceId = "research.verification.canonical" },
                 researchUnlockBridge = new ResearchUnlockBridgeConfig { enabled = true, ruleSourceId = "research.unlock.canonical", unlocks = new[] { new ResearchUnlockDefinitionConfig { researchProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId, summaryKey = "ui.research.unlock.basic_run_analysis.summary" } } }
             });
             return content;

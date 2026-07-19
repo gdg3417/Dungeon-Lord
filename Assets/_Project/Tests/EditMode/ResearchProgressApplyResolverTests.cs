@@ -9,6 +9,23 @@ namespace DungeonBuilder.Tests.EditMode
     public class ResearchProgressApplyResolverTests
     {
         [Test]
+        public void Resolve_ElapsedBeyondConfiguredMaximum_IsClamped()
+        {
+            ResearchProgressApplySummary summary = ResearchProgressApplyResolver.Resolve(
+                ValidPending(), ValidProgress(), new ResearchProgressScaffoldConfig
+                {
+                    enabled = true,
+                    ruleSourceId = "test.progress",
+                    progressPerActiveSecond = 0.5d,
+                    maxActiveSessionElapsedSeconds = 10
+                }, 100);
+
+            Assert.That(summary.RuleResolved, Is.True);
+            Assert.That(summary.ElapsedSecondsUsed, Is.EqualTo(10));
+            Assert.That(summary.ProgressDeltaApplied, Is.EqualTo(5d));
+        }
+
+        [Test]
         public void Resolve_NullPending_ReturnsSafeNoApplySummary()
         {
             ResearchProgressApplySummary summary = ResearchProgressApplyResolver.Resolve(null, ValidProgress(), ValidConfig(), 10);
@@ -262,7 +279,8 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 enabled = true,
                 ruleSourceId = "research.progress.rule.test",
-                progressPerActiveSecond = 0.25d
+                progressPerActiveSecond = 0.25d,
+                maxActiveSessionElapsedSeconds = 600
             };
         }
 

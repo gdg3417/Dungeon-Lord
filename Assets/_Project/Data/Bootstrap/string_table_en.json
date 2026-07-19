@@ -2366,6 +2366,22 @@
     {
       "key": "ui.mvp_primary_next_action.research.claim",
       "text": "Claim Adventurer Activity Analysis."
+    },
+    {
+      "key": "ui.player_research.blocked.invalid_state",
+      "text": "Research state needs attention before Activity Analysis can continue."
+    },
+    {
+      "key": "ui.player_research.blocked.claim_authority",
+      "text": "Activity Analysis is complete, but local claim authority is unavailable."
+    },
+    {
+      "key": "ui.mvp_primary_next_action.research.blocked",
+      "text": "Resolve the blocked Activity Analysis state before continuing the contract."
+    },
+    {
+      "key": "ui.dev.player_research_authority_format",
+      "text": "Player Research Authority \u2014 state={0} canStart={1} canClaimLocalMvp={2} canClaimProduction={3} localAuthority={4} productionVerificationAvailable={5} wouldCallServer={6} feedbackKey={7}"
     }
   ]
 }

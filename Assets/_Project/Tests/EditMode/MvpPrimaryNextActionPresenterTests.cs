@@ -21,19 +21,27 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(result.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey));
         }
 
-        [TestCase(false, "", MvpPrimaryNextActionPresenter.StartResearchActionKey)]
-        [TestCase(true, "ui.research.status.active_in_progress", MvpPrimaryNextActionPresenter.ContinueResearchActionKey)]
-        [TestCase(true, "ui.research.status.verification_required", MvpPrimaryNextActionPresenter.ClaimResearchActionKey)]
-        public void Resolve_ResearchRequirement_OwnsContextualPrimaryAction(bool hasResearch, string statusKey, string expectedActionKey)
+        [TestCase(PlayerResearchAuthorityState.Available, true, false, MvpPrimaryNextActionPresenter.StartResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.InProgress, false, false, MvpPrimaryNextActionPresenter.ContinueResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.ReadyForLocalMvpClaim, false, true, MvpPrimaryNextActionPresenter.ClaimResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, false, false, PlayerResearchActionHandler.BlockedInvalidKey)]
+        [TestCase(PlayerResearchAuthorityState.Blocked, false, false, PlayerResearchActionHandler.BlockedInvalidKey)]
+        public void Resolve_ResearchRequirement_UsesSharedAuthority(PlayerResearchAuthorityState state, bool canStart, bool canClaim, string expectedActionKey)
         {
             MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
                 new MvpPlayerLoopSummary
                 {
                     RuleResolved = true,
                     HasRunOutcome = true,
-                    HasResearchStatus = hasResearch,
-                    ResearchProjectId = hasResearch ? "test.project" : string.Empty,
-                    ResearchStatusKey = statusKey
+                    HasResearchStatus = true,
+                    PlayerResearchAuthority = new PlayerResearchAuthoritySummary
+                    {
+                        RuleResolved = true,
+                        State = state,
+                        CanStart = canStart,
+                        CanClaimLocalMvp = canClaim,
+                        FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+                    }
                 },
                 null,
                 new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false },
@@ -41,6 +49,33 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(result.PrimaryActionKey, Is.EqualTo(expectedActionKey));
             Assert.That(result.PrimaryActionSource, Is.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
+        }
+
+        [Test]
+        public void SharedAuthority_KeepsPanelAndPrimaryActionConsistent()
+        {
+            var authority = new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = true,
+                State = PlayerResearchAuthorityState.ReadyForLocalMvpClaim,
+                CanClaimLocalMvp = true,
+                UsesLocalMvpAuthority = true,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.ReadyToClaimKey
+            };
+            var actionResult = new PlayerResearchActionResult
+            {
+                State = PlayerResearchState.ReadyToClaim,
+                Authority = authority,
+                CanClaimLocalMvp = true,
+                FeedbackLocalizationKey = authority.FeedbackLocalizationKey
+            };
+            PlayerResearchPanelPresentation panel = PlayerResearchPanelPresenter.Present(actionResult, (key, fallback) => "Localized");
+            MvpPrimaryNextActionSummary primary = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary { PlayerResearchAuthority = authority }, null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false }, null);
+            Assert.That(panel.ShowAction, Is.True);
+            Assert.That(panel.ActionClaimsResearch, Is.True);
+            Assert.That(primary.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ClaimResearchActionKey));
         }
 
         [Test]

@@ -75,6 +75,7 @@ namespace DungeonBuilder.M0
         public string CompletedResearchStateLine { get; private set; } = "ui.dev.completed_research_state_format";
         public string ResearchCompletionClaimApplyLine { get; private set; } = "ui.dev.research_completion_claim_apply_format";
         public string ResearchStatusPresentationLine { get; private set; } = "ui.dev.research_status_presentation_format";
+        public string PlayerResearchAuthorityLine { get; private set; } = "ui.dev.player_research_authority_format";
         public string ResearchStatusSafetyLine { get; private set; } = "ui.dev.research_status_safety_format";
         public string ResearchVerificationBoundaryLine { get; private set; } = "ui.dev.research_verification_boundary_format";
         public string ResearchVerificationSafetyLine { get; private set; } = "ui.dev.research_verification_safety_format";
@@ -114,7 +115,8 @@ namespace DungeonBuilder.M0
                 config,
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
-                GetResearchUnlockBridgeConfig());
+                GetResearchUnlockBridgeConfig(),
+                CreatePlayerResearchActionHandler().ResolveAuthority());
         }
 
         public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)
@@ -137,11 +139,6 @@ namespace DungeonBuilder.M0
         public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
         {
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
-            if (result.Succeeded && result.StateChanged)
-            {
-                MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
-                SaveService?.Save(Save, SaveReason.StateChange);
-            }
             RefreshOfflineSummaryLines();
             return result;
         }
@@ -1337,6 +1334,15 @@ namespace DungeonBuilder.M0
                     statusPresentation.StatusLocalizationKey ?? string.Empty,
                     statusPresentation.RuleSourceIdUsed ?? string.Empty);
 
+            PlayerResearchAuthoritySummary playerAuthority = CreatePlayerResearchActionHandler().ResolveAuthority();
+            const string playerAuthorityFormatKey = "ui.dev.player_research_authority_format";
+            string playerAuthorityFormat = Content != null ? Content.GetString(playerAuthorityFormatKey, playerAuthorityFormatKey) : playerAuthorityFormatKey;
+            PlayerResearchAuthorityLine = string.Equals(playerAuthorityFormat, playerAuthorityFormatKey, StringComparison.Ordinal)
+                ? playerAuthorityFormatKey
+                : string.Format(playerAuthorityFormat, playerAuthority.State, playerAuthority.CanStart, playerAuthority.CanClaimLocalMvp,
+                    playerAuthority.CanClaimProduction, playerAuthority.UsesLocalMvpAuthority, playerAuthority.ProductionVerificationAvailable,
+                    playerAuthority.WouldCallServer, playerAuthority.FeedbackLocalizationKey ?? string.Empty);
+
             const string statusSafetyFormatKey = "ui.dev.research_status_safety_format";
             string statusSafetyFormat = Content != null ? Content.GetString(statusSafetyFormatKey, statusSafetyFormatKey) : statusSafetyFormatKey;
             ResearchStatusSafetyLine = string.Equals(statusSafetyFormat, statusSafetyFormatKey, StringComparison.Ordinal)
@@ -1489,6 +1495,7 @@ namespace DungeonBuilder.M0
                 GetResearchProgressScaffoldConfig(),
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchCompletionClaimScaffoldConfig(),
+                GetResearchVerificationScaffoldConfig(),
                 RunSimulationConfig?.MvpFirstSessionObjective?.AnalysisResearchProjectId,
                 _restrictedActionGate,
                 HasValidAdventurerRun,
@@ -1505,6 +1512,7 @@ namespace DungeonBuilder.M0
 
         private void SavePlayerResearchTransition()
         {
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
             SaveService?.Save(Save, SaveReason.StateChange);
         }
 

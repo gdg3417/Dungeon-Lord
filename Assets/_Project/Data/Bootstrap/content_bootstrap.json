@@ -43,7 +43,8 @@
   },
   "researchCompletionClaimScaffold": {
     "enabled": true,
-    "ruleSourceId": "research.completion_claim.rule.m7_b7_scaffold"
+    "ruleSourceId": "research.completion_claim.rule.m7_b7_scaffold",
+    "claimAuthorityMode": "localMvp"
   },
   "researchVerificationScaffold": {
     "enabled": true,

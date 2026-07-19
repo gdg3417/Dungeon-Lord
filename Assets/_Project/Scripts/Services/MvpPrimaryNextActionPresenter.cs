@@ -28,6 +28,7 @@ namespace DungeonBuilder.M0
         public const string StartResearchActionKey = "ui.mvp_primary_next_action.research.start";
         public const string ContinueResearchActionKey = "ui.mvp_primary_next_action.research.continue";
         public const string ClaimResearchActionKey = "ui.mvp_primary_next_action.research.claim";
+        public const string BlockedResearchActionKey = "ui.mvp_primary_next_action.research.blocked";
 
         public static MvpPrimaryNextActionSummary Resolve(
             MvpPlayerLoopSummary loopSummary,
@@ -37,19 +38,27 @@ namespace DungeonBuilder.M0
         {
             if (firstContract == null || !firstContract.RuleResolved || !firstContract.IsComplete)
             {
-                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && loopSummary != null && loopSummary.HasRunOutcome)
+                PlayerResearchAuthoritySummary research = loopSummary?.PlayerResearchAuthority;
+                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && research != null)
                 {
-                    if (!loopSummary.HasResearchStatus)
+                    if (research.State == PlayerResearchAuthorityState.Available && research.CanStart)
                     {
                         return Create(RuleFirstContractIncomplete, StartResearchActionKey, SourceFirstContract, SourceFirstContractKey);
                     }
-                    if (string.Equals(loopSummary.ResearchStatusKey, ResearchStatusPresenter.ActiveInProgressStatusKey, StringComparison.Ordinal))
+                    if (research.State == PlayerResearchAuthorityState.InProgress)
                     {
                         return Create(RuleFirstContractIncomplete, ContinueResearchActionKey, SourceFirstContract, SourceFirstContractKey);
                     }
-                    if (!string.IsNullOrWhiteSpace(loopSummary.ResearchProjectId))
+                    if (research.State == PlayerResearchAuthorityState.ReadyForLocalMvpClaim && research.CanClaimLocalMvp)
                     {
                         return Create(RuleFirstContractIncomplete, ClaimResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (research.State == PlayerResearchAuthorityState.Blocked || research.State == PlayerResearchAuthorityState.ClaimBlocked)
+                    {
+                        string blockedActionKey = string.IsNullOrWhiteSpace(research.FeedbackLocalizationKey)
+                            ? BlockedResearchActionKey
+                            : research.FeedbackLocalizationKey;
+                        return Create(RuleFirstContractIncomplete, blockedActionKey, SourceFirstContract, SourceFirstContractKey, research.FeedbackLocalizationKey);
                     }
                 }
                 return Create(RuleFirstContractIncomplete, FirstContractIncompleteActionKey, SourceFirstContract, SourceFirstContractKey);
