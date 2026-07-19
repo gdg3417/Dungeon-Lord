@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
@@ -111,3 +112,4 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using NUnit.Framework;
 using UnityEngine;
 using DungeonBuilder.M0;
@@ -111,3 +112,4 @@ namespace DungeonBuilder.Tests.EditMode
         }
     }
 }
+#endif

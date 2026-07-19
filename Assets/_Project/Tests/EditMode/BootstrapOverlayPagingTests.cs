@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -28,6 +29,7 @@ namespace DungeonBuilder.Tests.EditMode
             _textObject = new GameObject("BootstrapOverlayPagingTextTest");
 
             _root = _rootObject.AddComponent<GameRoot>();
+            TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
             SetContent(BuildContent(includeDiagnosticsLocalization: true));
             SetLine("<BuildLine>k__BackingField", "build-line");
             SetLine("<PendingStateLine>k__BackingField", "pending-line");
@@ -96,6 +98,22 @@ namespace DungeonBuilder.Tests.EditMode
             Object.DestroyImmediate(_textObject);
             Object.DestroyImmediate(_overlayObject);
             Object.DestroyImmediate(_rootObject);
+        }
+
+
+        [Test]
+        public void DiagnosticsGate_BlocksAndPermitsOverlayDiagnosticsAndSmokeCopy()
+        {
+            TestDiagnosticsHelper.SetDevelopmentDiagnostics(_root, false);
+
+            _overlay.ToggleDiagnosticsVisibility();
+            Assert.That(_overlay.DiagnosticsVisible, Is.False);
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Is.Empty);
+
+            TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
+            _overlay.ToggleDiagnosticsVisibility();
+            Assert.That(_overlay.DiagnosticsVisible, Is.True);
+            Assert.That(_overlay.CopyFullSmokeTextToClipboard(), Is.Not.Empty);
         }
 
         [Test]
@@ -2648,3 +2666,4 @@ namespace DungeonBuilder.Tests.EditMode
 
     }
 }
+#endif

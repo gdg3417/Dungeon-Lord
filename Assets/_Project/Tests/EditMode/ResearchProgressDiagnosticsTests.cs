@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -24,6 +25,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlayObject = new GameObject("ResearchProgressDiagnosticsOverlayTest");
             _textObject = new GameObject("ResearchProgressDiagnosticsTextTest");
             _root = _rootObject.AddComponent<GameRoot>();
+            TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
             SetBackingField("<Content>k__BackingField", BuildContent(includeProgressFormat: true));
             SetBackingField("<Save>k__BackingField", BuildSave());
             _root.RefreshOfflineSummaryLines();
@@ -299,3 +301,4 @@ namespace DungeonBuilder.Tests.EditMode
         }
     }
 }
+#endif

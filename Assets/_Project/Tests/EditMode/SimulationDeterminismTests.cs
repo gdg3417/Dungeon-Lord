@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
@@ -130,3 +131,4 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+#endif

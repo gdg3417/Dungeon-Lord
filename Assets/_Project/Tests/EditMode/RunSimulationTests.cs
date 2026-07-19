@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -2383,6 +2384,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = rootObject.AddComponent<GameRoot>();
+                TestDiagnosticsHelper.EnableDevelopmentDiagnostics(root);
                 SetSave(root, new SaveData
                 {
                     structureRuntime = runtime,
@@ -2813,6 +2815,7 @@ namespace DungeonBuilder.Tests.EditMode
             try
             {
                 var root = rootObject.AddComponent<GameRoot>();
+                TestDiagnosticsHelper.EnableDevelopmentDiagnostics(root);
                 typeof(GameRoot).GetField("<RunHeatCoolingLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(root, "cooling-line");
                 typeof(GameRoot).GetField("<RunHeatDeltaLine>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -3474,3 +3477,4 @@ namespace DungeonBuilder.Tests.EditMode
 
     }
 }
+#endif

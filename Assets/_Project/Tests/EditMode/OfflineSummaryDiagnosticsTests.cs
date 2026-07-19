@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -24,6 +25,7 @@ namespace DungeonBuilder.Tests.EditMode
             _overlayObject = new GameObject("OfflineSummaryDiagnosticsOverlayTest");
             _textObject = new GameObject("OfflineSummaryDiagnosticsTextTest");
             _root = _rootObject.AddComponent<GameRoot>();
+            TestDiagnosticsHelper.EnableDevelopmentDiagnostics(_root);
             SetBackingField("<Content>k__BackingField", BuildContent(includeFormats: true));
             SetBackingField("<Save>k__BackingField", new SaveData
             {
@@ -297,3 +299,4 @@ namespace DungeonBuilder.Tests.EditMode
         }
     }
 }
+#endif

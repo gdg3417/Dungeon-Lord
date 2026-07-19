@@ -79,7 +79,8 @@ namespace DungeonBuilder.M0
         public int PlayerFacingSectionNumber => _playerFacingSectionIndex + 1;
         public bool MinimalMvpActionPanelCollapsed => _minimalMvpActionPanelCollapsed;
         public bool DevPanelVisible => _devPanelVisible;
-        public bool DiagnosticsVisible => _diagnosticsVisible || _runDiagnosticsOnlyVisible;
+        public bool DiagnosticsVisible => DiagnosticsAllowed && (_diagnosticsVisible || _runDiagnosticsOnlyVisible);
+        private bool DiagnosticsAllowed => _root != null && _root.DevPanelEnabled;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
         public Vector2 MinimalMvpActionPanelScrollPosition => _minimalMvpActionPanelScrollPosition;
@@ -103,17 +104,35 @@ namespace DungeonBuilder.M0
 
         public void ToggleDevPanel()
         {
+            if (!DiagnosticsAllowed)
+            {
+                _devPanelVisible = false;
+                return;
+            }
+
             _devPanelVisible = !_devPanelVisible;
         }
 
         public void ToggleRunDiagnosticsFocus()
         {
+            if (!DiagnosticsAllowed)
+            {
+                _runDiagnosticsOnlyVisible = false;
+                return;
+            }
+
             _runDiagnosticsOnlyVisible = !_runDiagnosticsOnlyVisible;
             _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = 0;
         }
 
         public void ToggleDiagnosticsVisibility()
         {
+            if (!DiagnosticsAllowed)
+            {
+                _diagnosticsVisible = false;
+                return;
+            }
+
             _diagnosticsVisible = !_diagnosticsVisible;
             if (_diagnosticsVisible)
             {
@@ -263,7 +282,7 @@ namespace DungeonBuilder.M0
 
         public bool SimulateRunOnceFromDevPanel()
         {
-            if (_root == null)
+            if (!DiagnosticsAllowed || _root == null)
             {
                 return false;
             }
@@ -291,7 +310,7 @@ namespace DungeonBuilder.M0
 
         public bool ResetCleanMvpValidationSessionFromDevPanel()
         {
-            if (_root == null || !_root.ResetCleanMvpValidationSession())
+            if (!DiagnosticsAllowed || _root == null || !_root.ResetCleanMvpValidationSession())
             {
                 return false;
             }
@@ -364,12 +383,24 @@ namespace DungeonBuilder.M0
 
         public void ToggleCompactSmokeView()
         {
+            if (!DiagnosticsAllowed)
+            {
+                _compactSmokeViewEnabled = false;
+                return;
+            }
+
             _compactSmokeViewEnabled = !_compactSmokeViewEnabled;
             _playerFacingScrollOffset = 0;
         }
 
         public void CyclePlayerFacingSmokeSection()
         {
+            if (!DiagnosticsAllowed)
+            {
+                _playerFacingSectionIndex = PlayerFacingSectionFull;
+                return;
+            }
+
             _playerFacingSectionIndex = (_playerFacingSectionIndex + 1) % PlayerFacingSectionCount;
             _playerFacingScrollOffset = 0;
         }
@@ -382,6 +413,11 @@ namespace DungeonBuilder.M0
 
         public string CopyFullSmokeTextToClipboard()
         {
+            if (!DiagnosticsAllowed)
+            {
+                return string.Empty;
+            }
+
             string smokeText = BuildFullPlayerFacingSmokeText();
             GUIUtility.systemCopyBuffer = smokeText;
             _smokeViewportStatusMessage = GetLocalizedString("ui.mvp_smoke.copy.confirmation");
@@ -428,23 +464,23 @@ namespace DungeonBuilder.M0
             {
                 ToggleDevPanel();
             }
-            if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
+            if (DiagnosticsAllowed && Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
             {
                 ToggleRunDiagnosticsFocus();
             }
-            if (Keyboard.current != null && Keyboard.current.f3Key.wasPressedThisFrame)
+            if (DiagnosticsAllowed && Keyboard.current != null && Keyboard.current.f3Key.wasPressedThisFrame)
             {
                 CycleFullDiagnosticsPage();
             }
-            if (Keyboard.current != null && Keyboard.current.f4Key.wasPressedThisFrame)
+            if (DiagnosticsAllowed && Keyboard.current != null && Keyboard.current.f4Key.wasPressedThisFrame)
             {
                 ToggleCompactSmokeView();
             }
-            if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame)
+            if (DiagnosticsAllowed && Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame)
             {
                 CyclePlayerFacingSmokeSection();
             }
-            if (Keyboard.current != null && Keyboard.current.f6Key.wasPressedThisFrame)
+            if (DiagnosticsAllowed && Keyboard.current != null && Keyboard.current.f6Key.wasPressedThisFrame)
             {
                 CopyFullSmokeTextToClipboard();
             }
@@ -1206,14 +1242,17 @@ namespace DungeonBuilder.M0
             {
                 SelectMvpRunPosture(RunPostureResolver.GreedyId);
             }
-            GUILayout.Label(GetLocalizedString(_diagnosticsVisible
-                ? "ui.mvp_view.diagnostics_mode.status"
-                : "ui.mvp_view.player_mode.status"), compactLabel, labelHeight);
-            string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
-            if (GUILayout.Button(diagnosticsButton, compactButton, buttonHeight))
+            if (DiagnosticsAllowed)
             {
-                ToggleDiagnosticsVisibility();
-                RefreshOverlayText();
+                GUILayout.Label(GetLocalizedString(_diagnosticsVisible
+                    ? "ui.mvp_view.diagnostics_mode.status"
+                    : "ui.mvp_view.player_mode.status"), compactLabel, labelHeight);
+                string diagnosticsButton = _diagnosticsVisible ? labels.HideDiagnosticsButton : labels.ShowDiagnosticsButton;
+                if (GUILayout.Button(diagnosticsButton, compactButton, buttonHeight))
+                {
+                    ToggleDiagnosticsVisibility();
+                    RefreshOverlayText();
+                }
             }
             GUILayout.EndScrollView();
             GUILayout.EndArea();
