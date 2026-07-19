@@ -75,6 +75,7 @@ namespace DungeonBuilder.M0
         public string CompletedResearchStateLine { get; private set; } = "ui.dev.completed_research_state_format";
         public string ResearchCompletionClaimApplyLine { get; private set; } = "ui.dev.research_completion_claim_apply_format";
         public string ResearchStatusPresentationLine { get; private set; } = "ui.dev.research_status_presentation_format";
+        public string PlayerResearchAuthorityLine { get; private set; } = "ui.dev.player_research_authority_format";
         public string ResearchStatusSafetyLine { get; private set; } = "ui.dev.research_status_safety_format";
         public string ResearchVerificationBoundaryLine { get; private set; } = "ui.dev.research_verification_boundary_format";
         public string ResearchVerificationSafetyLine { get; private set; } = "ui.dev.research_verification_safety_format";
@@ -114,12 +115,39 @@ namespace DungeonBuilder.M0
                 config,
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
-                GetResearchUnlockBridgeConfig());
+                GetResearchUnlockBridgeConfig(),
+                CreatePlayerResearchActionHandler().ResolveAuthority());
         }
 
         public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)
         {
             return GuidedMvpActionPathPresenter.Resolve(Save, summary ?? ResolveMvpPlayerLoopSummary());
+        }
+
+        public PlayerResearchActionResult ResolvePlayerResearchState()
+        {
+            return CreatePlayerResearchActionHandler().ResolveState();
+        }
+
+        public PlayerResearchActionResult StartConfiguredPlayerResearch()
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
+        public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
+        public PlayerResearchActionResult ApplyConfiguredPlayerResearchActiveTick(long elapsedSeconds)
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().ApplyActiveTick(elapsedSeconds);
+            RefreshOfflineSummaryLines();
+            return result;
         }
 
         private void Awake()
@@ -1306,6 +1334,15 @@ namespace DungeonBuilder.M0
                     statusPresentation.StatusLocalizationKey ?? string.Empty,
                     statusPresentation.RuleSourceIdUsed ?? string.Empty);
 
+            PlayerResearchAuthoritySummary playerAuthority = CreatePlayerResearchActionHandler().ResolveAuthority();
+            const string playerAuthorityFormatKey = "ui.dev.player_research_authority_format";
+            string playerAuthorityFormat = Content != null ? Content.GetString(playerAuthorityFormatKey, playerAuthorityFormatKey) : playerAuthorityFormatKey;
+            PlayerResearchAuthorityLine = string.Equals(playerAuthorityFormat, playerAuthorityFormatKey, StringComparison.Ordinal)
+                ? playerAuthorityFormatKey
+                : string.Format(playerAuthorityFormat, playerAuthority.State, playerAuthority.CanStart, playerAuthority.CanClaimLocalMvp,
+                    playerAuthority.CanClaimProduction, playerAuthority.UsesLocalMvpAuthority, playerAuthority.ProductionVerificationAvailable,
+                    playerAuthority.WouldCallServer, playerAuthority.FeedbackLocalizationKey ?? string.Empty);
+
             const string statusSafetyFormatKey = "ui.dev.research_status_safety_format";
             string statusSafetyFormat = Content != null ? Content.GetString(statusSafetyFormatKey, statusSafetyFormatKey) : statusSafetyFormatKey;
             ResearchStatusSafetyLine = string.Equals(statusSafetyFormat, statusSafetyFormatKey, StringComparison.Ordinal)
@@ -1448,6 +1485,35 @@ namespace DungeonBuilder.M0
         private ResearchUnlockBridgeConfig GetResearchUnlockBridgeConfig()
         {
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchUnlockBridge : null;
+        }
+
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler()
+        {
+            return new PlayerResearchActionHandler(
+                Save,
+                GetResearchPendingScaffoldConfig(),
+                GetResearchProgressScaffoldConfig(),
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchCompletionClaimScaffoldConfig(),
+                GetResearchVerificationScaffoldConfig(),
+                RunSimulationConfig?.MvpFirstSessionObjective?.AnalysisResearchProjectId,
+                _restrictedActionGate,
+                HasValidAdventurerRun,
+                () => IsOnline,
+                () => VerificationPending,
+                SavePlayerResearchTransition);
+        }
+
+        private bool HasValidAdventurerRun()
+        {
+            return Save?.runHistory?.LatestOutcome != null ||
+                   (Save?.runHistory?.RecentOutcomes != null && Save.runHistory.RecentOutcomes.Any(outcome => outcome != null));
+        }
+
+        private void SavePlayerResearchTransition()
+        {
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+            SaveService?.Save(Save, SaveReason.StateChange);
         }
 
         private long GetActiveSessionElapsedSeconds()
@@ -1873,8 +1939,8 @@ namespace DungeonBuilder.M0
             {
                 _activeSessionTickCount += 1;
             }
-            ApplyResearchProgressForActiveTick();
-            ApplyResearchCompletionPendingForActiveTick();
+            long researchTickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
+            ApplyConfiguredPlayerResearchActiveTick(researchTickSeconds);
             RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
@@ -1892,32 +1958,6 @@ namespace DungeonBuilder.M0
             TickLine = $"Tick: {tickIndex}";
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";
-        }
-
-        private void ApplyResearchProgressForActiveTick()
-        {
-            long tickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
-            ResearchProgressApplySummary summary = ResearchProgressApplyResolver.Resolve(
-                Save != null ? Save.researchPending : null,
-                Save != null ? Save.researchProgress : null,
-                GetResearchProgressScaffoldConfig(),
-                tickSeconds);
-            if (summary.RuleResolved && Save != null && Save.researchProgress != null)
-            {
-                Save.researchProgress.ProgressUnits = summary.NextProgressUnits;
-            }
-        }
-
-        private void ApplyResearchCompletionPendingForActiveTick()
-        {
-            ResearchCompletionPendingApplySummary summary = ResearchCompletionPendingApplyResolver.Resolve(
-                Save != null ? Save.researchPending : null,
-                Save != null ? Save.researchProgress : null,
-                GetResearchCompletionEligibilityScaffoldConfig());
-            if (summary.WouldSetCompletionPending && Save != null && Save.researchProgress != null)
-            {
-                Save.researchProgress.CompletionPending = true;
-            }
         }
 
         private void HandleTickTelemetry(long tickIndex)

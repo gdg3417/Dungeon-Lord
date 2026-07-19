@@ -71,7 +71,8 @@ namespace DungeonBuilder.M0
                 return Error(ResearchProgressApplySummaryErrorCode.InvalidElapsedTime, pendingState, progressState, config.ruleSourceId);
             }
 
-            double progressDeltaApplied = activeTickElapsedSeconds * config.progressPerActiveSecond;
+            long elapsedSecondsUsed = Math.Min(activeTickElapsedSeconds, config.maxActiveSessionElapsedSeconds);
+            double progressDeltaApplied = elapsedSecondsUsed * config.progressPerActiveSecond;
             double nextProgressUnits = progressState.ProgressUnits + progressDeltaApplied;
             if (double.IsNaN(progressDeltaApplied) ||
                 double.IsInfinity(progressDeltaApplied) ||
@@ -88,7 +89,7 @@ namespace DungeonBuilder.M0
                 HasProgressState = true,
                 SlotId = pendingState.SlotId,
                 ProjectId = pendingState.ProjectId,
-                ElapsedSecondsUsed = activeTickElapsedSeconds,
+                ElapsedSecondsUsed = elapsedSecondsUsed,
                 ProgressDeltaApplied = progressDeltaApplied,
                 PreviousProgressUnits = progressState.ProgressUnits,
                 NextProgressUnits = nextProgressUnits,

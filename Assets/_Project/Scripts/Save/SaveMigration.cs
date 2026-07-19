@@ -1,6 +1,7 @@
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
+using System;
 
 namespace DungeonBuilder.M0
 {
@@ -94,6 +95,8 @@ namespace DungeonBuilder.M0
                 root.primary.completedObjectives.ObjectiveIds = System.Array.Empty<string>();
             }
 
+            NormalizeEmptyResearchSerializationShells(root.primary);
+
             RunHistoryState history = root.primary.runHistory;
             if (history.RecentOutcomes == null)
             {
@@ -111,6 +114,33 @@ namespace DungeonBuilder.M0
             }
 
             return root;
+        }
+
+        internal static void NormalizeEmptyResearchSerializationShells(SaveData save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            ResearchPendingState pending = save.researchPending;
+            if (pending != null &&
+                string.IsNullOrWhiteSpace(pending.SlotId) &&
+                string.IsNullOrWhiteSpace(pending.ProjectId))
+            {
+                save.researchPending = null;
+            }
+
+            ResearchProgressState progress = save.researchProgress;
+            if (progress != null &&
+                string.IsNullOrWhiteSpace(progress.SlotId) &&
+                string.IsNullOrWhiteSpace(progress.ProjectId) &&
+                string.IsNullOrWhiteSpace(progress.RuleSourceIdUsed) &&
+                progress.ProgressUnits == 0d &&
+                !progress.CompletionPending)
+            {
+                save.researchProgress = null;
+            }
         }
     }
 }

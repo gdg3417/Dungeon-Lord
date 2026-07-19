@@ -91,6 +91,34 @@ namespace DungeonBuilder.M0
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
         public string MvpRunResultFeedback => _mvpRunResultFeedback;
 
+        public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
+        {
+            return PlayerResearchPanelPresenter.Present(
+                _root?.ResolvePlayerResearchState(),
+                (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        public PlayerResearchActionResult StartPlayerResearch()
+        {
+            PlayerResearchActionResult result = _root?.StartConfiguredPlayerResearch();
+            PresentPlayerResearchFeedback(result);
+            return result;
+        }
+
+        public PlayerResearchActionResult ClaimPlayerResearch()
+        {
+            PlayerResearchActionResult result = _root?.ClaimConfiguredPlayerResearch();
+            PresentPlayerResearchFeedback(result);
+            return result;
+        }
+
+        private void PresentPlayerResearchFeedback(PlayerResearchActionResult result)
+        {
+            if (_root == null || result == null) return;
+            _root.SetBanner(GetLocalizedString(result.FeedbackLocalizationKey, result.FeedbackLocalizationKey));
+            RefreshOverlayText();
+        }
+
         public void Bind(GameRoot root)
         {
             _root = root;
@@ -812,6 +840,7 @@ namespace DungeonBuilder.M0
         private void AppendResearchStatusPresentationDiagnostics(StringBuilder builder)
         {
             AppendLine(builder, _root.ResearchStatusPresentationLine);
+            AppendLine(builder, _root.PlayerResearchAuthorityLine);
         }
 
         private void AppendResearchStatusSafetyDiagnostics(StringBuilder builder)
@@ -1175,6 +1204,13 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(labels.RunButton, compactButton, buttonHeight))
             {
                 RunOrObserveDungeon();
+            }
+            PlayerResearchPanelPresentation research = ResolvePlayerResearchPanelPresentation();
+            GUILayout.Label(research.StatusText, compactLabel, labelHeight);
+            if (research.ShowAction && GUILayout.Button(research.ActionText, compactButton, buttonHeight))
+            {
+                if (research.ActionClaimsResearch) ClaimPlayerResearch();
+                else StartPlayerResearch();
             }
             GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))

@@ -182,9 +182,23 @@ namespace DungeonBuilder.M0
 
         private static string BuildResearchLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
-            string status = summary != null && summary.RuleResolved && summary.HasResearchStatus
-                ? MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize)
-                : Localize(localize, MvpLoopSummaryPanelPresenter.ValueNoResearchKey);
+            string status;
+            if (summary == null || !summary.RuleResolved || !summary.HasResearchStatus)
+            {
+                status = Localize(localize, MvpLoopSummaryPanelPresenter.ValueNoResearchKey);
+            }
+            else if (summary.PlayerResearchAuthority != null && summary.PlayerResearchAuthority.RuleResolved)
+            {
+                status = PlayerResearchStatusTextPresenter.Present(
+                    summary.ResearchStatusKey,
+                    summary.PlayerResearchAuthority,
+                    localize);
+            }
+            else
+            {
+                status = MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize);
+            }
+
             return string.Format(Localize(localize, ResearchFormatKey), status);
         }
 

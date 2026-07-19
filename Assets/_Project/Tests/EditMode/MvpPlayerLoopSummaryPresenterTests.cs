@@ -10,6 +10,45 @@ namespace DungeonBuilder.Tests.EditMode
 {
     public class MvpPlayerLoopSummaryPresenterTests
     {
+        [Test]
+        public void Resolve_UnresolvedPlayerAuthority_PreservesExistingVerificationPresentation()
+        {
+            SaveData save = FullSave();
+            PlayerResearchAuthoritySummary unresolved = new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = false,
+                State = PlayerResearchAuthorityState.Blocked,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+            };
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(
+                save, HeatConfig(), EligibilityConfig(), VerificationConfig(), UnlockConfig(), unresolved);
+
+            Assert.That(summary.PlayerResearchAuthority, Is.Null);
+            Assert.That(summary.ResearchStatusKey, Is.Not.EqualTo(PlayerResearchActionHandler.BlockedInvalidKey));
+            Assert.That(summary.HasResearchStatus, Is.True);
+        }
+
+        [Test]
+        public void Resolve_SharedLocalAuthorityOverridesPlayerStatusWithoutClaimingProductionVerification()
+        {
+            PlayerResearchAuthoritySummary authority = new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = true,
+                State = PlayerResearchAuthorityState.ReadyForLocalMvpClaim,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.ReadyToClaimKey,
+                CanClaimLocalMvp = true,
+                UsesLocalMvpAuthority = true,
+                CanClaimProduction = false
+            };
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(
+                FullSave(), HeatConfig(), EligibilityConfig(), UnavailableVerificationConfig(), UnlockConfig(), authority);
+            Assert.That(summary.ResearchStatusKey, Is.EqualTo(PlayerResearchActionHandler.ReadyToClaimKey));
+            Assert.That(summary.CanClaimLocalMvp, Is.True);
+            Assert.That(summary.CanClaimProduction, Is.False);
+            Assert.That(summary.PlayerResearchAuthority, Is.SameAs(authority));
+        }
+
         private const string SlotId = "research.slot.primary";
         private const string ProjectId = "research.project.mvp_loop";
         private const string StructureId = "structure.mana_generator.basic";

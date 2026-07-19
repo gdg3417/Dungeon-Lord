@@ -8,6 +8,26 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpPrimaryNextActionPresenterTests
     {
         [Test]
+        public void Resolve_UnresolvedResearchAuthority_UsesFirstContractFallback()
+        {
+            MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary
+                {
+                    PlayerResearchAuthority = new PlayerResearchAuthoritySummary
+                    {
+                        RuleResolved = false,
+                        State = PlayerResearchAuthorityState.Blocked,
+                        FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+                    }
+                },
+                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false },
+                null);
+
+            Assert.That(result.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey));
+        }
+
+        [Test]
         public void Resolve_FirstContractIncomplete_OwnsPrimaryAction()
         {
             MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
@@ -19,6 +39,63 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(result.ResolvedRule, Is.EqualTo(MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete));
             Assert.That(result.PrimaryActionSource, Is.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
             Assert.That(result.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey));
+        }
+
+        [TestCase(PlayerResearchAuthorityState.Available, true, false, MvpPrimaryNextActionPresenter.StartResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.InProgress, false, false, MvpPrimaryNextActionPresenter.ContinueResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.ReadyForLocalMvpClaim, false, true, MvpPrimaryNextActionPresenter.ClaimResearchActionKey)]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, false, false, PlayerResearchActionHandler.BlockedInvalidKey)]
+        [TestCase(PlayerResearchAuthorityState.Blocked, false, false, PlayerResearchActionHandler.BlockedInvalidKey)]
+        public void Resolve_ResearchRequirement_UsesSharedAuthority(PlayerResearchAuthorityState state, bool canStart, bool canClaim, string expectedActionKey)
+        {
+            MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary
+                {
+                    RuleResolved = true,
+                    HasRunOutcome = true,
+                    HasResearchStatus = true,
+                    PlayerResearchAuthority = new PlayerResearchAuthoritySummary
+                    {
+                        RuleResolved = true,
+                        State = state,
+                        CanStart = canStart,
+                        CanClaimLocalMvp = canClaim,
+                        FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey
+                    }
+                },
+                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false },
+                null);
+
+            Assert.That(result.PrimaryActionKey, Is.EqualTo(expectedActionKey));
+            Assert.That(result.PrimaryActionSource, Is.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
+        }
+
+        [Test]
+        public void SharedAuthority_KeepsPanelAndPrimaryActionConsistent()
+        {
+            var authority = new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = true,
+                State = PlayerResearchAuthorityState.ReadyForLocalMvpClaim,
+                CanClaimLocalMvp = true,
+                UsesLocalMvpAuthority = true,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.ReadyToClaimKey
+            };
+            var actionResult = new PlayerResearchActionResult
+            {
+                State = PlayerResearchState.ReadyToClaim,
+                Authority = authority,
+                CanClaimLocalMvp = true,
+                FeedbackLocalizationKey = authority.FeedbackLocalizationKey
+            };
+            PlayerResearchPanelPresentation panel = PlayerResearchPanelPresenter.Present(actionResult, (key, fallback) => "Localized");
+            MvpPrimaryNextActionSummary primary = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary { PlayerResearchAuthority = authority }, null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false }, null);
+            Assert.That(panel.ShowAction, Is.True);
+            Assert.That(panel.ActionClaimsResearch, Is.True);
+            Assert.That(primary.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ClaimResearchActionKey));
         }
 
         [Test]

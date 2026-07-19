@@ -11,6 +11,60 @@ namespace DungeonBuilder.Tests.EditMode
     public class MvpLoopSummaryPanelPresenterTests
     {
         [Test]
+        public void BuildPanelText_InProgressResearch_RendersAuthorityProgressWithoutKeysOrPlaceholders()
+        {
+            MvpPlayerLoopSummary summary = ResearchAuthoritySummary(
+                PlayerResearchAuthorityState.InProgress,
+                PlayerResearchActionHandler.InProgressFormatKey,
+                0.4d,
+                1d);
+
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, ResearchStateLocalize);
+            PlayerResearchActionResult actionState = new PlayerResearchActionResult
+            {
+                State = PlayerResearchState.InProgress,
+                FeedbackLocalizationKey = PlayerResearchActionHandler.InProgressFormatKey,
+                Authority = summary.PlayerResearchAuthority
+            };
+            PlayerResearchPanelPresentation actionPanel = PlayerResearchPanelPresenter.Present(actionState, ResearchStateLocalize);
+
+            Assert.That(text, Does.Contain("Research in progress: 0.4 / 1"));
+            Assert.That(actionPanel.StatusText, Is.EqualTo("Research in progress: 0.4 / 1"));
+            Assert.That(text, Does.Not.Contain("{0"));
+            Assert.That(text, Does.Not.Contain("{1"));
+            Assert.That(text, Does.Not.Contain("ui."));
+        }
+
+        [TestCase(PlayerResearchAuthorityState.Available, PlayerResearchActionHandler.AvailableKey, "Adventurer Activity Analysis is available.")]
+        [TestCase(PlayerResearchAuthorityState.ReadyForLocalMvpClaim, PlayerResearchActionHandler.ReadyToClaimKey, "Adventurer Activity Analysis is ready to claim.")]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, "gate.error.offline_required", "This action requires an online connection.")]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, "gate.error.verification_pending", "Action pending verification. Reconnect to continue.")]
+        [TestCase(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, "Research state needs attention before Activity Analysis can continue.")]
+        [TestCase(PlayerResearchAuthorityState.Completed, PlayerResearchActionHandler.CompletedKey, "Adventurer Activity Analysis complete.")]
+        public void BuildPanelText_ResearchAuthorityStates_RenderLocalizedFinalText(
+            PlayerResearchAuthorityState state,
+            string key,
+            string expected)
+        {
+            MvpPlayerLoopSummary summary = ResearchAuthoritySummary(state, key, 1d, 1d);
+            string text = MvpLoopSummaryPanelPresenter.BuildPanelText(summary, ResearchStateLocalize);
+            PlayerResearchPanelPresentation actionPanel = PlayerResearchPanelPresenter.Present(
+                new PlayerResearchActionResult
+                {
+                    State = ToPlayerResearchState(state),
+                    FeedbackLocalizationKey = key,
+                    Authority = summary.PlayerResearchAuthority
+                },
+                ResearchStateLocalize);
+
+            Assert.That(text, Does.Contain(expected));
+            Assert.That(actionPanel.StatusText, Is.EqualTo(expected));
+            Assert.That(text, Does.Not.Contain("{0"));
+            Assert.That(text, Does.Not.Contain("{1"));
+            Assert.That(text, Does.Not.Contain("ui."));
+        }
+
+        [Test]
         public void BuildPanelText_NoRunHistory_UsesSafeLocalizedFallbacksAndRunSuggestion()
         {
             MvpPlayerLoopSummary summary = new MvpPlayerLoopSummary
@@ -569,6 +623,61 @@ namespace DungeonBuilder.Tests.EditMode
                     return "|";
                 default:
                     return "LOC[" + key + "]";
+            }
+        }
+
+        private static MvpPlayerLoopSummary ResearchAuthoritySummary(
+            PlayerResearchAuthorityState state,
+            string key,
+            double progress,
+            double required)
+        {
+            return new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasResearchStatus = true,
+                ResearchStatusKey = key,
+                PlayerResearchAuthority = new PlayerResearchAuthoritySummary
+                {
+                    RuleResolved = true,
+                    State = state,
+                    FeedbackLocalizationKey = key,
+                    ProgressUnits = progress,
+                    RequiredProgressUnits = required,
+                    CanStart = state == PlayerResearchAuthorityState.Available,
+                    CanClaimLocalMvp = state == PlayerResearchAuthorityState.ReadyForLocalMvpClaim
+                },
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey
+            };
+        }
+
+        private static string ResearchStateLocalize(string key, string fallback)
+        {
+            switch (key)
+            {
+                case MvpLoopSummaryPanelPresenter.SectionLineFormatKey: return "{0}: {1}";
+                case MvpLoopSummaryPanelPresenter.ResearchSectionKey: return "Research";
+                case MvpLoopSummaryPanelPresenter.ResearchFormatKey: return "{0}";
+                case PlayerResearchActionHandler.InProgressFormatKey: return "Research in progress: {0:0.##} / {1:0.##}";
+                case PlayerResearchActionHandler.AvailableKey: return "Adventurer Activity Analysis is available.";
+                case PlayerResearchActionHandler.ReadyToClaimKey: return "Adventurer Activity Analysis is ready to claim.";
+                case PlayerResearchActionHandler.BlockedInvalidStateKey: return "Research state needs attention before Activity Analysis can continue.";
+                case PlayerResearchActionHandler.CompletedKey: return "Adventurer Activity Analysis complete.";
+                case "gate.error.offline_required": return "This action requires an online connection.";
+                case "gate.error.verification_pending": return "Action pending verification. Reconnect to continue.";
+                default: return "Localized";
+            }
+        }
+
+        private static PlayerResearchState ToPlayerResearchState(PlayerResearchAuthorityState state)
+        {
+            switch (state)
+            {
+                case PlayerResearchAuthorityState.Available: return PlayerResearchState.Available;
+                case PlayerResearchAuthorityState.InProgress: return PlayerResearchState.InProgress;
+                case PlayerResearchAuthorityState.ReadyForLocalMvpClaim: return PlayerResearchState.ReadyToClaim;
+                case PlayerResearchAuthorityState.Completed: return PlayerResearchState.Completed;
+                default: return PlayerResearchState.Blocked;
             }
         }
 

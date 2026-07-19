@@ -285,7 +285,7 @@ namespace DungeonBuilder.Tests.EditMode
                 timeRules = new TimeRules { detectClockSkewSeconds = 300, maxOfflineSeconds = 3600, offlineSummaryRuleSourceId = "offline.summary.gd56" },
                 featureFlags = new FeatureFlags { enableDevPanel = true },
                 researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig { enabled = true, projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, requiredProgressUnits = 1d, ruleSourceId = "research.eligibility.gd56" },
-                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.gd56" },
+                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.gd56", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode },
                 researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode, ruleSourceId = "research.verification.gd56" },
                 researchUnlockBridge = new ResearchUnlockBridgeConfig { enabled = true, ruleSourceId = "research.unlock.gd56", unlocks = new[] { new ResearchUnlockDefinitionConfig { researchProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId, summaryKey = "ui.research.unlock.basic_run_analysis.summary" } } }
             });

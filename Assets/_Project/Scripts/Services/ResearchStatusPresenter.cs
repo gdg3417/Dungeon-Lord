@@ -5,7 +5,7 @@ namespace DungeonBuilder.M0
     public static class ResearchStatusPresenter
     {
         private const string NoResearchStatusKey = "ui.research.status.no_research";
-        private const string ActiveInProgressStatusKey = "ui.research.status.active_in_progress";
+        public const string ActiveInProgressStatusKey = "ui.research.status.active_in_progress";
         private const string ActiveCompletionPendingStatusKey = "ui.research.status.active_completion_pending";
         private const string VerificationRequiredStatusKey = "ui.research.status.verification_required";
         private const string CompletedStatusKey = "ui.research.status.completed";

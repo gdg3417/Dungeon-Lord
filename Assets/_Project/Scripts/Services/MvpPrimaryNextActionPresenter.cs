@@ -25,6 +25,10 @@ namespace DungeonBuilder.M0
         public const string SourceGuidedPathKey = "ui.mvp_primary_next_action.source.guided_path";
         public const string SourceSummaryKey = "ui.mvp_primary_next_action.source.summary";
         public const string FirstContractIncompleteActionKey = "ui.mvp_primary_next_action.first_contract.incomplete";
+        public const string StartResearchActionKey = "ui.mvp_primary_next_action.research.start";
+        public const string ContinueResearchActionKey = "ui.mvp_primary_next_action.research.continue";
+        public const string ClaimResearchActionKey = "ui.mvp_primary_next_action.research.claim";
+        public const string BlockedResearchActionKey = "ui.mvp_primary_next_action.research.blocked";
 
         public static MvpPrimaryNextActionSummary Resolve(
             MvpPlayerLoopSummary loopSummary,
@@ -34,6 +38,29 @@ namespace DungeonBuilder.M0
         {
             if (firstContract == null || !firstContract.RuleResolved || !firstContract.IsComplete)
             {
+                PlayerResearchAuthoritySummary research = loopSummary?.PlayerResearchAuthority;
+                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && research != null && research.RuleResolved)
+                {
+                    if (research.State == PlayerResearchAuthorityState.Available && research.CanStart)
+                    {
+                        return Create(RuleFirstContractIncomplete, StartResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (research.State == PlayerResearchAuthorityState.InProgress)
+                    {
+                        return Create(RuleFirstContractIncomplete, ContinueResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (research.State == PlayerResearchAuthorityState.ReadyForLocalMvpClaim && research.CanClaimLocalMvp)
+                    {
+                        return Create(RuleFirstContractIncomplete, ClaimResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (research.State == PlayerResearchAuthorityState.Blocked || research.State == PlayerResearchAuthorityState.ClaimBlocked)
+                    {
+                        string blockedActionKey = string.IsNullOrWhiteSpace(research.FeedbackLocalizationKey)
+                            ? BlockedResearchActionKey
+                            : research.FeedbackLocalizationKey;
+                        return Create(RuleFirstContractIncomplete, blockedActionKey, SourceFirstContract, SourceFirstContractKey, research.FeedbackLocalizationKey);
+                    }
+                }
                 return Create(RuleFirstContractIncomplete, FirstContractIncompleteActionKey, SourceFirstContract, SourceFirstContractKey);
             }
 

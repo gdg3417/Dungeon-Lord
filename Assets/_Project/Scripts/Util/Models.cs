@@ -763,6 +763,9 @@ namespace DungeonBuilder.M0
         public bool VerificationRequired = false;
         public bool VerificationAvailable = false;
         public bool CanClaimProduction = false;
+        public bool CanClaimLocalMvp = false;
+        public bool UsesLocalMvpClaimAuthority = false;
+        public PlayerResearchAuthoritySummary PlayerResearchAuthority;
         public string[] AdventurerPartyClassIds = Array.Empty<string>();
         public bool AdventurerPartyPreviewResolved = false;
         public int AdventurerPartyPreviewDeterministicErrorCode = (int)AdventurerPartyCompositionSummaryErrorCode.None;
@@ -855,6 +858,7 @@ namespace DungeonBuilder.M0
     {
         public bool enabled;
         public string ruleSourceId;
+        public string claimAuthorityMode;
     }
 
     [Serializable]

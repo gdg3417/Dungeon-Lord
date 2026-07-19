@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -16,6 +17,7 @@ namespace DungeonBuilder.Tests.EditMode
         private GameObject _rootObject;
         private GameRoot _root;
         private RunSimulationConfig _config;
+        private Dictionary<string, string> _englishStrings;
 
         [SetUp]
         public void SetUp()
@@ -26,9 +28,11 @@ namespace DungeonBuilder.Tests.EditMode
                 GameRoot.TryCreateRunSimulationService(runConfigJson, lootConfigJson, out RunSimulationService runService),
                 Is.True);
             _config = runService.Config;
+            StringTable stringTable = JsonUtility.FromJson<StringTable>(File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            _englishStrings = stringTable.entries.ToDictionary(entry => entry.key, entry => entry.text, StringComparer.Ordinal);
             _rootObject = new GameObject("MvpCanonicalJourneyIntegrationRoot");
             _root = _rootObject.AddComponent<GameRoot>();
-            SetRoot("<DevPanelEnabled>k__BackingField", true);
+            SetRoot("<DevPanelEnabled>k__BackingField", false);
             SetRoot("<Content>k__BackingField", BuildContent());
             SetRoot("_runSimulationService", runService);
             SetRoot("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "mvp_canonical_journey_test.json", useAtomicWrites = false }));
@@ -41,8 +45,10 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void CleanSaveMvpJourney_RemainsRepeatableAcrossBuildRunResearchGreedRiskAdjustmentSaveLoadAndReset()
         {
-            Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+            GameRoot.ApplyCleanMvpValidationBaseline(_root.Save);
             AssertCleanStart();
+            Assert.That(_root.StartConfiguredPlayerResearch().Succeeded, Is.False);
+            Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
 
             PlaceStarterDungeon();
@@ -80,6 +86,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(firstOutcome.ReasonKey, Is.Not.Empty);
             Assert.That(_root.Save.runHistory.RecentOutcomes, Does.Contain(firstOutcome));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.StartResearchActionKey));
 
             CompleteResearchThroughRootBoundary();
             RunUntilFirstContractRequirementsComplete();
@@ -164,7 +171,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_root.Save.completedResearch.ProjectIds, Does.Contain(_config.MvpFirstSessionObjective.AnalysisResearchProjectId));
             Assert.That(ResolvePrimary().PrimaryActionSource, Is.Not.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
 
-            Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+            GameRoot.ApplyCleanMvpValidationBaseline(_root.Save);
             AssertCleanStart();
             Assert.That(_root.Save.completedObjectives.ObjectiveIds, Is.Null.Or.Empty);
             Assert.That(_root.Save.completedResearch.ProjectIds, Is.Null.Or.Empty);
@@ -198,9 +205,46 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void CompleteResearchThroughRootBoundary()
         {
-            _root.Save.researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId };
-            _root.Save.researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ProgressUnits = 1d, CompletionPending = true };
-            Assert.That(_root.ClaimResearchCompletionScaffold(), Is.True);
+            Assert.That(_root.DevPanelEnabled, Is.False);
+            PlayerResearchActionResult available = _root.ResolvePlayerResearchState();
+            Assert.That(available.State, Is.EqualTo(PlayerResearchState.Available));
+            PlayerResearchActionResult started = _root.StartConfiguredPlayerResearch();
+            Assert.That(started.Succeeded, Is.True);
+            Assert.That(started.StateChanged, Is.True);
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ContinueResearchActionKey));
+            Assert.That(_root.ResolveMvpPlayerLoopSummary().ResearchStatusKey, Is.EqualTo(PlayerResearchActionHandler.InProgressFormatKey));
+            Assert.That(_root.Save.researchPending, Is.Not.Null);
+            _root.ApplyConfiguredPlayerResearchActiveTick(10);
+            string partialLoopPanel = MvpLoopSummaryPanelPresenter.BuildPanelText(
+                _root.ResolveMvpPlayerLoopSummary(),
+                (key, fallback) => _englishStrings.TryGetValue(key, out string value) ? value : fallback);
+            Assert.That(partialLoopPanel, Does.Contain("Research in progress: 0.1 / 1"));
+            Assert.That(partialLoopPanel, Does.Not.Contain("{0"));
+            Assert.That(partialLoopPanel, Does.Not.Contain("{1"));
+            for (int i = 0; i < 10 && _root.ResolvePlayerResearchState().State != PlayerResearchState.ReadyToClaim; i++)
+            {
+                _root.ApplyConfiguredPlayerResearchActiveTick(10);
+            }
+            Assert.That(_root.Save.researchProgress.CompletionPending, Is.True);
+            Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
+            Assert.That(_root.ResolvePlayerResearchState().CanClaimLocalMvp, Is.True);
+            Assert.That(_root.ResolvePlayerResearchState().CanClaimProduction, Is.False);
+            PlayerResearchPanelPresentation panel = PlayerResearchPanelPresenter.Present(_root.ResolvePlayerResearchState(), (key, fallback) => key);
+            Assert.That(panel.ShowAction, Is.True);
+            Assert.That(panel.ActionClaimsResearch, Is.True);
+            ResearchVerificationBoundarySummary productionVerification = ResearchVerificationBoundaryResolver.Resolve(
+                _root.Save.researchPending, _root.Save.researchProgress, _root.Save.completedResearch,
+                _root.Content.Bootstrap.researchCompletionEligibilityScaffold, _root.Content.Bootstrap.researchVerificationScaffold);
+            Assert.That(productionVerification.CanClaimProduction, Is.False);
+            Assert.That(productionVerification.WouldCallServer, Is.False);
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ClaimResearchActionKey));
+            PlayerResearchActionResult claimed = _root.ClaimConfiguredPlayerResearch();
+            Assert.That(claimed.Succeeded, Is.True);
+            Assert.That(claimed.StateChanged, Is.True);
+            Assert.That(_root.Save.completedResearch.ProjectIds, Does.Contain(_config.MvpFirstSessionObjective.AnalysisResearchProjectId));
+            Assert.That(_root.Save.researchPending, Is.Null);
+            Assert.That(_root.Save.researchProgress, Is.Null);
+            Assert.That(_root.ResolveMvpPlayerLoopSummary().AnalysisUnlocked, Is.True);
         }
 
         private string FirstRunDiagnostics(RunOutcomeRecord outcome)
@@ -280,10 +324,13 @@ namespace DungeonBuilder.Tests.EditMode
             var content = new ContentService();
             typeof(ContentService).GetField("<Bootstrap>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(content, new ContentBootstrap
             {
-                featureFlags = new FeatureFlags { enableDevPanel = true },
+                tickSeconds = 10,
+                featureFlags = new FeatureFlags { enableDevPanel = false },
+                researchPendingScaffold = new ResearchPendingScaffoldConfig { enabled = true, slotId = "research.slot.primary", projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ruleSourceId = "research.pending.canonical" },
+                researchProgressScaffold = new ResearchProgressScaffoldConfig { enabled = true, progressPerActiveSecond = 0.01d, maxActiveSessionElapsedSeconds = 86400, ruleSourceId = "research.progress.canonical" },
                 researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig { enabled = true, projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, requiredProgressUnits = 1d, ruleSourceId = "research.eligibility.canonical" },
-                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.canonical" },
-                researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode, ruleSourceId = "research.verification.canonical" },
+                researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.canonical", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode },
+                researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode, ruleSourceId = "research.verification.canonical" },
                 researchUnlockBridge = new ResearchUnlockBridgeConfig { enabled = true, ruleSourceId = "research.unlock.canonical", unlocks = new[] { new ResearchUnlockDefinitionConfig { researchProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId, summaryKey = "ui.research.unlock.basic_run_analysis.summary" } } }
             });
             return content;
