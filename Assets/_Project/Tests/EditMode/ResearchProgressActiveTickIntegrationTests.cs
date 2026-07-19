@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
 

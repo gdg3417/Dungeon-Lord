@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 
 namespace DungeonBuilder.Tests.EditMode
