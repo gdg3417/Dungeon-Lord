@@ -88,6 +88,66 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("ui.mvp_"));
         }
 
+        [TestCase(PlayerResearchAuthorityState.Available, PlayerResearchActionHandler.AvailableKey, "Research: Adventurer Activity Analysis is available.")]
+        [TestCase(PlayerResearchAuthorityState.InProgress, PlayerResearchActionHandler.InProgressFormatKey, "Research: Research in progress: 0.3 / 1")]
+        [TestCase(PlayerResearchAuthorityState.ReadyForLocalMvpClaim, PlayerResearchActionHandler.ReadyToClaimKey, "Research: Adventurer Activity Analysis is ready to claim.")]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, "gate.error.offline_required", "Research: This action requires an online connection.")]
+        [TestCase(PlayerResearchAuthorityState.ClaimBlocked, "gate.error.verification_pending", "Research: Action pending verification. Reconnect to continue.")]
+        [TestCase(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, "Research: Research state needs attention before Activity Analysis can continue.")]
+        [TestCase(PlayerResearchAuthorityState.Completed, PlayerResearchActionHandler.CompletedKey, "Research: Adventurer Activity Analysis complete.")]
+        public void BuildScreenText_ResolvedPlayerResearchAuthority_RendersFinalLocalizedStatus(
+            PlayerResearchAuthorityState state,
+            string feedbackKey,
+            string expectedLine)
+        {
+            PlayerResearchAuthoritySummary authority = BuildAuthority(state, feedbackKey);
+
+            string text = BuildResearchScreen(authority, feedbackKey);
+
+            Assert.That(text, Does.Contain(expectedLine));
+            Assert.That(text, Does.Not.Contain("{0"));
+            Assert.That(text, Does.Not.Contain("{1"));
+            Assert.That(text, Does.Not.Contain("ui.player_research"));
+        }
+
+        [Test]
+        public void BuildScreenText_UnresolvedPlayerResearchAuthority_PreservesLegacyResearchStatus()
+        {
+            var authority = BuildAuthority(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidKey);
+            authority.RuleResolved = false;
+
+            string text = BuildResearchScreen(authority, "ui.research.status.active_in_progress");
+
+            Assert.That(text, Does.Contain("Research: Research in progress"));
+            Assert.That(text, Does.Not.Contain("Research unavailable"));
+            Assert.That(text, Does.Not.Contain("ui.player_research"));
+        }
+
+        [Test]
+        public void BuildScreenText_InProgressResearch_MatchesSharedPanelStatusFormatting()
+        {
+            PlayerResearchAuthoritySummary authority = BuildAuthority(
+                PlayerResearchAuthorityState.InProgress,
+                PlayerResearchActionHandler.InProgressFormatKey);
+            string screen = BuildResearchScreen(authority, PlayerResearchActionHandler.InProgressFormatKey);
+            string loopSummary = MvpLoopSummaryPanelPresenter.BuildPanelText(
+                BuildResearchSummary(authority, PlayerResearchActionHandler.InProgressFormatKey),
+                Localize);
+            PlayerResearchPanelPresentation actionPanel = PlayerResearchPanelPresenter.Present(
+                new PlayerResearchActionResult
+                {
+                    State = PlayerResearchState.InProgress,
+                    FeedbackLocalizationKey = PlayerResearchActionHandler.InProgressFormatKey,
+                    Authority = authority
+                },
+                Localize);
+
+            const string expectedStatus = "Research in progress: 0.3 / 1";
+            Assert.That(screen, Does.Contain("Research: " + expectedStatus));
+            Assert.That(loopSummary, Does.Contain(expectedStatus));
+            Assert.That(actionPanel.StatusText, Is.EqualTo(expectedStatus));
+        }
+
         [Test]
         public void BuildScreenText_AfterAppliedAnalysisChange_ShowsRunAgainInstruction()
         {
@@ -253,6 +313,52 @@ namespace DungeonBuilder.Tests.EditMode
             return count;
         }
 
+        private static PlayerResearchAuthoritySummary BuildAuthority(PlayerResearchAuthorityState state, string feedbackKey)
+        {
+            return new PlayerResearchAuthoritySummary
+            {
+                RuleResolved = true,
+                State = state,
+                FeedbackLocalizationKey = feedbackKey,
+                ProgressUnits = 0.3d,
+                RequiredProgressUnits = 1d
+            };
+        }
+
+        private static MvpPlayerLoopSummary BuildResearchSummary(PlayerResearchAuthoritySummary authority, string statusKey)
+        {
+            return new MvpPlayerLoopSummary
+            {
+                RuleResolved = true,
+                HasResearchStatus = true,
+                ResearchStatusKey = statusKey,
+                PlayerResearchAuthority = authority,
+                NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey,
+                PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true }
+            };
+        }
+
+        private static string BuildResearchScreen(PlayerResearchAuthoritySummary authority, string statusKey)
+        {
+            return MvpPlayableScreenPresenter.BuildScreenText(
+                BuildResearchSummary(authority, statusKey),
+                new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true },
+                null,
+                null,
+                Localize);
+        }
+
         private static string Localize(string key, string fallback)
         {
             return Strings.TryGetValue(key, out string value) ? value : fallback;
@@ -398,6 +504,14 @@ namespace DungeonBuilder.Tests.EditMode
             ["placement.category.room.display_name"] = "Room",
             ["placement.option.room.basic.display_name"] = "Basic Room",
             ["ui.research.status.active_in_progress"] = "Research in progress",
+            [PlayerResearchActionHandler.AvailableKey] = "Adventurer Activity Analysis is available.",
+            [PlayerResearchActionHandler.InProgressFormatKey] = "Research in progress: {0:0.##} / {1:0.##}",
+            [PlayerResearchActionHandler.ReadyToClaimKey] = "Adventurer Activity Analysis is ready to claim.",
+            [PlayerResearchActionHandler.CompletedKey] = "Adventurer Activity Analysis complete.",
+            [PlayerResearchActionHandler.BlockedInvalidKey] = "Research unavailable",
+            [PlayerResearchActionHandler.BlockedInvalidStateKey] = "Research state needs attention before Activity Analysis can continue.",
+            ["gate.error.offline_required"] = "This action requires an online connection.",
+            ["gate.error.verification_pending"] = "Action pending verification. Reconnect to continue.",
             [MvpPlayerLoopSummaryPresenter.SuggestRunDungeonKey] = "Observe adventurer activity to see the first outcome.",
             [MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey] = "Next: adjust one placement before the next adventurer visit.",
             [BasicRunAnalysisRecommendationPresenter.ReduceDangerKey] = "Reduce danger or use a safer posture before pushing for more loot.",

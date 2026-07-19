@@ -889,6 +889,37 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Not.Contain("production verification succeeded"));
         }
 
+        [Test]
+        public void PlayerFacingOverlay_ActiveResearch_RendersNumericProgressWithoutFormatPlaceholders()
+        {
+            const string projectId = "research.project.panel_progress";
+            SetContent(BuildContentWithResearchScaffold(projectId));
+            RunSimulationService runService = BuildRunSimulationServiceForActionTest();
+            runService.Config.MvpFirstSessionObjective.AnalysisResearchProjectId = projectId;
+            SetBackingField("_runSimulationService", runService);
+            SetSave(new SaveData
+            {
+                structureRuntime = new StructureRuntimeState { Heat = 3d, ManaReserve = 14d },
+                runHistory = new RunHistoryState(),
+                researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = projectId },
+                researchProgress = new ResearchProgressState
+                {
+                    SlotId = "research.slot.primary",
+                    ProjectId = projectId,
+                    ProgressUnits = 0.3d,
+                    CompletionPending = false,
+                    RuleSourceIdUsed = "research.progress.rule.test"
+                }
+            });
+
+            string text = RefreshText();
+
+            Assert.That(text, Does.Contain("Research: Research in progress: 0.3 / 2"));
+            Assert.That(text, Does.Not.Contain("{0"));
+            Assert.That(text, Does.Not.Contain("{1"));
+            Assert.That(text, Does.Not.Contain("ui.player_research"));
+        }
+
 
         [Test]
         public void MinimalMvpActionPlacementBanner_UsesLocalizedPlacementNameInsteadOfRawId()
@@ -2224,6 +2255,7 @@ namespace DungeonBuilder.Tests.EditMode
                 });
             var map = (Dictionary<string, string>)typeof(ContentService).GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(content);
             map[PlayerResearchActionHandler.ReadyToClaimKey] = "Adventurer Activity Analysis is ready to claim.";
+            map[PlayerResearchActionHandler.InProgressFormatKey] = "Research in progress: {0:0.##} / {1:0.##}";
             map[PlayerResearchActionHandler.BlockedInvalidKey] = "Research unavailable";
             return content;
         }
