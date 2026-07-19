@@ -122,6 +122,37 @@ namespace DungeonBuilder.M0
             return GuidedMvpActionPathPresenter.Resolve(Save, summary ?? ResolveMvpPlayerLoopSummary());
         }
 
+        public PlayerResearchActionResult ResolvePlayerResearchState()
+        {
+            return CreatePlayerResearchActionHandler().ResolveState();
+        }
+
+        public PlayerResearchActionResult StartConfiguredPlayerResearch()
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
+        public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
+            if (result.Succeeded && result.StateChanged)
+            {
+                MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+                SaveService?.Save(Save, SaveReason.StateChange);
+            }
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
+        public PlayerResearchActionResult ApplyConfiguredPlayerResearchActiveTick(long elapsedSeconds)
+        {
+            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().ApplyActiveTick(elapsedSeconds);
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -1450,6 +1481,33 @@ namespace DungeonBuilder.M0
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchUnlockBridge : null;
         }
 
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler()
+        {
+            return new PlayerResearchActionHandler(
+                Save,
+                GetResearchPendingScaffoldConfig(),
+                GetResearchProgressScaffoldConfig(),
+                GetResearchCompletionEligibilityScaffoldConfig(),
+                GetResearchCompletionClaimScaffoldConfig(),
+                RunSimulationConfig?.MvpFirstSessionObjective?.AnalysisResearchProjectId,
+                _restrictedActionGate,
+                HasValidAdventurerRun,
+                () => IsOnline,
+                () => VerificationPending,
+                SavePlayerResearchTransition);
+        }
+
+        private bool HasValidAdventurerRun()
+        {
+            return Save?.runHistory?.LatestOutcome != null ||
+                   (Save?.runHistory?.RecentOutcomes != null && Save.runHistory.RecentOutcomes.Any(outcome => outcome != null));
+        }
+
+        private void SavePlayerResearchTransition()
+        {
+            SaveService?.Save(Save, SaveReason.StateChange);
+        }
+
         private long GetActiveSessionElapsedSeconds()
         {
             long tickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
@@ -1873,8 +1931,8 @@ namespace DungeonBuilder.M0
             {
                 _activeSessionTickCount += 1;
             }
-            ApplyResearchProgressForActiveTick();
-            ApplyResearchCompletionPendingForActiveTick();
+            long researchTickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
+            ApplyConfiguredPlayerResearchActiveTick(researchTickSeconds);
             RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
@@ -1892,32 +1950,6 @@ namespace DungeonBuilder.M0
             TickLine = $"Tick: {tickIndex}";
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";
-        }
-
-        private void ApplyResearchProgressForActiveTick()
-        {
-            long tickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
-            ResearchProgressApplySummary summary = ResearchProgressApplyResolver.Resolve(
-                Save != null ? Save.researchPending : null,
-                Save != null ? Save.researchProgress : null,
-                GetResearchProgressScaffoldConfig(),
-                tickSeconds);
-            if (summary.RuleResolved && Save != null && Save.researchProgress != null)
-            {
-                Save.researchProgress.ProgressUnits = summary.NextProgressUnits;
-            }
-        }
-
-        private void ApplyResearchCompletionPendingForActiveTick()
-        {
-            ResearchCompletionPendingApplySummary summary = ResearchCompletionPendingApplyResolver.Resolve(
-                Save != null ? Save.researchPending : null,
-                Save != null ? Save.researchProgress : null,
-                GetResearchCompletionEligibilityScaffoldConfig());
-            if (summary.WouldSetCompletionPending && Save != null && Save.researchProgress != null)
-            {
-                Save.researchProgress.CompletionPending = true;
-            }
         }
 
         private void HandleTickTelemetry(long tickIndex)

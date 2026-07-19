@@ -25,6 +25,9 @@ namespace DungeonBuilder.M0
         public const string SourceGuidedPathKey = "ui.mvp_primary_next_action.source.guided_path";
         public const string SourceSummaryKey = "ui.mvp_primary_next_action.source.summary";
         public const string FirstContractIncompleteActionKey = "ui.mvp_primary_next_action.first_contract.incomplete";
+        public const string StartResearchActionKey = "ui.mvp_primary_next_action.research.start";
+        public const string ContinueResearchActionKey = "ui.mvp_primary_next_action.research.continue";
+        public const string ClaimResearchActionKey = "ui.mvp_primary_next_action.research.claim";
 
         public static MvpPrimaryNextActionSummary Resolve(
             MvpPlayerLoopSummary loopSummary,
@@ -34,6 +37,21 @@ namespace DungeonBuilder.M0
         {
             if (firstContract == null || !firstContract.RuleResolved || !firstContract.IsComplete)
             {
+                if (firstContract != null && firstContract.RuleResolved && firstContract.RunObservedComplete && !firstContract.AnalysisComplete && loopSummary != null && loopSummary.HasRunOutcome)
+                {
+                    if (!loopSummary.HasResearchStatus)
+                    {
+                        return Create(RuleFirstContractIncomplete, StartResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (string.Equals(loopSummary.ResearchStatusKey, ResearchStatusPresenter.ActiveInProgressStatusKey, StringComparison.Ordinal))
+                    {
+                        return Create(RuleFirstContractIncomplete, ContinueResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                    if (!string.IsNullOrWhiteSpace(loopSummary.ResearchProjectId))
+                    {
+                        return Create(RuleFirstContractIncomplete, ClaimResearchActionKey, SourceFirstContract, SourceFirstContractKey);
+                    }
+                }
                 return Create(RuleFirstContractIncomplete, FirstContractIncompleteActionKey, SourceFirstContract, SourceFirstContractKey);
             }
 

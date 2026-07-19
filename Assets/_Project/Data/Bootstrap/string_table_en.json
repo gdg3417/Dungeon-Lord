@@ -2302,6 +2302,70 @@
     {
       "key": "ui.mvp_screen.current_heat_format",
       "text": "Current heat: {0:0.##} ({1})."
+    },
+    {
+      "key": "ui.player_research.available",
+      "text": "Adventurer Activity Analysis is available."
+    },
+    {
+      "key": "ui.player_research.in_progress_format",
+      "text": "Research in progress: {0:0.##} / {1:0.##}"
+    },
+    {
+      "key": "ui.player_research.ready_to_claim",
+      "text": "Adventurer Activity Analysis is ready to claim."
+    },
+    {
+      "key": "ui.player_research.completed",
+      "text": "Adventurer Activity Analysis complete."
+    },
+    {
+      "key": "ui.player_research.blocked.prerequisite",
+      "text": "Complete a valid adventurer run to make Activity Analysis available."
+    },
+    {
+      "key": "ui.player_research.blocked.slot_occupied",
+      "text": "Research is blocked while the research slot is occupied."
+    },
+    {
+      "key": "ui.player_research.blocked.unavailable",
+      "text": "Activity Analysis is currently unavailable."
+    },
+    {
+      "key": "ui.player_research.blocked.not_ready",
+      "text": "Activity Analysis is not ready to claim."
+    },
+    {
+      "key": "ui.player_research.already_active",
+      "text": "Activity Analysis is already in progress."
+    },
+    {
+      "key": "ui.player_research.start_succeeded",
+      "text": "Adventurer Activity Analysis started."
+    },
+    {
+      "key": "ui.player_research.claim_succeeded",
+      "text": "Adventurer Activity Analysis completed."
+    },
+    {
+      "key": "ui.player_research.action.start",
+      "text": "Start Activity Analysis"
+    },
+    {
+      "key": "ui.player_research.action.claim",
+      "text": "Claim Activity Analysis"
+    },
+    {
+      "key": "ui.mvp_primary_next_action.research.start",
+      "text": "Start Adventurer Activity Analysis."
+    },
+    {
+      "key": "ui.mvp_primary_next_action.research.continue",
+      "text": "Continue playing while Activity Analysis progresses."
+    },
+    {
+      "key": "ui.mvp_primary_next_action.research.claim",
+      "text": "Claim Adventurer Activity Analysis."
     }
   ]
 }

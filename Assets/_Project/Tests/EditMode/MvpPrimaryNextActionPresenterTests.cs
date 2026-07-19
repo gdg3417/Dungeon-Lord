@@ -21,6 +21,28 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(result.PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.FirstContractIncompleteActionKey));
         }
 
+        [TestCase(false, "", MvpPrimaryNextActionPresenter.StartResearchActionKey)]
+        [TestCase(true, "ui.research.status.active_in_progress", MvpPrimaryNextActionPresenter.ContinueResearchActionKey)]
+        [TestCase(true, "ui.research.status.verification_required", MvpPrimaryNextActionPresenter.ClaimResearchActionKey)]
+        public void Resolve_ResearchRequirement_OwnsContextualPrimaryAction(bool hasResearch, string statusKey, string expectedActionKey)
+        {
+            MvpPrimaryNextActionSummary result = MvpPrimaryNextActionPresenter.Resolve(
+                new MvpPlayerLoopSummary
+                {
+                    RuleResolved = true,
+                    HasRunOutcome = true,
+                    HasResearchStatus = hasResearch,
+                    ResearchProjectId = hasResearch ? "test.project" : string.Empty,
+                    ResearchStatusKey = statusKey
+                },
+                null,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true, RunObservedComplete = true, AnalysisComplete = false },
+                null);
+
+            Assert.That(result.PrimaryActionKey, Is.EqualTo(expectedActionKey));
+            Assert.That(result.PrimaryActionSource, Is.EqualTo(MvpPrimaryNextActionPresenter.SourceFirstContract));
+        }
+
         [Test]
         public void Resolve_GreedTrialIncomplete_OwnsAfterContractComplete()
         {

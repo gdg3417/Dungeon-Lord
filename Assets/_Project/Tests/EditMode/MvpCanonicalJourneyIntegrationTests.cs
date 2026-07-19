@@ -28,7 +28,7 @@ namespace DungeonBuilder.Tests.EditMode
             _config = runService.Config;
             _rootObject = new GameObject("MvpCanonicalJourneyIntegrationRoot");
             _root = _rootObject.AddComponent<GameRoot>();
-            SetRoot("<DevPanelEnabled>k__BackingField", true);
+            SetRoot("<DevPanelEnabled>k__BackingField", false);
             SetRoot("<Content>k__BackingField", BuildContent());
             SetRoot("_runSimulationService", runService);
             SetRoot("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "mvp_canonical_journey_test.json", useAtomicWrites = false }));
@@ -80,6 +80,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(firstOutcome.ReasonKey, Is.Not.Empty);
             Assert.That(_root.Save.runHistory.RecentOutcomes, Does.Contain(firstOutcome));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.StartResearchActionKey));
 
             CompleteResearchThroughRootBoundary();
             RunUntilFirstContractRequirementsComplete();
@@ -198,9 +199,27 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void CompleteResearchThroughRootBoundary()
         {
-            _root.Save.researchPending = new ResearchPendingState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId };
-            _root.Save.researchProgress = new ResearchProgressState { SlotId = "research.slot.primary", ProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ProgressUnits = 1d, CompletionPending = true };
-            Assert.That(_root.ClaimResearchCompletionScaffold(), Is.True);
+            Assert.That(_root.DevPanelEnabled, Is.False);
+            PlayerResearchActionResult available = _root.ResolvePlayerResearchState();
+            Assert.That(available.State, Is.EqualTo(PlayerResearchState.Available));
+            PlayerResearchActionResult started = _root.StartConfiguredPlayerResearch();
+            Assert.That(started.Succeeded, Is.True);
+            Assert.That(started.StateChanged, Is.True);
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ContinueResearchActionKey));
+            for (int i = 0; i < 10 && _root.ResolvePlayerResearchState().State != PlayerResearchState.ReadyToClaim; i++)
+            {
+                _root.ApplyConfiguredPlayerResearchActiveTick(10);
+            }
+            Assert.That(_root.Save.researchProgress.CompletionPending, Is.True);
+            Assert.That(_root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ClaimResearchActionKey));
+            PlayerResearchActionResult claimed = _root.ClaimConfiguredPlayerResearch();
+            Assert.That(claimed.Succeeded, Is.True);
+            Assert.That(claimed.StateChanged, Is.True);
+            Assert.That(_root.Save.completedResearch.ProjectIds, Does.Contain(_config.MvpFirstSessionObjective.AnalysisResearchProjectId));
+            Assert.That(_root.Save.researchPending, Is.Null);
+            Assert.That(_root.Save.researchProgress, Is.Null);
+            Assert.That(_root.ResolveMvpPlayerLoopSummary().AnalysisUnlocked, Is.True);
         }
 
         private string FirstRunDiagnostics(RunOutcomeRecord outcome)
@@ -280,7 +299,10 @@ namespace DungeonBuilder.Tests.EditMode
             var content = new ContentService();
             typeof(ContentService).GetField("<Bootstrap>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(content, new ContentBootstrap
             {
-                featureFlags = new FeatureFlags { enableDevPanel = true },
+                tickSeconds = 10,
+                featureFlags = new FeatureFlags { enableDevPanel = false },
+                researchPendingScaffold = new ResearchPendingScaffoldConfig { enabled = true, slotId = "research.slot.primary", projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, ruleSourceId = "research.pending.canonical" },
+                researchProgressScaffold = new ResearchProgressScaffoldConfig { enabled = true, progressPerActiveSecond = 0.01d, maxActiveSessionElapsedSeconds = 86400, ruleSourceId = "research.progress.canonical" },
                 researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig { enabled = true, projectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, requiredProgressUnits = 1d, ruleSourceId = "research.eligibility.canonical" },
                 researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig { enabled = true, ruleSourceId = "research.claim.canonical" },
                 researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode, ruleSourceId = "research.verification.canonical" },

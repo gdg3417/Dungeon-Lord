@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR 120 / GD26. The repository now contains manual smoke runs using resolved adventurer intent after the GD20-GD26 gameplay prototype expansion.
+Main is merged through PR 156 / GD58, with GD59 implementing the normal player-facing Adventurer Activity Analysis start, active progress, and claim path. The next gameplay priority after GD59 is ordered two-room run resolution.
 
 ## Operating rules
 
