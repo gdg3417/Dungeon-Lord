@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -16,6 +17,7 @@ namespace DungeonBuilder.Tests.EditMode
         private GameObject _rootObject;
         private GameRoot _root;
         private RunSimulationConfig _config;
+        private Dictionary<string, string> _englishStrings;
 
         [SetUp]
         public void SetUp()
@@ -26,6 +28,8 @@ namespace DungeonBuilder.Tests.EditMode
                 GameRoot.TryCreateRunSimulationService(runConfigJson, lootConfigJson, out RunSimulationService runService),
                 Is.True);
             _config = runService.Config;
+            StringTable stringTable = JsonUtility.FromJson<StringTable>(File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            _englishStrings = stringTable.entries.ToDictionary(entry => entry.key, entry => entry.text, StringComparer.Ordinal);
             _rootObject = new GameObject("MvpCanonicalJourneyIntegrationRoot");
             _root = _rootObject.AddComponent<GameRoot>();
             SetRoot("<DevPanelEnabled>k__BackingField", false);
@@ -210,6 +214,13 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ContinueResearchActionKey));
             Assert.That(_root.ResolveMvpPlayerLoopSummary().ResearchStatusKey, Is.EqualTo(PlayerResearchActionHandler.InProgressFormatKey));
             Assert.That(_root.Save.researchPending, Is.Not.Null);
+            _root.ApplyConfiguredPlayerResearchActiveTick(10);
+            string partialLoopPanel = MvpLoopSummaryPanelPresenter.BuildPanelText(
+                _root.ResolveMvpPlayerLoopSummary(),
+                (key, fallback) => _englishStrings.TryGetValue(key, out string value) ? value : fallback);
+            Assert.That(partialLoopPanel, Does.Contain("Research in progress: 0.1 / 1"));
+            Assert.That(partialLoopPanel, Does.Not.Contain("{0"));
+            Assert.That(partialLoopPanel, Does.Not.Contain("{1"));
             for (int i = 0; i < 10 && _root.ResolvePlayerResearchState().State != PlayerResearchState.ReadyToClaim; i++)
             {
                 _root.ApplyConfiguredPlayerResearchActiveTick(10);

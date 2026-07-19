@@ -259,6 +259,14 @@ namespace DungeonBuilder.M0
         private static string ResolveResearch(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             if (summary == null || !summary.RuleResolved || !summary.HasResearchStatus) return Localize(localize, ValueNoResearchKey);
+            if (summary.PlayerResearchAuthority != null)
+            {
+                return PlayerResearchStatusTextPresenter.Present(
+                    summary.ResearchStatusKey,
+                    summary.PlayerResearchAuthority,
+                    localize);
+            }
+
             return MvpPlayerFacingLabelResolver.ResolveResearchStatusLabel(summary.ResearchStatusKey, localize);
         }
 

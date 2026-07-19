@@ -18,11 +18,10 @@ namespace DungeonBuilder.M0
         public static PlayerResearchPanelPresentation Present(PlayerResearchActionResult state, Func<string, string, string> localize)
         {
             state = state ?? new PlayerResearchActionResult { State = PlayerResearchState.Blocked, FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedInvalidKey };
-            string status = Localize(localize, state.FeedbackLocalizationKey);
-            if (state.State == PlayerResearchState.InProgress)
-            {
-                status = string.Format(status, state.ProgressUnits, state.RequiredProgressUnits);
-            }
+            string status = PlayerResearchStatusTextPresenter.Present(
+                state.FeedbackLocalizationKey,
+                state.Authority,
+                localize);
             return new PlayerResearchPanelPresentation
             {
                 StatusText = status,
