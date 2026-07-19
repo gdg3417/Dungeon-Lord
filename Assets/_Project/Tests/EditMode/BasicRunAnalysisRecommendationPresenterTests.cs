@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests
@@ -96,3 +97,4 @@ namespace DungeonBuilder.M0.Tests
         }
     }
 }
+#endif

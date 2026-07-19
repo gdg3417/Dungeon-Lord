@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -625,3 +626,4 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+#endif

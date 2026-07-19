@@ -27,6 +27,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void EditModeTestSources_AreCompletelyEditorGuarded()
+        {
+            Assert.DoesNotThrow(DevelopmentBuildUtility.ValidateEditModeTestsEditorGuarded);
+        }
+
+        [Test]
+        public void EditorGuardValidation_RejectsPartialOrMissingGuards()
+        {
+            Assert.True(DevelopmentBuildUtility.IsCompletelyEditorGuarded("#if UNITY_EDITOR\nclass Test {}\n#endif"));
+            Assert.False(DevelopmentBuildUtility.IsCompletelyEditorGuarded("using NUnit.Framework;\n#if UNITY_EDITOR\nclass Test {}\n#endif"));
+            Assert.False(DevelopmentBuildUtility.IsCompletelyEditorGuarded("#if UNITY_EDITOR\nclass Test {}\n#endif\nclass PlayerLeak {}"));
+            Assert.False(DevelopmentBuildUtility.IsCompletelyEditorGuarded("#if UNITY_EDITOR\n#endif\nclass PlayerLeak {}\n#if OTHER\n#endif"));
+            Assert.False(DevelopmentBuildUtility.IsCompletelyEditorGuarded("#if UNITY_EDITOR\nclass EditorTest {}\n#else\nclass PlayerLeak {}\n#endif"));
+            Assert.False(DevelopmentBuildUtility.IsCompletelyEditorGuarded("class Test {}"));
+        }
+
+        [Test]
         public void SceneValidation_FailsWhenBootstrapMissing()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>

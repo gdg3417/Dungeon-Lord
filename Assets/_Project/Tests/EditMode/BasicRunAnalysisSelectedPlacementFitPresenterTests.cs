@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
@@ -119,3 +120,4 @@ namespace DungeonBuilder.M0.Tests
         }
     }
 }
+#endif

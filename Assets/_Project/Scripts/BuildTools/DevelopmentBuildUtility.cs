@@ -17,6 +17,7 @@ namespace DungeonBuilder.M0.EditorTools
         public const string CompanyName = "gdg3417";
         public const string ProductName = "Dungeon Lord";
         public const string ApplicationIdentifier = "com.gdg3417.dungeonlord";
+        public const string EditModeTestsPath = "Assets/_Project/Tests/EditMode";
 
         [MenuItem("Dungeon Lord/Build/Windows 64-bit Development Build")]
         public static void BuildWindowsDevelopmentMenu() => BuildWindowsDevelopment();
@@ -36,6 +37,7 @@ namespace DungeonBuilder.M0.EditorTools
 
         public static void BuildDevelopment(BuildTarget target, string outputPath)
         {
+            ValidateEditModeTestsEditorGuarded();
             ValidateBuildSupport(target);
             EnsureActiveBuildTarget(target);
             ValidateProjectIdentity(PlayerSettings.companyName, PlayerSettings.productName, PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Standalone));
@@ -105,6 +107,71 @@ namespace DungeonBuilder.M0.EditorTools
             {
                 throw new InvalidOperationException($"Unity build support is not installed for {target} ({group}).");
             }
+        }
+
+        public static void ValidateEditModeTestsEditorGuarded()
+        {
+            string projectRoot = Directory.GetParent(Application.dataPath)?.FullName;
+            string testsDirectory = Path.Combine(projectRoot ?? string.Empty, EditModeTestsPath);
+            if (!Directory.Exists(testsDirectory))
+            {
+                throw new InvalidOperationException($"Required EditMode tests directory was not found: {testsDirectory}");
+            }
+
+            string[] unguardedFiles = Directory.GetFiles(testsDirectory, "*.cs", SearchOption.AllDirectories)
+                .Where(path => !IsCompletelyEditorGuarded(File.ReadAllText(path)))
+                .Select(path => path.Replace('\\', '/'))
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+
+            if (unguardedFiles.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    "Every C# file beneath Assets/_Project/Tests/EditMode must be completely guarded by #if UNITY_EDITOR / #endif. Unguarded files: " +
+                    string.Join(", ", unguardedFiles));
+            }
+        }
+
+        public static bool IsCompletelyEditorGuarded(string source)
+        {
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return false;
+            }
+
+            string normalized = source.TrimStart('\uFEFF').Trim();
+            string[] lines = normalized.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+            if (!string.Equals(lines[0].Trim(), "#if UNITY_EDITOR", StringComparison.Ordinal) ||
+                !string.Equals(lines[lines.Length - 1].Trim(), "#endif", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            int conditionalDepth = 0;
+            for (int index = 0; index < lines.Length; index++)
+            {
+                string line = lines[index].Trim();
+                if (line.StartsWith("#if ", StringComparison.Ordinal))
+                {
+                    conditionalDepth++;
+                }
+                else if (string.Equals(line, "#endif", StringComparison.Ordinal))
+                {
+                    conditionalDepth--;
+                }
+                else if (conditionalDepth == 1 &&
+                         (line.StartsWith("#else", StringComparison.Ordinal) || line.StartsWith("#elif ", StringComparison.Ordinal)))
+                {
+                    return false;
+                }
+
+                if (conditionalDepth <= 0 && index < lines.Length - 1)
+                {
+                    return false;
+                }
+            }
+
+            return conditionalDepth == 0;
         }
 
         public static void EnsureActiveBuildTarget(BuildTarget target)

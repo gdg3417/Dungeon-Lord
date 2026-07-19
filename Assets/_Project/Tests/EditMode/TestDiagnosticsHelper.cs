@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Reflection;
 using DungeonBuilder.M0;
 
@@ -17,3 +18,4 @@ namespace DungeonBuilder.Tests.EditMode
         }
     }
 }
+#endif

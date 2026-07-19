@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -325,3 +326,4 @@ namespace DungeonBuilder.Tests.EditMode
         }
     }
 }
+#endif
