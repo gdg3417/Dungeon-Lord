@@ -456,6 +456,29 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class RunRoomResolutionSummary
+    {
+        public int FloorIndex;
+        public int RoomIndex;
+        public string RoomOptionId;
+        public bool Reached;
+        public bool Cleared;
+        public int PartyEntering;
+        public int SurvivorsLeaving;
+        public int Deaths;
+        public bool StoppedRoute;
+        public string StopReasonKey;
+        public MvpPlacementEffectsSummary LocalPlacementEffects;
+        public int GeneratedLootValue;
+        public int ExtractedLootValue;
+        public int ExtractedTradeableLootValue;
+        public double HeatDelta;
+        public double ManaPressureCost;
+        public int DeterministicSeed;
+        public string RuleSourceId;
+    }
+
+    [Serializable]
     public sealed class RunOutcomeRecord
     {
         public string RunId;
@@ -486,6 +509,11 @@ namespace DungeonBuilder.M0
         public RunHeatApplicationSummary RunHeatApplicationSummary;
         public RunCompositionOutcomeSummary CompositionOutcomeSummary;
         public string RunPostureId;
+        public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
+        public int HighestRoomReached = -1;
+        public int ClearedRoomCount;
+        public int ReachedRoomCount;
+        public string FinalRouteOutcomeKey;
     }
 
     [Serializable]

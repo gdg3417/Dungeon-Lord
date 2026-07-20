@@ -1,5 +1,6 @@
 using System;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
@@ -25,6 +26,60 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId)
         {
             return SimulateOnce(runtime, tickStarted, runSequence, postureId, null);
+        }
+
+        public RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route)
+        {
+            if (route == null || route.Length <= 1)
+            {
+                MvpPlacementEffectsSummary effects = route != null && route.Length == 1
+                    ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config) : null;
+                RunOutcomeRecord compatible = SimulateOnce(runtime, tickStarted, runSequence, postureId, effects);
+                compatible.RoomResolutions = route == null || route.Length == 0 ? Array.Empty<RunRoomResolutionSummary>()
+                    : new[] { BuildRoomSummary(route[0], compatible, compatible.SurvivalSummary?.PartySize ?? 0, false) };
+                compatible.ReachedRoomCount = compatible.RoomResolutions.Length;
+                compatible.ClearedRoomCount = compatible.Success ? compatible.ReachedRoomCount : 0;
+                compatible.HighestRoomReached = compatible.ReachedRoomCount == 0 ? -1 : route[0].RoomIndex;
+                compatible.FinalRouteOutcomeKey = compatible.ReasonKey;
+                return compatible;
+            }
+
+            var roomResults = new System.Collections.Generic.List<RunRoomResolutionSummary>();
+            RunOutcomeRecord aggregate = null;
+            int entrants = 0;
+            double initialHeat = runtime.Heat;
+            for (int i = 0; i < route.Length; i++)
+            {
+                MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolvePlacements(route[i].ToOrderedPlacements(), _config);
+                // Room identity is folded into the existing deterministic tick seed without using runtime hash codes.
+                long roomTick = unchecked(tickStarted + (i * 31L) + route[i].FloorIndex + route[i].RoomIndex);
+                RunOutcomeRecord roomOutcome = SimulateOnce(runtime, roomTick, runSequence, postureId, effects);
+                if (i == 0) entrants = roomOutcome.SurvivalSummary?.PartySize ?? 0;
+                RunRoomResolutionSummary room = BuildRoomSummary(route[i], roomOutcome, entrants, !roomOutcome.Success);
+                roomResults.Add(room);
+                aggregate = roomOutcome;
+                entrants = room.SurvivorsLeaving;
+                if (room.StoppedRoute || entrants <= 0) break;
+            }
+
+            int deaths = 0, generated = 0;
+            for (int i = 0; i < roomResults.Count; i++) { deaths += roomResults[i].Deaths; generated += roomResults[i].GeneratedLootValue; }
+            aggregate.RoomResolutions = roomResults.ToArray();
+            aggregate.ReachedRoomCount = roomResults.Count;
+            aggregate.ClearedRoomCount = roomResults.FindAll(room => room.Cleared).Count;
+            aggregate.HighestRoomReached = roomResults[roomResults.Count - 1].RoomIndex;
+            aggregate.FinalRouteOutcomeKey = aggregate.ReasonKey;
+            aggregate.HeatAtStart = initialHeat;
+            if (aggregate.SurvivalSummary != null) { aggregate.SurvivalSummary.PartySize = roomResults[0].PartyEntering; aggregate.SurvivalSummary.DeathCount = deaths; aggregate.SurvivalSummary.SurvivorCount = entrants; aggregate.SurvivalSummary.SurvivorRatio = aggregate.SurvivalSummary.PartySize > 0 ? (double)entrants / aggregate.SurvivalSummary.PartySize : 0d; }
+            if (aggregate.LootSummary != null) aggregate.LootSummary.TotalGeneratedWorldValue = generated;
+            return aggregate;
+        }
+
+        private static RunRoomResolutionSummary BuildRoomSummary(MvpOrderedRouteRoom room, RunOutcomeRecord outcome, int entrants, bool stopped)
+        {
+            RunSurvivalSummary survival = outcome.SurvivalSummary;
+            int survivors = survival == null ? entrants : Math.Min(entrants, (int)Math.Round(entrants * survival.SurvivorRatio));
+            return new RunRoomResolutionSummary { FloorIndex = room.FloorIndex, RoomIndex = room.RoomIndex, RoomOptionId = room.RoomOptionId, Reached = true, Cleared = outcome.Success, PartyEntering = entrants, SurvivorsLeaving = survivors, Deaths = Math.Max(0, entrants - survivors), StoppedRoute = stopped || survivors == 0, StopReasonKey = stopped || survivors == 0 ? outcome.ReasonKey : string.Empty, LocalPlacementEffects = outcome.CompositionOutcomeSummary?.PlacementEffects, GeneratedLootValue = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0, ExtractedLootValue = outcome.LootExtractionSummary?.TotalExtractedWorldValue ?? 0, ExtractedTradeableLootValue = outcome.LootExtractionSummary?.TotalExtractedTradeableWorldValue ?? 0, HeatDelta = outcome.RunHeatDeltaSummary?.FinalHeatDelta ?? 0d, ManaPressureCost = outcome.CompositionOutcomeSummary?.ManaReservePressureCost ?? 0d, DeterministicSeed = survival?.DeterministicSeed ?? 0, RuleSourceId = outcome.CompositionOutcomeSummary?.RuleSourceId };
         }
 
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary placementEffects)

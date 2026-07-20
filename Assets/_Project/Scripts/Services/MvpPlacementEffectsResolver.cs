@@ -21,6 +21,11 @@ namespace DungeonBuilder.M0
             return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config), config);
         }
 
+        public static MvpPlacementEffectsSummary ResolvePlacements(MvpDungeonPlacementEntry[] orderedPlacements, RunSimulationConfig config)
+        {
+            return Resolve(orderedPlacements, config);
+        }
+
         private static MvpPlacementEffectsSummary Resolve(MvpDungeonPlacementEntry[] orderedPlacements, RunSimulationConfig config)
         {
             var summary = new MvpPlacementEffectsSummary

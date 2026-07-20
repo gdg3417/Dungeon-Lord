@@ -336,35 +336,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 })
                 .ToArray();
 
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedMonsterOptionIds, (room, values) => room.AssignedMonsterOptionIds = values);
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedTrapOptionIds, (room, values) => room.AssignedTrapOptionIds = values);
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedLootNodeOptionIds, (room, values) => room.AssignedLootNodeOptionIds = values);
-
             return rooms.Length == 0 ? null : new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms };
-        }
-
-        private static void RemoveAssignmentsAfterFirstAssignedRoom(
-            MvpDungeonRoomInstance[] rooms,
-            Func<MvpDungeonRoomInstance, string[]> getAssignments,
-            Action<MvpDungeonRoomInstance, string[]> setAssignments)
-        {
-            bool foundAssignedRoom = false;
-            foreach (MvpDungeonRoomInstance room in rooms)
-            {
-                string[] assignments = getAssignments(room);
-                if (assignments == null || assignments.Length == 0)
-                {
-                    continue;
-                }
-
-                if (foundAssignedRoom)
-                {
-                    setAssignments(room, Array.Empty<string>());
-                    continue;
-                }
-
-                foundAssignedRoom = true;
-            }
         }
 
         private static bool CanAccept(MvpDungeonRoomInstance room, string categoryId)

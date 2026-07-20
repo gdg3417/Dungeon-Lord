@@ -4,15 +4,13 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR 156 / GD58. Open PR #157 implements GD59's normal player-facing Adventurer Activity Analysis start, active progress, and local-MVP claim path; after GD59, the next gameplay priority is ordered two-room run resolution.
+Main is merged through PR #157 / GD59. GD60 is the active workstream: deterministic adventurer resolution across an ordered two-room route.
 
 ## Operating rules
 
-- Keep PRs small and evidence-backed.
-- Keep resolver behavior deterministic.
-- Keep gameplay tuning in config or typed config assets, not runtime logic.
-- Keep player-facing text localization-owned.
-- Preserve legacy-safe saves and additive compatibility patterns.
+- Keep resolver behavior deterministic and changes evidence-backed.
+- Keep gameplay tuning in config and player-facing text in localization.
+- Preserve additive, legacy-safe saves.
 
 ## Validation expectations
 
@@ -26,8 +24,10 @@ VS4 first-session MVP smoke documentation:
 - [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
 - [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
 
-## Next intended work
+## Next likely gameplay sequence after GD60
 
-The next intended work is AR1 through AR4 architecture debt containment before GD27 gameplay resumes.
-
-- [AR1 architecture debt containment plan after GD26](docs/planning/architecture-debt-containment-plan-after-gd26.md)
+1. Mana-backed building decisions
+2. Real offline mana
+3. Additional floor progression
+4. Room-level loot depth
+5. Monster-family and progression breadth

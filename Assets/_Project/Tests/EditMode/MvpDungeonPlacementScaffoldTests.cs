@@ -376,7 +376,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void PersistedRoomSlotLayout_HidesExtraRoomTwoMonsterWhenActiveCompositionUsesRoomOneMonster()
+        public void PersistedRoomSlotLayout_PreservesRoomTwoMonsterWhileAggregateCompatibilityUsesRoomOne()
         {
             RunSimulationConfig config = RoomSlotPlacementEffectsConfig();
             var save = new SaveData
@@ -412,8 +412,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(layoutText, Does.Not.Contain("Dungeon layout:"));
             Assert.That(layoutText, Does.Contain("Room 1: Narrow Hall"));
-            Assert.That(layoutText, Does.Contain("Room 2: Basic Room — Monsters 0/1: Empty; Traps 0/1: Empty; Loot 1/1: Basic Loot Node"));
-            Assert.That(layoutText, Does.Not.Contain("Skeleton"));
+            Assert.That(layoutText, Does.Contain("Room 2: Basic Room — Monsters 1/1: Skeleton; Traps 0/1: Empty; Loot 1/1: Basic Loot Node"));
+            Assert.That(layoutText, Does.Contain("Skeleton"));
             Assert.That(summary.DungeonPlacements, Has.Some.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.GoblinOptionId));
             Assert.That(summary.DungeonPlacements, Has.None.Matches<MvpDungeonPlacementEntry>(entry => entry.OptionId == MvpDungeonPlacementIds.SkeletonOptionId));
             Assert.That(effects.ContributingOptionIds, Does.Not.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
