@@ -2418,6 +2418,14 @@
     {
       "key": "run.route.outcome.no_encounter",
       "text": "No adventurers entered because the route has no active encounter."
+    },
+    {
+      "key": "run.reason.party_wiped",
+      "text": "The adventurer party was wiped out."
+    },
+    {
+      "key": "run.reason.no_encounter",
+      "text": "The route has no active encounter or reward content."
     }
   ]
 }

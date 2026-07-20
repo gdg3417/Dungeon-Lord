@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using NUnit.Framework;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.Structures;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -42,6 +45,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void SaveService_RealSimulatedTwoRoomOutcomeRoundTrips()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "gd60-real-route-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, MinPartySize = 2, MaxPartySize = 2, MaxAllowedPartySize = 2, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
+                var simulation = new RunSimulationService(config); var runtime = new StructureRuntimeState { Heat = 6d };
+                MvpOrderedRouteRoom first = ActiveRoom(0, MvpDungeonPlacementIds.SkeletonOptionId); MvpOrderedRouteRoom second = ActiveRoom(1, MvpDungeonPlacementIds.GoblinOptionId);
+                RunOutcomeRecord outcome = simulation.SimulateRoute(runtime, 55L, 1, RunPostureResolver.BalancedId, new[] { first, second });
+                var service = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "real.json", useAtomicWrites = false }, directory);
+                SaveData save = service.LoadOrCreate("gd60", out _); save.runHistory = new RunHistoryState(); save.runHistory.AppendOutcome(outcome, 5); service.Save(save, SaveReason.ManualDev);
+                RunOutcomeRecord loaded = service.LoadOrCreate("gd60", out _).runHistory.LatestOutcome;
+                Assert.That(loaded.ConfiguredRoomCount, Is.EqualTo(2)); Assert.That(loaded.RoomResolutions[0].RoomIndex, Is.EqualTo(0)); Assert.That(loaded.RoomResolutions[1].RoomIndex, Is.EqualTo(1));
+                Assert.That(loaded.RoomResolutions[1].PartyEntering, Is.EqualTo(loaded.RoomResolutions[0].SurvivorsLeaving));
+                Assert.That(loaded.SurvivalSummary.DeathCount, Is.EqualTo(loaded.RoomResolutions[0].Deaths + loaded.RoomResolutions[1].Deaths));
+                Assert.That(loaded.HighestRoomReached, Is.EqualTo(1)); Assert.That(loaded.FinalRouteOutcomeKey, Is.EqualTo(outcome.FinalRouteOutcomeKey));
+                Assert.That(loaded.ConfiguredRoutePlacementEffects, Is.Not.Null); Assert.That(loaded.ReachedRoutePlacementEffects, Is.Not.Null); Assert.That(loaded.ClearedRewardPlacementEffects, Is.Not.Null);
+                Assert.That(loaded.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(outcome.LootSummary.TotalGeneratedWorldValue)); Assert.That(loaded.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(outcome.RunHeatApplicationSummary.HeatBefore));
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
         public void SaveService_LegacyOutcomeWithoutRouteFieldsLoadsSafely()
         {
             string directory = Path.Combine(Path.GetTempPath(), "gd60-legacy-" + Guid.NewGuid().ToString("N"));
@@ -50,7 +76,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var service = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "legacy.json", useAtomicWrites = false }, directory);
                 SaveData save = service.LoadOrCreate("legacy", out _); save.runHistory = new RunHistoryState();
                 save.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "legacy", CompositionOutcomeSummary = new RunCompositionOutcomeSummary { PlacementEffects = Effects(1) } }, 5);
-                service.Save(save, SaveReason.ManualDev);
+                const string legacyJson = "{\"schema\":\"save_root\",\"schemaVersion\":1,\"primary\":{\"saveVersion\":1,\"contentVersion\":\"legacy\",\"runHistory\":{\"NextRunSequence\":2,\"LatestOutcome\":{\"RunId\":\"legacy\",\"CompositionOutcomeSummary\":{\"RuleResolved\":true,\"PlacementEffects\":{\"RuleResolved\":true,\"Danger\":1}}},\"RecentOutcomes\":[]}}}";
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(service.SavePath, legacyJson);
                 RunOutcomeRecord loaded = service.LoadOrCreate("legacy", out _).runHistory.LatestOutcome;
                 Assert.That(loaded.ConfiguredRoomCount, Is.Zero);
                 Assert.That(loaded.RoomResolutions, Is.Empty);
@@ -59,6 +87,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
         }
 
+        private static MvpOrderedRouteRoom ActiveRoom(int index, string monsterId) => new MvpOrderedRouteRoom { FloorIndex = 0, RoomIndex = index, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, IncludeRoomPlacement = true, HasActiveContent = true, AssignedMonsterOptionIds = new[] { monsterId }, Capacity = new MvpRoomSlotCapacity() };
         private static MvpPlacementEffectsSummary Effects(int danger) => new MvpPlacementEffectsSummary { RuleResolved = true, Danger = danger };
         private static RunRoomResolutionSummary Room(int index, int entering, int survivors, int deaths) => new RunRoomResolutionSummary { FloorIndex = 0, RoomIndex = index, Reached = true, PartyEntering = entering, SurvivorsLeaving = survivors, Deaths = deaths };
     }

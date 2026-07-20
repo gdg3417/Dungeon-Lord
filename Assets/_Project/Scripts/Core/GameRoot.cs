@@ -920,12 +920,18 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (!TryResolveRunnableMvpRoute(out MvpOrderedRouteRoom[] route, out string rejectionReasonKey))
+            {
+                ApplyRunRejection(rejectionReasonKey);
+                return false;
+            }
+
             if (_structureSimulationPass != null && Save.dungeonLayout != null)
             {
                 didApplyStructureTick = SimulateStructureTick();
             }
 
-            return SimulateRunOnce(postureId);
+            return SimulateResolvedRoute(postureId, route);
         }
 
         public bool SimulateRunOnce()
@@ -935,21 +941,40 @@ namespace DungeonBuilder.M0
 
         public bool SimulateRunOnce(string postureId)
         {
-            LastRunRejectionReasonKey = string.Empty;
-            if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
+            if (!TryResolveRunnableMvpRoute(out MvpOrderedRouteRoom[] route, out string rejectionReasonKey))
             {
+                ApplyRunRejection(rejectionReasonKey);
                 return false;
             }
+            return SimulateResolvedRoute(postureId, route);
+        }
 
-            long tickStarted = Save.totalTicks;
-            int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
-            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+        private bool TryResolveRunnableMvpRoute(out MvpOrderedRouteRoom[] route, out string rejectionReasonKey)
+        {
+            LastRunRejectionReasonKey = string.Empty;
+            route = Array.Empty<MvpOrderedRouteRoom>();
+            rejectionReasonKey = string.Empty;
+            if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null) return false;
+            route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
             {
-                LastRunRejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
-                SetBanner(Content != null ? Content.GetString(LastRunRejectionReasonKey, LastRunRejectionReasonKey) : LastRunRejectionReasonKey);
+                rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
                 return false;
             }
+            return true;
+        }
+
+        private void ApplyRunRejection(string rejectionReasonKey)
+        {
+            LastRunRejectionReasonKey = rejectionReasonKey ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(LastRunRejectionReasonKey))
+                SetBanner(Content != null ? Content.GetString(LastRunRejectionReasonKey, LastRunRejectionReasonKey) : LastRunRejectionReasonKey);
+        }
+
+        private bool SimulateResolvedRoute(string postureId, MvpOrderedRouteRoom[] route)
+        {
+            long tickStarted = Save.totalTicks;
+            int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateRoute(Save.structureRuntime, tickStarted, sequence, postureId, route);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;

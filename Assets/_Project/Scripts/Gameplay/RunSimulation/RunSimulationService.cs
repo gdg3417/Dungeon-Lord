@@ -162,7 +162,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return new RunOutcomeRecord {
                 RunId = $"run-{runSequence}", TickStarted = tickStarted, Success = fullClear,
                 Score = fullClear ? _config.BaseScoreOnSuccess + (int)Math.Round(aggregateComposition.EffectiveManaReserve * _config.ScorePerManaPoint) : 0,
-                ReasonKey = fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),
+                ReasonKey = partyWiped ? PartyWipedReasonKey : fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),
                 HeatAtStart = heatAtStart, ManaAtStart = manaAtStart, CrisisActiveAtStart = runtime.IsHeatCrisisActive, HasBreakdown = true,
                 BaseChance = _config.BaseSuccessChance, HeatPenaltyApplied = finalHeatPenalty,
                 ManaBonusApplied = finalManaBonus, CrisisPenaltyApplied = finalCrisisPenalty, FinalChance = finalChance,
@@ -185,7 +185,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var extraction = new RunLootExtractionSummary { RuleResolved = true, DeterministicErrorCode = (int)RunLootExtractionSummaryErrorCode.None, DeterministicSeed = ComputeResolverSeed(runSequence, tickStarted), ExtractedItemIds = Array.Empty<string>(), LostItemIds = Array.Empty<string>() };
             var heatDelta = new RunHeatDeltaSummary { RuleResolved = true, DeterministicErrorCode = (int)RunHeatDeltaSummaryErrorCode.None, FinalHeatDelta = 0d, DeterministicSeed = ComputeResolverSeed(runSequence, tickStarted) };
             var heatApplication = new RunHeatApplicationSummary { RuleResolved = true, DeterministicErrorCode = (int)RunHeatApplicationSummaryErrorCode.None, HeatBefore = heatAtStart, HeatAfter = heatAtStart, AppliedDelta = 0d };
-            return new RunOutcomeRecord { RunId = $"run-{runSequence}", TickStarted = tickStarted, Success = false, Score = 0, ReasonKey = "run.reason.failed_threshold",
+            return new RunOutcomeRecord { RunId = $"run-{runSequence}", TickStarted = tickStarted, Success = false, Score = 0, ReasonKey = NoEncounterReasonKey,
                 HeatAtStart = heatAtStart, ManaAtStart = manaAtStart, CrisisActiveAtStart = runtime.IsHeatCrisisActive, HasBreakdown = true, BaseChance = _config.BaseSuccessChance, FinalChance = _config.BaseSuccessChance, SuccessThresholdUsed = _config.SuccessThreshold,
                 FeedbackTagKeys = BuildFeedbackTagKeys(runtime, false, BuildCompositionOutcomeSummary(EmptyPlacementEffects(), manaAtStart)), LootSummary = loot, LootExtractionSummary = extraction, LootBreakdown = Array.Empty<RunLootDropRecord>(),
                 SurvivalSummary = party, RunHeatDeltaSummary = heatDelta, RunHeatApplicationSummary = heatApplication, CompositionOutcomeSummary = BuildCompositionOutcomeSummary(reached, manaAtStart), RunPostureId = posture?.Id,
@@ -199,6 +199,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public const string RouteWipedKey = "run.route.outcome.wiped";
         public const string RouteRetreatedKey = "run.route.outcome.retreated";
         public const string RouteNoEncounterKey = "run.route.outcome.no_encounter";
+        public const string PartyWipedReasonKey = "run.reason.party_wiped";
+        public const string NoEncounterReasonKey = "run.reason.no_encounter";
 
         private void AddCompatibleRoomMetadata(RunOutcomeRecord outcome, MvpOrderedRouteRoom[] route)
         {

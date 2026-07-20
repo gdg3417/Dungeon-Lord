@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(outcome.Success, Is.False);
             Assert.That(outcome.Score, Is.Zero);
             Assert.That(outcome.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteNoEncounterKey));
+            Assert.That(outcome.ReasonKey, Is.EqualTo(RunSimulationService.NoEncounterReasonKey));
             Assert.That(outcome.ConfiguredRoomCount, Is.EqualTo(2));
             Assert.That(outcome.ReachedRoomCount, Is.EqualTo(2));
             Assert.That(outcome.ClearedRoomCount, Is.EqualTo(2));
@@ -65,6 +66,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(outcome.Success, Is.False);
             Assert.That(outcome.Score, Is.Zero);
             Assert.That(outcome.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteWipedKey));
+            Assert.That(outcome.ReasonKey, Is.EqualTo(RunSimulationService.PartyWipedReasonKey));
             Assert.That(outcome.LootExtractionSummary.TotalExtractedWorldValue, Is.Zero);
             Assert.That(outcome.ClearedRoomCount, Is.EqualTo(1));
         }
