@@ -392,6 +392,8 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey] = "Rewards and Risk",
             [MvpLoopSummaryPanelPresenter.ResearchSectionKey] = "Research",
             [MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey] = "Suggested Next Action",
+            [MvpLoopSummaryPanelPresenter.WhyRunFormatKey] = "Main reason: {0}.",
+            [MvpLoopSummaryPanelPresenter.WhyMixedKey] = "the current placement mix shaped the result",
             [MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}",
             [MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.",
             [MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}",
