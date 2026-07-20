@@ -112,6 +112,7 @@ namespace DungeonBuilder.M0
                 FinalRouteOutcomeKey = latestRun?.FinalRouteOutcomeKey ?? string.Empty,
                 HighestRoomReached = latestRun?.HighestRoomReached ?? -1,
                 ReachedRoomCount = latestRun?.ReachedRoomCount ?? 0,
+                ConfiguredRoomCount = latestRun?.ConfiguredRoomCount ?? 0,
                 ClearedRoomCount = latestRun?.ClearedRoomCount ?? 0,
                 RoomResolutions = latestRun?.RoomResolutions ?? Array.Empty<RunRoomResolutionSummary>(),
                 ManaReserve = currentMana,
@@ -165,15 +166,13 @@ namespace DungeonBuilder.M0
 
         private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
         {
-            RunCompositionOutcomeSummary composition = latestRun?.CompositionOutcomeSummary;
-            MvpPlacementEffectsSummary stored = latestRun?.ConfiguredRoutePlacementEffects ?? composition?.PlacementEffects;
             if (latestRun == null) return currentPlacementEffects;
-            if (stored != null && stored.RuleResolved)
-            {
-                return stored;
-            }
-
-            return CreateEmptyResolvedPlacementEffects();
+            MvpPlacementEffectsSummary configured = latestRun.ConfiguredRoutePlacementEffects;
+            if (configured != null && configured.RuleResolved) return configured;
+            MvpPlacementEffectsSummary legacy = latestRun.CompositionOutcomeSummary?.PlacementEffects;
+            if (legacy != null && legacy.RuleResolved) return legacy;
+            // A non-null unresolved configured snapshot is explicit invalid evidence. Missing legacy evidence falls back to current.
+            return configured != null ? CreateEmptyResolvedPlacementEffects() : currentPlacementEffects;
         }
 
         private static MvpPlacementEffectsSummary CreateEmptyResolvedPlacementEffects()

@@ -516,6 +516,7 @@ namespace DungeonBuilder.M0
         public int HighestRoomReached = -1;
         public int ClearedRoomCount;
         public int ReachedRoomCount;
+        public int ConfiguredRoomCount;
         public string FinalRouteOutcomeKey;
         public MvpPlacementEffectsSummary ConfiguredRoutePlacementEffects;
         public MvpPlacementEffectsSummary ReachedRoutePlacementEffects;
@@ -774,6 +775,7 @@ namespace DungeonBuilder.M0
         public string FinalRouteOutcomeKey;
         public int HighestRoomReached = -1;
         public int ReachedRoomCount = 0;
+        public int ConfiguredRoomCount = 0;
         public int ClearedRoomCount = 0;
         public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
         public double ManaReserve = 0d;

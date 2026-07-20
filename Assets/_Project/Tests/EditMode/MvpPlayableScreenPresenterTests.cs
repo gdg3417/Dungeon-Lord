@@ -329,7 +329,7 @@ namespace DungeonBuilder.Tests.EditMode
         public void BuildScreenText_TwoRoomOutcomeAppearsInPlayableLatestResult()
         {
             MvpPlayerLoopSummary summary = BuildResearchSummary(null, string.Empty);
-            summary.HasResearchStatus = false; summary.HasRunOutcome = true; summary.ReachedRoomCount = 2;
+            summary.HasResearchStatus = false; summary.HasRunOutcome = true; summary.ConfiguredRoomCount = 2; summary.ReachedRoomCount = 2;
             summary.HighestRoomReached = 1; summary.FinalRouteOutcomeKey = Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey;
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { RuleResolved = true },
                 string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
