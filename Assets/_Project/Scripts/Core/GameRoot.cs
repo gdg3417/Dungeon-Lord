@@ -42,6 +42,7 @@ namespace DungeonBuilder.M0
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
 
         public string BannerMessage { get; private set; } = string.Empty;
+        public string LastRunRejectionReasonKey { get; private set; } = string.Empty;
         public string PendingStateLine { get; private set; } = "Pending: None";
         public string GateStatusLine { get; private set; } = "Gate: unknown";
         public string KpiLine { get; private set; } = "KPI: n/a";
@@ -934,6 +935,7 @@ namespace DungeonBuilder.M0
 
         public bool SimulateRunOnce(string postureId)
         {
+            LastRunRejectionReasonKey = string.Empty;
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null)
             {
                 return false;
@@ -944,6 +946,8 @@ namespace DungeonBuilder.M0
             MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
             {
+                LastRunRejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
+                SetBanner(Content != null ? Content.GetString(LastRunRejectionReasonKey, LastRunRejectionReasonKey) : LastRunRejectionReasonKey);
                 return false;
             }
             RunOutcomeRecord outcome = _runSimulationService.SimulateRoute(Save.structureRuntime, tickStarted, sequence, postureId, route);

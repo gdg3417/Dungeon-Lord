@@ -69,6 +69,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(outcome.ClearedRoomCount, Is.EqualTo(1));
         }
 
+        [Test]
+        public void TwoClearedRooms_CarryExactSurvivorsAndPreserveOriginalTick()
+        {
+            var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
+                MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
+            var service = new RunSimulationService(config);
+            MvpOrderedRouteRoom first = EmptyRoom(0); first.HasActiveContent = true; first.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId };
+            MvpOrderedRouteRoom second = EmptyRoom(1); second.HasActiveContent = true; second.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId };
+            RunOutcomeRecord outcome = service.SimulateRoute(new StructureRuntimeState(), 456L, 3, RunPostureResolver.BalancedId, new[] { first, second });
+            Assert.That(outcome.TickStarted, Is.EqualTo(456L));
+            Assert.That(outcome.RoomResolutions, Has.Length.EqualTo(2));
+            Assert.That(outcome.RoomResolutions[1].PartyEntering, Is.EqualTo(outcome.RoomResolutions[0].SurvivorsLeaving));
+            Assert.That(outcome.SurvivalSummary.PartySize, Is.EqualTo(outcome.RoomResolutions[0].PartyEntering));
+            Assert.That(outcome.Success, Is.True);
+            Assert.That(outcome.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteClearedKey));
+        }
+
         private static MvpOrderedRouteRoom EmptyRoom(int index) => new MvpOrderedRouteRoom {
             FloorIndex = 0, RoomIndex = index, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
             IncludeRoomPlacement = true, HasActiveContent = false, Capacity = new MvpRoomSlotCapacity()
