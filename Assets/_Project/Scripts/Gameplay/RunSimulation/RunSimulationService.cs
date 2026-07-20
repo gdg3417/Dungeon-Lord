@@ -36,6 +36,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 MvpPlacementEffectsSummary effects = route != null && route.Length == 1
                     ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config) : null;
                 RunOutcomeRecord compatible = SimulateOnce(runtime, tickStarted, runSequence, postureId, effects);
+                compatible.ConfiguredRoutePlacementEffects = ClonePlacementEffects(effects);
+                compatible.ReachedRoutePlacementEffects = ClonePlacementEffects(effects);
+                compatible.ClearedRewardPlacementEffects = compatible.Success ? ClonePlacementEffects(effects) : EmptyPlacementEffects();
                 AddCompatibleRoomMetadata(compatible, route);
                 return compatible;
             }
@@ -50,7 +53,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var rooms = new System.Collections.Generic.List<RunRoomResolutionSummary>();
             var generatedItems = new System.Collections.Generic.List<string>();
             int generatedValue = 0, generatedReserve = 0, generatedTradeable = 0, rollCount = 0;
+            bool lootResolverSuccess = true;
+            int lootResolverErrorCode = (int)LootRollResolverErrorCode.None;
+            MvpPlacementEffectsSummary configuredEffects = EmptyPlacementEffects();
+            for (int i = 0; i < route.Length; i++) AddPlacementEffects(configuredEffects, MvpPlacementEffectsResolver.ResolvePlacements(route[i].ToOrderedPlacements(), _config));
             MvpPlacementEffectsSummary reachedEffects = EmptyPlacementEffects();
+            MvpPlacementEffectsSummary clearedRewardEffects = EmptyPlacementEffects();
             RunCompositionOutcomeSummary finalComposition = BuildCompositionOutcomeSummary(reachedEffects, manaAtStart);
             bool finalSuccess = true;
             double finalChance = _config.BaseSuccessChance;
@@ -82,8 +90,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 RunLootSummary roomLoot = null;
                 if (cleared)
                 {
+                    AddPlacementEffects(clearedRewardEffects, localEffects);
                     roomLoot = ApplyCompositionToLootSummary(ApplyPostureToLootSummary(BuildLootSummary(roomSeed), posture), composition);
-                    if (roomLoot != null && roomLoot.ResolverSuccess)
+                    if (roomLoot == null || !roomLoot.ResolverSuccess)
+                    {
+                        lootResolverSuccess = false;
+                        if (lootResolverErrorCode == (int)LootRollResolverErrorCode.None)
+                            lootResolverErrorCode = roomLoot?.ResolverErrorCode ?? (int)LootRollResolverErrorCode.TableIdMissing;
+                    }
+                    else
                     {
                         generatedItems.AddRange(roomLoot.GeneratedItemIds ?? Array.Empty<string>());
                         generatedValue += roomLoot.TotalGeneratedWorldValue;
@@ -100,21 +115,23 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     Deaths = roomSurvival.DeathCount, StoppedRoute = stopped,
                     StopReasonKey = stopped ? (currentSurvivors <= 0 ? RouteWipedKey : RouteRetreatedKey) : string.Empty,
                     LocalPlacementEffects = localEffects, GeneratedLootValue = roomLoot?.TotalGeneratedWorldValue ?? 0,
-                    CarriedLootValueAfterRoom = generatedValue, HeatDelta = composition.HeatDeltaOffset + roomSurvival.CasualtyHeatDelta,
-                    ManaPressureCost = composition.ManaReservePressureCost, DeterministicSeed = roomSeed, RuleSourceId = composition.RuleSourceId
+                    CarriedLootValueAfterRoom = generatedValue, LocalHeatPressureDelta = composition.HeatDeltaOffset,
+                    CasualtyPressureHeatDelta = roomSurvival.CasualtyHeatDelta, CasualtyPressure = roomSurvival.CasualtyPressure,
+                    CasualtyLootExtractionPenalty = roomSurvival.CasualtyLootExtractionPenalty, ManaPressureCost = composition.ManaReservePressureCost, DeterministicSeed = roomSeed, RuleSourceId = composition.RuleSourceId
                 });
                 finalComposition = composition;
                 finalSuccess = cleared;
                 if (stopped) break;
             }
 
-            var loot = new RunLootSummary { LootTableId = _lootTableId, ResolverSeed = seed, ResolverSuccess = true, RollCount = rollCount,
+            var loot = new RunLootSummary { LootTableId = _lootTableId, ResolverSeed = seed, ResolverSuccess = lootResolverSuccess, ResolverErrorCode = lootResolverErrorCode, RollCount = rollCount,
                 GeneratedItemIds = generatedItems.ToArray(), TotalGeneratedWorldValue = generatedValue,
                 TotalGeneratedReserveCost = generatedReserve, TotalGeneratedTradeableWorldValue = Math.Min(generatedValue, generatedTradeable) };
             var survival = BuildAggregateSurvival(partyRoll, initialParty, currentSurvivors, rooms);
             RunCompositionOutcomeSummary aggregateComposition = BuildCompositionOutcomeSummary(reachedEffects, manaAtStart);
+            RunCompositionOutcomeSummary rewardComposition = BuildCompositionOutcomeSummary(clearedRewardEffects, manaAtStart);
             RunLootExtractionSummary extraction = ApplyCompositionToExtractionSummary(
-                ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(_lootConfig, loot, survival, seed, _config.LootExtractionRoundingPolicyId, _config.LootExtractionRuleSourceId), loot, posture), loot, aggregateComposition);
+                ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(_lootConfig, loot, survival, seed, _config.LootExtractionRoundingPolicyId, _config.LootExtractionRuleSourceId), loot, posture), loot, rewardComposition);
             ApplyCasualtyPressureToExtractionSummary(extraction, loot, survival);
             RunLootDropRecord[] breakdown = RunLootBreakdownResolver.Resolve(_lootConfig, extraction);
             RunAdventurerAttractionSummary attraction = ApplyCompositionToAttractionSummary(AdventurerAttractionResolver.Resolve(_config, extraction, seed), aggregateComposition);
@@ -141,7 +158,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 AdventurerAttractionSummary = attraction, AdventurerInterestForecastSummary = forecast, AdventurerDemandBudgetSummary = demand,
                 RunHeatDeltaSummary = heatDelta, RunHeatApplicationSummary = heatApplication, CompositionOutcomeSummary = aggregateComposition,
                 RunPostureId = posture?.Id, RoomResolutions = rooms.ToArray(), HighestRoomReached = rooms[rooms.Count - 1].RoomIndex,
-                ReachedRoomCount = rooms.Count, ClearedRoomCount = clearedCount, FinalRouteOutcomeKey = routeKey
+                ReachedRoomCount = rooms.Count, ClearedRoomCount = clearedCount, FinalRouteOutcomeKey = routeKey,
+                ConfiguredRoutePlacementEffects = configuredEffects, ReachedRoutePlacementEffects = reachedEffects,
+                ClearedRewardPlacementEffects = clearedRewardEffects
             };
         }
 
@@ -175,7 +194,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 Deaths = survival?.DeathCount ?? 0, StoppedRoute = stopped, StopReasonKey = stopped ? outcome.ReasonKey : string.Empty,
                 LocalPlacementEffects = outcome.CompositionOutcomeSummary?.PlacementEffects, GeneratedLootValue = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0,
                 CarriedLootValueAfterRoom = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0,
-                HeatDelta = outcome.RunHeatDeltaSummary?.FinalHeatDelta ?? 0d, ManaPressureCost = outcome.CompositionOutcomeSummary?.ManaReservePressureCost ?? 0d,
+                LocalHeatPressureDelta = outcome.CompositionOutcomeSummary?.HeatDeltaOffset ?? 0d,
+                CasualtyPressureHeatDelta = survival?.CasualtyHeatDelta ?? 0d, CasualtyPressure = survival?.CasualtyPressure ?? 0d,
+                CasualtyLootExtractionPenalty = survival?.CasualtyLootExtractionPenalty ?? 0d, ManaPressureCost = outcome.CompositionOutcomeSummary?.ManaReservePressureCost ?? 0d,
                 DeterministicSeed = survival?.DeterministicSeed ?? 0, RuleSourceId = outcome.CompositionOutcomeSummary?.RuleSourceId };
         }
 
@@ -212,7 +233,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private static RunSurvivalSummary BuildAggregateSurvival(RunSurvivalSummary partyRoll, int initialParty, int survivors, System.Collections.Generic.List<RunRoomResolutionSummary> rooms)
         {
             double casualtyPenalty = 0d, casualtyHeat = 0d, pressure = 0d;
-            foreach (RunRoomResolutionSummary room in rooms) { pressure = Math.Max(pressure, room.LocalPlacementEffects?.Danger ?? 0); }
+            // Route pressure is the maximum resolved room pressure; penalties and casualty heat are additive.
+            foreach (RunRoomResolutionSummary room in rooms)
+            {
+                pressure = Math.Max(pressure, room.CasualtyPressure);
+                casualtyPenalty += room.CasualtyLootExtractionPenalty;
+                casualtyHeat += room.CasualtyPressureHeatDelta;
+            }
+            casualtyPenalty = Math.Max(0d, Math.Min(1d, casualtyPenalty));
             return new RunSurvivalSummary { PartySize = initialParty, SurvivorCount = survivors, DeathCount = initialParty - survivors,
                 SurvivorRatio = initialParty > 0 ? (double)survivors / initialParty : 0d, DeterministicSeed = partyRoll.DeterministicSeed,
                 RuleResolved = partyRoll.RuleResolved, DeterministicErrorCode = partyRoll.DeterministicErrorCode, RuleSourceId = partyRoll.RuleSourceId,

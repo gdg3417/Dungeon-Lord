@@ -472,7 +472,10 @@ namespace DungeonBuilder.M0
         public int GeneratedLootValue;
         public int CarriedLootValueAfterRoom;
         public int LootLostInRoom;
-        public double HeatDelta;
+        public double LocalHeatPressureDelta;
+        public double CasualtyPressureHeatDelta;
+        public double CasualtyPressure;
+        public double CasualtyLootExtractionPenalty;
         public double ManaPressureCost;
         public int DeterministicSeed;
         public string RuleSourceId;
@@ -514,6 +517,9 @@ namespace DungeonBuilder.M0
         public int ClearedRoomCount;
         public int ReachedRoomCount;
         public string FinalRouteOutcomeKey;
+        public MvpPlacementEffectsSummary ConfiguredRoutePlacementEffects;
+        public MvpPlacementEffectsSummary ReachedRoutePlacementEffects;
+        public MvpPlacementEffectsSummary ClearedRewardPlacementEffects;
     }
 
     [Serializable]

@@ -325,6 +325,21 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+        [Test]
+        public void BuildScreenText_TwoRoomOutcomeAppearsInPlayableLatestResult()
+        {
+            MvpPlayerLoopSummary summary = BuildResearchSummary(null, string.Empty);
+            summary.HasResearchStatus = false; summary.HasRunOutcome = true; summary.ReachedRoomCount = 2;
+            summary.HighestRoomReached = 1; summary.FinalRouteOutcomeKey = Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey;
+            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                string.Empty, string.Empty, new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true }, null, null, Localize);
+            Assert.That(text, Does.Contain("Route result: Route stopped in Room 2."));
+            Assert.That(text, Does.Contain("Depth reached: Room 2."));
+            Assert.That(text, Does.Not.Contain("run.route"));
+            Assert.That(text, Does.Not.Contain("{0"));
+        }
+
         private static MvpPlayerLoopSummary BuildResearchSummary(PlayerResearchAuthoritySummary authority, string statusKey)
         {
             return new MvpPlayerLoopSummary
@@ -366,6 +381,10 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
+            [MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}",
+            [MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.",
+            [MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}",
+            [Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.",
 
             [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",

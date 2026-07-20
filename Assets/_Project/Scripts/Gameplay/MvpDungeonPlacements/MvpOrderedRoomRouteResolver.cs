@@ -41,8 +41,19 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
             if (layout?.Rooms == null) return Array.Empty<MvpOrderedRouteRoom>();
             bool persisted = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
-            bool explicitRoom = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements)
-                .Any(p => p != null && string.Equals(p.CategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal));
+            MvpDungeonPlacementEntry[] legacyPlacements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);
+            bool explicitRoom = legacyPlacements.Any(p => p != null && string.Equals(p.CategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal));
+            if (!persisted)
+            {
+                MvpDungeonRoomInstance displayRoom = layout.Rooms.FirstOrDefault(r => r != null);
+                MvpDungeonPlacementEntry[] active = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);
+                return new[] { new MvpOrderedRouteRoom { FloorIndex = 0, RoomIndex = 0, RoomOptionId = displayRoom?.RoomOptionId,
+                    IncludeRoomPlacement = explicitRoom, Capacity = displayRoom?.Capacity,
+                    AssignedMonsterOptionIds = Options(active, MvpDungeonPlacementIds.MonsterCategoryId),
+                    AssignedTrapOptionIds = Options(active, MvpDungeonPlacementIds.TrapCategoryId),
+                    AssignedLootNodeOptionIds = Options(active, MvpDungeonPlacementIds.LootNodeCategoryId),
+                    HasActiveContent = active.Any(p => p != null && !string.Equals(p.CategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal)) } };
+            }
             var route = new List<MvpOrderedRouteRoom>();
             // Persisted normalization retains actual indices and uses the established last-record-wins rule.
             foreach (MvpDungeonRoomInstance room in layout.Rooms.Where(r => r != null && r.FloorIndex == 0 && r.RoomIndex >= 0 && r.RoomIndex <= MvpRoomSlotLayoutResolver.MvpSecondRoomSlotIndex).OrderBy(r => r.RoomIndex))
@@ -57,6 +68,11 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 });
             }
             return route.ToArray();
+        }
+
+        private static string[] Options(MvpDungeonPlacementEntry[] placements, string categoryId)
+        {
+            return placements == null ? Array.Empty<string>() : placements.Where(p => p != null && string.Equals(p.CategoryId, categoryId, StringComparison.Ordinal)).Select(p => p.OptionId).ToArray();
         }
     }
 }

@@ -41,7 +41,7 @@ namespace DungeonBuilder.M0
             RunOutcomeRecord latestRun = GetLatestRun(save.runHistory);
             DungeonSlot? selectedSlot = GetSelectedSlot(save.dungeonLayout);
             MvpDungeonPlacementEntry[] dungeonPlacements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, runConfig);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, runConfig);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save, runConfig);
             double currentMana = runtime?.ManaReserve ?? 0d;
             double currentHeat = runtime?.Heat ?? 0d;
 
@@ -166,13 +166,9 @@ namespace DungeonBuilder.M0
         private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
         {
             RunCompositionOutcomeSummary composition = latestRun?.CompositionOutcomeSummary;
-            if (composition == null)
-            {
-                return currentPlacementEffects;
-            }
-
-            MvpPlacementEffectsSummary stored = composition.PlacementEffects;
-            if (composition.RuleResolved && stored != null && stored.RuleResolved)
+            MvpPlacementEffectsSummary stored = latestRun?.ConfiguredRoutePlacementEffects ?? composition?.PlacementEffects;
+            if (latestRun == null) return currentPlacementEffects;
+            if (stored != null && stored.RuleResolved)
             {
                 return stored;
             }

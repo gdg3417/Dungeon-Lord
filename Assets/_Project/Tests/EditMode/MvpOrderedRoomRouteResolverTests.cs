@@ -64,6 +64,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(route[0].ToOrderedPlacements(), Is.Empty);
         }
 
+        [Test]
+        public void ConfiguredRouteEffects_IncludeBothRoomsEvenWhenSelectionIsRoomTwo()
+        {
+            RunSimulationConfig config = Config();
+            config.MvpPlacementEffects = new[] {
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 2 },
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId, Danger = 3 }
+            };
+            var save = new SaveData { mvpSelectedRoomSlotIndex = 1, mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new List<MvpRoomSlotAssignmentState> {
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId } },
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 1, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterOptionIds = new[] { MvpDungeonPlacementIds.GoblinOptionId } }
+            } } };
+            MvpPlacementEffectsSummary effects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save, config);
+            Assert.That(effects.Danger, Is.EqualTo(5));
+            Assert.That(effects.ContributingOptionIds, Does.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(effects.ContributingOptionIds, Does.Contain(MvpDungeonPlacementIds.GoblinOptionId));
+        }
+
+        [Test]
+        public void Resolve_LegacyPlacementsRemainOneCompatibilityEncounter()
+        {
+            var save = new SaveData { mvpDungeonPlacements = new MvpDungeonPlacementState() };
+            save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 1));
+            save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, 2));
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, Config());
+            Assert.That(route, Has.Length.EqualTo(1));
+            Assert.That(route[0].AssignedMonsterOptionIds, Does.Contain(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(route[0].AssignedLootNodeOptionIds, Does.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
+        }
+
         private static RunSimulationConfig Config() => new RunSimulationConfig { MvpRoomSlotCapacities = new[] { new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 } } };
     }
 }
