@@ -38,6 +38,10 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
     {
         public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config)
         {
+            List<MvpRoomSlotAssignmentState> persistedRooms = save?.mvpRoomSlotAssignments?.Rooms;
+            bool hasPersistedRecords = persistedRooms != null && persistedRooms.Count > 0;
+            bool hasSupportedPersistedRecord = hasPersistedRecords && persistedRooms.Any(room => room != null && room.FloorIndex == 0 && room.RoomIndex >= 0 && room.RoomIndex <= MvpRoomSlotLayoutResolver.MvpSecondRoomSlotIndex);
+            if (hasPersistedRecords && !hasSupportedPersistedRecord) return Array.Empty<MvpOrderedRouteRoom>();
             MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
             if (layout?.Rooms == null) return Array.Empty<MvpOrderedRouteRoom>();
             bool persisted = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;

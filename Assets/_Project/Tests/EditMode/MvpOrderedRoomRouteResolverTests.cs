@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
@@ -94,6 +95,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(route[0].AssignedLootNodeOptionIds, Does.Contain(MvpDungeonPlacementIds.BasicLootNodeOptionId));
         }
 
+        [Test]
+        public void Resolve_OnlyNegativePersistedRoomReturnsEmpty()
+        {
+            var save = new SaveData { mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new List<MvpRoomSlotAssignmentState> { new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = -1 } } } };
+            Assert.That(MvpOrderedRoomRouteResolver.Resolve(save, Config()), Is.Empty);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        public void Resolve_ValidRoomMixedWithUnsupportedRoomPreservesAuthoritativeValidIndex(int validIndex)
+        {
+            var save = new SaveData { mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new List<MvpRoomSlotAssignmentState> {
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = validIndex, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId },
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 2, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId } } } };
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, Config());
+            Assert.That(route, Has.Length.EqualTo(1));
+            Assert.That(route[0].RoomIndex, Is.EqualTo(validIndex));
+        }
+
         private static RunSimulationConfig Config() => new RunSimulationConfig { MvpRoomSlotCapacities = new[] { new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 } } };
     }
 }
+#endif

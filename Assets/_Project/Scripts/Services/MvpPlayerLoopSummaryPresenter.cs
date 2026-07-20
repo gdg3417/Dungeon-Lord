@@ -169,9 +169,14 @@ namespace DungeonBuilder.M0
             if (latestRun == null) return currentPlacementEffects;
             MvpPlacementEffectsSummary configured = latestRun.ConfiguredRoutePlacementEffects;
             if (configured != null && configured.RuleResolved) return configured;
-            MvpPlacementEffectsSummary legacy = latestRun.CompositionOutcomeSummary?.PlacementEffects;
-            if (legacy != null && legacy.RuleResolved) return legacy;
-            // A non-null unresolved configured snapshot is explicit invalid evidence. Missing legacy evidence falls back to current.
+            RunCompositionOutcomeSummary composition = latestRun.CompositionOutcomeSummary;
+            if (composition != null)
+            {
+                MvpPlacementEffectsSummary legacy = composition.PlacementEffects;
+                return composition.RuleResolved && legacy != null && legacy.RuleResolved
+                    ? legacy
+                    : CreateEmptyResolvedPlacementEffects();
+            }
             return configured != null ? CreateEmptyResolvedPlacementEffects() : currentPlacementEffects;
         }
 

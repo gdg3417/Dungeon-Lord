@@ -382,6 +382,16 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
+            [MvpLoopSummaryPanelPresenter.TitleKey] = "MVP Loop Summary",
+            [MvpLoopSummaryPanelPresenter.SectionLineFormatKey] = "{0}: {1}",
+            [MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey] = "Current Dungeon",
+            [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Expected next adventurer intent",
+            [MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey] = "Adventurer pressure",
+            [MvpLoopSummaryPanelPresenter.LatestRunSectionKey] = "Latest Adventurer Visit",
+            [MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey] = "Why It Happened",
+            [MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey] = "Rewards and Risk",
+            [MvpLoopSummaryPanelPresenter.ResearchSectionKey] = "Research",
+            [MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey] = "Suggested Next Action",
             [MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}",
             [MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.",
             [MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}",
