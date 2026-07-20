@@ -119,7 +119,8 @@ namespace DungeonBuilder.M0
             string partyList = BuildPartyList(summary, localize);
             string casualtyLine = BuildCasualtyLine(summary, localize);
             string outcomeLine = string.IsNullOrEmpty(partyList) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyList);
-            return JoinInline(localize, outcomeLine, casualtyLine);
+            string routeLine = MvpRouteResultPresenter.BuildCompactText(summary, localize);
+            return string.IsNullOrEmpty(routeLine) ? JoinInline(localize, outcomeLine, casualtyLine) : JoinInline(localize, outcomeLine, casualtyLine) + "\n" + routeLine;
         }
 
         private static string BuildCasualtyLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

@@ -34,6 +34,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(route[0].AssignedMonsterOptionIds[0], Is.EqualTo(MvpDungeonPlacementIds.GoblinOptionId));
         }
 
+
+        [Test]
+        public void Resolve_RoomOneWithoutRoomZeroPreservesAuthoritativeIndex()
+        {
+            var save = new SaveData { mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new List<MvpRoomSlotAssignmentState> {
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 1, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId }
+            } } };
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, Config());
+            Assert.That(route, Has.Length.EqualTo(1));
+            Assert.That(route[0].RoomIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Resolve_RoomIndexAboveGd60RangeIsIgnored()
+        {
+            var save = new SaveData { mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new List<MvpRoomSlotAssignmentState> {
+                new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 2, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId }
+            } } };
+            Assert.That(MvpOrderedRoomRouteResolver.Resolve(save, Config()), Is.Empty);
+        }
+
+        [Test]
+        public void Resolve_ImplicitFallbackRoomDoesNotBecomeActiveRoomPlacement()
+        {
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(new SaveData(), Config());
+            Assert.That(route, Has.Length.EqualTo(1));
+            Assert.That(route[0].IncludeRoomPlacement, Is.False);
+            Assert.That(route[0].ToOrderedPlacements(), Is.Empty);
+        }
+
         private static RunSimulationConfig Config() => new RunSimulationConfig { MvpRoomSlotCapacities = new[] { new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 1 } } };
     }
 }

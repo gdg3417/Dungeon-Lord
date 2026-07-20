@@ -470,8 +470,8 @@ namespace DungeonBuilder.M0
         public string StopReasonKey;
         public MvpPlacementEffectsSummary LocalPlacementEffects;
         public int GeneratedLootValue;
-        public int ExtractedLootValue;
-        public int ExtractedTradeableLootValue;
+        public int CarriedLootValueAfterRoom;
+        public int LootLostInRoom;
         public double HeatDelta;
         public double ManaPressureCost;
         public int DeterministicSeed;
@@ -765,6 +765,11 @@ namespace DungeonBuilder.M0
         public bool HasRunOutcome = false;
         public string LatestRunId;
         public bool RunSucceeded = false;
+        public string FinalRouteOutcomeKey;
+        public int HighestRoomReached = -1;
+        public int ReachedRoomCount = 0;
+        public int ClearedRoomCount = 0;
+        public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
         public double ManaReserve = 0d;
         public int LootGeneratedWorldValue = 0;
         public int LootExtractedWorldValue = 0;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
@@ -8,6 +9,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public int FloorIndex;
         public int RoomIndex;
         public string RoomOptionId;
+        public bool IncludeRoomPlacement;
         public string[] AssignedMonsterOptionIds = Array.Empty<string>();
         public string[] AssignedTrapOptionIds = Array.Empty<string>();
         public string[] AssignedLootNodeOptionIds = Array.Empty<string>();
@@ -17,7 +19,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public MvpDungeonPlacementEntry[] ToOrderedPlacements()
         {
             var result = new List<MvpDungeonPlacementEntry>();
-            Add(result, MvpDungeonPlacementIds.RoomCategoryId, new[] { RoomOptionId });
+            if (IncludeRoomPlacement) Add(result, MvpDungeonPlacementIds.RoomCategoryId, new[] { RoomOptionId });
             Add(result, MvpDungeonPlacementIds.MonsterCategoryId, AssignedMonsterOptionIds);
             Add(result, MvpDungeonPlacementIds.TrapCategoryId, AssignedTrapOptionIds);
             Add(result, MvpDungeonPlacementIds.LootNodeCategoryId, AssignedLootNodeOptionIds);
@@ -38,15 +40,16 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         {
             MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
             if (layout?.Rooms == null) return Array.Empty<MvpOrderedRouteRoom>();
+            bool persisted = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
+            bool explicitRoom = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements)
+                .Any(p => p != null && string.Equals(p.CategoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal));
             var route = new List<MvpOrderedRouteRoom>();
-            // The slot resolver already applies the save convention “last duplicate wins”.
-            // GD60 admits only floor zero and its first two ordered room indices.
-            for (int roomIndex = 0; roomIndex < layout.Rooms.Length && roomIndex <= MvpRoomSlotLayoutResolver.MvpSecondRoomSlotIndex; roomIndex++)
+            // Persisted normalization retains actual indices and uses the established last-record-wins rule.
+            foreach (MvpDungeonRoomInstance room in layout.Rooms.Where(r => r != null && r.FloorIndex == 0 && r.RoomIndex >= 0 && r.RoomIndex <= MvpRoomSlotLayoutResolver.MvpSecondRoomSlotIndex).OrderBy(r => r.RoomIndex))
             {
-                MvpDungeonRoomInstance room = layout.Rooms[roomIndex];
-                if (room == null) continue;
                 route.Add(new MvpOrderedRouteRoom {
-                    FloorIndex = layout.FloorIndex, RoomIndex = roomIndex, RoomOptionId = room.RoomOptionId,
+                    FloorIndex = room.FloorIndex, RoomIndex = room.RoomIndex, RoomOptionId = room.RoomOptionId,
+                    IncludeRoomPlacement = persisted || explicitRoom,
                     AssignedMonsterOptionIds = room.AssignedMonsterOptionIds ?? Array.Empty<string>(),
                     AssignedTrapOptionIds = room.AssignedTrapOptionIds ?? Array.Empty<string>(),
                     AssignedLootNodeOptionIds = room.AssignedLootNodeOptionIds ?? Array.Empty<string>(), Capacity = room.Capacity,
