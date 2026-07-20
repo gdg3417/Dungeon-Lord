@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using System;
 using System.Collections.Generic;
 using DungeonBuilder.M0;
@@ -174,7 +175,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             var handler = new BootstrapMvpActionHandler(new BootstrapMvpActionHandler.Context(
                 Localize, (category, option) => default, () => _beforeSummary, posture => false,
-                message => _banner = message, () => Gameplay.RunSimulation.RunSimulationService.RouteNoEncounterKey));
+                message => _banner = message, () => RunSimulationService.RouteNoEncounterKey));
             BootstrapMvpActionHandler.RunResult result = handler.RunOrObserveDungeon(RunPostureResolver.BalancedId);
             Assert.That(result.DidRun, Is.False);
             Assert.That(result.BannerMessage, Is.EqualTo("Add active encounter or reward content before observing a route."));
@@ -221,7 +222,7 @@ namespace DungeonBuilder.Tests.EditMode
                 ["ui.banner.place_success"] = "Placement succeeded.",
                 ["ui.banner.run_simulated"] = "Run simulated.",
                 ["ui.banner.run_sim_failed"] = "Run failed.",
-                [Gameplay.RunSimulation.RunSimulationService.RouteNoEncounterKey] = "Add active encounter or reward content before observing a route.",
+                [RunSimulationService.RouteNoEncounterKey] = "Add active encounter or reward content before observing a route.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
                 [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",

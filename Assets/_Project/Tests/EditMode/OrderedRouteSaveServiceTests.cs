@@ -21,7 +21,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 save.runHistory = new RunHistoryState();
                 save.runHistory.AppendOutcome(new RunOutcomeRecord {
                     RunId = "run-1", TickStarted = 12, ConfiguredRoomCount = 2, ReachedRoomCount = 2, ClearedRoomCount = 1, HighestRoomReached = 1,
-                    FinalRouteOutcomeKey = Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey,
+                    FinalRouteOutcomeKey = RunSimulationService.RouteStoppedRoomTwoKey,
                     ConfiguredRoutePlacementEffects = Effects(5), ReachedRoutePlacementEffects = Effects(5), ClearedRewardPlacementEffects = Effects(2),
                     SurvivalSummary = new RunSurvivalSummary { PartySize = 3, SurvivorCount = 1, DeathCount = 2, RuleResolved = true },
                     LootSummary = new RunLootSummary { ResolverSuccess = true, TotalGeneratedWorldValue = 9 },

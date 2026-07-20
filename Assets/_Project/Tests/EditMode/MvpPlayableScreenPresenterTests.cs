@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using System.Collections.Generic;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -330,7 +331,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             MvpPlayerLoopSummary summary = BuildResearchSummary(null, string.Empty);
             summary.HasResearchStatus = false; summary.HasRunOutcome = true; summary.ConfiguredRoomCount = 2; summary.ReachedRoomCount = 2;
-            summary.HighestRoomReached = 1; summary.FinalRouteOutcomeKey = Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey;
+            summary.HighestRoomReached = 1; summary.FinalRouteOutcomeKey = RunSimulationService.RouteStoppedRoomTwoKey;
             string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { RuleResolved = true },
                 string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
                 string.Empty, string.Empty, new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true }, null, null, Localize);
@@ -384,7 +385,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}",
             [MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.",
             [MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}",
-            [Gameplay.RunSimulation.RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.",
+            [RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.",
 
             [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
