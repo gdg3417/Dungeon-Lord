@@ -19,6 +19,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             RunOutcomeRecord outcome = service.SimulateRoute(runtime, 123L, 7, RunPostureResolver.BalancedId, route);
 
+            Assert.That(outcome.Success, Is.False);
+            Assert.That(outcome.Score, Is.Zero);
+            Assert.That(outcome.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteNoEncounterKey));
             Assert.That(outcome.ConfiguredRoomCount, Is.EqualTo(2));
             Assert.That(outcome.ReachedRoomCount, Is.EqualTo(2));
             Assert.That(outcome.ClearedRoomCount, Is.EqualTo(2));
@@ -42,6 +45,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(second.SurvivalSummary.PartySize, Is.EqualTo(first.SurvivalSummary.PartySize));
             Assert.That(second.FinalRouteOutcomeKey, Is.EqualTo(first.FinalRouteOutcomeKey));
             Assert.That(second.RoomResolutions[1].DeterministicSeed, Is.EqualTo(first.RoomResolutions[1].DeterministicSeed));
+        }
+
+        [Test]
+        public void ClearedRoomOnePressureWipe_OverridesClearAndPreventsRoomTwo()
+        {
+            var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 100,
+                MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d,
+                CasualtyPressureRuleSourceId = "test.casualty", CasualtyPressurePerDanger = 1d, CasualtyPressureMinimum = 0d, CasualtyPressureMaximum = 1d,
+                BalancedCasualtyPressureMultiplier = 1d, PartyWipeCasualtyPressureThreshold = 0.5d,
+                MvpPlacementEffects = new[] { new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 1 } } };
+            var service = new RunSimulationService(config);
+            MvpOrderedRouteRoom dangerous = EmptyRoom(0); dangerous.HasActiveContent = true; dangerous.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId };
+            RunOutcomeRecord outcome = service.SimulateRoute(new StructureRuntimeState(), 9L, 1, RunPostureResolver.BalancedId, new[] { dangerous, EmptyRoom(1) });
+            Assert.That(outcome.RoomResolutions, Has.Length.EqualTo(1));
+            Assert.That(outcome.RoomResolutions[0].Cleared, Is.True);
+            Assert.That(outcome.SurvivalSummary.SurvivorCount, Is.Zero);
+            Assert.That(outcome.SurvivalSummary.SuccessAtResolution, Is.False);
+            Assert.That(outcome.Success, Is.False);
+            Assert.That(outcome.Score, Is.Zero);
+            Assert.That(outcome.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteWipedKey));
+            Assert.That(outcome.LootExtractionSummary.TotalExtractedWorldValue, Is.Zero);
+            Assert.That(outcome.ClearedRoomCount, Is.EqualTo(1));
         }
 
         private static MvpOrderedRouteRoom EmptyRoom(int index) => new MvpOrderedRouteRoom {

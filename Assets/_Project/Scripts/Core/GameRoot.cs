@@ -942,6 +942,10 @@ namespace DungeonBuilder.M0
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+            if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
+            {
+                return false;
+            }
             RunOutcomeRecord outcome = _runSimulationService.SimulateRoute(Save.structureRuntime, tickStarted, sequence, postureId, route);
             RunSimulationConfig config = _runSimulationService.Config;
             CurrentHeat = Save.structureRuntime.Heat;

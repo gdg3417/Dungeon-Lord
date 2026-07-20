@@ -2414,6 +2414,10 @@
     {
       "key": "ui.mvp_loop.route.room_number_format",
       "text": "Room {0}"
+    },
+    {
+      "key": "run.route.outcome.no_encounter",
+      "text": "No adventurers entered because the route has no active encounter."
     }
   ]
 }
