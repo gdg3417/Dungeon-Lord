@@ -769,6 +769,7 @@ namespace DungeonBuilder.M0
         public MvpDungeonPlacementEntry[] DungeonPlacements = Array.Empty<MvpDungeonPlacementEntry>();
         public MvpPlacementEffectsSummary PlacementEffects = new MvpPlacementEffectsSummary();
         public MvpPlacementEffectsSummary LatestRunPlacementEffects = new MvpPlacementEffectsSummary();
+        public MvpPlacementEffectsSummary LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary();
         public bool HasRunOutcome = false;
         public string LatestRunId;
         public bool RunSucceeded = false;

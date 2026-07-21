@@ -197,7 +197,8 @@ namespace DungeonBuilder.Tests.EditMode
             HasRunOutcome = true,
             AnalysisAdviceKey = adviceKey,
             PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true },
-            LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true }
+            LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true },
+            LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true }
         };
 
         private static MvpPlayerLoopSummary AppliedDangerAdjustmentSummary() => new MvpPlayerLoopSummary
@@ -207,7 +208,8 @@ namespace DungeonBuilder.Tests.EditMode
             HasRunOutcome = true,
             AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
             PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 1 },
-            LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 2 }
+            LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 2 },
+            LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 2 }
         };
 
         private static int CountOccurrences(string text, string value)

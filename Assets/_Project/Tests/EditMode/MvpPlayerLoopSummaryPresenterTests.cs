@@ -353,6 +353,24 @@ namespace DungeonBuilder.Tests.EditMode
 
 
         [Test]
+        public void Resolve_Gd60OutcomeSeparatesReachedCausalEffectsFromConfiguredComparisonEffects()
+        {
+            SaveData save = FullSave();
+            save.runHistory.LatestOutcome = RunWithLoot(generatedWorldValue: 0, extractedWorldValue: 0, extractedTradeableWorldValue: 0);
+            save.runHistory.LatestOutcome.ReachedRoutePlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 5, HeatPressure = 2, EffectLocalizationKeys = new[] { "effect.stored" } };
+            save.runHistory.LatestOutcome.ConfiguredRoutePlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 5, HeatPressure = 2, LootBonus = 6, Attraction = 4, EffectLocalizationKeys = new[] { "effect.stored" } };
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(save, PlacementEffectsConfig(), EligibilityConfig(), VerificationConfig());
+            Assert.That(summary.LatestRunPlacementEffects.Danger, Is.EqualTo(5));
+            Assert.That(summary.LatestRunPlacementEffects.LootBonus, Is.Zero);
+            Assert.That(summary.LatestRunPlacementEffects.Attraction, Is.Zero);
+            Assert.That(summary.LatestRunConfiguredPlacementEffects.LootBonus, Is.EqualTo(6));
+            Assert.That(summary.LatestRunConfiguredPlacementEffects.Attraction, Is.EqualTo(4));
+            string feedback = MvpRunResultFeedbackPresenter.BuildFeedbackText(new MvpPlayerLoopSummary { RuleResolved = true }, summary, true, FeedbackLocalize);
+            Assert.That(feedback, Does.Contain("danger +5"));
+            Assert.That(feedback, Does.Not.Contain("loot +6"));
+        }
+
+        [Test]
         public void Resolve_UnresolvedCompositionOutcome_DoesNotShowStoredOrCurrentEffectsAsLatestRunImpact()
         {
             SaveData save = FullSave();

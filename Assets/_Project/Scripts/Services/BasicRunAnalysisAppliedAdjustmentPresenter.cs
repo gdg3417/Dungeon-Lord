@@ -27,7 +27,7 @@ namespace DungeonBuilder.M0
             }
 
             MvpPlacementEffectsSummary current = summary.PlacementEffects;
-            MvpPlacementEffectsSummary latest = summary.LatestRunPlacementEffects;
+            MvpPlacementEffectsSummary latest = summary.LatestRunConfiguredPlacementEffects;
             if (current == null || latest == null || !current.RuleResolved || !latest.RuleResolved)
             {
                 return null;

@@ -105,7 +105,8 @@ namespace DungeonBuilder.M0
                 SelectedStructureId = selectedSlot.HasValue ? selectedSlot.Value.StructureId ?? string.Empty : string.Empty,
                 DungeonPlacements = dungeonPlacements,
                 PlacementEffects = placementEffects,
-                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects),
+                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects, useReachedRouteEffects: true),
+                LatestRunConfiguredPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects, useReachedRouteEffects: false),
                 HasRunOutcome = hasRunOutcome,
                 LatestRunId = latestRun?.RunId ?? string.Empty,
                 RunSucceeded = latestRun != null && latestRun.Success,
@@ -164,20 +165,27 @@ namespace DungeonBuilder.M0
             return summary;
         }
 
-        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
+        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(
+            RunOutcomeRecord latestRun,
+            MvpPlacementEffectsSummary currentPlacementEffects,
+            bool useReachedRouteEffects)
         {
             if (latestRun == null) return currentPlacementEffects;
-            MvpPlacementEffectsSummary configured = latestRun.ConfiguredRoutePlacementEffects;
-            if (configured != null && configured.RuleResolved) return configured;
+            MvpPlacementEffectsSummary routeEffects = useReachedRouteEffects
+                ? latestRun.ReachedRoutePlacementEffects
+                : latestRun.ConfiguredRoutePlacementEffects;
+            if (routeEffects != null && routeEffects.RuleResolved) return routeEffects;
+
             RunCompositionOutcomeSummary composition = latestRun.CompositionOutcomeSummary;
-            if (composition != null)
-            {
-                MvpPlacementEffectsSummary legacy = composition.PlacementEffects;
-                return composition.RuleResolved && legacy != null && legacy.RuleResolved
-                    ? legacy
-                    : CreateEmptyResolvedPlacementEffects();
-            }
-            return configured != null ? CreateEmptyResolvedPlacementEffects() : currentPlacementEffects;
+            MvpPlacementEffectsSummary legacy = composition?.PlacementEffects;
+            if (composition != null && composition.RuleResolved && legacy != null && legacy.RuleResolved) return legacy;
+
+            bool hasExplicitRouteEvidence = latestRun.ReachedRoutePlacementEffects != null ||
+                latestRun.ConfiguredRoutePlacementEffects != null ||
+                latestRun.ClearedRewardPlacementEffects != null;
+            return hasExplicitRouteEvidence || composition != null
+                ? CreateEmptyResolvedPlacementEffects()
+                : currentPlacementEffects;
         }
 
         private static MvpPlacementEffectsSummary CreateEmptyResolvedPlacementEffects()

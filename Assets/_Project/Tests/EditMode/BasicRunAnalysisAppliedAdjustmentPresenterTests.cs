@@ -78,7 +78,8 @@ namespace DungeonBuilder.Tests.EditMode
                 HasRunOutcome = true,
                 AnalysisAdviceKey = recommendationKey,
                 PlacementEffects = current,
-                LatestRunPlacementEffects = latest
+                LatestRunPlacementEffects = latest,
+                LatestRunConfiguredPlacementEffects = latest
             };
         }
 

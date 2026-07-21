@@ -61,12 +61,12 @@ namespace DungeonBuilder.Tests.EditMode
                 Is.True);
             MvpPlayerLoopSummary adjustedSummary = original.Root.ResolveMvpPlayerLoopSummary();
             Assert.That(
-                EffectsDiffer(adjustedSummary.PlacementEffects, adjustedSummary.LatestRunPlacementEffects),
+                EffectsDiffer(adjustedSummary.PlacementEffects, adjustedSummary.LatestRunConfiguredPlacementEffects),
                 Is.True,
                 Snapshot.Capture(original.Root, _config).Describe());
             Assert.That(
-                adjustedSummary.PlacementEffects.Danger < adjustedSummary.LatestRunPlacementEffects.Danger ||
-                adjustedSummary.PlacementEffects.HeatPressure < adjustedSummary.LatestRunPlacementEffects.HeatPressure,
+                adjustedSummary.PlacementEffects.Danger < adjustedSummary.LatestRunConfiguredPlacementEffects.Danger ||
+                adjustedSummary.PlacementEffects.HeatPressure < adjustedSummary.LatestRunConfiguredPlacementEffects.HeatPressure,
                 Is.True,
                 Snapshot.Capture(original.Root, _config).Describe());
             BasicRunAnalysisAppliedAdjustmentResult adjustment =
