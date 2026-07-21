@@ -2285,6 +2285,15 @@ namespace DungeonBuilder.Tests.EditMode
             map["structure.risk_lab.basic.display_name"] = "Risk Lab";
             map["ui.mvp_label.structure.unknown"] = "Unknown structure";
             map["ui.mvp_loop.panel.title"] = "MVP Loop Summary";
+            map[MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}";
+            map[MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.";
+            map[MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}";
+            map[RunSimulationService.RouteClearedKey] = "Full route cleared.";
+            map[RunSimulationService.RouteStoppedRoomOneKey] = "Route stopped in Room 1.";
+            map[RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.";
+            map[RunSimulationService.RouteWipedKey] = "The adventurer party was wiped out.";
+            map[RunSimulationService.RouteRetreatedKey] = "The adventurer party retreated.";
+            map[RunSimulationService.RouteNoEncounterKey] = "No adventurers entered because the route has no active encounter.";
             map["ui.mvp_loop.section.adventurer_intent"] = "Expected next adventurer intent";
             map["ui.adventurer_intent.summary_format"] = "Expected next adventurer intent: {0} likely. Reason: {1}";
             map["ui.adventurer_intent.score_summary_format"] = "Intent scores: Cautious {0:0.#}, Balanced {1:0.#}, Greedy {2:0.#}";

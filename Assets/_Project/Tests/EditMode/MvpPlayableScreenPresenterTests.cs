@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using System.Collections.Generic;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -162,7 +163,8 @@ namespace DungeonBuilder.Tests.EditMode
                 AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
                 NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey,
                 PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 3 },
-                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 }
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 },
+                LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 }
             };
 
             string text = MvpPlayableScreenPresenter.BuildScreenText(
@@ -325,6 +327,21 @@ namespace DungeonBuilder.Tests.EditMode
             };
         }
 
+        [Test]
+        public void BuildScreenText_TwoRoomOutcomeAppearsInPlayableLatestResult()
+        {
+            MvpPlayerLoopSummary summary = BuildResearchSummary(null, string.Empty);
+            summary.HasResearchStatus = false; summary.HasRunOutcome = true; summary.ConfiguredRoomCount = 2; summary.ReachedRoomCount = 2;
+            summary.HighestRoomReached = 1; summary.FinalRouteOutcomeKey = RunSimulationService.RouteStoppedRoomTwoKey;
+            string text = MvpPlayableScreenPresenter.BuildScreenText(summary, new GuidedMvpActionPathSummary { RuleResolved = true },
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                string.Empty, string.Empty, new MvpFirstSessionObjectiveSummary { RuleResolved = true, IsComplete = true }, null, null, Localize);
+            Assert.That(text, Does.Contain("Route result: Route stopped in Room 2."));
+            Assert.That(text, Does.Contain("Depth reached: Room 2."));
+            Assert.That(text, Does.Not.Contain("run.route"));
+            Assert.That(text, Does.Not.Contain("{0"));
+        }
+
         private static MvpPlayerLoopSummary BuildResearchSummary(PlayerResearchAuthoritySummary authority, string statusKey)
         {
             return new MvpPlayerLoopSummary
@@ -366,6 +383,22 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static readonly Dictionary<string, string> Strings = new Dictionary<string, string>
         {
+            [MvpLoopSummaryPanelPresenter.TitleKey] = "MVP Loop Summary",
+            [MvpLoopSummaryPanelPresenter.SectionLineFormatKey] = "{0}: {1}",
+            [MvpLoopSummaryPanelPresenter.CurrentDungeonSectionKey] = "Current Dungeon",
+            [MvpLoopSummaryPanelPresenter.AdventurerIntentSectionKey] = "Expected next adventurer intent",
+            [MvpLoopSummaryPanelPresenter.AdventurerPressureSectionKey] = "Adventurer pressure",
+            [MvpLoopSummaryPanelPresenter.LatestRunSectionKey] = "Latest Adventurer Visit",
+            [MvpLoopSummaryPanelPresenter.WhyItHappenedSectionKey] = "Why It Happened",
+            [MvpLoopSummaryPanelPresenter.RewardsAndRiskSectionKey] = "Rewards and Risk",
+            [MvpLoopSummaryPanelPresenter.ResearchSectionKey] = "Research",
+            [MvpLoopSummaryPanelPresenter.SuggestedNextActionSectionKey] = "Suggested Next Action",
+            [MvpLoopSummaryPanelPresenter.WhyRunFormatKey] = "Main reason: {0}.",
+            [MvpLoopSummaryPanelPresenter.WhyMixedKey] = "the current placement mix shaped the result",
+            [MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}",
+            [MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.",
+            [MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}",
+            [RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.",
 
             [MvpPrimaryNextActionPresenter.CompactLineFormatKey] = "Next: {0} ({1})",
             [MvpPrimaryNextActionPresenter.SourceFirstContractKey] = "First Dungeon Contract",
@@ -406,6 +439,10 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.LatestResultFormatKey] = "{0}; {1}; {2}; {3}; {4}",
             [MvpPlayableScreenPresenter.LatestResultNoRunKey] = "No adventurer visit yet. Use Run / observe dungeon after the path is ready.",
             [MvpPlayableScreenPresenter.CurrentHeatFormatKey] = "Current heat: {0:0.##} ({1}).",
+            [MvpPlayableScreenPresenter.AnalysisFormatKey] = "Analysis: {0}",
+            [AdventurerTrafficPressurePresenter.SummaryFormatKey] = "Adventurer traffic: {0}. Estimated active delves: {1}. Reason: {2}.",
+            ["ui.adventurer_traffic.band.none"] = "none",
+            [AdventurerTrafficPressureResolver.ReasonFallbackKey] = "current dungeon signals are still forming",
             [MvpPlayableScreenPresenter.TitleKey] = "Dungeon Command (MVP Loop Summary)",
             [MvpPlayableScreenPresenter.TopStatusKey] = "Top Status",
             [MvpPlayableScreenPresenter.CurrentDungeonKey] = "Current Dungeon",

@@ -21,6 +21,19 @@ namespace DungeonBuilder.M0
             return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config), config);
         }
 
+        public static MvpPlacementEffectsSummary ResolveConfiguredRouteForSave(SaveData save, RunSimulationConfig config)
+        {
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, config);
+            var placements = new List<MvpDungeonPlacementEntry>();
+            for (int i = 0; i < route.Length; i++) placements.AddRange(route[i].ToOrderedPlacements());
+            return Resolve(placements.ToArray(), config);
+        }
+
+        public static MvpPlacementEffectsSummary ResolvePlacements(MvpDungeonPlacementEntry[] orderedPlacements, RunSimulationConfig config)
+        {
+            return Resolve(orderedPlacements, config);
+        }
+
         private static MvpPlacementEffectsSummary Resolve(MvpDungeonPlacementEntry[] orderedPlacements, RunSimulationConfig config)
         {
             var summary = new MvpPlacementEffectsSummary

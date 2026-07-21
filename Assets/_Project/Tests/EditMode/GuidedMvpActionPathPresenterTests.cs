@@ -292,6 +292,12 @@ namespace DungeonBuilder.Tests.EditMode
                     RuleResolved = true,
                     Danger = latestDanger,
                     PathCapacity = 1
+                },
+                LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary
+                {
+                    RuleResolved = true,
+                    Danger = latestDanger,
+                    PathCapacity = 1
                 }
             };
         }

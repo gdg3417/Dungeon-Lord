@@ -87,6 +87,8 @@ namespace DungeonBuilder.M0
 
             AppendSection(builder, localize, LatestResultKey);
             AppendLine(builder, BuildLatestResultLine(summary, localize));
+            string routeResult = MvpRouteResultPresenter.BuildCompactText(summary, localize);
+            if (!string.IsNullOrWhiteSpace(routeResult)) AppendLine(builder, routeResult);
             string appliedAdjustmentLine = BasicRunAnalysisAppliedAdjustmentPresenter.BuildAppliedAdjustmentLine(summary, localize);
             if (!string.IsNullOrWhiteSpace(appliedAdjustmentLine)) AppendLine(builder, appliedAdjustmentLine);
             AppendLine(builder, Localize(localize, DetailsHintKey));

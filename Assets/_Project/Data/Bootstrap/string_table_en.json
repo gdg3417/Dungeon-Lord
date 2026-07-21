@@ -2382,6 +2382,50 @@
     {
       "key": "ui.dev.player_research_authority_format",
       "text": "Player Research Authority \u2014 state={0} canStart={1} canClaimLocalMvp={2} canClaimProduction={3} localAuthority={4} productionVerificationAvailable={5} wouldCallServer={6} feedbackKey={7}"
+    },
+    {
+      "key": "run.route.outcome.cleared",
+      "text": "Full route cleared."
+    },
+    {
+      "key": "run.route.outcome.stopped_room_one",
+      "text": "Route stopped in Room 1."
+    },
+    {
+      "key": "run.route.outcome.stopped_room_two",
+      "text": "Route stopped in Room 2."
+    },
+    {
+      "key": "run.route.outcome.wiped",
+      "text": "The adventurer party was wiped out."
+    },
+    {
+      "key": "run.route.outcome.retreated",
+      "text": "The adventurer party retreated."
+    },
+    {
+      "key": "ui.mvp_loop.route.result_format",
+      "text": "Route result: {0}"
+    },
+    {
+      "key": "ui.mvp_loop.route.depth_format",
+      "text": "Depth reached: {0}."
+    },
+    {
+      "key": "ui.mvp_loop.route.room_number_format",
+      "text": "Room {0}"
+    },
+    {
+      "key": "run.route.outcome.no_encounter",
+      "text": "No adventurers entered because the route has no active encounter."
+    },
+    {
+      "key": "run.reason.party_wiped",
+      "text": "The adventurer party was wiped out."
+    },
+    {
+      "key": "run.reason.no_encounter",
+      "text": "The route has no active encounter or reward content."
     }
   ]
 }

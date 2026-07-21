@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
     public sealed class MvpDungeonRoomInstance
     {
+        public int FloorIndex;
+        public int RoomIndex;
         public string RoomOptionId;
         public MvpRoomSlotCapacity Capacity;
         public string[] AssignedMonsterOptionIds = Array.Empty<string>();
@@ -72,7 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             MvpRoomSlotCapacity basicCapacity = ResolveCapacity(MvpDungeonPlacementIds.BasicRoomOptionId, config);
             var rooms = new List<MvpDungeonRoomInstance>
             {
-                new MvpDungeonRoomInstance { RoomOptionId = roomId, Capacity = primaryCapacity }
+                new MvpDungeonRoomInstance { FloorIndex = 0, RoomIndex = 0, RoomOptionId = roomId, Capacity = primaryCapacity }
             };
 
             string monsterId = byCategory.TryGetValue(MvpDungeonPlacementIds.MonsterCategoryId, out MvpDungeonPlacementEntry monster) ? monster.OptionId : string.Empty;
@@ -82,7 +84,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             Assign(rooms[0], monsterId, trapId, lootId);
             if (!string.IsNullOrWhiteSpace(lootId) && rooms[0].AssignedLootNodeOptionIds.Length == 0 && basicCapacity.LootCapacity > 0)
             {
-                var fallback = new MvpDungeonRoomInstance { RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, Capacity = basicCapacity };
+                var fallback = new MvpDungeonRoomInstance { FloorIndex = 0, RoomIndex = 1, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, Capacity = basicCapacity };
                 Assign(fallback, string.Empty, string.Empty, lootId);
                 rooms.Add(fallback);
             }
@@ -317,7 +319,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             }
 
             MvpDungeonRoomInstance[] rooms = assignedRooms
-                .Where(room => room != null && room.FloorIndex == 0 && room.RoomIndex >= 0)
+                .Where(room => room != null && room.FloorIndex == 0 && room.RoomIndex >= 0 && room.RoomIndex <= MvpSecondRoomSlotIndex)
                 .GroupBy(room => room.RoomIndex)
                 .OrderBy(group => group.Key)
                 .Select(group => group.Last())
@@ -327,6 +329,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                     MvpRoomSlotCapacity capacity = ResolveCapacity(roomOptionId, config);
                     return new MvpDungeonRoomInstance
                     {
+                        FloorIndex = room.FloorIndex,
+                        RoomIndex = room.RoomIndex,
                         RoomOptionId = roomOptionId,
                         Capacity = capacity,
                         AssignedMonsterOptionIds = Clamp(Normalize(room.MonsterOptionIds, MvpDungeonPlacementIds.MonsterCategoryId), capacity.MonsterCapacity),
@@ -336,35 +340,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 })
                 .ToArray();
 
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedMonsterOptionIds, (room, values) => room.AssignedMonsterOptionIds = values);
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedTrapOptionIds, (room, values) => room.AssignedTrapOptionIds = values);
-            RemoveAssignmentsAfterFirstAssignedRoom(rooms, room => room.AssignedLootNodeOptionIds, (room, values) => room.AssignedLootNodeOptionIds = values);
-
             return rooms.Length == 0 ? null : new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms };
-        }
-
-        private static void RemoveAssignmentsAfterFirstAssignedRoom(
-            MvpDungeonRoomInstance[] rooms,
-            Func<MvpDungeonRoomInstance, string[]> getAssignments,
-            Action<MvpDungeonRoomInstance, string[]> setAssignments)
-        {
-            bool foundAssignedRoom = false;
-            foreach (MvpDungeonRoomInstance room in rooms)
-            {
-                string[] assignments = getAssignments(room);
-                if (assignments == null || assignments.Length == 0)
-                {
-                    continue;
-                }
-
-                if (foundAssignedRoom)
-                {
-                    setAssignments(room, Array.Empty<string>());
-                    continue;
-                }
-
-                foundAssignedRoom = true;
-            }
         }
 
         private static bool CanAccept(MvpDungeonRoomInstance room, string categoryId)

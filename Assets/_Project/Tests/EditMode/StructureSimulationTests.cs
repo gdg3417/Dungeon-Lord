@@ -2,6 +2,7 @@
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using System.Reflection;
@@ -440,6 +441,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally
             {
                 UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void MvpActiveLoop_TwoEmptyRoomsRejectBeforeStructureTickOrStateMutation()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            var save = new SaveData { dungeonLayout = layout, totalTicks = 9, structureRuntime = new StructureRuntimeState { ManaReserve = 4d, Heat = 12d },
+                runHistory = new RunHistoryState { NextRunSequence = 3 }, completedObjectives = new CompletedObjectiveState(),
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection { Rooms = new System.Collections.Generic.List<MvpRoomSlotAssignmentState> {
+                    new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 0, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId },
+                    new MvpRoomSlotAssignmentState { FloorIndex = 0, RoomIndex = 1, RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId } } } };
+            using (GameRootTestHarness harness = CreateMvpLoopHarness(save, includeStructurePass: true))
+            {
+                bool didRun = harness.Root.SimulateMvpActiveLoopOnce(out bool didApplyStructureTick);
+                Assert.That(didRun, Is.False); Assert.That(didApplyStructureTick, Is.False);
+                Assert.That(save.totalTicks, Is.EqualTo(9)); Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(4d));
+                Assert.That(save.structureRuntime.Heat, Is.EqualTo(12d)); Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(3));
+                Assert.That(save.runHistory.RecentOutcomes, Is.Empty); Assert.That(harness.Root.LastRunRejectionReasonKey, Is.EqualTo(RunSimulationService.RouteNoEncounterKey));
             }
         }
 

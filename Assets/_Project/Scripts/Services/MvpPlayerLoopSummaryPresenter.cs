@@ -41,7 +41,7 @@ namespace DungeonBuilder.M0
             RunOutcomeRecord latestRun = GetLatestRun(save.runHistory);
             DungeonSlot? selectedSlot = GetSelectedSlot(save.dungeonLayout);
             MvpDungeonPlacementEntry[] dungeonPlacements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, runConfig);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, runConfig);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save, runConfig);
             double currentMana = runtime?.ManaReserve ?? 0d;
             double currentHeat = runtime?.Heat ?? 0d;
 
@@ -105,10 +105,17 @@ namespace DungeonBuilder.M0
                 SelectedStructureId = selectedSlot.HasValue ? selectedSlot.Value.StructureId ?? string.Empty : string.Empty,
                 DungeonPlacements = dungeonPlacements,
                 PlacementEffects = placementEffects,
-                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects),
+                LatestRunPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects, useReachedRouteEffects: true),
+                LatestRunConfiguredPlacementEffects = ResolveLatestRunPlacementEffects(latestRun, placementEffects, useReachedRouteEffects: false),
                 HasRunOutcome = hasRunOutcome,
                 LatestRunId = latestRun?.RunId ?? string.Empty,
                 RunSucceeded = latestRun != null && latestRun.Success,
+                FinalRouteOutcomeKey = latestRun?.FinalRouteOutcomeKey ?? string.Empty,
+                HighestRoomReached = latestRun?.HighestRoomReached ?? -1,
+                ReachedRoomCount = latestRun?.ReachedRoomCount ?? 0,
+                ConfiguredRoomCount = latestRun?.ConfiguredRoomCount ?? 0,
+                ClearedRoomCount = latestRun?.ClearedRoomCount ?? 0,
+                RoomResolutions = latestRun?.RoomResolutions ?? Array.Empty<RunRoomResolutionSummary>(),
                 ManaReserve = currentMana,
                 LootGeneratedWorldValue = generatedWorldValue,
                 LootExtractedWorldValue = extractedWorldValue,
@@ -158,21 +165,27 @@ namespace DungeonBuilder.M0
             return summary;
         }
 
-        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(RunOutcomeRecord latestRun, MvpPlacementEffectsSummary currentPlacementEffects)
+        private static MvpPlacementEffectsSummary ResolveLatestRunPlacementEffects(
+            RunOutcomeRecord latestRun,
+            MvpPlacementEffectsSummary currentPlacementEffects,
+            bool useReachedRouteEffects)
         {
-            RunCompositionOutcomeSummary composition = latestRun?.CompositionOutcomeSummary;
-            if (composition == null)
-            {
-                return currentPlacementEffects;
-            }
+            if (latestRun == null) return currentPlacementEffects;
+            MvpPlacementEffectsSummary routeEffects = useReachedRouteEffects
+                ? latestRun.ReachedRoutePlacementEffects
+                : latestRun.ConfiguredRoutePlacementEffects;
+            if (routeEffects != null && routeEffects.RuleResolved) return routeEffects;
 
-            MvpPlacementEffectsSummary stored = composition.PlacementEffects;
-            if (composition.RuleResolved && stored != null && stored.RuleResolved)
-            {
-                return stored;
-            }
+            RunCompositionOutcomeSummary composition = latestRun.CompositionOutcomeSummary;
+            MvpPlacementEffectsSummary legacy = composition?.PlacementEffects;
+            if (composition != null && composition.RuleResolved && legacy != null && legacy.RuleResolved) return legacy;
 
-            return CreateEmptyResolvedPlacementEffects();
+            bool hasExplicitRouteEvidence = latestRun.ReachedRoutePlacementEffects != null ||
+                latestRun.ConfiguredRoutePlacementEffects != null ||
+                latestRun.ClearedRewardPlacementEffects != null;
+            return hasExplicitRouteEvidence || composition != null
+                ? CreateEmptyResolvedPlacementEffects()
+                : currentPlacementEffects;
         }
 
         private static MvpPlacementEffectsSummary CreateEmptyResolvedPlacementEffects()

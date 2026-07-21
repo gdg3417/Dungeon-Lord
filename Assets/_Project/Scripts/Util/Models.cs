@@ -456,6 +456,32 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public sealed class RunRoomResolutionSummary
+    {
+        public int FloorIndex;
+        public int RoomIndex;
+        public string RoomOptionId;
+        public bool Reached;
+        public bool Cleared;
+        public int PartyEntering;
+        public int SurvivorsLeaving;
+        public int Deaths;
+        public bool StoppedRoute;
+        public string StopReasonKey;
+        public MvpPlacementEffectsSummary LocalPlacementEffects;
+        public int GeneratedLootValue;
+        public int CarriedLootValueAfterRoom;
+        public int LootLostInRoom;
+        public double LocalHeatPressureDelta;
+        public double CasualtyPressureHeatDelta;
+        public double CasualtyPressure;
+        public double CasualtyLootExtractionPenalty;
+        public double ManaPressureCost;
+        public int DeterministicSeed;
+        public string RuleSourceId;
+    }
+
+    [Serializable]
     public sealed class RunOutcomeRecord
     {
         public string RunId;
@@ -486,6 +512,15 @@ namespace DungeonBuilder.M0
         public RunHeatApplicationSummary RunHeatApplicationSummary;
         public RunCompositionOutcomeSummary CompositionOutcomeSummary;
         public string RunPostureId;
+        public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
+        public int HighestRoomReached = -1;
+        public int ClearedRoomCount;
+        public int ReachedRoomCount;
+        public int ConfiguredRoomCount;
+        public string FinalRouteOutcomeKey;
+        public MvpPlacementEffectsSummary ConfiguredRoutePlacementEffects;
+        public MvpPlacementEffectsSummary ReachedRoutePlacementEffects;
+        public MvpPlacementEffectsSummary ClearedRewardPlacementEffects;
     }
 
     [Serializable]
@@ -734,9 +769,16 @@ namespace DungeonBuilder.M0
         public MvpDungeonPlacementEntry[] DungeonPlacements = Array.Empty<MvpDungeonPlacementEntry>();
         public MvpPlacementEffectsSummary PlacementEffects = new MvpPlacementEffectsSummary();
         public MvpPlacementEffectsSummary LatestRunPlacementEffects = new MvpPlacementEffectsSummary();
+        public MvpPlacementEffectsSummary LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary();
         public bool HasRunOutcome = false;
         public string LatestRunId;
         public bool RunSucceeded = false;
+        public string FinalRouteOutcomeKey;
+        public int HighestRoomReached = -1;
+        public int ReachedRoomCount = 0;
+        public int ConfiguredRoomCount = 0;
+        public int ClearedRoomCount = 0;
+        public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
         public double ManaReserve = 0d;
         public int LootGeneratedWorldValue = 0;
         public int LootExtractedWorldValue = 0;

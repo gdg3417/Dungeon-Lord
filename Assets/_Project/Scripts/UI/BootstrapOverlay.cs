@@ -1426,7 +1426,8 @@ namespace DungeonBuilder.M0
                 },
                 () => _root.ResolveMvpPlayerLoopSummary(),
                 postureId => _root.SimulateMvpActiveLoopOnce(out _, postureId),
-                message => _root.SetBanner(message)));
+                message => _root.SetBanner(message),
+                () => _root.LastRunRejectionReasonKey));
         }
 
         private void ShowPlacementBanner(string structureId)

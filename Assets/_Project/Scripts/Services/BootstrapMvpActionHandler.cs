@@ -12,13 +12,15 @@ namespace DungeonBuilder.M0
                 Func<string, string, PlacementAttempt> placeOrModifySelectedPlacement,
                 Func<MvpPlayerLoopSummary> resolveMvpPlayerLoopSummary,
                 Func<string, bool> simulateMvpActiveLoopOnce,
-                Action<string> setBanner)
+                Action<string> setBanner,
+                Func<string> resolveRunRejectionReasonKey = null)
             {
                 Localize = localize;
                 PlaceOrModifySelectedPlacement = placeOrModifySelectedPlacement;
                 ResolveMvpPlayerLoopSummary = resolveMvpPlayerLoopSummary;
                 SimulateMvpActiveLoopOnce = simulateMvpActiveLoopOnce;
                 SetBanner = setBanner;
+                ResolveRunRejectionReasonKey = resolveRunRejectionReasonKey;
             }
 
             public Func<string, string, string> Localize { get; }
@@ -26,6 +28,7 @@ namespace DungeonBuilder.M0
             public Func<MvpPlayerLoopSummary> ResolveMvpPlayerLoopSummary { get; }
             public Func<string, bool> SimulateMvpActiveLoopOnce { get; }
             public Action<string> SetBanner { get; }
+            public Func<string> ResolveRunRejectionReasonKey { get; }
         }
 
         public readonly struct PlacementAttempt
@@ -152,7 +155,8 @@ namespace DungeonBuilder.M0
                 didRun,
                 Localize);
             string feedback = string.Concat(postureSource, " ", resultFeedback);
-            string banner = Localize(didRun ? "ui.banner.run_simulated" : "ui.banner.run_sim_failed");
+            string rejectionKey = !didRun ? _context.ResolveRunRejectionReasonKey?.Invoke() : string.Empty;
+            string banner = Localize(didRun ? "ui.banner.run_simulated" : !string.IsNullOrWhiteSpace(rejectionKey) ? rejectionKey : "ui.banner.run_sim_failed");
             _context.SetBanner?.Invoke(banner);
             return new RunResult(didRun, feedback, intentSummary, runPostureId, selectedDebugPostureId, fallbackUsed, banner);
         }

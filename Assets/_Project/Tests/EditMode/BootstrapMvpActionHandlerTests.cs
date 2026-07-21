@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using System;
 using System.Collections.Generic;
 using DungeonBuilder.M0;
@@ -169,6 +170,19 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(playerScroll, Is.EqualTo(3));
         }
 
+        [Test]
+        public void RunOrObserveDungeon_NoEncounterUsesSpecificLocalizedBanner()
+        {
+            var handler = new BootstrapMvpActionHandler(new BootstrapMvpActionHandler.Context(
+                Localize, (category, option) => default, () => _beforeSummary, posture => false,
+                message => _banner = message, () => RunSimulationService.RouteNoEncounterKey));
+            BootstrapMvpActionHandler.RunResult result = handler.RunOrObserveDungeon(RunPostureResolver.BalancedId);
+            Assert.That(result.DidRun, Is.False);
+            Assert.That(result.BannerMessage, Is.EqualTo("Add active encounter or reward content before observing a route."));
+            Assert.That(_banner, Is.EqualTo(result.BannerMessage));
+            Assert.That(_banner, Does.Not.Contain("run.route"));
+        }
+
         private BootstrapMvpActionHandler CreateHandler(Func<string, string, BootstrapMvpActionHandler.PlacementAttempt> place = null)
         {
             return new BootstrapMvpActionHandler(new BootstrapMvpActionHandler.Context(
@@ -208,6 +222,7 @@ namespace DungeonBuilder.Tests.EditMode
                 ["ui.banner.place_success"] = "Placement succeeded.",
                 ["ui.banner.run_simulated"] = "Run simulated.",
                 ["ui.banner.run_sim_failed"] = "Run failed.",
+                [RunSimulationService.RouteNoEncounterKey] = "Add active encounter or reward content before observing a route.",
                 [MvpStructurePlacementFeedbackPresenter.EmptySlotKey] = "Empty slot",
                 [MvpStructurePlacementFeedbackPresenter.EmptyPlacementValueKey] = "Empty",
                 [MvpStructurePlacementFeedbackPresenter.RoomTargetedPlacementChangedFormatKey] = "Changed Room {0} {1}: {2} -> {3}.",
