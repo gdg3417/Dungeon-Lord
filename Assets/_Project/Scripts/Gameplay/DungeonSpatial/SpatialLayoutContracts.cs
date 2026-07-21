@@ -100,7 +100,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static FloorRouteNode CopyNode(FloorRouteNode node) => node == null ? null : new FloorRouteNode
         {
-            NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId
+            NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId ?? string.Empty
         };
 
         private static CorridorEdge CopyEdge(CorridorEdge edge) => edge == null ? null : new CorridorEdge
@@ -108,7 +108,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             EdgeId = edge.EdgeId, CorridorDefinitionId = edge.CorridorDefinitionId, FloorId = edge.FloorId,
             SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
             Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
-            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId
+            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty
         };
     }
 

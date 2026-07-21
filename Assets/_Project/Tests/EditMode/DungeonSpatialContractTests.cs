@@ -53,10 +53,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             FloorSpatialLayout layout = FloorLayoutValidatorTests.ValidLayout();
             layout.Rooms = layout.Rooms.Reverse().ToArray(); layout.Nodes = layout.Nodes.Reverse().ToArray(); layout.Edges = layout.Edges.Reverse().ToArray();
             FloorSpatialLayout canonical = layout.Canonicalized();
+            Assert.That(canonical.Nodes.Where(x => x.Kind != FloorRouteNodeKind.Room).Select(x => x.RoomInstanceId), Is.All.EqualTo(string.Empty));
+            Assert.That(canonical.Edges.Where(x => x.Classification == RouteClassification.Required).Select(x => x.OptionalBranchId), Is.All.EqualTo(string.Empty));
             string json = JsonUtility.ToJson(canonical);
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(json);
             AssertLayoutsEqual(canonical, restored);
             Assert.That(FloorLayoutValidator.Validate(restored, FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).IsValid, Is.True);
+        }
+
+        [Test]
+        public void Canonicalization_NormalizesOnlyCopyOptionalStrings_WithoutChangingValidation()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            FloorRouteNode sourceEntrance = source.Nodes.Single(x => x.Kind == FloorRouteNodeKind.Entrance);
+            CorridorEdge sourceRequiredEdge = source.Edges.Single(x => x.EdgeId == "edge.0");
+            Assert.That(sourceEntrance.RoomInstanceId, Is.Null);
+            Assert.That(sourceRequiredEdge.OptionalBranchId, Is.Null);
+            string[] sourceIssues = FloorLayoutValidator.Validate(source, FloorLayoutValidatorTests.Configuration(),
+                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).Issues
+                .Select(IssueKey).ToArray();
+
+            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorSpatialLayout canonicalAgain = canonical.Canonicalized();
+
+            Assert.That(sourceEntrance.RoomInstanceId, Is.Null);
+            Assert.That(sourceRequiredEdge.OptionalBranchId, Is.Null);
+            Assert.That(canonical.Nodes.Single(x => x.NodeId == sourceEntrance.NodeId).RoomInstanceId, Is.EqualTo(string.Empty));
+            Assert.That(canonical.Edges.Single(x => x.EdgeId == sourceRequiredEdge.EdgeId).OptionalBranchId, Is.EqualTo(string.Empty));
+            Assert.That(canonical.Nodes.Single(x => x.NodeId == sourceEntrance.NodeId), Is.Not.SameAs(sourceEntrance));
+            Assert.That(canonical.Edges.Single(x => x.EdgeId == sourceRequiredEdge.EdgeId), Is.Not.SameAs(sourceRequiredEdge));
+            Assert.That(JsonUtility.ToJson(canonicalAgain), Is.EqualTo(JsonUtility.ToJson(canonical)));
+            CollectionAssert.AreEqual(sourceIssues, FloorLayoutValidator.Validate(canonical, FloorLayoutValidatorTests.Configuration(),
+                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).Issues.Select(IssueKey).ToArray());
         }
 
         [Test]
@@ -106,6 +134,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(expected.Edges[index].Footprint.OccupiedTiles, actual.Edges[index].Footprint.OccupiedTiles);
             }
         }
+
+        private static string IssueKey(FloorLayoutValidationIssue issue) =>
+            $"{(int)issue.Reason}|{issue.SubjectId}|{issue.RelatedId}|{issue.HasCoordinate}|{issue.Coordinate.X}|{issue.Coordinate.Y}";
 
         private static RoomSpatialDefinition Definition(string id, TileCoordinate[] reserved, int monster, int trap, int loot) => new RoomSpatialDefinition
         { RoomDefinitionId = id, GrossFootprint = new RectangularFootprintDefinition(2, 2), ReservedTileOffsets = reserved, MonsterCapacity = monster, TrapCapacity = trap, LootCapacity = loot };
