@@ -174,9 +174,9 @@ Source authority: [What is the smallest version of Dungeon Builder that proves t
 | Dungeon core | Partial; prototype core loop exists, exact locked-scope closure requires confirmation | Validate integration with spatial progression and final journey | 1-9 | Required |
 | One main dungeon | Partial; current prototype operates one simple dungeon/layout | Complete spatial construction, multi-floor progression and editor | 1-9 | Required |
 | Up to five floors | Remaining beyond current one-floor prototype; GD60 is an ordered two-room route, not multi-floor evidence | Floor 2 foundation, then configured Floors 3-5 and final validation | 6, 8, 9 | Required; maximum is five |
-| Undead monster family | Partial or requires confirmation; starter content is not evidence of full launch-family breadth | Author/validate launch family and one allowed boss set | 8, 9 | Required |
-| Goblinoid monster family | Requires confirmation | Author/validate launch family and one allowed boss set | 8, 9 | Required |
-| One boss set per launch family | Remaining/requires confirmation | At most one boss set for Undead and one for Goblinoid | 8, 9 | Required where the locked family scope calls for bosses; sets beyond one per family excluded |
+| Undead monster family | Partial or requires confirmation; starter content is not evidence of full launch-family breadth | Author and validate the launch family | 8, 9 | Required |
+| Goblinoid monster family | Requires confirmation | Author and validate the launch family | 8, 9 | Required |
+| Boss-set constraint | Optional content; no boss-set completion evidence is asserted | If another authoritative content specification requires a boss set, validate it without exceeding the cap | 8, 9 | Not independently required; no more than one boss set per monster family |
 | Mana generation | Partial; prototype mana feedback/simulation exists | Confirm locked formulas, integration and final journey evidence | 4, 9 | Required |
 | Idle offline mana | Partial or requires confirmation; no completion claim from GD61 | Complete and evidence calculation before final validation | 4, 9 | Required |
 | Peace, Notice and Concern heat states | Partial; prototype heat system exists, exact three-state journey evidence requires confirmation | Validate only the three locked MVP states | 8, 9 | Required; more than three excluded |
@@ -186,6 +186,8 @@ Source authority: [What is the smallest version of Dungeon Builder that proves t
 | One Mana Farm sub-dungeon | Remaining; historical planning deferred it until core-loop stability | Implement one type after main spatial and construction economy stabilize | 8, 9 | Required; more than one excluded |
 
 **Locked explicit MVP exclusions:** prestige; seasonal events; PvP or leaderboards; hero adventurers; more than one sub-dungeon; advanced diplomacy; more than three heat states; and boss sets beyond one per family. GD61 does not amend these exclusions.
+
+**Boss-set constraint:** The MVP may include no more than one boss set per monster family. A boss set is not independently required unless another authoritative content specification explicitly requires it.
 
 ## 8. Genuine open decisions (owners and decision gates)
 
