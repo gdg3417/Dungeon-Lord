@@ -6,7 +6,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 Main is merged through PR #158 / GD60. GD61 is a documentation-only planning reset that reconciles the prototype with the historical sprint plans and defines spatial floor construction before implementation begins.
 
-The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet implement physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI.
+The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet implement physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
 
 Normal play still depends on the temporary Bootstrap overlay and simple MVP screen. These are validation surfaces, not the intended production editor, and will be replaced only after spatial contracts and editing behavior stabilize.
 

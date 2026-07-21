@@ -7,7 +7,7 @@
 | Status | **Locked candidate** — approved system decisions; numeric tuning and unresolved policies remain content/design gates |
 | Scope | Floor capacity, tile footprints, rooms, corridors, entrances/exits, route graphs, branching, layout validity, progression and performance |
 | Primary goal | Make dungeon construction spatial, strategically legible, deterministic and saveable without exceeding mobile-safe bounds |
-| Invariants referenced | INV-01 deterministic simulation; INV-02 data-owned tuning; INV-03 stable saves; new INV-38 |
+| Invariants referenced | INV-04 stable IDs/content-owned tuning; INV-06 modifier order; INV-12 dungeon-edit save safety; INV-15 spatial validity |
 | Related specs | 01, 09, 15, 17, 19, 28, 30, 36, 37; Architecture research spec |
 
 # 1. Purpose and authority
@@ -22,7 +22,7 @@ Define the missing spatial contract between authored construction content, saved
 - **Blocked/reserved internal area:** footprint tiles unavailable for ordinary contents because of structure or environment.
 - **Usable placement area:** gross internal area minus blocked/reserved area under authored rules.
 - **Content-specific capacity:** independently authored monster, trap and loot capacity; it is not inferred solely from area.
-- **Floor-space cost / space units:** an optional player-facing, configured summary projection of physical consumption.
+- **Floor-space cost / space units:** the required player-facing, configured capacity consumption of every buildable room and corridor, derived from or validated against physical footprint rules.
 - **Node:** entrance, room, exit/descent, or completion vertex.
 - **Edge/corridor:** a structural connection between valid same-floor endpoints.
 - **Required route:** connectivity that must reach a valid terminal.
@@ -31,9 +31,9 @@ Define the missing spatial contract between authored construction content, saved
 
 # 3. Capacity model
 
-Each active floor has configured base capacity. Later floors generally have greater base capacity, but exact values are authored. Final capacity may be modified by Architecture research, mana-funded expansion, floor upgrades, and content/theme modifiers through Spec 30 ordering.
+Each active floor exposes configured final floor-space capacity plus deterministically calculated used and remaining capacity. Later floors generally have greater configured base capacity, but exact values are authored. Final capacity may be modified by Architecture research, mana-funded expansion, floor upgrades, and content/theme modifiers through INV-06 and Spec 30 ordering. Every buildable room and corridor exposes a configured floor-space cost.
 
-The physical footprint is the source of truth for occupancy and overlap. Used capacity is deterministically derived from active room/corridor footprints under configured accounting rules. Remaining capacity is final capacity minus used capacity. A displayed floor-space cost may aggregate or translate that physical consumption for comprehension, but it must be a configured projection with explicit units/rounding and validation against the same underlying footprint. It must never become a second independently editable capacity authority.
+The physical footprint is the source of truth for geometry, fit, occupancy and overlap. Required floor-space costs are derived from or validated against the same authored footprint rules. Used capacity is the deterministic total of active structure costs under configured accounting rules; remaining capacity is final capacity minus used capacity. The UI must eventually display final, used and remaining floor-space capacity and each prospective structure cost. Values, conversion rules, coefficients and rounding rules are content-owned and tunable under INV-04. Floor-space values must never become a second geometry authority.
 
 Capacity increases expand construction possibility; they do not silently relocate existing structures. Content-limit reductions must be handled gracefully: preserve readable saved state, mark invalid/excess state explicitly, prevent worsening edits, and offer a deterministic repair path rather than deleting content silently.
 
@@ -62,9 +62,9 @@ The MVP may author one simple corridor type. Its endpoints must exist, permit th
 
 # 6. Floor route graph
 
-Every active floor graph contains exactly the configured/allowed entrance semantics, room nodes, structural edges, and an exit/descent or completion terminal appropriate to its role. Every active room must be reachable from the floor entrance using valid same-floor edges. Descending and later returning is never required to reach a room. Disconnected active rooms are invalid in the MVP; a future secret-room rule would require an explicit spec amendment.
+Every active MVP floor has exactly one entrance node. Every active room must be reachable from that floor's entrance through a path entirely contained on that floor. Reaching a room must never require descending to another floor and returning. Branches and alternate paths are allowed, but disconnected active rooms are invalid for the MVP. Multiple entrances remain deferred. Future secret-room or alternate-entry rules require an explicit specification amendment and are not MVP behavior.
 
-Every required path leads to a valid exit, descent or completion node. A non-final active floor generally places a descent/exit at the logical end of its required route. Surviving adventurers and the defined run state transfer there to the next floor; a future choice may allow exit instead. The final floor uses a dungeon-exit or run-completion condition. Alternate exits, shortcuts, escape routes, portals and secret transitions are extensibility points, not MVP behavior.
+Every required path leads to a valid exit, descent or completion terminal. Once multiple floors exist, a non-final floor generally ends at a terminal where adventurers may choose either to exit the dungeon and end the run with the defined survivors, loot and run state, or to descend and carry the defined survivors and run state to the next floor. The exact choice formula and transferred state are Phase 6 design gates. The final active floor uses an exit or run-completion terminal. Shortcuts, escape routes, portals and secret transitions remain future extensibility points.
 
 Graph serialization uses stable IDs and canonical deterministic ordering independent of map/dictionary enumeration or UI selection order. Route resolution and summaries consume this canonical order and explicit tie-break rules.
 
@@ -91,7 +91,7 @@ A committed active layout is valid only when all apply:
 11. Removing/replacing a room explicitly resolves contained monsters, traps, loot and connected corridors under an approved deterministic policy; nothing is silently orphaned.
 12. Saved state uses stable IDs, canonical ordering and versioned migration.
 
-**INV-38:** Every active dungeon floor must remain within its configured spatial capacity, and every active room must be reachable from that floor's entrance through a valid saved same-floor route graph.
+**INV-15:** Every active dungeon floor must remain within its configured spatial capacity, and every active room must be reachable from that floor's entrance through a valid saved same-floor route graph.
 
 Validation is deterministic, side-effect-free before commit, and produces stable reason codes. Player-facing explanations map those codes through localization; they are not hardcoded by the validator. An edit commits atomically only after all affected invariants pass or an explicit transaction resolves all consequences.
 
@@ -103,13 +103,13 @@ Architecture research and mana-funded expansion create tradeoffs among more room
 
 # 10. Save and migration contract
 
-Spec 28 governs versioning. Saved spatial state must include stable floor/node/edge/structure identities, footprint/orientation data or stable content references plus required instance state, graph relationships, and canonical order. A migration must map the current ordered two-room layout to a valid graph (entrance → ordered rooms → completion) without changing deterministic outcomes unless explicitly versioned and evidenced.
+INV-12 requires immediate save safety for committed dungeon tile placement/movement; Spec 28 governs versioning. Saved spatial state must include stable floor/node/edge/structure identities, footprint/orientation data or stable content references plus required instance state, graph relationships, and canonical order. A migration must map the current ordered two-room layout to a valid graph (entrance → ordered rooms → completion) without changing deterministic outcomes unless explicitly versioned and evidenced.
 
 Before schema implementation, approve default coordinates/footprints, stable-ID derivation, content-missing behavior, rollback/recovery behavior and legacy fixtures. Migration is deterministic and idempotent. Runtime must not maintain ordered slots and a graph as competing writable authorities.
 
 # 11. UI and information exposure
 
-Spec 15 governs trust and Spec 27 governs text. The editor must eventually expose used/final/remaining capacity, footprint preview, overlap/fit result, room-specific capacities, blocked area, connection availability, required/optional route classification, route taken, construction cost and edit consequences. Reasons use localization keys/table references.
+Spec 15 governs trust and Spec 27 governs text. The editor must expose configured final, used and remaining floor-space capacity, each prospective room/corridor floor-space cost, footprint preview, overlap/fit result, room-specific capacities, blocked area, connection availability, required/optional route classification, route taken, construction cost and edit consequences. Reasons use localization keys/table references.
 
 Bootstrap is a temporary diagnostics/control surface. It may validate domain behavior during Phases 1-6 but must not become the permanent editor. The graphical vertical slice begins after contracts and structural behavior stabilize and replaces normal Bootstrap controls only after feature parity and smoke evidence.
 
@@ -121,7 +121,7 @@ Validation and route selection occur on edits/run boundaries rather than per fra
 
 # 13. MVP implementation profile
 
-The initial roadmap supports Floor 1; configured fixed initial capacity; Basic Room; Narrow Hall; one additional room archetype; one simple corridor; entrance; required path; exit/completion; at most one optional branch; tile/footprint, capacity and same-floor reachability validation; save compatibility; deterministic route ordering; and player-visible capacity/route results.
+The initial spatial implementation profile supports Floor 1; configured fixed initial capacity; Basic Room; Narrow Hall; one additional room archetype; one simple corridor; entrance; required path; exit/completion; at most one optional branch; tile/footprint, capacity and same-floor reachability validation; save compatibility; deterministic route ordering; and player-visible capacity/route results.
 
 Explicitly deferred: curved/freeform corridors, multiple elevations, teleporters, secret rooms, locked-door puzzles, procedural generation, unrestricted mazes, complex pathfinding AI, multiple entrances, multiple descent points, advanced environmental simulation, floor-to-floor backtracking and full production art.
 
@@ -141,6 +141,7 @@ Explicitly deferred: curved/freeform corridors, multiple elevations, teleporters
 # 15. Acceptance gates for implementation planning
 
 - Every field and invariant has a clear domain/content/save/UI owner.
+- Every buildable room/corridor has a configured floor-space cost, and every floor exposes final, used and remaining floor-space capacity.
 - No unlabeled numeric example is treated as authoritative tuning.
 - The tile footprint and displayed capacity relationship has one source of truth.
 - Migration is reviewed before current saves are changed.

@@ -50,7 +50,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 |---|---|
 | Ordered slots become a second, incompatible layout model | Define Spec 38 contracts first; migrate once; retain a compatibility adapter only as needed. |
 | Save breakage or nondeterministic graph ordering | Approve version/migration plan before schema changes; stable IDs, canonical ordering, legacy fixtures. |
-| Two capacity systems disagree | Tiles/masks own physical truth; displayed space is a configured projection validated against it. |
+| Two capacity systems disagree | Tiles/masks own geometry; required player-facing floor-space costs/capacities are configured and derived from or validated against the same footprint rules. |
 | Tuning leaks into runtime | Put every limit, coefficient, cost and modifier in approved typed/content configuration. |
 | Full UI rewrite begins before domain behavior stabilizes | Complete Phases 1-6 contracts/behavior first; Phase 7 proves parity before Bootstrap retirement. |
 | More scaffolding without fun | Every phase ends in observable capability; run player-fantasy checkpoints at Phases 3, 5, 7, and 9. |
@@ -97,11 +97,12 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Exit:** Floor 1 supports entrance, Basic Room, Narrow Hall, one additional room archetype, required route and completion node; valid edits persist and invalid edits are atomic. **Technical gate:** boundary, overlap, reachability, connection, containment and ordering tests. **Fantasy gate:** players can predict fit failures and compare compact versus spreading layouts in a low-fidelity test.
 
-### Phase 4 — Mana-backed construction
+### Phase 4 — Mana-backed construction and offline mana completion
 
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
 3. Add localized cost, remaining-capacity, consequence and affordability previews before commit.
+4. Complete and evidence idle offline mana calculation before final MVP validation; exact existing coverage requires confirmation.
 
 **Exit:** every structural edit previews and atomically applies the configured cost/policy; insufficient mana cannot partially mutate layout. **Technical gate:** formula order, affordability, rollback, migration and localization tests. **Fantasy gate:** observe whether spatial growth competes meaningfully with monsters, traps, loot and research.
 
@@ -116,8 +117,9 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 ### Phase 6 — Additional floor foundation
 
 1. Author Floor 2 unlock and configured larger base capacity without tying floor index to monster level.
-2. Add entrance/descent/completion semantics and survivor/run-state transfer.
-3. Add exit-versus-descend decision and deterministic multi-floor summary.
+2. Give each active MVP floor exactly one entrance and add terminal semantics and survivor/run-state transfer.
+3. At a non-final-floor terminal, implement the approved choice to exit with defined survivors/loot/run state or descend with defined survivors/run state; define its deterministic selection formula and exact transfer contract at this Phase 6 gate.
+4. Add deterministic multi-floor summary. The final active floor ends at an exit or run-completion terminal.
 
 **Exit:** two floors remain independently valid same-floor graphs; survivors transition without backtracking; save/replay ordering is stable. **Technical gate:** transition, capacity, save, outcome and bounded-work tests. **Fantasy gate:** validate compact first/large second, dangerous first/weak second, boss, training and loot-focused concepts remain possible.
 
@@ -132,7 +134,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 ### Phase 8 — Content and research expansion
 
-Use small vertical content packets: additional rooms and boss room; environmental blocked-area features; monster/trap/loot choices; Architecture nodes and research interface; progression toward the approved MVP floor target. Every packet includes authoring validation, balance hypothesis and a player-observable choice.
+Use small vertical content packets: Floors 3 through the locked maximum of 5; additional rooms and environmental blocked-area features; Undead and Goblinoid launch-family breadth with no more than one boss set per family; five adventurer classes; loot progression through Steel; Architecture nodes and research interface; and the one Mana Farm sub-dungeon after main-dungeon spatial and construction-economy contracts stabilize. Every packet includes authoring validation, balance hypothesis and a player-observable choice. Exact current coverage for these requirements requires confirmation rather than inference.
 
 **Exit:** enough combinations exist to form multiple viable archetypes without one dominant layout; content limits remain configured. **Technical gate:** content integrity, modifier, save and performance tests. **Fantasy gate:** large boss room versus several small rooms and environmental placement tradeoffs are legible and meaningful.
 
@@ -159,11 +161,33 @@ At Phase 3/5/7/9 checkpoints, record observation and evidence rather than yes/no
 
 ## 6. MVP boundary versus post-MVP hardening
 
-**MVP requires:** narrow Spec 38 spatial scope, two-floor foundation/progression toward the approved target, one branch, deterministic runs, meaningful configurable content, usable graphical editor, onboarding/accessibility baseline, low-end performance evidence and an external test build whose observed play supports the fantasy.
+**MVP requires:** the complete locked checklist below, narrow Spec 38 spatial scope, progression through the approved maximum of five floors, one branch, deterministic runs, meaningful configurable content, usable graphical editor, onboarding/accessibility baseline, low-end performance evidence and an external test build whose observed play supports the fantasy.
 
 **Post-MVP production hardening begins only after that proof:** larger graphs and richer route AI, advanced transitions/environments, full production art, extensive device matrices, service scaling, live operations, prestige, social features, monetization implementation, anti-cheat expansion, release dashboards and operational automation. Critical security/data-loss fixes may move earlier when they block safe testing.
 
-## 7. Genuine open decisions (owners and decision gates)
+## 7. Locked MVP Scope Checklist
+
+Source authority: [What is the smallest version of Dungeon Builder that proves the fantasy is fun](../../Docs/What%20is%20the%20smallest%20version%20of%20Dungeon%20Builder%20that%20proves%20the%20fantasy%20is%20fun.md). This checklist preserves the full locked scope; Floor 2 is only the first multi-floor foundation and does not reduce the up-to-five-floor MVP.
+
+| Locked requirement | Current status / GD evidence | Remaining gap | Phase | MVP disposition |
+|---|---|---|---|---|
+| Dungeon core | Partial; prototype core loop exists, exact locked-scope closure requires confirmation | Validate integration with spatial progression and final journey | 1-9 | Required |
+| One main dungeon | Partial; current prototype operates one simple dungeon/layout | Complete spatial construction, multi-floor progression and editor | 1-9 | Required |
+| Up to five floors | Remaining beyond current one-floor prototype; GD60 is an ordered two-room route, not multi-floor evidence | Floor 2 foundation, then configured Floors 3-5 and final validation | 6, 8, 9 | Required; maximum is five |
+| Undead monster family | Partial or requires confirmation; starter content is not evidence of full launch-family breadth | Author/validate launch family and one allowed boss set | 8, 9 | Required |
+| Goblinoid monster family | Requires confirmation | Author/validate launch family and one allowed boss set | 8, 9 | Required |
+| One boss set per launch family | Remaining/requires confirmation | At most one boss set for Undead and one for Goblinoid | 8, 9 | Required where the locked family scope calls for bosses; sets beyond one per family excluded |
+| Mana generation | Partial; prototype mana feedback/simulation exists | Confirm locked formulas, integration and final journey evidence | 4, 9 | Required |
+| Idle offline mana | Partial or requires confirmation; no completion claim from GD61 | Complete and evidence calculation before final validation | 4, 9 | Required |
+| Peace, Notice and Concern heat states | Partial; prototype heat system exists, exact three-state journey evidence requires confirmation | Validate only the three locked MVP states | 8, 9 | Required; more than three excluded |
+| Five adventurer classes | Partial or requires confirmation | Complete/validate exactly five MVP classes in content and runs | 8, 9 | Required |
+| Loot progression through Steel | Partial; deterministic loot/spoils exist but tier breadth requires confirmation | Author/validate progression through Steel | 8, 9 | Required |
+| One research slot | Implemented at prototype scope through the single-slot lifecycle/research bridge and GD59; final integration still required | Architecture progression/UI and final journey evidence | 5, 8, 9 | Required; retain one slot |
+| One Mana Farm sub-dungeon | Remaining; historical planning deferred it until core-loop stability | Implement one type after main spatial and construction economy stabilize | 8, 9 | Required; more than one excluded |
+
+**Locked explicit MVP exclusions:** prestige; seasonal events; PvP or leaderboards; hero adventurers; more than one sub-dungeon; advanced diplomacy; more than three heat states; and boss sets beyond one per family. GD61 does not amend these exclusions.
+
+## 8. Genuine open decisions (owners and decision gates)
 
 | Question | Needed by | Required evidence/owner |
 |---|---|---|
@@ -174,8 +198,8 @@ At Phase 3/5/7/9 checkpoints, record observation and evidence rather than yes/no
 | Legacy two-room migration default coordinates and IDs | Before Phase 2 | Engineering/Data; fixture review |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
 | Exit-versus-descend state carried between floors | Phase 6 | Design/Engineering; cross-spec review |
-| Exact MVP floor/content/device limits | Phases 6/8/9 | Existing approved sources where present; otherwise Design/QA data decision |
+| Exact active-floor/content/device limits within the locked maximum of five floors | Phases 6/8/9 | Existing approved sources where present; otherwise Design/QA data decision |
 
-## 8. Next implementation recommendation
+## 9. Next implementation recommendation
 
-**GD62: Establish spatial domain contracts and layout validation foundations.** Limit it to Phase 1 packet 1: config-consumed contracts, stable identifiers, deterministic canonical ordering, and pure validators for capacity, overlap, endpoints, connections and same-floor reachability. Include the save-version/migration *plan* but do not migrate saves, change current gameplay, or add UI. This prevents both premature schema migration and a premature editor rewrite.
+**GD62: Establish spatial domain contracts and layout validation foundations.** Limit it to typed or configuration-consumed floor-capacity, room/corridor footprint, and graph node/edge representations; stable identifiers; deterministic canonical ordering; and pure deterministic validators for capacity, overlap, endpoints, connections and same-floor reachability. Include save-version and migration planning only. GD62 must not migrate saves, change the current player loop, add structural editing UI, mana costs, branching, additional floors, the Mana Farm, or production UI. This prevents premature migration and editor rewrites.

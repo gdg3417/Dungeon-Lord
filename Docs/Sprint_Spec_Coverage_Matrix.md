@@ -6,9 +6,10 @@ Purpose: Trace each design/system spec to sprint implementation, artifact output
 > **GD61 disposition (2026-07-21): Historical coverage matrix, superseded execution order.** Sprint targets below preserve the May planning record and are not proof of implementation. The authoritative sequence is the [post-GD60 MVP execution plan](../docs/planning/post-gd60-mvp-execution-plan.md). See the [GD traceability matrix](../docs/planning/backlog-to-sprint-traceability-matrix.md) for reconciled evidence and remaining gaps. Status values in the legacy tables mean planned coverage, not current completion.
 
 Status legend:
-- `Planned` = scheduled in current forward plan
-- `Deferred` = intentionally out of MVP implementation for now
-- `Reference` = informs work but no direct implementation in current sprint window
+- `Planned` = historically scheduled in the May 2026 Sprint 2-4 plan; it is not a current implementation status.
+- `Deferred` = historically deferred from that sprint window; locked MVP items still remain MVP unless their authoritative source is amended.
+- `Reference` = historically used as guidance without direct scheduled implementation in that sprint window.
+- `Locked candidate / active` = Spec 38's current post-GD60 planning authority; implementation still follows its named roadmap gates.
 
 ## A) Master and system spec coverage (`00`–`38`)
 
