@@ -63,6 +63,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(FloorLayoutValidator.Validate(restored, FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).IsValid, Is.True);
         }
 
+        [Test]
+        public void Canonicalization_IsDetachedPreservesDuplicatesAndIsIdempotent()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            source.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(2, 1), new TileCoordinate(1, 1), new TileCoordinate(1, 1) });
+            FloorSpatialLayout first = source.Canonicalized(); FloorSpatialLayout second = first.Canonicalized();
+            Assert.That(first.Rooms[0], Is.Not.SameAs(source.Rooms[0])); Assert.That(first.Nodes[0], Is.Not.SameAs(source.Nodes[0])); Assert.That(first.Edges[0], Is.Not.SameAs(source.Edges[0])); Assert.That(first.Edges[0].Footprint, Is.Not.SameAs(source.Edges[0].Footprint));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1) }, first.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
+            Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
+            first.Rooms[0].RoomInstanceId = "changed"; Assert.That(source.Rooms.Any(x => x.RoomInstanceId == "changed"), Is.False);
+        }
+
         private static RoomSpatialDefinition Definition(string id, TileCoordinate[] reserved, int monster, int trap, int loot) => new RoomSpatialDefinition
         { RoomDefinitionId = id, GrossFootprint = new RectangularFootprintDefinition(2, 2), ReservedTileOffsets = reserved, MonsterCapacity = monster, TrapCapacity = trap, LootCapacity = loot };
     }

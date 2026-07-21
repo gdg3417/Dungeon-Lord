@@ -74,14 +74,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public FloorRouteNode[] Nodes = Array.Empty<FloorRouteNode>();
         public CorridorEdge[] Edges = Array.Empty<CorridorEdge>();
 
-        public FloorSpatialLayout Canonicalized() => new FloorSpatialLayout
+        public FloorSpatialLayout Canonicalized()
         {
-            FloorId = FloorId,
-            Rooms = (Rooms ?? Array.Empty<RoomSpatialInstance>()).OrderBy(room => room?.RoomInstanceId, StringComparer.Ordinal).ToArray(),
-            Nodes = (Nodes ?? Array.Empty<FloorRouteNode>()).OrderBy(node => node == null ? 0 : (int)node.Kind).ThenBy(node => node?.NodeId, StringComparer.Ordinal).ToArray(),
-            Edges = (Edges ?? Array.Empty<CorridorEdge>()).OrderBy(edge => edge == null ? 0 : (int)edge.Classification)
-                .ThenBy(edge => edge?.SourceNodeId, StringComparer.Ordinal).ThenBy(edge => edge?.DestinationNodeId, StringComparer.Ordinal)
-                .ThenBy(edge => edge?.EdgeId, StringComparer.Ordinal).ToArray()
+            return new FloorSpatialLayout
+            {
+                FloorId = FloorId,
+                Rooms = (Rooms ?? Array.Empty<RoomSpatialInstance>()).Select(CopyRoom)
+                    .OrderBy(room => room?.RoomInstanceId, StringComparer.Ordinal).ToArray(),
+                Nodes = (Nodes ?? Array.Empty<FloorRouteNode>()).Select(CopyNode)
+                    .OrderBy(node => node == null ? 0 : (int)node.Kind)
+                    .ThenBy(node => node?.NodeId, StringComparer.Ordinal).ToArray(),
+                Edges = (Edges ?? Array.Empty<CorridorEdge>()).Select(CopyEdge)
+                    .OrderBy(edge => edge == null ? 0 : (int)edge.Classification)
+                    .ThenBy(edge => edge?.SourceNodeId, StringComparer.Ordinal)
+                    .ThenBy(edge => edge?.DestinationNodeId, StringComparer.Ordinal)
+                    .ThenBy(edge => edge?.EdgeId, StringComparer.Ordinal).ToArray()
+            };
+        }
+
+        private static RoomSpatialInstance CopyRoom(RoomSpatialInstance room) => room == null ? null : new RoomSpatialInstance
+        {
+            RoomInstanceId = room.RoomInstanceId, RoomDefinitionId = room.RoomDefinitionId, FloorId = room.FloorId,
+            Anchor = room.Anchor, Orientation = room.Orientation
+        };
+
+        private static FloorRouteNode CopyNode(FloorRouteNode node) => node == null ? null : new FloorRouteNode
+        {
+            NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId
+        };
+
+        private static CorridorEdge CopyEdge(CorridorEdge edge) => edge == null ? null : new CorridorEdge
+        {
+            EdgeId = edge.EdgeId, CorridorDefinitionId = edge.CorridorDefinitionId, FloorId = edge.FloorId,
+            SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
+            Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
+            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId
         };
     }
 

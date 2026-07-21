@@ -2,8 +2,8 @@
 
 | Item | Result |
 |---|---|
-| Commit tested | GD62 working tree based on `7a69607` (final commit is the pull-request HEAD) |
-| Static checks | `git diff --cached --check`, merge-marker scan, Unity `.meta` audit, prohibited-path audit, ordinal-comparison audit, and persistent-ID/hash audit passed |
+| Commit tested | `9cbb1f9` |
+| Static checks | `git diff --check`, merge-marker scan, new C# Unity `.meta` audit, prohibited-path audit, hardcoded-tuning audit, player-facing-string audit, ordinal-comparison audit, and persistent-ID/`GetHashCode` audit passed |
 | Focused EditMode tests | Pending developer execution in Unity 6000.3.2f1; Unity is unavailable in this environment |
 | Full EditMode suite | Pending developer execution in Unity 6000.3.2f1; Unity is unavailable in this environment |
 | Manual regression | Pending developer execution; regression-only |

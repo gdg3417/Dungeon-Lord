@@ -36,7 +36,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public ResolvedTileFootprint() { }
         public ResolvedTileFootprint(IEnumerable<TileCoordinate> tiles)
         {
-            OccupiedTiles = (tiles ?? Enumerable.Empty<TileCoordinate>()).Distinct().OrderBy(tile => tile).ToArray();
+            OccupiedTiles = (tiles ?? Enumerable.Empty<TileCoordinate>()).OrderBy(tile => tile).ToArray();
         }
     }
 
