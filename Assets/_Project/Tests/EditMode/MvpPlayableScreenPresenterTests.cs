@@ -163,7 +163,8 @@ namespace DungeonBuilder.Tests.EditMode
                 AnalysisAdviceKey = BasicRunAnalysisRecommendationPresenter.ReduceDangerKey,
                 NextOptimizationSuggestionKey = MvpPlayerLoopSummaryPresenter.SuggestRepeatOrImprovePlacementKey,
                 PlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 3 },
-                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 }
+                LatestRunPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 },
+                LatestRunConfiguredPlacementEffects = new MvpPlacementEffectsSummary { RuleResolved = true, Danger = 4 }
             };
 
             string text = MvpPlayableScreenPresenter.BuildScreenText(
