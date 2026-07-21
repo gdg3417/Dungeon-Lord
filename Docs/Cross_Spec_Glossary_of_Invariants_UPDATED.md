@@ -110,3 +110,11 @@ INV-14 Telemetry Reliability Rule
 Telemetry may buffer offline and upload idempotently.
 
 Strict acknowledgment applies only to economy-critical mutations.
+
+INV-38 Dungeon Floor Spatial Validity
+
+Every active dungeon floor must remain within its configured spatial capacity, and every active room must be reachable from that floor's entrance through a valid saved same-floor route graph.
+
+Physical tile footprints are the occupancy authority; any displayed space units are a configured projection rather than a second capacity system. Spatial tuning is data-owned, graph ordering is deterministic, and saves use stable IDs.
+
+Referenced by: Spec 38, 19, 28, 30, 36, 37

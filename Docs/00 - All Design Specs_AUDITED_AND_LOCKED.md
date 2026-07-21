@@ -20,13 +20,17 @@ GLOBAL LOCKS:
 
 VERSION STATUS:
 
-\- Specs 1–37 reviewed
+\- Specs 1–37 reviewed and locked in the original audit
+
+\- Spec 38 is a locked candidate added by GD61 for spatial implementation planning; its unresolved numeric tuning and policy gates remain explicitly open
 
 \- Contradictions resolved
 
 \- Safe for implementation
 
 Last audit status: CLEAN
+
+GD61 addendum: [System Spec 38](38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) adds the authoritative spatial-capacity and saved same-floor route-graph invariant. It does not reopen unrelated locked rules.
 
 # System Spec 1. Mana System 
 

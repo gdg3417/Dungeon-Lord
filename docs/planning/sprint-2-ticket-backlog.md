@@ -1,5 +1,9 @@
 # Sprint 2 Ticket Backlog (Playable Deterministic Core Loop)
 
+> **Historical / partially completed / no longer in current execution order (GD61).** Repository work through GD60 delivered substantial portions of this core-loop intent, but the original ticket status labels are planning records rather than proof of completion. Preserve the acceptance criteria below for traceability. Use the [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md) for active sequencing and [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) for spatial work.
+
+**Current disposition:** implemented pieces include deterministic core-loop, research, heat, placement, loot, trust presentation, room-slot, and ordered-route work across GD workstreams through GD60. Remaining spatial layout, construction economy, robust offline behavior, and any uncertain ticket-specific evidence require confirmation and are re-planned by phase; no `Added`, `Existing`, or `Modified` label below should be read as a current implementation status.
+
 ## Sprint Scope and Guardrails
 - Sprint focus: deterministic playable loop (research -> encounter -> loot -> reinvestment) with verification-safe behavior.
 - Must preserve MVP constraints from locked specs and defer non-MVP systems.

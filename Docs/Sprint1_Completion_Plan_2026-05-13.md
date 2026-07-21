@@ -1,5 +1,7 @@
 # MVP Sprint Completion Plan (Assuming Sprint 1 Passed)
 
+> **Historical / partially completed / superseded execution order (GD61).** Preserve this document's acceptance criteria and May 2026 assumptions, but do not schedule work from its Sprint 2-4 order. Current implementation status and dependencies are reconciled in the [post-GD60 MVP execution plan](../docs/planning/post-gd60-mvp-execution-plan.md).
+
 Date: 2026-05-13  
 Scope: Forward plan for Sprint 2 and Sprint 3 (plus Sprint 4 recommended) with explicit build steps per sprint.
 
