@@ -55,11 +55,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             FloorSpatialLayout canonical = layout.Canonicalized();
             string json = JsonUtility.ToJson(canonical);
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(json);
-            Assert.That(restored.FloorId, Is.EqualTo(FloorLayoutValidatorTests.FloorId));
-            CollectionAssert.AreEqual(canonical.Rooms.Select(x => x.RoomInstanceId), restored.Rooms.Select(x => x.RoomInstanceId));
-            CollectionAssert.AreEqual(canonical.Nodes.Select(x => x.NodeId), restored.Nodes.Select(x => x.NodeId));
-            CollectionAssert.AreEqual(canonical.Edges.Select(x => x.EdgeId), restored.Edges.Select(x => x.EdgeId));
-            Assert.That(restored.Edges[0].Footprint.OccupiedTiles[0], Is.EqualTo(canonical.Edges[0].Footprint.OccupiedTiles[0]));
+            AssertLayoutsEqual(canonical, restored);
             Assert.That(FloorLayoutValidator.Validate(restored, FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).IsValid, Is.True);
         }
 
@@ -70,9 +66,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
             source.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(2, 1), new TileCoordinate(1, 1), new TileCoordinate(1, 1) });
             FloorSpatialLayout first = source.Canonicalized(); FloorSpatialLayout second = first.Canonicalized();
             Assert.That(first.Rooms[0], Is.Not.SameAs(source.Rooms[0])); Assert.That(first.Nodes[0], Is.Not.SameAs(source.Nodes[0])); Assert.That(first.Edges[0], Is.Not.SameAs(source.Edges[0])); Assert.That(first.Edges[0].Footprint, Is.Not.SameAs(source.Edges[0].Footprint));
+            Assert.That(first.Rooms, Is.Not.SameAs(source.Rooms)); Assert.That(first.Nodes, Is.Not.SameAs(source.Nodes)); Assert.That(first.Edges, Is.Not.SameAs(source.Edges));
+            Assert.That(first.Edges[0].Footprint.OccupiedTiles, Is.Not.SameAs(source.Edges[0].Footprint.OccupiedTiles));
             CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1) }, first.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
             Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
             first.Rooms[0].RoomInstanceId = "changed"; Assert.That(source.Rooms.Any(x => x.RoomInstanceId == "changed"), Is.False);
+        }
+
+        private static void AssertLayoutsEqual(FloorSpatialLayout expected, FloorSpatialLayout actual)
+        {
+            Assert.That(actual.FloorId, Is.EqualTo(expected.FloorId));
+            Assert.That(actual.Rooms.Length, Is.EqualTo(expected.Rooms.Length));
+            for (int index = 0; index < expected.Rooms.Length; index++)
+            {
+                Assert.That(actual.Rooms[index].RoomInstanceId, Is.EqualTo(expected.Rooms[index].RoomInstanceId));
+                Assert.That(actual.Rooms[index].RoomDefinitionId, Is.EqualTo(expected.Rooms[index].RoomDefinitionId));
+                Assert.That(actual.Rooms[index].FloorId, Is.EqualTo(expected.Rooms[index].FloorId));
+                Assert.That(actual.Rooms[index].Anchor, Is.EqualTo(expected.Rooms[index].Anchor));
+                Assert.That(actual.Rooms[index].Orientation, Is.EqualTo(expected.Rooms[index].Orientation));
+            }
+            Assert.That(actual.Nodes.Length, Is.EqualTo(expected.Nodes.Length));
+            for (int index = 0; index < expected.Nodes.Length; index++)
+            {
+                Assert.That(actual.Nodes[index].NodeId, Is.EqualTo(expected.Nodes[index].NodeId));
+                Assert.That(actual.Nodes[index].FloorId, Is.EqualTo(expected.Nodes[index].FloorId));
+                Assert.That(actual.Nodes[index].Kind, Is.EqualTo(expected.Nodes[index].Kind));
+                Assert.That(actual.Nodes[index].RoomInstanceId, Is.EqualTo(expected.Nodes[index].RoomInstanceId));
+            }
+            Assert.That(actual.Edges.Length, Is.EqualTo(expected.Edges.Length));
+            for (int index = 0; index < expected.Edges.Length; index++)
+            {
+                Assert.That(actual.Edges[index].EdgeId, Is.EqualTo(expected.Edges[index].EdgeId));
+                Assert.That(actual.Edges[index].CorridorDefinitionId, Is.EqualTo(expected.Edges[index].CorridorDefinitionId));
+                Assert.That(actual.Edges[index].FloorId, Is.EqualTo(expected.Edges[index].FloorId));
+                Assert.That(actual.Edges[index].SourceNodeId, Is.EqualTo(expected.Edges[index].SourceNodeId));
+                Assert.That(actual.Edges[index].DestinationNodeId, Is.EqualTo(expected.Edges[index].DestinationNodeId));
+                Assert.That(actual.Edges[index].Classification, Is.EqualTo(expected.Edges[index].Classification));
+                Assert.That(actual.Edges[index].OptionalBranchId, Is.EqualTo(expected.Edges[index].OptionalBranchId));
+                CollectionAssert.AreEqual(expected.Edges[index].Footprint.OccupiedTiles, actual.Edges[index].Footprint.OccupiedTiles);
+            }
         }
 
         private static RoomSpatialDefinition Definition(string id, TileCoordinate[] reserved, int monster, int trap, int loot) => new RoomSpatialDefinition

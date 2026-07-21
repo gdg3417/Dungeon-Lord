@@ -61,7 +61,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             Dictionary<string, RoomSpatialDefinition> roomDefinitionById = Unambiguous(roomDefinitions, x => x.RoomDefinitionId);
             Dictionary<string, CorridorSpatialDefinition> corridorDefinitionById = Unambiguous(corridorDefinitions, x => x.CorridorDefinitionId);
             Dictionary<string, RoomSpatialInstance> roomById = Unambiguous(rooms.Where(x => x != null), x => x.RoomInstanceId);
-            Dictionary<string, FloorRouteNode> nodeById = Unambiguous(nodes.Where(x => x != null), x => x.NodeId);
+            Dictionary<string, FloorRouteNode> unambiguousNodeById = Unambiguous(nodes.Where(x => x != null), x => x.NodeId);
             HashSet<string> uniqueEdgeIds = UniqueIds(edges.Where(x => x != null).Select(x => x.EdgeId));
 
             int finalCapacity = floor?.FinalFloorSpaceCapacity ?? 0;
@@ -69,7 +69,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Add(issues, FloorLayoutValidationReason.NegativeConfigurationValue, floor.FloorDefinitionId);
 
             int usedCapacity = 0;
-            var occupancy = new Dictionary<TileCoordinate, List<string>>();
+            var occupancy = new Dictionary<TileCoordinate, List<OccupantIdentity>>();
             foreach (RoomSpatialInstance room in rooms.Where(x => x != null).OrderBy(x => x.RoomInstanceId, StringComparer.Ordinal))
             {
                 bool definitionResolved = roomDefinitionById.TryGetValue(room.RoomDefinitionId ?? string.Empty, out RoomSpatialDefinition definition);
@@ -82,10 +82,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         Add(issues, FloorLayoutValidationReason.InvalidOrientation, room.RoomInstanceId);
                     if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, out ResolvedTileFootprint footprint))
                         Add(issues, FloorLayoutValidationReason.InvalidRoomFootprint, room.RoomInstanceId, room.RoomDefinitionId);
-                    else AddOccupants(occupancy, footprint.OccupiedTiles, room.RoomInstanceId);
+                    else AddOccupants(occupancy, footprint.OccupiedTiles, new OccupantIdentity(OccupantKind.Room, room.RoomInstanceId));
                 }
             }
 
+            ValidateRoomNodeBijection(rooms, nodes, roomById, issues);
+            Dictionary<string, FloorRouteNode> validNodeById = BuildValidNodeAuthority(layout, nodes, roomById);
             var validEdges = new List<CorridorEdge>();
             foreach (CorridorEdge edge in edges.Where(x => x != null).OrderBy(x => x.EdgeId, StringComparer.Ordinal))
             {
@@ -97,16 +99,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     usedCapacity += Math.Max(0, definition.FloorSpaceCost);
                 }
                 bool footprintValid = ValidateCorridorFootprint(edge, issues);
-                if (edge.Footprint != null) AddOccupants(occupancy, edge.Footprint.OccupiedTiles, edge.EdgeId);
-                bool sourceResolved = ResolveEndpoint(edge.SourceNodeId, edge.EdgeId, true, nodeById, issues, out FloorRouteNode source);
-                bool destinationResolved = ResolveEndpoint(edge.DestinationNodeId, edge.EdgeId, false, nodeById, issues, out FloorRouteNode destination);
+                if (edge.Footprint != null) AddOccupants(occupancy, edge.Footprint.OccupiedTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
+                bool sourceResolved = ResolveEndpoint(edge.SourceNodeId, edge.EdgeId, true, validNodeById, issues, out FloorRouteNode source);
+                bool destinationResolved = ResolveEndpoint(edge.DestinationNodeId, edge.EdgeId, false, validNodeById, issues, out FloorRouteNode destination);
                 bool self = !string.IsNullOrWhiteSpace(edge.SourceNodeId) && string.Equals(edge.SourceNodeId, edge.DestinationNodeId, StringComparison.Ordinal);
                 if (self) Add(issues, FloorLayoutValidationReason.SelfEdge, edge.EdgeId, edge.SourceNodeId);
                 bool edgeFloorValid = string.Equals(edge.FloorId, layout.FloorId, StringComparison.Ordinal);
                 if (!edgeFloorValid) Add(issues, FloorLayoutValidationReason.EdgeFloorMismatch, edge.EdgeId, edge.FloorId);
-                bool endpointsOnFloor = (!sourceResolved || string.Equals(source.FloorId, layout.FloorId, StringComparison.Ordinal)) &&
-                    (!destinationResolved || string.Equals(destination.FloorId, layout.FloorId, StringComparison.Ordinal));
-                if ((sourceResolved || destinationResolved) && !endpointsOnFloor) Add(issues, FloorLayoutValidationReason.CrossFloorEdge, edge.EdgeId);
+                bool sourceExists = unambiguousNodeById.TryGetValue(edge.SourceNodeId ?? string.Empty, out FloorRouteNode suppliedSource);
+                bool destinationExists = unambiguousNodeById.TryGetValue(edge.DestinationNodeId ?? string.Empty, out FloorRouteNode suppliedDestination);
+                bool endpointsOnFloor = (!sourceExists || string.Equals(suppliedSource.FloorId, layout.FloorId, StringComparison.Ordinal)) &&
+                    (!destinationExists || string.Equals(suppliedDestination.FloorId, layout.FloorId, StringComparison.Ordinal));
+                if ((sourceExists || destinationExists) && !endpointsOnFloor) Add(issues, FloorLayoutValidationReason.CrossFloorEdge, edge.EdgeId);
                 bool classificationValid = Enum.IsDefined(typeof(RouteClassification), edge.Classification);
                 if (!classificationValid) Add(issues, FloorLayoutValidationReason.InvalidRouteClassification, edge.EdgeId);
                 bool branchValid = ValidateBranch(edge, classificationValid, issues);
@@ -116,8 +120,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             EmitOverlaps(occupancy, issues);
             if (usedCapacity > finalCapacity) Add(issues, FloorLayoutValidationReason.CapacityExceeded, layout.FloorId);
-            ValidateRoomNodeBijection(layout, rooms, nodes, roomById, issues);
-            ValidateGraph(layout, floor, rooms, nodes, roomById, nodeById, roomDefinitionById, validEdges.ToArray(), issues);
+            ValidateGraph(layout, floor, roomById, validNodeById, roomDefinitionById, validEdges.ToArray(), issues);
             return new FloorLayoutValidationResult
             {
                 Capacity = new FloorCapacitySummary { FinalFloorSpaceCapacity = finalCapacity, UsedFloorSpaceCapacity = usedCapacity, RemainingFloorSpaceCapacity = finalCapacity - usedCapacity },
@@ -176,8 +179,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool ValidateCorridorFootprint(CorridorEdge edge, List<FloorLayoutValidationIssue> issues)
         {
             TileCoordinate[] tiles = edge.Footprint?.OccupiedTiles;
-            bool valid = tiles != null && tiles.Length >= 2 && tiles.Distinct().Count() == tiles.Length &&
-                tiles.SequenceEqual(tiles.OrderBy(x => x));
+            bool valid = tiles != null && tiles.Length >= 2 && tiles.Distinct().Count() == tiles.Length;
             if (valid)
             {
                 bool horizontal = tiles.All(x => x.Y == tiles[0].Y), vertical = tiles.All(x => x.X == tiles[0].X);
@@ -212,7 +214,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        private static void ValidateRoomNodeBijection(FloorSpatialLayout layout, RoomSpatialInstance[] rooms, FloorRouteNode[] nodes,
+        private static void ValidateRoomNodeBijection(RoomSpatialInstance[] rooms, FloorRouteNode[] nodes,
             Dictionary<string, RoomSpatialInstance> roomById, List<FloorLayoutValidationIssue> issues)
         {
             FloorRouteNode[] roomNodes = nodes.Where(x => x != null && x.Kind == FloorRouteNodeKind.Room).ToArray();
@@ -229,23 +231,49 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     Add(issues, FloorLayoutValidationReason.RoomNodeMissingRoom, node.NodeId, node.RoomInstanceId);
         }
 
-        private static void ValidateGraph(FloorSpatialLayout layout, FloorSpatialConfiguration floor, RoomSpatialInstance[] rooms,
-            FloorRouteNode[] nodes, Dictionary<string, RoomSpatialInstance> roomById, Dictionary<string, FloorRouteNode> nodeById,
+        private static Dictionary<string, FloorRouteNode> BuildValidNodeAuthority(FloorSpatialLayout layout,
+            FloorRouteNode[] nodes, Dictionary<string, RoomSpatialInstance> roomById)
+        {
+            HashSet<string> uniqueNodeIds = UniqueIds(nodes.Where(x => x != null).Select(x => x.NodeId));
+            var roomNodeCounts = nodes.Where(x => x != null && x.Kind == FloorRouteNodeKind.Room && !string.IsNullOrWhiteSpace(x.RoomInstanceId))
+                .GroupBy(x => x.RoomInstanceId, StringComparer.Ordinal).ToDictionary(x => x.Key, x => x.Count(), StringComparer.Ordinal);
+            var result = new Dictionary<string, FloorRouteNode>(StringComparer.Ordinal);
+            foreach (FloorRouteNode node in nodes.Where(x => x != null).OrderBy(x => x.NodeId, StringComparer.Ordinal))
+            {
+                bool valid = uniqueNodeIds.Contains(node.NodeId) && !string.IsNullOrWhiteSpace(node.FloorId) &&
+                    string.Equals(node.FloorId, layout.FloorId, StringComparison.Ordinal) &&
+                    Enum.IsDefined(typeof(FloorRouteNodeKind), node.Kind);
+                if (valid && node.Kind == FloorRouteNodeKind.Room)
+                {
+                    valid = !string.IsNullOrWhiteSpace(node.RoomInstanceId) &&
+                        roomNodeCounts.TryGetValue(node.RoomInstanceId, out int count) && count == 1 &&
+                        roomById.TryGetValue(node.RoomInstanceId, out RoomSpatialInstance room) &&
+                        !string.IsNullOrWhiteSpace(room.FloorId) &&
+                        string.Equals(room.FloorId, layout.FloorId, StringComparison.Ordinal) &&
+                        string.Equals(node.FloorId, room.FloorId, StringComparison.Ordinal);
+                }
+                if (valid) result.Add(node.NodeId, node);
+            }
+            return result;
+        }
+
+        private static void ValidateGraph(FloorSpatialLayout layout, FloorSpatialConfiguration floor,
+            Dictionary<string, RoomSpatialInstance> roomById, Dictionary<string, FloorRouteNode> validNodeById,
             Dictionary<string, RoomSpatialDefinition> roomDefinitions, CorridorEdge[] validEdges, List<FloorLayoutValidationIssue> issues)
         {
-            FloorRouteNode[] entrances = nodes.Where(x => x != null && x.Kind == FloorRouteNodeKind.Entrance &&
-                UniqueIds(nodes.Where(y => y != null).Select(y => y.NodeId)).Contains(x.NodeId) && string.Equals(x.FloorId, layout.FloorId, StringComparison.Ordinal)).ToArray();
+            FloorRouteNode[] validNodes = validNodeById.Values.OrderBy(x => x.NodeId, StringComparer.Ordinal).ToArray();
+            FloorRouteNode[] entrances = validNodes.Where(x => x.Kind == FloorRouteNodeKind.Entrance).ToArray();
             if (entrances.Length == 0) Add(issues, FloorLayoutValidationReason.MissingEntrance, layout.FloorId);
             if (entrances.Length > 1) Add(issues, FloorLayoutValidationReason.MultipleEntrances, layout.FloorId);
             HashSet<string> reachable = entrances.Length == 1 ? Reachable(entrances[0].NodeId, validEdges, null) : new HashSet<string>(StringComparer.Ordinal);
-            foreach (FloorRouteNode node in nodes.Where(x => x != null && x.Kind == FloorRouteNodeKind.Room && !reachable.Contains(x.NodeId)))
+            foreach (FloorRouteNode node in validNodes.Where(x => x.Kind == FloorRouteNodeKind.Room && !reachable.Contains(x.NodeId)))
                 Add(issues, FloorLayoutValidationReason.UnreachableRoom, node.NodeId, node.RoomInstanceId);
-            foreach (FloorRouteNode node in nodes.Where(x => x != null && x.Kind == FloorRouteNodeKind.Room))
+            foreach (FloorRouteNode node in validNodes.Where(x => x.Kind == FloorRouteNodeKind.Room))
                 if (roomById.TryGetValue(node.RoomInstanceId ?? string.Empty, out RoomSpatialInstance room) && roomDefinitions.TryGetValue(room.RoomDefinitionId ?? string.Empty, out RoomSpatialDefinition definition) &&
                     validEdges.Count(x => string.Equals(x.SourceNodeId, node.NodeId, StringComparison.Ordinal) || string.Equals(x.DestinationNodeId, node.NodeId, StringComparison.Ordinal)) > definition.MaximumConnectionCount)
                     Add(issues, FloorLayoutValidationReason.ConnectionLimitExceeded, node.NodeId, room.RoomInstanceId);
             HashSet<string> requiredReachable = entrances.Length == 1 ? Reachable(entrances[0].NodeId, validEdges, RouteClassification.Required) : new HashSet<string>(StringComparer.Ordinal);
-            var terminals = new HashSet<string>(nodes.Where(x => x != null && (x.Kind == FloorRouteNodeKind.Exit || x.Kind == FloorRouteNodeKind.Descent || x.Kind == FloorRouteNodeKind.Completion) && string.Equals(x.FloorId, layout.FloorId, StringComparison.Ordinal)).Select(x => x.NodeId), StringComparer.Ordinal);
+            var terminals = new HashSet<string>(validNodes.Where(x => x.Kind == FloorRouteNodeKind.Exit || x.Kind == FloorRouteNodeKind.Descent || x.Kind == FloorRouteNodeKind.Completion).Select(x => x.NodeId), StringComparer.Ordinal);
             foreach (string nodeId in requiredReachable.OrderBy(x => x, StringComparer.Ordinal))
                 if (!Reachable(nodeId, validEdges, RouteClassification.Required).Overlaps(terminals)) Add(issues, FloorLayoutValidationReason.RequiredRouteWithoutTerminal, nodeId);
             int branchCount = validEdges.Where(x => x.Classification == RouteClassification.Optional).Select(x => x.OptionalBranchId).Distinct(StringComparer.Ordinal).Count();
@@ -264,20 +292,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return result;
         }
 
-        private static void AddOccupants(Dictionary<TileCoordinate, List<string>> occupancy, IEnumerable<TileCoordinate> tiles, string id)
+        private static void AddOccupants(Dictionary<TileCoordinate, List<OccupantIdentity>> occupancy,
+            IEnumerable<TileCoordinate> tiles, OccupantIdentity occupant)
         {
             foreach (TileCoordinate tile in tiles ?? Enumerable.Empty<TileCoordinate>())
-            { if (!occupancy.TryGetValue(tile, out List<string> occupants)) occupancy.Add(tile, occupants = new List<string>()); occupants.Add(id ?? string.Empty); }
+            {
+                if (!occupancy.TryGetValue(tile, out List<OccupantIdentity> occupants))
+                    occupancy.Add(tile, occupants = new List<OccupantIdentity>());
+                occupants.Add(occupant);
+            }
         }
 
-        private static void EmitOverlaps(Dictionary<TileCoordinate, List<string>> occupancy, List<FloorLayoutValidationIssue> issues)
+        private static void EmitOverlaps(Dictionary<TileCoordinate, List<OccupantIdentity>> occupancy,
+            List<FloorLayoutValidationIssue> issues)
         {
-            foreach (KeyValuePair<TileCoordinate, List<string>> entry in occupancy.OrderBy(x => x.Key))
+            foreach (KeyValuePair<TileCoordinate, List<OccupantIdentity>> entry in occupancy.OrderBy(x => x.Key))
             {
-                string[] occupants = entry.Value.Distinct(StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal).ToArray();
+                OccupantIdentity[] occupants = entry.Value.Distinct().OrderBy(x => (int)x.Kind)
+                    .ThenBy(x => x.StableId, StringComparer.Ordinal).ToArray();
                 for (int first = 0; first < occupants.Length; first++) for (int second = first + 1; second < occupants.Length; second++)
-                    Add(issues, FloorLayoutValidationReason.FootprintOverlap, occupants[first], occupants[second], entry.Key);
+                    Add(issues, FloorLayoutValidationReason.FootprintOverlap, occupants[first].DiagnosticId, occupants[second].DiagnosticId, entry.Key);
             }
+        }
+
+        private enum OccupantKind { Room = 0, Corridor = 1 }
+
+        private readonly struct OccupantIdentity : IEquatable<OccupantIdentity>
+        {
+            public OccupantIdentity(OccupantKind kind, string stableId) { Kind = kind; StableId = stableId ?? string.Empty; }
+            public OccupantKind Kind { get; }
+            public string StableId { get; }
+            public string DiagnosticId => Kind == OccupantKind.Room ? "room:" + StableId : "corridor:" + StableId;
+            public bool Equals(OccupantIdentity other) => Kind == other.Kind && string.Equals(StableId, other.StableId, StringComparison.Ordinal);
+            public override bool Equals(object obj) => obj is OccupantIdentity other && Equals(other);
+            public override int GetHashCode() => ((int)Kind * 397) ^ StringComparer.Ordinal.GetHashCode(StableId);
         }
 
         private static Dictionary<string, T> Unambiguous<T>(IEnumerable<T> records, Func<T, string> idSelector) => records

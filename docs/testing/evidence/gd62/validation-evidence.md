@@ -2,8 +2,10 @@
 
 | Item | Result |
 |---|---|
-| Commit tested | `9cbb1f9` |
-| Static checks | `git diff --check`, merge-marker scan, new C# Unity `.meta` audit, prohibited-path audit, hardcoded-tuning audit, player-facing-string audit, ordinal-comparison audit, and persistent-ID/`GetHashCode` audit passed |
+| Implementation commit tested | `67394637377bec185868c4e69fd34a9f8537bdde` |
+| Evidence commit | Recorded by the separate documentation commit containing this file; it does not alter the tested implementation |
+| Final task commit | The evidence commit is the intended final task commit; its SHA is reported by the Codex task result |
+| Static checks | `git diff --check`, merge-marker scan, Unity `.meta` audit, prohibited-path audit, hardcoded-tuning audit, player-facing-string audit, ordinal-comparison audit, stable-ID persistence audit, `GetHashCode` persistence audit, save-schema audit, and GD62 runtime-wiring audit passed against the implementation commit |
 | Focused EditMode tests | Pending developer execution in Unity 6000.3.2f1; Unity is unavailable in this environment |
 | Full EditMode suite | Pending developer execution in Unity 6000.3.2f1; Unity is unavailable in this environment |
 | Manual regression | Pending developer execution; regression-only |
