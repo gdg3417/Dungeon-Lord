@@ -226,8 +226,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) }, verticalTiles);
 
             FloorSpatialLayout canonicalized = layout.Canonicalized();
-            CollectionAssert.AreEqual(new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20) }, canonicalized.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
-            CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 30), new TileCoordinate(30, 31) }, canonicalized.Edges.Single(x => x.EdgeId == "edge.1").Footprint.OccupiedTiles);
+            TileCoordinate[] canonicalHorizontalTiles = canonicalized.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles;
+            TileCoordinate[] canonicalVerticalTiles = canonicalized.Edges.Single(x => x.EdgeId == "edge.1").Footprint.OccupiedTiles;
+            Assert.That(horizontalFootprint.OccupiedTiles, Is.SameAs(horizontalTiles));
+            Assert.That(verticalFootprint.OccupiedTiles, Is.SameAs(verticalTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) }, horizontalTiles);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) }, verticalTiles);
+            Assert.That(canonicalHorizontalTiles, Is.Not.SameAs(horizontalTiles));
+            Assert.That(canonicalVerticalTiles, Is.Not.SameAs(verticalTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20) }, canonicalHorizontalTiles);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 30), new TileCoordinate(30, 31) }, canonicalVerticalTiles);
         }
 
         [Test]
