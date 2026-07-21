@@ -100,8 +100,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var missingEntrance = ValidLayout(); missingEntrance.Nodes = missingEntrance.Nodes.Where(x => x.Kind != FloorRouteNodeKind.Entrance).ToArray(); AssertReason(missingEntrance, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.MissingEntrance);
             var multiple = ValidLayout(); multiple.Nodes = multiple.Nodes.Concat(new[] { Node("entrance.2", FloorRouteNodeKind.Entrance) }).ToArray(); AssertReason(multiple, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.MultipleEntrances);
             var disconnected = ValidLayout(); disconnected.Edges = disconnected.Edges.Where(x => x.EdgeId != "edge.1").ToArray(); AssertReason(disconnected, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.UnreachableRoom);
-            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(2), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded), Is.False);
-            AssertReason(ValidLayout(), Configuration(), Definitions(1), CorridorDefinitions(), FloorLayoutValidationReason.ConnectionLimitExceeded);
+            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(connections: 2), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded), Is.False);
+            var exceeded = ValidLayout();
+            string[] connectionIssues = FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues
+                .Where(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded).Select(Key).ToArray();
+            CollectionAssert.AreEqual(new[]
+            {
+                "22|node.room.0|room.0|False|0|0",
+                "22|node.room.1|room.1|False|0|0"
+            }, connectionIssues);
+            exceeded.Rooms = exceeded.Rooms.Reverse().ToArray(); exceeded.Nodes = exceeded.Nodes.Reverse().ToArray(); exceeded.Edges = exceeded.Edges.Reverse().ToArray();
+            CollectionAssert.AreEqual(connectionIssues, FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues
+                .Where(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded).Select(Key).ToArray());
             var deadEnd = ValidLayout(); deadEnd.Edges = deadEnd.Edges.Where(x => x.EdgeId != "edge.2").ToArray(); AssertReason(deadEnd, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredRouteWithoutTerminal);
             var cycle = ValidLayout(); cycle.Edges[2].DestinationNodeId = "node.room.0"; AssertReason(cycle, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredRouteWithoutTerminal);
         }
