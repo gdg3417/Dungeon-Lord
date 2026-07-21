@@ -1,8 +1,8 @@
 # SPEC LOCK SUMMARY (AUTHORITATIVE)
 
-This document represents the locked and audited system design specification for the game.
+This document represents the original lock summary for Specs 1 through 37, with a GD61 status addendum for Spec 38.
 
-All contradictions identified during cross-spec review have been resolved.
+All contradictions identified during the original cross-spec review of Specs 1 through 37 were resolved. Those specifications retain their locked and audited status and are not broadly reopened by GD61.
 
 GLOBAL LOCKS:
 
@@ -20,13 +20,17 @@ GLOBAL LOCKS:
 
 VERSION STATUS:
 
-\- Specs 1–37 reviewed
+\- Specs 1–37: reviewed, contradictions resolved, locked, audited CLEAN, and safe for implementation under their existing constraints.
 
-\- Contradictions resolved
+\- Spec 38: **locked candidate for planning**. Its approved spatial direction and INV-15 are authoritative, while numeric tuning and the policy gates explicitly listed in Spec 38 and the phased roadmap remain unresolved.
 
-\- Safe for implementation
+\- Spec 38 implementation is authorized only through the [post-GD60 phased roadmap](../docs/planning/post-gd60-mvp-execution-plan.md) after each relevant named gate is resolved.
 
-Last audit status: CLEAN
+\- GD61 authorizes documentation and implementation planning only; it authorizes no runtime implementation, schema migration, tuning values, or player-facing behavior.
+
+Original Specs 1–37 audit status: CLEAN
+
+GD61 addendum: [System Spec 38](38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) adds authoritative spatial-capacity, required player-facing floor-space accounting, and saved same-floor route-graph direction. It does not reopen unrelated locked rules.
 
 # System Spec 1. Mana System 
 

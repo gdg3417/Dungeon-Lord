@@ -90,6 +90,8 @@ MVP includes a minimal, readable node set that demonstrates the branch fantasy a
 
 - Notes: Future hooks: advanced path control
 
+- Spatial contract: Spec 38 limits the first implementation to one reachable optional branch per floor, explicit required/optional route classification, deterministic selection, and saved same-floor graph validity. This unlock grants an allowance; it does not define hardcoded geometry or tuning.
+
 # 7. Data model and tables
 
 - ResearchNode table is the single authoritative list of research entries.

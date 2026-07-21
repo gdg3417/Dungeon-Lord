@@ -1,5 +1,7 @@
 # MVP Vertical-Slice Integration Plan After M7-C2
 
+> **Historical / substantially completed / superseded after GD61.** The VS and GD10-GD15 sequences remain useful traceability for the prototype delivered and extended through GD60, but they are no longer the forward execution order. See the [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md).
+
 _Date: 2026-06-04 (UTC)_
 
 _Status basis: merged repository state through PR 73 / M7-C2_

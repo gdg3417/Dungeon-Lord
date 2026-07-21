@@ -1,5 +1,9 @@
 # Sprint 4 Ticket Backlog (Onboarding, Tuning, Accessibility, MVP-safe Hooks)
 
+> **Historical / remaining / no longer in current execution order (GD61).** The goals remain useful, but polish cannot precede a stable spatial editor and a testable build-run-inspect-revise loop. The [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md) re-sequences onboarding, accessibility, balance, performance, Android, and external-test evidence into Phase 9 after the Phase 7 graphical editor and Phase 8 content/research expansion.
+
+**Current disposition:** targeted usability and pacing work through GD55/GD57 is completed evidence for the temporary prototype, not completion of production onboarding or accessibility. Test-only overrides remain deferred unless a concrete validation need appears; player-facing live operations remain out of MVP scope.
+
 ## Test Governance References
 - Test-stage matrix: `docs/planning/test-stage-matrix.md`
 - Sprint 4 closeout checklist: `docs/planning/sprint-4-closeout-checklist.md`

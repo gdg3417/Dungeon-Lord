@@ -1,5 +1,7 @@
 # MVP Progress and Revised Timeline After PR 52
 
+> **Historical / superseded after GD61.** This records the repository interpretation after PR 52 and is not the current execution plan. Preserve it for milestone evidence; use the [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md) for current status and order.
+
 _Date: 2026-05-30 (UTC)_
 
 _Status basis: merged repository state through PR 52_

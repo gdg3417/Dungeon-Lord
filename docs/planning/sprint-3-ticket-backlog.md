@@ -1,5 +1,9 @@
 # Sprint 3 Ticket Backlog (Hardening, Reconciliation, Release Reliability)
 
+> **Historical / partially completed / no longer in current execution order (GD61).** Some save/lifecycle, content-validation, performance, and build-readiness foundations were delivered through GD60 (notably GD56 and GD58), but this document does not contain complete ticket-by-ticket merge evidence. Unconfirmed items remain unconfirmed. Production hardening must not displace proof of a playable spatial fantasy; see the [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md).
+
+**Current disposition:** reuse these acceptance criteria when their dependencies arise in Phases 1-9. Broad backend reconciliation and release-dashboard work are deferred until they are demonstrated MVP blockers or enter post-MVP production hardening.
+
 ## Test Governance References
 - Test-stage matrix: `docs/planning/test-stage-matrix.md`
 - Sprint 3 closeout checklist: `docs/planning/sprint-3-closeout-checklist.md`

@@ -1,5 +1,17 @@
 # Actionable Game Development Backlog
 
+> **Historical / partially completed / superseded execution order (GD61).** This backlog preserves acceptance criteria and source traceability. Its post-GD9 GD10-GD15 sequence was delivered and extended through GD60, but it is no longer the authoritative forward order. Current disposition and remaining work are governed by the [post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md) and [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md). Items without repository evidence require confirmation; do not infer completion from a planned status.
+
+## GD61 disposition
+
+| Historical workstream | Implementation status / GD evidence | Remaining gap | Current disposition |
+|---|---|---|---|
+| GD10-GD15 placement, outcomes, layout, simple editor, loot, research bridge | Completed in PRs #101, #103, #105-#108 | Spatial construction and production editor were explicit non-goals | Historical; superseded by Phases 1-8 |
+| Room-slot and two-room evolution | Partially completed in PRs #130-#142 and #158 (GD60) | Physical footprints, corridors, graph persistence, reachability and capacity | Migrate only after Phase 1 contracts |
+| Player-facing loop and analysis | Completed/expanded through PRs #113-#157 (GD20-GD59) | Graphical construction parity, onboarding and external fun evidence | Retain; validate in Phases 7-9 |
+| Mana/offline, multiple floors, content breadth | Partial or remaining; exact old-ticket closure is not consistently evidenced here | Construction economy, additional-floor traversal, breadth and balance | Re-sequenced into Phases 4, 6, 8 and 9 |
+| Backend, live operations, prestige, monetization, release dashboards | Deferred | Not needed to prove the core fantasy | Post-MVP unless a concrete MVP dependency is demonstrated |
+
 ## Source Documents Reviewed
 - `README.md` - repository-level context (minimal project framing).
 - `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` - authoritative lock status, global invariants, and implementation safety constraints.

@@ -3,12 +3,15 @@
 Date: 2026-05-15  
 Purpose: Trace each design/system spec to sprint implementation, artifact output, and validation gate.
 
-Status legend:
-- `Planned` = scheduled in current forward plan
-- `Deferred` = intentionally out of MVP implementation for now
-- `Reference` = informs work but no direct implementation in current sprint window
+> **GD61 disposition (2026-07-21): Historical coverage matrix, superseded execution order.** Sprint targets below preserve the May planning record and are not proof of implementation. The authoritative sequence is the [post-GD60 MVP execution plan](../docs/planning/post-gd60-mvp-execution-plan.md). See the [GD traceability matrix](../docs/planning/backlog-to-sprint-traceability-matrix.md) for reconciled evidence and remaining gaps. Status values in the legacy tables mean planned coverage, not current completion.
 
-## A) Master and system spec coverage (`00`–`37`)
+Status legend:
+- `Planned` = historically scheduled in the May 2026 Sprint 2-4 plan; it is not a current implementation status.
+- `Deferred` = historically deferred from that sprint window; locked MVP items still remain MVP unless their authoritative source is amended.
+- `Reference` = historically used as guidance without direct scheduled implementation in that sprint window.
+- `Locked candidate / active` = Spec 38's current post-GD60 planning authority; implementation still follows its named roadmap gates.
+
+## A) Master and system spec coverage (`00`–`38`)
 
 | Spec ID | Requirement focus (short) | Sprint target | Owner role(s) | Primary artifact(s) | Validation gate | MVP scope | Status |
 |---|---|---|---|---|---|---|---|
@@ -50,6 +53,7 @@ Status legend:
 | 35 | Error handling/player trust | S2 | Engineering, Design | explicit pending/failure messaging | UX/UAT trust checks | In-MVP | Planned |
 | 36 | Performance/memory/device targets | S3 | Engineering, QA | budget profiles + benchmarks | perf regression gate | In-MVP | Planned |
 | 37 | QA strategy/test harness | S2/S3 | QA, Engineering | deterministic replay + CI gates | full QA matrix | In-MVP | Planned |
+| 38 | Floor spatial capacity and route graph | Post-GD60 Phases 1-9 | Design, Engineering, Data, QA, UI | spatial contracts, migration, editor, route evidence | invariant, migration, performance and fun gates | In-MVP | **Locked candidate / active** |
 
 ## B) Design doc alignment coverage
 
@@ -64,8 +68,9 @@ Status legend:
 | Dungeon_Builder_Arcanology_Spec_v1 | S2/S4 | research/magic loop references + balance | Planned |
 | Dungeon_Builder_Diplomacy_Spec_v1 | Deferred | tracked for future expansion beyond MVP slice | Deferred |
 
-## C) Immediate execution next actions (ticketization)
-1. Convert S2-01..S2-07 into ticket IDs with assignees and estimate ranges.
-2. Add acceptance checklists directly to each ticket from this matrix `Validation gate` column.
-3. Add sprint board labels: `spec:<id>`, `mvp:in`, `mvp:deferred`, and `risk:high/med/low`.
-4. Publish weekly coverage rollup: `% specs with implementation artifacts started` and `% gates passed`.
+## C) Current execution handoff
+
+1. Phase 0 / GD61 locks planning authority and Spec 38; it implements no runtime behavior.
+2. The next likely packet is **GD62: Establish spatial domain contracts and layout validation foundations**.
+3. Later packets follow Phases 2-9; old sprint acceptance criteria are reused only where relevant.
+4. Completion reporting must cite merged GD work, tests/evidence, a remaining gap, and current disposition. Uncertain evidence is marked **requires confirmation**.
