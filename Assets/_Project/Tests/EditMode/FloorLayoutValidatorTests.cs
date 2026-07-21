@@ -209,12 +209,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void ValidHorizontalAndVerticalCorridors_PassAndCanonicalizeReversedInput()
+        public void DirectUnsortedRawHorizontalAndVerticalCorridorFootprints_AreAcceptedWithoutInputMutation_AndCanonicalizedOnlyByCanonicalized()
         {
-            var layout = ValidLayout(); layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) });
-            layout.Edges[1].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) });
+            var horizontalTiles = new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) };
+            var verticalTiles = new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) };
+            var horizontalFootprint = new ResolvedTileFootprint { OccupiedTiles = horizontalTiles };
+            var verticalFootprint = new ResolvedTileFootprint { OccupiedTiles = verticalTiles };
+            var layout = ValidLayout();
+            layout.Edges[0].Footprint = horizontalFootprint;
+            layout.Edges[1].Footprint = verticalFootprint;
+
             Assert.That(FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint), Is.False);
-            CollectionAssert.AreEqual(new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20) }, layout.Canonicalized().Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
+            Assert.That(horizontalFootprint.OccupiedTiles, Is.SameAs(horizontalTiles));
+            Assert.That(verticalFootprint.OccupiedTiles, Is.SameAs(verticalTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) }, horizontalTiles);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) }, verticalTiles);
+
+            FloorSpatialLayout canonicalized = layout.Canonicalized();
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20) }, canonicalized.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 30), new TileCoordinate(30, 31) }, canonicalized.Edges.Single(x => x.EdgeId == "edge.1").Footprint.OccupiedTiles);
         }
 
         [Test]
