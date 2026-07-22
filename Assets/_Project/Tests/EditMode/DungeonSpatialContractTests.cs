@@ -95,6 +95,73 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CanonicalizationAndUnityJson_PreserveInvalidDirectDoorwayData()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            FloorRouteEdge doorway = source.Edges[0];
+            doorway.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            doorway.CorridorDefinitionId = "corridor.invalid";
+            TileCoordinate[] sourceTiles = { new TileCoordinate(9, 4), new TileCoordinate(8, 4) };
+            doorway.Footprint = new ResolvedTileFootprint { OccupiedTiles = sourceTiles };
+
+            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorSpatialLayout canonicalAgain = canonical.Canonicalized();
+            FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
+
+            foreach (FloorSpatialLayout candidate in new[] { source, canonical, restored })
+            {
+                FloorLayoutValidationReason[] reasons = FloorLayoutValidator.Validate(candidate,
+                    FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(),
+                    FloorLayoutValidatorTests.CorridorDefinitions()).Issues.Select(issue => issue.Reason).ToArray();
+                Assert.That(reasons, Does.Contain(FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition));
+                Assert.That(reasons, Does.Contain(FloorLayoutValidationReason.DirectDoorwayHasFootprint));
+            }
+
+            FloorRouteEdge canonicalDoorway = canonical.Edges.Single(edge => edge.EdgeId == doorway.EdgeId);
+            Assert.That(canonicalDoorway.CorridorDefinitionId, Is.EqualTo("corridor.invalid"));
+            Assert.That(canonicalDoorway.Footprint, Is.Not.SameAs(doorway.Footprint));
+            Assert.That(canonicalDoorway.Footprint.OccupiedTiles, Is.Not.SameAs(sourceTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(8, 4), new TileCoordinate(9, 4) }, canonicalDoorway.Footprint.OccupiedTiles);
+            Assert.That(doorway.CorridorDefinitionId, Is.EqualTo("corridor.invalid"));
+            Assert.That(doorway.Footprint.OccupiedTiles, Is.SameAs(sourceTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(9, 4), new TileCoordinate(8, 4) }, sourceTiles);
+            Assert.That(JsonUtility.ToJson(canonicalAgain), Is.EqualTo(JsonUtility.ToJson(canonical)));
+            AssertLayoutsEqual(canonical, restored);
+        }
+
+        [Test]
+        public void Canonicalization_MixedKindsUseEstablishedKeysAndRoundTripDeterministically()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            source.Edges[0].ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            source.Edges[0].CorridorDefinitionId = null;
+            source.Edges[0].Footprint = null;
+            source.Edges[1].Classification = RouteClassification.Optional;
+            source.Edges[1].OptionalBranchId = "branch.test";
+            source.Edges = new[] { source.Edges[2], source.Edges[1], source.Edges[0] };
+
+            FloorSpatialLayout canonical = source.Canonicalized();
+            CollectionAssert.AreEqual(new[] { "edge.0", "edge.2", "edge.1" }, canonical.Edges.Select(edge => edge.EdgeId));
+            Assert.That(canonical.Edges[0].ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(canonical.Edges[1].ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            Assert.That(canonical.Edges, Is.Not.SameAs(source.Edges));
+            Assert.That(canonical.Edges[1], Is.Not.SameAs(source.Edges[0]));
+
+            FloorLayoutValidationResult before = FloorLayoutValidator.Validate(canonical,
+                FloorLayoutValidatorTests.Configuration(branches: 1), FloorLayoutValidatorTests.Definitions(),
+                FloorLayoutValidatorTests.CorridorDefinitions());
+            FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
+            FloorLayoutValidationResult after = FloorLayoutValidator.Validate(restored,
+                FloorLayoutValidatorTests.Configuration(branches: 1), FloorLayoutValidatorTests.Definitions(),
+                FloorLayoutValidatorTests.CorridorDefinitions());
+            AssertLayoutsEqual(canonical, restored);
+            CollectionAssert.AreEqual(before.Issues.Select(IssueKey), after.Issues.Select(IssueKey));
+            Assert.That(after.Capacity.FinalFloorSpaceCapacity, Is.EqualTo(before.Capacity.FinalFloorSpaceCapacity));
+            Assert.That(after.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(before.Capacity.UsedFloorSpaceCapacity));
+            Assert.That(after.Capacity.RemainingFloorSpaceCapacity, Is.EqualTo(before.Capacity.RemainingFloorSpaceCapacity));
+        }
+
+        [Test]
         public void Canonicalization_NormalizesOnlyCopyOptionalStrings_WithoutChangingValidation()
         {
             FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();

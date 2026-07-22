@@ -120,12 +120,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
                     bool footprintValid = ValidateCorridorFootprint(edge, issues);
                     kindContractValid = definitionResolved && footprintValid;
-                    if (kindContractValid)
+                    TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
+                    if (suppliedTiles != null && suppliedTiles.Length > 0)
                     {
-                        AddOccupants(occupancy, edge.Footprint.OccupiedTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
-                        AddStructureTiles(usedTiles, edge.Footprint.OccupiedTiles, floor?.Bounds, boundsValid,
+                        AddOccupants(occupancy, suppliedTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
+                        ValidateStructureTileBounds(suppliedTiles, floor?.Bounds, boundsValid,
                             "corridor:" + (edge.EdgeId ?? string.Empty), issues);
                     }
+                    if (kindContractValid) AddUsedTiles(usedTiles, suppliedTiles);
                 }
 
                 bool sourceResolved = ResolveEndpoint(edge.SourceNodeId, edge.EdgeId, true, validNodeById, issues, out FloorRouteNode source);
@@ -325,9 +327,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static void AddStructureTiles(HashSet<TileCoordinate> usedTiles, IEnumerable<TileCoordinate> tiles,
             RectangularFloorBounds bounds, bool boundsValid, string subjectId, List<FloorLayoutValidationIssue> issues)
         {
+            AddUsedTiles(usedTiles, tiles);
+            ValidateStructureTileBounds(tiles, bounds, boundsValid, subjectId, issues);
+        }
+
+        private static void AddUsedTiles(HashSet<TileCoordinate> usedTiles, IEnumerable<TileCoordinate> tiles)
+        {
+            foreach (TileCoordinate tile in tiles ?? Enumerable.Empty<TileCoordinate>()) usedTiles.Add(tile);
+        }
+
+        private static void ValidateStructureTileBounds(IEnumerable<TileCoordinate> tiles,
+            RectangularFloorBounds bounds, bool boundsValid, string subjectId, List<FloorLayoutValidationIssue> issues)
+        {
             foreach (TileCoordinate tile in tiles ?? Enumerable.Empty<TileCoordinate>())
             {
-                usedTiles.Add(tile);
                 if (boundsValid && !bounds.Contains(tile))
                     Add(issues, FloorLayoutValidationReason.StructureTileOutsideFloorBounds, subjectId, null, tile);
             }

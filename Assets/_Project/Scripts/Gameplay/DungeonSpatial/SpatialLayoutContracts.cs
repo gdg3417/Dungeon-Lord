@@ -106,12 +106,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static FloorRouteEdge CopyEdge(FloorRouteEdge edge) => edge == null ? null : new FloorRouteEdge
         {
             EdgeId = edge.EdgeId,
-            CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway
-                ? string.Empty : edge.CorridorDefinitionId,
+            CorridorDefinitionId = edge.CorridorDefinitionId ?? string.Empty,
             FloorId = edge.FloorId,
             SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
-            Footprint = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway || edge.Footprint == null
-                ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
+            Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
             Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
             ConnectionKind = edge.ConnectionKind
         };
