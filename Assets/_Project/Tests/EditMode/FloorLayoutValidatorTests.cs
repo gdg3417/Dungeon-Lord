@@ -224,15 +224,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var footprint = Definitions(); footprint[0].GrossFootprint = null; AssertReason(ValidLayout(), Configuration(), footprint, CorridorDefinitions(), FloorLayoutValidationReason.InvalidRoomFootprint);
         }
 
-        [TestCase("null")] [TestCase("empty")] [TestCase("single")] [TestCase("duplicate")] [TestCase("diagonal")] [TestCase("bent")] [TestCase("gapped")]
+        [TestCase("null")] [TestCase("empty")] [TestCase("duplicate")] [TestCase("diagonal")] [TestCase("bent")] [TestCase("gapped")]
         public void InvalidCorridorFootprints_AreRejected(string kind)
         {
             var layout = ValidLayout();
-            TileCoordinate[] tiles = kind == "empty" ? Array.Empty<TileCoordinate>() : kind == "single" ? new[] { new TileCoordinate(20, 20) } :
-                kind == "duplicate" ? new[] { new TileCoordinate(20, 20), new TileCoordinate(20, 20) } : kind == "diagonal" ? new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 21) } :
+            TileCoordinate[] tiles = kind == "empty" ? Array.Empty<TileCoordinate>() : kind == "duplicate" ? new[] { new TileCoordinate(20, 20), new TileCoordinate(20, 20) } : kind == "diagonal" ? new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 21) } :
                 kind == "bent" ? new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20), new TileCoordinate(21, 21) } : new[] { new TileCoordinate(20, 20), new TileCoordinate(22, 20) };
             layout.Edges[0].Footprint = kind == "null" ? null : new ResolvedTileFootprint(tiles);
             AssertReason(layout, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.InvalidCorridorFootprint);
+        }
+
+        [Test]
+        public void OneTilePhysicalCorridorContributesOneTileAndParticipatesInGraphAndConnections()
+        {
+            var layout = ValidLayout(); layout.Edges[1].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 2) });
+            FloorLayoutValidationResult valid = FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(), CorridorDefinitions());
+            Assert.That(valid.IsValid, Is.True); Assert.That(valid.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(7));
+            Assert.That(valid.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(connections: 1), CorridorDefinitions()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.True);
         }
 
         [Test]
@@ -584,6 +593,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
             Assert.That(layout.Edges[1].Footprint.OccupiedTiles, Is.SameAs(rawTiles));
             CollectionAssert.AreEqual(new[] { new TileCoordinate(2, 0), new TileCoordinate(10, 0) }, rawTiles);
+        }
+
+        [Test]
+        public void DuplicateRawCorridorCoordinatesEmitUniqueBoundsDiagnosticsWithoutAuthorityOrMutation()
+        {
+            var layout = ValidLayout();
+            TileCoordinate[] rawTiles = { new TileCoordinate(-1, 0), new TileCoordinate(-1, 0), new TileCoordinate(-2, 0) };
+            layout.Edges[1].Footprint = new ResolvedTileFootprint { OccupiedTiles = rawTiles };
+            var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions());
+            Assert.That(result.Issues.Count(issue => issue.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint && issue.SubjectId == "edge.1"), Is.EqualTo(1));
+            FloorLayoutValidationIssue[] bounds = result.Issues.Where(issue => issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && issue.SubjectId == "corridor:edge.1").ToArray();
+            Assert.That(bounds.Length, Is.EqualTo(2));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(-2, 0), new TileCoordinate(-1, 0) }, bounds.Select(issue => issue.Coordinate));
+            Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
+            Assert.That(layout.Edges[1].Footprint.OccupiedTiles, Is.SameAs(rawTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(-1, 0), new TileCoordinate(-1, 0), new TileCoordinate(-2, 0) }, rawTiles);
+        }
+
+        [Test]
+        public void ExtremeCorridorFootprintProducesStableIssueWithoutOverflowOrMutation()
+        {
+            var layout = ValidLayout(); TileCoordinate[] rawTiles = { new TileCoordinate(int.MinValue, 0), new TileCoordinate(int.MaxValue, 0) };
+            layout.Edges[1].Footprint = new ResolvedTileFootprint { OccupiedTiles = rawTiles };
+            AssertReason(layout, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.InvalidCorridorFootprint);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(int.MinValue, 0), new TileCoordinate(int.MaxValue, 0) }, rawTiles);
         }
 
         [Test]

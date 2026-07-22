@@ -123,8 +123,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
                     if (suppliedTiles != null && suppliedTiles.Length > 0)
                     {
-                        AddOccupants(occupancy, suppliedTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
-                        ValidateStructureTileBounds(suppliedTiles, floor?.Bounds, boundsValid,
+                        TileCoordinate[] diagnosticTiles = suppliedTiles.Distinct().OrderBy(tile => tile).ToArray();
+                        AddOccupants(occupancy, diagnosticTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
+                        ValidateStructureTileBounds(diagnosticTiles, floor?.Bounds, boundsValid,
                             "corridor:" + (edge.EdgeId ?? string.Empty), issues);
                     }
                     if (kindContractValid) AddUsedTiles(usedTiles, suppliedTiles);
@@ -211,15 +212,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool ValidateCorridorFootprint(FloorRouteEdge edge, List<FloorLayoutValidationIssue> issues)
         {
             TileCoordinate[] tiles = edge.Footprint?.OccupiedTiles;
-            bool valid = tiles != null && tiles.Length >= 2 && tiles.Distinct().Count() == tiles.Length;
-            if (valid)
+            bool valid = tiles != null && tiles.Length >= 1 && tiles.Distinct().Count() == tiles.Length;
+            if (valid && tiles.Length > 1)
             {
                 bool horizontal = tiles.All(x => x.Y == tiles[0].Y), vertical = tiles.All(x => x.X == tiles[0].X);
                 if (!horizontal && !vertical) valid = false;
                 else
                 {
                     TileCoordinate[] canonical = tiles.OrderBy(x => x).ToArray();
-                    int extent = horizontal ? canonical[canonical.Length - 1].X - canonical[0].X : canonical[canonical.Length - 1].Y - canonical[0].Y;
+                    long extent = horizontal
+                        ? (long)canonical[canonical.Length - 1].X - canonical[0].X
+                        : (long)canonical[canonical.Length - 1].Y - canonical[0].Y;
                     valid = extent + 1 == canonical.Length;
                 }
             }

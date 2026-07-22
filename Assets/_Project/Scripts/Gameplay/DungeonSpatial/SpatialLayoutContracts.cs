@@ -106,7 +106,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static FloorRouteEdge CopyEdge(FloorRouteEdge edge) => edge == null ? null : new FloorRouteEdge
         {
             EdgeId = edge.EdgeId,
-            CorridorDefinitionId = edge.CorridorDefinitionId ?? string.Empty,
+            CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                string.IsNullOrWhiteSpace(edge.CorridorDefinitionId) ? string.Empty : edge.CorridorDefinitionId ?? string.Empty,
             FloorId = edge.FloorId,
             SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
             Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
