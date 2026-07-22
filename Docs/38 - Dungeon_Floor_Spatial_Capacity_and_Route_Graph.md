@@ -31,11 +31,13 @@ Define the missing spatial contract between authored construction content, saved
 
 # 3. Capacity model
 
-Each active floor exposes an authored rectangular boundary and deterministically calculated final, used, and remaining floor space. Later floors generally have greater authored capacity, but exact bounds remain a content gate. Final available space may be changed only through an approved authored boundary/capacity policy.
+Each active floor has an authored rectangular boundary defining legal coordinates and exposes deterministically calculated final, used, and remaining floor space. Occupied active structure tiles determine used space: one occupied physical tile equals one floor-space unit, and a tile never counts as multiple units. Final available capacity cannot authorize placement outside legal bounds.
 
-Physical footprint is the single source of truth for geometry, fit, occupancy, overlap, and used floor space: one occupied physical tile equals one floor-space unit. Used space is the union/count of occupied active structure tiles; a tile never counts as multiple units. Mana price is separate and may use authored formulas and modifiers. The editor must eventually display final, used, remaining, and prospective use. Floor-space values must never become a second or weighted geometry authority.
+The exact relationship among legal bounds, buildable/unavailable tiles, final available capacity, Architecture research, mana-funded expansion, floor upgrades, and ordered theme/content modifiers remains an authored design and contract gate. Those progression mechanisms remain intended, but this specification does not choose whether or how they unlock or expand buildable tiles. No second weighted space authority is permitted. Mana price remains separate. The editor must eventually display final, used, remaining, and prospective use.
 
 Capacity increases expand construction possibility; they do not silently relocate existing structures. Content-limit reductions must be handled gracefully: preserve readable saved state, mark invalid/excess state explicitly, prevent worsening edits, and offer a deterministic repair path rather than deleting content silently.
+
+**Inactive GD62 delta:** the current inactive floor contract has final capacity but no rectangular boundary; room/corridor definitions carry independent floor-space costs that the validator sums; and the only edge shape is a physical corridor edge, with no footprint-free direct-doorway representation. GD64 must align contracts and validation before spatial content authoring or migration design. It preserves canonical ordering and reason values 1–39, appends new reasons, adds focused EditMode tests, and changes no schema, runtime authority, UI, tuning, content, or migration.
 
 # 4. Room contract
 
@@ -163,4 +165,4 @@ Explicitly deferred: curved/freeform corridors, multiple elevations, teleporters
 
 # 16. Open questions (not locked tuning)
 
-Exact floor bounds; dimensions/footprints; capacities; content and stable textual IDs; connection points; costs/modifiers; refund percentage/rounding/clamping; invested-mana save representation; migration coordinates/orientations/fixtures/fallbacks; branch formula/tie-break; transfer fields/formula/save state; offline-mana tuning; and device limits require their named roadmap gates. Structural identities, ownership, movement/removal, direct-doorway, and one-tile-one-space policies are resolved in the GD63 decision record. Until approved in content/config and evidence, they must not be guessed in runtime code.
+Exact boundary dimensions; buildable-tile unlock rules; expansion formulas/modifier behavior; dimensions/footprints; capacities; content and stable textual IDs; connection points; costs/modifiers; refund percentage/rounding/clamping; invested-mana save representation; migration coordinates/orientations/fixtures/fallbacks; branch formula/tie-break; transfer fields/formula/save state; offline-mana tuning; and device limits require their named roadmap gates. Structural identities, ownership, movement/removal, direct-doorway, and one-tile-one-space policies are resolved in the GD63 decision record. Until approved in content/config and evidence, they must not be guessed in runtime code.

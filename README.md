@@ -32,4 +32,4 @@ VS4 first-session MVP smoke documentation:
 
 The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
 
-The current documentation packet is **GD63: Lock approved spatial design decisions and reconcile the post-GD62 plan**. The likely sequence is GD64 inactive spatial content/export validation, GD65 final migration design, then a separately reviewed migration implementation. None should activate competing layout authorities prematurely.
+The current documentation packet is **GD63: Lock approved spatial design decisions and reconcile the post-GD62 plan**. The inactive GD62 contracts still lack rectangular floor bounds and footprint-free doorways and calculate used capacity from independent configured costs; they must be aligned before content or migration work. The sequence is GD64 inactive contract/validator alignment, GD65 inactive content/export validation, GD66 final migration design, then Phase 2 migration and authority transition.

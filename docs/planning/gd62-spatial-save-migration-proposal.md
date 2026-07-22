@@ -37,7 +37,7 @@ Repeated migration of the same logical input must produce byte-equivalent canoni
 
 ## Legacy authority and fixture gate
 
-GD65 must approve fixtures for schema versions 1–6; empty/populated `dungeonLayout`; legacy placements only; floor-layout nodes only; disagreements among representations; assignments only; legacy Room 0 only; both legacy rooms; duplicate/out-of-range records; missing room/corridor content; malformed/duplicate IDs; partial graph-shaped data if applicable; and current-version idempotence. Each fixture identifies the winning compatibility field and expected semantic route.
+GD66 must approve fixtures for schema versions 1–6; empty/populated `dungeonLayout`; legacy placements only; floor-layout nodes only; disagreements among representations; assignments only; legacy Room 0 only; both legacy rooms; duplicate/out-of-range records; missing room/corridor content; malformed/duplicate IDs; partial graph-shaped data if applicable; and current-version idempotence. Each fixture identifies the winning compatibility field and expected semantic route.
 
 Missing content requires an explicitly approved migration map or safe fallback. No fallback ID is approved. Corrupt state stays recoverable and diagnosable rather than being silently deleted, partially rewritten, or accepted. Failure to produce a valid graph must preserve the original save and backup, return a stable internal failure classification, and prevent a competing partial graph from becoming writable.
 
@@ -53,6 +53,6 @@ INV-12 requires immediate save safety for later committed tile placement/movemen
 
 ## Genuinely unresolved implementation gates
 
-GD64 must first approve inactive MVP spatial content IDs, rectangular footprints, connection points, capacities, and export/schema validation. GD65 can then approve exact migration coordinates/orientations, stable textual ID derivation, edge IDs, direct-doorway compatibility, legacy fixtures, missing-content/fallback IDs, and recovery UX/telemetry. Exact floor bounds, construction/invested-mana state, corridor content, and recovery evidence also remain unapproved where migration requires them.
+GD64 must first align the inactive contracts and validator with rectangular bounds, footprint-derived used space, and separately represented direct doorways. GD65 may then approve inactive MVP spatial content IDs, rectangular footprints, connection points, capacities, and export/schema validation. GD66 can then approve exact migration coordinates/orientations, stable textual ID derivation, edge IDs, direct-doorway compatibility, legacy fixtures, missing-content/fallback IDs, and recovery UX/telemetry. Exact floor bounds, construction/invested-mana state, corridor content, and recovery evidence also remain unapproved where migration requires them.
 
-No exact coordinate, orientation, footprint, textual ID template, content ID, fallback ID, or recovery UI is approved by this proposal. Migration implementation and a schema change remain a later, separately reviewed packet.
+No exact coordinate, orientation, footprint, textual ID template, content ID, fallback ID, or recovery UI is approved by this proposal. Migration implementation, schema change, runtime-reader switch, writable-authority transition, rollback, and migration evidence belong exclusively to Phase 2.

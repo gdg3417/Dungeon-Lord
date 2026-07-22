@@ -18,12 +18,14 @@ GD63 is documentation only. The save root remains schema version **6**. The GD62
 
 - One occupied physical tile equals one floor-space unit. Used floor space is derived directly from occupied physical tiles; a physical tile never counts as multiple units.
 - Geometry/floor-space consumption and mana price are separate concepts.
-- Rectangular floor boundaries and rectangular or square rooms are the MVP content restriction. The domain may support irregular masks after MVP, but irregular rooms are not an MVP content requirement.
+- Rectangular floor boundaries define legal MVP coordinates; rectangular or square rooms are the MVP content restriction. The domain may support irregular masks after MVP, but irregular rooms are not an MVP content requirement.
 - Reserved structural or environmental tiles, such as a lava pool, reduce usable placement area. Features may also apply authored content-capacity and gameplay modifiers. They do not increase the external footprint unless the feature belongs to a separately authored larger room variant.
 - Gross footprint, reserved internal tiles, usable placement area, and monster/trap/loot capacities are distinct authorities.
+- Occupied active structure tiles determine used floor space. Final available capacity cannot authorize placement outside the rectangular legal bounds.
+- The exact relationship among legal bounds, buildable or unavailable tiles, final available capacity, Architecture research, mana-funded expansion, floor upgrades, and ordered theme/content modifiers remains an authored design and contract gate. These progression mechanisms remain intended, but no expansion model is approved and no weighted second space authority is permitted.
 - The editor must eventually expose final, used, remaining, and prospective floor-space use. Player-facing labels and explanations use localization references.
 
-Exact floor dimensions, room dimensions, footprints, content capacities, and costs are not approved here.
+Exact boundary and room dimensions, unlock rules, expansion formulas, modifier behavior, footprints, content capacities, and costs are not approved here.
 
 ## 3. Locked MVP structural identities
 
@@ -175,19 +177,32 @@ Each required MVP family budgets one base unit, two basic specialty units, one s
 
 - Offline mana uses a configured percentage of the applicable online passive generation rate.
 - Research may improve offline efficiency, eligible duration, storage, or Mana Farm production.
-- It should support continued expansion without replacing active play. The design target is that a normal overnight absence generally funds one meaningful construction or renovation decision, not a whole floor.
+- It should support continued expansion without replacing active play. A normal overnight absence funding roughly one meaningful construction or renovation decision rather than a whole floor is a **non-authoritative Phase 4 balance hypothesis to test**, not locked tuning or an approved target.
 - Percentage, cap, duration, clock-manipulation handling, and rounding remain tunable gates.
 - Future results must explain elapsed time, effective rate, cap, and awarded mana through localization-backed presentation.
 
-## 13. Architecture requirements
+## 13. Known inactive GD62 implementation delta
+
+The merged, inactive GD62 contracts do **not** yet conform to every approved decision in this record:
+
+- Floor configuration exposes a final floor-space capacity but has no rectangular floor-boundary representation.
+- Room and corridor definitions expose independent floor-space costs, and the validator sums those configured costs rather than deriving used space from occupied physical tiles.
+- The only edge contract is a corridor edge that requires corridor definition/footprint behavior; there is no separate footprint-free direct-doorway representation.
+
+This is a known inactive implementation delta, not current player-facing behavior. Content authoring and migration design must not proceed against these incompatible contracts. GD64 must align the inactive contracts and validator before GD65 content/export work or GD66 migration design. GD63 does not change C# or prescribe final class names or architecture.
+
+GD64 is narrowly required to add or approve rectangular floor-boundary representation; derive used floor space from occupied physical tiles; remove, replace, deprecate, or strictly validate the obsolete independent floor-space-cost authority; and represent direct-doorway connections separately from physical corridor content. It must preserve deterministic canonical ordering, preserve reason values 1–39 and append rather than renumber any new reasons, add focused EditMode tests, and keep the graph inactive. It must not change save schema, runtime authority, player-facing UI, content tuning, or migration.
+
+## 14. Architecture requirements
 
 Later implementation must preserve deterministic simulation; stable IDs; ordinal canonical ordering; versioned saves and explicit migration; atomic state changes; a single writable layout authority; side-effect-free validation; stable reason codes; configuration-owned tuning; localization-backed text; mobile-bounded workloads; save compatibility; and physical tiles as both geometry and floor-space authority.
 
-## 14. Remaining implementation and authored-content gates
+## 15. Remaining implementation and authored-content gates
 
-- **GD64:** inactive MVP spatial content contract, final content IDs/footprints, and export/schema/foreign-key validation.
-- **GD65:** final migration mapping, stable textual ID rules, coordinates/orientations, fixtures, fallback/content-missing policy, backup/recovery UX, and atomic recovery evidence.
-- **Later migration implementation:** separately reviewed schema change and authority transition; no version is approved by GD63.
+- **GD64:** inactive spatial contract and validator alignment described below.
+- **GD65:** inactive MVP spatial content contract, final content IDs/footprints, and export/schema/foreign-key validation after GD64 aligns the domain.
+- **GD66:** final migration mapping, stable textual ID rules, coordinates/orientations, fixtures, fallback/content-missing policy, backup/recovery UX, and atomic recovery design.
+- **Phase 2 only:** separately reviewed schema migration, legacy-state migration, runtime-reader switch, writable-authority transition, rollback, and migration evidence; no version is approved by GD63.
 - Exact floor/room dimensions and capacities; content IDs; connection points; socket/content capacities; construction/renovation/corridor costs; refund percentage, rounding and clamping; environmental modifiers; and workload/device limits.
 - Doorway geometry/validation, invested-mana save representation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 branch formula/tie-break, and Phase 6 transfer/save details.
 - Offline mana percentage, cap, duration, safeguards, rounding, and result presentation.
