@@ -4,6 +4,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum FloorRouteNodeKind { Entrance = 1, Room = 2, Exit = 3, Descent = 4, Completion = 5 }
     public enum RouteClassification { Required = 1, Optional = 2 }
+    public enum FloorRouteConnectionKind { DirectDoorway = 1, PhysicalCorridor = 2 }
 
     [Serializable]
     public sealed class FloorRouteNode
@@ -15,15 +16,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     [Serializable]
-    public sealed class CorridorEdge
+    public sealed class FloorRouteEdge
     {
         public string EdgeId;
         public string CorridorDefinitionId;
         public string FloorId;
         public string SourceNodeId;
         public string DestinationNodeId;
-        public ResolvedTileFootprint Footprint = new ResolvedTileFootprint();
+        public ResolvedTileFootprint Footprint;
         public RouteClassification Classification;
         public string OptionalBranchId;
+        public FloorRouteConnectionKind ConnectionKind;
     }
 }

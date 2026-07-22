@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public string FloorDefinitionId;
         public int FloorIndex;
+        public RectangularFloorBounds Bounds;
         public int FinalFloorSpaceCapacity;
         public int OptionalBranchAllowance;
     }
@@ -19,7 +20,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId;
         public RectangularFootprintDefinition GrossFootprint;
         public TileCoordinate[] ReservedTileOffsets = Array.Empty<TileCoordinate>();
-        public int FloorSpaceCost;
         public int MaximumConnectionCount;
         public int MonsterCapacity;
         public int TrapCapacity;
@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     [Serializable]
-    public sealed class CorridorSpatialDefinition { public string CorridorDefinitionId; public int FloorSpaceCost; }
+    public sealed class CorridorSpatialDefinition { public string CorridorDefinitionId; }
 
     [Serializable]
     public sealed class RoomSpatialInstance
@@ -72,7 +72,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string FloorId;
         public RoomSpatialInstance[] Rooms = Array.Empty<RoomSpatialInstance>();
         public FloorRouteNode[] Nodes = Array.Empty<FloorRouteNode>();
-        public CorridorEdge[] Edges = Array.Empty<CorridorEdge>();
+        public FloorRouteEdge[] Edges = Array.Empty<FloorRouteEdge>();
 
         public FloorSpatialLayout Canonicalized()
         {
@@ -84,7 +84,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Nodes = (Nodes ?? Array.Empty<FloorRouteNode>()).Select(CopyNode)
                     .OrderBy(node => node == null ? 0 : (int)node.Kind)
                     .ThenBy(node => node?.NodeId, StringComparer.Ordinal).ToArray(),
-                Edges = (Edges ?? Array.Empty<CorridorEdge>()).Select(CopyEdge)
+                Edges = (Edges ?? Array.Empty<FloorRouteEdge>()).Select(CopyEdge)
                     .OrderBy(edge => edge == null ? 0 : (int)edge.Classification)
                     .ThenBy(edge => edge?.SourceNodeId, StringComparer.Ordinal)
                     .ThenBy(edge => edge?.DestinationNodeId, StringComparer.Ordinal)
@@ -103,12 +103,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId ?? string.Empty
         };
 
-        private static CorridorEdge CopyEdge(CorridorEdge edge) => edge == null ? null : new CorridorEdge
+        private static FloorRouteEdge CopyEdge(FloorRouteEdge edge) => edge == null ? null : new FloorRouteEdge
         {
-            EdgeId = edge.EdgeId, CorridorDefinitionId = edge.CorridorDefinitionId, FloorId = edge.FloorId,
+            EdgeId = edge.EdgeId,
+            CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway
+                ? string.Empty : edge.CorridorDefinitionId,
+            FloorId = edge.FloorId,
             SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
-            Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
-            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty
+            Footprint = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway || edge.Footprint == null
+                ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
+            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
+            ConnectionKind = edge.ConnectionKind
         };
     }
 

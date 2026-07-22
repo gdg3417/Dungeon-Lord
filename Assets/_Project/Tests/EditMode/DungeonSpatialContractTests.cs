@@ -29,6 +29,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RectangularFloorBounds_UsesInclusiveMinimumExclusiveMaximum()
+        {
+            var bounds = new RectangularFloorBounds(new TileCoordinate(-2, 3), 4, 2);
+            Assert.That(bounds.IsValid, Is.True);
+            Assert.That(bounds.TileCount, Is.EqualTo(8));
+            Assert.That(bounds.Contains(new TileCoordinate(-2, 3)), Is.True);
+            Assert.That(bounds.Contains(new TileCoordinate(1, 4)), Is.True);
+            Assert.That(bounds.Contains(new TileCoordinate(-3, 3)), Is.False);
+            Assert.That(bounds.Contains(new TileCoordinate(2, 4)), Is.False);
+            Assert.That(new RectangularFloorBounds(default, 0, 2).Contains(default), Is.False);
+        }
+
+        [Test]
         public void StraightCorridor_RejectsDiagonal_AndIncludesBothEndpoints()
         {
             Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(0, 0), new TileCoordinate(1, 1), out _), Is.False);
@@ -62,11 +75,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CanonicalizationAndUnityJson_PreserveMixedConnectionKindsAndDoorwayNulls()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            FloorRouteEdge doorway = source.Edges[1];
+            doorway.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            doorway.CorridorDefinitionId = null;
+            doorway.Footprint = null;
+            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorRouteEdge canonicalDoorway = canonical.Edges.Single(edge => edge.EdgeId == doorway.EdgeId);
+            Assert.That(canonicalDoorway.CorridorDefinitionId, Is.EqualTo(string.Empty));
+            Assert.That(canonicalDoorway.Footprint, Is.Null);
+            Assert.That(canonicalDoorway.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(source.Edges[1].CorridorDefinitionId, Is.Null);
+            Assert.That(source.Edges[1].Footprint, Is.Null);
+            FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
+            AssertLayoutsEqual(canonical, restored);
+            CollectionAssert.AreEqual(canonical.Edges.Select(edge => edge.EdgeId), restored.Canonicalized().Edges.Select(edge => edge.EdgeId));
+        }
+
+        [Test]
         public void Canonicalization_NormalizesOnlyCopyOptionalStrings_WithoutChangingValidation()
         {
             FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
             FloorRouteNode sourceEntrance = source.Nodes.Single(x => x.Kind == FloorRouteNodeKind.Entrance);
-            CorridorEdge sourceRequiredEdge = source.Edges.Single(x => x.EdgeId == "edge.0");
+            FloorRouteEdge sourceRequiredEdge = source.Edges.Single(x => x.EdgeId == "edge.0");
             Assert.That(sourceEntrance.RoomInstanceId, Is.Null);
             Assert.That(sourceRequiredEdge.OptionalBranchId, Is.Null);
             string[] sourceIssues = FloorLayoutValidator.Validate(source, FloorLayoutValidatorTests.Configuration(),
@@ -131,7 +164,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(actual.Edges[index].DestinationNodeId, Is.EqualTo(expected.Edges[index].DestinationNodeId));
                 Assert.That(actual.Edges[index].Classification, Is.EqualTo(expected.Edges[index].Classification));
                 Assert.That(actual.Edges[index].OptionalBranchId, Is.EqualTo(expected.Edges[index].OptionalBranchId));
-                CollectionAssert.AreEqual(expected.Edges[index].Footprint.OccupiedTiles, actual.Edges[index].Footprint.OccupiedTiles);
+                Assert.That(actual.Edges[index].ConnectionKind, Is.EqualTo(expected.Edges[index].ConnectionKind));
+                if (expected.Edges[index].Footprint == null) Assert.That(actual.Edges[index].Footprint, Is.Null);
+                else CollectionAssert.AreEqual(expected.Edges[index].Footprint.OccupiedTiles, actual.Edges[index].Footprint.OccupiedTiles);
             }
         }
 

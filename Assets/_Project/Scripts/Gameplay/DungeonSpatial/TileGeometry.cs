@@ -7,6 +7,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public enum CardinalOrientation { Zero = 0, Ninety = 1, OneEighty = 2, TwoSeventy = 3 }
 
     [Serializable]
+    public sealed class RectangularFloorBounds
+    {
+        public TileCoordinate Minimum;
+        public int Width;
+        public int Height;
+
+        public RectangularFloorBounds() { }
+        public RectangularFloorBounds(TileCoordinate minimum, int width, int height)
+        {
+            Minimum = minimum;
+            Width = width;
+            Height = height;
+        }
+
+        public bool IsValid => Width > 0 && Height > 0;
+        public long TileCount => IsValid ? (long)Width * Height : 0L;
+
+        public bool Contains(TileCoordinate coordinate) => IsValid &&
+            coordinate.X >= Minimum.X && coordinate.Y >= Minimum.Y &&
+            (long)coordinate.X < (long)Minimum.X + Width &&
+            (long)coordinate.Y < (long)Minimum.Y + Height;
+    }
+
+    [Serializable]
     public struct TileCoordinate : IEquatable<TileCoordinate>, IComparable<TileCoordinate>
     {
         public int X;
