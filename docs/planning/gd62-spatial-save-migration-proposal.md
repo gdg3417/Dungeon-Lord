@@ -2,19 +2,26 @@
 
 ## Status and authority
 
-This is a proposal for the next design gate, not authorization or implementation. The current save root schema version remains **6**. GD62 adds no field to `SaveData`, changes neither migration implementation, and does not make the inactive graph a runtime authority. Spec 38 and INV-12 control future committed spatial editing; Spec 28 supplies the general versioning and recovery rules.
+This remains a **proposal**, not authorization or implementation. The current save root schema version remains **6**. GD62 added no `SaveData` field and did not change migration implementation; GD63 changes documentation only. The inactive `DungeonSpatial` graph is not runtime or save authority. Existing ordered two-room models retain both authorities until a separately reviewed migration.
 
-The current competing compatibility fields are resolved in this order: persisted `mvpRoomSlotAssignments` for ordered room instances; `mvpDungeonFloorLayout` for current placement nodes; `mvpDungeonPlacements` as its legacy fallback; and `dungeonLayout` as the older generic slot scaffold. That observed order must be frozen in approved fixtures before migration.
+The current compatibility precedence remains: persisted `mvpRoomSlotAssignments`; `mvpDungeonFloorLayout`; `mvpDungeonPlacements` as its legacy fallback; then `dungeonLayout`. That observed order must be frozen in approved fixtures before migration.
 
-## Provisional next version and mapping
+## Resolved policy direction
 
-Schema version **7** is a provisional candidate only. A later reviewed migration would read the compatibility authority once and emit:
+A later migration will read compatibility authority once and produce a deterministic, simple straight-line route in this semantic order:
 
-`entrance -> Room 0 -> Room 1 (when present) -> completion`
+1. distinct entrance node, which may display to the player as Room 0;
+2. legacy internal Room 0 as the first buildable room, displayed as player-facing Room 1;
+3. legacy internal Room 1, when present, as the second buildable room, displayed as player-facing Room 2; and
+4. completion terminal.
 
-Room 0 and Room 1 become room nodes in their existing numeric order. A gate must approve deterministic textual derivation rules for the floor instance, room instances, room nodes, corridor instances, entrance, and completion IDs. IDs must be derived only from approved stable source IDs and explicit position semantics—never runtime hashes, `GetHashCode`, dictionary/list enumeration, or incidental collection order.
+Player-facing numbering is a derived label and never persistent identity authority. The entrance is not legacy room-index authority. New graph state uses stable entrance, room-instance, node, edge, and terminal IDs. Adjacent compatible structures may use direct-doorway edges without inventing corridor content or footprint; physical separation requires authored corridor content.
 
-Default coordinates, orientations, footprints, corridor content IDs, and structure costs are deliberately unspecified. Migration cannot ship until approved content makes that mapping valid without guessing tuning.
+The migration remains deterministic, idempotent, atomic, rollback-safe, canonically ordered, and a single transition between writable authorities. It cannot change current deterministic outcomes unless explicitly versioned and evidenced.
+
+## Schema-version boundary
+
+Schema version **7** remains a provisional candidate only; neither GD62 nor GD63 approves it. No schema marker advances until the entire candidate payload is durable and valid. Exact new-version selection is part of the later implementation review.
 
 ## Canonical serialization and idempotence
 
@@ -26,24 +33,26 @@ The proposed graph writes canonical arrays as follows:
 4. Edges by route classification, source node ID, destination node ID, then edge ID using ordinal comparison.
 5. Occupied tiles by X, then Y.
 
-Repeated migration of the same logical input must produce byte-equivalent canonical graph data. Migrating an already-current save must be a no-op. The migration must not create new IDs or reorder data based on input enumeration.
+Repeated migration of the same logical input must produce byte-equivalent canonical graph data. An already-current save is a no-op. Runtime hashes, `GetHashCode`, incidental enumeration, UI labels, and collection order cannot derive identities or ordering.
 
-## Legacy authority and fixture matrix
+## Legacy authority and fixture gate
 
-The design gate must approve fixtures covering: schema versions 1 through 6; empty and populated `dungeonLayout`; legacy placements only; floor-layout nodes only; both legacy representations with disagreement; room assignments only; Room 0 only; Room 0 and Room 1; duplicate/out-of-range room records; missing room/corridor content; malformed IDs; duplicate IDs; partial graph-shaped data if applicable; and a current-version idempotence fixture. Each fixture must state which compatibility field wins and the expected ordered route without inventing unapproved coordinates or content IDs.
+GD66 must approve fixtures for schema versions 1–6; empty/populated `dungeonLayout`; legacy placements only; floor-layout nodes only; disagreements among representations; assignments only; legacy Room 0 only; both legacy rooms; duplicate/out-of-range records; missing room/corridor content; malformed/duplicate IDs; partial graph-shaped data if applicable; and current-version idempotence. Each fixture identifies the winning compatibility field and expected semantic route.
 
-Missing content must use an explicitly approved migration map or safe content fallback. No fallback ID is approved by GD62. Corrupt state must remain recoverable and diagnosable; it must not be silently deleted, partially rewritten, or treated as valid. If a valid graph cannot be produced, migration must fail atomically, preserve the original save and backup, return a stable internal failure classification, and keep gameplay from writing a competing partial graph.
+Missing content requires an explicitly approved migration map or safe fallback. No fallback ID is approved. Corrupt state stays recoverable and diagnosable rather than being silently deleted, partially rewritten, or accepted. Failure to produce a valid graph must preserve the original save and backup, return a stable internal failure classification, and prevent a competing partial graph from becoming writable.
 
 ## Backup, rollback, and recovery
 
-Before committing the future version change, persist and verify a recoverable version-6 backup. Build the version-7 candidate separately, validate all IDs, footprints, capacity, endpoints, reachability, connection limits, terminal behavior, and canonical ordering, then atomically replace the active payload. On write/validation failure, retain version 6 and the backup. Recovery must be repeatable and must never advance the schema marker before the full payload is durable.
+Before a future version commit, persist and verify a recoverable version-6 backup. Build the candidate separately; validate IDs, footprints, one-tile-one-space capacity, endpoints, reachability, connections, terminal behavior, and canonical ordering; then replace the active payload atomically. On write or validation failure, retain version 6 and its backup. Recovery must be repeatable.
 
 ## Authority transition
 
-During the migration release, old models become read-only compatibility adapters at the point the validated graph is successfully committed. They must stop accepting writes before any runtime system writes the graph. The graph becomes the sole writable authority only after all gameplay readers, save lifecycle paths, and ordered-route regressions use its canonical view. A later cleanup may remove compatibility data only after rollback support and fixture coverage permit it; there must never be two writable layout authorities.
+Old models become read-only compatibility adapters only when the validated graph commits successfully. They stop accepting writes before any runtime system writes the graph. The graph becomes sole writable authority only after all gameplay readers, save lifecycle paths, and ordered-route regressions use its canonical view. Cleanup waits for rollback and fixture support. There must never be two writable layout authorities.
 
-Every later committed tile placement or movement must save immediately under INV-12. The older standalone Spec 28 statement that tile edits use interval saves conflicts with the audited lock summary, INV-12, and Spec 38; INV-12 and Spec 38 control future spatial editing.
+INV-12 requires immediate save safety for later committed tile placement/movement. The older standalone Spec 28 interval-save statement conflicts with the audited lock summary, INV-12, and Spec 38; INV-12 and Spec 38 control future editing.
 
-## Unresolved approval gates
+## Genuinely unresolved implementation gates
 
-The following must be approved before implementation: default migration coordinates and orientations; room and corridor footprint definitions; corridor content IDs; floor dimensions/bounds; the cost-to-footprint projection and schema/export validation rule; safe missing-content/fallback IDs; stable textual ID templates; exact legacy fixtures; and recovery UX/telemetry ownership. The later content contract/export packet owns validation that configured costs agree with authored footprint rules. GD62 intentionally supplies no formula converting tile count into floor-space cost.
+GD64 must first align the inactive contracts and validator with rectangular bounds, footprint-derived used space, and separately represented direct doorways. GD65 may then approve inactive MVP spatial content IDs, rectangular footprints, connection points, capacities, and export/schema validation. GD66 can then approve exact migration coordinates/orientations, stable textual ID derivation, edge IDs, direct-doorway compatibility, legacy fixtures, missing-content/fallback IDs, and recovery UX/telemetry. Exact floor bounds, construction/invested-mana state, corridor content, and recovery evidence also remain unapproved where migration requires them.
+
+No exact coordinate, orientation, footprint, textual ID template, content ID, fallback ID, or recovery UI is approved by this proposal. Migration implementation, schema change, runtime-reader switch, writable-authority transition, rollback, and migration evidence belong exclusively to Phase 2.

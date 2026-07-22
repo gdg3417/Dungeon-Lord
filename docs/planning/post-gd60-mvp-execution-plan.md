@@ -2,19 +2,19 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Authoritative active roadmap after GD61** |
-| Baseline | Main through PR #158 / GD60 |
+| Status | **Authoritative active roadmap after GD63 reconciliation** |
+| Baseline | Main through merged PR #160 / GD62 |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-21 |
+| Last reconciled | 2026-07-22 |
 
 ## 1. Authority and purpose
 
 This is the single active dependency order from the GD60 prototype to a fun MVP, a usable graphical editor, and external testing. Older sprint plans, closeouts, evidence records, and vertical-slice plans remain historical traceability: they retain useful acceptance criteria, but are **not** the authoritative execution sequence. A planned status is not implementation evidence. The merged repository and committed tests/evidence are authoritative; uncertain closure is marked **requires confirmation**.
 
-GD61 changes documentation only. It does not implement spatial models, migration, economy, routing, additional floors, content, or UI.
+GD63 records approved decisions and reconciles planning documentation only. It does not activate the GD62 graph or implement migration, economy, routing, additional floors, content, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
 
-## 2. Current repository baseline after GD60
+## 2. Current repository baseline after GD62
 
 ### Implemented capabilities
 
@@ -29,16 +29,16 @@ Merged history establishes the following at prototype scope:
 
 ### Partially implemented capabilities
 
-- **Layout:** two ordered room slots imply route order, but are not physical tile geometry or a general graph.
+- **Layout:** GD62 provides inactive tile/footprint, floor, room, corridor, node, and edge contracts plus a pure deterministic validator with stable reason codes 1–39. Those inactive contracts still use independent configured floor-space costs, lack rectangular floor bounds, and represent only corridor edges—not footprint-free direct doorways—so GD64 alignment is required before content or migration design. Two ordered room slots still own runtime route order; the graph is not active or authoritative.
 - **Construction:** choices and replacement exist, but spatial placement, corridors, structural removal/renovation, and mana-backed costs do not.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** prototype mana/heat flows exist; construction spending, floor expansion, and production-grade offline behavior remain incomplete or require confirmation.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** lifecycle integrity is hardened for current models; graph-version migration has not been designed or implemented.
+- **Saves:** lifecycle integrity is hardened for current models; the GD62 migration proposal exists, but final mapping is not approved and no graph-version migration is implemented. Schema version remains 6.
 
 ### Missing MVP capabilities
 
-Physical footprints and overlap checks; authoritative floor capacity; corridor structures; entrance/exit nodes; saved same-floor route graphs; reachability validation; structural editing and containment resolution; construction economy; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
+Active physical footprints and overlap enforcement; authoritative runtime floor capacity; corridor structures; entrance/exit nodes; saved same-floor route graphs; reachability validation; structural editing and containment resolution; construction economy; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
 
 ### Deferred capabilities
 
@@ -50,7 +50,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 |---|---|
 | Ordered slots become a second, incompatible layout model | Define Spec 38 contracts first; migrate once; retain a compatibility adapter only as needed. |
 | Save breakage or nondeterministic graph ordering | Approve version/migration plan before schema changes; stable IDs, canonical ordering, legacy fixtures. |
-| Two capacity systems disagree | Tiles/masks own geometry; required player-facing floor-space costs/capacities are configured and derived from or validated against the same footprint rules. |
+| Two capacity systems disagree | One occupied physical tile is both geometry authority and one floor-space unit; mana price and content capacities remain separate authored concepts. |
 | Tuning leaks into runtime | Put every limit, coefficient, cost and modifier in approved typed/content configuration. |
 | Full UI rewrite begins before domain behavior stabilizes | Complete Phases 1-6 contracts/behavior first; Phase 7 proves parity before Bootstrap retirement. |
 | More scaffolding without fun | Every phase ends in observable capability; run player-fantasy checkpoints at Phases 3, 5, 7, and 9. |
@@ -67,25 +67,31 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 ## 4. Dependency-ordered phases and PR-sized packets
 
-### Phase 0 — GD61 planning reset (current)
+### Phase 0 — GD61 planning reset (complete)
 
 **Packets:** (1) audit/reconciliation and authority banners; (2) Spec 38; (3) this roadmap and matrices.
 
-**Exit:** required documents agree on baseline, authority, scope and sequence; links validate; diff is documentation-only. **Technical gate:** documentation validation passes. **Fantasy gate:** questions to test are explicit; no claim that fun is proven.
+**Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation
+### Phase 1 — Spatial domain foundation (in progress)
 
-1. **GD62 — Spatial contracts and validator foundation:** typed/config contracts for floor capacity, tile footprints/masks, rooms, simple corridors, graph nodes/edges, stable IDs and canonical ordering; pure capacity/overlap/connectivity/endpoint validators.
-2. **Save/migration design gate:** version proposal, old-to-new mapping, failure/rollback policy and fixtures, without migrating live state unless kept as a separately reviewable PR.
-3. **Content contract/export update:** approved authoring fields, foreign-key/schema validation and test configuration; all numbers data-driven.
+1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
+2. **GD63 — Approved decisions and planning reconciliation (current documentation packet):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
+3. **GD64 — Inactive spatial contract and validator alignment:** add or approve rectangular floor-boundary representation; derive used space from occupied physical tiles; remove, replace, deprecate, or strictly validate independent floor-space costs; and represent direct doorways separately from physical corridors. Preserve canonical ordering and reason values 1–39, append new reasons, add focused EditMode tests, and keep the graph inactive. No schema, runtime-authority, UI, tuning, content, or migration changes. Final class names and architecture require implementation review.
+4. **GD65 — Inactive MVP spatial content contract and export validation:** after GD64, approve authored identities, IDs, rectangular footprints, connection points, capacities, and schema/foreign-key/export validation.
+5. **GD66 — Final save/migration design gate:** after GD65 content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
-**Exit:** contracts can represent the MVP layout, reject every Spec 38 invariant violation deterministically, and round-trip a test graph. Save migration is reviewed before persistence changes. **Technical gate:** deterministic validator/schema tests; no gameplay constants or player-facing literals. **Fantasy gate:** paper/prototype review confirms capacity and fit explanations are understandable.
+**Phase boundary:** Phase 1 ends with GD66 design approval. It does not change schema, migrate legacy state, switch runtime readers, transition writable authority, or provide migration implementation evidence. Those actions belong exclusively to Phase 2.
+
+**Exit:** aligned inactive contracts and approved content represent the MVP layout; deterministic validation and exports pass; and final migration design is reviewed before persistence changes. **Technical gate:** focused contract/validator and schema tests; no gameplay constants or player-facing literals. **Fantasy gate:** paper/prototype review may test whether capacity and fit explanations are understandable; correctness does not prove fun.
 
 ### Phase 2 — Backward-compatible migration
 
-1. Add the new save version and migrate/adapter-map the current ordered two-room state to entrance → rooms → completion.
-2. Switch existing simulation/read models to canonical graph order while preserving current player flow and outcomes.
-3. Add legacy/current fixtures, idempotence, corrupt-state policy, and rollback/recovery evidence.
+Phase 2 exclusively owns migration implementation and authority transition:
+
+1. Change the save schema and migrate/adapter-map legacy ordered two-room state to entrance → rooms → completion.
+2. Switch runtime readers to canonical graph order and transition to one writable authority while preserving current player flow and outcomes.
+3. Add legacy/current fixtures, idempotence, corrupt-state policy, rollback, and migration/recovery evidence.
 
 **Exit:** old saves load without losing assignments; current saves round-trip; identical legacy inputs preserve deterministic route behavior; no dual writable authority remains. **Technical gate:** migration matrix, journey, route and save tests. **Fantasy gate:** existing build/run/inspect flow shows no regression.
 
@@ -95,14 +101,14 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 2. Replace/renovate/remove structures; explicitly resolve contents and attached corridors using approved policies.
 3. Expose deterministic validation reasons via localization-backed presentation contracts (Bootstrap may host temporary diagnostics only).
 
-**Exit:** Floor 1 supports entrance, Basic Room, Narrow Hall, one additional room archetype, required route and completion node; valid edits persist and invalid edits are atomic. **Technical gate:** boundary, overlap, reachability, connection, containment and ordering tests. **Fantasy gate:** players can predict fit failures and compare compact versus spreading layouts in a low-fidelity test.
+**Exit:** Floor 1 supports Entrance Hall, Basic Room, Rectangle Room, Large Chamber, the Narrow Hall / Straight Stone Corridor category, a required route, and Completion Terminal; valid edits persist and invalid edits are atomic. **Technical gate:** boundary, overlap, reachability, connection, containment and ordering tests. **Fantasy gate:** players can predict fit failures and compare compact versus spreading layouts in a low-fidelity test.
 
 ### Phase 4 — Mana-backed construction and offline mana completion
 
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
 3. Add localized cost, remaining-capacity, consequence and affordability previews before commit.
-4. Complete and evidence idle offline mana calculation before final MVP validation; exact existing coverage requires confirmation.
+4. Complete and evidence idle offline mana using the configured percentage in Spec 29’s locked single-grant calculation: no offline time cap, with mana storage capacity as the output clamp. Research may improve efficiency percentage, storage capacity, or Mana Farm production, not eligible duration. Explain elapsed time, effective rate, storage-cap clamp, and awarded mana; retain the overnight-one-edit statement only as a non-authoritative balance hypothesis.
 
 **Exit:** every structural edit previews and atomically applies the configured cost/policy; insufficient mana cannot partially mutate layout. **Technical gate:** formula order, affordability, rollback, migration and localization tests. **Fantasy gate:** observe whether spatial growth competes meaningfully with monsters, traps, loot and research.
 
@@ -191,17 +197,19 @@ Source authority: [What is the smallest version of Dungeon Builder that proves t
 
 ## 8. Genuine open decisions (owners and decision gates)
 
+Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progression-design-decisions.md), not repeated as unresolved. The following implementation/data gates remain open:
+
 | Question | Needed by | Required evidence/owner |
 |---|---|---|
-| Tile scale, Floor 1 capacity, footprints, costs and coefficients | Phase 1 content contract | Design/Data; authored tuning, never runtime constants |
-| Exact mapping between occupied tiles and displayed space units | Phase 1 | Design/UX/Data; one projection with rounding rules |
-| Third MVP room archetype and simple corridor identity | Phase 1 content packet | Design/Content |
-| Removal/refund and contained-placement resolution policy | Before Phase 3 implementation | Design + save/UX review |
-| Legacy two-room migration default coordinates and IDs | Before Phase 2 | Engineering/Data; fixture review |
+| Exact legal bounds, buildable/unavailable-tile unlock model, expansion/modifier behavior, room/corridor footprints, content capacities, connection points, final content IDs, costs and modifiers | GD64 alignment / GD65 content contract | Design/Data; authored content and schema validation, never runtime constants |
+| Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
+| Invested construction/renovation mana representation; refund percentage, rounding and clamping | Before Phase 2/4 implementation | Design/Data/Save; reviewed data contract |
+| Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
-| Exit-versus-descend state carried between floors | Phase 6 | Design/Engineering; cross-spec review |
-| Exact active-floor/content/device limits within the locked maximum of five floors | Phases 6/8/9 | Existing approved sources where present; otherwise Design/QA data decision |
+| Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
+| Offline efficiency percentage, timestamp/clock-manipulation safeguards and rounding; storage-cap tuning where otherwise authorized | Phase 4 | Design/Data/Save; preserve Spec 29 no-time-cap and storage-clamp policy |
+| Exact active-floor/content/device workload limits within the maximum five floors | Phases 6/8/9 | Design/QA data decision and device profiling |
 
-## 9. Next implementation recommendation
+## 9. Next packet recommendation
 
-**GD62: Establish spatial domain contracts and layout validation foundations.** Limit it to typed or configuration-consumed floor-capacity, room/corridor footprint, and graph node/edge representations; stable identifiers; deterministic canonical ordering; and pure deterministic validators for capacity, overlap, endpoints, connections and same-floor reachability. Include save-version and migration planning only. GD62 must not migrate saves, change the current player loop, add structural editing UI, mana costs, branching, additional floors, the Mana Farm, or production UI. This prevents premature migration and editor rewrites.
+**GD63: Lock approved spatial design decisions and reconcile the post-GD62 plan.** Keep the packet documentation-only. It records approved policy without choosing tuning, keeps the inactive graph non-authoritative, and establishes the dependency-correct sequence GD63 → GD64 inactive contract/validator alignment → GD65 content/export validation → GD66 final migration design → Phase 2 migration implementation. No player-facing behavior changes, and fun remains for the Phase 3, 5, 7, and 9 observation gates.

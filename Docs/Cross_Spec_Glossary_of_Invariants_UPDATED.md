@@ -115,7 +115,7 @@ INV-15 Dungeon Floor Spatial Validity
 
 Every active dungeon floor must remain within its configured spatial capacity, and every active room must be reachable from that floor's entrance through a valid saved same-floor route graph.
 
-Physical tile footprints are the geometry, fit, occupancy and overlap authority. Every buildable room and corridor has a required configured floor-space cost, and every floor exposes configured final capacity plus calculated used and remaining capacity for player-facing display. Floor-space values are derived from or validated against the same authored footprint rules rather than acting as a second geometry authority. All values and conversion/rounding rules are content-owned and tunable; graph ordering is deterministic; saves use stable IDs.
+Physical tile footprints are the geometry, fit, occupancy, overlap, and used-floor-space authority. One occupied active structure tile equals one used floor-space unit. Rectangular bounds define legal coordinates, and final available capacity cannot authorize placement outside them. The exact buildable-tile unlock/expansion and modifier model remains an authored gate; it must not introduce weighted space. Mana price and content-specific capacities remain separate, content-owned concepts. Graph ordering is deterministic; saves use stable IDs.
 
 Numbering convention: post-audit invariants continue the glossary sequence; therefore the spatial invariant following INV-14 is INV-15, independent of its owning specification number.
 
