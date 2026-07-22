@@ -25,19 +25,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public int TrapCapacity;
         public int LootCapacity;
 
-        public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation, out ResolvedTileFootprint footprint) =>
-            TileFootprintResolver.TryResolveRectangle(GrossFootprint, anchor, orientation, out footprint);
+        public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint) =>
+            TileFootprintResolver.TryResolveRectangle(GrossFootprint, anchor, orientation, limits, out footprint);
 
-        public TileCoordinate[] ResolveReservedTiles(TileCoordinate anchor, CardinalOrientation orientation)
+        public TileCoordinate[] ResolveReservedTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits)
         {
-            if (GrossFootprint == null || ReservedTileOffsets == null) return Array.Empty<TileCoordinate>();
+            if (GrossFootprint == null || ReservedTileOffsets == null || !limits.Allows(ReservedTileOffsets.LongLength))
+                return Array.Empty<TileCoordinate>();
             return ReservedTileOffsets.Select(offset => TransformOffset(offset, anchor, orientation)).OrderBy(tile => tile).ToArray();
         }
 
-        public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation)
+        public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits)
         {
-            if (!TryResolveGrossTiles(anchor, orientation, out ResolvedTileFootprint gross)) return Array.Empty<TileCoordinate>();
-            var reserved = new HashSet<TileCoordinate>(ResolveReservedTiles(anchor, orientation));
+            if (ReservedTileOffsets != null && !limits.Allows(ReservedTileOffsets.LongLength)) return Array.Empty<TileCoordinate>();
+            if (!TryResolveGrossTiles(anchor, orientation, limits, out ResolvedTileFootprint gross)) return Array.Empty<TileCoordinate>();
+            var reserved = new HashSet<TileCoordinate>(ResolveReservedTiles(anchor, orientation, limits));
             return gross.OccupiedTiles.Where(tile => !reserved.Contains(tile)).ToArray();
         }
 

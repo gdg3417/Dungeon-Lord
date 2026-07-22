@@ -2,24 +2,29 @@
 
 ## Scope
 
-GD64 aligns the inactive spatial contracts and deterministic validator with the approved GD63 direction. This final hardening correction permits one-tile physical corridors, makes coordinate arithmetic overflow-safe, normalizes semantically blank doorway IDs, preserves nonblank invalid doorway payloads, deduplicates raw-coordinate diagnostics, and strengthens deterministic ordering tests. It does not activate spatial runtime authority, alter saves or migration, author gameplay content, or add player-facing behavior.
+GD64 aligns the inactive spatial contracts and deterministic validator with the approved GD63 direction. The allocation-safety correction adds an explicit caller-supplied maximum materialized tile count and fails closed before oversized rectangle, corridor, raw-footprint, or reserved-tile processing. It preserves one-tile physical corridors, overflow-safe arithmetic, blank doorway-ID normalization, invalid doorway payload preservation, deduplicated raw diagnostics, and established edge ordering. The domain remains inactive and non-authoritative.
 
-## Reviewed head
+## Reviewed and final heads
 
-The requested reviewed PR head is `addc13de2a7aee320556616dccef264d5d67a15a`. This checkout had no configured GitHub remote and did not contain that object, so the remote SHA could not be independently resolved. The correction was applied to the GD64 snapshot supplied in the checkout on the requested `codex/implement-gd64-spatial-contracts-and-validation` branch. The final local commit and PR metadata are reported after commit; no separate PR is opened.
+The actual previous reviewed remote head is `b7602521f576b6000992535b7f691f4ccb678a90`. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting branch-head SHA is recorded in the final delivery report and PR metadata after commit. No separate PR is opened and no merge is performed.
+
+## Explicit allocation-workload contract
+
+`SpatialValidationWorkloadLimits` is an immutable caller-supplied value containing `MaximumMaterializedTileCount`. There is no default, fallback, inferred floor-based value, mutable global, system-memory inspection, or production tuning value. Missing, zero, and negative limits fail closed. GD65 remains responsible for approving and supplying the production/export value.
+
+Rectangle and straight-corridor resolvers reject tile counts above the limit before proportional allocation. The validator rejects oversized raw physical-corridor footprints with the existing `InvalidCorridorFootprint` reason and omits their per-coordinate processing, capacity, reachability, and connection authority. Oversized reserved-tile collections are rejected before set insertion or sorting. Focused tests use small fake limits only.
 
 ## Static validation completed on 2026-07-22
 
-- `git status --short`: completed before commit; the correction changes three inactive-domain source files, two focused EditMode test files, and this evidence file.
+- `git status --short`: run before and after commit.
 - `git diff --check`: passed with no output before commit.
 - `git diff --check origin/main...HEAD`: passed with no output against the verified GD63 baseline.
-- `git diff --name-only origin/main...HEAD`: returned exactly `FloorLayoutValidation.cs`, `FloorRouteGraph.cs`, `SpatialLayoutContracts.cs`, `TileGeometry.cs`, `DungeonSpatialContractTests.cs`, `FloorLayoutValidatorTests.cs`, `README.md`, the roadmap, and this evidence file.
+- `git diff --name-only origin/main...HEAD`: returned the four inactive-domain source files, two focused EditMode tests, README, roadmap, and this evidence file.
 - `git grep -n "FloorSpaceCost" -- Assets/_Project || true`: passed with no matches.
-- `git grep -n 'LatestSchemaVersion = 6' -- Assets/_Project/Scripts/Save/SaveMigration.cs`: passed; save schema remains 6.
-- SaveData inspection found no spatial, floor-route, tile, or graph field.
-- DungeonSpatial reference inspection found no use outside the inactive domain and its two focused EditMode tests.
-- Automated reason-code extraction returned exactly the contiguous values 1 through 45.
-- Prohibited-path and generated-file scans returned no nested `dungeon-builder/`, Library, logs, builds, test-result exports, scenes, prefabs, GameRoot, Bootstrap, build settings, or ordered-room-system changes.
+- Save-schema inspection confirmed `SaveMigration.LatestSchemaVersion = 6`; SaveData inspection found no spatial field.
+- DungeonSpatial reference-boundary inspection found no use outside the inactive domain and its focused EditMode tests.
+- Automated reason extraction returned exactly contiguous values 1 through 45.
+- Prohibited-path and generated-file scans returned no matches.
 
 ## Unity validation pending
 
@@ -35,4 +40,4 @@ GD64 does not validate direct-doorway adjacency; doorway orientation, connection
 
 ## Manual validation classification
 
-No gameplay, save-lifecycle, standalone-build, player-facing, or fun validation is required or claimed. This remains an inactive domain-foundation change, and the graph remains non-authoritative.
+No gameplay, save-lifecycle, standalone-build, player-facing, or fun validation is required or claimed. Existing ordered-room systems remain runtime/save authority.

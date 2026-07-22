@@ -49,7 +49,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class FloorLayoutValidator
     {
         public static FloorLayoutValidationResult Validate(FloorSpatialLayout suppliedLayout, FloorSpatialConfiguration floor,
-            IEnumerable<RoomSpatialDefinition> suppliedRoomDefinitions, IEnumerable<CorridorSpatialDefinition> suppliedCorridorDefinitions)
+            IEnumerable<RoomSpatialDefinition> suppliedRoomDefinitions, IEnumerable<CorridorSpatialDefinition> suppliedCorridorDefinitions,
+            SpatialValidationWorkloadLimits limits)
         {
             var issues = new List<FloorLayoutValidationIssue>();
             FloorSpatialLayout layout = suppliedLayout ?? new FloorSpatialLayout();
@@ -83,10 +84,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingRoomDefinition, room.RoomInstanceId, room.RoomDefinitionId);
                 else
                 {
-                    ValidateRoomDefinition(definition, room, issues);
+                    ValidateRoomDefinition(definition, room, limits, issues);
                     if (!Enum.IsDefined(typeof(CardinalOrientation), room.Orientation))
                         Add(issues, FloorLayoutValidationReason.InvalidOrientation, room.RoomInstanceId);
-                    if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, out ResolvedTileFootprint footprint))
+                    if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out ResolvedTileFootprint footprint))
                         Add(issues, FloorLayoutValidationReason.InvalidRoomFootprint, room.RoomInstanceId, room.RoomDefinitionId);
                     else
                     {
@@ -118,10 +119,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty, out _);
                     if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
-                    bool footprintValid = ValidateCorridorFootprint(edge, issues);
+                    bool footprintValid = ValidateCorridorFootprint(edge, limits, issues);
                     kindContractValid = definitionResolved && footprintValid;
                     TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
-                    if (suppliedTiles != null && suppliedTiles.Length > 0)
+                    if (suppliedTiles != null && suppliedTiles.Length > 0 && limits.Allows(suppliedTiles.LongLength))
                     {
                         TileCoordinate[] diagnosticTiles = suppliedTiles.Distinct().OrderBy(tile => tile).ToArray();
                         AddOccupants(occupancy, diagnosticTiles, new OccupantIdentity(OccupantKind.Corridor, edge.EdgeId));
@@ -194,12 +195,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private static void ValidateRoomDefinition(RoomSpatialDefinition definition, RoomSpatialInstance room, List<FloorLayoutValidationIssue> issues)
+        private static void ValidateRoomDefinition(RoomSpatialDefinition definition, RoomSpatialInstance room,
+            SpatialValidationWorkloadLimits limits, List<FloorLayoutValidationIssue> issues)
         {
             if (definition.GrossFootprint == null || definition.GrossFootprint.Width <= 0 || definition.GrossFootprint.Height <= 0)
                 Add(issues, FloorLayoutValidationReason.InvalidFootprintDimensions, definition.RoomDefinitionId);
             if (definition.MaximumConnectionCount < 0 || definition.MonsterCapacity < 0 || definition.TrapCapacity < 0 || definition.LootCapacity < 0)
                 Add(issues, FloorLayoutValidationReason.NegativeConfigurationValue, definition.RoomDefinitionId);
+            if (!limits.Allows((definition.ReservedTileOffsets ?? Array.Empty<TileCoordinate>()).LongLength))
+            {
+                Add(issues, FloorLayoutValidationReason.InvalidRoomFootprint, room.RoomInstanceId, definition.RoomDefinitionId);
+                return;
+            }
             var seen = new HashSet<TileCoordinate>();
             foreach (TileCoordinate offset in definition.ReservedTileOffsets ?? Array.Empty<TileCoordinate>())
             {
@@ -209,10 +216,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private static bool ValidateCorridorFootprint(FloorRouteEdge edge, List<FloorLayoutValidationIssue> issues)
+        private static bool ValidateCorridorFootprint(FloorRouteEdge edge, SpatialValidationWorkloadLimits limits,
+            List<FloorLayoutValidationIssue> issues)
         {
             TileCoordinate[] tiles = edge.Footprint?.OccupiedTiles;
-            bool valid = tiles != null && tiles.Length >= 1 && tiles.Distinct().Count() == tiles.Length;
+            bool valid = tiles != null && tiles.Length >= 1 && limits.Allows(tiles.LongLength);
+            if (valid) valid = tiles.Distinct().Count() == tiles.Length;
             if (valid && tiles.Length > 1)
             {
                 bool horizontal = tiles.All(x => x.Y == tiles[0].Y), vertical = tiles.All(x => x.X == tiles[0].X);

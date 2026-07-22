@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class FloorLayoutValidatorTests
     {
         public const string FloorId = "floor.instance.test";
+        public static SpatialValidationWorkloadLimits Limits(int maximumTiles = 100) => new SpatialValidationWorkloadLimits(maximumTiles);
         private const string RoomDefinitionId = "room.definition.test";
         private const string CorridorDefinitionId = "corridor.definition.test";
         private const int FinalCapacity = 8;
@@ -30,7 +31,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(FloorRouteNodeKind.Completion)] [TestCase(FloorRouteNodeKind.Exit)] [TestCase(FloorRouteNodeKind.Descent)]
         public void ValidLayout_ExactCapacity_AndTerminalKindsPass(FloorRouteNodeKind terminal)
         {
-            var result = FloorLayoutValidator.Validate(ValidLayout(terminal), Configuration(), Definitions(), CorridorDefinitions());
+            var result = FloorLayoutValidator.Validate(ValidLayout(terminal), Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.IsValid, Is.True); Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(FinalCapacity)); Assert.That(result.Capacity.RemainingFloorSpaceCapacity, Is.Zero);
         }
 
@@ -46,7 +47,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ReservedOutsideAndDuplicate_AreBothReported()
         {
             var definitions = Definitions(); definitions[0].ReservedTileOffsets = new[] { new TileCoordinate(2, 2), new TileCoordinate(2, 2) };
-            var result = FloorLayoutValidator.Validate(ValidLayout(), Configuration(), definitions, CorridorDefinitions());
+            var result = FloorLayoutValidator.Validate(ValidLayout(), Configuration(), definitions, CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.ReservedTileOutsideFootprint), Is.True);
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.DuplicateReservedTile), Is.True);
         }
@@ -59,7 +60,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (kind == "room-corridor") layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { layout.Rooms[0].Anchor, new TileCoordinate(layout.Rooms[0].Anchor.X + 1, layout.Rooms[0].Anchor.Y) });
             if (kind == "corridor-corridor") layout.Edges[1].Footprint = layout.Edges[0].Footprint;
             AssertReason(layout, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.FootprintOverlap);
-            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap), Is.False);
         }
 
         [TestCase(FloorLayoutValidationReason.MissingSourceNode)] [TestCase(FloorLayoutValidationReason.MissingDestinationNode)] [TestCase(FloorLayoutValidationReason.SelfEdge)] [TestCase(FloorLayoutValidationReason.CrossFloorEdge)]
@@ -88,7 +89,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             string[] missingKeys = EndpointIssueKeys(missing, reason);
             CollectionAssert.AreEqual(new[] { $"{(int)reason}|edge.0|node.missing|False|0|0" }, missingKeys);
-            Assert.That(FloorLayoutValidator.Validate(missing, Configuration(), Definitions(), CorridorDefinitions()).Issues.Any(x =>
+            Assert.That(FloorLayoutValidator.Validate(missing, Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues.Any(x =>
                 x.Reason == FloorLayoutValidationReason.MissingStableId && x.SubjectId == "edge.0"), Is.False);
             missing.Edges = missing.Edges.Reverse().ToArray();
             CollectionAssert.AreEqual(missingKeys, EndpointIssueKeys(missing, reason));
@@ -100,9 +101,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var missingEntrance = ValidLayout(); missingEntrance.Nodes = missingEntrance.Nodes.Where(x => x.Kind != FloorRouteNodeKind.Entrance).ToArray(); AssertReason(missingEntrance, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.MissingEntrance);
             var multiple = ValidLayout(); multiple.Nodes = multiple.Nodes.Concat(new[] { Node("entrance.2", FloorRouteNodeKind.Entrance) }).ToArray(); AssertReason(multiple, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.MultipleEntrances);
             var disconnected = ValidLayout(); disconnected.Edges = disconnected.Edges.Where(x => x.EdgeId != "edge.1").ToArray(); AssertReason(disconnected, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.UnreachableRoom);
-            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(connections: 2), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(connections: 2), CorridorDefinitions(), Limits()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded), Is.False);
             var exceeded = ValidLayout();
-            string[] connectionIssues = FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues
+            string[] connectionIssues = FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits()).Issues
                 .Where(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded).Select(Key).ToArray();
             CollectionAssert.AreEqual(new[]
             {
@@ -110,7 +111,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "22|node.room.1|room.1|False|0|0"
             }, connectionIssues);
             exceeded.Rooms = exceeded.Rooms.Reverse().ToArray(); exceeded.Nodes = exceeded.Nodes.Reverse().ToArray(); exceeded.Edges = exceeded.Edges.Reverse().ToArray();
-            CollectionAssert.AreEqual(connectionIssues, FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues
+            CollectionAssert.AreEqual(connectionIssues, FloorLayoutValidator.Validate(exceeded, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits()).Issues
                 .Where(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded).Select(Key).ToArray());
             var deadEnd = ValidLayout(); deadEnd.Edges = deadEnd.Edges.Where(x => x.EdgeId != "edge.2").ToArray(); AssertReason(deadEnd, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredRouteWithoutTerminal);
             var cycle = ValidLayout(); cycle.Edges[2].DestinationNodeId = "node.room.0"; AssertReason(cycle, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredRouteWithoutTerminal);
@@ -119,8 +120,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void OptionalBranches_CountDistinctIds_AndEnforceClassificationRules()
         {
-            var zero = ValidLayout(); Assert.That(FloorLayoutValidator.Validate(zero, Configuration(branches: 0), Definitions(), CorridorDefinitions()).IsValid, Is.True);
-            var one = ValidLayout(); one.Edges[1].Classification = RouteClassification.Optional; one.Edges[1].OptionalBranchId = "branch.a"; one.Edges[2].Classification = RouteClassification.Optional; one.Edges[2].OptionalBranchId = "branch.a"; Assert.That(FloorLayoutValidator.Validate(one, Configuration(branches: 1), Definitions(), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.OptionalBranchAllowanceExceeded), Is.False);
+            var zero = ValidLayout(); Assert.That(FloorLayoutValidator.Validate(zero, Configuration(branches: 0), Definitions(), CorridorDefinitions(), Limits()).IsValid, Is.True);
+            var one = ValidLayout(); one.Edges[1].Classification = RouteClassification.Optional; one.Edges[1].OptionalBranchId = "branch.a"; one.Edges[2].Classification = RouteClassification.Optional; one.Edges[2].OptionalBranchId = "branch.a"; Assert.That(FloorLayoutValidator.Validate(one, Configuration(branches: 1), Definitions(), CorridorDefinitions(), Limits()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.OptionalBranchAllowanceExceeded), Is.False);
             var two = ValidLayout(); two.Edges[1].Classification = RouteClassification.Optional; two.Edges[1].OptionalBranchId = "branch.a"; two.Edges[2].Classification = RouteClassification.Optional; two.Edges[2].OptionalBranchId = "branch.b"; AssertReason(two, Configuration(branches: 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.OptionalBranchAllowanceExceeded);
             var missing = ValidLayout(); missing.Edges[1].Classification = RouteClassification.Optional; AssertReason(missing, Configuration(branches: 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.OptionalEdgeMissingBranchId);
             var required = ValidLayout(); required.Edges[0].OptionalBranchId = "branch.a"; AssertReason(required, Configuration(branches: 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredEdgeHasBranchId);
@@ -130,7 +131,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void DuplicateAndMissingDefinitions_AndMultipleFailures_AreReturned()
         {
             var duplicate = ValidLayout(); duplicate.Rooms = duplicate.Rooms.Concat(new[] { Room("room.0", 10) }).ToArray(); duplicate.Nodes = duplicate.Nodes.Concat(new[] { Node("entrance", FloorRouteNodeKind.Entrance) }).ToArray(); duplicate.Edges = duplicate.Edges.Concat(new[] { Edge("edge.0", "missing", "missing", 12) }).ToArray();
-            var result = FloorLayoutValidator.Validate(duplicate, null, Array.Empty<RoomSpatialDefinition>(), Array.Empty<CorridorSpatialDefinition>());
+            var result = FloorLayoutValidator.Validate(duplicate, null, Array.Empty<RoomSpatialDefinition>(), Array.Empty<CorridorSpatialDefinition>(), Limits());
             Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.DuplicateRoomId)); Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.DuplicateNodeId)); Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.DuplicateEdgeId)); Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.MissingFloorConfiguration)); Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.MissingRoomDefinition)); Assert.That(result.Issues.Select(x => x.Reason), Does.Contain(FloorLayoutValidationReason.MissingCorridorDefinition));
         }
 
@@ -148,8 +149,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TileCoordinate boundsMinimum = configuration.Bounds.Minimum; int boundsWidth = configuration.Bounds.Width; int boundsHeight = configuration.Bounds.Height;
             string roomDefinitionId = roomDefinitions[0].RoomDefinitionId; int maximumConnections = roomDefinitions[0].MaximumConnectionCount;
             string corridorDefinitionId = corridorDefinitions[0].CorridorDefinitionId;
-            var a = FloorLayoutValidator.Validate(first, configuration, roomDefinitions, corridorDefinitions);
-            var b = FloorLayoutValidator.Validate(second, configuration, roomDefinitions.Reverse(), corridorDefinitions.Reverse());
+            var a = FloorLayoutValidator.Validate(first, configuration, roomDefinitions, corridorDefinitions, Limits());
+            var b = FloorLayoutValidator.Validate(second, configuration, roomDefinitions.Reverse(), corridorDefinitions.Reverse(), Limits());
             CollectionAssert.AreEqual(a.Issues.Select(Key), b.Issues.Select(Key)); AssertCapacityEqual(a.Capacity, b.Capacity);
             CollectionAssert.AreEqual(originalRooms, first.Rooms.Select(x => x.RoomInstanceId));
             CollectionAssert.AreEqual(originalNodes, first.Nodes.Select(x => x.NodeId));
@@ -205,7 +206,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RoomNodeBijectionAndFloorMembership_AreValidated()
         {
-            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions()).IsValid, Is.True);
+            Assert.That(FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions(), Limits()).IsValid, Is.True);
             var noNode = ValidLayout(); noNode.Nodes = noNode.Nodes.Where(x => x.RoomInstanceId != "room.1").ToArray(); AssertReason(noNode, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RoomMissingNode);
             var twoNodes = ValidLayout(); twoNodes.Nodes = twoNodes.Nodes.Concat(new[] { Node("node.room.duplicate", FloorRouteNodeKind.Room, "room.0") }).ToArray(); AssertReason(twoNodes, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.MultipleNodesForRoom);
             var missingRoom = ValidLayout(); missingRoom.Nodes[1].RoomInstanceId = "room.missing"; AssertReason(missingRoom, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RoomNodeMissingRoom);
@@ -238,10 +239,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void OneTilePhysicalCorridorContributesOneTileAndParticipatesInGraphAndConnections()
         {
             var layout = ValidLayout(); layout.Edges[1].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 2) });
-            FloorLayoutValidationResult valid = FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult valid = FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(valid.IsValid, Is.True); Assert.That(valid.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(7));
             Assert.That(valid.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.False);
-            Assert.That(FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(connections: 1), CorridorDefinitions()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.True);
+            Assert.That(FloorLayoutValidator.Validate(layout, Configuration(7), Definitions(connections: 1), CorridorDefinitions(), Limits()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.True);
         }
 
         [Test]
@@ -255,7 +256,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             layout.Edges[0].Footprint = horizontalFootprint;
             layout.Edges[1].Footprint = verticalFootprint;
 
-            Assert.That(FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues.Any(x => x.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint), Is.False);
             Assert.That(horizontalFootprint.OccupiedTiles, Is.SameAs(horizontalTiles));
             Assert.That(verticalFootprint.OccupiedTiles, Is.SameAs(verticalTiles));
             CollectionAssert.AreEqual(new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) }, horizontalTiles);
@@ -279,13 +280,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var layout = ValidLayout(); layout.Rooms[0].Anchor = new TileCoordinate(20, 20); layout.Rooms[1].Anchor = new TileCoordinate(20, 20);
             layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(20, 20), new TileCoordinate(21, 20) });
-            string[] expected = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions()).Issues.Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key).ToArray();
+            string[] expected = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues.Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key).ToArray();
             Assert.That(expected.Length, Is.EqualTo(3));
             Assert.That(expected, Does.Contain("13|room:room.0|room:room.1|True|20|20"));
             Assert.That(expected, Does.Contain("13|room:room.0|corridor:edge.0|True|20|20"));
             Assert.That(expected, Does.Contain("13|room:room.1|corridor:edge.0|True|20|20"));
             layout.Rooms = layout.Rooms.Reverse().ToArray(); layout.Edges = layout.Edges.Reverse().ToArray();
-            CollectionAssert.AreEqual(expected, FloorLayoutValidator.Validate(layout, Configuration(), Definitions().Reverse(), CorridorDefinitions().Reverse()).Issues.Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key));
+            CollectionAssert.AreEqual(expected, FloorLayoutValidator.Validate(layout, Configuration(), Definitions().Reverse(), CorridorDefinitions().Reverse(), Limits()).Issues.Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key));
         }
 
         [Test]
@@ -296,7 +297,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             layout.Nodes.Single(x => x.NodeId == "node.room.0").RoomInstanceId = "shared";
             layout.Edges[0].EdgeId = "shared";
             layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { layout.Rooms[0].Anchor, new TileCoordinate(layout.Rooms[0].Anchor.X + 1, layout.Rooms[0].Anchor.Y) });
-            string[] overlaps = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions()).Issues
+            string[] overlaps = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues
                 .Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key).ToArray();
             Assert.That(overlaps, Does.Contain("13|room:shared|corridor:shared|True|2|0"));
         }
@@ -359,7 +360,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (kind == "room-floor") layout.Rooms.Single(x => x.RoomInstanceId == "room.0").FloorId = "floor.other";
             if (kind == "node-floor") intermediary.FloorId = "floor.other";
             if (kind == "duplicate-node") layout.Nodes = layout.Nodes.Concat(new[] { Node("node.room.0", FloorRouteNodeKind.Room, "room.0") }).ToArray();
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(20), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(20), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.MissingDestinationNode && x.SubjectId == "edge.0"), Is.True);
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.UnreachableRoom && x.SubjectId == "node.room.1"), Is.True);
         }
@@ -398,10 +399,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void InvalidEntranceAndTerminal_DoNotSatisfyGraphConclusions()
         {
             var entrance = ValidLayout(); entrance.Nodes.Single(x => x.NodeId == "entrance").Kind = (FloorRouteNodeKind)99;
-            FloorLayoutValidationResult entranceResult = FloorLayoutValidator.Validate(entrance, Configuration(), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult entranceResult = FloorLayoutValidator.Validate(entrance, Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(entranceResult.Issues.Any(x => x.Reason == FloorLayoutValidationReason.MissingEntrance), Is.True);
             var terminal = ValidLayout(); terminal.Nodes.Single(x => x.NodeId == "terminal").FloorId = "floor.other";
-            FloorLayoutValidationResult terminalResult = FloorLayoutValidator.Validate(terminal, Configuration(), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult terminalResult = FloorLayoutValidator.Validate(terminal, Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(terminalResult.Issues.Any(x => x.Reason == FloorLayoutValidationReason.RequiredRouteWithoutTerminal), Is.True);
         }
 
@@ -433,7 +434,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (kind == "cross-floor") layout.Nodes.Single(x => x.NodeId == edge.SourceNodeId).FloorId = "floor.other";
             if (kind == "classification") edge.Classification = (RouteClassification)99;
             if (kind == "footprint") edge.Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 2) });
-            var result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(connections: 1), CorridorDefinitions());
+            var result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.True);
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && x.SubjectId == "node.room.0"), Is.False);
         }
@@ -443,7 +444,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var branch = Configuration(); branch.OptionalBranchAllowance = -1; AssertReason(ValidLayout(), branch, Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.NegativeConfigurationValue);
             var index = Configuration(); index.FloorIndex = -1; AssertReason(ValidLayout(), index, Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.NegativeConfigurationValue);
-            FloorLayoutValidationResult exceeded = FloorLayoutValidator.Validate(ValidLayout(), Configuration(7), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult exceeded = FloorLayoutValidator.Validate(ValidLayout(), Configuration(7), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(exceeded.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.CapacityExceeded), Is.True);
             Assert.That(exceeded.Capacity.RemainingFloorSpaceCapacity, Is.EqualTo(-1));
         }
@@ -453,7 +454,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var layout = ValidLayout(); layout.Rooms[0].Anchor = new TileCoordinate(x, y);
             var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
-            var issue = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions()).Issues.Single(candidate =>
+            var issue = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions(), Limits()).Issues.Single(candidate =>
                 candidate.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && candidate.SubjectId == "room:room.0");
             Assert.That(issue.Coordinate, Is.EqualTo(new TileCoordinate(x, y)));
         }
@@ -464,7 +465,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var layout = ValidLayout();
             layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(x1, y1), new TileCoordinate(x2, y2) });
             var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
-            var issues = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions()).Issues.Where(candidate =>
+            var issues = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions(), Limits()).Issues.Where(candidate =>
                 candidate.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && candidate.SubjectId == "corridor:edge.0").ToArray();
             Assert.That(issues.Length, Is.EqualTo(2));
         }
@@ -475,7 +476,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var definitions = Definitions(); definitions[0].GrossFootprint = new RectangularFootprintDefinition(2, 3);
             var layout = ValidLayout(); layout.Rooms[0].Anchor = new TileCoordinate(7, 8); layout.Rooms[0].Orientation = CardinalOrientation.Ninety;
             var config = Configuration(20); config.Bounds = new RectangularFloorBounds(default, 10, 10);
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, definitions, CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, definitions, CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && issue.SubjectId == "room:room.0"), Is.False);
         }
 
@@ -498,7 +499,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var layout = ValidLayout(); layout.Rooms[1].Anchor = layout.Rooms[0].Anchor;
             layout.Edges[0].Footprint = new ResolvedTileFootprint(new[] { layout.Rooms[0].Anchor, new TileCoordinate(3, 0) });
             layout.Edges[1].Footprint = layout.Edges[0].Footprint;
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(20), definitions, CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(20), definitions, CorridorDefinitions(), Limits());
             Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(4));
             Assert.That(result.Capacity.RemainingFloorSpaceCapacity, Is.EqualTo(16));
         }
@@ -510,7 +511,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             layout.Edges[1].ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
             layout.Edges[1].CorridorDefinitionId = null;
             layout.Edges[1].Footprint = null;
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(6), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(6), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.IsValid, Is.True);
             Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.False);
@@ -532,11 +533,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var invalid = ValidLayout(); invalid.Edges[0].ConnectionKind = (FloorRouteConnectionKind)99;
             AssertReason(invalid, Configuration(), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.InvalidConnectionKind);
             var missingDefinition = ValidLayout(); missingDefinition.Edges[0].CorridorDefinitionId = "missing";
-            FloorLayoutValidationResult missing = FloorLayoutValidator.Validate(missingDefinition, Configuration(), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult missing = FloorLayoutValidator.Validate(missingDefinition, Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(missing.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.MissingCorridorDefinition), Is.True);
             Assert.That(missing.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
             var missingFootprint = ValidLayout(); missingFootprint.Edges[0].Footprint = null;
-            FloorLayoutValidationResult footprint = FloorLayoutValidator.Validate(missingFootprint, Configuration(), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult footprint = FloorLayoutValidator.Validate(missingFootprint, Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(footprint.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint), Is.True);
             Assert.That(footprint.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
         }
@@ -547,7 +548,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var layout = ValidLayout();
             layout.Edges[1].CorridorDefinitionId = "corridor.missing";
             layout.Edges[1].Footprint = new ResolvedTileFootprint(new[] { layout.Rooms[0].Anchor, new TileCoordinate(3, 0) });
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.MissingCorridorDefinition && issue.SubjectId == "edge.1"), Is.True);
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.FootprintOverlap && issue.SubjectId == "room:room.0" && issue.RelatedId == "corridor:edge.1"), Is.True);
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom && issue.SubjectId == "node.room.1"), Is.True);
@@ -563,10 +564,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CorridorSpatialDefinition[] definitions = CorridorDefinitions().Concat(CorridorDefinitions()).ToArray();
             var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
 
-            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, config, Definitions(), definitions);
+            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, config, Definitions(), definitions, Limits());
             layout.Rooms = layout.Rooms.Reverse().ToArray(); layout.Edges = layout.Edges.Reverse().ToArray();
             rawTiles = rawTiles.Reverse().ToArray(); layout.Edges.Single(edge => edge.EdgeId == "edge.1").Footprint.OccupiedTiles = rawTiles;
-            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, config, Definitions().Reverse(), definitions.Reverse());
+            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, config, Definitions().Reverse(), definitions.Reverse(), Limits());
 
             Assert.That(forward.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.DuplicateCorridorDefinitionId), Is.True);
             Assert.That(forward.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.MissingCorridorDefinition && issue.SubjectId == "edge.1"), Is.True);
@@ -584,7 +585,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TileCoordinate[] rawTiles = { layout.Rooms[0].Anchor, new TileCoordinate(10, 0) };
             layout.Edges[1].Footprint = new ResolvedTileFootprint { OccupiedTiles = rawTiles };
             var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, Definitions(connections: 1), CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, Definitions(connections: 1), CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint && issue.SubjectId == "edge.1"), Is.True);
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.FootprintOverlap && issue.RelatedId == "corridor:edge.1"), Is.True);
             Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && issue.SubjectId == "corridor:edge.1" && issue.Coordinate.Equals(new TileCoordinate(10, 0))), Is.True);
@@ -602,7 +603,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TileCoordinate[] rawTiles = { new TileCoordinate(-1, 0), new TileCoordinate(-1, 0), new TileCoordinate(-2, 0) };
             layout.Edges[1].Footprint = new ResolvedTileFootprint { OccupiedTiles = rawTiles };
             var config = Configuration(); config.Bounds = new RectangularFloorBounds(default, 10, 10);
-            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions());
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, config, Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.Issues.Count(issue => issue.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint && issue.SubjectId == "edge.1"), Is.EqualTo(1));
             FloorLayoutValidationIssue[] bounds = result.Issues.Where(issue => issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds && issue.SubjectId == "corridor:edge.1").ToArray();
             Assert.That(bounds.Length, Is.EqualTo(2));
@@ -622,19 +623,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void OversizedRawCorridorFailsBeforeTileProcessingWithoutAuthorityOrMutation()
+        {
+            var layout = ValidLayout();
+            TileCoordinate[] rawTiles = { new TileCoordinate(2, 0), new TileCoordinate(3, 0), new TileCoordinate(4, 0), new TileCoordinate(5, 0) };
+            layout.Edges[1].Footprint = new ResolvedTileFootprint { OccupiedTiles = rawTiles };
+            FloorLayoutValidationResult result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits(3));
+            Assert.That(result.Issues.Count(issue => issue.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint && issue.SubjectId == "edge.1"), Is.EqualTo(1));
+            Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.FootprintOverlap && issue.RelatedId == "corridor:edge.1"), Is.False);
+            Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom && issue.SubjectId == "node.room.1"), Is.True);
+            Assert.That(result.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.False);
+            Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
+            Assert.That(layout.Edges[1].Footprint.OccupiedTiles, Is.SameAs(rawTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(2, 0), new TileCoordinate(3, 0), new TileCoordinate(4, 0), new TileCoordinate(5, 0) }, rawTiles);
+        }
+
+        [Test]
+        public void NonpositiveLimitsAndOversizedReservedTilesFailClosedWithoutMutation()
+        {
+            var layout = ValidLayout();
+            RoomSpatialDefinition[] definitions = Definitions();
+            TileCoordinate[] reserved = { default, default, default, default };
+            definitions[0].ReservedTileOffsets = reserved;
+            FloorLayoutValidationResult oversized = FloorLayoutValidator.Validate(layout, Configuration(), definitions, CorridorDefinitions(), Limits(3));
+            Assert.That(oversized.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.InvalidRoomFootprint), Is.True);
+            Assert.That(definitions[0].ReservedTileOffsets, Is.SameAs(reserved));
+            CollectionAssert.AreEqual(new[] { default(TileCoordinate), default(TileCoordinate), default(TileCoordinate), default(TileCoordinate) }, reserved);
+            FloorLayoutValidationResult missing = FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions(), default);
+            Assert.That(missing.IsValid, Is.False);
+            Assert.That(missing.Capacity.UsedFloorSpaceCapacity, Is.Zero);
+            FloorLayoutValidationResult negative = FloorLayoutValidator.Validate(ValidLayout(), Configuration(), Definitions(), CorridorDefinitions(), Limits(-1));
+            Assert.That(negative.IsValid, Is.False);
+            Assert.That(negative.Capacity.UsedFloorSpaceCapacity, Is.Zero);
+        }
+
+        [Test]
         public void DirectDoorwayBranchRulesAndMixedConnectionLimitsAreEnforced()
         {
             var optional = ValidLayout(); SetDoorway(optional.Edges[0]); optional.Edges[0].Classification = RouteClassification.Optional; optional.Edges[0].OptionalBranchId = "branch.a";
-            Assert.That(FloorLayoutValidator.Validate(optional, Configuration(branches: 1), Definitions(), CorridorDefinitions()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.OptionalEdgeMissingBranchId), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(optional, Configuration(branches: 1), Definitions(), CorridorDefinitions(), Limits()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.OptionalEdgeMissingBranchId), Is.False);
             var missingBranch = ValidLayout(); SetDoorway(missingBranch.Edges[0]); missingBranch.Edges[0].Classification = RouteClassification.Optional;
             AssertReason(missingBranch, Configuration(branches: 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.OptionalEdgeMissingBranchId);
             var requiredBranch = ValidLayout(); SetDoorway(requiredBranch.Edges[0]); requiredBranch.Edges[0].OptionalBranchId = "branch.a";
             AssertReason(requiredBranch, Configuration(branches: 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.RequiredEdgeHasBranchId);
 
             var mixed = ValidLayout(); SetDoorway(mixed.Edges[0]);
-            Assert.That(FloorLayoutValidator.Validate(mixed, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.True);
+            Assert.That(FloorLayoutValidator.Validate(mixed, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.True);
             mixed.Edges[0].Footprint = new ResolvedTileFootprint();
-            Assert.That(FloorLayoutValidator.Validate(mixed, Configuration(), Definitions(connections: 1), CorridorDefinitions()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.False);
+            Assert.That(FloorLayoutValidator.Validate(mixed, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits()).Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.False);
         }
 
         [Test]
@@ -655,13 +691,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static FloorRouteEdge Edge(string id, string source, string destination, int x) => new FloorRouteEdge { EdgeId = id, CorridorDefinitionId = CorridorDefinitionId, FloorId = FloorId, SourceNodeId = source, DestinationNodeId = destination, Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(x, 2), new TileCoordinate(x + 1, 2) }), Classification = RouteClassification.Required, ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor };
         private static void SetDoorway(FloorRouteEdge edge) { edge.ConnectionKind = FloorRouteConnectionKind.DirectDoorway; edge.CorridorDefinitionId = null; edge.Footprint = null; }
         private static void AssertCapacityEqual(FloorCapacitySummary expected, FloorCapacitySummary actual) { Assert.That(actual.FinalFloorSpaceCapacity, Is.EqualTo(expected.FinalFloorSpaceCapacity)); Assert.That(actual.UsedFloorSpaceCapacity, Is.EqualTo(expected.UsedFloorSpaceCapacity)); Assert.That(actual.RemainingFloorSpaceCapacity, Is.EqualTo(expected.RemainingFloorSpaceCapacity)); }
-        private static void AssertReason(FloorSpatialLayout layout, FloorSpatialConfiguration config, RoomSpatialDefinition[] rooms, CorridorSpatialDefinition[] corridors, FloorLayoutValidationReason reason) => Assert.That(FloorLayoutValidator.Validate(layout, config, rooms, corridors).Issues.Any(x => x.Reason == reason), Is.True);
-        private static string[] IssueKeys(FloorSpatialLayout layout, RoomSpatialDefinition[] rooms, CorridorSpatialDefinition[] corridors) => FloorLayoutValidator.Validate(layout, Configuration(30), rooms, corridors).Issues.Select(Key).ToArray();
-        private static string[] EndpointIssueKeys(FloorSpatialLayout layout, FloorLayoutValidationReason endpointReason) => FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions()).Issues
+        private static void AssertReason(FloorSpatialLayout layout, FloorSpatialConfiguration config, RoomSpatialDefinition[] rooms, CorridorSpatialDefinition[] corridors, FloorLayoutValidationReason reason) => Assert.That(FloorLayoutValidator.Validate(layout, config, rooms, corridors, Limits()).Issues.Any(x => x.Reason == reason), Is.True);
+        private static string[] IssueKeys(FloorSpatialLayout layout, RoomSpatialDefinition[] rooms, CorridorSpatialDefinition[] corridors) => FloorLayoutValidator.Validate(layout, Configuration(30), rooms, corridors, Limits()).Issues.Select(Key).ToArray();
+        private static string[] EndpointIssueKeys(FloorSpatialLayout layout, FloorLayoutValidationReason endpointReason) => FloorLayoutValidator.Validate(layout, Configuration(), Definitions(), CorridorDefinitions(), Limits()).Issues
             .Where(x => x.SubjectId == "edge.0" && (x.Reason == FloorLayoutValidationReason.MissingStableId || x.Reason == endpointReason)).Select(Key).ToArray();
-        private static string[] OverlapIssueKeys(FloorSpatialLayout layout) => FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), CorridorDefinitions()).Issues
+        private static string[] OverlapIssueKeys(FloorSpatialLayout layout) => FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), CorridorDefinitions(), Limits()).Issues
             .Where(x => x.Reason == FloorLayoutValidationReason.FootprintOverlap).Select(Key).ToArray();
-        private static string[] OwnedMalformedNodeIssueKeys(FloorSpatialLayout layout) => FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), CorridorDefinitions()).Issues
+        private static string[] OwnedMalformedNodeIssueKeys(FloorSpatialLayout layout) => FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), CorridorDefinitions(), Limits()).Issues
             .Where(x => (x.Reason == FloorLayoutValidationReason.InvalidNodeKind && x.SubjectId == "node.room.0") ||
                 (x.Reason == FloorLayoutValidationReason.MissingDestinationNode && x.SubjectId == "edge.0") ||
                 (x.Reason == FloorLayoutValidationReason.MissingSourceNode && x.SubjectId == "edge.1") ||

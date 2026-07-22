@@ -6,6 +6,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum CardinalOrientation { Zero = 0, Ninety = 1, OneEighty = 2, TwoSeventy = 3 }
 
+    public readonly struct SpatialValidationWorkloadLimits
+    {
+        public SpatialValidationWorkloadLimits(int maximumMaterializedTileCount)
+        {
+            MaximumMaterializedTileCount = maximumMaterializedTileCount;
+        }
+
+        public int MaximumMaterializedTileCount { get; }
+        public bool IsValid => MaximumMaterializedTileCount > 0;
+        public bool Allows(long tileCount) => IsValid && tileCount >= 0 && tileCount <= MaximumMaterializedTileCount;
+    }
+
     [Serializable]
     public sealed class RectangularFloorBounds
     {
@@ -69,7 +81,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class TileFootprintResolver
     {
         public static bool TryResolveRectangle(RectangularFootprintDefinition definition, TileCoordinate anchor,
-            CardinalOrientation orientation, out ResolvedTileFootprint footprint)
+            CardinalOrientation orientation, SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint)
         {
             footprint = new ResolvedTileFootprint();
             if (definition == null || definition.Width <= 0 || definition.Height <= 0 || !Enum.IsDefined(typeof(CardinalOrientation), orientation)) return false;
@@ -78,7 +90,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             long area = (long)width * height;
             long maximumX = (long)anchor.X + width - 1;
             long maximumY = (long)anchor.Y + height - 1;
-            if (area > int.MaxValue || maximumX > int.MaxValue || maximumY > int.MaxValue) return false;
+            if (!limits.Allows(area) || maximumX > int.MaxValue || maximumY > int.MaxValue) return false;
             var tiles = new List<TileCoordinate>((int)area);
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
                 tiles.Add(new TileCoordinate((int)((long)anchor.X + x), (int)((long)anchor.Y + y)));
@@ -86,14 +98,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        public static bool TryResolveStraightCorridor(TileCoordinate start, TileCoordinate end, out ResolvedTileFootprint footprint)
+        public static bool TryResolveStraightCorridor(TileCoordinate start, TileCoordinate end,
+            SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint)
         {
             footprint = new ResolvedTileFootprint();
             long deltaX = (long)end.X - start.X, deltaY = (long)end.Y - start.Y;
             if (deltaX != 0 && deltaY != 0) return false;
             long length = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
             long requiredLength = length + 1;
-            if (requiredLength > int.MaxValue) return false;
+            if (!limits.Allows(requiredLength)) return false;
             int dx = Math.Sign(deltaX), dy = Math.Sign(deltaY);
             var tiles = new TileCoordinate[(int)requiredLength];
             for (int i = 0; i < tiles.Length; i++)

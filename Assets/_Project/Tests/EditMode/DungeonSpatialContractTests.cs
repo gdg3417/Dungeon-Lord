@@ -10,13 +10,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private const int RectangleWidth = 2;
         private const int RectangleHeight = 3;
+        private static SpatialValidationWorkloadLimits Limits(int maximumTiles = 100) => new SpatialValidationWorkloadLimits(maximumTiles);
 
         [Test]
         public void Rectangle_Resolves_OneTile_And_RotatedNonSquare_InCanonicalOrder()
         {
-            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(1, 1), new TileCoordinate(4, 7), CardinalOrientation.Zero, out ResolvedTileFootprint single), Is.True);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(1, 1), new TileCoordinate(4, 7), CardinalOrientation.Zero, Limits(), out ResolvedTileFootprint single), Is.True);
             CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 7) }, single.OccupiedTiles);
-            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(RectangleWidth, RectangleHeight), new TileCoordinate(0, 0), CardinalOrientation.Ninety, out ResolvedTileFootprint rotated), Is.True);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(RectangleWidth, RectangleHeight), new TileCoordinate(0, 0), CardinalOrientation.Ninety, Limits(), out ResolvedTileFootprint rotated), Is.True);
             Assert.That(rotated.OccupiedTiles.Length, Is.EqualTo(RectangleWidth * RectangleHeight));
             Assert.That(rotated.OccupiedTiles.Last(), Is.EqualTo(new TileCoordinate(2, 1)));
             CollectionAssert.AreEqual(rotated.OccupiedTiles.OrderBy(tile => tile).ToArray(), rotated.OccupiedTiles);
@@ -25,7 +26,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(0, 1)] [TestCase(1, -1)]
         public void Rectangle_Rejects_NonpositiveDimensions(int width, int height)
         {
-            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(width, height), default, CardinalOrientation.Zero, out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(width, height), default, CardinalOrientation.Zero, Limits(), out _), Is.False);
         }
 
         [Test]
@@ -55,24 +56,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void StraightCorridor_RejectsDiagonal_AndIncludesBothEndpoints()
         {
-            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(0, 0), new TileCoordinate(1, 1), out _), Is.False);
-            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(3, 3), new TileCoordinate(3, 3), out ResolvedTileFootprint single), Is.True);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(0, 0), new TileCoordinate(1, 1), Limits(), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(3, 3), new TileCoordinate(3, 3), Limits(), out ResolvedTileFootprint single), Is.True);
             CollectionAssert.AreEqual(new[] { new TileCoordinate(3, 3) }, single.OccupiedTiles);
-            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(1, 2), new TileCoordinate(3, 2), out ResolvedTileFootprint footprint), Is.True);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(1, 2), new TileCoordinate(3, 2), Limits(), out ResolvedTileFootprint footprint), Is.True);
             CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 2), new TileCoordinate(2, 2), new TileCoordinate(3, 2) }, footprint.OccupiedTiles);
-            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(int.MinValue, 0), new TileCoordinate(int.MaxValue, 0), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(int.MinValue, 0), new TileCoordinate(int.MaxValue, 0), Limits(), out _), Is.False);
         }
 
         [Test]
         public void RectangleResolution_RejectsOverflowWithoutThrowingOrMutatingDefinition()
         {
             var definition = new RectangularFootprintDefinition(2, 1);
-            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, new TileCoordinate(int.MaxValue, 0), CardinalOrientation.Zero, out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, new TileCoordinate(int.MaxValue, 0), CardinalOrientation.Zero, Limits(), out _), Is.False);
             Assert.That(definition.Width, Is.EqualTo(2)); Assert.That(definition.Height, Is.EqualTo(1));
             var excessiveArea = new RectangularFootprintDefinition(50000, 50000);
-            Assert.That(TileFootprintResolver.TryResolveRectangle(excessiveArea, default, CardinalOrientation.Zero, out _), Is.False);
-            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(1, 1), new TileCoordinate(int.MaxValue, int.MaxValue), CardinalOrientation.Zero, out ResolvedTileFootprint extreme), Is.True);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(excessiveArea, default, CardinalOrientation.Zero, Limits(), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(1, 1), new TileCoordinate(int.MaxValue, int.MaxValue), CardinalOrientation.Zero, Limits(), out ResolvedTileFootprint extreme), Is.True);
             CollectionAssert.AreEqual(new[] { new TileCoordinate(int.MaxValue, int.MaxValue) }, extreme.OccupiedTiles);
+        }
+
+        [Test]
+        public void RectangleResolution_UsesExplicitMaterializationLimitAndFailsClosed()
+        {
+            var definition = new RectangularFootprintDefinition(2, 2);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, default, CardinalOrientation.Zero, Limits(4), out ResolvedTileFootprint exact), Is.True);
+            Assert.That(exact.OccupiedTiles.Length, Is.EqualTo(4));
+            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, default, CardinalOrientation.Zero, Limits(3), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(new RectangularFootprintDefinition(50000, 1), default, CardinalOrientation.Zero, Limits(10), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, default, CardinalOrientation.Zero, default, out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveRectangle(definition, default, CardinalOrientation.Zero, Limits(0), out _), Is.False);
+            Assert.That(definition.Width, Is.EqualTo(2)); Assert.That(definition.Height, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void StraightCorridorResolution_UsesExplicitMaterializationLimitAndFailsClosed()
+        {
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(default, default, Limits(1), out ResolvedTileFootprint single), Is.True);
+            Assert.That(single.OccupiedTiles.Length, Is.EqualTo(1));
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(default, new TileCoordinate(2, 0), Limits(3), out ResolvedTileFootprint exact), Is.True);
+            Assert.That(exact.OccupiedTiles.Length, Is.EqualTo(3));
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(default, new TileCoordinate(3, 0), Limits(3), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(default, default, default, out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(default, default, Limits(-1), out _), Is.False);
+            Assert.That(TileFootprintResolver.TryResolveStraightCorridor(new TileCoordinate(int.MinValue, 0), new TileCoordinate(int.MaxValue, 0), Limits(3), out _), Is.False);
         }
 
         [Test]
@@ -80,8 +107,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var first = Definition("a", new[] { new TileCoordinate(0, 0) }, 1, 2, 3);
             var second = Definition("b", new[] { new TileCoordinate(1, 1) }, 4, 5, 6);
-            Assert.That(first.ResolveUsableTiles(default, CardinalOrientation.Zero).Length, Is.EqualTo(3));
-            Assert.That(second.ResolveUsableTiles(default, CardinalOrientation.Zero).Length, Is.EqualTo(3));
+            Assert.That(first.ResolveUsableTiles(default, CardinalOrientation.Zero, Limits()).Length, Is.EqualTo(3));
+            Assert.That(second.ResolveUsableTiles(default, CardinalOrientation.Zero, Limits()).Length, Is.EqualTo(3));
             Assert.That(first.MonsterCapacity, Is.Not.EqualTo(second.MonsterCapacity));
             Assert.That(first.ReservedTileOffsets.Single(), Is.Not.EqualTo(second.ReservedTileOffsets.Single()));
         }
@@ -97,7 +124,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string json = JsonUtility.ToJson(canonical);
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(json);
             AssertLayoutsEqual(canonical, restored);
-            Assert.That(FloorLayoutValidator.Validate(restored, FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).IsValid, Is.True);
+            Assert.That(FloorLayoutValidator.Validate(restored, FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions(), Limits()).IsValid, Is.True);
         }
 
         [Test]
@@ -152,7 +179,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 FloorLayoutValidationReason[] reasons = FloorLayoutValidator.Validate(candidate,
                     FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(),
-                    FloorLayoutValidatorTests.CorridorDefinitions()).Issues.Select(issue => issue.Reason).ToArray();
+                    FloorLayoutValidatorTests.CorridorDefinitions(), Limits()).Issues.Select(issue => issue.Reason).ToArray();
                 Assert.That(reasons, Does.Contain(FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition));
                 Assert.That(reasons, Does.Contain(FloorLayoutValidationReason.DirectDoorwayHasFootprint));
             }
@@ -187,11 +214,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             FloorLayoutValidationResult before = FloorLayoutValidator.Validate(canonical,
                 FloorLayoutValidatorTests.Configuration(branches: 1), FloorLayoutValidatorTests.Definitions(),
-                FloorLayoutValidatorTests.CorridorDefinitions());
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
             FloorLayoutValidationResult after = FloorLayoutValidator.Validate(restored,
                 FloorLayoutValidatorTests.Configuration(branches: 1), FloorLayoutValidatorTests.Definitions(),
-                FloorLayoutValidatorTests.CorridorDefinitions());
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
             AssertLayoutsEqual(canonical, restored);
             CollectionAssert.AreEqual(before.Issues.Select(IssueKey), after.Issues.Select(IssueKey));
             Assert.That(after.Capacity.FinalFloorSpaceCapacity, Is.EqualTo(before.Capacity.FinalFloorSpaceCapacity));
@@ -208,7 +235,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(sourceEntrance.RoomInstanceId, Is.Null);
             Assert.That(sourceRequiredEdge.OptionalBranchId, Is.Null);
             string[] sourceIssues = FloorLayoutValidator.Validate(source, FloorLayoutValidatorTests.Configuration(),
-                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).Issues
+                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions(), Limits()).Issues
                 .Select(IssueKey).ToArray();
 
             FloorSpatialLayout canonical = source.Canonicalized();
@@ -222,7 +249,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(canonical.Edges.Single(x => x.EdgeId == sourceRequiredEdge.EdgeId), Is.Not.SameAs(sourceRequiredEdge));
             Assert.That(JsonUtility.ToJson(canonicalAgain), Is.EqualTo(JsonUtility.ToJson(canonical)));
             CollectionAssert.AreEqual(sourceIssues, FloorLayoutValidator.Validate(canonical, FloorLayoutValidatorTests.Configuration(),
-                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions()).Issues.Select(IssueKey).ToArray());
+                FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions(), Limits()).Issues.Select(IssueKey).ToArray());
         }
 
         [Test]
