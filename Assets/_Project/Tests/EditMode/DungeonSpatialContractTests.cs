@@ -118,7 +118,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             FloorSpatialLayout layout = FloorLayoutValidatorTests.ValidLayout();
             layout.Rooms = layout.Rooms.Reverse().ToArray(); layout.Nodes = layout.Nodes.Reverse().ToArray(); layout.Edges = layout.Edges.Reverse().ToArray();
-            FloorSpatialLayout canonical = layout.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(layout);
             Assert.That(canonical.Nodes.Where(x => x.Kind != FloorRouteNodeKind.Room).Select(x => x.RoomInstanceId), Is.All.EqualTo(string.Empty));
             Assert.That(canonical.Edges.Where(x => x.Classification == RouteClassification.Required).Select(x => x.OptionalBranchId), Is.All.EqualTo(string.Empty));
             string json = JsonUtility.ToJson(canonical);
@@ -135,7 +135,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             doorway.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
             doorway.CorridorDefinitionId = null;
             doorway.Footprint = null;
-            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(source);
             FloorRouteEdge canonicalDoorway = canonical.Edges.Single(edge => edge.EdgeId == doorway.EdgeId);
             Assert.That(canonicalDoorway.CorridorDefinitionId, Is.EqualTo(string.Empty));
             Assert.That(canonicalDoorway.Footprint, Is.Null);
@@ -144,7 +144,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(source.Edges[1].Footprint, Is.Null);
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
             AssertLayoutsEqual(canonical, restored);
-            CollectionAssert.AreEqual(canonical.Edges.Select(edge => edge.EdgeId), restored.Canonicalized().Edges.Select(edge => edge.EdgeId));
+            CollectionAssert.AreEqual(canonical.Edges.Select(edge => edge.EdgeId), Canonicalize(restored).Edges.Select(edge => edge.EdgeId));
         }
 
         [TestCase(null)] [TestCase("")] [TestCase("   ")]
@@ -153,12 +153,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
             FloorRouteEdge doorway = source.Edges[1];
             doorway.ConnectionKind = FloorRouteConnectionKind.DirectDoorway; doorway.CorridorDefinitionId = suppliedId; doorway.Footprint = null;
-            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(source);
             Assert.That(canonical.Edges.Single(edge => edge.EdgeId == doorway.EdgeId).CorridorDefinitionId, Is.EqualTo(string.Empty));
             Assert.That(doorway.CorridorDefinitionId, Is.EqualTo(suppliedId));
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
             Assert.That(restored.Edges.Single(edge => edge.EdgeId == doorway.EdgeId).CorridorDefinitionId, Is.EqualTo(string.Empty));
-            Assert.That(JsonUtility.ToJson(restored.Canonicalized()), Is.EqualTo(JsonUtility.ToJson(canonical)));
+            Assert.That(JsonUtility.ToJson(Canonicalize(restored)), Is.EqualTo(JsonUtility.ToJson(canonical)));
         }
 
         [Test]
@@ -171,8 +171,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TileCoordinate[] sourceTiles = { new TileCoordinate(9, 4), new TileCoordinate(8, 4) };
             doorway.Footprint = new ResolvedTileFootprint { OccupiedTiles = sourceTiles };
 
-            FloorSpatialLayout canonical = source.Canonicalized();
-            FloorSpatialLayout canonicalAgain = canonical.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(source);
+            FloorSpatialLayout canonicalAgain = Canonicalize(canonical);
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
 
             foreach (FloorSpatialLayout candidate in new[] { source, canonical, restored })
@@ -205,7 +205,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             source.Edges[1].Footprint = null;
             source.Edges = new[] { source.Edges[2], source.Edges[1], source.Edges[0] };
 
-            FloorSpatialLayout canonical = source.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(source);
             CollectionAssert.AreEqual(new[] { "edge.0", "edge.1", "edge.2" }, canonical.Edges.Select(edge => edge.EdgeId));
             Assert.That(canonical.Edges[0].ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
             Assert.That(canonical.Edges[1].ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
@@ -238,8 +238,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 FloorLayoutValidatorTests.Definitions(), FloorLayoutValidatorTests.CorridorDefinitions(), Limits()).Issues
                 .Select(IssueKey).ToArray();
 
-            FloorSpatialLayout canonical = source.Canonicalized();
-            FloorSpatialLayout canonicalAgain = canonical.Canonicalized();
+            FloorSpatialLayout canonical = Canonicalize(source);
+            FloorSpatialLayout canonicalAgain = Canonicalize(canonical);
 
             Assert.That(sourceEntrance.RoomInstanceId, Is.Null);
             Assert.That(sourceRequiredEdge.OptionalBranchId, Is.Null);
@@ -257,13 +257,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
             source.Edges[0].Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(2, 1), new TileCoordinate(1, 1), new TileCoordinate(1, 1) });
-            FloorSpatialLayout first = source.Canonicalized(); FloorSpatialLayout second = first.Canonicalized();
+            FloorSpatialLayout first = Canonicalize(source); FloorSpatialLayout second = Canonicalize(first);
             Assert.That(first.Rooms[0], Is.Not.SameAs(source.Rooms[0])); Assert.That(first.Nodes[0], Is.Not.SameAs(source.Nodes[0])); Assert.That(first.Edges[0], Is.Not.SameAs(source.Edges[0])); Assert.That(first.Edges[0].Footprint, Is.Not.SameAs(source.Edges[0].Footprint));
             Assert.That(first.Rooms, Is.Not.SameAs(source.Rooms)); Assert.That(first.Nodes, Is.Not.SameAs(source.Nodes)); Assert.That(first.Edges, Is.Not.SameAs(source.Edges));
             Assert.That(first.Edges[0].Footprint.OccupiedTiles, Is.Not.SameAs(source.Edges[0].Footprint.OccupiedTiles));
             CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1) }, first.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles);
             Assert.That(JsonUtility.ToJson(second), Is.EqualTo(JsonUtility.ToJson(first)));
             first.Rooms[0].RoomInstanceId = "changed"; Assert.That(source.Rooms.Any(x => x.RoomInstanceId == "changed"), Is.False);
+        }
+
+        [Test]
+        public void TryCanonicalize_EnforcesFootprintLimitBeforeCopyingAndFailsWithoutMutation()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            FloorRouteEdge edge = source.Edges[0];
+            ResolvedTileFootprint footprint = edge.Footprint;
+            TileCoordinate[] exactTiles =
+            {
+                new TileCoordinate(2, 1), new TileCoordinate(0, 1), new TileCoordinate(1, 1)
+            };
+            footprint.OccupiedTiles = exactTiles;
+            Assert.That(source.TryCanonicalize(Limits(3), out FloorSpatialLayout exact), Is.True);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(0, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1) },
+                exact.Edges.Single(candidate => candidate.EdgeId == edge.EdgeId).Footprint.OccupiedTiles);
+
+            TileCoordinate[] oversizedTiles =
+            {
+                new TileCoordinate(3, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1), new TileCoordinate(0, 1)
+            };
+            footprint.OccupiedTiles = oversizedTiles;
+            string[] roomOrder = source.Rooms.Select(room => room.RoomInstanceId).ToArray();
+            string[] nodeOrder = source.Nodes.Select(node => node.NodeId).ToArray();
+            string[] edgeOrder = source.Edges.Select(candidate => candidate.EdgeId).ToArray();
+            Assert.That(source.TryCanonicalize(Limits(3), out FloorSpatialLayout oversized), Is.False);
+            Assert.That(oversized, Is.Null);
+            Assert.That(source.Edges[0], Is.SameAs(edge));
+            Assert.That(edge.Footprint, Is.SameAs(footprint));
+            Assert.That(footprint.OccupiedTiles, Is.SameAs(oversizedTiles));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(3, 1), new TileCoordinate(1, 1), new TileCoordinate(2, 1), new TileCoordinate(0, 1) }, oversizedTiles);
+            CollectionAssert.AreEqual(roomOrder, source.Rooms.Select(room => room.RoomInstanceId));
+            CollectionAssert.AreEqual(nodeOrder, source.Nodes.Select(node => node.NodeId));
+            CollectionAssert.AreEqual(edgeOrder, source.Edges.Select(candidate => candidate.EdgeId));
+            Assert.That(source.TryCanonicalize(default, out FloorSpatialLayout missing), Is.False); Assert.That(missing, Is.Null);
+            Assert.That(source.TryCanonicalize(Limits(0), out FloorSpatialLayout zero), Is.False); Assert.That(zero, Is.Null);
+            Assert.That(source.TryCanonicalize(Limits(-1), out FloorSpatialLayout negative), Is.False); Assert.That(negative, Is.Null);
+        }
+
+        private static FloorSpatialLayout Canonicalize(FloorSpatialLayout source, int maximumTiles = 100)
+        {
+            Assert.That(source.TryCanonicalize(Limits(maximumTiles), out FloorSpatialLayout canonical), Is.True);
+            return canonical;
         }
 
         private static void AssertLayoutsEqual(FloorSpatialLayout expected, FloorSpatialLayout actual)

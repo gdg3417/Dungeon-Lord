@@ -2,17 +2,17 @@
 
 ## Scope
 
-GD64 aligns the inactive spatial contracts and deterministic validator with the approved GD63 direction. The allocation-safety correction adds an explicit caller-supplied maximum materialized tile count and fails closed before oversized rectangle, corridor, raw-footprint, or reserved-tile processing. It preserves one-tile physical corridors, overflow-safe arithmetic, blank doorway-ID normalization, invalid doorway payload preservation, deduplicated raw diagnostics, and established edge ordering. The domain remains inactive and non-authoritative.
+GD64 aligns the inactive spatial contracts and deterministic validator with the approved GD63 direction. Explicit caller-supplied tile-materialization limits now bound geometry resolution, validation of supplied tile collections, and layout canonicalization. The domain remains inactive and non-authoritative.
 
 ## Reviewed and final heads
 
-The actual previous reviewed remote head is `b7602521f576b6000992535b7f691f4ccb678a90`. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting branch-head SHA is recorded in the final delivery report and PR metadata after commit. No separate PR is opened and no merge is performed.
+The previous reviewed remote head is `6cdce520cbb73ff2f0c0f77ae032754607543acb`. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting final branch-head SHA is reported in the final delivery record and PR metadata after commit. No separate PR is opened and no merge is performed.
 
-## Explicit allocation-workload contract
+## Bounded spatial processing
 
-`SpatialValidationWorkloadLimits` is an immutable caller-supplied value containing `MaximumMaterializedTileCount`. There is no default, fallback, inferred floor-based value, mutable global, system-memory inspection, or production tuning value. Missing, zero, and negative limits fail closed. GD65 remains responsible for approving and supplying the production/export value.
+`SpatialValidationWorkloadLimits` remains the immutable caller-supplied contract for `MaximumMaterializedTileCount`; it has no default, inferred, global, or production value. Rectangle and straight-corridor resolution reject over-limit tile counts before proportional allocation. Validation rejects oversized raw corridor and reserved-tile collections before sorting, deduplication, set insertion, diagnostics, capacity, or graph authority.
 
-Rectangle and straight-corridor resolvers reject tile counts above the limit before proportional allocation. The validator rejects oversized raw physical-corridor footprints with the existing `InvalidCorridorFootprint` reason and omits their per-coordinate processing, capacity, reachability, and connection authority. Oversized reserved-tile collections are rejected before set insertion or sorting. Focused tests use small fake limits only.
+Unlimited layout canonicalization was removed. `FloorSpatialLayout.TryCanonicalize(limits, out canonical)` starts with a null result, fails closed for nonpositive limits, preflights every supplied edge footprint before copying or sorting any footprint, and returns no partial layout if any footprint is oversized. Accepted canonicalization retains detached copies, established room/node/edge ordering, X/Y footprint ordering, optional-string normalization, valid blank-doorway normalization, and preservation of bounded invalid doorway payloads.
 
 ## Static validation completed on 2026-07-22
 
@@ -21,10 +21,10 @@ Rectangle and straight-corridor resolvers reject tile counts above the limit bef
 - `git diff --check origin/main...HEAD`: passed with no output against the verified GD63 baseline.
 - `git diff --name-only origin/main...HEAD`: returned the four inactive-domain source files, two focused EditMode tests, README, roadmap, and this evidence file.
 - `git grep -n "FloorSpaceCost" -- Assets/_Project || true`: passed with no matches.
-- Save-schema inspection confirmed `SaveMigration.LatestSchemaVersion = 6`; SaveData inspection found no spatial field.
-- DungeonSpatial reference-boundary inspection found no use outside the inactive domain and its focused EditMode tests.
+- Save-schema inspection confirmed version 6; SaveData inspection found no spatial field.
+- DungeonSpatial reference-boundary inspection found no use outside the inactive domain and focused EditMode tests.
 - Automated reason extraction returned exactly contiguous values 1 through 45.
-- Prohibited-path and generated-file scans returned no matches.
+- Prohibited-path, generated-file, and unlimited-canonicalization scans returned no matches.
 
 ## Unity validation pending
 
@@ -36,7 +36,7 @@ Unity is not installed in this execution environment (`command -v unity-editor |
 
 ## Deliberately deferred validation capabilities
 
-GD64 does not validate direct-doorway adjacency; doorway orientation, connection points, reserved tiles, or passability; corridor-to-endpoint geometric attachment; complete optional-branch shape, loops, nesting, dead-end behavior, or alternate terminals; or buildable/unavailable tile masks and expansion policy. These remain later approved gates. GD65 must not claim complete spatial-layout validation solely from the GD64 validator.
+GD64 does not validate direct-doorway adjacency; doorway orientation, connection points, reserved tiles, or passability; corridor-to-endpoint geometric attachment; complete optional-branch shape, loops, nesting, dead-end behavior, or alternate terminals; or buildable/unavailable tile masks and expansion policy. These remain later approved gates. GD65 must not claim complete spatial-layout validation solely from GD64.
 
 ## Manual validation classification
 

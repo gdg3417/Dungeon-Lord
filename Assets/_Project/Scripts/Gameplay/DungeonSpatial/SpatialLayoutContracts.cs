@@ -79,9 +79,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public FloorRouteNode[] Nodes = Array.Empty<FloorRouteNode>();
         public FloorRouteEdge[] Edges = Array.Empty<FloorRouteEdge>();
 
-        public FloorSpatialLayout Canonicalized()
+        public bool TryCanonicalize(SpatialValidationWorkloadLimits limits, out FloorSpatialLayout canonical)
         {
-            return new FloorSpatialLayout
+            canonical = null;
+            if (!limits.IsValid) return false;
+            FloorRouteEdge[] suppliedEdges = Edges ?? Array.Empty<FloorRouteEdge>();
+            foreach (FloorRouteEdge edge in suppliedEdges)
+            {
+                if (edge?.Footprint?.OccupiedTiles != null && !limits.Allows(edge.Footprint.OccupiedTiles.LongLength))
+                    return false;
+            }
+
+            FloorRouteEdge[] copiedEdges = new FloorRouteEdge[suppliedEdges.Length];
+            for (int index = 0; index < suppliedEdges.Length; index++)
+                if (!TryCopyEdge(suppliedEdges[index], limits, out copiedEdges[index])) return false;
+
+            canonical = new FloorSpatialLayout
             {
                 FloorId = FloorId,
                 Rooms = (Rooms ?? Array.Empty<RoomSpatialInstance>()).Select(CopyRoom)
@@ -89,12 +102,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Nodes = (Nodes ?? Array.Empty<FloorRouteNode>()).Select(CopyNode)
                     .OrderBy(node => node == null ? 0 : (int)node.Kind)
                     .ThenBy(node => node?.NodeId, StringComparer.Ordinal).ToArray(),
-                Edges = (Edges ?? Array.Empty<FloorRouteEdge>()).Select(CopyEdge)
+                Edges = copiedEdges
                     .OrderBy(edge => edge == null ? 0 : (int)edge.Classification)
                     .ThenBy(edge => edge?.SourceNodeId, StringComparer.Ordinal)
                     .ThenBy(edge => edge?.DestinationNodeId, StringComparer.Ordinal)
                     .ThenBy(edge => edge?.EdgeId, StringComparer.Ordinal).ToArray()
             };
+            return true;
         }
 
         private static RoomSpatialInstance CopyRoom(RoomSpatialInstance room) => room == null ? null : new RoomSpatialInstance
@@ -108,17 +122,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId ?? string.Empty
         };
 
-        private static FloorRouteEdge CopyEdge(FloorRouteEdge edge) => edge == null ? null : new FloorRouteEdge
+        private static bool TryCopyEdge(FloorRouteEdge edge, SpatialValidationWorkloadLimits limits, out FloorRouteEdge copy)
         {
-            EdgeId = edge.EdgeId,
-            CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
-                string.IsNullOrWhiteSpace(edge.CorridorDefinitionId) ? string.Empty : edge.CorridorDefinitionId ?? string.Empty,
-            FloorId = edge.FloorId,
-            SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
-            Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
-            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
-            ConnectionKind = edge.ConnectionKind
-        };
+            copy = null;
+            if (edge == null) return true;
+            ResolvedTileFootprint footprint = null;
+            if (edge.Footprint != null)
+            {
+                TileCoordinate[] suppliedTiles = edge.Footprint.OccupiedTiles;
+                long tileCount = suppliedTiles?.LongLength ?? 0L;
+                if (!limits.Allows(tileCount)) return false;
+                TileCoordinate[] copiedTiles = suppliedTiles == null ? Array.Empty<TileCoordinate>() : (TileCoordinate[])suppliedTiles.Clone();
+                Array.Sort(copiedTiles);
+                footprint = new ResolvedTileFootprint { OccupiedTiles = copiedTiles };
+            }
+            copy = new FloorRouteEdge
+            {
+                EdgeId = edge.EdgeId,
+                CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                    string.IsNullOrWhiteSpace(edge.CorridorDefinitionId) ? string.Empty : edge.CorridorDefinitionId ?? string.Empty,
+                FloorId = edge.FloorId,
+                SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
+                Footprint = footprint,
+                Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
+                ConnectionKind = edge.ConnectionKind
+            };
+            return true;
+        }
     }
 
     public static class FloorSpatialConfigurationOrdering

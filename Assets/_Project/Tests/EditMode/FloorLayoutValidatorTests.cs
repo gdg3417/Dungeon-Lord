@@ -246,7 +246,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void DirectUnsortedRawHorizontalAndVerticalCorridorFootprints_AreAcceptedWithoutInputMutation_AndCanonicalizedOnlyByCanonicalized()
+        public void DirectUnsortedRawHorizontalAndVerticalCorridorFootprints_AreAcceptedWithoutInputMutation_AndCanonicalizedOnlyByTryCanonicalize()
         {
             var horizontalTiles = new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) };
             var verticalTiles = new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) };
@@ -262,7 +262,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { new TileCoordinate(21, 20), new TileCoordinate(20, 20) }, horizontalTiles);
             CollectionAssert.AreEqual(new[] { new TileCoordinate(30, 31), new TileCoordinate(30, 30) }, verticalTiles);
 
-            FloorSpatialLayout canonicalized = layout.Canonicalized();
+            FloorSpatialLayout canonicalized = Canonicalize(layout);
             TileCoordinate[] canonicalHorizontalTiles = canonicalized.Edges.Single(x => x.EdgeId == "edge.0").Footprint.OccupiedTiles;
             TileCoordinate[] canonicalVerticalTiles = canonicalized.Edges.Single(x => x.EdgeId == "edge.1").Footprint.OccupiedTiles;
             Assert.That(horizontalFootprint.OccupiedTiles, Is.SameAs(horizontalTiles));
@@ -686,6 +686,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasFootprint, Is.EqualTo(45));
         }
 
+        private static FloorSpatialLayout Canonicalize(FloorSpatialLayout source, int maximumTiles = 100)
+        {
+            Assert.That(source.TryCanonicalize(Limits(maximumTiles), out FloorSpatialLayout canonical), Is.True);
+            return canonical;
+        }
         private static RoomSpatialInstance Room(string id, int x) => new RoomSpatialInstance { RoomInstanceId = id, RoomDefinitionId = RoomDefinitionId, FloorId = FloorId, Anchor = new TileCoordinate(x, 0), Orientation = CardinalOrientation.Zero };
         private static FloorRouteNode Node(string id, FloorRouteNodeKind kind, string room = null) => new FloorRouteNode { NodeId = id, FloorId = FloorId, Kind = kind, RoomInstanceId = room };
         private static FloorRouteEdge Edge(string id, string source, string destination, int x) => new FloorRouteEdge { EdgeId = id, CorridorDefinitionId = CorridorDefinitionId, FloorId = FloorId, SourceNodeId = source, DestinationNodeId = destination, Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(x, 2), new TileCoordinate(x + 1, 2) }), Classification = RouteClassification.Required, ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor };
