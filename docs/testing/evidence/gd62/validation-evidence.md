@@ -1,20 +1,50 @@
 # GD62 validation evidence
 
+## Final validation baseline
+
 | Item | Result |
 |---|---|
-| Initial published correction commit | `c5c4db4f6f689fc29e5ae83d17c5a680c1f6f6ab` |
-| Published code-and-test baseline validated | `36336ba5d2d5d2329198b84ba3672c6dd4682a54` |
+| Final tested code-and-test baseline | `398567cfec4344ddfaad092eb5db9366b4c48c1d` |
+| Environment | macOS, Unity 6000.3.2f1 |
 | Evidence update | Documentation-only; the evidence commit is identifiable through Git history and is intentionally not self-referenced here |
-| Static checks | `git diff --check`, merge-marker scan, reason-code audit, prohibited-path audit, player-facing-string audit, save-schema audit, GD62 runtime-wiring audit, and four-file PR-scope audit were rerun against `36336ba5d2d5d2329198b84ba3672c6dd4682a54` before this documentation-only update and passed |
-| Focused GD62 EditMode tests | Pending developer execution in Unity 6000.3.2f1; Unity was unavailable in the validation environment |
-| Full EditMode suite | Pending developer execution in Unity 6000.3.2f1; Unity was unavailable in the validation environment |
-| Manual Bootstrap regression | Pending developer execution |
-| Save-close-reopen-load-rerun regression | Pending developer execution |
-| Save schema | Confirmed unchanged at version 6 by static inspection |
-| Runtime and player-facing behavior | None; the spatial domain remains inactive |
-| Unit | EditMode unit coverage is present, but execution remains pending because Unity was unavailable |
-| SIT | No runtime or cross-system integration was added; standalone graph composition, canonicalization, JSON round-trip, and revalidation coverage exists in EditMode tests and remains pending execution |
-| UAT | Not applicable because no player-facing behavior exists |
-| Fun validation | Not applicable until spatial editing becomes player-observable |
 
-Automation for GD62 establishes contract correctness only. It does not establish that spatial capacity, editing, or the dungeon-building fantasy is understandable or fun.
+## Automated validation
+
+| Check | Result |
+|---|---|
+| `DungeonSpatialContractTests` | Passed |
+| `FloorLayoutValidatorTests` | Passed |
+| Complete Unity EditMode suite | Passed; no exact passing test count is recorded |
+| Test scripts | All passed |
+
+The initial test run had two failures: a Unity JSON `null`/`string.Empty` mismatch and an incorrect positional connection-limit test argument. Both failures were corrected through PR #163, after which the final focused and complete suites passed.
+
+## Manual and regression validation
+
+| Check | Result |
+|---|---|
+| Clean Bootstrap reset | Passed |
+| One-room gameplay regression | Passed |
+| Two-room gameplay regression | Passed; Room 2 remained ordered and the route reported `Full route cleared` and `Depth reached: Room 2` |
+| Diagnostic pages | Passed |
+| Game-view resolution checks | Passed |
+| Save Now | Passed |
+| Save-close-reopen-load-rerun | Passed; room order and assignments persisted |
+| Save lifecycle integrity | No migration prompt, schema error, duplicate state, missing assignment, or inactive spatial-system activation occurred |
+| Save schema | Remains version 6 |
+
+The First Dungeon Contract output `Path built: incomplete` versus the guided output `Path complete: Yes` is accepted as a pre-existing, non-GD62 observation.
+
+## Validation classification and scope
+
+| Area | Result |
+|---|---|
+| Unit | Passed |
+| SIT | Passed for the inactive standalone domain and the existing Bootstrap regression |
+| UAT | Not applicable; GD62 introduced no player-facing behavior |
+| Save lifecycle | Passed on macOS |
+| Fun validation | Not applicable |
+| Runtime and player-facing scope | No runtime spatial authority or player-facing GD62 behavior was introduced |
+| Windows standalone | Not required because the PR contains no active runtime integration, platform-specific code, save-schema change, scene change, prefab change, build change, or player-facing spatial behavior |
+
+Automation for GD62 establishes contract correctness only. It does not prove that future spatial editing is understandable or fun.
