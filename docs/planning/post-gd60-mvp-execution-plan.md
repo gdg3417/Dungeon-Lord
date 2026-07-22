@@ -108,7 +108,7 @@ Phase 2 exclusively owns migration implementation and authority transition:
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
 3. Add localized cost, remaining-capacity, consequence and affordability previews before commit.
-4. Complete and evidence idle offline mana calculation before final MVP validation; exact existing coverage requires confirmation.
+4. Complete and evidence idle offline mana using the configured percentage in Spec 29’s locked single-grant calculation: no offline time cap, with mana storage capacity as the output clamp. Research may improve efficiency percentage, storage capacity, or Mana Farm production, not eligible duration. Explain elapsed time, effective rate, storage-cap clamp, and awarded mana; retain the overnight-one-edit statement only as a non-authoritative balance hypothesis.
 
 **Exit:** every structural edit previews and atomically applies the configured cost/policy; insufficient mana cannot partially mutate layout. **Technical gate:** formula order, affordability, rollback, migration and localization tests. **Fantasy gate:** observe whether spatial growth competes meaningfully with monsters, traps, loot and research.
 
@@ -207,7 +207,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
 | Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
-| Offline percentage, cap, eligible duration, anti-clock-manipulation policy and rounding | Phase 4 | Design/Data/Save; authored policy and lifecycle cases |
+| Offline efficiency percentage, timestamp/clock-manipulation safeguards and rounding; storage-cap tuning where otherwise authorized | Phase 4 | Design/Data/Save; preserve Spec 29 no-time-cap and storage-clamp policy |
 | Exact active-floor/content/device workload limits within the maximum five floors | Phases 6/8/9 | Design/QA data decision and device profiling |
 
 ## 9. Next packet recommendation

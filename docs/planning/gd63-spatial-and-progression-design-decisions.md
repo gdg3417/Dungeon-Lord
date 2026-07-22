@@ -163,9 +163,9 @@ The following are capacity-authoring composition targets, not fixed object-count
 | 2 | 3 | 1–2 |
 | 3 | 3–4 | 2–3 |
 | 4 | 4–5 | 3–4 |
-| 5 | 5–6 | 3–4 |
+| 5 | 5–6 | Remainder within 7–9 combined |
 
-Floor 5 targets approximately 7–9 buildable rooms and corridors combined. Entrance and completion terminals do not count as buildable route pieces. Configured capacity may accommodate fewer large rooms or more small rooms. Floor index does not determine monster level or layout style. Exact floor capacities remain unapproved.
+Floor 5 targets approximately 7–9 buildable route pieces combined: approximately 5–6 rooms, with corridors comprising the remainder within that combined target. Entrance Hall and Completion Terminal do not count as buildable route pieces. These are capacity-authoring targets, not hard limits; authored capacity may accommodate fewer large rooms or more small rooms. Floor index does not determine monster level or layout style. Exact floor capacities remain unapproved.
 
 ## 11. Monster-family direction and MVP content budget
 
@@ -175,11 +175,12 @@ Each required MVP family budgets one base unit, two basic specialty units, one s
 
 ## 12. Offline mana direction
 
-- Offline mana uses a configured percentage of the applicable online passive generation rate.
-- Research may improve offline efficiency, eligible duration, storage, or Mana Farm production.
-- It should support continued expansion without replacing active play. A normal overnight absence funding roughly one meaningful construction or renovation decision rather than a whole floor is a **non-authoritative Phase 4 balance hypothesis to test**, not locked tuning or an approved target.
-- Percentage, cap, duration, clock-manipulation handling, and rounding remain tunable gates.
-- Future results must explain elapsed time, effective rate, cap, and awarded mana through localization-backed presentation.
+- Offline mana uses a configured percentage of the applicable online passive generation rate, integrated with Spec 29's locked single-grant calculation from the last known mana-per-hour rate.
+- There is no offline time cap for mana credit. Mana storage capacity clamps the output.
+- Research may improve offline efficiency percentage, mana storage capacity, or Mana Farm production. Under the current locked specification it does not extend eligible offline duration.
+- Offline accumulation should support continued expansion without replacing active play. A normal overnight absence funding roughly one meaningful construction or renovation decision rather than a whole floor is a **non-authoritative Phase 4 balance hypothesis to test**, not locked tuning or an approved target.
+- Percentage, timestamp/clock-manipulation safeguards, and rounding remain authored implementation gates; GD63 does not authorize changing the no-time-cap rule.
+- Future results must explain elapsed offline time, effective generation rate, the storage-cap clamp, and mana awarded through localization-backed presentation.
 
 ## 13. Known inactive GD62 implementation delta
 
@@ -205,6 +206,6 @@ Later implementation must preserve deterministic simulation; stable IDs; ordinal
 - **Phase 2 only:** separately reviewed schema migration, legacy-state migration, runtime-reader switch, writable-authority transition, rollback, and migration evidence; no version is approved by GD63.
 - Exact floor/room dimensions and capacities; content IDs; connection points; socket/content capacities; construction/renovation/corridor costs; refund percentage, rounding and clamping; environmental modifiers; and workload/device limits.
 - Doorway geometry/validation, invested-mana save representation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 branch formula/tie-break, and Phase 6 transfer/save details.
-- Offline mana percentage, cap, duration, safeguards, rounding, and result presentation.
+- Offline efficiency percentage, timestamp/clock safeguards, rounding, and result presentation; Spec 29 retains no time cap and the storage-cap clamp.
 
 These gates must not be guessed in runtime code. Phase 3, 5, 7, and 9 observation gates remain responsible for testing whether the spatial fantasy is understandable and fun.
