@@ -58,18 +58,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public readonly struct SpatialContentValidationWorkloadLimits
     {
         public SpatialContentValidationWorkloadLimits(int maximumTopLevelRecords, int maximumNestedRecords,
-            int maximumMaterializedTiles, int maximumIssues)
+            int maximumMaterializedTiles, int maximumIssues, int maximumStringCharacters)
         {
             MaximumTopLevelRecords = maximumTopLevelRecords;
             MaximumNestedRecords = maximumNestedRecords;
             MaximumMaterializedTiles = maximumMaterializedTiles;
             MaximumIssues = maximumIssues;
+            MaximumStringCharacters = maximumStringCharacters;
         }
         public int MaximumTopLevelRecords { get; }
         public int MaximumNestedRecords { get; }
         public int MaximumMaterializedTiles { get; }
         public int MaximumIssues { get; }
+        public int MaximumStringCharacters { get; }
         public bool IsValid => MaximumTopLevelRecords > 0 && MaximumNestedRecords > 0 &&
-            MaximumMaterializedTiles > 0 && MaximumIssues > 0;
+            MaximumMaterializedTiles > 0 && MaximumIssues > 0 && MaximumStringCharacters > 0;
     }
 }

@@ -1,23 +1,59 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    // These explicit values become stable content-export diagnostics when GD65A merges.
     public enum SpatialContentValidationReason
     {
-        CatalogMissing = 1, WorkloadLimitsInvalid = 2, WorkloadExceeded = 3,
-        MetadataMissing = 4, SchemaIdentityMissing = 5, SchemaIdentityMalformed = 6,
-        SchemaVersionNonpositive = 7, ContentVersionMissing = 8, DefinitionMissing = 9,
-        StableIdMissing = 10, DuplicateStableId = 11, DuplicateFloorIndex = 12,
-        UnknownEnumValue = 13, FootprintMissing = 14, FootprintDimensionsInvalid = 15,
-        FootprintTileCountExceeded = 16, ReservedTileDuplicate = 17, ReservedTileOutsideFootprint = 18,
-        OrientationDuplicate = 19, OrientationInvalid = 20, CapacityNegative = 21,
-        MaximumConnectionsNegative = 22, ConnectionPointIdDuplicate = 23,
-        ConnectionPointOffsetInvalid = 24, ConnectionPointBoundaryInvalid = 25,
-        ConnectionPointFacingInvalid = 26, ForeignKeyMissing = 27, ForeignKeyAmbiguous = 28,
-        CorridorLengthInvalid = 29, CorridorWidthInvalid = 30, FixedStructureKindInvalid = 31,
-        FixedStructureCapacityInvalid = 32, DiagnosticLimitExceeded = 33
+        CatalogMissing = 1,
+        WorkloadLimitsInvalid = 2,
+        WorkloadExceeded = 3,
+        DiagnosticLimitExceeded = 4,
+        MetadataMissing = 5,
+        SchemaIdentityMissing = 6,
+        SchemaIdentityMalformed = 7,
+        SchemaVersionNonpositive = 8,
+        ContentVersionMissing = 9,
+        DefinitionMissing = 10,
+        StableIdMissing = 11,
+        DuplicateStableId = 12,
+        DuplicateFloorIndex = 13,
+        UnknownEnumValue = 14,
+        FootprintMissing = 15,
+        FootprintDimensionsInvalid = 16,
+        FootprintTileCountExceeded = 17,
+        ReservedTileDuplicate = 18,
+        ReservedTileOutsideFootprint = 19,
+        OrientationSetMissing = 20,
+        OrientationDuplicate = 21,
+        OrientationInvalid = 22,
+        CapacityNegative = 23,
+        MaximumConnectionsNegative = 24,
+        MaximumConnectionsExceedPoints = 25,
+        ConnectionPointSetMissing = 26,
+        ConnectionPointIdDuplicate = 27,
+        ConnectionPointOffsetInvalid = 28,
+        ConnectionPointBoundaryInvalid = 29,
+        ConnectionPointFacingInvalid = 30,
+        ConnectionPointOnReservedTile = 31,
+        ConnectionPointPositionDuplicate = 32,
+        ForeignKeyMissing = 33,
+        ForeignKeyAmbiguous = 34,
+        CorridorLengthInvalid = 35,
+        CorridorWidthInvalid = 36,
+        CorridorMonsterCapacityInvalid = 37,
+        FixedStructureKindInvalid = 38,
+        LocalizationKeyMissing = 39,
+        LocalizationReferenceMissing = 40,
+        LocalizationLookupEntryMissing = 41,
+        FloorIndexNegative = 42,
+        FloorCapacityNegative = 43,
+        FloorCapacityExceedsBounds = 44,
+        FloorBranchAllowanceNegative = 45,
+        FloorBranchAllowanceExceeded = 46
     }
 
     [Serializable]
@@ -30,156 +66,795 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public sealed class SpatialContentValidationResult
     {
-        public SpatialContentValidationResult(SpatialContentValidationIssue[] issues) { Issues = issues; }
+        public SpatialContentValidationResult(SpatialContentValidationIssue[] issues)
+        {
+            Issues = issues;
+        }
+
         public SpatialContentValidationIssue[] Issues { get; }
         public bool IsValid => Issues.Length == 0;
     }
 
     public static class SpatialContentValidator
     {
-        public static SpatialContentValidationResult Validate(SpatialContentCatalog catalog,
-            SpatialContentValidationWorkloadLimits limits, ISet<string> localizationKeys = null)
+        public static SpatialContentValidationResult Validate(
+            SpatialContentCatalog suppliedCatalog,
+            SpatialContentValidationWorkloadLimits limits,
+            ISet<string> suppliedLocalizationKeys = null)
         {
-            var issues = new List<SpatialContentValidationIssue>();
-            if (!limits.IsValid) return Result(SpatialContentValidationReason.WorkloadLimitsInvalid);
-            if (catalog == null) return Result(SpatialContentValidationReason.CatalogMissing);
-            long top = Length(catalog.Floors) + Length(catalog.Rooms) + Length(catalog.Corridors) +
-                Length(catalog.FixedStructures) + Length(catalog.SocketTypes);
-            if (top > limits.MaximumTopLevelRecords) return Result(SpatialContentValidationReason.WorkloadExceeded);
-            long nested = CountNested(catalog);
-            if (nested > limits.MaximumNestedRecords) return Result(SpatialContentValidationReason.WorkloadExceeded);
-            // Conservative upper bound prevents diagnostic construction from exceeding the caller's budget.
-            if (4L + top * 16L + nested * 6L > limits.MaximumIssues)
-                return Result(SpatialContentValidationReason.DiagnosticLimitExceeded);
-            // Validate a detached canonical copy so row permutations cannot affect paths or issue order.
-            if (!SpatialContentCanonicalizer.TryCanonicalize(catalog, limits, out catalog))
-                return Result(SpatialContentValidationReason.WorkloadExceeded);
+            if (!limits.IsValid)
+                return Single(SpatialContentValidationReason.WorkloadLimitsInvalid);
+            if (suppliedCatalog == null)
+                return Single(SpatialContentValidationReason.CatalogMissing);
 
-            AddMetadata(catalog.Metadata, issues);
-            var sockets = Index(catalog.SocketTypes, x => x?.SocketTypeId, "socketTypes", issues);
-            var rooms = Index(catalog.Rooms, x => x?.RoomDefinitionId, "rooms", issues);
-            var corridors = Index(catalog.Corridors, x => x?.CorridorDefinitionId, "corridors", issues);
-            var structures = Index(catalog.FixedStructures, x => x?.StructureDefinitionId, "fixedStructures", issues);
-            ValidateFloors(catalog.Floors, rooms, corridors, structures, catalog.FixedStructures, limits, issues);
-            ForEach(catalog.Rooms, (x, p) => ValidateRoom(x, p, sockets, limits, localizationKeys, issues), "rooms");
-            ForEach(catalog.Corridors, (x, p) => ValidateCorridor(x, p, sockets, localizationKeys, issues), "corridors");
-            ForEach(catalog.FixedStructures, (x, p) => ValidateFixed(x, p, sockets, limits, localizationKeys, issues), "fixedStructures");
-            ForEach(catalog.SocketTypes, (x, p) => ValidateSocket(x, p, sockets, issues), "socketTypes");
-            return new SpatialContentValidationResult(issues.OrderBy(x => (int)x.Reason).ThenBy(x => x.Path, StringComparer.Ordinal)
-                .ThenBy(x => x.RelatedId, StringComparer.Ordinal).ToArray());
+            if (!SpatialContentWorkload.TryPreflight(suppliedCatalog, suppliedLocalizationKeys, limits))
+                return Single(SpatialContentValidationReason.WorkloadExceeded);
+
+            if (!SpatialContentCanonicalizer.TryCanonicalize(suppliedCatalog, limits, out SpatialContentCatalog catalog))
+                return Single(SpatialContentValidationReason.WorkloadExceeded);
+
+            var issues = new IssueCollector(limits.MaximumIssues);
+            HashSet<string> localizationKeys = BuildLocalizationIndex(suppliedLocalizationKeys, issues);
+
+            ValidateMetadata(catalog.Metadata, issues);
+
+            DefinitionIndex<FloorSpatialConfiguration> floors = BuildIndex(
+                catalog.Floors, value => value?.FloorDefinitionId, "floors", issues);
+            DefinitionIndex<RoomSpatialDefinition> rooms = BuildIndex(
+                catalog.Rooms, value => value?.RoomDefinitionId, "rooms", issues);
+            DefinitionIndex<CorridorSpatialDefinition> corridors = BuildIndex(
+                catalog.Corridors, value => value?.CorridorDefinitionId, "corridors", issues);
+            DefinitionIndex<FixedSpatialStructureDefinition> fixedStructures = BuildIndex(
+                catalog.FixedStructures, value => value?.StructureDefinitionId, "fixedStructures", issues);
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets = BuildIndex(
+                catalog.SocketTypes, value => value?.SocketTypeId, "socketTypes", issues);
+
+            ValidateFloors(catalog.Floors, rooms, corridors, fixedStructures, limits, issues);
+            ValidateRooms(catalog.Rooms, sockets, localizationKeys, suppliedLocalizationKeys != null, limits, issues);
+            ValidateCorridors(catalog.Corridors, sockets, localizationKeys, suppliedLocalizationKeys != null, issues);
+            ValidateFixedStructures(catalog.FixedStructures, sockets, localizationKeys,
+                suppliedLocalizationKeys != null, limits, issues);
+            ValidateSockets(catalog.SocketTypes, sockets, issues);
+
+            if (issues.Exceeded)
+                return Single(SpatialContentValidationReason.DiagnosticLimitExceeded);
+
+            return new SpatialContentValidationResult(issues.Items
+                .OrderBy(issue => (int)issue.Reason)
+                .ThenBy(issue => issue.Path, StringComparer.Ordinal)
+                .ThenBy(issue => issue.RelatedId, StringComparer.Ordinal)
+                .ToArray());
         }
 
-        private static void AddMetadata(SpatialContentExportMetadata m, List<SpatialContentValidationIssue> issues)
+        private static HashSet<string> BuildLocalizationIndex(
+            ISet<string> suppliedKeys,
+            IssueCollector issues)
         {
-            if (m == null) { Add(issues, SpatialContentValidationReason.MetadataMissing, "metadata"); return; }
-            if (string.IsNullOrWhiteSpace(m.SchemaId)) Add(issues, SpatialContentValidationReason.SchemaIdentityMissing, "metadata.schemaId");
-            else if (m.SchemaId.Any(char.IsWhiteSpace)) Add(issues, SpatialContentValidationReason.SchemaIdentityMalformed, "metadata.schemaId");
-            if (m.SchemaVersion <= 0) Add(issues, SpatialContentValidationReason.SchemaVersionNonpositive, "metadata.schemaVersion");
-            if (string.IsNullOrWhiteSpace(m.ContentVersion)) Add(issues, SpatialContentValidationReason.ContentVersionMissing, "metadata.contentVersion");
+            if (suppliedKeys == null)
+                return null;
+
+            var result = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string key in suppliedKeys)
+            {
+                if (key == null)
+                {
+                    issues.Add(SpatialContentValidationReason.LocalizationLookupEntryMissing,
+                        "localizationKeys");
+                    continue;
+                }
+
+                result.Add(key);
+            }
+
+            return result;
         }
 
-        private static void ValidateFloors(FloorSpatialConfiguration[] values, Dictionary<string,int> rooms,
-            Dictionary<string,int> corridors, Dictionary<string,int> structures,
-            FixedSpatialStructureDefinition[] fixedDefinitions, SpatialContentValidationWorkloadLimits limits,
-            List<SpatialContentValidationIssue> issues)
+        private static void ValidateMetadata(
+            SpatialContentExportMetadata metadata,
+            IssueCollector issues)
         {
-            var indexes = new HashSet<int>();
-            ForEach(values, (x,p) => { if (x == null) { Add(issues, SpatialContentValidationReason.DefinitionMissing,p); return; }
-                if (!indexes.Add(x.FloorIndex)) Add(issues, SpatialContentValidationReason.DuplicateFloorIndex,p);
-                if (x.Bounds == null) Add(issues, SpatialContentValidationReason.FootprintMissing,p+".bounds");
-                else if (!x.Bounds.IsValid) Add(issues, SpatialContentValidationReason.FootprintDimensionsInvalid,p+".bounds");
-                else if (x.Bounds.TileCount > limits.MaximumMaterializedTiles) Add(issues, SpatialContentValidationReason.FootprintTileCountExceeded,p+".bounds");
-                Refs(x.AllowedRoomDefinitionIds, rooms,p+".allowedRooms",issues); Refs(x.AllowedCorridorDefinitionIds,corridors,p+".allowedCorridors",issues);
-                Ref(x.EntranceStructureDefinitionId,structures,p+".entrance",issues); Ref(x.CompletionStructureDefinitionId,structures,p+".completion",issues);
-                RequireFixedKind(x.EntranceStructureDefinitionId, FixedSpatialStructureKind.Entrance, fixedDefinitions, p+".entrance", issues);
-                RequireFixedKind(x.CompletionStructureDefinitionId, FixedSpatialStructureKind.CompletionTerminal, fixedDefinitions, p+".completion", issues);
-            }, "floors");
-            Index(values, x => x?.FloorDefinitionId, "floors", issues);
+            if (metadata == null)
+            {
+                issues.Add(SpatialContentValidationReason.MetadataMissing, "metadata");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(metadata.SchemaId))
+                issues.Add(SpatialContentValidationReason.SchemaIdentityMissing, "metadata.schemaId");
+            else if (metadata.SchemaId.Any(char.IsWhiteSpace))
+                issues.Add(SpatialContentValidationReason.SchemaIdentityMalformed, "metadata.schemaId");
+
+            if (metadata.SchemaVersion <= 0)
+                issues.Add(SpatialContentValidationReason.SchemaVersionNonpositive, "metadata.schemaVersion");
+            if (string.IsNullOrWhiteSpace(metadata.ContentVersion))
+                issues.Add(SpatialContentValidationReason.ContentVersionMissing, "metadata.contentVersion");
         }
 
-        private static void RequireFixedKind(string id, FixedSpatialStructureKind kind,
-            FixedSpatialStructureDefinition[] values, string path, List<SpatialContentValidationIssue> issues)
+        private static void ValidateFloors(
+            FloorSpatialConfiguration[] floors,
+            DefinitionIndex<RoomSpatialDefinition> rooms,
+            DefinitionIndex<CorridorSpatialDefinition> corridors,
+            DefinitionIndex<FixedSpatialStructureDefinition> fixedStructures,
+            SpatialContentValidationWorkloadLimits limits,
+            IssueCollector issues)
         {
-            if (string.IsNullOrWhiteSpace(id) || values == null) return;
-            FixedSpatialStructureDefinition match = values.FirstOrDefault(x => x != null && string.Equals(x.StructureDefinitionId, id, StringComparison.Ordinal));
-            if (match != null && match.Kind != kind) Add(issues, SpatialContentValidationReason.FixedStructureKindInvalid, path, id);
+            var floorIndexes = new HashSet<int>();
+            ForEach(floors, "floors", (floor, path) =>
+            {
+                if (floor == null)
+                    return;
+
+                if (!floorIndexes.Add(floor.FloorIndex))
+                    issues.Add(SpatialContentValidationReason.DuplicateFloorIndex, path);
+                if (floor.FloorIndex < 0)
+                    issues.Add(SpatialContentValidationReason.FloorIndexNegative, path + ".floorIndex");
+                if (floor.FinalFloorSpaceCapacity < 0)
+                    issues.Add(SpatialContentValidationReason.FloorCapacityNegative, path + ".finalFloorSpaceCapacity");
+                if (floor.OptionalBranchAllowance < 0)
+                    issues.Add(SpatialContentValidationReason.FloorBranchAllowanceNegative, path + ".optionalBranchAllowance");
+                if (floor.OptionalBranchAllowance > 1)
+                    issues.Add(SpatialContentValidationReason.FloorBranchAllowanceExceeded, path + ".optionalBranchAllowance");
+
+                if (floor.Bounds == null)
+                {
+                    issues.Add(SpatialContentValidationReason.FootprintMissing, path + ".bounds");
+                }
+                else if (!floor.Bounds.IsValid)
+                {
+                    issues.Add(SpatialContentValidationReason.FootprintDimensionsInvalid, path + ".bounds");
+                }
+                else
+                {
+                    if (floor.Bounds.TileCount > limits.MaximumMaterializedTiles)
+                        issues.Add(SpatialContentValidationReason.FootprintTileCountExceeded, path + ".bounds");
+                    if (floor.FinalFloorSpaceCapacity > floor.Bounds.TileCount)
+                        issues.Add(SpatialContentValidationReason.FloorCapacityExceedsBounds,
+                            path + ".finalFloorSpaceCapacity");
+                }
+
+                ValidateReferences(floor.AllowedRoomDefinitionIds, rooms, path + ".allowedRooms", issues);
+                ValidateReferences(floor.AllowedCorridorDefinitionIds, corridors,
+                    path + ".allowedCorridors", issues);
+                ValidateFixedReference(floor.EntranceStructureDefinitionId,
+                    FixedSpatialStructureKind.Entrance, fixedStructures, path + ".entrance", issues);
+                ValidateFixedReference(floor.CompletionStructureDefinitionId,
+                    FixedSpatialStructureKind.CompletionTerminal, fixedStructures, path + ".completion", issues);
+            });
         }
 
-        private static void ValidateRoom(RoomSpatialDefinition x,string p,Dictionary<string,int> sockets,
-            SpatialContentValidationWorkloadLimits limits,ISet<string> loc,List<SpatialContentValidationIssue> issues)
-        { if (x == null) return; ValidateShape(x.GrossFootprint,x.ReservedTileOffsets,x.AllowedOrientations,x.ConnectionPoints,p,sockets,limits,issues);
-          Capacities(x.MonsterCapacity,x.TrapCapacity,x.LootCapacity,x.MaximumConnectionCount,p,issues); Localization(x.LocalizationKey,p,loc,issues); }
+        private static void ValidateRooms(
+            RoomSpatialDefinition[] rooms,
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets,
+            HashSet<string> localizationKeys,
+            bool validateLocalizationReference,
+            SpatialContentValidationWorkloadLimits limits,
+            IssueCollector issues)
+        {
+            ForEach(rooms, "rooms", (room, path) =>
+            {
+                if (room == null)
+                    return;
 
-        private static void ValidateCorridor(CorridorSpatialDefinition x,string p,Dictionary<string,int> sockets,ISet<string> loc,List<SpatialContentValidationIssue> issues)
-        { if (x == null) return; if (!Enum.IsDefined(typeof(CorridorSpatialCategory),x.Category)) Add(issues,SpatialContentValidationReason.UnknownEnumValue,p+".category");
-          if (x.MinimumLength <= 0 || x.MaximumLength <= 0 || x.MinimumLength > x.MaximumLength) Add(issues,SpatialContentValidationReason.CorridorLengthInvalid,p+".length");
-          if (x.Width <= 0) Add(issues,SpatialContentValidationReason.CorridorWidthInvalid,p+".width"); Orientations(x.AllowedOrientations,p,issues);
-          Capacities(x.MonsterCapacity,x.TrapCapacity,x.LootCapacity,0,p,issues); Refs(x.CompatibleSocketTypeIds,sockets,p+".compatibleSockets",issues); Localization(x.LocalizationKey,p,loc,issues); }
+                ValidateLocalization(room.LocalizationKey, localizationKeys,
+                    validateLocalizationReference, path, issues);
+                ValidateCapacities(room.MonsterCapacity, room.TrapCapacity, room.LootCapacity, path, issues);
+                ValidateConnectableShape(room.GrossFootprint, room.ReservedTileOffsets,
+                    room.AllowedOrientations, room.ConnectionPoints, room.MaximumConnectionCount,
+                    sockets, limits, path, issues);
+            });
+        }
 
-        private static void ValidateFixed(FixedSpatialStructureDefinition x,string p,Dictionary<string,int> sockets,
-            SpatialContentValidationWorkloadLimits limits,ISet<string> loc,List<SpatialContentValidationIssue> issues)
-        { if (x == null) return; if (!Enum.IsDefined(typeof(FixedSpatialStructureKind),x.Kind)) Add(issues,SpatialContentValidationReason.FixedStructureKindInvalid,p+".kind");
-          ValidateShape(x.GrossFootprint,x.ReservedTileOffsets,x.AllowedOrientations,x.ConnectionPoints,p,sockets,limits,issues);
-          if (x.MaximumConnectionCount < 0) Add(issues,SpatialContentValidationReason.MaximumConnectionsNegative,p+".maximumConnections"); Localization(x.LocalizationKey,p,loc,issues); }
+        private static void ValidateCorridors(
+            CorridorSpatialDefinition[] corridors,
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets,
+            HashSet<string> localizationKeys,
+            bool validateLocalizationReference,
+            IssueCollector issues)
+        {
+            ForEach(corridors, "corridors", (corridor, path) =>
+            {
+                if (corridor == null)
+                    return;
 
-        private static void ValidateShape(RectangularFootprintDefinition f,TileCoordinate[] reserved,CardinalOrientation[] orientations,
-            SpatialConnectionPointDefinition[] points,string p,Dictionary<string,int> sockets,SpatialContentValidationWorkloadLimits limits,List<SpatialContentValidationIssue> issues)
-        { if (f == null) { Add(issues,SpatialContentValidationReason.FootprintMissing,p+".footprint"); return; }
-          if (f.Width <= 0 || f.Height <= 0) Add(issues,SpatialContentValidationReason.FootprintDimensionsInvalid,p+".footprint");
-          long area=(long)f.Width*f.Height; if (area > limits.MaximumMaterializedTiles) Add(issues,SpatialContentValidationReason.FootprintTileCountExceeded,p+".footprint");
-          var seen=new HashSet<TileCoordinate>(); ForEach(reserved,(v,rp)=>{if(!seen.Add(v))Add(issues,SpatialContentValidationReason.ReservedTileDuplicate,rp); if(!Inside(v,f))Add(issues,SpatialContentValidationReason.ReservedTileOutsideFootprint,rp);},p+".reserved");
-          Orientations(orientations,p,issues); var ids=new HashSet<string>(StringComparer.Ordinal); ForEach(points,(v,cp)=>{if(v==null){Add(issues,SpatialContentValidationReason.DefinitionMissing,cp);return;}
-            if(string.IsNullOrWhiteSpace(v.ConnectionPointId))Add(issues,SpatialContentValidationReason.StableIdMissing,cp); else if(!ids.Add(v.ConnectionPointId))Add(issues,SpatialContentValidationReason.ConnectionPointIdDuplicate,cp,v.ConnectionPointId);
-            if(!Inside(v.Offset,f))Add(issues,SpatialContentValidationReason.ConnectionPointOffsetInvalid,cp); else if(!Boundary(v.Offset,f))Add(issues,SpatialContentValidationReason.ConnectionPointBoundaryInvalid,cp);
-            if(!Enum.IsDefined(typeof(CardinalOrientation),v.Facing))Add(issues,SpatialContentValidationReason.OrientationInvalid,cp); else if(Inside(v.Offset,f)&&Boundary(v.Offset,f)&&!Facing(v.Offset,f,v.Facing))Add(issues,SpatialContentValidationReason.ConnectionPointFacingInvalid,cp);
-            Ref(v.SocketTypeId,sockets,cp+".socket",issues);},p+".connectionPoints"); }
+                ValidateLocalization(corridor.LocalizationKey, localizationKeys,
+                    validateLocalizationReference, path, issues);
+                if (!Enum.IsDefined(typeof(CorridorSpatialCategory), corridor.Category))
+                    issues.Add(SpatialContentValidationReason.UnknownEnumValue, path + ".category");
+                if (corridor.MinimumLength <= 0 || corridor.MaximumLength <= 0 ||
+                    corridor.MinimumLength > corridor.MaximumLength)
+                    issues.Add(SpatialContentValidationReason.CorridorLengthInvalid, path + ".length");
+                if (corridor.Width <= 0)
+                    issues.Add(SpatialContentValidationReason.CorridorWidthInvalid, path + ".width");
+                if (corridor.Category == CorridorSpatialCategory.Straight && corridor.MonsterCapacity > 0)
+                    issues.Add(SpatialContentValidationReason.CorridorMonsterCapacityInvalid,
+                        path + ".monsterCapacity");
 
-        private static void ValidateSocket(SpatialSocketTypeDefinition x,string p,Dictionary<string,int> sockets,List<SpatialContentValidationIssue> issues)
-        { if(x!=null) Refs(x.CompatibleSocketTypeIds,sockets,p+".compatible",issues); }
-        private static void Capacities(int m,int t,int l,int max,string p,List<SpatialContentValidationIssue> issues)
-        { if(m<0||t<0||l<0)Add(issues,SpatialContentValidationReason.CapacityNegative,p+".capacities"); if(max<0)Add(issues,SpatialContentValidationReason.MaximumConnectionsNegative,p+".maximumConnections"); }
-        private static void Orientations(CardinalOrientation[] values,string p,List<SpatialContentValidationIssue> issues)
-        { var seen=new HashSet<CardinalOrientation>(); ForEach(values,(v,vp)=>{if(!Enum.IsDefined(typeof(CardinalOrientation),v))Add(issues,SpatialContentValidationReason.OrientationInvalid,vp);else if(!seen.Add(v))Add(issues,SpatialContentValidationReason.OrientationDuplicate,vp);},p+".orientations"); }
-        private static bool Inside(TileCoordinate v,RectangularFootprintDefinition f)=>v.X>=0&&v.Y>=0&&v.X<f.Width&&v.Y<f.Height;
-        private static bool Boundary(TileCoordinate v,RectangularFootprintDefinition f)=>v.X==0||v.Y==0||v.X==f.Width-1||v.Y==f.Height-1;
-        private static bool Facing(TileCoordinate v,RectangularFootprintDefinition f,CardinalOrientation o)=>
-            (o==CardinalOrientation.Zero&&v.Y==f.Height-1)||(o==CardinalOrientation.Ninety&&v.X==f.Width-1)||(o==CardinalOrientation.OneEighty&&v.Y==0)||(o==CardinalOrientation.TwoSeventy&&v.X==0);
-        private static void Localization(string key,string p,ISet<string> loc,List<SpatialContentValidationIssue> issues){if(loc!=null)Ref(key,loc.ToDictionary(x=>x,x=>1,StringComparer.Ordinal),p+".localization",issues);}
-        private static void Refs(string[] refs,Dictionary<string,int> index,string p,List<SpatialContentValidationIssue> issues)=>ForEach(refs,(v,vp)=>Ref(v,index,vp,issues),p);
-        private static void Ref(string id,Dictionary<string,int> index,string p,List<SpatialContentValidationIssue> issues){if(string.IsNullOrWhiteSpace(id)||!index.TryGetValue(id,out int count))Add(issues,SpatialContentValidationReason.ForeignKeyMissing,p,id);else if(count>1)Add(issues,SpatialContentValidationReason.ForeignKeyAmbiguous,p,id);}
-        private static Dictionary<string,int> Index<T>(T[] values,Func<T,string> id,string p,List<SpatialContentValidationIssue> issues){var d=new Dictionary<string,int>(StringComparer.Ordinal);ForEach(values,(v,vp)=>{if(v==null){Add(issues,SpatialContentValidationReason.DefinitionMissing,vp);return;}string key=id(v);if(string.IsNullOrWhiteSpace(key)){Add(issues,SpatialContentValidationReason.StableIdMissing,vp);return;}d.TryGetValue(key,out int n);d[key]=n+1;if(n>0)Add(issues,SpatialContentValidationReason.DuplicateStableId,vp,key);},p);return d;}
-        private static long CountNested(SpatialContentCatalog c){long n=0;ForEach(c.Rooms,(x,p)=>{if(x!=null)n+=Length(x.ReservedTileOffsets)+Length(x.AllowedOrientations)+Length(x.ConnectionPoints);},"");ForEach(c.FixedStructures,(x,p)=>{if(x!=null)n+=Length(x.ReservedTileOffsets)+Length(x.AllowedOrientations)+Length(x.ConnectionPoints);},"");ForEach(c.Corridors,(x,p)=>{if(x!=null)n+=Length(x.AllowedOrientations)+Length(x.CompatibleSocketTypeIds);},"");ForEach(c.SocketTypes,(x,p)=>{if(x!=null)n+=Length(x.CompatibleSocketTypeIds);},"");ForEach(c.Floors,(x,p)=>{if(x!=null)n+=Length(x.AllowedRoomDefinitionIds)+Length(x.AllowedCorridorDefinitionIds);},"");return n;}
-        private static long Length(Array a)=>a?.LongLength??0;
-        private static void ForEach<T>(T[] values,Action<T,string> action,string p){if(values==null)return;for(int i=0;i<values.Length;i++)action(values[i],p+"["+i+"]");}
-        private static void Add(List<SpatialContentValidationIssue> x,SpatialContentValidationReason r,string p,string id="")=>x.Add(new SpatialContentValidationIssue{Reason=r,Path=p,RelatedId=id??string.Empty});
-        private static SpatialContentValidationResult Result(SpatialContentValidationReason r)=>new SpatialContentValidationResult(new[]{new SpatialContentValidationIssue{Reason=r,Path=string.Empty,RelatedId=string.Empty}});
+                ValidateCapacities(corridor.MonsterCapacity, corridor.TrapCapacity,
+                    corridor.LootCapacity, path, issues);
+                ValidateOrientations(corridor.AllowedOrientations, path, issues);
+                ValidateReferences(corridor.CompatibleSocketTypeIds, sockets,
+                    path + ".compatibleSockets", issues);
+            });
+        }
+
+        private static void ValidateFixedStructures(
+            FixedSpatialStructureDefinition[] structures,
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets,
+            HashSet<string> localizationKeys,
+            bool validateLocalizationReference,
+            SpatialContentValidationWorkloadLimits limits,
+            IssueCollector issues)
+        {
+            ForEach(structures, "fixedStructures", (structure, path) =>
+            {
+                if (structure == null)
+                    return;
+
+                ValidateLocalization(structure.LocalizationKey, localizationKeys,
+                    validateLocalizationReference, path, issues);
+                if (!Enum.IsDefined(typeof(FixedSpatialStructureKind), structure.Kind))
+                    issues.Add(SpatialContentValidationReason.FixedStructureKindInvalid, path + ".kind");
+
+                ValidateConnectableShape(structure.GrossFootprint, structure.ReservedTileOffsets,
+                    structure.AllowedOrientations, structure.ConnectionPoints,
+                    structure.MaximumConnectionCount, sockets, limits, path, issues);
+            });
+        }
+
+        private static void ValidateSockets(
+            SpatialSocketTypeDefinition[] socketTypes,
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets,
+            IssueCollector issues)
+        {
+            ForEach(socketTypes, "socketTypes", (socket, path) =>
+            {
+                if (socket != null)
+                    ValidateReferences(socket.CompatibleSocketTypeIds, sockets,
+                        path + ".compatible", issues);
+            });
+        }
+
+        private static void ValidateConnectableShape(
+            RectangularFootprintDefinition footprint,
+            TileCoordinate[] reservedOffsets,
+            CardinalOrientation[] orientations,
+            SpatialConnectionPointDefinition[] connectionPoints,
+            int maximumConnections,
+            DefinitionIndex<SpatialSocketTypeDefinition> sockets,
+            SpatialContentValidationWorkloadLimits limits,
+            string path,
+            IssueCollector issues)
+        {
+            ValidateOrientations(orientations, path, issues);
+            if (maximumConnections < 0)
+                issues.Add(SpatialContentValidationReason.MaximumConnectionsNegative,
+                    path + ".maximumConnections");
+            if (connectionPoints == null || connectionPoints.Length == 0)
+                issues.Add(SpatialContentValidationReason.ConnectionPointSetMissing,
+                    path + ".connectionPoints");
+
+            bool validGeometry = footprint != null && footprint.Width > 0 && footprint.Height > 0;
+            if (footprint == null)
+                issues.Add(SpatialContentValidationReason.FootprintMissing, path + ".footprint");
+            else if (!validGeometry)
+                issues.Add(SpatialContentValidationReason.FootprintDimensionsInvalid, path + ".footprint");
+            else if ((long)footprint.Width * footprint.Height > limits.MaximumMaterializedTiles)
+                issues.Add(SpatialContentValidationReason.FootprintTileCountExceeded, path + ".footprint");
+
+            var reserved = new HashSet<TileCoordinate>();
+            ForEach(reservedOffsets, path + ".reserved", (offset, offsetPath) =>
+            {
+                if (!reserved.Add(offset))
+                    issues.Add(SpatialContentValidationReason.ReservedTileDuplicate, offsetPath);
+                if (validGeometry && !IsInside(offset, footprint))
+                    issues.Add(SpatialContentValidationReason.ReservedTileOutsideFootprint, offsetPath);
+            });
+
+            var pointIds = new HashSet<string>(StringComparer.Ordinal);
+            var positions = new HashSet<TileCoordinate>();
+            int distinctValidPoints = 0;
+            ForEach(connectionPoints, path + ".connectionPoints", (point, pointPath) =>
+            {
+                if (point == null)
+                {
+                    issues.Add(SpatialContentValidationReason.DefinitionMissing, pointPath);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(point.ConnectionPointId))
+                    issues.Add(SpatialContentValidationReason.StableIdMissing, pointPath);
+                else if (!pointIds.Add(point.ConnectionPointId))
+                    issues.Add(SpatialContentValidationReason.ConnectionPointIdDuplicate,
+                        pointPath, point.ConnectionPointId);
+
+                bool uniquePosition = positions.Add(point.Offset);
+                if (!uniquePosition)
+                    issues.Add(SpatialContentValidationReason.ConnectionPointPositionDuplicate, pointPath);
+
+                bool pointGeometryValid = false;
+                if (validGeometry)
+                {
+                    if (!IsInside(point.Offset, footprint))
+                        issues.Add(SpatialContentValidationReason.ConnectionPointOffsetInvalid, pointPath);
+                    else if (!IsBoundary(point.Offset, footprint))
+                        issues.Add(SpatialContentValidationReason.ConnectionPointBoundaryInvalid, pointPath);
+                    else
+                    {
+                        pointGeometryValid = true;
+                        if (reserved.Contains(point.Offset))
+                            issues.Add(SpatialContentValidationReason.ConnectionPointOnReservedTile, pointPath);
+                    }
+                }
+
+                bool facingValid = Enum.IsDefined(typeof(CardinalOrientation), point.Facing);
+                if (!facingValid)
+                    issues.Add(SpatialContentValidationReason.OrientationInvalid, pointPath + ".facing");
+                else if (pointGeometryValid && !FacingMatchesBoundary(point.Offset, footprint, point.Facing))
+                    issues.Add(SpatialContentValidationReason.ConnectionPointFacingInvalid, pointPath);
+
+                ReferenceResolution<SpatialSocketTypeDefinition> socketResolution =
+                    ResolveReference(point.SocketTypeId, sockets, pointPath + ".socket", issues);
+                if (uniquePosition && pointGeometryValid && facingValid && socketResolution.IsUnique &&
+                    !reserved.Contains(point.Offset) && !string.IsNullOrWhiteSpace(point.ConnectionPointId))
+                    distinctValidPoints++;
+            });
+
+            if (maximumConnections >= 0 && maximumConnections > distinctValidPoints)
+                issues.Add(SpatialContentValidationReason.MaximumConnectionsExceedPoints,
+                    path + ".maximumConnections");
+        }
+
+        private static void ValidateOrientations(
+            CardinalOrientation[] orientations,
+            string path,
+            IssueCollector issues)
+        {
+            if (orientations == null || orientations.Length == 0)
+            {
+                issues.Add(SpatialContentValidationReason.OrientationSetMissing, path + ".orientations");
+                return;
+            }
+
+            var seen = new HashSet<CardinalOrientation>();
+            ForEach(orientations, path + ".orientations", (orientation, orientationPath) =>
+            {
+                if (!Enum.IsDefined(typeof(CardinalOrientation), orientation))
+                    issues.Add(SpatialContentValidationReason.OrientationInvalid, orientationPath);
+                else if (!seen.Add(orientation))
+                    issues.Add(SpatialContentValidationReason.OrientationDuplicate, orientationPath);
+            });
+        }
+
+        private static void ValidateCapacities(
+            int monsterCapacity,
+            int trapCapacity,
+            int lootCapacity,
+            string path,
+            IssueCollector issues)
+        {
+            if (monsterCapacity < 0 || trapCapacity < 0 || lootCapacity < 0)
+                issues.Add(SpatialContentValidationReason.CapacityNegative, path + ".capacities");
+        }
+
+        private static void ValidateLocalization(
+            string key,
+            HashSet<string> localizationKeys,
+            bool validateReference,
+            string path,
+            IssueCollector issues)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                issues.Add(SpatialContentValidationReason.LocalizationKeyMissing,
+                    path + ".localizationKey");
+                return;
+            }
+
+            if (validateReference && !localizationKeys.Contains(key))
+                issues.Add(SpatialContentValidationReason.LocalizationReferenceMissing,
+                    path + ".localizationKey", key);
+        }
+
+        private static void ValidateFixedReference(
+            string id,
+            FixedSpatialStructureKind requiredKind,
+            DefinitionIndex<FixedSpatialStructureDefinition> index,
+            string path,
+            IssueCollector issues)
+        {
+            ReferenceResolution<FixedSpatialStructureDefinition> resolution =
+                ResolveReference(id, index, path, issues);
+            if (resolution.IsUnique && resolution.Value.Kind != requiredKind)
+                issues.Add(SpatialContentValidationReason.FixedStructureKindInvalid, path, id);
+        }
+
+        private static void ValidateReferences<T>(
+            string[] ids,
+            DefinitionIndex<T> index,
+            string path,
+            IssueCollector issues)
+        {
+            ForEach(ids, path, (id, idPath) => ValidateReference(id, index, idPath, issues));
+        }
+
+        private static void ValidateReference<T>(
+            string id,
+            DefinitionIndex<T> index,
+            string path,
+            IssueCollector issues)
+        {
+            ResolveReference(id, index, path, issues);
+        }
+
+        private static ReferenceResolution<T> ResolveReference<T>(
+            string id,
+            DefinitionIndex<T> index,
+            string path,
+            IssueCollector issues)
+        {
+            if (string.IsNullOrWhiteSpace(id) || !index.Entries.TryGetValue(id, out List<T> matches))
+            {
+                issues.Add(SpatialContentValidationReason.ForeignKeyMissing, path, id);
+                return default;
+            }
+
+            if (matches.Count != 1)
+            {
+                issues.Add(SpatialContentValidationReason.ForeignKeyAmbiguous, path, id);
+                return default;
+            }
+
+            return new ReferenceResolution<T>(matches[0]);
+        }
+
+        private static DefinitionIndex<T> BuildIndex<T>(
+            T[] values,
+            Func<T, string> getId,
+            string path,
+            IssueCollector issues)
+        {
+            var entries = new Dictionary<string, List<T>>(StringComparer.Ordinal);
+            ForEach(values, path, (value, valuePath) =>
+            {
+                if (value == null)
+                {
+                    issues.Add(SpatialContentValidationReason.DefinitionMissing, valuePath);
+                    return;
+                }
+
+                string id = getId(value);
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    issues.Add(SpatialContentValidationReason.StableIdMissing, valuePath);
+                    return;
+                }
+
+                if (!entries.TryGetValue(id, out List<T> matches))
+                {
+                    matches = new List<T>();
+                    entries.Add(id, matches);
+                }
+
+                matches.Add(value);
+                if (matches.Count > 1)
+                    issues.Add(SpatialContentValidationReason.DuplicateStableId, valuePath, id);
+            });
+            return new DefinitionIndex<T>(entries);
+        }
+
+        private static bool IsInside(TileCoordinate value, RectangularFootprintDefinition footprint) =>
+            value.X >= 0 && value.Y >= 0 && value.X < footprint.Width && value.Y < footprint.Height;
+
+        private static bool IsBoundary(TileCoordinate value, RectangularFootprintDefinition footprint) =>
+            value.X == 0 || value.Y == 0 || value.X == footprint.Width - 1 || value.Y == footprint.Height - 1;
+
+        private static bool FacingMatchesBoundary(
+            TileCoordinate value,
+            RectangularFootprintDefinition footprint,
+            CardinalOrientation facing) =>
+            (facing == CardinalOrientation.Zero && value.Y == footprint.Height - 1) ||
+            (facing == CardinalOrientation.Ninety && value.X == footprint.Width - 1) ||
+            (facing == CardinalOrientation.OneEighty && value.Y == 0) ||
+            (facing == CardinalOrientation.TwoSeventy && value.X == 0);
+
+        private static void ForEach<T>(T[] values, string path, Action<T, string> action)
+        {
+            if (values == null)
+                return;
+            for (int index = 0; index < values.Length; index++)
+                action(values[index], path + "[" + index + "]");
+        }
+
+        private static SpatialContentValidationResult Single(SpatialContentValidationReason reason) =>
+            new SpatialContentValidationResult(new[]
+            {
+                new SpatialContentValidationIssue
+                {
+                    Reason = reason,
+                    Path = string.Empty,
+                    RelatedId = string.Empty
+                }
+            });
+
+        private sealed class IssueCollector
+        {
+            private readonly int maximumIssues;
+
+            public IssueCollector(int maximumIssues)
+            {
+                this.maximumIssues = maximumIssues;
+                Items = new List<SpatialContentValidationIssue>(Math.Min(maximumIssues, 16));
+            }
+
+            public List<SpatialContentValidationIssue> Items { get; }
+            public bool Exceeded { get; private set; }
+
+            public void Add(SpatialContentValidationReason reason, string path, string relatedId = "")
+            {
+                if (Items.Count >= maximumIssues)
+                {
+                    Exceeded = true;
+                    return;
+                }
+
+                Items.Add(new SpatialContentValidationIssue
+                {
+                    Reason = reason,
+                    Path = path,
+                    RelatedId = relatedId ?? string.Empty
+                });
+            }
+        }
+
+        private sealed class DefinitionIndex<T>
+        {
+            public DefinitionIndex(Dictionary<string, List<T>> entries)
+            {
+                Entries = entries;
+            }
+
+            public Dictionary<string, List<T>> Entries { get; }
+        }
+
+        private readonly struct ReferenceResolution<T>
+        {
+            public ReferenceResolution(T value)
+            {
+                Value = value;
+                IsUnique = true;
+            }
+
+            public T Value { get; }
+            public bool IsUnique { get; }
+        }
+    }
+
+    internal static class SpatialContentWorkload
+    {
+        public static bool TryPreflight(
+            SpatialContentCatalog catalog,
+            ISet<string> localizationKeys,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            long topLevel = Length(catalog.Floors) + Length(catalog.Rooms) +
+                Length(catalog.Corridors) + Length(catalog.FixedStructures) + Length(catalog.SocketTypes);
+            if (topLevel > limits.MaximumTopLevelRecords)
+                return false;
+
+            long nested = localizationKeys?.Count ?? 0;
+            long characters = StringLength(catalog.Metadata?.SchemaId) +
+                StringLength(catalog.Metadata?.ContentVersion);
+
+            CountFloors(catalog.Floors, ref nested, ref characters);
+            CountRooms(catalog.Rooms, ref nested, ref characters);
+            CountCorridors(catalog.Corridors, ref nested, ref characters);
+            CountFixed(catalog.FixedStructures, ref nested, ref characters);
+            CountSockets(catalog.SocketTypes, ref nested, ref characters);
+
+            if (localizationKeys != null)
+            {
+                foreach (string key in localizationKeys)
+                    characters += StringLength(key);
+            }
+
+            return nested <= limits.MaximumNestedRecords &&
+                characters <= limits.MaximumStringCharacters;
+        }
+
+        private static void CountFloors(FloorSpatialConfiguration[] values, ref long nested, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.FloorDefinitionId) +
+                    StringLength(value?.EntranceStructureDefinitionId) +
+                    StringLength(value?.CompletionStructureDefinitionId);
+                CountStrings(value?.AllowedRoomDefinitionIds, ref nested, ref chars);
+                CountStrings(value?.AllowedCorridorDefinitionIds, ref nested, ref chars);
+            });
+        }
+
+        private static void CountRooms(RoomSpatialDefinition[] values, ref long nested, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.RoomDefinitionId) + StringLength(value?.LocalizationKey);
+                nested += Length(value?.ReservedTileOffsets) + Length(value?.AllowedOrientations) +
+                    Length(value?.ConnectionPoints);
+                CountPoints(value?.ConnectionPoints, ref chars);
+            });
+        }
+
+        private static void CountCorridors(CorridorSpatialDefinition[] values, ref long nested, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.CorridorDefinitionId) + StringLength(value?.LocalizationKey);
+                nested += Length(value?.AllowedOrientations);
+                CountStrings(value?.CompatibleSocketTypeIds, ref nested, ref chars);
+            });
+        }
+
+        private static void CountFixed(FixedSpatialStructureDefinition[] values, ref long nested, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.StructureDefinitionId) + StringLength(value?.LocalizationKey);
+                nested += Length(value?.ReservedTileOffsets) + Length(value?.AllowedOrientations) +
+                    Length(value?.ConnectionPoints);
+                CountPoints(value?.ConnectionPoints, ref chars);
+            });
+        }
+
+        private static void CountSockets(SpatialSocketTypeDefinition[] values, ref long nested, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.SocketTypeId);
+                CountStrings(value?.CompatibleSocketTypeIds, ref nested, ref chars);
+            });
+        }
+
+        private static void CountPoints(SpatialConnectionPointDefinition[] values, ref long chars)
+        {
+            ForEach(values, value =>
+            {
+                chars += StringLength(value?.ConnectionPointId) + StringLength(value?.SocketTypeId);
+            });
+        }
+
+        private static void CountStrings(string[] values, ref long nested, ref long chars)
+        {
+            nested += Length(values);
+            ForEach(values, value => chars += StringLength(value));
+        }
+
+        private static long StringLength(string value) => value?.Length ?? 0L;
+        private static long Length(Array values) => values?.LongLength ?? 0L;
+
+        private static void ForEach<T>(T[] values, Action<T> action)
+        {
+            if (values == null)
+                return;
+            foreach (T value in values)
+                action(value);
+        }
     }
 
     public static class SpatialContentCanonicalizer
     {
-        public static bool TryCanonicalize(SpatialContentCatalog source, SpatialContentValidationWorkloadLimits limits, out SpatialContentCatalog result)
+        public static bool TryCanonicalize(
+            SpatialContentCatalog source,
+            SpatialContentValidationWorkloadLimits limits,
+            out SpatialContentCatalog result)
         {
-            result=null; if(source==null||!limits.IsValid) return false;
-            long top=(source.Floors?.LongLength??0)+(source.Rooms?.LongLength??0)+(source.Corridors?.LongLength??0)+(source.FixedStructures?.LongLength??0)+(source.SocketTypes?.LongLength??0);
-            if(top>limits.MaximumTopLevelRecords) return false;
-            long nested=0;
-            AddNested(source.Rooms,x=>x==null?0:(x.ReservedTileOffsets?.LongLength??0)+(x.AllowedOrientations?.LongLength??0)+(x.ConnectionPoints?.LongLength??0),ref nested);
-            AddNested(source.FixedStructures,x=>x==null?0:(x.ReservedTileOffsets?.LongLength??0)+(x.AllowedOrientations?.LongLength??0)+(x.ConnectionPoints?.LongLength??0),ref nested);
-            AddNested(source.Corridors,x=>x==null?0:(x.AllowedOrientations?.LongLength??0)+(x.CompatibleSocketTypeIds?.LongLength??0),ref nested);
-            AddNested(source.SocketTypes,x=>x==null?0:(x.CompatibleSocketTypeIds?.LongLength??0),ref nested);
-            AddNested(source.Floors,x=>x==null?0:(x.AllowedRoomDefinitionIds?.LongLength??0)+(x.AllowedCorridorDefinitionIds?.LongLength??0),ref nested);
-            if(nested>limits.MaximumNestedRecords) return false;
-            // Unity JSON provides a compact detached copy while retaining nulls, duplicates, and unknown enum values.
-            result=UnityEngine.JsonUtility.FromJson<SpatialContentCatalog>(UnityEngine.JsonUtility.ToJson(source));
-            Sort(result.Floors,x=>x?.FloorDefinitionId); Sort(result.Rooms,x=>x?.RoomDefinitionId); Sort(result.Corridors,x=>x?.CorridorDefinitionId); Sort(result.FixedStructures,x=>x?.StructureDefinitionId); Sort(result.SocketTypes,x=>x?.SocketTypeId);
-            ForEach(result.Floors,x=>{SortStrings(x.AllowedRoomDefinitionIds);SortStrings(x.AllowedCorridorDefinitionIds);});
-            ForEach(result.Rooms,x=>Shape(x.ReservedTileOffsets,x.AllowedOrientations,x.ConnectionPoints)); ForEach(result.FixedStructures,x=>Shape(x.ReservedTileOffsets,x.AllowedOrientations,x.ConnectionPoints));
-            ForEach(result.Corridors,x=>{if(x.AllowedOrientations!=null)Array.Sort(x.AllowedOrientations);SortStrings(x.CompatibleSocketTypeIds);}); ForEach(result.SocketTypes,x=>SortStrings(x.CompatibleSocketTypeIds)); return true;
+            result = null;
+            if (source == null || !limits.IsValid ||
+                !SpatialContentWorkload.TryPreflight(source, null, limits))
+                return false;
+
+            result = JsonUtility.FromJson<SpatialContentCatalog>(JsonUtility.ToJson(source));
+            CanonicalizeNested(result);
+
+            SortRecords(result.Floors, value => value?.FloorDefinitionId);
+            SortRecords(result.Rooms, value => value?.RoomDefinitionId);
+            SortRecords(result.Corridors, value => value?.CorridorDefinitionId);
+            SortRecords(result.FixedStructures, value => value?.StructureDefinitionId);
+            SortRecords(result.SocketTypes, value => value?.SocketTypeId);
+            return true;
         }
-        private static void Shape(TileCoordinate[] t,CardinalOrientation[] o,SpatialConnectionPointDefinition[] p){if(t!=null)Array.Sort(t);if(o!=null)Array.Sort(o);if(p!=null)Array.Sort(p,(a,b)=>StringComparer.Ordinal.Compare(a?.ConnectionPointId,b?.ConnectionPointId));}
-        private static void Sort<T>(T[] a,Func<T,string> id){if(a!=null)Array.Sort(a,(x,y)=>StringComparer.Ordinal.Compare(id(x),id(y)));}
-        private static void SortStrings(string[] a){if(a!=null)Array.Sort(a,StringComparer.Ordinal);}
-        private static void ForEach<T>(T[] a,Action<T> f){if(a==null)return;foreach(T x in a)if(x!=null)f(x);}
-        private static void AddNested<T>(T[] a,Func<T,long> count,ref long total){if(a==null)return;foreach(T x in a)total+=count(x);}
+
+        private static void CanonicalizeNested(SpatialContentCatalog catalog)
+        {
+            ForEach(catalog.Floors, floor =>
+            {
+                SortStrings(floor.AllowedRoomDefinitionIds);
+                SortStrings(floor.AllowedCorridorDefinitionIds);
+            });
+            ForEach(catalog.Rooms, room => CanonicalizeShape(
+                room.ReservedTileOffsets, room.AllowedOrientations, room.ConnectionPoints));
+            ForEach(catalog.Corridors, corridor =>
+            {
+                SortOrientations(corridor.AllowedOrientations);
+                SortStrings(corridor.CompatibleSocketTypeIds);
+            });
+            ForEach(catalog.FixedStructures, structure => CanonicalizeShape(
+                structure.ReservedTileOffsets, structure.AllowedOrientations, structure.ConnectionPoints));
+            ForEach(catalog.SocketTypes, socket => SortStrings(socket.CompatibleSocketTypeIds));
+        }
+
+        private static void CanonicalizeShape(
+            TileCoordinate[] reserved,
+            CardinalOrientation[] orientations,
+            SpatialConnectionPointDefinition[] points)
+        {
+            if (reserved != null)
+                Array.Sort(reserved);
+            SortOrientations(orientations);
+            SortRecords(points, point => point?.ConnectionPointId);
+        }
+
+        private static void SortRecords<T>(T[] values, Func<T, string> getId) where T : class
+        {
+            if (values == null)
+                return;
+
+            var keyedRecords = new CanonicalRecord<T>[values.Length];
+            for (int index = 0; index < values.Length; index++)
+            {
+                T value = values[index];
+                keyedRecords[index] = new CanonicalRecord<T>(
+                    value,
+                    getId(value),
+                    value == null ? string.Empty : JsonUtility.ToJson(value));
+            }
+
+            Array.Sort(keyedRecords, (left, right) =>
+            {
+                int idComparison = StringComparer.Ordinal.Compare(left.Id, right.Id);
+                if (idComparison != 0)
+                    return idComparison;
+                return StringComparer.Ordinal.Compare(left.Payload, right.Payload);
+            });
+
+            for (int index = 0; index < values.Length; index++)
+                values[index] = keyedRecords[index].Value;
+        }
+
+        private static void SortStrings(string[] values)
+        {
+            if (values != null)
+                Array.Sort(values, StringComparer.Ordinal);
+        }
+
+        private static void SortOrientations(CardinalOrientation[] values)
+        {
+            if (values != null)
+                Array.Sort(values);
+        }
+
+        private static void ForEach<T>(T[] values, Action<T> action) where T : class
+        {
+            if (values == null)
+                return;
+            foreach (T value in values)
+            {
+                if (value != null)
+                    action(value);
+            }
+        }
+
+        private readonly struct CanonicalRecord<T>
+        {
+            public CanonicalRecord(T value, string id, string payload)
+            {
+                Value = value;
+                Id = id;
+                Payload = payload;
+            }
+
+            public T Value { get; }
+            public string Id { get; }
+            public string Payload { get; }
+        }
     }
 }
