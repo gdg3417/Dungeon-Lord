@@ -12,6 +12,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RectangularFloorBounds Bounds;
         public int FinalFloorSpaceCapacity;
         public int OptionalBranchAllowance;
+        public string[] AllowedRoomDefinitionIds = Array.Empty<string>();
+        public string[] AllowedCorridorDefinitionIds = Array.Empty<string>();
+        public string EntranceStructureDefinitionId;
+        public string CompletionStructureDefinitionId;
     }
 
     [Serializable]
@@ -24,6 +28,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public int MonsterCapacity;
         public int TrapCapacity;
         public int LootCapacity;
+        public string LocalizationKey;
+        public CardinalOrientation[] AllowedOrientations = Array.Empty<CardinalOrientation>();
+        public SpatialConnectionPointDefinition[] ConnectionPoints = Array.Empty<SpatialConnectionPointDefinition>();
 
         public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation,
             SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint) =>
@@ -59,7 +66,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     [Serializable]
-    public sealed class CorridorSpatialDefinition { public string CorridorDefinitionId; }
+    public sealed class CorridorSpatialDefinition
+    {
+        public string CorridorDefinitionId;
+        public string LocalizationKey;
+        public CorridorSpatialCategory Category;
+        public int MinimumLength;
+        public int MaximumLength;
+        public int Width;
+        public int MonsterCapacity;
+        public int TrapCapacity;
+        public int LootCapacity;
+        public CardinalOrientation[] AllowedOrientations = Array.Empty<CardinalOrientation>();
+        public string[] CompatibleSocketTypeIds = Array.Empty<string>();
+    }
 
     [Serializable]
     public sealed class RoomSpatialInstance
