@@ -480,6 +480,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CumulativeNestedAndCharacterLimitsFailClosedAtExactBoundaries()
+        {
+            SpatialContentCatalog catalog = Valid();
+            HashSet<string> localizationKeys = AllLocalizationKeys(catalog);
+            int nestedCount = CountNestedRecords(catalog) + localizationKeys.Count;
+            int characterCount = CountAuthoredCharacters(catalog) +
+                localizationKeys.Sum(value => value?.Length ?? 0);
+
+            Assert.That(Validate(catalog,
+                Limits(nested: nestedCount, characters: characterCount), localizationKeys).IsValid, Is.True);
+            CollectionAssert.AreEqual(
+                new[] { SpatialContentValidationReason.WorkloadExceeded },
+                Reasons(catalog, Limits(nested: nestedCount - 1, characters: characterCount),
+                    localizationKeys));
+            CollectionAssert.AreEqual(
+                new[] { SpatialContentValidationReason.WorkloadExceeded },
+                Reasons(catalog, Limits(nested: nestedCount, characters: characterCount - 1),
+                    localizationKeys));
+
+            Assert.That(nestedCount, Is.GreaterThan(localizationKeys.Count));
+            Assert.That(characterCount, Is.GreaterThan(
+                localizationKeys.Sum(value => value?.Length ?? 0)));
+        }
+
+        [Test]
         public void CanonicalizationIsDetachedStableAndRoundTripIdempotent()
         {
             var source = Valid();
@@ -575,6 +600,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .Concat(catalog.Corridors.Select(value => value.LocalizationKey))
                 .Concat(catalog.FixedStructures.Select(value => value.LocalizationKey)),
                 StringComparer.Ordinal);
+
+        private static int CountNestedRecords(SpatialContentCatalog catalog) =>
+            catalog.Floors.Sum(value => Length(value.AllowedRoomDefinitionIds) +
+                Length(value.AllowedCorridorDefinitionIds)) +
+            catalog.Rooms.Sum(value => Length(value.ReservedTileOffsets) +
+                Length(value.AllowedOrientations) + Length(value.ConnectionPoints)) +
+            catalog.Corridors.Sum(value => Length(value.AllowedOrientations) +
+                Length(value.CompatibleSocketTypeIds)) +
+            catalog.FixedStructures.Sum(value => Length(value.ReservedTileOffsets) +
+                Length(value.AllowedOrientations) + Length(value.ConnectionPoints)) +
+            catalog.SocketTypes.Sum(value => Length(value.CompatibleSocketTypeIds));
+
+        private static int CountAuthoredCharacters(SpatialContentCatalog catalog) =>
+            StringLength(catalog.Metadata.SchemaId) + StringLength(catalog.Metadata.ContentVersion) +
+            catalog.Floors.Sum(value => StringLength(value.FloorDefinitionId) +
+                StringLength(value.EntranceStructureDefinitionId) +
+                StringLength(value.CompletionStructureDefinitionId) +
+                StringLengths(value.AllowedRoomDefinitionIds) +
+                StringLengths(value.AllowedCorridorDefinitionIds)) +
+            catalog.Rooms.Sum(value => StringLength(value.RoomDefinitionId) +
+                StringLength(value.LocalizationKey) + PointStringLengths(value.ConnectionPoints)) +
+            catalog.Corridors.Sum(value => StringLength(value.CorridorDefinitionId) +
+                StringLength(value.LocalizationKey) + StringLengths(value.CompatibleSocketTypeIds)) +
+            catalog.FixedStructures.Sum(value => StringLength(value.StructureDefinitionId) +
+                StringLength(value.LocalizationKey) + PointStringLengths(value.ConnectionPoints)) +
+            catalog.SocketTypes.Sum(value => StringLength(value.SocketTypeId) +
+                StringLengths(value.CompatibleSocketTypeIds));
+
+        private static int PointStringLengths(SpatialConnectionPointDefinition[] values) =>
+            values?.Sum(value => StringLength(value?.ConnectionPointId) +
+                StringLength(value?.SocketTypeId)) ?? 0;
+
+        private static int StringLengths(string[] values) =>
+            values?.Sum(StringLength) ?? 0;
+
+        private static int StringLength(string value) => value?.Length ?? 0;
+        private static int Length(Array values) => values?.Length ?? 0;
 
         private static void AssertPermutationStable(
             SpatialContentCatalog original,

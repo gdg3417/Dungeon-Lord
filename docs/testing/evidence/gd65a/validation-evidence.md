@@ -1,80 +1,76 @@
-# GD65A corrected validation evidence
+# GD65A final validation evidence
 
 ## Commit and environment classification
 
-- Remote reviewed head supplied for PR #167: `3a9e5b93f21a3fb274a853aadaad2136194691be`.
-- Remote fetch command was attempted before editing but the provided environment had no configured `origin`; therefore remote verification could not be completed locally.
-- Preloaded local PR patch head: `19dd39b` on top of `0d2d29460aa0c73d924de55e35b5b7fcd81b39cf`.
-- Confirmed `main` baseline represented merged PR #166 / GD64 at `0d2d29460aa0c73d924de55e35b5b7fcd81b39cf`.
-- Corrected implementation and test head statically tested: `1139660ec34acd5c6742811898cd6df39ebc780a`.
-- The commit following that implementation head changes this evidence file only; no implementation file changed after the recorded checks.
+- Reviewed remote PR #167 head supplied for this correction: `367c89395b97ff374d9b7ab29cdeb5653f1528ed`.
+- The environment had no configured remote URL, so that remote SHA could not be fetched or independently verified.
+- Confirmed local GD64/main reference: `origin/main` at `0d2d29460aa0c73d924de55e35b5b7fcd81b39cf` (merged PR #166).
+- Pre-correction local branch head: `4ad63b9e46b36b2f6298879939106c6e6acad1ee`.
+- Final corrected implementation and test head statically tested: `01dae2fff8d1a7f4fa1eabccbbe6052cc84704b7`.
+- The commit containing this rewritten evidence file is separate from the tested implementation commit and changes documentation only; its SHA is reported in the PR description and final delivery report because a commit cannot contain its own final SHA.
 - Host: Linux x86_64. Repository Unity version: `6000.3.2f1`.
-- Manual validation classification: static source, contract, determinism, and scope audit only.
+- Manual validation classification: static source, contract, determinism, workload, and scope audit only.
 
-## Commands actually run
+## Workload correction
 
-Commands run before and during inspection:
+`SpatialContentWorkload.TryPreflight` now uses one directly reviewable bounded-add operation for every cumulative total. It rejects before addition when `additional < 0` or `current > maximum - additional`, then adds only after the bound succeeds. It does not use exceptions as validation flow.
 
-```text
-git status --short --branch
-git remote -v
-git fetch origin codex/define-inactive-spatial-content-schema
-git branch -avv
-git log --oneline --decorate -12
-git cat-file -t 3a9e5b93f21a3fb274a853aadaad2136194691be
-git checkout -b codex/define-inactive-spatial-content-schema
-git diff --stat 0d2d294...HEAD
-sed -n '1,260p' Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs
-sed -n '1,160p' Assets/_Project/Tests/EditMode/SpatialContentValidationTests.cs
-sed -n '1,120p' docs/testing/evidence/gd65a/validation-evidence.md
-sed -n '1,100p' docs/planning/gd63-spatial-and-progression-design-decisions.md
-sed -n '1,120p' Assets/_Project/Tests/EditMode/FloorLayoutValidatorTests.cs
-rg -n "SpatialContentValidationWorkloadLimits\(" Assets --glob '*.cs'
-rg -n "GetHashCode|RuntimeHelpers|FirstOrDefault|ToDictionary" Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs
-command -v dotnet
-command -v csc
-command -v mcs
-```
+The fail-closed accumulator is applied individually and immediately to:
 
-Static checks run against corrected implementation and test head `1139660ec34acd5c6742811898cd6df39ebc780a`:
+- Every top-level floor, room, corridor, fixed-structure, and socket array count.
+- Supplied localization-key count.
+- Floor allowed-room and allowed-corridor references.
+- Room reserved offsets, orientations, and connection points.
+- Corridor orientations and compatibility references.
+- Fixed-structure reserved offsets, orientations, and connection points.
+- Socket compatibility references.
+- Metadata, definition, localization, reference, connection-point, and socket string characters.
+- Supplied localization-key characters.
+
+A failed addition returns immediately, so later proportional collections are not enumerated or allocated. All maxima remain explicitly caller-supplied; no production default was introduced.
+
+Focused tests calculate cumulative nested and character totals across all catalog collection types plus localization entries. They prove exact limits pass, one-under limits return only `WorkloadExceeded`, localization contributes to both totals, and existing invalid-limit behavior remains `WorkloadLimitsInvalid` only. No impossible arrays are allocated.
+
+## Successful commands actually run
+
+The following commands completed successfully against implementation/test head `01dae2fff8d1a7f4fa1eabccbbe6052cc84704b7`:
 
 ```text
 git status --short
 git diff --check
 git diff --check origin/main...HEAD
 git diff --name-only origin/main...HEAD
+git log --oneline --decorate --max-count=6
+git show --stat --oneline HEAD
 sed -n '7,25p' Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLayoutValidation.cs
 rg -n 'DirectDoorway = 1, PhysicalCorridor = 2' Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorRouteGraph.cs
 rg -n 'LatestSchemaVersion = 6' Assets/_Project/Scripts/Save/SaveMigration.cs
-rg -n 'SpatialContentCatalog' Assets/_Project/Scripts --glob '!Gameplay/DungeonSpatial/SpatialContentContracts.cs' --glob '!Gameplay/DungeonSpatial/SpatialContentValidation.cs'
-git diff --name-only origin/main...HEAD -- Assets/_Project/Data/Bootstrap Assets/_Project/Scripts/Save Assets/_Project/Scenes Assets/_Project/Prefabs ProjectSettings
+git diff --name-only origin/main...HEAD -- Assets/_Project/Scripts/Save Assets/_Project/Data/Bootstrap Assets/_Project/Scenes Assets/_Project/Prefabs ProjectSettings
+rg -n 'SpatialContentCatalog' Assets/_Project/Scripts
 find Assets -type f -iname '*spatial*.json' -print
-rg -n 'placement\.option\.room\.(basic|narrow_hall)' Assets/_Project/Scripts/Gameplay/DungeonSpatial Assets/_Project/Tests/EditMode/SpatialContentValidationTests.cs
+rg -n 'placement\.option\.room\.(basic|narrow_hall)' Assets/_Project/Scripts/Gameplay/DungeonSpatial
 for f in $(git diff --name-only origin/main...HEAD -- 'Assets/**/*.cs'); do test -f "$f.meta"; done
-command -v unity-editor || command -v Unity || find /opt /usr/local -maxdepth 3 -iname Unity -type f
 git rev-parse HEAD
-git branch --show-current
-uname -a
-cat ProjectSettings/ProjectVersion.txt
 ```
 
 Results:
 
-- `git status --short` was clean at the corrected implementation head.
-- Both `git diff --check` commands passed with no output.
-- The name-only diff contained only the ten intended GD65A files.
-- GD64 `FloorLayoutValidationReason` remains exactly 1 through 45.
+- `git status --short` was clean.
+- Both diff checks passed with no output.
+- The name-only PR diff contained exactly the ten intended GD65A files.
+- The implementation commit changed only `SpatialContentValidation.cs` and `SpatialContentValidationTests.cs`.
+- `FloorLayoutValidationReason` remains exactly 1 through 45.
 - `FloorRouteConnectionKind` remains `DirectDoorway = 1` and `PhysicalCorridor = 2`.
 - Save schema remains version 6.
-- No SaveData, migration, Bootstrap data, manifest, schema registry, scene, prefab, build-setting, or production spatial JSON changed.
-- No active runtime consumer was added; matches were confined to the inactive content contract/validator.
+- No save, migration, Bootstrap, manifest, schema-registry, scene, prefab, or build-setting file changed.
+- Catalog references in production scripts remain confined to the inactive contract, validator, preflight, and canonicalizer; no runtime consumer exists.
+- No production spatial JSON exists.
 - No prototype placement ID became spatial content authority.
-- Every new Unity C# file has its matching `.meta` file.
-- No `FirstOrDefault`, per-definition `ToDictionary`, runtime hash, or `GetHashCode` tie-break remains in content validation/canonicalization.
+- Every new Unity C# file has a matching `.meta` file.
 
 ## Content-validation reason map
 
-These values are explicit and become stable when GD65A merges:
+`SpatialContentValidationReason` retains explicit values 1 through 46:
 
 | Value | Reason | Value | Reason |
 |---:|---|---:|---|
@@ -102,31 +98,25 @@ These values are explicit and become stable when GD65A merges:
 | 22 | `OrientationInvalid` | 45 | `FloorBranchAllowanceNegative` |
 | 23 | `CapacityNegative` | 46 | `FloorBranchAllowanceExceeded` |
 
-## Tests actually run
+## Review-thread reinspection
 
-No Unity tests were run. `command -v unity-editor`, `command -v Unity`, and the bounded `/opt` and `/usr/local` search found no Unity executable. No compilation, pass count, failure count, skipped count, or inconclusive count is claimed.
+The current code was reinspected after the workload correction:
 
-## Unity tests pending
+- Invalid floor configuration remains covered: negative index/capacity/allowance, allowance above one, missing/invalid/over-limit bounds, capacity above bounds, duplicate IDs/indexes, and foreign keys.
+- Localization keys remain mandatory; an optional supplied lookup is preflight-bounded and indexed once with ordinal identity.
+- Duplicate and missing-ID canonical ties still use canonical serialized payloads with ordinal comparison after nested canonicalization.
 
-The blocking code corrections and test additions are committed. The following remain pending in an environment with Unity `6000.3.2f1`:
+These three findings remain corrected. The environment exposes no review-thread API, so thread resolution status could not be changed here; no thread is claimed resolved merely because it is outdated.
 
-1. `DungeonBuilder.M0.Tests.EditMode.SpatialContentValidationTests`
-2. `DungeonBuilder.M0.Tests.EditMode.DungeonSpatialContractTests`
-3. `DungeonBuilder.M0.Tests.EditMode.FloorLayoutValidatorTests`
-4. Complete EditMode suite
+## Unity status
 
-PlayMode, standalone-build, save-lifecycle, localization rendering, gameplay, and player-experience validation were not run and are outside this inactive packet.
+No Unity compilation or tests were run. `unity-editor` and `Unity` were unavailable in this environment. No pass, failure, skipped, or inconclusive totals are claimed. Unity testing is planned only after the next ChatGPT review.
 
-## Scope confirmations
+## Scope confirmations and limitations
 
-- All fixture IDs and fake localization keys remain inline under the `test.gd65a.*` test namespace.
-- No production spatial ID, schema/content version, floor bound, footprint, capacity, connection, socket, corridor range, localization key, cost, modifier, or allowance was authored.
-- The catalog remains inactive and is not registered with `ContentService`, Bootstrap, the content manifest, or the schema registry.
-- Save schema remains 6; SaveData, migration, ordered-room authority, and runtime layout readers are unchanged.
-- No scene, prefab, UI, Bootstrap control, construction economy, route selection, additional floor, or player-facing text was added.
-- GD65B still owns approved authored records and production export registration; GD66 and Phase 2 remain out of scope.
-- Static validation does not prove gameplay fun.
-
-## Known limitations
-
-Unity compilation and EditMode execution remain pending because the required editor is unavailable. Remote PR head verification also remains pending because the environment had no configured `origin`; the remote reviewed SHA above is the actual SHA supplied for PR #167. The implementation remains schema/validation-only and cannot establish production content correctness until GD65B approves and supplies authored values.
+- No production spatial identity, numeric value, localization record, export registration, or content-version decision was added; those remain GD65B gates.
+- Test fixtures remain inline under `test.gd65a.*`.
+- The catalog remains inactive and disconnected from ContentService, Bootstrap, manifests, schema registration, saves, migration, scenes, prefabs, UI, gameplay, and runtime authority.
+- Save schema remains 6 and ordered two-room runtime/save authority remains unchanged.
+- Static validation does not prove Unity compilation, gameplay correctness, or fun.
+- Remote SHA verification remains unavailable because no remote URL is configured.

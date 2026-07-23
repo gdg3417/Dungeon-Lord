@@ -636,108 +636,202 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ISet<string> localizationKeys,
             SpatialContentValidationWorkloadLimits limits)
         {
-            long topLevel = Length(catalog.Floors) + Length(catalog.Rooms) +
-                Length(catalog.Corridors) + Length(catalog.FixedStructures) + Length(catalog.SocketTypes);
-            if (topLevel > limits.MaximumTopLevelRecords)
+            long topLevel = 0;
+            if (!TryAdd(ref topLevel, Length(catalog.Floors), limits.MaximumTopLevelRecords) ||
+                !TryAdd(ref topLevel, Length(catalog.Rooms), limits.MaximumTopLevelRecords) ||
+                !TryAdd(ref topLevel, Length(catalog.Corridors), limits.MaximumTopLevelRecords) ||
+                !TryAdd(ref topLevel, Length(catalog.FixedStructures), limits.MaximumTopLevelRecords) ||
+                !TryAdd(ref topLevel, Length(catalog.SocketTypes), limits.MaximumTopLevelRecords))
                 return false;
 
-            long nested = localizationKeys?.Count ?? 0;
-            long characters = StringLength(catalog.Metadata?.SchemaId) +
-                StringLength(catalog.Metadata?.ContentVersion);
+            long nested = 0;
+            if (!TryAdd(ref nested, localizationKeys?.Count ?? 0, limits.MaximumNestedRecords))
+                return false;
 
-            CountFloors(catalog.Floors, ref nested, ref characters);
-            CountRooms(catalog.Rooms, ref nested, ref characters);
-            CountCorridors(catalog.Corridors, ref nested, ref characters);
-            CountFixed(catalog.FixedStructures, ref nested, ref characters);
-            CountSockets(catalog.SocketTypes, ref nested, ref characters);
+            long characters = 0;
+            if (!TryAddString(ref characters, catalog.Metadata?.SchemaId, limits) ||
+                !TryAddString(ref characters, catalog.Metadata?.ContentVersion, limits) ||
+                !TryCountFloors(catalog.Floors, ref nested, ref characters, limits) ||
+                !TryCountRooms(catalog.Rooms, ref nested, ref characters, limits) ||
+                !TryCountCorridors(catalog.Corridors, ref nested, ref characters, limits) ||
+                !TryCountFixed(catalog.FixedStructures, ref nested, ref characters, limits) ||
+                !TryCountSockets(catalog.SocketTypes, ref nested, ref characters, limits))
+                return false;
 
-            if (localizationKeys != null)
+            if (localizationKeys == null)
+                return true;
+
+            foreach (string key in localizationKeys)
             {
-                foreach (string key in localizationKeys)
-                    characters += StringLength(key);
+                if (!TryAddString(ref characters, key, limits))
+                    return false;
             }
 
-            return nested <= limits.MaximumNestedRecords &&
-                characters <= limits.MaximumStringCharacters;
+            return true;
         }
 
-        private static void CountFloors(FloorSpatialConfiguration[] values, ref long nested, ref long chars)
+        internal static bool TryAdd(ref long current, long additional, long maximum)
         {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.FloorDefinitionId) +
-                    StringLength(value?.EntranceStructureDefinitionId) +
-                    StringLength(value?.CompletionStructureDefinitionId);
-                CountStrings(value?.AllowedRoomDefinitionIds, ref nested, ref chars);
-                CountStrings(value?.AllowedCorridorDefinitionIds, ref nested, ref chars);
-            });
+            if (additional < 0 || current < 0 || maximum < 0 || current > maximum - additional)
+                return false;
+
+            current += additional;
+            return true;
         }
 
-        private static void CountRooms(RoomSpatialDefinition[] values, ref long nested, ref long chars)
-        {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.RoomDefinitionId) + StringLength(value?.LocalizationKey);
-                nested += Length(value?.ReservedTileOffsets) + Length(value?.AllowedOrientations) +
-                    Length(value?.ConnectionPoints);
-                CountPoints(value?.ConnectionPoints, ref chars);
-            });
-        }
-
-        private static void CountCorridors(CorridorSpatialDefinition[] values, ref long nested, ref long chars)
-        {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.CorridorDefinitionId) + StringLength(value?.LocalizationKey);
-                nested += Length(value?.AllowedOrientations);
-                CountStrings(value?.CompatibleSocketTypeIds, ref nested, ref chars);
-            });
-        }
-
-        private static void CountFixed(FixedSpatialStructureDefinition[] values, ref long nested, ref long chars)
-        {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.StructureDefinitionId) + StringLength(value?.LocalizationKey);
-                nested += Length(value?.ReservedTileOffsets) + Length(value?.AllowedOrientations) +
-                    Length(value?.ConnectionPoints);
-                CountPoints(value?.ConnectionPoints, ref chars);
-            });
-        }
-
-        private static void CountSockets(SpatialSocketTypeDefinition[] values, ref long nested, ref long chars)
-        {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.SocketTypeId);
-                CountStrings(value?.CompatibleSocketTypeIds, ref nested, ref chars);
-            });
-        }
-
-        private static void CountPoints(SpatialConnectionPointDefinition[] values, ref long chars)
-        {
-            ForEach(values, value =>
-            {
-                chars += StringLength(value?.ConnectionPointId) + StringLength(value?.SocketTypeId);
-            });
-        }
-
-        private static void CountStrings(string[] values, ref long nested, ref long chars)
-        {
-            nested += Length(values);
-            ForEach(values, value => chars += StringLength(value));
-        }
-
-        private static long StringLength(string value) => value?.Length ?? 0L;
-        private static long Length(Array values) => values?.LongLength ?? 0L;
-
-        private static void ForEach<T>(T[] values, Action<T> action)
+        private static bool TryCountFloors(
+            FloorSpatialConfiguration[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
         {
             if (values == null)
-                return;
-            foreach (T value in values)
-                action(value);
+                return true;
+
+            foreach (FloorSpatialConfiguration value in values)
+            {
+                if (!TryAddString(ref characters, value?.FloorDefinitionId, limits) ||
+                    !TryAddString(ref characters, value?.EntranceStructureDefinitionId, limits) ||
+                    !TryAddString(ref characters, value?.CompletionStructureDefinitionId, limits) ||
+                    !TryCountStrings(value?.AllowedRoomDefinitionIds, ref nested, ref characters, limits) ||
+                    !TryCountStrings(value?.AllowedCorridorDefinitionIds, ref nested, ref characters, limits))
+                    return false;
+            }
+
+            return true;
         }
+
+        private static bool TryCountRooms(
+            RoomSpatialDefinition[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (values == null)
+                return true;
+
+            foreach (RoomSpatialDefinition value in values)
+            {
+                if (!TryAddString(ref characters, value?.RoomDefinitionId, limits) ||
+                    !TryAddString(ref characters, value?.LocalizationKey, limits) ||
+                    !TryAdd(ref nested, Length(value?.ReservedTileOffsets), limits.MaximumNestedRecords) ||
+                    !TryAdd(ref nested, Length(value?.AllowedOrientations), limits.MaximumNestedRecords) ||
+                    !TryAdd(ref nested, Length(value?.ConnectionPoints), limits.MaximumNestedRecords) ||
+                    !TryCountPoints(value?.ConnectionPoints, ref characters, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryCountCorridors(
+            CorridorSpatialDefinition[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (values == null)
+                return true;
+
+            foreach (CorridorSpatialDefinition value in values)
+            {
+                if (!TryAddString(ref characters, value?.CorridorDefinitionId, limits) ||
+                    !TryAddString(ref characters, value?.LocalizationKey, limits) ||
+                    !TryAdd(ref nested, Length(value?.AllowedOrientations), limits.MaximumNestedRecords) ||
+                    !TryCountStrings(value?.CompatibleSocketTypeIds, ref nested, ref characters, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryCountFixed(
+            FixedSpatialStructureDefinition[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (values == null)
+                return true;
+
+            foreach (FixedSpatialStructureDefinition value in values)
+            {
+                if (!TryAddString(ref characters, value?.StructureDefinitionId, limits) ||
+                    !TryAddString(ref characters, value?.LocalizationKey, limits) ||
+                    !TryAdd(ref nested, Length(value?.ReservedTileOffsets), limits.MaximumNestedRecords) ||
+                    !TryAdd(ref nested, Length(value?.AllowedOrientations), limits.MaximumNestedRecords) ||
+                    !TryAdd(ref nested, Length(value?.ConnectionPoints), limits.MaximumNestedRecords) ||
+                    !TryCountPoints(value?.ConnectionPoints, ref characters, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryCountSockets(
+            SpatialSocketTypeDefinition[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (values == null)
+                return true;
+
+            foreach (SpatialSocketTypeDefinition value in values)
+            {
+                if (!TryAddString(ref characters, value?.SocketTypeId, limits) ||
+                    !TryCountStrings(value?.CompatibleSocketTypeIds, ref nested, ref characters, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryCountPoints(
+            SpatialConnectionPointDefinition[] values,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (values == null)
+                return true;
+
+            foreach (SpatialConnectionPointDefinition value in values)
+            {
+                if (!TryAddString(ref characters, value?.ConnectionPointId, limits) ||
+                    !TryAddString(ref characters, value?.SocketTypeId, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryCountStrings(
+            string[] values,
+            ref long nested,
+            ref long characters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (!TryAdd(ref nested, Length(values), limits.MaximumNestedRecords))
+                return false;
+            if (values == null)
+                return true;
+
+            foreach (string value in values)
+            {
+                if (!TryAddString(ref characters, value, limits))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryAddString(
+            ref long characters,
+            string value,
+            SpatialContentValidationWorkloadLimits limits) =>
+            TryAdd(ref characters, value?.Length ?? 0L, limits.MaximumStringCharacters);
+
+        private static long Length(Array values) => values?.LongLength ?? 0L;
     }
 
     public static class SpatialContentCanonicalizer
