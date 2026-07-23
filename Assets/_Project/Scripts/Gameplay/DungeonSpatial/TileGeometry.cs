@@ -6,6 +6,44 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum CardinalOrientation { Zero = 0, Ninety = 1, OneEighty = 2, TwoSeventy = 3 }
 
+    public readonly struct SpatialValidationWorkloadLimits
+    {
+        public SpatialValidationWorkloadLimits(int maximumMaterializedTileCount)
+        {
+            MaximumMaterializedTileCount = maximumMaterializedTileCount;
+        }
+
+        public int MaximumMaterializedTileCount { get; }
+        public bool IsValid => MaximumMaterializedTileCount > 0;
+        public bool Allows(long tileCount) => IsValid && tileCount >= 0 && tileCount <= MaximumMaterializedTileCount;
+    }
+
+    [Serializable]
+    public sealed class RectangularFloorBounds
+    {
+        public TileCoordinate Minimum;
+        public int Width;
+        public int Height;
+
+        public RectangularFloorBounds() { }
+        public RectangularFloorBounds(TileCoordinate minimum, int width, int height)
+        {
+            Minimum = minimum;
+            Width = width;
+            Height = height;
+        }
+
+        public bool IsValid => Width > 0 && Height > 0 &&
+            (long)Minimum.X + Width - 1 <= int.MaxValue &&
+            (long)Minimum.Y + Height - 1 <= int.MaxValue;
+        public long TileCount => IsValid ? (long)Width * Height : 0L;
+
+        public bool Contains(TileCoordinate coordinate) => IsValid &&
+            coordinate.X >= Minimum.X && coordinate.Y >= Minimum.Y &&
+            (long)coordinate.X < (long)Minimum.X + Width &&
+            (long)coordinate.Y < (long)Minimum.Y + Height;
+    }
+
     [Serializable]
     public struct TileCoordinate : IEquatable<TileCoordinate>, IComparable<TileCoordinate>
     {
@@ -43,26 +81,36 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class TileFootprintResolver
     {
         public static bool TryResolveRectangle(RectangularFootprintDefinition definition, TileCoordinate anchor,
-            CardinalOrientation orientation, out ResolvedTileFootprint footprint)
+            CardinalOrientation orientation, SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint)
         {
             footprint = new ResolvedTileFootprint();
             if (definition == null || definition.Width <= 0 || definition.Height <= 0 || !Enum.IsDefined(typeof(CardinalOrientation), orientation)) return false;
             int width = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy ? definition.Height : definition.Width;
             int height = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy ? definition.Width : definition.Height;
-            var tiles = new List<TileCoordinate>(width * height);
-            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++) tiles.Add(new TileCoordinate(anchor.X + x, anchor.Y + y));
+            long area = (long)width * height;
+            long maximumX = (long)anchor.X + width - 1;
+            long maximumY = (long)anchor.Y + height - 1;
+            if (!limits.Allows(area) || maximumX > int.MaxValue || maximumY > int.MaxValue) return false;
+            var tiles = new List<TileCoordinate>((int)area);
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++)
+                tiles.Add(new TileCoordinate((int)((long)anchor.X + x), (int)((long)anchor.Y + y)));
             footprint = new ResolvedTileFootprint(tiles);
             return true;
         }
 
-        public static bool TryResolveStraightCorridor(TileCoordinate start, TileCoordinate end, out ResolvedTileFootprint footprint)
+        public static bool TryResolveStraightCorridor(TileCoordinate start, TileCoordinate end,
+            SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint)
         {
             footprint = new ResolvedTileFootprint();
-            if (start.Equals(end) || (start.X != end.X && start.Y != end.Y)) return false;
-            int dx = Math.Sign(end.X - start.X), dy = Math.Sign(end.Y - start.Y);
-            int length = Math.Max(Math.Abs(end.X - start.X), Math.Abs(end.Y - start.Y));
-            var tiles = new TileCoordinate[length + 1];
-            for (int i = 0; i <= length; i++) tiles[i] = new TileCoordinate(start.X + dx * i, start.Y + dy * i);
+            long deltaX = (long)end.X - start.X, deltaY = (long)end.Y - start.Y;
+            if (deltaX != 0 && deltaY != 0) return false;
+            long length = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
+            long requiredLength = length + 1;
+            if (!limits.Allows(requiredLength)) return false;
+            int dx = Math.Sign(deltaX), dy = Math.Sign(deltaY);
+            var tiles = new TileCoordinate[(int)requiredLength];
+            for (int i = 0; i < tiles.Length; i++)
+                tiles[i] = new TileCoordinate((int)((long)start.X + (long)dx * i), (int)((long)start.Y + (long)dy * i));
             footprint = new ResolvedTileFootprint(tiles);
             return true;
         }

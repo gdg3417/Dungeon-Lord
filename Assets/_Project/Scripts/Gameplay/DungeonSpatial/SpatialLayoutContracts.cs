@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public string FloorDefinitionId;
         public int FloorIndex;
+        public RectangularFloorBounds Bounds;
         public int FinalFloorSpaceCapacity;
         public int OptionalBranchAllowance;
     }
@@ -19,25 +20,29 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId;
         public RectangularFootprintDefinition GrossFootprint;
         public TileCoordinate[] ReservedTileOffsets = Array.Empty<TileCoordinate>();
-        public int FloorSpaceCost;
         public int MaximumConnectionCount;
         public int MonsterCapacity;
         public int TrapCapacity;
         public int LootCapacity;
 
-        public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation, out ResolvedTileFootprint footprint) =>
-            TileFootprintResolver.TryResolveRectangle(GrossFootprint, anchor, orientation, out footprint);
+        public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint) =>
+            TileFootprintResolver.TryResolveRectangle(GrossFootprint, anchor, orientation, limits, out footprint);
 
-        public TileCoordinate[] ResolveReservedTiles(TileCoordinate anchor, CardinalOrientation orientation)
+        public TileCoordinate[] ResolveReservedTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits)
         {
-            if (GrossFootprint == null || ReservedTileOffsets == null) return Array.Empty<TileCoordinate>();
+            if (GrossFootprint == null || ReservedTileOffsets == null || !limits.Allows(ReservedTileOffsets.LongLength))
+                return Array.Empty<TileCoordinate>();
             return ReservedTileOffsets.Select(offset => TransformOffset(offset, anchor, orientation)).OrderBy(tile => tile).ToArray();
         }
 
-        public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation)
+        public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation,
+            SpatialValidationWorkloadLimits limits)
         {
-            if (!TryResolveGrossTiles(anchor, orientation, out ResolvedTileFootprint gross)) return Array.Empty<TileCoordinate>();
-            var reserved = new HashSet<TileCoordinate>(ResolveReservedTiles(anchor, orientation));
+            if (ReservedTileOffsets != null && !limits.Allows(ReservedTileOffsets.LongLength)) return Array.Empty<TileCoordinate>();
+            if (!TryResolveGrossTiles(anchor, orientation, limits, out ResolvedTileFootprint gross)) return Array.Empty<TileCoordinate>();
+            var reserved = new HashSet<TileCoordinate>(ResolveReservedTiles(anchor, orientation, limits));
             return gross.OccupiedTiles.Where(tile => !reserved.Contains(tile)).ToArray();
         }
 
@@ -54,7 +59,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     [Serializable]
-    public sealed class CorridorSpatialDefinition { public string CorridorDefinitionId; public int FloorSpaceCost; }
+    public sealed class CorridorSpatialDefinition { public string CorridorDefinitionId; }
 
     [Serializable]
     public sealed class RoomSpatialInstance
@@ -72,11 +77,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string FloorId;
         public RoomSpatialInstance[] Rooms = Array.Empty<RoomSpatialInstance>();
         public FloorRouteNode[] Nodes = Array.Empty<FloorRouteNode>();
-        public CorridorEdge[] Edges = Array.Empty<CorridorEdge>();
+        public FloorRouteEdge[] Edges = Array.Empty<FloorRouteEdge>();
 
-        public FloorSpatialLayout Canonicalized()
+        public bool TryCanonicalize(SpatialValidationWorkloadLimits limits, out FloorSpatialLayout canonical)
         {
-            return new FloorSpatialLayout
+            canonical = null;
+            if (!limits.IsValid) return false;
+            FloorRouteEdge[] suppliedEdges = Edges ?? Array.Empty<FloorRouteEdge>();
+            foreach (FloorRouteEdge edge in suppliedEdges)
+            {
+                if (edge?.Footprint?.OccupiedTiles != null && !limits.Allows(edge.Footprint.OccupiedTiles.LongLength))
+                    return false;
+            }
+
+            FloorRouteEdge[] copiedEdges = new FloorRouteEdge[suppliedEdges.Length];
+            for (int index = 0; index < suppliedEdges.Length; index++)
+                if (!TryCopyEdge(suppliedEdges[index], limits, out copiedEdges[index])) return false;
+
+            canonical = new FloorSpatialLayout
             {
                 FloorId = FloorId,
                 Rooms = (Rooms ?? Array.Empty<RoomSpatialInstance>()).Select(CopyRoom)
@@ -84,12 +102,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Nodes = (Nodes ?? Array.Empty<FloorRouteNode>()).Select(CopyNode)
                     .OrderBy(node => node == null ? 0 : (int)node.Kind)
                     .ThenBy(node => node?.NodeId, StringComparer.Ordinal).ToArray(),
-                Edges = (Edges ?? Array.Empty<CorridorEdge>()).Select(CopyEdge)
+                Edges = copiedEdges
                     .OrderBy(edge => edge == null ? 0 : (int)edge.Classification)
                     .ThenBy(edge => edge?.SourceNodeId, StringComparer.Ordinal)
                     .ThenBy(edge => edge?.DestinationNodeId, StringComparer.Ordinal)
                     .ThenBy(edge => edge?.EdgeId, StringComparer.Ordinal).ToArray()
             };
+            return true;
         }
 
         private static RoomSpatialInstance CopyRoom(RoomSpatialInstance room) => room == null ? null : new RoomSpatialInstance
@@ -103,13 +122,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId ?? string.Empty
         };
 
-        private static CorridorEdge CopyEdge(CorridorEdge edge) => edge == null ? null : new CorridorEdge
+        private static bool TryCopyEdge(FloorRouteEdge edge, SpatialValidationWorkloadLimits limits, out FloorRouteEdge copy)
         {
-            EdgeId = edge.EdgeId, CorridorDefinitionId = edge.CorridorDefinitionId, FloorId = edge.FloorId,
-            SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
-            Footprint = edge.Footprint == null ? null : new ResolvedTileFootprint(edge.Footprint.OccupiedTiles),
-            Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty
-        };
+            copy = null;
+            if (edge == null) return true;
+            ResolvedTileFootprint footprint = null;
+            if (edge.Footprint != null)
+            {
+                TileCoordinate[] suppliedTiles = edge.Footprint.OccupiedTiles;
+                long tileCount = suppliedTiles?.LongLength ?? 0L;
+                if (!limits.Allows(tileCount)) return false;
+                TileCoordinate[] copiedTiles = suppliedTiles == null ? Array.Empty<TileCoordinate>() : (TileCoordinate[])suppliedTiles.Clone();
+                Array.Sort(copiedTiles);
+                footprint = new ResolvedTileFootprint { OccupiedTiles = copiedTiles };
+            }
+            copy = new FloorRouteEdge
+            {
+                EdgeId = edge.EdgeId,
+                CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                    string.IsNullOrWhiteSpace(edge.CorridorDefinitionId) ? string.Empty : edge.CorridorDefinitionId ?? string.Empty,
+                FloorId = edge.FloorId,
+                SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
+                Footprint = footprint,
+                Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
+                ConnectionKind = edge.ConnectionKind
+            };
+            return true;
+        }
     }
 
     public static class FloorSpatialConfigurationOrdering

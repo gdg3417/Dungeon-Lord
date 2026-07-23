@@ -3,7 +3,7 @@
 | Field | Decision |
 |---|---|
 | Status | **Authoritative active roadmap after GD63 reconciliation** |
-| Baseline | Main through merged PR #160 / GD62 |
+| Baseline | Main through merged PR #165 / GD63 |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-22 |
@@ -76,8 +76,8 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 ### Phase 1 — Spatial domain foundation (in progress)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
-2. **GD63 — Approved decisions and planning reconciliation (current documentation packet):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
-3. **GD64 — Inactive spatial contract and validator alignment:** add or approve rectangular floor-boundary representation; derive used space from occupied physical tiles; remove, replace, deprecate, or strictly validate independent floor-space costs; and represent direct doorways separately from physical corridors. Preserve canonical ordering and reason values 1–39, append new reasons, add focused EditMode tests, and keep the graph inactive. No schema, runtime-authority, UI, tuning, content, or migration changes. Final class names and architecture require implementation review.
+2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
+3. **GD64 — Inactive spatial contract and validator alignment (current implementation packet):** add or approve rectangular floor-boundary representation; derive used space from occupied physical tiles; remove, replace, deprecate, or strictly validate independent floor-space costs; and represent direct doorways separately from physical corridors. Preserve canonical ordering and reason values 1–39, append new reasons, add focused EditMode tests, and keep the graph inactive. No schema, runtime-authority, UI, tuning, content, or migration changes. Final class names and architecture require implementation review.
 4. **GD65 — Inactive MVP spatial content contract and export validation:** after GD64, approve authored identities, IDs, rectangular footprints, connection points, capacities, and schema/foreign-key/export validation.
 5. **GD66 — Final save/migration design gate:** after GD65 content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
