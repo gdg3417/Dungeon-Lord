@@ -433,8 +433,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (kind == "missing") edge.SourceNodeId = "missing";
             if (kind == "cross-floor") layout.Nodes.Single(x => x.NodeId == edge.SourceNodeId).FloorId = "floor.other";
             if (kind == "classification") edge.Classification = (RouteClassification)99;
-            if (kind == "footprint") edge.Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 2) });
+            TileCoordinate[] suppliedFootprint = null;
+            if (kind == "footprint")
+            {
+                suppliedFootprint = new[] { new TileCoordinate(4, 2), new TileCoordinate(5, 3) };
+                edge.Footprint = new ResolvedTileFootprint { OccupiedTiles = suppliedFootprint };
+            }
             var result = FloorLayoutValidator.Validate(layout, Configuration(), Definitions(connections: 1), CorridorDefinitions(), Limits());
+            if (kind == "footprint")
+            {
+                Assert.That(result.Issues.Count(x => x.Reason == FloorLayoutValidationReason.InvalidCorridorFootprint && x.SubjectId == edge.EdgeId), Is.EqualTo(1));
+                Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(6));
+                Assert.That(edge.Footprint.OccupiedTiles, Is.SameAs(suppliedFootprint));
+                CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 2), new TileCoordinate(5, 3) }, suppliedFootprint);
+            }
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.True);
             Assert.That(result.Issues.Any(x => x.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && x.SubjectId == "node.room.0"), Is.False);
         }

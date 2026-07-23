@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -16,8 +17,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     [Serializable]
-    public sealed class FloorRouteEdge
+    public sealed class FloorRouteEdge : ISerializationCallbackReceiver
     {
+        private enum FootprintPresence { UnknownOrLegacy = 0, Absent = 1, Present = 2 }
+
         public string EdgeId;
         public string CorridorDefinitionId;
         public string FloorId;
@@ -27,5 +30,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RouteClassification Classification;
         public string OptionalBranchId;
         public FloorRouteConnectionKind ConnectionKind;
+
+        [SerializeField] private FootprintPresence footprintPresence;
+
+        public void OnBeforeSerialize()
+        {
+            footprintPresence = Footprint == null ? FootprintPresence.Absent : FootprintPresence.Present;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            if (footprintPresence == FootprintPresence.Absent) Footprint = null;
+        }
     }
 }

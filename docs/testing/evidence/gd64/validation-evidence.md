@@ -6,7 +6,7 @@ GD64 aligns the inactive spatial contracts and deterministic validator with the 
 
 ## Reviewed and final heads
 
-The previous failing remote head is `df84652a091a367dc7cf51460527cf0964d702e5`. The correction updates the four missed validator calls in the duplicate room-definition and duplicate corridor-definition tests to pass the existing explicit `Limits()` helper. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting branch-head SHA is reported in the final delivery record and PR metadata after commit. No separate PR is opened and no merge is performed.
+The previous failing remote head is `ba8a05ea3f595415552ccc72db6d639588d08a0e`. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting branch-head SHA is reported in the final delivery record and PR metadata after commit. No separate PR is opened and no merge is performed.
 
 ## Bounded spatial processing
 
@@ -27,13 +27,15 @@ Unlimited layout canonicalization was removed. `FloorSpatialLayout.TryCanonicali
 - Prohibited-path, generated-file, and unlimited-canonicalization scans returned no matches.
 - Repository-wide `FloorLayoutValidator.Validate(` call-site inspection confirmed that every call now supplies the mandatory explicit workload-limit argument.
 
-## Unity validation pending
+## Unity validation requiring rerun
 
-Unity is not installed in this execution environment (`command -v unity-editor || command -v Unity` returns no executable). No Unity execution or pass counts are claimed:
+The complete Unity EditMode run on the previous failing head compiled and executed 1,189 tests: 1,186 passed, 3 failed, 0 skipped, and 0 inconclusive. The failures were:
 
-- `DungeonSpatialContractTests`: pending; pass/fail/skipped/inconclusive counts unavailable.
-- `FloorLayoutValidatorTests`: pending; pass/fail/skipped/inconclusive counts unavailable.
-- Complete Unity EditMode suite: pending; pass/fail/skipped/inconclusive counts unavailable.
+1. `DungeonSpatialContractTests.CanonicalizationAndUnityJson_PreserveMixedConnectionKindsAndDoorwayNulls`
+2. `DungeonSpatialContractTests.Canonicalization_MixedKindsUseEstablishedKeysAndRoundTripDeterministically`
+3. `FloorLayoutValidatorTests.StructurallyInvalidEdge_DoesNotProveReachabilityOrConsumeConnectionLimit("footprint")`
+
+The first two failures exposed Unity's nested-serializable-object null round-trip behavior: a null footprint was restored as a non-null empty shell. The third retained the stale assumption that a one-tile physical corridor was invalid. The correction adds a private serialized footprint-presence discriminator and replaces the stale fixture with a diagonal footprint. These failures remain unresolved until the corrected branch is rerun in Unity. Unity is unavailable in this execution environment, so no corrected-run result is claimed.
 
 ## Deliberately deferred validation capabilities
 

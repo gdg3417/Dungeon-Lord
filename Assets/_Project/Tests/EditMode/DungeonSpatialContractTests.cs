@@ -142,9 +142,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(canonicalDoorway.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
             Assert.That(source.Edges[1].CorridorDefinitionId, Is.Null);
             Assert.That(source.Edges[1].Footprint, Is.Null);
+            FloorLayoutValidationResult before = FloorLayoutValidator.Validate(canonical,
+                FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(),
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
             FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
             AssertLayoutsEqual(canonical, restored);
+            FloorLayoutValidationResult after = FloorLayoutValidator.Validate(restored,
+                FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(),
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
+            Assert.That(restored.Edges.Single(edge => edge.EdgeId == doorway.EdgeId).Footprint, Is.Null);
+            Assert.That(after.IsValid, Is.True);
+            CollectionAssert.AreEqual(before.Issues.Select(IssueKey), after.Issues.Select(IssueKey));
+            Assert.That(after.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(before.Capacity.UsedFloorSpaceCapacity));
+            Assert.That(after.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.False);
+            Assert.That(after.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded), Is.False);
             CollectionAssert.AreEqual(canonical.Edges.Select(edge => edge.EdgeId), Canonicalize(restored).Edges.Select(edge => edge.EdgeId));
+        }
+
+        [Test]
+        public void CanonicalizationAndUnityJson_PreserveInvalidEmptyDirectDoorwayFootprintShell()
+        {
+            FloorSpatialLayout source = FloorLayoutValidatorTests.ValidLayout();
+            FloorRouteEdge doorway = source.Edges[1];
+            doorway.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            doorway.CorridorDefinitionId = null;
+            var sourceFootprint = new ResolvedTileFootprint();
+            TileCoordinate[] sourceTiles = sourceFootprint.OccupiedTiles;
+            doorway.Footprint = sourceFootprint;
+
+            FloorSpatialLayout canonical = Canonicalize(source);
+            FloorRouteEdge canonicalDoorway = canonical.Edges.Single(edge => edge.EdgeId == doorway.EdgeId);
+            Assert.That(canonicalDoorway.Footprint, Is.Not.Null);
+            FloorLayoutValidationResult before = FloorLayoutValidator.Validate(canonical,
+                FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(connections: 1),
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
+            FloorSpatialLayout restored = JsonUtility.FromJson<FloorSpatialLayout>(JsonUtility.ToJson(canonical));
+            FloorRouteEdge restoredDoorway = restored.Edges.Single(edge => edge.EdgeId == doorway.EdgeId);
+            FloorLayoutValidationResult after = FloorLayoutValidator.Validate(restored,
+                FloorLayoutValidatorTests.Configuration(), FloorLayoutValidatorTests.Definitions(connections: 1),
+                FloorLayoutValidatorTests.CorridorDefinitions(), Limits());
+
+            Assert.That(restoredDoorway.Footprint, Is.Not.Null);
+            Assert.That(before.Issues.Count(issue => issue.Reason == FloorLayoutValidationReason.DirectDoorwayHasFootprint), Is.EqualTo(1));
+            Assert.That(after.Issues.Count(issue => issue.Reason == FloorLayoutValidationReason.DirectDoorwayHasFootprint), Is.EqualTo(1));
+            Assert.That(before.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.True);
+            Assert.That(after.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.UnreachableRoom), Is.True);
+            Assert.That(before.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.False);
+            Assert.That(after.Issues.Any(issue => issue.Reason == FloorLayoutValidationReason.ConnectionLimitExceeded && issue.SubjectId == "node.room.0"), Is.False);
+            CollectionAssert.AreEqual(before.Issues.Select(IssueKey), after.Issues.Select(IssueKey));
+            Assert.That(after.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(before.Capacity.UsedFloorSpaceCapacity));
+            Assert.That(doorway.Footprint, Is.SameAs(sourceFootprint));
+            Assert.That(sourceFootprint.OccupiedTiles, Is.SameAs(sourceTiles));
+            Assert.That(Canonicalize(restored).Edges.Single(edge => edge.EdgeId == doorway.EdgeId).Footprint, Is.Not.Null);
         }
 
         [TestCase(null)] [TestCase("")] [TestCase("   ")]
@@ -194,6 +243,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { new TileCoordinate(9, 4), new TileCoordinate(8, 4) }, sourceTiles);
             Assert.That(JsonUtility.ToJson(canonicalAgain), Is.EqualTo(JsonUtility.ToJson(canonical)));
             AssertLayoutsEqual(canonical, restored);
+            Assert.That(restored.Edges.Where(edge => edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
+                .All(edge => edge.Footprint != null), Is.True);
         }
 
         [Test]
