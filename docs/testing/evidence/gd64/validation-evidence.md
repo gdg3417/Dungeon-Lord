@@ -6,7 +6,7 @@ GD64 aligns the inactive spatial contracts and deterministic validator with the 
 
 ## Reviewed and final heads
 
-The previous reviewed remote head is `6cdce520cbb73ff2f0c0f77ae032754607543acb`. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting final branch-head SHA is reported in the final delivery record and PR metadata after commit. No separate PR is opened and no merge is performed.
+The previous failing remote head is `df84652a091a367dc7cf51460527cf0964d702e5`. The correction updates the four missed validator calls in the duplicate room-definition and duplicate corridor-definition tests to pass the existing explicit `Limits()` helper. Corrections are committed to `codex/implement-gd64-spatial-contracts-and-validation`; the resulting branch-head SHA is reported in the final delivery record and PR metadata after commit. No separate PR is opened and no merge is performed.
 
 ## Bounded spatial processing
 
@@ -14,7 +14,7 @@ The previous reviewed remote head is `6cdce520cbb73ff2f0c0f77ae032754607543acb`.
 
 Unlimited layout canonicalization was removed. `FloorSpatialLayout.TryCanonicalize(limits, out canonical)` starts with a null result, fails closed for nonpositive limits, preflights every supplied edge footprint before copying or sorting any footprint, and returns no partial layout if any footprint is oversized. Accepted canonicalization retains detached copies, established room/node/edge ordering, X/Y footprint ordering, optional-string normalization, valid blank-doorway normalization, and preservation of bounded invalid doorway payloads.
 
-## Static validation completed on 2026-07-22
+## Static validation completed on 2026-07-23
 
 - `git status --short`: run before and after commit.
 - `git diff --check`: passed with no output before commit.
@@ -25,6 +25,7 @@ Unlimited layout canonicalization was removed. `FloorSpatialLayout.TryCanonicali
 - DungeonSpatial reference-boundary inspection found no use outside the inactive domain and focused EditMode tests.
 - Automated reason extraction returned exactly contiguous values 1 through 45.
 - Prohibited-path, generated-file, and unlimited-canonicalization scans returned no matches.
+- Repository-wide `FloorLayoutValidator.Validate(` call-site inspection confirmed that every call now supplies the mandatory explicit workload-limit argument.
 
 ## Unity validation pending
 

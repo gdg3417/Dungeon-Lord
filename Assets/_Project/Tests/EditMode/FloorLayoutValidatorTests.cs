@@ -179,8 +179,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomSpatialDefinition second = Definitions(connections: 7)[0];
             second.GrossFootprint = new RectangularFootprintDefinition(3, 2);
             FloorSpatialLayout layout = ValidLayout();
-            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, Configuration(30), new[] { first, second }, CorridorDefinitions());
-            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, Configuration(30), new[] { second, first }, CorridorDefinitions());
+            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, Configuration(30), new[] { first, second }, CorridorDefinitions(), Limits());
+            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, Configuration(30), new[] { second, first }, CorridorDefinitions(), Limits());
             CollectionAssert.AreEqual(forward.Issues.Select(Key), reverse.Issues.Select(Key));
             Assert.That(forward.Issues.Any(x => x.Reason == FloorLayoutValidationReason.DuplicateRoomDefinitionId && x.SubjectId == RoomDefinitionId), Is.True);
             Assert.That(forward.Issues.Count(x => x.Reason == FloorLayoutValidationReason.MissingRoomDefinition), Is.EqualTo(layout.Rooms.Length));
@@ -194,8 +194,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CorridorSpatialDefinition first = CorridorDefinitions()[0];
             CorridorSpatialDefinition second = CorridorDefinitions()[0];
             FloorSpatialLayout layout = ValidLayout();
-            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), new[] { first, second });
-            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), new[] { second, first });
+            FloorLayoutValidationResult forward = FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), new[] { first, second }, Limits());
+            FloorLayoutValidationResult reverse = FloorLayoutValidator.Validate(layout, Configuration(30), Definitions(), new[] { second, first }, Limits());
             CollectionAssert.AreEqual(forward.Issues.Select(Key), reverse.Issues.Select(Key));
             Assert.That(forward.Issues.Any(x => x.Reason == FloorLayoutValidationReason.DuplicateCorridorDefinitionId && x.SubjectId == CorridorDefinitionId), Is.True);
             Assert.That(forward.Issues.Count(x => x.Reason == FloorLayoutValidationReason.MissingCorridorDefinition), Is.EqualTo(layout.Edges.Length));
