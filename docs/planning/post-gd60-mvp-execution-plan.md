@@ -3,7 +3,7 @@
 | Field | Decision |
 |---|---|
 | Status | **Authoritative active roadmap during GD65B0 approvals; GD65B remains blocked** |
-| Starting baseline for this approval update | Main through merged PR #171 / GD65B0B at `06aac95b99d043726f6dea6a8d40c5eb6b5399f7` |
+| Starting baseline for this approval update | Main through merged PR #172 / GD65B0C1 at `b4dfd741bb2c07af5ad5c2de496f4f9dde3117c1` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-24 |
