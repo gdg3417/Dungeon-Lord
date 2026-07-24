@@ -139,6 +139,8 @@ Validation and route selection occur on edits/run boundaries rather than per fra
 
 The initial spatial implementation profile supports Floor 1; authored rectangular bounds; rectangular Basic Room, Rectangle Room, and Large Chamber content; the Narrow Hall / Straight Stone Corridor category; entrance; required path; exit/completion; at most one optional branch; tile/footprint, capacity and same-floor reachability validation; save compatibility; deterministic route ordering; and player-visible capacity/route results.
 
+`OptionalBranchAllowance` is a nonnegative, per-floor authored configuration value, and its serialized schema is not capped at 1. The active MVP behavior and MVP production content remain limited to at most one optional dead-end detour per floor. Values above 1 are post-MVP only and require a later specification and implementation packet covering route topology and selection, save behavior, UI, determinism, workloads, and testing before they may be activated. Schema support alone does not authorize or implement multiple branches.
+
 Explicitly deferred: curved/freeform corridors, multiple elevations, teleporters, secret rooms, locked-door puzzles, procedural generation, unrestricted mazes, complex pathfinding AI, multiple entrances, multiple descent points, advanced environmental simulation, floor-to-floor backtracking and full production art.
 
 # 14. Cross-spec ownership

@@ -54,6 +54,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         FloorCapacityNegative = 43,
         FloorCapacityExceedsBounds = 44,
         FloorBranchAllowanceNegative = 45,
+        // Reserved for stable diagnostic compatibility. Generic validation no longer emits this
+        // reason because the MVP branch-count policy is not a permanent schema maximum.
         FloorBranchAllowanceExceeded = 46
     }
 
@@ -193,8 +195,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     issues.Add(SpatialContentValidationReason.FloorCapacityNegative, path + ".finalFloorSpaceCapacity");
                 if (floor.OptionalBranchAllowance < 0)
                     issues.Add(SpatialContentValidationReason.FloorBranchAllowanceNegative, path + ".optionalBranchAllowance");
-                if (floor.OptionalBranchAllowance > 1)
-                    issues.Add(SpatialContentValidationReason.FloorBranchAllowanceExceeded, path + ".optionalBranchAllowance");
 
                 if (floor.Bounds == null)
                 {
