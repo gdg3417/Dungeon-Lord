@@ -2,8 +2,8 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Authoritative active roadmap after GD65A completion; GD65B blocked by GD65B0 approvals** |
-| Baseline | Main through merged PR #167 / GD65A at `a547a30affd839b5780986c66e440f6f219773a3` |
+| Status | **Authoritative active roadmap during GD65B0 approvals; GD65B remains blocked** |
+| Starting baseline for this approval update | Main through merged PR #168 / GD65B0 at `c60ad61c858c80271020bb9346fffacdb4ed5097` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-24 |
@@ -13,6 +13,8 @@
 This is the single active dependency order from the GD60 prototype to a fun MVP, a usable graphical editor, and external testing. Older sprint plans, closeouts, evidence records, and vertical-slice plans remain historical traceability: they retain useful acceptance criteria, but are **not** the authoritative execution sequence. A planned status is not implementation evidence. The merged repository and committed tests/evidence are authoritative; uncertain closure is marked **requires confirmation**.
 
 GD64 completed the inactive spatial contract and layout-validator alignment without activating the graph. GD65A then completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Neither packet added production spatial records, export registration, a runtime catalog consumer, migration, economy, additional floors, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
+
+Merged PR #168 established the GD65B0 register. The first identity decision group is now owner-approved: the stable-ID convention, seven definition IDs, one initial socket ID, the production straight-corridor semantic resolution, and the contract-defined connection-point namespace mapping. This approval creates no records and makes no catalog loaded or authoritative. GD65B remains blocked by remaining geometry, capacities, localization, pipeline, workload, and current-scope Save signoff decisions.
 
 ## 2. Current repository baseline after GD65A
 
@@ -73,13 +75,13 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (GD65A complete; GD65B blocked by GD65B0)
+### Phase 1 — Spatial domain foundation (first GD65B0 identity group approved; GD65B blocked)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
 3. **GD64 — Inactive spatial contract and validator alignment (complete):** rectangular floor bounds, occupied-tile-union capacity, distinct footprint-free direct doorways and physical corridors, explicit workload limits, stable reason values 1–45, and deterministic invalid-payload preservation are merged through PR #166. The graph remains inactive.
 4. **GD65A — Inactive spatial content schema and deterministic export validation (complete through PR #167):** the Unity-serializable export envelope, metadata, floor/room/corridor/fixed-endpoint/socket/connection contracts, pure caller-bounded validation, foreign-key checks, detached ordinal canonicalization, JSON tests, and test-only fixtures are merged. No production authored values, registration, or consumer exists.
-5. **GD65B0 — Production spatial content authority and pipeline decision record (current dependency packet):** complete the [approval register](gd65b-production-spatial-content-approval.md) for IDs, versions, Floor 1 geometry/capacities, sockets/connections, localization, export/registration/loading ownership, canonicalization/validation invocation, workload limits, and pipeline tests. This documentation packet authors no production values.
+5. **GD65B0 — Production spatial content authority and pipeline decision record (current dependency packet):** PR #168 established the [approval register](gd65b-production-spatial-content-approval.md), and the first identity decision group is approved. Complete its remaining decisions for versions, Floor 1 geometry/capacities, concrete connections, localization, export/registration/loading ownership, canonicalization/validation invocation, workload limits, Save signoff, and pipeline tests. Approval documentation authors no production records.
 6. **GD65B — Approved MVP authored records and production export evidence (blocked):** begins only after every required GD65B0 production row is explicitly approved with owner evidence. Then author the actual MVP records, register the non-Bootstrap production export, and provide pipeline evidence.
 7. **GD66 — Final save/migration design gate:** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
@@ -203,7 +205,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 | Question | Needed by | Required evidence/owner |
 |---|---|---|
-| GD65B catalog IDs/versions, Floor 1 bounds/capacity, room/corridor/fixed geometry and capacities, sockets/connections, localization, export/registration/loading ownership, validation/canonical serialization invocation, workload limits, and pipeline tests | GD65B0 approval before GD65B | Assigned Design, Data, Engineering, Localization, Performance and QA owners; complete approval evidence in the GD65B record, never runtime constants or inferred prototype values |
+| GD65B remaining schema/content versions, Floor 1 bounds/capacity, room/corridor/fixed geometry and capacities, concrete connections, localization, export/registration/loading ownership, validation/canonical serialization invocation, workload limits, Save signoff, and pipeline tests | GD65B0 approval before GD65B | Assigned Design, Data, Engineering, Localization, Save, Performance and QA owners; complete approval evidence in the GD65B record, never runtime constants or inferred prototype values |
 | Buildable/unavailable-tile unlock model, expansion/modifier behavior, costs and modifiers | Later spatial progression/construction packets | Design/Data; reviewed configured content and formulas, never runtime constants |
 | Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
 | Invested construction/renovation mana representation; refund percentage, rounding and clamping | Before Phase 2/4 implementation | Design/Data/Save; reviewed data contract |
@@ -215,4 +217,4 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 ## 9. Current dependency packet
 
-**GD65B0: complete the Floor 1 production spatial content authority and pipeline decision record.** GD63, GD64, and GD65A are complete. Production GD65B authoring remains blocked until every required value and owner in the [GD65B approval register](gd65b-production-spatial-content-approval.md) is approved with evidence. GD65B0 is documentation-only: it does not choose values, activate the graph, change save schema 6, register content, or displace ordered two-room runtime/save authority. The Phase 2 through Phase 9 order and all MVP scope/exclusions above remain unchanged.
+**GD65B0: complete the Floor 1 production spatial content authority and pipeline decision record.** GD63, GD64, and GD65A are complete; PR #168 established the gate, and its first identity decision group is approved. Production GD65B authoring remains blocked until every remaining required value and owner in the [GD65B approval register](gd65b-production-spatial-content-approval.md) is approved with evidence, including geometry, capacities, localization, pipeline, workload, and current-scope Save signoff decisions. GD65B0 approval documentation creates no production records, activates no graph, changes no save schema 6, registers no content, loads no catalog, and does not displace ordered two-room runtime/save authority. The Phase 1 through Phase 9 order, GD66 after GD65B, Phase 2-only migration/authority transition, and all MVP scope/exclusions above remain unchanged.
