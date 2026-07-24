@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
@@ -846,7 +847,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !SpatialContentWorkload.TryPreflight(source, null, limits))
                 return false;
 
-            result = JsonUtility.FromJson<SpatialContentCatalog>(JsonUtility.ToJson(source));
+            result = CopyCatalog(source);
             CanonicalizeNested(result);
 
             SortRecords(result.Floors, value => value?.FloorDefinitionId);
@@ -855,6 +856,133 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SortRecords(result.FixedStructures, value => value?.StructureDefinitionId);
             SortRecords(result.SocketTypes, value => value?.SocketTypeId);
             return true;
+        }
+
+        private static SpatialContentCatalog CopyCatalog(SpatialContentCatalog source) =>
+            new SpatialContentCatalog
+            {
+                Metadata = CopyMetadata(source.Metadata),
+                Floors = CopyReferenceArray(source.Floors, CopyFloor),
+                Rooms = CopyReferenceArray(source.Rooms, CopyRoom),
+                Corridors = CopyReferenceArray(source.Corridors, CopyCorridor),
+                FixedStructures = CopyReferenceArray(source.FixedStructures, CopyFixedStructure),
+                SocketTypes = CopyReferenceArray(source.SocketTypes, CopySocketType)
+            };
+
+        private static SpatialContentExportMetadata CopyMetadata(SpatialContentExportMetadata source) =>
+            source == null ? null : new SpatialContentExportMetadata
+            {
+                SchemaId = source.SchemaId,
+                SchemaVersion = source.SchemaVersion,
+                ContentVersion = source.ContentVersion
+            };
+
+        private static FloorSpatialConfiguration CopyFloor(FloorSpatialConfiguration source) =>
+            source == null ? null : new FloorSpatialConfiguration
+            {
+                FloorDefinitionId = source.FloorDefinitionId,
+                FloorIndex = source.FloorIndex,
+                Bounds = CopyBounds(source.Bounds),
+                FinalFloorSpaceCapacity = source.FinalFloorSpaceCapacity,
+                OptionalBranchAllowance = source.OptionalBranchAllowance,
+                AllowedRoomDefinitionIds = CopyArray(source.AllowedRoomDefinitionIds),
+                AllowedCorridorDefinitionIds = CopyArray(source.AllowedCorridorDefinitionIds),
+                EntranceStructureDefinitionId = source.EntranceStructureDefinitionId,
+                CompletionStructureDefinitionId = source.CompletionStructureDefinitionId
+            };
+
+        private static RoomSpatialDefinition CopyRoom(RoomSpatialDefinition source) =>
+            source == null ? null : new RoomSpatialDefinition
+            {
+                RoomDefinitionId = source.RoomDefinitionId,
+                GrossFootprint = CopyFootprint(source.GrossFootprint),
+                ReservedTileOffsets = CopyArray(source.ReservedTileOffsets),
+                MaximumConnectionCount = source.MaximumConnectionCount,
+                MonsterCapacity = source.MonsterCapacity,
+                TrapCapacity = source.TrapCapacity,
+                LootCapacity = source.LootCapacity,
+                LocalizationKey = source.LocalizationKey,
+                AllowedOrientations = CopyArray(source.AllowedOrientations),
+                ConnectionPoints = CopyReferenceArray(source.ConnectionPoints, CopyConnectionPoint)
+            };
+
+        private static CorridorSpatialDefinition CopyCorridor(CorridorSpatialDefinition source) =>
+            source == null ? null : new CorridorSpatialDefinition
+            {
+                CorridorDefinitionId = source.CorridorDefinitionId,
+                LocalizationKey = source.LocalizationKey,
+                Category = source.Category,
+                MinimumLength = source.MinimumLength,
+                MaximumLength = source.MaximumLength,
+                Width = source.Width,
+                MonsterCapacity = source.MonsterCapacity,
+                TrapCapacity = source.TrapCapacity,
+                LootCapacity = source.LootCapacity,
+                AllowedOrientations = CopyArray(source.AllowedOrientations),
+                CompatibleSocketTypeIds = CopyArray(source.CompatibleSocketTypeIds)
+            };
+
+        private static FixedSpatialStructureDefinition CopyFixedStructure(
+            FixedSpatialStructureDefinition source) =>
+            source == null ? null : new FixedSpatialStructureDefinition
+            {
+                StructureDefinitionId = source.StructureDefinitionId,
+                LocalizationKey = source.LocalizationKey,
+                Kind = source.Kind,
+                GrossFootprint = CopyFootprint(source.GrossFootprint),
+                ReservedTileOffsets = CopyArray(source.ReservedTileOffsets),
+                AllowedOrientations = CopyArray(source.AllowedOrientations),
+                ConnectionPoints = CopyReferenceArray(source.ConnectionPoints, CopyConnectionPoint),
+                MaximumConnectionCount = source.MaximumConnectionCount
+            };
+
+        private static SpatialSocketTypeDefinition CopySocketType(SpatialSocketTypeDefinition source) =>
+            source == null ? null : new SpatialSocketTypeDefinition
+            {
+                SocketTypeId = source.SocketTypeId,
+                CompatibleSocketTypeIds = CopyArray(source.CompatibleSocketTypeIds)
+            };
+
+        private static SpatialConnectionPointDefinition CopyConnectionPoint(
+            SpatialConnectionPointDefinition source) =>
+            source == null ? null : new SpatialConnectionPointDefinition
+            {
+                ConnectionPointId = source.ConnectionPointId,
+                Offset = source.Offset,
+                Facing = source.Facing,
+                SocketTypeId = source.SocketTypeId
+            };
+
+        private static RectangularFloorBounds CopyBounds(RectangularFloorBounds source) =>
+            source == null ? null : new RectangularFloorBounds
+            {
+                Minimum = source.Minimum,
+                Width = source.Width,
+                Height = source.Height
+            };
+
+        private static RectangularFootprintDefinition CopyFootprint(
+            RectangularFootprintDefinition source) =>
+            source == null ? null : new RectangularFootprintDefinition
+            {
+                Width = source.Width,
+                Height = source.Height
+            };
+
+        private static T[] CopyArray<T>(T[] source) =>
+            source == null ? null : (T[])source.Clone();
+
+        private static TOutput[] CopyReferenceArray<TInput, TOutput>(
+            TInput[] source,
+            Func<TInput, TOutput> copy)
+        {
+            if (source == null)
+                return null;
+
+            var result = new TOutput[source.Length];
+            for (int index = 0; index < source.Length; index++)
+                result[index] = copy(source[index]);
+            return result;
         }
 
         private static void CanonicalizeNested(SpatialContentCatalog catalog)
@@ -899,7 +1027,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 keyedRecords[index] = new CanonicalRecord<T>(
                     value,
                     getId(value),
-                    value == null ? string.Empty : JsonUtility.ToJson(value));
+                    value == null ? string.Empty : CreateCanonicalPayload(value));
             }
 
             Array.Sort(keyedRecords, (left, right) =>
@@ -912,6 +1040,86 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             for (int index = 0; index < values.Length; index++)
                 values[index] = keyedRecords[index].Value;
+        }
+
+        private static string CreateCanonicalPayload<T>(T value) where T : class
+        {
+            var topology = new StringBuilder();
+            AppendNullTopology(topology, value);
+            topology.Append('|').Append(JsonUtility.ToJson(value));
+            return topology.ToString();
+        }
+
+        private static void AppendNullTopology(StringBuilder output, object value)
+        {
+            if (value is FloorSpatialConfiguration floor)
+            {
+                AppendReference(output, floor.Bounds);
+                AppendStringArray(output, floor.AllowedRoomDefinitionIds);
+                AppendStringArray(output, floor.AllowedCorridorDefinitionIds);
+            }
+            else if (value is RoomSpatialDefinition room)
+            {
+                AppendReference(output, room.GrossFootprint);
+                AppendArray(output, room.ReservedTileOffsets);
+                AppendArray(output, room.AllowedOrientations);
+                AppendReferenceArray(output, room.ConnectionPoints);
+            }
+            else if (value is CorridorSpatialDefinition corridor)
+            {
+                AppendArray(output, corridor.AllowedOrientations);
+                AppendStringArray(output, corridor.CompatibleSocketTypeIds);
+            }
+            else if (value is FixedSpatialStructureDefinition structure)
+            {
+                AppendReference(output, structure.GrossFootprint);
+                AppendArray(output, structure.ReservedTileOffsets);
+                AppendArray(output, structure.AllowedOrientations);
+                AppendReferenceArray(output, structure.ConnectionPoints);
+            }
+            else if (value is SpatialSocketTypeDefinition socket)
+            {
+                AppendStringArray(output, socket.CompatibleSocketTypeIds);
+            }
+            else if (value is SpatialConnectionPointDefinition point)
+            {
+                AppendReference(output, point.ConnectionPointId);
+                AppendReference(output, point.SocketTypeId);
+            }
+        }
+
+        private static void AppendReference(StringBuilder output, object value) =>
+            output.Append(value == null ? '0' : '1');
+
+        private static void AppendArray<T>(StringBuilder output, T[] values) =>
+            output.Append(values == null ? "N;" : "A" + values.Length + ";");
+
+        private static void AppendReferenceArray<T>(StringBuilder output, T[] values) where T : class
+        {
+            if (values == null)
+            {
+                output.Append("N;");
+                return;
+            }
+
+            output.Append('A').Append(values.Length).Append(':');
+            foreach (T value in values)
+                output.Append(value == null ? '0' : '1');
+            output.Append(';');
+        }
+
+        private static void AppendStringArray(StringBuilder output, string[] values)
+        {
+            if (values == null)
+            {
+                output.Append("N;");
+                return;
+            }
+
+            output.Append('A').Append(values.Length).Append(':');
+            foreach (string value in values)
+                output.Append(value == null ? '0' : '1');
+            output.Append(';');
         }
 
         private static void SortStrings(string[] values)

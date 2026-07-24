@@ -149,7 +149,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(
                 new[] { SpatialContentValidationReason.CatalogMissing }, Reasons(null));
             CollectionAssert.AreEqual(
-                new[] { SpatialContentValidationReason.WorkloadLimitsInvalid }, Reasons(Valid(), default));
+                new[] { SpatialContentValidationReason.WorkloadLimitsInvalid },
+                SpatialContentValidator.Validate(Valid(),
+                    default(SpatialContentValidationWorkloadLimits)).Issues
+                    .Select(issue => issue.Reason).ToArray());
         }
 
         [Test]
@@ -530,6 +533,78 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SpatialContentCanonicalizer.TryCanonicalize(catalog, Limits(), out SpatialContentCatalog canonical), Is.True);
             CollectionAssert.AreEqual(before, Reasons(canonical));
             Assert.That(canonical.Rooms[0].ReservedTileOffsets, Is.Null);
+        }
+
+        [Test]
+        public void DetachedCopyPreservesCompleteNullTopologyAndStableReasons()
+        {
+            SpatialContentCatalog source = Valid();
+            source.Metadata = null;
+            source.Floors[0].Bounds = null;
+            source.Floors = new[] { source.Floors[0], null };
+            source.Rooms[0].GrossFootprint = null;
+            source.Rooms[0].ReservedTileOffsets = null;
+            source.Rooms[0].AllowedOrientations = Array.Empty<CardinalOrientation>();
+            source.Rooms[0].ConnectionPoints = new SpatialConnectionPointDefinition[] { null };
+            source.FixedStructures[0].GrossFootprint = null;
+            source.FixedStructures[0].ReservedTileOffsets = Array.Empty<TileCoordinate>();
+            source.FixedStructures[0].ConnectionPoints = null;
+            source.Corridors[0].AllowedOrientations = null;
+            source.Corridors[0].CompatibleSocketTypeIds = new[] { "test.gd65a.socket", null };
+            source.SocketTypes[0].CompatibleSocketTypeIds = Array.Empty<string>();
+
+            SpatialContentValidationReason[] reasonsBefore = Reasons(source);
+            Assert.That(SpatialContentCanonicalizer.TryCanonicalize(
+                source, Limits(), out SpatialContentCatalog canonical), Is.True);
+
+            Assert.That(canonical.Metadata, Is.Null);
+            Assert.That(canonical.Floors.Any(value => value == null), Is.True);
+            Assert.That(canonical.Floors.Single(value => value != null).Bounds, Is.Null);
+            Assert.That(canonical.Rooms[0].GrossFootprint, Is.Null);
+            Assert.That(canonical.Rooms[0].ReservedTileOffsets, Is.Null);
+            Assert.That(canonical.Rooms[0].AllowedOrientations, Is.Empty);
+            Assert.That(canonical.Rooms[0].ConnectionPoints.Single(), Is.Null);
+            Assert.That(canonical.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.Entrance).GrossFootprint, Is.Null);
+            Assert.That(canonical.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.Entrance).ReservedTileOffsets, Is.Empty);
+            Assert.That(canonical.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.Entrance).ConnectionPoints, Is.Null);
+            Assert.That(canonical.Corridors[0].AllowedOrientations, Is.Null);
+            Assert.That(canonical.Corridors[0].CompatibleSocketTypeIds[0], Is.Null);
+            Assert.That(canonical.SocketTypes[0].CompatibleSocketTypeIds, Is.Empty);
+            CollectionAssert.AreEqual(reasonsBefore, Reasons(canonical));
+
+            Assert.That(source.Metadata, Is.Null);
+            Assert.That(source.Floors[1], Is.Null);
+            Assert.That(source.Rooms[0].ReservedTileOffsets, Is.Null);
+            Assert.That(source.Corridors[0].CompatibleSocketTypeIds[1], Is.Null);
+
+            Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.MetadataMissing));
+            Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.FootprintMissing));
+            Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.DefinitionMissing));
+            Assert.That(reasonsBefore, Does.Not.Contain(SpatialContentValidationReason.SchemaIdentityMissing));
+        }
+
+        [Test]
+        public void DetachedCopyPreservesNullTopLevelCollectionsAndEmptyTopLevelCollections()
+        {
+            SpatialContentCatalog source = Valid();
+            source.Floors = null;
+            source.Rooms = Array.Empty<RoomSpatialDefinition>();
+            source.Corridors = null;
+            source.FixedStructures = Array.Empty<FixedSpatialStructureDefinition>();
+            source.SocketTypes = null;
+
+            Assert.That(SpatialContentCanonicalizer.TryCanonicalize(
+                source, Limits(), out SpatialContentCatalog canonical), Is.True);
+            Assert.That(canonical.Floors, Is.Null);
+            Assert.That(canonical.Rooms, Is.Empty);
+            Assert.That(canonical.Corridors, Is.Null);
+            Assert.That(canonical.FixedStructures, Is.Empty);
+            Assert.That(canonical.SocketTypes, Is.Null);
+            Assert.That(source.Floors, Is.Null);
+            Assert.That(source.Rooms, Is.Empty);
         }
 
         [Test]
