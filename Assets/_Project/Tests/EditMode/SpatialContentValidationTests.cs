@@ -259,10 +259,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Validate(catalog).IsValid, Is.True);
             floor.OptionalBranchAllowance = 2;
             Assert.That(Validate(catalog).IsValid, Is.True);
-            Assert.That(Reasons(catalog), Does.Not.Contain(SpatialContentValidationReason.FloorBranchAllowanceExceeded));
+            CollectionAssert.DoesNotContain(
+                Reasons(catalog),
+                SpatialContentValidationReason.FloorBranchAllowanceExceeded);
             floor.OptionalBranchAllowance = 37;
             Assert.That(Validate(catalog).IsValid, Is.True);
-            Assert.That(Reasons(catalog), Does.Not.Contain(SpatialContentValidationReason.FloorBranchAllowanceExceeded));
+            CollectionAssert.DoesNotContain(
+                Reasons(catalog),
+                SpatialContentValidationReason.FloorBranchAllowanceExceeded);
             floor.FinalFloorSpaceCapacity = 17;
             Assert.That(Reasons(catalog), Does.Contain(SpatialContentValidationReason.FloorCapacityExceedsBounds));
         }
