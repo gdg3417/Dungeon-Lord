@@ -2,19 +2,19 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Authoritative active roadmap after GD63 reconciliation** |
-| Baseline | Main through merged PR #165 / GD63 |
+| Status | **Authoritative active roadmap after GD64 completion** |
+| Baseline | Main through merged PR #166 / GD64 |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-22 |
+| Last reconciled | 2026-07-23 |
 
 ## 1. Authority and purpose
 
 This is the single active dependency order from the GD60 prototype to a fun MVP, a usable graphical editor, and external testing. Older sprint plans, closeouts, evidence records, and vertical-slice plans remain historical traceability: they retain useful acceptance criteria, but are **not** the authoritative execution sequence. A planned status is not implementation evidence. The merged repository and committed tests/evidence are authoritative; uncertain closure is marked **requires confirmation**.
 
-GD63 records approved decisions and reconciles planning documentation only. It does not activate the GD62 graph or implement migration, economy, routing, additional floors, content, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
+GD64 completed the inactive spatial contract and layout-validator alignment without activating the graph. It did not implement migration, economy, additional floors, authored spatial content, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
 
-## 2. Current repository baseline after GD62
+## 2. Current repository baseline after GD64
 
 ### Implemented capabilities
 
@@ -29,7 +29,7 @@ Merged history establishes the following at prototype scope:
 
 ### Partially implemented capabilities
 
-- **Layout:** GD62 provides inactive tile/footprint, floor, room, corridor, node, and edge contracts plus a pure deterministic validator with stable reason codes 1–39. Those inactive contracts still use independent configured floor-space costs, lack rectangular floor bounds, and represent only corridor edges—not footprint-free direct doorways—so GD64 alignment is required before content or migration design. Two ordered room slots still own runtime route order; the graph is not active or authoritative.
+- **Layout:** GD64 completed the inactive rectangular floor-bound, occupied-tile capacity, direct-doorway, physical-corridor, bounded canonicalization, and pure deterministic layout-validation contracts with stable reason codes 1–45. Two ordered room slots still own runtime route order; the spatial domain is not active or authoritative.
 - **Construction:** choices and replacement exist, but spatial placement, corridors, structural removal/renovation, and mana-backed costs do not.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** prototype mana/heat flows exist; construction spending, floor expansion, and production-grade offline behavior remain incomplete or require confirmation.
@@ -73,13 +73,14 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (in progress)
+### Phase 1 — Spatial domain foundation (in progress: GD65A)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
-3. **GD64 — Inactive spatial contract and validator alignment (current implementation packet):** add or approve rectangular floor-boundary representation; derive used space from occupied physical tiles; remove, replace, deprecate, or strictly validate independent floor-space costs; and represent direct doorways separately from physical corridors. Preserve canonical ordering and reason values 1–39, append new reasons, add focused EditMode tests, and keep the graph inactive. No schema, runtime-authority, UI, tuning, content, or migration changes. Final class names and architecture require implementation review.
-4. **GD65 — Inactive MVP spatial content contract and export validation:** after GD64, approve authored identities, IDs, rectangular footprints, connection points, capacities, and schema/foreign-key/export validation.
-5. **GD66 — Final save/migration design gate:** after GD65 content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
+3. **GD64 — Inactive spatial contract and validator alignment (complete):** rectangular floor bounds, occupied-tile-union capacity, distinct footprint-free direct doorways and physical corridors, explicit workload limits, stable reason values 1–45, and deterministic invalid-payload preservation are merged through PR #166. The graph remains inactive.
+4. **GD65A — Inactive spatial content schema and deterministic export validation (current packet):** define the Unity-serializable export envelope, metadata, floor/room/corridor/fixed-endpoint/socket/connection contracts, pure bounded validation, foreign-key checks, detached ordinal canonicalization, JSON tests, and test-only fixture content. No production authored values or export registration.
+5. **GD65B — Approved MVP authored records and production export evidence:** after Design/Data approve every gated value, author the actual MVP spatial records, register the production export, and provide pipeline evidence.
+6. **GD66 — Final save/migration design gate:** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
 **Phase boundary:** Phase 1 ends with GD66 design approval. It does not change schema, migrate legacy state, switch runtime readers, transition writable authority, or provide migration implementation evidence. Those actions belong exclusively to Phase 2.
 
@@ -201,7 +202,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 | Question | Needed by | Required evidence/owner |
 |---|---|---|
-| Exact legal bounds, buildable/unavailable-tile unlock model, expansion/modifier behavior, room/corridor footprints, content capacities, connection points, final content IDs, costs and modifiers | GD64 alignment / GD65 content contract | Design/Data; authored content and schema validation, never runtime constants |
+| Exact legal bounds, buildable/unavailable-tile unlock model, expansion/modifier behavior, room/corridor footprints, content capacities, connection points, final content IDs, costs and modifiers | GD64 alignment / GD65A schema / GD65B content | Design/Data; authored content and schema validation, never runtime constants |
 | Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
 | Invested construction/renovation mana representation; refund percentage, rounding and clamping | Before Phase 2/4 implementation | Design/Data/Save; reviewed data contract |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |

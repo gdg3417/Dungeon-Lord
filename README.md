@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR #165 / GD63. GD62 added inactive DungeonSpatial contracts and pure deterministic validation; GD63 reconciled approved design decisions in documentation. The save schema remains version 6, the graph remains non-authoritative, and ordered two-room models remain runtime/save authority.
+Main is merged through PR #166 / GD64 at this branch baseline. GD64 completed the inactive spatial contract and deterministic layout-validation alignment. The save schema remains version 6, the spatial domain remains non-authoritative, and ordered two-room models remain runtime/save authority.
 
 The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet activate physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
 
@@ -28,8 +28,8 @@ VS4 first-session MVP smoke documentation:
 - [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
 - [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
 
-## Active plan after GD63
+## Active plan after GD64
 
 The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
 
-The current implementation packet is **GD64: Align inactive spatial contracts and deterministic validation**. It adds rectangular floor bounds, tile-union capacity, and footprint-free direct doorways while keeping the spatial domain inactive and non-authoritative. The sequence is GD64 inactive contract/validator alignment, GD65 inactive content/export validation, GD66 final migration design, then Phase 2 migration and authority transition.
+GD64 is complete. GD65 is split because production spatial values are not yet approved: **GD65A** defines only an inactive serializable schema plus bounded deterministic export validation, while **GD65B** will own approved production records and actual export registration. GD66 remains the final migration-design gate after GD65B, and Phase 2 exclusively owns migration implementation and authority transition. The catalog introduced by GD65A is not loaded or consumed at runtime.
