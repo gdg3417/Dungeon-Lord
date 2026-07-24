@@ -43,7 +43,7 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 12. Completion Terminal is required and contains no normal room content.
 13. Adjacent compatible structures may use a direct doorway with no corridor footprint.
 14. Separated structures require a physical corridor.
-15. The optional branch maximum is one per floor.
+15. MVP production content and active MVP behavior permit at most one optional branch per floor; the generic nonnegative per-floor authored field has no permanent schema maximum of 1.
 16. Stable IDs and ordinal canonical ordering are required.
 17. Player-facing text is localization-owned.
 18. Numeric tuning and workload limits are configuration-owned.
@@ -82,7 +82,7 @@ For the identities approved in rows 4–10, the production convention is exactly
 | 19 | Floor 1 `AllowedCorridorDefinitionIds` | `UNAPPROVED` | GD65A serializes and independently validates this corridor-reference collection | — | Exact ordinal-canonical production collection of allowed corridor definition IDs | Floor validation, authoring, editor catalog, canonical export | Design/Data | Pending signoff in §14 |
 | 20 | Floor 1 `EntranceStructureDefinitionId` | `UNAPPROVED` | GD65A serializes a distinct fixed-structure foreign key and validates the Entrance kind | — | Exact production assignment to an approved Entrance structure definition | Floor validation, route endpoint, authoring, canonical export | Design/Data | Pending signoff in §14 |
 | 21 | Floor 1 `CompletionStructureDefinitionId` | `UNAPPROVED` | GD65A serializes a distinct fixed-structure foreign key and validates the CompletionTerminal kind | — | Exact production assignment to an approved Completion Terminal definition | Floor validation, route endpoint, authoring, canonical export | Design/Data | Pending signoff in §14 |
-| 22 | Optional branch allowance | `UNAPPROVED` | GD63/Spec 38 approve a global maximum of one; they do not authorize the exact serialized Floor 1 value or the later research-gated effective allowance | — | Exact Floor 1 `OptionalBranchAllowance` value within the maximum; Phase 5 separately owns the effective research-gated allowance | Graph validation, route selection, editor | Design/Data | Pending signoff in §14 |
+| 22 | Optional branch allowance | `UNAPPROVED` | The generic field accepts nonnegative per-floor authored values without a permanent schema maximum of 1; MVP policy permits at most one optional branch per floor | — | Exact Floor 1 `OptionalBranchAllowance` value remains unapproved; values above 1 are post-MVP and unauthorized for current production content, while Phase 5 separately owns the effective research-gated allowance | Graph validation, route selection, editor | Design/Data | Pending signoff in §14 |
 | 23 | Basic Room width and height | `UNAPPROVED` | Square/medium only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
 | 24 | Rectangle Room width and height | `UNAPPROVED` | Rectangular/approximately Basic space class only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
 | 25 | Large Chamber width and height | `UNAPPROVED` | Larger/higher commitment only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |

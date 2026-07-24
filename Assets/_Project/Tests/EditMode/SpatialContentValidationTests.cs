@@ -258,10 +258,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floor.OptionalBranchAllowance = 1;
             Assert.That(Validate(catalog).IsValid, Is.True);
             floor.OptionalBranchAllowance = 2;
-            Assert.That(Reasons(catalog), Does.Contain(SpatialContentValidationReason.FloorBranchAllowanceExceeded));
-            floor.OptionalBranchAllowance = 1;
+            Assert.That(Validate(catalog).IsValid, Is.True);
+            Assert.That(Reasons(catalog), Does.Not.Contain(SpatialContentValidationReason.FloorBranchAllowanceExceeded));
+            floor.OptionalBranchAllowance = 37;
+            Assert.That(Validate(catalog).IsValid, Is.True);
+            Assert.That(Reasons(catalog), Does.Not.Contain(SpatialContentValidationReason.FloorBranchAllowanceExceeded));
             floor.FinalFloorSpaceCapacity = 17;
             Assert.That(Reasons(catalog), Does.Contain(SpatialContentValidationReason.FloorCapacityExceedsBounds));
+        }
+
+        [Test]
+        public void BranchAllowanceAboveOne_SurvivesJsonAndCanonicalizationWithoutMutation()
+        {
+            var source = Valid();
+            source.Floors[0].OptionalBranchAllowance = 37;
+            string json = JsonUtility.ToJson(source);
+
+            SpatialContentCatalog roundTrip = JsonUtility.FromJson<SpatialContentCatalog>(json);
+            Assert.That(roundTrip.Floors[0].OptionalBranchAllowance, Is.EqualTo(37));
+            Assert.That(SpatialContentCanonicalizer.TryCanonicalize(
+                roundTrip, Limits(), out SpatialContentCatalog canonical), Is.True);
+            Assert.That(canonical.Floors[0].OptionalBranchAllowance, Is.EqualTo(37));
+            Assert.That(roundTrip.Floors[0].OptionalBranchAllowance, Is.EqualTo(37));
+            Assert.That(Validate(canonical).IsValid, Is.True);
         }
 
         [Test]
