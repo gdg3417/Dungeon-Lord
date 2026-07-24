@@ -175,7 +175,7 @@ Later work must preserve deterministic validation; stable IDs; ordinal canonical
 
 ## 11. Explicit implementation readiness gate
 
-**GD65B is NOT READY.** The register contains 72 rows: 23 `APPROVED`, 49 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping rows 14 and 71 create no new production value. The production identity conflict is resolved, but remaining geometry, capacities, localization, pipeline, and workload decisions still require assigned owner signoff. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
+**GD65B is NOT READY.** The register contains 72 rows: 23 `APPROVED`, 49 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping rows 14 and 71 create no new production value. The production identity conflict is resolved, but the remaining blockers—Floor 1 bounds; final floor-space capacity; room, corridor, entrance, and completion geometry/capacities; socket compatibility; concrete room and fixed-structure connection points; localization; export, manifest, registry, loading, validation, and canonical serialization ownership; workload limits; and production pipeline test ownership—still require assigned owner signoff. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
 
 After all remaining signoff, GD65B must author and validate production records and execute the production pipeline without activating graph/save authority. GD66 signoff is not required first; GD66 begins after GD65B records exist. Activation or migration requires a separate packet.
 
@@ -224,8 +224,8 @@ This partial signoff does not open the gate. The next dependency-correct packet 
 
 | Authority | Required decisions | Approver/evidence | Status |
 |---|---|---|---|
-| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — scoped identity decisions approved; remaining rows UNAPPROVED` |
-| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — scoped identity decisions approved; remaining rows UNAPPROVED` |
+| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — identities, Floor 1 index and foreign-key references, and the Floor 1 authored branch allowance are approved; geometry, capacities, sockets, connections, localization, and other required decisions remain UNAPPROVED` |
+| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — schema identity/version, content version, identities, and Floor 1 reference collections are approved; export, manifest/registry, loading, canonical serialization ownership, and other required decisions remain UNAPPROVED` |
 | Engineering | Production loading/assignment/validation and non-Bootstrap composition | — | `UNAPPROVED` |
 | Localization | Convention, keys, English entries, lookup ownership | — | `UNAPPROVED` |
 | Performance / QA | Conservative production validation limits, Floor 1 envelope rationale, later validation stages, and pipeline test ownership; device profiling remains Phase 9 | — | `UNAPPROVED` |
