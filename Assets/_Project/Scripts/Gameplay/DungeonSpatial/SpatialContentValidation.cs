@@ -850,11 +850,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result = CopyCatalog(source);
             CanonicalizeNested(result);
 
-            SortRecords(result.Floors, value => value?.FloorDefinitionId);
-            SortRecords(result.Rooms, value => value?.RoomDefinitionId);
-            SortRecords(result.Corridors, value => value?.CorridorDefinitionId);
-            SortRecords(result.FixedStructures, value => value?.StructureDefinitionId);
-            SortRecords(result.SocketTypes, value => value?.SocketTypeId);
+            SortRecords(result.Floors, value => value?.FloorDefinitionId, CopyFloor);
+            SortRecords(result.Rooms, value => value?.RoomDefinitionId, CopyRoom);
+            SortRecords(result.Corridors, value => value?.CorridorDefinitionId, CopyCorridor);
+            SortRecords(result.FixedStructures, value => value?.StructureDefinitionId, CopyFixedStructure);
+            SortRecords(result.SocketTypes, value => value?.SocketTypeId, CopySocketType);
             return true;
         }
 
@@ -1012,10 +1012,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (reserved != null)
                 Array.Sort(reserved);
             SortOrientations(orientations);
-            SortRecords(points, point => point?.ConnectionPointId);
+            SortRecords(points, point => point?.ConnectionPointId, CopyConnectionPoint);
         }
 
-        private static void SortRecords<T>(T[] values, Func<T, string> getId) where T : class
+        private static void SortRecords<T>(
+            T[] values,
+            Func<T, string> getId,
+            Func<T, T> copyForPayload)
+            where T : class
         {
             if (values == null)
                 return;
@@ -1027,7 +1031,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 keyedRecords[index] = new CanonicalRecord<T>(
                     value,
                     getId(value),
-                    value == null ? string.Empty : CreateCanonicalPayload(value));
+                    value == null ? string.Empty : CreateCanonicalPayload(value, copyForPayload));
             }
 
             Array.Sort(keyedRecords, (left, right) =>
@@ -1042,11 +1046,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 values[index] = keyedRecords[index].Value;
         }
 
-        private static string CreateCanonicalPayload<T>(T value) where T : class
+        private static string CreateCanonicalPayload<T>(T value, Func<T, T> copyForPayload)
+            where T : class
         {
             var topology = new StringBuilder();
             AppendNullTopology(topology, value);
-            topology.Append('|').Append(JsonUtility.ToJson(value));
+            T scratch = copyForPayload(value);
+            topology.Append('|').Append(JsonUtility.ToJson(scratch));
             return topology.ToString();
         }
 

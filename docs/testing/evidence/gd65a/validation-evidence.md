@@ -5,7 +5,7 @@
 - Confirmed local base: `0d2d29460aa0c73d924de55e35b5b7fcd81b39cf` (merged PR #166 / GD64).
 - Reviewed PR #167 head supplied with the Unity failure report: `452b36955a852a6d637efb8eb160dbaecb8fe111`.
 - The environment has no configured remote URL, so the supplied remote head could not be fetched independently. The preloaded local equivalent was `cef588b`.
-- Null-preservation correction implementation/test head statically tested: `6090a517779ae9e35d593991205b7bee39859bdb`.
+- Scratch-payload correction implementation/test head statically tested: `8e303910dc80a6467b45195099552117ba039e81`.
 - The commit containing this evidence update follows the tested implementation head and changes this documentation file only; its SHA is reported in the PR description and final report.
 - Repository Unity version: `6000.3.2f1`. Codex host: Linux x86_64.
 
@@ -35,6 +35,20 @@ One was a test-helper failure:
 
 This failed run is historical evidence and is not replaced by the correction. Corrected Unity results remain pending.
 
+## Second full Unity EditMode run — one remaining failure
+
+The user reran the complete EditMode suite with Unity `6000.3.2f1` at remote commit `5b9b88679c9da5232e02350de4153bc5af85bebc`:
+
+- Total: **1,213**
+- Passed: **1,212**
+- Failed: **1**
+- Inconclusive: **0**
+- Skipped: **0**
+
+The only failure was `DetachedCopyPreservesCompleteNullTopologyAndStableReasons`. A null room connection-point element was materialized as a default `SpatialConnectionPointDefinition` while `JsonUtility.ToJson` generated a deterministic tie-break payload from the live canonical room. The explicit deep copy itself had preserved the null correctly.
+
+The correction now builds topology from the canonical record, creates a second disposable type-specific scratch copy, and serializes only that scratch copy. Unity serialization can therefore mutate only discarded payload input, never the canonical result. All top-level and nested connection-point `SortRecords` calls supply their existing explicit copy helper. Corrected Unity results remain pending.
+
 ## Correction implemented
 
 `SpatialContentCanonicalizer` no longer uses `JsonUtility.ToJson` / `FromJson` as its detached-copy mechanism. It now performs an explicit deep copy after successful workload preflight. Small copy helpers cover the catalog, metadata, every top-level definition, bounds, footprints, connection points, string arrays, coordinate/enum arrays, and all scalar fields.
@@ -49,7 +63,7 @@ The copy preserves exactly:
 - Null connection-point elements and null string-array elements.
 - Invalid scalar/enum values, IDs, versions, capacities, coordinates, duplicates, and input order before intentional sorting.
 
-Nested collections are canonicalized only after copying. Top-level ordering remains ordinal by stable ID with deterministic canonical-payload tie-breaking. The payload key now includes explicit null-topology markers before its Unity JSON scalar payload so null/empty and null-element distinctions cannot collapse into input-dependent ties. The supplied source is never mutated.
+Nested collections are canonicalized only after copying. Top-level ordering remains ordinal by stable ID with deterministic canonical-payload tie-breaking. The payload key includes explicit null-topology markers from the canonical record. Unity JSON scalar payload representation is generated only from a disposable explicit scratch copy, so serialization cannot mutate the canonical record. The supplied source is never mutated.
 
 The invalid-limit test now directly calls `SpatialContentValidator.Validate` with `default(SpatialContentValidationWorkloadLimits)`, bypassing the nullable convenience helper.
 
@@ -59,7 +73,7 @@ Unity JSON round-trip behavior remains separately tested, but is not claimed to 
 
 ## Static validation actually executed
 
-The following commands completed successfully against implementation/test head `6090a517779ae9e35d593991205b7bee39859bdb`:
+The following commands completed successfully against implementation/test head `8e303910dc80a6467b45195099552117ba039e81`:
 
 ```text
 git status --short
@@ -83,7 +97,7 @@ Results:
 - Status was clean before the evidence update.
 - Both diff checks passed with no output.
 - The PR diff contains exactly the ten intended GD65A files.
-- The correction commit changes only `SpatialContentValidation.cs` and `SpatialContentValidationTests.cs`.
+- The scratch-payload correction commit changes only `SpatialContentValidation.cs` and `SpatialContentValidationTests.cs`.
 - Save schema remains 6.
 - `FloorLayoutValidationReason` remains exactly 1 through 45.
 - `FloorRouteConnectionKind` remains `DirectDoorway = 1` and `PhysicalCorridor = 2`.

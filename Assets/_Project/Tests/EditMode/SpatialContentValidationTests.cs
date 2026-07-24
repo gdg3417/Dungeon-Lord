@@ -610,6 +610,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void DuplicateRoomPayloadSortingUsesScratchCopiesAndPreservesNullPoints()
+        {
+            const string duplicateId = "test.gd65a.room.duplicate.null-point";
+            RoomSpatialDefinition nullPointRoom = Room(
+                duplicateId, "test.gd65a.loc.room.null-point", "test.gd65a.socket");
+            nullPointRoom.ConnectionPoints = new SpatialConnectionPointDefinition[] { null };
+            RoomSpatialDefinition defaultPointRoom = Room(
+                duplicateId, "test.gd65a.loc.room.default-point", "test.gd65a.socket");
+            defaultPointRoom.ConnectionPoints = new[] { new SpatialConnectionPointDefinition() };
+
+            SpatialContentCatalog forward = Valid();
+            forward.Rooms = new[] { nullPointRoom, defaultPointRoom };
+            SpatialContentCatalog reverse = Valid();
+            RoomSpatialDefinition reverseNullPointRoom = Room(
+                duplicateId, "test.gd65a.loc.room.null-point", "test.gd65a.socket");
+            reverseNullPointRoom.ConnectionPoints = new SpatialConnectionPointDefinition[] { null };
+            RoomSpatialDefinition reverseDefaultPointRoom = Room(
+                duplicateId, "test.gd65a.loc.room.default-point", "test.gd65a.socket");
+            reverseDefaultPointRoom.ConnectionPoints = new[] { new SpatialConnectionPointDefinition() };
+            reverse.Rooms = new[] { reverseDefaultPointRoom, reverseNullPointRoom };
+
+            Assert.That(SpatialContentCanonicalizer.TryCanonicalize(
+                forward, Limits(), out SpatialContentCatalog forwardCanonical), Is.True);
+            Assert.That(SpatialContentCanonicalizer.TryCanonicalize(
+                reverse, Limits(), out SpatialContentCatalog reverseCanonical), Is.True);
+
+            CollectionAssert.AreEqual(
+                forwardCanonical.Rooms.Select(value => value.LocalizationKey),
+                reverseCanonical.Rooms.Select(value => value.LocalizationKey));
+            Assert.That(forwardCanonical.Rooms[0].ConnectionPoints.Single(), Is.Null);
+            Assert.That(reverseCanonical.Rooms[0].ConnectionPoints.Single(), Is.Null);
+            Assert.That(forwardCanonical.Rooms[1].ConnectionPoints.Single(), Is.Not.Null);
+            Assert.That(forwardCanonical.Rooms[1].ConnectionPoints.Single(),
+                Is.Not.SameAs(defaultPointRoom.ConnectionPoints.Single()));
+            Assert.That(nullPointRoom.ConnectionPoints.Single(), Is.Null);
+            Assert.That(reverseNullPointRoom.ConnectionPoints.Single(), Is.Null);
+            Assert.That(defaultPointRoom.ConnectionPoints.Single(), Is.Not.Null);
+        }
+
+        [Test]
         public void ExactContentAndGd64ReasonMapsArePreserved()
         {
             var expected = new Dictionary<SpatialContentValidationReason, int>
