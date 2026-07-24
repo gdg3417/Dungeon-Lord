@@ -583,7 +583,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.MetadataMissing));
             Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.FootprintMissing));
             Assert.That(reasonsBefore, Does.Contain(SpatialContentValidationReason.DefinitionMissing));
-            Assert.That(reasonsBefore, Does.Not.Contain(SpatialContentValidationReason.SchemaIdentityMissing));
+            Assert.That(
+                reasonsBefore.Contains(SpatialContentValidationReason.SchemaIdentityMissing),
+                Is.False);
         }
 
         [Test]
