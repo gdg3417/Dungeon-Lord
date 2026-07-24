@@ -33,7 +33,7 @@ One was a test-helper failure:
 
 6. `NullCatalogAndInvalidLimits_FailClosed` — nullable helper fallback replaced the intended zero-valued limit with valid test limits, so production invalid-limit behavior was never invoked.
 
-This failed run is historical evidence and is not replaced by the correction. Corrected Unity results remain pending.
+This failed run is historical evidence and is not replaced by the correction.
 
 ## Second full Unity EditMode run — one remaining failure
 
@@ -47,7 +47,7 @@ The user reran the complete EditMode suite with Unity `6000.3.2f1` at remote com
 
 The only failure was `DetachedCopyPreservesCompleteNullTopologyAndStableReasons`. A null room connection-point element was materialized as a default `SpatialConnectionPointDefinition` while `JsonUtility.ToJson` generated a deterministic tie-break payload from the live canonical room. The explicit deep copy itself had preserved the null correctly.
 
-The correction now builds topology from the canonical record, creates a second disposable type-specific scratch copy, and serializes only that scratch copy. Unity serialization can therefore mutate only discarded payload input, never the canonical result. All top-level and nested connection-point `SortRecords` calls supply their existing explicit copy helper. Corrected Unity results remain pending.
+The correction now builds topology from the canonical record, creates a second disposable type-specific scratch copy, and serializes only that scratch copy. Unity serialization can therefore mutate only discarded payload input, never the canonical result. All top-level and nested connection-point `SortRecords` calls supply their existing explicit copy helper. This failure is also preserved as historical evidence and was superseded by the final successful complete-suite rerun below.
 
 ## Correction implemented
 
@@ -106,16 +106,13 @@ Results:
 - No runtime catalog consumer or production spatial JSON was added.
 - Every new Unity C# file has its matching `.meta` file.
 
-## Unity status after correction
+## Final complete Unity EditMode result
 
-Unity was unavailable in the Codex environment, so the corrected tests were not executed here. No corrected pass/failure totals are claimed.
+The user confirmed a final successful run of the complete EditMode suite with Unity `6000.3.2f1` after the correction. Zero failed and zero inconclusive tests remained. The GD65A tests, GD64 tests, and the remaining EditMode suite all passed.
 
-The user must rerun with Unity `6000.3.2f1`:
+No final test count or XML result path is recorded because neither is supplied by the confirmed final-pass evidence. Codex did not execute Unity; this is explicitly user-confirmed evidence.
 
-1. `DungeonBuilder.M0.Tests.EditMode.SpatialContentValidationTests`
-2. `DungeonBuilder.M0.Tests.EditMode.DungeonSpatialContractTests`
-3. `DungeonBuilder.M0.Tests.EditMode.FloorLayoutValidatorTests`
-4. The complete EditMode suite
+PlayMode, build, save-lifecycle, UI, and gameplay testing were not required for GD65A because the spatial catalog remained inactive and disconnected from runtime, saves, scenes, prefabs, UI, and gameplay.
 
 ## Scope confirmations and limitations
 
@@ -123,4 +120,4 @@ The user must rerun with Unity `6000.3.2f1`:
 - Test fixture values remain under `test.gd65a.*`.
 - The catalog remains inactive and disconnected from runtime content loading, saves, migration, scenes, prefabs, UI, gameplay, Bootstrap, manifests, and schema registration.
 - Existing ordered two-room runtime/save authority remains unchanged.
-- Remaining uncertainty is corrected Unity compilation and execution; static checks cannot substitute for that rerun or prove gameplay fun.
+- The corrected complete Unity EditMode pass is user-confirmed. It does not provide PlayMode, build, save-lifecycle, UI, gameplay, performance, or fun evidence; those were not required for the inactive GD65A catalog.
