@@ -16,7 +16,7 @@ GD64 completed the inactive spatial contract and layout-validator alignment with
 
 Merged PR #168 established the GD65B0 register. The first identity decision group is now owner-approved: the stable-ID convention, seven definition IDs, one initial socket ID, the production straight-corridor semantic resolution, and the contract-defined connection-point namespace mapping. This approval creates no records and makes no catalog loaded or authoritative. GD65B remains blocked by remaining geometry, capacities, localization, pipeline, workload, and current-scope Save signoff decisions.
 
-## 2. Current repository baseline after GD65A
+## 2. Current repository baseline during GD65B0 approvals
 
 ### Implemented capabilities
 
