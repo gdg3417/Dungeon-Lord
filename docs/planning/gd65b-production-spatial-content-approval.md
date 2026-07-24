@@ -3,7 +3,7 @@
 | Field | Decision |
 |---|---|
 | Status | **BLOCKED — approval register incomplete; GD65B production implementation is not authorized** |
-| Starting baseline for this approval update | `bfeaca9f9df137a05126ec9a47d6bf05cfb0d959` (main through merged PR #170 / GD65B0A) |
+| Starting baseline for this approval update | `06aac95b99d043726f6dea6a8d40c5eb6b5399f7` (main through merged PR #171 / GD65B0B) |
 | Packet | GD65B0 — Floor 1 spatial content authority and pipeline decision record |
 | Scope | Approval authority for Floor 1 production spatial records and their production pipeline |
 | Last reconciled | 2026-07-24 |
@@ -23,6 +23,7 @@ The only register statuses are `APPROVED`, `INFERRED_NOT_APPROVED`, `UNAPPROVED`
 - Merged PR #168 / GD65B0 established this 72-row authority and pipeline gate.
 - Merged PR #169 approved the first identity group.
 - Merged PR #170 / GD65B0A preserved generic optional-branch allowance extensibility above the MVP limit.
+- Merged PR #171 / GD65B0B approved catalog metadata, Floor 1 references, the Floor 1 branch allowance, and the limited current-scope Save boundary.
 - [GD63](gd63-spatial-and-progression-design-decisions.md) and [Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) own approved qualitative spatial direction.
 - Specs 19, 27, 28, 36, and 37 constrain content pipeline, localization, saves, workloads, and evidence; none supplies missing production values.
 - GD66 depends on approved GD65B records for final migration mapping. Phase 2 alone may implement migration and switch runtime/save authority.
@@ -53,7 +54,7 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 20. The spatial catalog remains inactive.
 21. Ordered two-room models remain runtime and save authority.
 
-*Medium*, *large*, *narrow*, *balanced*, *approximately*, *higher*, and *lower* remain qualitative and must not be converted into numbers without approval.
+*Narrow* and any qualitative statement not covered by an approved row must not be converted into a number. Rows 23–25 and 29–31 now supply the only approved numeric interpretation for the scoped initial room profiles; descriptive words such as *medium*, *large*, *balanced*, *approximately*, *higher*, and *lower* do not independently authorize other values.
 
 ## 4. Complete approval register
 
@@ -85,15 +86,15 @@ For the identities approved in rows 4–10, the production convention is exactly
 | 20 | Floor 1 `EntranceStructureDefinitionId` | `APPROVED` | Owner-approved Floor 1 foreign-key assignment only | `EntranceStructureDefinitionId = "spatial.fixed.entrance_hall"` | Geometry, coordinates, orientation, connections, localization, migration placement, and saved representation remain unapproved | Floor validation, route endpoint, authoring, canonical export | Design/Data | §14 owner metadata and Floor 1 approval record; this documentation PR |
 | 21 | Floor 1 `CompletionStructureDefinitionId` | `APPROVED` | Owner-approved Floor 1 foreign-key assignment only | `CompletionStructureDefinitionId = "spatial.fixed.completion_terminal"` | Geometry, coordinates, orientation, connections, localization, migration placement, and saved representation remain unapproved | Floor validation, route endpoint, authoring, canonical export | Design/Data | §14 owner metadata and Floor 1 approval record; this documentation PR |
 | 22 | Optional branch allowance | `APPROVED` | Authored Floor 1 MVP maximum; generic nonnegative per-floor field remains extensible above 1 post-MVP; architecture research may initially make effective allowance 0, and Phase 5 owns effective research gating and route selection | `OptionalBranchAllowance = 1` | This does not activate branching; active MVP behavior/content remain at most one branch, while later floors require separate approval for values above 1 | Graph validation, route selection, editor | Design/Data | §14 owner metadata and Floor 1 approval record; this documentation PR |
-| 23 | Basic Room width and height | `UNAPPROVED` | Square/medium only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
-| 24 | Rectangle Room width and height | `UNAPPROVED` | Rectangular/approximately Basic space class only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
-| 25 | Large Chamber width and height | `UNAPPROVED` | Larger/higher commitment only | — | Exact dimensions | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
+| 23 | Basic Room width and height | `APPROVED` | Owner-approved exact gross footprint for `spatial.room.basic`; square/medium role retained | `spatial.room.basic`:<br>`GrossFootprint.Width = 4`<br>`GrossFootprint.Height = 4` | Reserved tiles, usable area, orientations, connections, placement, and runtime activation remain excluded | Content authoring, footprint validation, fit preview, editor | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
+| 24 | Rectangle Room width and height | `APPROVED` | Owner-approved exact gross footprint for `spatial.room.rectangle`; width 3 and height 5 are definition authority, while rotation remains separate | `spatial.room.rectangle`:<br>`GrossFootprint.Width = 3`<br>`GrossFootprint.Height = 5` | Reserved tiles, usable area, allowed rotations, connections, placement, and runtime activation remain excluded; do not canonicalize the definition to 5 × 3 | Content authoring, footprint validation, fit preview, editor | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
+| 25 | Large Chamber width and height | `APPROVED` | Owner-approved exact gross footprint for `spatial.room.large_chamber`; large/high-commitment role retained | `spatial.room.large_chamber`:<br>`GrossFootprint.Width = 5`<br>`GrossFootprint.Height = 6` | Reserved tiles, usable area, orientations, connections, placement, and runtime activation remain excluded | Content authoring, footprint validation, fit preview, editor | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
 | 26 | Reserved tile offsets for every room | `UNAPPROVED` | GD65A contract shape only; no production value | — | Complete exact value per room | Placement, connections, canonical export, editor | Design/Data | Pending signoff in §14 |
 | 27 | Allowed orientations for every room | `UNAPPROVED` | GD65A contract shape only; no production value | — | Complete exact value per room | Placement, connections, canonical export, editor | Design/Data | Pending signoff in §14 |
 | 28 | Maximum connection count for every room | `UNAPPROVED` | GD65A contract shape only; no production value | — | Complete exact value per room | Placement, connections, canonical export, editor | Design/Data | Pending signoff in §14 |
-| 29 | Monster capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
-| 30 | Trap capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
-| 31 | Loot capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
+| 29 | Monster capacity for every room | `APPROVED` | Owner-approved independently authored category maxima; design authority only | `MonsterCapacity`:<br>`spatial.room.basic = 2`<br>`spatial.room.rectangle = 3`<br>`spatial.room.large_chamber = 4` | Individual footprints/coordinates, usable and reserved tiles, non-room capacities, placement validation, runtime consumption, and balance evidence remain excluded | Future content authoring, category-limit validation, fit preview, localized UI | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
+| 30 | Trap capacity for every room | `APPROVED` | Owner-approved independently authored category maxima; design authority only | `TrapCapacity`:<br>`spatial.room.basic = 2`<br>`spatial.room.rectangle = 1`<br>`spatial.room.large_chamber = 4` | Individual footprints/coordinates, usable and reserved tiles, non-room capacities, placement validation, runtime consumption, and balance evidence remain excluded | Future content authoring, category-limit validation, fit preview, localized UI | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
+| 31 | Loot capacity for every room | `APPROVED` | Owner-approved independently authored category maxima; design authority only | `LootCapacity`:<br>`spatial.room.basic = 2`<br>`spatial.room.rectangle = 2`<br>`spatial.room.large_chamber = 4` | Individual footprints/coordinates, usable and reserved tiles, non-room capacities, placement validation, runtime consumption, and balance evidence remain excluded | Future content authoring, category-limit validation, fit preview, localized UI | Design/Data | §14 GD65B0C1 owner room-profile approval; this documentation PR |
 | 32 | Corridor category | `APPROVED` | GD63 §3 and Spec 38 | `CorridorSpatialCategory.Straight` (serialized enum value `1`) | No missing serialized category decision; production identity is separately approved in row 8. Geometry, dimensions, capacities other than row 36, orientations, sockets, localization, loading, migration, and save representation remain separate decisions. | Catalog, routing, editor, validation | Design/Data | `docs/planning/gd63-spatial-and-progression-design-decisions.md` §3; `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md`; `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs` |
 | 33 | Corridor width | `UNAPPROVED` | “Narrow” is qualitative only | — | Exact width | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
 | 34 | Corridor minimum length | `UNAPPROVED` | Variable length approved; bound absent | — | Exact minimum | Placement, workload, editor | Design/Data | Pending signoff in §14 |
@@ -136,6 +137,26 @@ For the identities approved in rows 4–10, the production convention is exactly
 | 71 | Localization lookup workload accounting (contract mapping; no independent limit) | `APPROVED` | GD65A `SpatialContentWorkload.TryPreflight` accounts supplied localization lookup data through the existing five-field workload contract | Lookup entry count consumes `MaximumNestedRecords`; lookup key characters consume `MaximumStringCharacters` | No sixth limit, new API, or independent localization workload value; exact numeric bounds remain in the nested-record and string-character rows | Validation preflight, localization lookup, memory bounds | Engineering/QA | `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs`; `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs` |
 | 72 | Production pipeline test ownership | `UNAPPROVED` | GD65A tests cover inactive contracts only | — | Named suite, stage, fixtures, evidence owner, failure gate | Export, registry, loading, release confidence | QA/Data/Engineering | Pending signoff in §14 |
 
+### 4.1 GD65B0C1 approved construction and occupancy policy
+
+One room or structure tile remains exactly one floor-space unit. For design guidance, one tile is an abstract construction and occupancy cell approximately equivalent to a 5 × 5-foot area; this approximation is not an exact movement, collision, combat, or tabletop-distance simulation, creates no serialized measurement or runtime conversion, and is not a second capacity authority.
+
+For the MVP design, one standard monster placement, one standard trap placement, and one loot placement each occupy one authored usable room tile. Ordinary content placements cannot overlap and must remain within authored usable room tiles. Both the independently authored category maximum and physical tile availability must permit a placement; an otherwise valid empty tile does not grant a category slot. The current inactive schema does **not** serialize individual monster, trap, or loot footprints or placement coordinates. These statements are design and data authority only: they do not implement placement, add contracts, or activate a catalog consumer.
+
+Later authored content may use multi-tile footprints, including large monsters, bosses, large traps, environmental features, and large loot structures or similar content. Those examples approve direction, not production records, dimensions, or tuning. Multi-tile implementation remains post-MVP extensibility unless a later approved packet changes sequencing; GD65B0C1 adds no speculative fields or framework.
+
+At simultaneous maximum standard monster, trap, and loot capacities, ordinary room content may occupy no more than 40% of gross footprint tiles, leaving at least 60% outside ordinary-content occupancy. This is a room-profile authoring constraint, not a runtime-hardcoded percentage or a second weighted capacity system. Reserved and blocked tiles, usable-area rules, connection geometry, and clear connection-to-connection traversal remain separate authorities; remaining gross tiles are not automatically traversable, and exact reserved tiles and traversal validation remain unapproved and unimplemented.
+
+The approved profiles and derived documentation facts are:
+
+| Stable definition ID | Approved gross footprint | Approved monster / trap / loot capacities | Gross tiles | Approximate design scale | Maximum ordinary occupancy | Design role |
+|---|---:|---:|---:|---:|---:|---|
+| `spatial.room.basic` | Width 4 × Height 4 | 2 / 2 / 2 | 16 | 20 × 20 feet | 6 / 16 = 37.5% | Square, medium, balanced |
+| `spatial.room.rectangle` | Width 3 × Height 5 | 3 / 1 / 2 | 15 | 15 × 25 feet | 6 / 15 = 40% | Approximately Basic space class, monster-favored, lower trap capacity; rotation changes fit, not identity/capacities |
+| `spatial.room.large_chamber` | Width 5 × Height 6 | 4 / 4 / 4 | 30 | 25 × 30 feet | 12 / 30 = 40% | Large rectangular, general-purpose high capacity and greater commitment; preserve the large-room-versus-several-small-rooms tradeoff |
+
+Rows 23–25 and 29–31 are the primary production-value authority. This summary supplies derived review facts without authoring production records.
+
 ## 5. Prototype ID warning and semantic conflict resolution
 
 `placement.option.room.basic` and `placement.option.room.narrow_hall` are MVP **placement option IDs**. They are not approved production spatial definition IDs, naming templates, migration targets, localization keys, or catalog authority. `placement.option.room.narrow_hall` remains an unchanged legacy prototype room-option ID. This PR does not rename, remove, remap, reinterpret, or migrate it.
@@ -175,13 +196,13 @@ Later work must preserve deterministic validation; stable IDs; ordinal canonical
 
 ## 11. Explicit implementation readiness gate
 
-**GD65B is NOT READY.** The register contains 72 rows: 23 `APPROVED`, 49 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping rows 14 and 71 create no new production value. The production identity conflict is resolved, but the remaining blockers—Floor 1 bounds; final floor-space capacity; room, corridor, entrance, and completion geometry/capacities; socket compatibility; concrete room and fixed-structure connection points; localization; export, manifest, registry, loading, validation, and canonical serialization ownership; workload limits; and production pipeline test ownership—still require assigned owner signoff. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
+**GD65B is NOT READY.** The register contains 72 rows: 29 `APPROVED`, 43 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping rows 14 and 71 create no new production value. The production identity conflict is resolved, but the remaining blockers—Floor 1 bounds; final floor-space capacity; room reserved tile offsets, allowed orientations, maximum connection counts, and connection points; corridor geometry, remaining capacities, orientations, and sockets; entrance and completion geometry and connection data; socket compatibility; localization; export, manifest, registry, loading, validation, and canonical serialization ownership; workload limits; and production pipeline test ownership—still require assigned owner signoff. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
 
 After all remaining signoff, GD65B must author and validate production records and execute the production pipeline without activating graph/save authority. GD66 signoff is not required first; GD66 begins after GD65B records exist. Activation or migration requires a separate packet.
 
 ## 12. Non-goals
 
-- Authoring production records or choosing additional IDs, versions, dimensions, capacities, connections, text, limits, or paths beyond the identities approved here.
+- Authoring production records or choosing additional IDs, versions, geometry, capacities, connections, text, limits, or paths beyond the exact scoped values approved here.
 - Promoting spreadsheet candidates, prototypes, fixtures, examples, enums, Bootstrap values, or code constants.
 - Renaming/migrating prototype IDs or defining legacy mapping.
 - Modifying code, JSON, tests, assets, UI, settings, saves, schemas, manifests, localization, or versions.
@@ -220,12 +241,22 @@ This partial signoff does not open the gate.
 
 **Current-scope Save boundary:** Save schema remains version 6. GD65B0 and GD65B add no saved spatial state. `FloorIndex = 0` is currently content identity/index only. Ordered two-room models remain runtime and save authority; no route graph becomes writable or persistent, no migration step is added, no current save is rewritten, and no duplicate writable authority is introduced. GD66 owns final save/migration design. Phase 2 exclusively owns migration implementation, runtime-reader switching, and writable-authority transition. Future spatial persistence or migration is not approved.
 
-This partial signoff does not open the gate. The next dependency-correct packet should address Floor 1 bounds, capacity, and room geometry/capacities unless repository evidence establishes a smaller group.
+This partial signoff does not open the gate.
+
+### 2026-07-24 owner MVP room-profile approval (GD65B0C1)
+
+- **Approver:** `gdg3417, primary developer and project owner`.
+- **Roles:** Design, Data, and MVP room-profile authority for these exact decisions.
+- **Decision source and durable evidence:** explicit project-owner approval supplied for GD65B0C1 and recorded verbatim in rows 23–25 and 29–31, §4.1, and Spec 38.
+- **Approved scope:** the approximate construction-tile scale; the one-usable-tile standard MVP monster, trap, and loot footprint policy; non-overlap; future multi-tile extensibility; the 40% maximum ordinary-content occupancy authoring constraint; separate reserved/blocked/usable/traversal authority; the exact Basic Room, Rectangle Room, and Large Chamber dimensions; their exact monster, trap, and loot capacities; and the explicit limitation that current implementation serializes no individual content footprints or placements.
+- **Excluded scope:** Floor 1 bounds; final floor-space capacity; reserved tile offsets; allowed room orientations; maximum room connections; connection points; corridor dimensions and remaining capacities; fixed-structure geometry; socket compatibility; localization; production pipeline ownership; workload limits; production records; runtime content placement; saves; and migration.
+
+This partial signoff does not open the gate, author records, activate placement, or claim current schema support. **GD65B remains blocked.** The next dependency-correct packet is **GD65B0C2: approve Floor 1 bounds and final floor-space capacity**; this packet does not choose those values.
 
 | Authority | Required decisions | Approver/evidence | Status |
 |---|---|---|---|
-| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — identities, Floor 1 index and foreign-key references, and the Floor 1 authored branch allowance are approved; geometry, capacities, sockets, connections, localization, and other required decisions remain UNAPPROVED` |
-| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — schema identity/version, content version, identities, and Floor 1 reference collections are approved; export, manifest/registry, loading, canonical serialization ownership, and other required decisions remain UNAPPROVED` |
+| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — identities, Floor 1 references/branch allowance, and initial room footprints/category capacities are approved; remaining geometry, sockets, connections, localization, and other required decisions remain UNAPPROVED` |
+| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — schema metadata, identities, Floor 1 references, and initial room profiles are approved; export, manifest/registry, loading, canonical serialization ownership, and other required decisions remain UNAPPROVED` |
 | Engineering | Production loading/assignment/validation and non-Bootstrap composition | — | `UNAPPROVED` |
 | Localization | Convention, keys, English entries, lookup ownership | — | `UNAPPROVED` |
 | Performance / QA | Conservative production validation limits, Floor 1 envelope rationale, later validation stages, and pipeline test ownership; device profiling remains Phase 9 | — | `UNAPPROVED` |
