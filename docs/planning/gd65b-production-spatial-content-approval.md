@@ -3,7 +3,7 @@
 | Field | Decision |
 |---|---|
 | Status | **BLOCKED — approval register incomplete; GD65B production implementation is not authorized** |
-| Baseline | `a547a30affd839b5780986c66e440f6f219773a3` (main through merged PR #167 / GD65A) |
+| Starting baseline for this approval update | `c60ad61c858c80271020bb9346fffacdb4ed5097` (main through merged PR #168 / GD65B0) |
 | Packet | GD65B0 — Floor 1 spatial content authority and pipeline decision record |
 | Scope | Approval authority for Floor 1 production spatial records and their production pipeline |
 | Last reconciled | 2026-07-24 |
@@ -20,6 +20,7 @@ The only register statuses are `APPROVED`, `INFERRED_NOT_APPROVED`, `UNAPPROVED`
 
 - Merged PR #166 / GD64 supplies inactive rectangular-bound, physical-tile-capacity, direct-doorway/corridor, bounded-validation, and canonical layout contracts.
 - Merged PR #167 / GD65A supplies the inactive serializable content schema and pure, bounded, deterministic validation and detached ordinal canonicalization.
+- Merged PR #168 / GD65B0 establishes this 72-row authority and pipeline gate at starting baseline `c60ad61c858c80271020bb9346fffacdb4ed5097`.
 - [GD63](gd63-spatial-and-progression-design-decisions.md) and [Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) own approved qualitative spatial direction.
 - Specs 19, 27, 28, 36, and 37 constrain content pipeline, localization, saves, workloads, and evidence; none supplies missing production values.
 - GD66 depends on approved GD65B records for final migration mapping. Phase 2 alone may implement migration and switch runtime/save authority.
@@ -56,22 +57,24 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 
 “Pending signoff in §14” means no approval evidence exists. Contract/design references identify constraints only.
 
+For the identities approved in rows 4–10, the production convention is exactly `spatial.<definition-kind>.<stable-name>`: IDs use lowercase ASCII; periods separate components; multiword stable names use underscores; and identity and ordering use ordinal strings. IDs are not derived from display text and must not contain dimensions, coordinates, capacities, tuning values, schema versions, or content versions. Definition IDs and localization keys remain separate authorities. Existing prototype `placement.option.*` IDs are not production spatial definition IDs, and `test.gd65a.*` fixture IDs are not production authority.
+
 | # | Field | Status | Current authority | Approved value | Missing decision | Downstream systems affected | Recommended owner | Approval evidence location |
 |---:|---|---|---|---|---|---|---|---|
 | 1 | Catalog schema identity | `UNAPPROVED` | GD65A contract shape only; no production value | — | Exact stable production schema ID | Export, validation, manifest, schema registry, loading | Data/Content Pipeline | Pending signoff in §14 |
 | 2 | Catalog schema version | `UNAPPROVED` | GD65A contract shape only; no production value | — | Exact initial version | Export, registry, compatibility | Data/Content Pipeline + Engineering | Pending signoff in §14 |
 | 3 | Production content version | `UNAPPROVED` | Spec 19 and GD65A require an explicit version | — | Exact version and versioning policy | Export, manifest, saves, loading | Data/Release | Pending signoff in §14 |
-| 4 | Stable Floor 1 definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production stable floor 1 definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 5 | Basic Room definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production basic room definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 6 | Rectangle Room definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production rectangle room definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 7 | Large Chamber definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production large chamber definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 8 | Straight corridor definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production straight corridor definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 9 | Entrance Hall structure definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production entrance hall structure definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
-| 10 | Completion Terminal structure definition ID | `UNAPPROVED` | Stable/qualitative identity only | — | Exact production completion terminal structure definition id | Catalog, editor, saves, migration, localization mapping | Design/Data | Pending signoff in §14 |
+| 4 | Stable Floor 1 definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.floor.01` | None for identity; geometry, index, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
+| 5 | Basic Room definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.room.basic` | None for identity; geometry, capacities, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
+| 6 | Rectangle Room definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.room.rectangle` | None for identity; geometry, capacities, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
+| 7 | Large Chamber definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.room.large_chamber` | None for identity; geometry, capacities, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
+| 8 | MVP straight corridor definition ID | `APPROVED` | Owner resolves the prior production identity conflict in §5: exactly one initial MVP straight-corridor definition; the prototype Narrow Hall remains non-authoritative | `spatial.corridor.straight_stone` | None for production identity; geometry, capacities, sockets, localization, compatibility, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §5 resolution; §14 owner approval record; this documentation PR |
+| 9 | Entrance Hall structure definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.fixed.entrance_hall` | None for identity; geometry, connections, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
+| 10 | Completion Terminal structure definition ID | `APPROVED` | Owner-approved production identity convention; identity only | `spatial.fixed.completion_terminal` | None for identity; geometry, connections, localization, migration, loading, and save representation remain separate | Catalog, editor, saves, migration, localization mapping | Design/Data | §14 owner approval record; this documentation PR |
 | 11 | Entrance Hall fixed-structure `Kind` | `APPROVED` | GD65A independently serializes `FixedSpatialStructureDefinition.Kind`; GD63 and Spec 38 approve the fixed structure identity | `FixedSpatialStructureKind.Entrance` (serialized enum value `1`) | No missing serialized `Kind` decision; approving the structure definition ID or Floor 1 foreign key does not assign this field | Fixed-definition validation, Floor 1 endpoint type safety, canonical export | Design/Data | `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs`; `docs/planning/gd63-spatial-and-progression-design-decisions.md`; `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md` |
 | 12 | Completion Terminal fixed-structure `Kind` | `APPROVED` | GD65A independently serializes `FixedSpatialStructureDefinition.Kind`; GD63 and Spec 38 approve the fixed structure identity | `FixedSpatialStructureKind.CompletionTerminal` (serialized enum value `2`) | No missing serialized `Kind` decision; approving the structure definition ID or Floor 1 foreign key does not assign this field | Fixed-definition validation, Floor 1 endpoint type safety, canonical export | Design/Data | `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs`; `docs/planning/gd63-spatial-and-progression-design-decisions.md`; `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md` |
-| 13 | Socket type IDs | `UNAPPROVED` | GD65A contract shape only; no production value | — | Complete production socket ID set | Compatibility, connections, editor, migration | Design/Data | Pending signoff in §14 |
-| 14 | Connection point IDs | `UNAPPROVED` | GD65A contract shape only; no production value | — | Complete production point ID set and scope rule | Connections, canonical export, editor, migration | Design/Data | Pending signoff in §14 |
+| 13 | Initial production socket type IDs | `APPROVED` | Owner approves exactly one initial socket identity; later types may be added without renaming it | `["spatial.socket.standard_passage"]` | Identity only; row 41 compatibility matrix, corridor compatible-socket collections, point coordinates/facing/counts, doorway geometry, reserved-tile interaction, and runtime behavior remain unapproved | Compatibility, connections, editor, migration | Design/Data | §14 owner approval record; this documentation PR |
+| 14 | Connection-point ID scope (informational contract mapping; no concrete ID) | `APPROVED` | GD65A contract: IDs are unique within their owning room or fixed-structure definition, not one catalog-wide namespace; rooms map to row 42, Entrance Hall to row 46, Completion Terminal to row 51; corridors reference compatible socket types and serialize no equivalent point collection | Owner-scoped identity: rows 42, 46, and 51 own exact IDs; no concrete production connection-point ID is approved in this packet | No independent global ID set; exact IDs and point geometry remain in rows 42, 46, and 51 | Connections, canonical export, editor, migration | Design/Data | `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs`; §14 owner approval record; this documentation PR |
 | 15 | Serialized Floor 1 index | `UNAPPROVED` | Nonnegative unique index contract; presentation numbering is not authority | — | Exact serialized index | Export, lookup, saves, migration | Design/Data + Save | Pending signoff in §14 |
 | 16 | Floor bounds (`Minimum`, `Width`, and `Height`) | `UNAPPROVED` | `RectangularFloorBounds` serializes `Minimum`, `Width`, and `Height`; rectangular bounds are approved but exact Floor 1 values are absent | — | Exact `Minimum`, positive `Width`, and positive `Height`; upper bounds are derived and exclusive: `exclusiveMaximumX = Minimum.X + Width`, `exclusiveMaximumY = Minimum.Y + Height` | Placement, capacity, validation, editor, migration | Design/Data | Pending signoff in §14 |
 | 17 | Final floor-space capacity | `UNAPPROVED` | Occupied-tile accounting approved; exact capacity absent | — | Exact configured capacity and bounds/unavailable-tile relationship | Placement, progression, editor, performance | Design/Data | Pending signoff in §14 |
@@ -89,7 +92,7 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 | 29 | Monster capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
 | 30 | Trap capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
 | 31 | Loot capacity for every room | `UNAPPROVED` | Qualitative/relative profile only | — | Exact capacity per room | Content placement, balance, UI, simulation | Design/Data | Pending signoff in §14 |
-| 32 | Corridor category | `APPROVED` | GD63 §3 and Spec 38 | `CorridorSpatialCategory.Straight` (serialized enum value `1`) | No missing serialized category decision; the production corridor ID remains independently unapproved | Catalog, routing, editor, validation | Design/Data | `docs/planning/gd63-spatial-and-progression-design-decisions.md` §3; `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md`; `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs` |
+| 32 | Corridor category | `APPROVED` | GD63 §3 and Spec 38 | `CorridorSpatialCategory.Straight` (serialized enum value `1`) | No missing serialized category decision; production identity is separately approved in row 8. Geometry, dimensions, capacities other than row 36, orientations, sockets, localization, loading, migration, and save representation remain separate decisions. | Catalog, routing, editor, validation | Design/Data | `docs/planning/gd63-spatial-and-progression-design-decisions.md` §3; `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md`; `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs` |
 | 33 | Corridor width | `UNAPPROVED` | “Narrow” is qualitative only | — | Exact width | Footprint, placement, capacity, editor | Design/Data | Pending signoff in §14 |
 | 34 | Corridor minimum length | `UNAPPROVED` | Variable length approved; bound absent | — | Exact minimum | Placement, workload, editor | Design/Data | Pending signoff in §14 |
 | 35 | Corridor maximum length | `UNAPPROVED` | Variable length approved; bound absent | — | Exact maximum | Placement, workload, editor | Design/Data + Performance | Pending signoff in §14 |
@@ -131,11 +134,15 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 | 71 | Localization lookup workload accounting (contract mapping; no independent limit) | `APPROVED` | GD65A `SpatialContentWorkload.TryPreflight` accounts supplied localization lookup data through the existing five-field workload contract | Lookup entry count consumes `MaximumNestedRecords`; lookup key characters consume `MaximumStringCharacters` | No sixth limit, new API, or independent localization workload value; exact numeric bounds remain in the nested-record and string-character rows | Validation preflight, localization lookup, memory bounds | Engineering/QA | `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs`; `Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs` |
 | 72 | Production pipeline test ownership | `UNAPPROVED` | GD65A tests cover inactive contracts only | — | Named suite, stage, fixtures, evidence owner, failure gate | Export, registry, loading, release confidence | QA/Data/Engineering | Pending signoff in §14 |
 
-## 5. Prototype ID warning and semantic conflict
+## 5. Prototype ID warning and semantic conflict resolution
 
-`placement.option.room.basic` and `placement.option.room.narrow_hall` are MVP **placement option IDs**. They are not approved production spatial definition IDs, naming templates, migration targets, localization keys, or catalog authority. GD65B0 does not rename or migrate them.
+`placement.option.room.basic` and `placement.option.room.narrow_hall` are MVP **placement option IDs**. They are not approved production spatial definition IDs, naming templates, migration targets, localization keys, or catalog authority. `placement.option.room.narrow_hall` remains an unchanged legacy prototype room-option ID. This PR does not rename, remove, remap, reinterpret, or migrate it.
 
-A semantic conflict remains: the prototype classifies Narrow Hall as a room option, while GD63/Spec 38 classifies Narrow Hall and Straight Stone Corridor as one corridor category. This context is `CONFLICTING`; it is not resolved by silently reusing, renaming, or mapping either ID. Design/Data must approve production identity, and GD66/Phase 2 must separately approve and implement any compatibility mapping.
+**Historical conflict:** the prototype classifies Narrow Hall as a room option, while GD63/Spec 38 classifies Narrow Hall and Straight Stone Corridor as one corridor category. The prototype value therefore could not be promoted automatically by silently reusing, renaming, reinterpreting, or mapping its ID.
+
+**Resolved production identity:** production spatial content has exactly one initial MVP straight-corridor definition, with stable ID `spatial.corridor.straight_stone`. Its intended initial English display name is `Straight Stone Corridor`, but that English name is design guidance only until localization rows 53–58 are separately approved; it is not a completed localization entry. GD65B must not use the prototype Narrow Hall option as production corridor authority. No second production Narrow Hall room or corridor definition is authorized. This explicit owner approval resolves the production identity conflict recorded in row 8.
+
+**Deferred legacy compatibility and migration:** GD66 will separately decide whether and how existing legacy Narrow Hall state maps to a corridor, room, or fallback during migration design. Phase 2 alone may implement any approved migration or runtime-authority transition. This deferred GD66 decision sits outside the numbered production-value statuses and does not alter the resolved production identity.
 
 ## 6. Pipeline ownership decisions
 
@@ -166,13 +173,13 @@ Later work must preserve deterministic validation; stable IDs; ordinal canonical
 
 ## 11. Explicit implementation readiness gate
 
-**GD65B is NOT READY.** All 72 rows must be reviewed. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping row 71 is satisfied by its cited GD65A implementation and creates no new production value. The prototype conflict must be explicitly resolved, and assigned Design, Data, Engineering, Localization, QA, Performance, and current-scope Save owners must sign off. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
+**GD65B is NOT READY.** The register contains 72 rows: 14 `APPROVED`, 58 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. Every production-required row must be `APPROVED` with precise evidence; informational contract-mapping rows 14 and 71 create no new production value. The production identity conflict is resolved, but remaining geometry, capacities, localization, pipeline, workload, and current-scope Save decisions still require assigned owner signoff. `INFERRED_NOT_APPROVED`, `UNAPPROVED`, `CONFLICTING`, or `DEFERRED` never passes the gate.
 
 After current-scope signoff, GD65B must author and validate production records and execute the production pipeline without activating graph/save authority. GD66 signoff is not required first; GD66 begins after GD65B records exist. Activation or migration requires a separate packet.
 
 ## 12. Non-goals
 
-- Authoring production records or choosing IDs, versions, dimensions, capacities, sockets, connections, text, limits, or paths.
+- Authoring production records or choosing additional IDs, versions, dimensions, capacities, connections, text, limits, or paths beyond the identities approved here.
 - Promoting spreadsheet candidates, prototypes, fixtures, examples, enums, Bootstrap values, or code constants.
 - Renaming/migrating prototype IDs or defining legacy mapping.
 - Modifying code, JSON, tests, assets, UI, settings, saves, schemas, manifests, localization, or versions.
@@ -191,12 +198,20 @@ After current-scope signoff, GD65B must author and validate production records a
 
 ## 14. Approval signoff
 
-No signoff is supplied. Empty signoff intentionally keeps the gate closed.
+### 2026-07-24 owner identity approval
+
+- **Approver:** `gdg3417, primary developer and project owner`.
+- **Roles:** Design and Data approver for the scoped decisions.
+- **Decision source and durable evidence:** explicit project-owner approval supplied for this documentation PR, recorded verbatim in rows 4–10 and 13–14, the convention above the register, and §5.
+- **Approved scope:** the stable ID convention, seven production definition IDs, one initial socket identity, the Narrow Hall production resolution, and the connection-point namespace mapping.
+- **Excluded scope:** every remaining approval row, including geometry, capacities, localization, pipeline, workload, current-scope Save signoff, and downstream migration.
+
+This partial signoff does not open the gate.
 
 | Authority | Required decisions | Approver/evidence | Status |
 |---|---|---|---|
-| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | — | `UNAPPROVED` |
-| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | — | `UNAPPROVED` |
+| Design | Identities, geometry/capacity, structures, sockets/connections, prototype conflict | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — scoped identity decisions approved; remaining rows UNAPPROVED` |
+| Data / Content Pipeline | Schema/content versions, IDs, export, manifest/registry, serialization | `gdg3417, primary developer and project owner`; scoped owner record above and this documentation PR | `PARTIAL — scoped identity decisions approved; remaining rows UNAPPROVED` |
 | Engineering | Production loading/assignment/validation and non-Bootstrap composition | — | `UNAPPROVED` |
 | Localization | Convention, keys, English entries, lookup ownership | — | `UNAPPROVED` |
 | Performance / QA | Conservative production validation limits, Floor 1 envelope rationale, later validation stages, and pipeline test ownership; device profiling remains Phase 9 | — | `UNAPPROVED` |

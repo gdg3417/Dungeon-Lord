@@ -4,7 +4,7 @@ Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic,
 
 ## Current status
 
-Main is merged through PR #167 / GD65A at baseline `a547a30affd839b5780986c66e440f6f219773a3`. GD64 completed the inactive spatial contract and deterministic layout-validation alignment; GD65A completed the inactive serializable spatial content schema and bounded deterministic export validator/canonicalizer. No production spatial records, export registration, or runtime spatial-catalog consumer exist. The save schema remains version 6, the spatial domain remains non-authoritative, and ordered two-room models remain runtime and save authority.
+The starting baseline for the current GD65B0 approval update is main through merged PR #168 at `c60ad61c858c80271020bb9346fffacdb4ed5097`. GD64 completed the inactive spatial contract and deterministic layout-validation alignment; GD65A completed the inactive serializable spatial content schema and bounded deterministic export validator/canonicalizer; PR #168 established the production-value approval gate. No production spatial records, export registration, or runtime spatial-catalog consumer exist. The save schema remains version 6, the spatial domain remains non-authoritative, and ordered two-room models remain runtime and save authority.
 
 The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet activate physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
 
@@ -28,8 +28,8 @@ VS4 first-session MVP smoke documentation:
 - [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
 - [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
 
-## Active plan after GD65A
+## Active GD65B0 approval gate
 
 The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
 
-GD64 and GD65A are complete. **GD65B remains blocked** by the incomplete [GD65B production spatial content approval record](docs/planning/gd65b-production-spatial-content-approval.md): production IDs, geometry, capacities, sockets/connections, localization, versions, pipeline ownership, and workload limits require explicit approval before records or registration may be implemented. GD66 remains the final migration-design gate after GD65B, and Phase 2 exclusively owns migration implementation and authority transition. The catalog introduced by GD65A is not loaded or consumed at runtime.
+GD64 and GD65A are complete, and the first GD65B0 identity decision group is approved: seven production definition IDs, one initial socket ID, the production corridor semantic resolution, and the contract-defined connection-point namespace mapping. This does **not** complete GD65B0 or authorize production implementation. **GD65B remains blocked** by the incomplete [GD65B production spatial content approval record](docs/planning/gd65b-production-spatial-content-approval.md): remaining geometry, capacities, localization, versions, pipeline ownership, workload limits, and current-scope Save signoff require explicit approval before records or registration may be implemented. GD66 remains the final migration-design gate after GD65B, and Phase 2 exclusively owns migration implementation and authority transition. The catalog introduced by GD65A is not loaded or consumed at runtime.
