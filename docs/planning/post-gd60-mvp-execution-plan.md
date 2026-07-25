@@ -6,7 +6,7 @@
 | Starting baseline for this approval update | Main through merged PR #174 / GD65B0C3 at `4bec48d4da068a6c3d738f35f9cddd5093a5899e` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-24 |
+| Last reconciled | 2026-07-25 |
 
 ## 1. Authority and purpose
 
