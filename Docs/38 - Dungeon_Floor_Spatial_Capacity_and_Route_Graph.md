@@ -94,6 +94,21 @@ Each room authors four possible boundary points but can use no more than three c
 
 Entrance Hall's sole point is `route` at `(1, 1)`, facing `Zero`, using Standard Passage on the north boundary of its 3 × 2 footprint. Completion Terminal's sole point is `route` at `(0, 0)`, facing `OneEighty`, using Standard Passage on the south boundary of its 2 × 2 footprint. Each point rotates with its structure. Entrance Hall is the single-entry origin and Completion Terminal is the required endpoint, not a routing hub or optional-branch host. No additional doors, anchors, migration coordinates, or normal fixed-structure content are approved.
 
+## 4.2 Approved production spatial display names
+
+GD65B0C5 approves localization-owned player-facing display names for the six initial definitions. Definition IDs remain distinct from localization keys and English values; neither keys nor text may be generated or hardcoded at runtime. The exact approved mappings, in ordinal localization-key order, are:
+
+| Production definition ID | Production localization key | Reviewed English entry |
+|---|---|---|
+| `spatial.corridor.straight_stone` | `spatial.corridor.straight_stone.display_name` | `Straight Stone Corridor` |
+| `spatial.fixed.completion_terminal` | `spatial.fixed.completion_terminal.display_name` | `Completion Terminal` |
+| `spatial.fixed.entrance_hall` | `spatial.fixed.entrance_hall.display_name` | `Entrance Hall` |
+| `spatial.room.basic` | `spatial.room.basic.display_name` | `Basic Room` |
+| `spatial.room.large_chamber` | `spatial.room.large_chamber.display_name` | `Large Chamber` |
+| `spatial.room.rectangle` | `spatial.room.rectangle.display_name` | `Rectangle Room` |
+
+`Straight Stone Corridor` is the approved production English corridor name. There is no second production Narrow Hall definition or localization key; the legacy prototype option remains unchanged and non-authoritative. Production localization-table location, export, loading, assignment, and fallback implementation remain unapproved in GD65B rows 59–65. Bootstrap does not own production spatial localization. GD65B0C5 creates no table or production record, activates no catalog or runtime text, and changes no runtime or save authority.
+
 # 5. Corridor contract
 
 Corridor occupied tiles consume floor space directly at one unit per tile; mana pricing is separate and configured. They are saved structural edges, not free visual lines. A corridor contract remains extensible for stable ID, length, width, direction/orientation, source and destination endpoints, occupied tiles, trap sockets, environmental hazards, movement modifiers, visibility, and required/optional classification.

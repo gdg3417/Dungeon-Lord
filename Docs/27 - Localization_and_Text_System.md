@@ -89,3 +89,28 @@ If a localization key is missing in a language pack, fall back to English and lo
 8.2 Content pipeline integration
 
 Localization keys are stored alongside content tables and exported with the content pipeline so content and text remain aligned.
+
+9\. Approved Initial Production Spatial Display Names
+
+9.1 Key authority
+
+GD65B0C5 approves the exact key convention `spatial.<definition-kind>.<stable-name>.display_name` for the initial production spatial display names. Keys are explicitly authored lowercase-ASCII data, with period-separated namespace components, underscores in multiword stable names, and the exact final suffix `display_name`. They are never generated at runtime from definition IDs, English text, type or enum names, or file names. Definition IDs and localization keys remain separate authorities even where their components are intentionally parallel. Future languages reuse these stable keys without code changes, and canonical collections use ordinal key ordering.
+
+9.2 Approved English entries
+
+The English-only approved entries, in ordinal key order, are:
+
+| Production localization key | Reviewed English entry |
+|---|---|
+| `spatial.corridor.straight_stone.display_name` | `Straight Stone Corridor` |
+| `spatial.fixed.completion_terminal.display_name` | `Completion Terminal` |
+| `spatial.fixed.entrance_hall.display_name` | `Entrance Hall` |
+| `spatial.room.basic.display_name` | `Basic Room` |
+| `spatial.room.large_chamber.display_name` | `Large Chamber` |
+| `spatial.room.rectangle.display_name` | `Rectangle Room` |
+
+This approval authors no Japanese or other-language entry. Japanese remains required for release readiness, and later languages must reuse the same keys. Descriptions, tooltips, tutorials, error text, flavor, lore, accessibility text, editor help, short names, plurals, and other text types require separate approval.
+
+9.3 Implementation boundary
+
+GD65B rows 59–65 still leave the production file/format, export, manifest, schema registration, loading, assignment, validation invocation, and canonical serialization ownership unresolved. This packet does not implement a language toggle, production fallback, missing-key diagnostics, or production string-table loading. Bootstrap content and its English string table remain prototype and validation infrastructure and are not production spatial-localization authority. No production record or runtime catalog/text behavior is activated.
