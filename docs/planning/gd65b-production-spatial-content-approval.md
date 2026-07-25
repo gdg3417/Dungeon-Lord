@@ -302,7 +302,7 @@ These tests, fixtures, evidence, limits file, production files, and pipeline do 
 
 ## 9. Downstream effects
 
-- **GD65B:** blocked by every non-approved required row.
+- **GD65B:** the approval dependency gate is open and GD65B implementation is the next packet. GD65B cannot merge until the approved production records, limits asset, pipeline implementation, required tests, and complete evidence exist and pass.
 - **GD66:** follows GD65B and later owns legacy stable-ID derivation, migration coordinates/orientations, fixtures, fallbacks, recovery, and compatibility mapping. GD66 review/signoff is not a GD65B0 or GD65B prerequisite.
 - **Phase 2:** exclusively owns migration, runtime-reader switch, save authority transition, and removal of duplicate writable authority.
 - **Phase 3:** depends on geometry, sockets, connections, localization, and production validation.
