@@ -111,6 +111,8 @@ The English-only approved entries, in ordinal key order, are:
 
 This approval authors no Japanese or other-language entry. Japanese remains required for release readiness, and later languages must reuse the same keys. Descriptions, tooltips, tutorials, error text, flavor, lore, accessibility text, editor help, short names, plurals, and other text types require separate approval.
 
-9.3 Implementation boundary
+9.3 Approved production-table pipeline boundary
 
-GD65B rows 59–65 still leave the production file/format, export, manifest, schema registration, loading, assignment, validation invocation, and canonical serialization ownership unresolved. This packet does not implement a language toggle, production fallback, missing-key diagnostics, or production string-table loading. Bootstrap content and its English string table remain prototype and validation infrastructure and are not production spatial-localization authority. No production record or runtime catalog/text behavior is activated.
+GD65B0C6 later approves `Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json` as the future production English spatial table, separate from `Assets/_Project/Data/Bootstrap/string_table_en.json`. The production domain manifest registers it exactly as `string_table` version 1 beside the catalog, and the dedicated production loader validates that registration and all catalog references without merging entries into Bootstrap state or using Bootstrap as fallback. Export orders entries by key using ordinal comparison, validates references before serialization, and reparses and revalidates them before atomic replacement; runtime loading repeats reference validation before publication.
+
+GD65B0C5 did not approve this pipeline ownership; GD65B0C6 does not physically author the six entries, any production file, Japanese table, fallback, diagnostic implementation, or runtime behavior. Japanese has not yet been authored. Rows 53–58 of the approval register remain the exact terminology authority, while numeric workload limits and production pipeline test ownership remain separate gates.

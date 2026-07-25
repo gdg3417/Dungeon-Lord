@@ -107,7 +107,15 @@ GD65B0C5 approves localization-owned player-facing display names for the six ini
 | `spatial.room.large_chamber` | `spatial.room.large_chamber.display_name` | `Large Chamber` |
 | `spatial.room.rectangle` | `spatial.room.rectangle.display_name` | `Rectangle Room` |
 
-`Straight Stone Corridor` is the approved production English corridor name. There is no second production Narrow Hall definition or localization key; the legacy prototype option remains unchanged and non-authoritative. Production localization-table location, export, loading, assignment, and fallback implementation remain unapproved in GD65B rows 59–65. Bootstrap does not own production spatial localization. GD65B0C5 creates no table or production record, activates no catalog or runtime text, and changes no runtime or save authority.
+`Straight Stone Corridor` is the approved production English corridor name. There is no second production Narrow Hall definition or localization key; the legacy prototype option remains unchanged and non-authoritative. GD65B0C5 created no table or production record and did not approve pipeline ownership; GD65B0C6 later approves that ownership without implementing it. Bootstrap does not own production spatial localization.
+
+## 4.3 Approved inactive production pipeline boundary
+
+GD65B0C6 approves the future production catalog at `Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json`, its domain manifest at `Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json`, its separate English table at `Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json`, and the separately authored limits configuration at `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`. The manifest's `requiredSchemas` collection is the single production schema registry for the catalog (`dungeon_spatial_content` v1) and table (`string_table` v1); Bootstrap and its schema infrastructure are not production authority or fallback.
+
+The future dedicated `ContentService.LoadProductionSpatialContent(...)` path must validate explicitly injected assets and publish no partial result. `GameRoot` owns four explicit serialized assignments without editor fallback or runtime discovery. Export, every-player-build preflight, and defensive runtime loading are three required gates sharing the same pure validation rules and configured limits. The future editor/command-line exporter canonicalizes the detached catalog, applies ordinal localization/manifest ordering, reparses and revalidates deterministic JSON, and atomically replaces exactly the catalog, table, and manifest; builds validate committed files and never regenerate them.
+
+This approval creates no file, record, implementation, scene reference, or catalog activation. Existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority; save schema remains 6. Exact workload-limit values in rows 66–70 and production pipeline test ownership in row 72 remain unapproved, so GD65B remains blocked.
 
 # 5. Corridor contract
 
