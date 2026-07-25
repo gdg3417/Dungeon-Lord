@@ -77,3 +77,11 @@ Define performance targets and scalability limits for Unity mobile builds. The g
 # 9. Open questions
 
 None.
+
+## 10. GD65B0C7 initial production-validation workload profile
+
+The approved initial configuration profile is `MaximumTopLevelRecords = 128`, `MaximumNestedRecords = 512`, `MaximumMaterializedTiles = 4096`, `MaximumIssues = 256`, and `MaximumStringCharacters = 32768`, solely owned by future `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`. These are bounded validation-safety values shared by export, pre-build, runtime load, and canonicalization—not gameplay, progression, floor-count, floor-space, schema/save, or permanent post-MVP limits.
+
+Initial evidence is 8 top-level records, 41 nested records including six lookup keys, Floor 1's 144-tile bounds, and safely bounded diagnostics/strings. A modeled current-shape 80-floor test uses approximately 357 nested records and remains below the approved envelopes. The materialized-tile bound applies to one footprint or floor boundary, never the sum across floors or catalog; 4,096 permits only a test-scale 64 by 64 boundary and is unrelated to Floor 1 capacity 60. Neither 80 production floors nor a 64 by 64 production floor is approved.
+
+`FloorSpatialConfiguration[]` and integer `FloorIndex` preserve floor-count extensibility without a permanent schema maximum. Later approved scale may raise configuration after workload/performance review and new evidence without inherently changing code, schema, saves, IDs, or ordering. Since the configuration is currently a Unity-imported `TextAsset`, deployment requires an updated content/application release. This profile proves bounded validator representation, not low-end mobile performance, memory residency, rendering, streaming, or frame rate. It approves no continuous rendering or per-tile simulation; device profiling remains required at its later gate.
