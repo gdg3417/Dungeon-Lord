@@ -27,8 +27,20 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 return Failure(ProductionSpatialGeneratedSetDiagnostic.MissingInput);
             var sourceKeys = projection.English.entries == null ? null : new HashSet<string>(
                 projection.English.entries.Where(entry => entry != null).Select(entry => entry.key), StringComparer.Ordinal);
-            if (!SpatialContentValidator.Validate(projection.Catalog, limits, sourceKeys).IsValid ||
-                !SpatialContentCanonicalizer.TryCanonicalize(projection.Catalog, limits, out SpatialContentCatalog catalog))
+            long englishCharacters = (projection.English.schema?.Length ?? 0) +
+                (projection.English.language?.Length ?? 0);
+            foreach (StringEntry entry in projection.English.entries ?? Array.Empty<StringEntry>())
+                englishCharacters += entry?.text?.Length ?? 0;
+            SpatialContentValidationResult validation = SpatialContentValidator.Validate(
+                projection.Catalog, limits, sourceKeys, englishCharacters);
+            if (!validation.IsValid)
+                return Failure(validation.Issues.Any(issue =>
+                    issue.Reason == SpatialContentValidationReason.WorkloadLimitsInvalid ||
+                    issue.Reason == SpatialContentValidationReason.WorkloadExceeded)
+                    ? ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded
+                    : ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
+            if (!SpatialContentCanonicalizer.TryCanonicalize(
+                projection.Catalog, limits, out SpatialContentCatalog catalog))
                 return Failure(ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
 
             StringTable english;

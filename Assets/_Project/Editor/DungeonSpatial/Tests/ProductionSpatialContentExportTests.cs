@@ -26,11 +26,100 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static DungeonSpatialAuthoringSource Production() => DungeonSpatialAuthoringRepository.Read();
 
-        private static ProductionSpatialGeneratedSetBuildResult Build()
+        private static DungeonSpatialAuthoringProjection Projection()
         {
             DungeonSpatialAuthoringResult source = DungeonSpatialAuthoringPackageParser.ParseAndProject(Production(), Limits());
             Assert.That(source.Success, Is.True, string.Join("\n", source.Issues.Select(issue => issue.ToString())));
-            return ProductionSpatialGeneratedSetBuilder.Build(source.Projection, Limits());
+            return source.Projection;
+        }
+
+        private static ProductionSpatialGeneratedSetBuildResult Build()
+        {
+            return ProductionSpatialGeneratedSetBuilder.Build(Projection(), Limits());
+        }
+
+        [Test]
+        public void RequiredPathViewCannotMutateCanonicalAuthorityOrBuilderOrder()
+        {
+            IReadOnlyList<string> view = ProductionSpatialGeneratedSetParser.RequiredPaths;
+            Assert.That(view, Is.Not.InstanceOf<string[]>());
+            Assert.Throws<NotSupportedException>(() => ((IList<string>)view)[0] = "test.json");
+            CollectionAssert.AreEqual(new[]
+            {
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                ProductionSpatialGeneratedSetParser.CatalogPath,
+                ProductionSpatialGeneratedSetParser.EnglishPath
+            }, ProductionSpatialGeneratedSetParser.RequiredPaths);
+            ProductionSpatialGeneratedSetBuildResult built = Build();
+            CollectionAssert.AreEqual(ProductionSpatialGeneratedSetParser.RequiredPaths,
+                built.Output.Files.Select(file => file.Path));
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(built.Output, Limits()).Success, Is.True);
+        }
+
+        [Test]
+        public void InvalidAndLowerWorkloadLimitsReturnOnlyWorkloadExceededAndNoOutput()
+        {
+            DungeonSpatialAuthoringProjection projection = Projection();
+            SpatialContentValidationWorkloadLimits production = Limits();
+            var limits = new[]
+            {
+                default(SpatialContentValidationWorkloadLimits),
+                new SpatialContentValidationWorkloadLimits(1, production.MaximumNestedRecords,
+                    production.MaximumMaterializedTiles, production.MaximumIssues, production.MaximumStringCharacters),
+                new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 1,
+                    production.MaximumMaterializedTiles, production.MaximumIssues, production.MaximumStringCharacters),
+                new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords,
+                    production.MaximumNestedRecords, production.MaximumMaterializedTiles,
+                    production.MaximumIssues, 1)
+            };
+            foreach (SpatialContentValidationWorkloadLimits limit in limits)
+            {
+                ProductionSpatialGeneratedSetBuildResult built = ProductionSpatialGeneratedSetBuilder.Build(projection, limit);
+                Assert.That(built.Output, Is.Null);
+                CollectionAssert.AreEqual(new[] { ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded }, built.Diagnostics);
+            }
+            ProductionSpatialGeneratedSet valid = Build().Output;
+            ProductionSpatialGeneratedSetResult parsed = ProductionSpatialGeneratedSetParser.ParseAndValidate(
+                valid, default(SpatialContentValidationWorkloadLimits));
+            Assert.That(parsed.Value, Is.Null);
+            CollectionAssert.AreEqual(new[] { ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded }, parsed.Diagnostics);
+        }
+
+        [Test]
+        public void InvalidCatalogReturnsCatalogInvalidWithoutSpuriousWorkloadDiagnostic()
+        {
+            DungeonSpatialAuthoringProjection projection = Projection();
+            projection.Catalog.Rooms[0].MaximumConnectionCount = -1;
+            ProductionSpatialGeneratedSetBuildResult built = ProductionSpatialGeneratedSetBuilder.Build(projection, Limits());
+            Assert.That(built.Output, Is.Null);
+            CollectionAssert.AreEqual(new[] { ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid }, built.Diagnostics);
+
+            ProductionSpatialGeneratedSet invalid = ReplaceJson(Build().Output,
+                ProductionSpatialGeneratedSetParser.CatalogPath,
+                json => json.Replace("\"MaximumConnectionCount\": 3", "\"MaximumConnectionCount\": -1"));
+            AssertExactFailure(invalid, Limits(), ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
+        }
+
+        [Test]
+        public void StrictDiagnosticOverflowIsBoundedAndRepeatable()
+        {
+            ProductionSpatialGeneratedSet invalid = ReplaceJson(Build().Output,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknownA\": 1,\n  \"unknownB\": 2,\n  \"unknownC\": 3,"));
+            SpatialContentValidationWorkloadLimits production = Limits();
+            var bounded = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords,
+                production.MaximumNestedRecords, production.MaximumMaterializedTiles, 2,
+                production.MaximumStringCharacters);
+            ProductionSpatialGeneratedSetResult first = ProductionSpatialGeneratedSetParser.ParseAndValidate(invalid, bounded);
+            ProductionSpatialGeneratedSetResult second = ProductionSpatialGeneratedSetParser.ParseAndValidate(invalid, bounded);
+            var expected = new[]
+            {
+                ProductionSpatialGeneratedSetDiagnostic.UnknownField,
+                ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded
+            };
+            Assert.That(first.Value, Is.Null); Assert.That(second.Value, Is.Null);
+            CollectionAssert.AreEqual(expected, first.Diagnostics);
+            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics);
         }
 
         [Test]
@@ -148,11 +237,105 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertManifestFailure(valid.Concat(new[] { (byte)'\n' }).ToArray(), ProductionSpatialGeneratedSetDiagnostic.InvalidTrailingNewline);
         }
 
+        [Test]
+        public void CatalogAndEnglishStrictJsonFailuresReturnExactDiagnostics()
+        {
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath, _ => "{\n",
+                ProductionSpatialGeneratedSetDiagnostic.MalformedJson);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath, _ => "{\n",
+                ProductionSpatialGeneratedSetDiagnostic.MalformedJson);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknown\": 1,"),
+                ProductionSpatialGeneratedSetDiagnostic.UnknownField);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknown\": 1,"),
+                ProductionSpatialGeneratedSetDiagnostic.UnknownField);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => json.Replace("\"language\": \"en\",\n", string.Empty),
+                ProductionSpatialGeneratedSetDiagnostic.MissingRequiredField);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": \"1\""),
+                ProductionSpatialGeneratedSetDiagnostic.WrongFieldType);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": 1.0"),
+                ProductionSpatialGeneratedSetDiagnostic.UnsupportedNumber);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": 2147483648"),
+                ProductionSpatialGeneratedSetDiagnostic.IntegerOverflow);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
+                json => json.Replace("\"Category\": 1", "\"Category\": 99"),
+                ProductionSpatialGeneratedSetDiagnostic.UnknownEnum);
+        }
+
+        [Test]
+        public void IdentityRegistrationAndLocalizationFailuresReturnExactDiagnostics()
+        {
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
+                json => json.Replace("\"SchemaId\": \"dungeon_spatial_content\"", "\"SchemaId\": \"test.catalog\""),
+                ProductionSpatialGeneratedSetDiagnostic.CatalogIdentityMismatch);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => json.Replace("\"schema\": \"string_table\"", "\"schema\": \"test.table\""),
+                ProductionSpatialGeneratedSetDiagnostic.StringTableIdentityMismatch);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"0.2.0\""),
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => json.Replace("\"language\": \"en\"", "\"language\": \"ja\""),
+                ProductionSpatialGeneratedSetDiagnostic.LanguageMismatch);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaId\": \"string_table\"", "\"schemaId\": \"test.table\""),
+                ProductionSpatialGeneratedSetDiagnostic.ManifestRegistrationMismatch);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => json.Replace("spatial.room.basic.display_name", "test.missing.localization"),
+                ProductionSpatialGeneratedSetDiagnostic.LocalizationInvalid,
+                ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
+        }
+
+        [Test]
+        public void NoncanonicalBytesReturnOnlyNoncanonicalOutput()
+        {
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => ReplaceFirst(json, "{\n", "{ \n"),
+                ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
+                json => ReplaceFirst(json, "{\n", "{ \n"),
+                ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+            AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
+                json => ReplaceFirst(json, "{\n", "{ \n"),
+                ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+        }
+
+        private static void AssertExactReplacement(string path, Func<string, string> change,
+            params ProductionSpatialGeneratedSetDiagnostic[] expected) =>
+            AssertExactFailure(ReplaceJson(Build().Output, path, change), Limits(), expected);
+
+        private static ProductionSpatialGeneratedSet ReplaceJson(ProductionSpatialGeneratedSet source,
+            string path, Func<string, string> change) => new ProductionSpatialGeneratedSet(source.Files.Select(file =>
+                file.Path == path
+                    ? new ProductionSpatialGeneratedFile(path, Encoding.UTF8.GetBytes(change(Encoding.UTF8.GetString(file.Bytes))))
+                    : file));
+
+        private static string ReplaceFirst(string source, string oldValue, string newValue)
+        {
+            int index = source.IndexOf(oldValue, StringComparison.Ordinal);
+            return index < 0 ? source : source.Substring(0, index) + newValue + source.Substring(index + oldValue.Length);
+        }
+
+        private static void AssertExactFailure(ProductionSpatialGeneratedSet files,
+            SpatialContentValidationWorkloadLimits limits,
+            params ProductionSpatialGeneratedSetDiagnostic[] expected)
+        {
+            ProductionSpatialGeneratedSetResult result = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, limits);
+            Assert.That(result.Success, Is.False); Assert.That(result.Value, Is.Null);
+            CollectionAssert.AreEqual(expected.OrderBy(value => (int)value), result.Diagnostics,
+                string.Join(",", result.Diagnostics));
+        }
+
         private static void AssertManifestFailure(byte[] replacement, ProductionSpatialGeneratedSetDiagnostic expected)
         {
             ProductionSpatialGeneratedFile[] files = Build().Output.Files.Select(file => file.Path == ProductionSpatialGeneratedSetParser.ManifestPath
                 ? new ProductionSpatialGeneratedFile(file.Path, replacement) : file).ToArray();
-            AssertFailure(files, expected);
+            AssertExactFailure(new ProductionSpatialGeneratedSet(files), Limits(), expected);
         }
 
         private static void AssertFailure(IEnumerable<ProductionSpatialGeneratedFile> files,
