@@ -134,15 +134,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Success, Is.True, string.Join("\n", result.Issues.Select(issue => issue.ToString())));
             SpatialContentCatalog catalog = result.Projection.Catalog;
             FloorSpatialConfiguration floor = catalog.Floors.Single();
-            Assert.Multiple(() =>
-            {
-                Assert.That(floor.FloorDefinitionId, Is.EqualTo("spatial.floor.01"));
-                Assert.That(floor.FloorIndex, Is.Zero); Assert.That(floor.Bounds.Minimum.X, Is.Zero); Assert.That(floor.Bounds.Minimum.Y, Is.Zero);
-                Assert.That(floor.Bounds.Width, Is.EqualTo(12)); Assert.That(floor.Bounds.Height, Is.EqualTo(12));
-                Assert.That(floor.FinalFloorSpaceCapacity, Is.EqualTo(60)); Assert.That(floor.OptionalBranchAllowance, Is.EqualTo(1));
-                Assert.That(floor.EntranceStructureDefinitionId, Is.EqualTo("spatial.fixed.entrance_hall"));
-                Assert.That(floor.CompletionStructureDefinitionId, Is.EqualTo("spatial.fixed.completion_terminal"));
-            });
+            Assert.That(floor.FloorDefinitionId, Is.EqualTo("spatial.floor.01"));
+            Assert.That(floor.FloorIndex, Is.Zero);
+            Assert.That(floor.Bounds.Minimum.X, Is.Zero);
+            Assert.That(floor.Bounds.Minimum.Y, Is.Zero);
+            Assert.That(floor.Bounds.Width, Is.EqualTo(12));
+            Assert.That(floor.Bounds.Height, Is.EqualTo(12));
+            Assert.That(floor.FinalFloorSpaceCapacity, Is.EqualTo(60));
+            Assert.That(floor.OptionalBranchAllowance, Is.EqualTo(1));
+            Assert.That(floor.EntranceStructureDefinitionId, Is.EqualTo("spatial.fixed.entrance_hall"));
+            Assert.That(floor.CompletionStructureDefinitionId, Is.EqualTo("spatial.fixed.completion_terminal"));
             CollectionAssert.AreEqual(new[] { "spatial.room.basic", "spatial.room.large_chamber", "spatial.room.rectangle" }, floor.AllowedRoomDefinitionIds);
             CollectionAssert.AreEqual(new[] { "spatial.corridor.straight_stone" }, floor.AllowedCorridorDefinitionIds);
             AssertRoom(catalog, "spatial.room.basic", 4, 4, 3, 2, 2, 2, new[] { CardinalOrientation.Zero },
@@ -152,7 +153,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertRoom(catalog, "spatial.room.rectangle", 3, 5, 3, 3, 1, 2, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
                 new[] { "east:2:2:Ninety", "north:1:4:Zero", "south:1:0:OneEighty", "west:0:2:TwoSeventy" });
             CorridorSpatialDefinition corridor = catalog.Corridors.Single();
-            Assert.Multiple(() => { Assert.That(corridor.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone")); Assert.That(corridor.Category, Is.EqualTo(CorridorSpatialCategory.Straight)); Assert.That(corridor.MinimumLength, Is.EqualTo(1)); Assert.That(corridor.MaximumLength, Is.EqualTo(4)); Assert.That(corridor.Width, Is.EqualTo(1)); Assert.That(corridor.MonsterCapacity, Is.Zero); Assert.That(corridor.TrapCapacity, Is.EqualTo(1)); Assert.That(corridor.LootCapacity, Is.EqualTo(1)); });
+            Assert.That(corridor.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone"));
+            Assert.That(corridor.Category, Is.EqualTo(CorridorSpatialCategory.Straight));
+            Assert.That(corridor.MinimumLength, Is.EqualTo(1));
+            Assert.That(corridor.MaximumLength, Is.EqualTo(4));
+            Assert.That(corridor.Width, Is.EqualTo(1));
+            Assert.That(corridor.MonsterCapacity, Is.Zero);
+            Assert.That(corridor.TrapCapacity, Is.EqualTo(1));
+            Assert.That(corridor.LootCapacity, Is.EqualTo(1));
             Assert.That(corridor.LocalizationKey, Is.EqualTo("spatial.corridor.straight_stone.display_name"));
             CollectionAssert.AreEqual(new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety }, corridor.AllowedOrientations);
             CollectionAssert.AreEqual(new[] { "spatial.socket.standard_passage" }, corridor.CompatibleSocketTypeIds);
@@ -440,13 +448,67 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DungeonSpatialAuthoringResult result = null; Assert.DoesNotThrow(() => result = DungeonSpatialAuthoringPackageParser.ParseAndProject(new DungeonSpatialAuthoringSource(files), Limits()));
             Assert.That(result.Issues.Any(issue => issue.Diagnostic == diagnostic), Is.True);
         }
-        private static void AssertRoom(SpatialContentCatalog catalog,string id,int width,int height,int connections,int monsters,int traps,int loot,CardinalOrientation[] orientations,string[] points)
+        private static void AssertRoom(
+            SpatialContentCatalog catalog,
+            string id,
+            int width,
+            int height,
+            int connections,
+            int monsters,
+            int traps,
+            int loot,
+            CardinalOrientation[] orientations,
+            string[] points)
         {
-            RoomSpatialDefinition room=catalog.Rooms.Single(item=>item.RoomDefinitionId==id); Assert.Multiple(()=>{Assert.That(room.LocalizationKey,Is.EqualTo(id+".display_name"));Assert.That(room.GrossFootprint.Width,Is.EqualTo(width));Assert.That(room.GrossFootprint.Height,Is.EqualTo(height));Assert.That(room.MaximumConnectionCount,Is.EqualTo(connections));Assert.That(room.MonsterCapacity,Is.EqualTo(monsters));Assert.That(room.TrapCapacity,Is.EqualTo(traps));Assert.That(room.LootCapacity,Is.EqualTo(loot));Assert.That(room.ReservedTileOffsets,Is.Empty);}); CollectionAssert.AreEqual(orientations,room.AllowedOrientations); CollectionAssert.AreEqual(points,room.ConnectionPoints.Select(point=>$"{point.ConnectionPointId}:{point.Offset.X}:{point.Offset.Y}:{point.Facing}")); Assert.That(room.ConnectionPoints.All(point=>point.SocketTypeId=="spatial.socket.standard_passage"),Is.True);
+            RoomSpatialDefinition room = catalog.Rooms.Single(item => item.RoomDefinitionId == id);
+            Assert.That(room.LocalizationKey, Is.EqualTo(id + ".display_name"));
+            Assert.That(room.GrossFootprint.Width, Is.EqualTo(width));
+            Assert.That(room.GrossFootprint.Height, Is.EqualTo(height));
+            Assert.That(room.MaximumConnectionCount, Is.EqualTo(connections));
+            Assert.That(room.MonsterCapacity, Is.EqualTo(monsters));
+            Assert.That(room.TrapCapacity, Is.EqualTo(traps));
+            Assert.That(room.LootCapacity, Is.EqualTo(loot));
+            Assert.That(room.ReservedTileOffsets, Is.Empty);
+            CollectionAssert.AreEqual(orientations, room.AllowedOrientations);
+            CollectionAssert.AreEqual(points, room.ConnectionPoints.Select(point =>
+                $"{point.ConnectionPointId}:{point.Offset.X}:{point.Offset.Y}:{point.Facing}"));
+            Assert.That(room.ConnectionPoints.All(point =>
+                point.SocketTypeId == "spatial.socket.standard_passage"), Is.True);
         }
-        private static void AssertFixed(SpatialContentCatalog catalog,string id,FixedSpatialStructureKind kind,int width,int height,int connections,int x,int y,CardinalOrientation facing)
+
+        private static void AssertFixed(
+            SpatialContentCatalog catalog,
+            string id,
+            FixedSpatialStructureKind kind,
+            int width,
+            int height,
+            int connections,
+            int x,
+            int y,
+            CardinalOrientation facing)
         {
-            FixedSpatialStructureDefinition item=catalog.FixedStructures.Single(value=>value.StructureDefinitionId==id); Assert.Multiple(()=>{Assert.That(item.LocalizationKey,Is.EqualTo(id+".display_name"));Assert.That(item.Kind,Is.EqualTo(kind));Assert.That(item.GrossFootprint.Width,Is.EqualTo(width));Assert.That(item.GrossFootprint.Height,Is.EqualTo(height));Assert.That(item.MaximumConnectionCount,Is.EqualTo(connections));Assert.That(item.ReservedTileOffsets,Is.Empty);Assert.That(item.AllowedOrientations,Is.EqualTo(new[]{CardinalOrientation.Zero,CardinalOrientation.Ninety,CardinalOrientation.OneEighty,CardinalOrientation.TwoSeventy}));Assert.That(item.ConnectionPoints.Single().ConnectionPointId,Is.EqualTo("route"));Assert.That(item.ConnectionPoints.Single().Offset.X,Is.EqualTo(x));Assert.That(item.ConnectionPoints.Single().Offset.Y,Is.EqualTo(y));Assert.That(item.ConnectionPoints.Single().Facing,Is.EqualTo(facing));Assert.That(item.ConnectionPoints.Single().SocketTypeId,Is.EqualTo("spatial.socket.standard_passage"));});
+            FixedSpatialStructureDefinition item = catalog.FixedStructures.Single(
+                value => value.StructureDefinitionId == id);
+            SpatialConnectionPointDefinition point = item.ConnectionPoints.Single();
+
+            Assert.That(item.LocalizationKey, Is.EqualTo(id + ".display_name"));
+            Assert.That(item.Kind, Is.EqualTo(kind));
+            Assert.That(item.GrossFootprint.Width, Is.EqualTo(width));
+            Assert.That(item.GrossFootprint.Height, Is.EqualTo(height));
+            Assert.That(item.MaximumConnectionCount, Is.EqualTo(connections));
+            Assert.That(item.ReservedTileOffsets, Is.Empty);
+            Assert.That(item.AllowedOrientations, Is.EqualTo(new[]
+            {
+                CardinalOrientation.Zero,
+                CardinalOrientation.Ninety,
+                CardinalOrientation.OneEighty,
+                CardinalOrientation.TwoSeventy
+            }));
+            Assert.That(point.ConnectionPointId, Is.EqualTo("route"));
+            Assert.That(point.Offset.X, Is.EqualTo(x));
+            Assert.That(point.Offset.Y, Is.EqualTo(y));
+            Assert.That(point.Facing, Is.EqualTo(facing));
+            Assert.That(point.SocketTypeId, Is.EqualTo("spatial.socket.standard_passage"));
         }
         private static DungeonSpatialAuthoringResult ParseWithStringLimit(int maximum)
         {
