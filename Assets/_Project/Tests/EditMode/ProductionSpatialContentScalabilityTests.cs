@@ -212,10 +212,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SpatialContentValidationWorkloadLimits limits = ProductionLimits();
             Assert.That(SpatialContentValidator.Validate(Fixture(), limits, LocalizationKeys()).IsValid, Is.True);
             SpatialContentValidationResult over = SpatialContentValidator.Validate(Fixture(4097, 1), limits, LocalizationKeys());
-            Assert.That(over.Issues.Select(issue => issue.Reason),
-                Does.Contain(SpatialContentValidationReason.FootprintTileCountExceeded));
-            Assert.That(over.Issues.Select(issue => issue.Reason),
-                Does.Not.Contain(SpatialContentValidationReason.WorkloadExceeded));
+            Assert.That(
+                over.Issues.Any(issue =>
+                    issue.Reason == SpatialContentValidationReason.FootprintTileCountExceeded),
+                Is.True);
+
+            Assert.That(
+                over.Issues.Any(issue =>
+                    issue.Reason == SpatialContentValidationReason.WorkloadExceeded),
+                Is.False);
         }
 
         private static SpatialContentCatalog Clone(SpatialContentCatalog source) =>
