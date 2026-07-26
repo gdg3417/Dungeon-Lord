@@ -86,7 +86,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
    The generic `OptionalBranchAllowance` field supports future nonnegative per-floor authored values and is not schema-capped at 1. Current MVP production content and active MVP behavior remain limited to at most one optional branch per floor; values above 1 remain post-MVP scope.
 6. **GD65B1 — Production spatial workload configuration and scalability foundation (complete in PR #179):** implemented the separately authored limits asset, strict parser/conversion boundary, and initial workload/scalability tests without activation.
 7. **GD65B2A — Production authoring-source contract (approved documentation packet):** approves normalized version-controlled CSV/schema authority at `ContentAuthoring/DungeonSpatial/`; creates no package or Unity evidence.
-8. **GD65B2B — Implement normalized production spatial authoring package and approved Floor 1 records (next):** create the schema and normalized table package; author only the approved Floor 1 production records and English entries; add source-package parsing and validation tests; do not activate runtime/save spatial authority.
+8. **GD65B2B — Implement normalized production spatial authoring package and approved Floor 1 records (complete in PR #181):** created the schema and normalized table package, authored only the approved Floor 1 production records and English entries, and added source-package parsing and validation tests without activating runtime/save spatial authority.
 9. **Remaining GD65B — Production export evidence:** implement deterministic generated output, recovery, loading/assignment, pre-build gating, remaining suites, and complete evidence.
 10. **GD66 — Final save/migration design gate:** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
@@ -234,3 +234,7 @@ Main is reconciled through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43
 ### GD65B2B status
 
 GD65B2B implements the normalized authoring package, the approved Floor 1 records, strict editor-only parsing/projection, and focused source-package tests. GD65B2A remains the architecture contract. Deterministic runtime-output serialization, reparse/revalidation evidence, recoverable publication, production loading/composition assignment, pre-build gating, and complete evidence remain later GD65B packets. The catalog remains inactive, save schema remains 6, runtime/save authority is unchanged, and GD66 remains blocked.
+
+### Current deterministic generated-set step
+
+The current packet constructs the exact catalog, English table, and domain manifest in memory and strictly reparses, validates, canonicalizes, and byte-compares the complete set. It adds no generated committed file or filesystem publication. Recoverable publication, loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. The catalog remains inactive, save schema remains 6, and existing runtime/save authority is unchanged.

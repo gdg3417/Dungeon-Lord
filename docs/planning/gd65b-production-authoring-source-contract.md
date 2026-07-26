@@ -145,3 +145,7 @@ At baseline `917b763dc0e5315fdd5d835da4b5f5de43f9ba59`, GD65B1's limits asset, s
 ## 14. GD65B2B implementation status
 
 GD65B2B implements the approved package at `ContentAuthoring/DungeonSpatial/`, including the manifest-selected `dungeon_spatial_authoring` version 1 boundary, machine-readable schema, 17 normalized CSV tables, approved Floor 1 records, six English entries, and a strict editor-only parser/projector. The architecture decisions in this contract remain unchanged. Generated runtime JSON, deterministic output serialization, recoverable publication, loading/composition assignment, pre-build gating, activation, and complete GD65B evidence remain absent. Save schema remains 6, existing runtime/save authority is unchanged, the catalog remains inactive, and GD66 remains blocked.
+
+## Current deterministic generated-set implementation step
+
+GD65B2B is complete. The current packet adds pure deterministic construction and strict atomic reparse/revalidation of the exact three approved generated outputs in memory. No generated runtime JSON is committed and no filesystem publication exists. Recoverable publication, loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. Save schema remains 6, the spatial catalog remains inactive, and current runtime/save authority is unchanged.
