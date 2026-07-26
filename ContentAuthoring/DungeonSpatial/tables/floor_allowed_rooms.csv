@@ -1,0 +1,4 @@
+FloorDefinitionId,RoomDefinitionId
+spatial.floor.01,spatial.room.basic
+spatial.floor.01,spatial.room.large_chamber
+spatial.floor.01,spatial.room.rectangle

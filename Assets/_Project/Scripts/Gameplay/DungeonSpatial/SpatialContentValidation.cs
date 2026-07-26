@@ -85,12 +85,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentValidationWorkloadLimits limits,
             ISet<string> suppliedLocalizationKeys = null)
         {
+            return Validate(suppliedCatalog, limits, suppliedLocalizationKeys, 0L);
+        }
+
+        public static SpatialContentValidationResult Validate(
+            SpatialContentCatalog suppliedCatalog,
+            SpatialContentValidationWorkloadLimits limits,
+            ISet<string> suppliedLocalizationKeys,
+            long additionalStringCharacters)
+        {
             if (!limits.IsValid)
                 return Single(SpatialContentValidationReason.WorkloadLimitsInvalid);
             if (suppliedCatalog == null)
                 return Single(SpatialContentValidationReason.CatalogMissing);
 
-            if (!SpatialContentWorkload.TryPreflight(suppliedCatalog, suppliedLocalizationKeys, limits))
+            if (!SpatialContentWorkload.TryPreflight(
+                    suppliedCatalog, suppliedLocalizationKeys, additionalStringCharacters, limits))
                 return Single(SpatialContentValidationReason.WorkloadExceeded);
 
             if (!SpatialContentCanonicalizer.TryCanonicalize(suppliedCatalog, limits, out SpatialContentCatalog catalog))
@@ -637,6 +647,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ISet<string> localizationKeys,
             SpatialContentValidationWorkloadLimits limits)
         {
+            return TryPreflight(catalog, localizationKeys, 0L, limits);
+        }
+
+        public static bool TryPreflight(
+            SpatialContentCatalog catalog,
+            ISet<string> localizationKeys,
+            long additionalStringCharacters,
+            SpatialContentValidationWorkloadLimits limits)
+        {
             long topLevel = 0;
             if (!TryAdd(ref topLevel, Length(catalog.Floors), limits.MaximumTopLevelRecords) ||
                 !TryAdd(ref topLevel, Length(catalog.Rooms), limits.MaximumTopLevelRecords) ||
@@ -659,16 +678,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !TryCountSockets(catalog.SocketTypes, ref nested, ref characters, limits))
                 return false;
 
-            if (localizationKeys == null)
-                return true;
-
-            foreach (string key in localizationKeys)
+            foreach (string key in localizationKeys ?? Enumerable.Empty<string>())
             {
                 if (!TryAddString(ref characters, key, limits))
                     return false;
             }
 
-            return true;
+            return TryAdd(ref characters, additionalStringCharacters, limits.MaximumStringCharacters);
         }
 
         internal static bool TryAdd(ref long current, long additional, long maximum)

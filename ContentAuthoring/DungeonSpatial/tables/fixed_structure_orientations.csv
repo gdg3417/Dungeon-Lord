@@ -1,0 +1,9 @@
+StructureDefinitionId,Orientation
+spatial.fixed.completion_terminal,Ninety
+spatial.fixed.completion_terminal,OneEighty
+spatial.fixed.completion_terminal,TwoSeventy
+spatial.fixed.completion_terminal,Zero
+spatial.fixed.entrance_hall,Ninety
+spatial.fixed.entrance_hall,OneEighty
+spatial.fixed.entrance_hall,TwoSeventy
+spatial.fixed.entrance_hall,Zero

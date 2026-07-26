@@ -1,0 +1,29 @@
+{
+  "schema": "dungeon_spatial_authoring",
+  "schemaVersion": 1,
+  "contentVersion": "0.1.0",
+  "catalogSchemaId": "dungeon_spatial_content",
+  "catalogSchemaVersion": 1,
+  "stringTableSchemaId": "string_table",
+  "stringTableSchemaVersion": 1,
+  "requiredLanguage": "en",
+  "tables": [
+    "tables/floors.csv",
+    "tables/floor_allowed_rooms.csv",
+    "tables/floor_allowed_corridors.csv",
+    "tables/rooms.csv",
+    "tables/room_orientations.csv",
+    "tables/room_reserved_offsets.csv",
+    "tables/room_connection_points.csv",
+    "tables/corridors.csv",
+    "tables/corridor_orientations.csv",
+    "tables/corridor_compatible_sockets.csv",
+    "tables/fixed_structures.csv",
+    "tables/fixed_structure_orientations.csv",
+    "tables/fixed_structure_reserved_offsets.csv",
+    "tables/fixed_structure_connection_points.csv",
+    "tables/socket_types.csv",
+    "tables/socket_compatibility.csv",
+    "tables/localization_en.csv"
+  ]
+}

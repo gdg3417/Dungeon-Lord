@@ -1,0 +1,4 @@
+RoomDefinitionId,Width,Height,MaximumConnectionCount,MonsterCapacity,TrapCapacity,LootCapacity,LocalizationKey
+spatial.room.basic,4,4,3,2,2,2,spatial.room.basic.display_name
+spatial.room.large_chamber,5,6,3,4,4,4,spatial.room.large_chamber.display_name
+spatial.room.rectangle,3,5,3,3,1,2,spatial.room.rectangle.display_name

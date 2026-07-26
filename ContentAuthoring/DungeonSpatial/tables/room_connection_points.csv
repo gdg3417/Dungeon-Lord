@@ -1,0 +1,13 @@
+RoomDefinitionId,ConnectionPointId,OffsetX,OffsetY,Facing,SocketTypeId
+spatial.room.basic,east,3,1,Ninety,spatial.socket.standard_passage
+spatial.room.basic,north,1,3,Zero,spatial.socket.standard_passage
+spatial.room.basic,south,1,0,OneEighty,spatial.socket.standard_passage
+spatial.room.basic,west,0,1,TwoSeventy,spatial.socket.standard_passage
+spatial.room.large_chamber,east,4,2,Ninety,spatial.socket.standard_passage
+spatial.room.large_chamber,north,2,5,Zero,spatial.socket.standard_passage
+spatial.room.large_chamber,south,2,0,OneEighty,spatial.socket.standard_passage
+spatial.room.large_chamber,west,0,2,TwoSeventy,spatial.socket.standard_passage
+spatial.room.rectangle,east,2,2,Ninety,spatial.socket.standard_passage
+spatial.room.rectangle,north,1,4,Zero,spatial.socket.standard_passage
+spatial.room.rectangle,south,1,0,OneEighty,spatial.socket.standard_passage
+spatial.room.rectangle,west,0,2,TwoSeventy,spatial.socket.standard_passage

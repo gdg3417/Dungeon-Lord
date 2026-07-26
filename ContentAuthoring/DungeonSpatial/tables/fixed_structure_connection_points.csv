@@ -1,0 +1,3 @@
+StructureDefinitionId,ConnectionPointId,OffsetX,OffsetY,Facing,SocketTypeId
+spatial.fixed.completion_terminal,route,0,0,OneEighty,spatial.socket.standard_passage
+spatial.fixed.entrance_hall,route,1,1,Zero,spatial.socket.standard_passage

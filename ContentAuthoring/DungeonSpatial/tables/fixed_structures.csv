@@ -1,0 +1,3 @@
+StructureDefinitionId,LocalizationKey,Kind,Width,Height,MaximumConnectionCount
+spatial.fixed.completion_terminal,spatial.fixed.completion_terminal.display_name,CompletionTerminal,2,2,1
+spatial.fixed.entrance_hall,spatial.fixed.entrance_hall.display_name,Entrance,3,2,1

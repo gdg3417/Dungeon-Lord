@@ -1,0 +1,2 @@
+CorridorDefinitionId,LocalizationKey,Category,MinimumLength,MaximumLength,Width,MonsterCapacity,TrapCapacity,LootCapacity
+spatial.corridor.straight_stone,spatial.corridor.straight_stone.display_name,Straight,1,4,1,0,1,1
