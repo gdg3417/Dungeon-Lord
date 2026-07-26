@@ -1,0 +1,7 @@
+{
+  "MaximumTopLevelRecords": 128,
+  "MaximumNestedRecords": 512,
+  "MaximumMaterializedTiles": 4096,
+  "MaximumIssues": 256,
+  "MaximumStringCharacters": 32768
+}

@@ -2,7 +2,7 @@
 
 | Field | Decision |
 |---|---|
-| Status | **GD65B0 approval complete; GD65B implementation is next and unblocked but not complete** |
+| Status | **GD65B0 approval complete; GD65B implementation begun through GD65B1 but not complete** |
 | Starting baseline for this approval update | Main through merged PR #177 / GD65B0C6 at `e1bae81649e73452c76946689b93ba48eaebcb7d` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
@@ -14,7 +14,7 @@ This is the single active dependency order from the GD60 prototype to a fun MVP,
 
 GD64 completed the inactive spatial contract and layout-validator alignment without activating the graph. GD65A then completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Neither packet added production spatial records, export registration, a runtime catalog consumer, migration, economy, additional floors, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
 
-Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B implementation is unblocked but remains absent.
+Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B implementation is unblocked and has begun through GD65B1.
 
 ## 2. Current repository baseline during GD65B0 approvals
 
@@ -75,7 +75,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (GD65B0 approval complete; GD65B implementation next)
+### Phase 1 — Spatial domain foundation (GD65B0 approval complete; GD65B1 implementation begun)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
@@ -219,6 +219,6 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 ## 9. Current dependency packet
 
-**GD65B implementation: next, dependency gate open, not implemented.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
+**GD65B implementation: begun through GD65B1, dependency gate open, incomplete.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
 
-GD65B must now create the approved production records/configuration and implement/export/load/test/evidence the pipeline; none exists yet. It adds no runtime/save activation unless separately authorized. Save schema remains 6 and existing runtime/save authority is unchanged. GD66 remains after GD65B production records and pipeline evidence, and Phase 2 alone owns migration and authority transition.
+GD65B1 now creates the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. Generated catalog, English table, manifest, production records, exporter/deterministic bytes, recovery, loader/composition-root assignment, pre-build integration, remaining suites, and complete evidence do not yet exist. It adds no runtime/save activation unless separately authorized. Save schema remains 6 and existing runtime/save authority is unchanged. GD66 remains after GD65B production records and pipeline evidence, and Phase 2 alone owns migration and authority transition.
