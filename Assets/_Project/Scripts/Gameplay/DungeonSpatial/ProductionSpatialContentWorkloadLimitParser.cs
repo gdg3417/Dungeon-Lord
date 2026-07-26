@@ -317,6 +317,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 bool unsupported = false;
                 long magnitude = 0;
+                long maximumMagnitude = negative ? 2147483648L : int.MaxValue;
                 if (Peek == '0')
                 {
                     index++;
@@ -331,7 +332,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     while (!IsAtEnd && Peek >= '0' && Peek <= '9')
                     {
                         int digit = Peek - '0';
-                        if (magnitude > (int.MaxValue - digit) / 10L)
+                        if (magnitude > (maximumMagnitude - digit) / 10L)
                             unsupported = true;
                         else if (!unsupported)
                             magnitude = magnitude * 10 + digit;
@@ -359,7 +360,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 if (unsupported)
                     return NumberResult.UnsupportedOrOverflow;
-                value = negative ? -(int)magnitude : (int)magnitude;
+                value = negative
+                    ? (magnitude == 2147483648L ? int.MinValue : -(int)magnitude)
+                    : (int)magnitude;
                 return NumberResult.Success;
             }
 
@@ -375,7 +378,46 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return TrySkipCollection(']', depth);
                 if (TryConsume('{'))
                     return TrySkipObject(depth);
+                if (Peek == '-' || (Peek >= '0' && Peek <= '9'))
+                    return TrySkipNumber();
                 return false;
+            }
+
+            private bool TrySkipNumber()
+            {
+                TryConsume('-');
+                if (IsAtEnd)
+                    return false;
+
+                if (TryConsume('0'))
+                {
+                    if (!IsAtEnd && Peek >= '0' && Peek <= '9')
+                        return false;
+                }
+                else
+                {
+                    if (Peek < '1' || Peek > '9')
+                        return false;
+                    do { index++; } while (!IsAtEnd && Peek >= '0' && Peek <= '9');
+                }
+
+                if (TryConsume('.'))
+                {
+                    if (IsAtEnd || Peek < '0' || Peek > '9')
+                        return false;
+                    do { index++; } while (!IsAtEnd && Peek >= '0' && Peek <= '9');
+                }
+
+                if (TryConsume('e') || TryConsume('E'))
+                {
+                    if (!IsAtEnd && (Peek == '+' || Peek == '-'))
+                        index++;
+                    if (IsAtEnd || Peek < '0' || Peek > '9')
+                        return false;
+                    do { index++; } while (!IsAtEnd && Peek >= '0' && Peek <= '9');
+                }
+
+                return true;
             }
 
             private bool TrySkipCollection(char end, int depth)

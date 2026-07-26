@@ -103,6 +103,69 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Field, Is.EqualTo((ProductionSpatialWorkloadLimitField)(field + 1)));
         }
 
+        [TestCase("[1]")]
+        [TestCase("[1,2.5,-3e2]")]
+        [TestCase("[{\"value\":1}]")]
+        [TestCase("{\"value\":1}")]
+        [TestCase("{\"value\":[1,{\"nested\":2}]}")]
+        [TestCase("[\"text\",true,false,null,1,-2.5e+3,{\"nested\":[4]}]")]
+        public void ValidWrongTypeCollections_AreInvalidNumericTokensRegardlessOfContents(string value)
+        {
+            foreach (int field in new[] { 0, 2, 4 })
+            {
+                ProductionSpatialContentWorkloadLimitParseResult result =
+                    ProductionSpatialContentWorkloadLimitParser.Parse(WithFieldValue(field, value));
+                Assert.That(result.Success, Is.False);
+                Assert.That(result.Diagnostic,
+                    Is.EqualTo(ProductionSpatialWorkloadLimitDiagnostic.InvalidNumericToken));
+                Assert.That(result.Field, Is.EqualTo((ProductionSpatialWorkloadLimitField)(field + 1)));
+                Assert.That(result.Limits.IsValid, Is.False);
+                CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 0 }, Values(result.Limits));
+            }
+        }
+
+        [TestCase("[01]")]
+        [TestCase("[1.]")]
+        [TestCase("{\"value\":1e}")]
+        [TestCase("[1,]")]
+        [TestCase("{\"value\":1,}")]
+        public void MalformedWrongTypeCollections_RemainMalformedJson(string value)
+        {
+            ProductionSpatialContentWorkloadLimitParseResult result =
+                ProductionSpatialContentWorkloadLimitParser.Parse(WithFieldValue(1, value));
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Diagnostic, Is.EqualTo(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson));
+            Assert.That(result.Field, Is.EqualTo(ProductionSpatialWorkloadLimitField.MaximumNestedRecords));
+            Assert.That(result.Limits.IsValid, Is.False);
+        }
+
+        [TestCase("2147483647", ProductionSpatialWorkloadLimitDiagnostic.None, true)]
+        [TestCase("2147483648", ProductionSpatialWorkloadLimitDiagnostic.IntegerOverflowOrUnsupportedRepresentation, false)]
+        [TestCase("-2147483647", ProductionSpatialWorkloadLimitDiagnostic.NonpositiveValue, false)]
+        [TestCase("-2147483648", ProductionSpatialWorkloadLimitDiagnostic.NonpositiveValue, false)]
+        [TestCase("-2147483649", ProductionSpatialWorkloadLimitDiagnostic.IntegerOverflowOrUnsupportedRepresentation, false)]
+        public void SignedInt32Boundaries_ReturnExactDiagnostic(
+            string value, ProductionSpatialWorkloadLimitDiagnostic diagnostic, bool success)
+        {
+            ProductionSpatialContentWorkloadLimitParseResult result =
+                ProductionSpatialContentWorkloadLimitParser.Parse(WithFieldValue(2, value));
+            Assert.That(result.Success, Is.EqualTo(success));
+            Assert.That(result.Diagnostic, Is.EqualTo(diagnostic));
+            Assert.That(result.Field, Is.EqualTo(success
+                ? ProductionSpatialWorkloadLimitField.None
+                : ProductionSpatialWorkloadLimitField.MaximumMaterializedTiles));
+            if (success)
+            {
+                Assert.That(result.Limits.MaximumMaterializedTiles, Is.EqualTo(int.MaxValue));
+                Assert.That(result.Limits.IsValid, Is.True);
+            }
+            else
+            {
+                Assert.That(result.Limits.IsValid, Is.False);
+                CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 0 }, Values(result.Limits));
+            }
+        }
+
         [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)]
         public void EveryFieldRejectsZeroNegativeAndOverflow(int field)
         {
@@ -234,6 +297,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static string Property(string name, string value) => "\"" + name + "\":" + value;
+
+        private static string WithFieldValue(int field, string value) =>
+            "{" + string.Join(",", Names.Select((name, index) =>
+                Property(name, index == field ? value : (index + 1).ToString()))) + "}";
 
         private static void AssertDiagnostic(string json, ProductionSpatialWorkloadLimitDiagnostic expected) =>
             Assert.That(ProductionSpatialContentWorkloadLimitParser.Parse(json).Diagnostic, Is.EqualTo(expected));
