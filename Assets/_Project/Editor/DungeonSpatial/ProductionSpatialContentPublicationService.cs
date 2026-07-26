@@ -97,6 +97,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             ProductionSpatialGeneratedSet candidate;
             ProductionSpatialGeneratedSet previous = null;
             string contentVersion;
+            string previousContentVersion = string.Empty;
             string limitsHash;
             bool priorPresent;
             try
@@ -131,8 +132,12 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 if (priorPresent)
                 {
                     previous = ReadSet(context.ProjectRoot, RequiredPaths);
-                    if (!ValidateSet(previous, limits, null, contentVersion))
+                    ProductionSpatialGeneratedSetResult previousParsed =
+                        ProductionSpatialGeneratedSetParser.ParseAndValidate(previous, limits);
+                    if (!previousParsed.Success ||
+                        string.IsNullOrWhiteSpace(previousParsed.Value.Manifest.contentVersion))
                         return Fail(ProductionSpatialPublicationStatus.InvalidExistingTargetState, ProductionSpatialPublicationDiagnostic.PreviousSetInvalid);
+                    previousContentVersion = previousParsed.Value.Manifest.contentVersion;
                 }
             }
             catch { return Fail(ProductionSpatialPublicationStatus.PreInstallValidationFailure, ProductionSpatialPublicationDiagnostic.AuthoringReadFailed); }
@@ -141,7 +146,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             string[] backups = RequiredPaths.Select((_, i) => TransactionWorkspacePath + "/backup/" + i.ToString(CultureInfo.InvariantCulture) + ".json").ToArray();
             string[] candidateHashes = candidate.Files.Select(file => Hash(file.Bytes)).ToArray();
             string[] priorHashes = priorPresent ? previous.Files.Select(file => Hash(file.Bytes)).ToArray() : Array.Empty<string>();
-            Journal journal = new Journal(0, "Prepared", priorPresent, 0, contentVersion, limitsHash,
+            Journal journal = new Journal(0, "Prepared", priorPresent, 0, contentVersion,
+                previousContentVersion, limitsHash,
                 staged, backups, candidateHashes, priorHashes);
             try
             {
@@ -154,7 +160,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(Absolute(context.ProjectRoot, backups[0])));
                     for (int i = 0; i < RequiredPaths.Length; i++) WriteDurable(Absolute(context.ProjectRoot, backups[i]), previous.Files[i].Bytes);
-                    if (!ValidateMappedSet(context.ProjectRoot, backups, limits, priorHashes, contentVersion))
+                    if (!ValidateMappedSet(context.ProjectRoot, backups, limits, priorHashes, previousContentVersion))
                         return Fail(ProductionSpatialPublicationStatus.BackupFailure, ProductionSpatialPublicationDiagnostic.BackupSetInvalid);
                 }
                 context.Fail(ProductionSpatialPublicationFailurePoint.AfterBackupCreation);
@@ -220,7 +226,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             catch { return Fail(ProductionSpatialPublicationStatus.UnrecoverableTransaction, ProductionSpatialPublicationDiagnostic.LimitsInvalid); }
 
             bool installedValid = ValidateMappedSet(context.ProjectRoot, RequiredPaths, limits, journal.StagedHashes, journal.ContentVersion);
-            bool priorValid = journal.PriorPresent && ValidateMappedSet(context.ProjectRoot, journal.BackupPaths, limits, journal.BackupHashes, journal.ContentVersion);
+            bool priorValid = journal.PriorPresent && ValidateMappedSet(context.ProjectRoot,
+                journal.BackupPaths, limits, journal.BackupHashes, journal.PreviousContentVersion);
             // Staging is evaluated independently. It is never a prerequisite for accepting an already-complete installed set.
             bool stagedValid = ValidateMappedSet(context.ProjectRoot, journal.StagedPaths, limits, journal.StagedHashes, journal.ContentVersion);
             ProductionSpatialPublicationStatus selected;
@@ -239,7 +246,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                     context.Refresh();
                 }
                 catch { return Fail(ProductionSpatialPublicationStatus.UnrecoverableTransaction, ProductionSpatialPublicationDiagnostic.RecoveryRestorationFailed); }
-                if (!ValidateMappedSet(context.ProjectRoot, RequiredPaths, limits, journal.BackupHashes, journal.ContentVersion))
+                if (!ValidateMappedSet(context.ProjectRoot, RequiredPaths, limits,
+                    journal.BackupHashes, journal.PreviousContentVersion))
                     return Fail(ProductionSpatialPublicationStatus.UnrecoverableTransaction, ProductionSpatialPublicationDiagnostic.RecoveryRestorationFailed);
                 selected = ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet;
             }
@@ -400,12 +408,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         private sealed class Journal
         {
             internal Journal(long sequence, string phase, bool priorPresent, int progress, string contentVersion,
-                string limitsHash, string[] staged, string[] backups, string[] stagedHashes, string[] backupHashes)
-            { Sequence=sequence;Phase=phase;PriorPresent=priorPresent;InstallationProgress=progress;ContentVersion=contentVersion;LimitsHash=limitsHash;StagedPaths=staged;BackupPaths=backups;StagedHashes=stagedHashes;BackupHashes=backupHashes; }
+                string previousContentVersion, string limitsHash, string[] staged, string[] backups,
+                string[] stagedHashes, string[] backupHashes)
+            { Sequence=sequence;Phase=phase;PriorPresent=priorPresent;InstallationProgress=progress;ContentVersion=contentVersion;PreviousContentVersion=previousContentVersion;LimitsHash=limitsHash;StagedPaths=staged;BackupPaths=backups;StagedHashes=stagedHashes;BackupHashes=backupHashes; }
             internal long Sequence; internal string Phase; internal bool PriorPresent; internal int InstallationProgress;
-            internal string ContentVersion, LimitsHash; internal string[] StagedPaths, BackupPaths, StagedHashes, BackupHashes;
+            internal string ContentVersion, PreviousContentVersion, LimitsHash; internal string[] StagedPaths, BackupPaths, StagedHashes, BackupHashes;
             internal Journal Next(string phase, int progress) => new Journal(Sequence + 1, phase, PriorPresent,
-                progress, ContentVersion, LimitsHash, StagedPaths, BackupPaths, StagedHashes, BackupHashes);
+                progress, ContentVersion, PreviousContentVersion, LimitsHash, StagedPaths, BackupPaths,
+                StagedHashes, BackupHashes);
         }
         private sealed class JournalCopy
         {
@@ -420,6 +430,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 "  \"schemaVersion\": " + JournalSchemaVersion + ",\n" +
                 "  \"sequence\": " + value.Sequence.ToString(CultureInfo.InvariantCulture) + ",\n" +
                 "  \"contentVersion\": \"" + value.ContentVersion + "\",\n" +
+                "  \"previousContentVersion\": \"" + value.PreviousContentVersion + "\",\n" +
                 "  \"limitsSha256\": \"" + value.LimitsHash + "\",\n" +
                 "  \"phase\": \"" + value.Phase + "\",\n" +
                 "  \"priorState\": \"" + (value.PriorPresent ? "Complete" : "AllAbsent") + "\",\n" +
@@ -444,12 +455,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             try { fields = new StrictJournalJson(StrictUtf8.GetString(bytes)).Object(); }
             catch (JournalProblem problem) { diagnostic = problem.Diagnostic; return false; }
             catch { return false; }
-            string[] names = { "schema", "schemaVersion", "sequence", "contentVersion", "limitsSha256", "phase", "priorState", "installationProgress", "generatedPaths", "finalPaths", "stagedPaths", "backupPaths", "stagedHashes", "backupHashes" };
+            string[] names = { "schema", "schemaVersion", "sequence", "contentVersion", "previousContentVersion", "limitsSha256", "phase", "priorState", "installationProgress", "generatedPaths", "finalPaths", "stagedPaths", "backupPaths", "stagedHashes", "backupHashes" };
             if (fields.Keys.Any(key => Array.IndexOf(names, key) < 0)) { diagnostic=ProductionSpatialPublicationDiagnostic.JournalFieldUnknown; return false; }
             if (names.Any(name => !fields.ContainsKey(name))) { diagnostic=ProductionSpatialPublicationDiagnostic.JournalFieldMissing; return false; }
             if (!(fields["schema"] is string schema) || schema != JournalSchema || !(fields["schemaVersion"] is long version) || version != JournalSchemaVersion)
             { diagnostic=ProductionSpatialPublicationDiagnostic.JournalVersionMismatch; return false; }
             if (!(fields["sequence"] is long sequence) || sequence < 0 || !(fields["contentVersion"] is string content) || string.IsNullOrWhiteSpace(content) ||
+                !(fields["previousContentVersion"] is string previousContent) ||
                 !(fields["limitsSha256"] is string limitsHash) || !ValidHash(limitsHash) || !(fields["phase"] is string phase) ||
                 !(fields["priorState"] is string prior) || (prior != "Complete" && prior != "AllAbsent") ||
                 !(fields["installationProgress"] is long progress) || progress < 0 || progress > int.MaxValue)
@@ -460,13 +472,16 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 !Strings(fields,"stagedHashes",out string[] stagedHashes)||!Strings(fields,"backupHashes",out string[] backupHashes))
             { diagnostic=ProductionSpatialPublicationDiagnostic.JournalValueInvalid; return false; }
             bool priorPresent = prior == "Complete";
+            if (priorPresent ? string.IsNullOrWhiteSpace(previousContent) : previousContent.Length != 0)
+            { diagnostic=ProductionSpatialPublicationDiagnostic.JournalStateCombinationInvalid; return false; }
             if (!generated.SequenceEqual(RequiredPaths) || !finals.SequenceEqual(RequiredPaths) || staged.Length != 3 || backups.Length != 3 || stagedHashes.Length != 3 || backupHashes.Length != (priorPresent ? 3 : 0))
             { diagnostic=ProductionSpatialPublicationDiagnostic.JournalStateCombinationInvalid; return false; }
             if (!ValidPaths(finals,RequiredPaths)||!ValidPaths(staged,RequiredPaths.Select((_,i)=>TransactionWorkspacePath+"/staged/"+i+".json").ToArray())||
                 !ValidPaths(backups,RequiredPaths.Select((_,i)=>TransactionWorkspacePath+"/backup/"+i+".json").ToArray()))
             { diagnostic=ProductionSpatialPublicationDiagnostic.JournalPathInvalid; return false; }
             if (stagedHashes.Concat(backupHashes).Any(hash => !ValidHash(hash))) { diagnostic=ProductionSpatialPublicationDiagnostic.JournalHashInvalid; return false; }
-            journal = new Journal(sequence,phase,priorPresent,(int)progress,content,limitsHash,staged,backups,stagedHashes,backupHashes);
+            journal = new Journal(sequence,phase,priorPresent,(int)progress,content,previousContent,
+                limitsHash,staged,backups,stagedHashes,backupHashes);
             diagnostic=ProductionSpatialPublicationDiagnostic.None; return true;
         }
         private static bool ValidPhaseProgress(string phase, int progress) =>
@@ -474,7 +489,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             phase == "Installing" ? progress >= 0 && progress <= RequiredPaths.Length :
             phase == "Installed" || phase == "Validated" || phase == "Complete" ? progress == RequiredPaths.Length : false;
         private static int StateRank(Journal value) => value.Phase == "Prepared" ? 0 : value.Phase == "Installing" ? 1 + value.InstallationProgress : value.Phase == "Installed" ? 5 : value.Phase == "Validated" ? 6 : 7;
-        private static bool SameTransaction(Journal a, Journal b) => a.PriorPresent==b.PriorPresent && a.ContentVersion==b.ContentVersion && a.LimitsHash==b.LimitsHash &&
+        private static bool SameTransaction(Journal a, Journal b) => a.PriorPresent==b.PriorPresent &&
+            a.ContentVersion==b.ContentVersion && a.PreviousContentVersion==b.PreviousContentVersion && a.LimitsHash==b.LimitsHash &&
             a.StagedPaths.SequenceEqual(b.StagedPaths) && a.BackupPaths.SequenceEqual(b.BackupPaths) && a.StagedHashes.SequenceEqual(b.StagedHashes) && a.BackupHashes.SequenceEqual(b.BackupHashes);
         private static bool JournalEquals(Journal a, Journal b) => SameTransaction(a,b)&&a.Sequence==b.Sequence&&a.Phase==b.Phase&&a.InstallationProgress==b.InstallationProgress;
         private static bool ValidHash(string hash) => hash != null && hash.Length == 64 && hash.All(c => c >= '0' && c <= '9' || c >= 'a' && c <= 'f');

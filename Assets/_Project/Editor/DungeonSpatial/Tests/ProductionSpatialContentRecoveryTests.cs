@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
 {
     public sealed class ProductionSpatialContentRecoveryTests
     {
+        private const string PreviousTestContentVersion = "test.gd65b.previous.version";
         private string root;
         private string source;
 
@@ -141,6 +142,115 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             AssertBytes(candidate);
             AssertCompleteSet(candidate);
             Assert.That(Directory.Exists(Workspace()), Is.False);
+        }
+
+        [Test]
+        public void CrossVersionReplacement_InstallsExactCandidateBytes()
+        {
+            byte[][] candidate = CandidateBytes();
+            byte[][] previous = WithContentVersion(candidate, PreviousTestContentVersion);
+            InstallTargets(previous);
+            Assert.That(Parse(previous).Value.Manifest.contentVersion, Is.EqualTo(PreviousTestContentVersion));
+
+            Assert.That(Publish().Status, Is.EqualTo(ProductionSpatialPublicationStatus.PublicationSucceeded));
+            AssertBytes(candidate);
+            AssertCompleteSet(candidate);
+            Assert.That(Parse(Bytes()).Value.Manifest.contentVersion,
+                Is.EqualTo(Parse(candidate).Value.Manifest.contentVersion));
+        }
+
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterJournalFlush, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterFirstTargetReplacement, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterIntermediateTargetReplacement, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterAllTargetReplacementsBeforeInstalledValidation, ProductionSpatialPublicationStatus.RecoveryCompletedToNewSet, true)]
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterInstalledValidationBeforeCleanup, ProductionSpatialPublicationStatus.RecoveryCompletedToNewSet, true)]
+        public void CrossVersionInterruptions_SelectExactVersionedCompleteSet(
+            ProductionSpatialPublicationFailurePoint point, ProductionSpatialPublicationStatus expectedStatus,
+            bool expectCandidate)
+        {
+            byte[][] candidate = CandidateBytes();
+            byte[][] previous = WithContentVersion(candidate, PreviousTestContentVersion);
+            InstallTargets(previous);
+            Assert.That(Interrupt(point).Success, Is.False);
+
+            ProductionSpatialPublicationResult recovered = Recover();
+            Assert.That(recovered.Status, Is.EqualTo(expectedStatus));
+            byte[][] expected = expectCandidate ? candidate : previous;
+            AssertBytes(expected);
+            AssertCompleteSet(expected);
+            Assert.That(IsMixed(previous, candidate, Bytes()), Is.False);
+            Assert.That(Parse(Bytes()).Value.Manifest.contentVersion,
+                Is.EqualTo(expectCandidate ? Parse(candidate).Value.Manifest.contentVersion : PreviousTestContentVersion));
+            Assert.That(Directory.Exists(Workspace()), Is.False);
+        }
+
+        [Test]
+        public void CrossVersionCorruptCandidateAndStaging_RestoresPreviousVersionBackup()
+        {
+            byte[][] candidate = CandidateBytes();
+            byte[][] previous = WithContentVersion(candidate, PreviousTestContentVersion);
+            InstallTargets(previous);
+            Assert.That(Interrupt(ProductionSpatialPublicationFailurePoint.AfterFirstTargetReplacement).Success, Is.False);
+            File.WriteAllText(Target(0), "corrupt");
+            File.WriteAllText(Staged(0), "corrupt");
+
+            Assert.That(Recover().Status, Is.EqualTo(ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet));
+            AssertBytes(previous);
+            AssertCompleteSet(previous);
+            Assert.That(Parse(Bytes()).Value.Manifest.contentVersion, Is.EqualTo(PreviousTestContentVersion));
+        }
+
+        [TestCase("missing", ProductionSpatialPublicationDiagnostic.JournalFieldMissing)]
+        [TestCase("blank", ProductionSpatialPublicationDiagnostic.JournalStateCombinationInvalid)]
+        public void CompletePriorJournalRequiresPreviousContentVersion(string mutation,
+            ProductionSpatialPublicationDiagnostic expected)
+        {
+            CreateCrossVersionPreparedJournal();
+            string json = File.ReadAllText(CurrentJournal());
+            string field = "  \"previousContentVersion\": \"" + PreviousTestContentVersion + "\",\n";
+            json = mutation == "missing" ? json.Replace(field, string.Empty) :
+                json.Replace("\"previousContentVersion\": \"" + PreviousTestContentVersion + "\"",
+                    "\"previousContentVersion\": \"\"");
+            File.WriteAllText(CurrentJournal(), json);
+            AssertRepeatedInvalidJournal(expected);
+        }
+
+        [Test]
+        public void AllAbsentJournalRejectsAssertedPreviousContentVersion()
+        {
+            CreatePreparedJournal();
+            File.WriteAllText(CurrentJournal(), File.ReadAllText(CurrentJournal()).Replace(
+                "\"previousContentVersion\": \"\"",
+                "\"previousContentVersion\": \"" + PreviousTestContentVersion + "\""));
+            AssertRepeatedInvalidJournal(ProductionSpatialPublicationDiagnostic.JournalStateCombinationInvalid);
+        }
+
+        [Test]
+        public void RepeatedCrossVersionRecoveryReturnsSameStatusVersionAndBytes()
+        {
+            ProductionSpatialPublicationStatus firstStatus = default;
+            byte[][] firstBytes = null;
+            string firstVersion = null;
+            for (int repetition = 0; repetition < 2; repetition++)
+            {
+                if (repetition != 0) ResetFixture();
+                byte[][] candidate = CandidateBytes();
+                InstallTargets(WithContentVersion(candidate, PreviousTestContentVersion));
+                Assert.That(Interrupt(ProductionSpatialPublicationFailurePoint.AfterFirstTargetReplacement).Success, Is.False);
+                ProductionSpatialPublicationResult recovered = Recover();
+                if (repetition == 0)
+                {
+                    firstStatus = recovered.Status;
+                    firstBytes = Bytes();
+                    firstVersion = Parse(firstBytes).Value.Manifest.contentVersion;
+                }
+                else
+                {
+                    Assert.That(recovered.Status, Is.EqualTo(firstStatus));
+                    AssertBytes(firstBytes);
+                    Assert.That(Parse(Bytes()).Value.Manifest.contentVersion, Is.EqualTo(firstVersion));
+                }
+            }
         }
 
         [Test]
@@ -375,6 +485,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         private ProductionSpatialPublicationResult Recover()=>ProductionSpatialContentPublicationService.Recover(new ProductionSpatialPublicationContext(root,source,()=>{}));
         private ProductionSpatialPublicationResult Interrupt(ProductionSpatialPublicationFailurePoint point)=>Publish(fail:current=>{if(current==point)throw new Exception();});
         private void CreatePreparedJournal(){Assert.That(Interrupt(ProductionSpatialPublicationFailurePoint.AfterJournalFlush).Success,Is.False);}
+        private void CreateCrossVersionPreparedJournal(){byte[][] candidate=CandidateBytes();InstallTargets(WithContentVersion(candidate,PreviousTestContentVersion));Assert.That(Interrupt(ProductionSpatialPublicationFailurePoint.AfterJournalFlush).Success,Is.False);}
         private void AssertRepeatedInvalidJournal(ProductionSpatialPublicationDiagnostic diagnostic){ProductionSpatialPublicationResult first=Recover();ProductionSpatialPublicationResult second=Recover();Assert.That(first.Status,Is.EqualTo(ProductionSpatialPublicationStatus.InvalidJournal));CollectionAssert.AreEqual(new[]{diagnostic},first.Diagnostics);Assert.That(second.Status,Is.EqualTo(first.Status));CollectionAssert.AreEqual(first.Diagnostics,second.Diagnostics);}
         private string LimitsPath()=>Path.Combine(root,ProductionSpatialContentPublicationService.LimitsPath);
         private string Workspace()=>Path.Combine(root,ProductionSpatialContentPublicationService.TransactionWorkspacePath);
@@ -386,11 +497,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         private string Staged(int index)=>Path.Combine(Workspace(),"staged",index+".json");
         private string Backup(int index)=>Path.Combine(Workspace(),"backup",index+".json");
         private void WriteTarget(int index,byte[] bytes){Directory.CreateDirectory(Path.GetDirectoryName(Target(index)));File.WriteAllBytes(Target(index),bytes);}
+        private void InstallTargets(byte[][] bytes){for(int i=0;i<bytes.Length;i++)WriteTarget(i,bytes[i]);}
         private byte[][] Bytes()=>ProductionSpatialGeneratedSetParser.RequiredPaths.Select(path=>File.ReadAllBytes(Path.Combine(root,path))).ToArray();
         private byte[][] ExistingBytes()=>ProductionSpatialGeneratedSetParser.RequiredPaths.Where(path=>File.Exists(Path.Combine(root,path))).Select(path=>File.ReadAllBytes(Path.Combine(root,path))).ToArray();
         private byte[][] CandidateBytes()=>BuildCandidate().Files.Select(file=>file.Bytes).ToArray();
         private ProductionSpatialGeneratedSet BuildCandidate(){SpatialContentValidationWorkloadLimits limits=Limits();DungeonSpatialAuthoringResult projection=DungeonSpatialAuthoringPackageParser.ParseAndProject(DungeonSpatialAuthoringRepository.Read(source),limits,true);return ProductionSpatialGeneratedSetBuilder.Build(projection.Projection,limits).Output;}
         private ProductionSpatialGeneratedSetResult Parse(byte[][] bytes)=>ProductionSpatialGeneratedSetParser.ParseAndValidate(new ProductionSpatialGeneratedSet(ProductionSpatialGeneratedSetParser.RequiredPaths.Select((path,index)=>new ProductionSpatialGeneratedFile(path,bytes[index]))),Limits());
+        private byte[][] WithContentVersion(byte[][] bytes,string version){ProductionSpatialGeneratedSetResult parsed=Parse(bytes);parsed.Value.Manifest.contentVersion=version;parsed.Value.Catalog.Metadata.ContentVersion=version;return new[]{ProductionSpatialGeneratedSetParser.SerializeCanonical(parsed.Value.Manifest),ProductionSpatialGeneratedSetParser.SerializeCanonical(parsed.Value.Catalog),bytes[2]};}
         private SpatialContentValidationWorkloadLimits Limits()=>ProductionSpatialContentWorkloadLimitParser.Parse(File.ReadAllText(LimitsPath())).Limits;
         private void AssertCompleteSet(byte[][] expected){Assert.That(expected.Length,Is.EqualTo(3));Assert.That(Parse(expected).Success,Is.True);}
         private void AssertBytes(byte[][] expected){byte[][] actual=Bytes();Assert.That(actual.Length,Is.EqualTo(expected.Length));for(int i=0;i<expected.Length;i++)CollectionAssert.AreEqual(expected[i],actual[i]);}
