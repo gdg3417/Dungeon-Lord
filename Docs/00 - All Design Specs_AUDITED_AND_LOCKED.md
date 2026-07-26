@@ -2797,7 +2797,7 @@ The analytics backend must support: cohort retention, per build comparisons, and
 
 # System Spec 19: Content Pipeline and Data Authoring
 
-Status: Locked v1
+Status: Locked v1 (GD65B2A authoring-source amendment approved 2026-07-25)
 
 Scope: MVP plus forward compatible
 
@@ -2817,9 +2817,11 @@ Core gameplay data is loaded from externalized tables so that balance and conten
 
 3\. Authoring Source of Truth
 
-3.1 Master spreadsheet
+3.1 Version-controlled authoring package
 
-A single master spreadsheet is the source of truth, with one tab per content domain: constants, rooms, tiles, monsters, loot items, loot tables, research nodes, events, and localization keys.
+Normalized UTF-8 text tables and machine-readable schemas committed to Git are the canonical production authoring authority. Flat and relational records use CSV; package metadata and schema definitions use JSON. Each production value has exactly one writable owner. Generated runtime data, workbooks, cloud editors, code records, duplicate assets, fixtures, caches, and unreviewed imports are not authoring authority.
+
+The approved future Dungeon Spatial package is `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree. Its exact contract is [GD65B production authoring source contract](../docs/planning/gd65b-production-authoring-source-contract.md). GD65B2A approves the path and contract but creates no package or authoring files.
 
 3.2 Solo authoring
 
@@ -2829,7 +2831,7 @@ In MVP, only the primary developer edits content. The pipeline still supports fu
 
 4.1 Export target
 
-The spreadsheet is exported to JSON for runtime loading. Export can be manual or scripted as a build step.
+The explicitly assigned version-controlled authoring package is strictly validated and exported to deterministic generated JSON for runtime loading. Export may be manually invoked or scripted, but runtime and player builds never read Excel, Google Sheets, a live database, a CMS, or another cloud authoring service. Workbooks and cloud editors are optional adapters only: proposed changes must become normalized, validated, Git-reviewable source-package changes before export.
 
 4.2 Schema
 
@@ -2911,9 +2913,9 @@ When online, the client checks for content updates and applies them. The player 
 
 A few minutes per balance change is acceptable. The workflow prioritizes correctness and safety over instant hot reload.
 
-10.2 Constants tab
+10.2 Normalized constants table
 
-All key coefficients are centralized in a constants tab so balance tuning does not require editing multiple tables.
+All key coefficients are centralized in an explicitly schema-owned normalized constants table so balance tuning does not require editing multiple tables. This amendment approves the concept, not a constants package, filename, schema, or value.
 
 11\. Forward Compatibility
 
@@ -2924,6 +2926,38 @@ Support explicit migration tables that map old ids to new ids when content is re
 11.2 Deprecation policy
 
 Content removal should be rare. Prefer deprecating entries and mapping them to safe alternatives rather than deleting outright.
+
+12\. Production Dungeon Spatial pipeline ownership (approved; GD65B1 complete, GD65B incomplete)
+
+12.1 Paths and writable authority
+
+GD65B0C6 approves `Assets/_Project/Data/Production/DungeonSpatial/` as the sole initial production Dungeon Spatial directory. The future generated, committed JSON `TextAsset` outputs are `dungeon_spatial_content.json`, `string_table_en.json`, and `content_manifest.json` in that directory. The separately authored configuration is `validation_limits.json` in the same directory and is read, never generated or replaced, by export. The catalog is one complete deterministic generated domain output; no per-definition or parallel writable source is approved. This does not weaken §3.1: the future `ContentAuthoring/DungeonSpatial/` package is the single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization. Its `authoring_manifest.json`, `authoring_schema.json`, and manifest-listed normalized CSV tables will be canonical when implemented. Its `authoring_manifest.json` will solely own the selected authoring-package schema identity/version; `authoring_schema.json` will own the structural and validation rules applicable to that manifest-selected version without duplicating the selected identity/version, and validation will reject an unsupported selection. No workbook, cloud service, generated JSON, C# source, ScriptableObject, editor asset, Bootstrap data, fixture, or cache may duplicate that authority. `validation_limits.json` remains separately authored configuration authority outside both the generated set and authoring package.
+
+12.2 Format, manifest, and registration
+
+Future generated outputs are deterministic pretty JSON, Unity-imported `TextAsset` files, UTF-8 without BOM, LF-only, and terminated by exactly one newline. They are reproducible committed artifacts, not manually edited output. The domain manifest has `schema = "content_manifest"`, `schemaVersion = 1`, and `contentVersion = "0.1.0"`; its ordinal `requiredSchemas` entries are `dungeon_spatial_content` v1 and `string_table` v1. That collection is the single production schema registry for these files. Bootstrap manifests/schema maps and `Assets/_Project/Data/Schemas/` remain non-authoritative, with no Bootstrap fallback.
+
+12.3 Loading, assignment, and validation gates
+
+`ContentService.LoadProductionSpatialContent(...)` owns dedicated loading from an explicitly injected manifest, catalog, read-only collection of production string-table `TextAsset`s, limits configuration, and diagnostics. It parses every table, ordinally validates each serialized `language`, rejects null/blank/duplicate entries, requires exactly one `language = "en"` mandatory fallback, validates catalog keys against English and every additional pack, and publishes no partial collection. Future packs append by serialized assignment without changing `GameRoot`, `ContentService`, the loader signature, spatial IDs, or localization keys. `GameRoot` owns four logical serialized inputs—manifest, catalog, language-table collection, and limits—and passes them to that loader; editor fallback assignment, runtime discovery, `Resources`, `StreamingAssets`, path guessing, and Bootstrap lookup are prohibited. One shared validation service gates export before and after serialization, every player build without regeneration, and defensive runtime loading.
+
+12.4 Canonical recoverable transactional publication boundary
+
+The future editor command is `Tools/Dungeon Lord/Content/Export Production Spatial Content`, with a Unity command-line-callable editor entry point. It canonicalizes via `SpatialContentCanonicalizer.TryCanonicalize`, orders stable definition IDs and approved nested collections canonically, and orders localization keys and manifest schema IDs ordinally. It reparses and revalidates generated bytes, stages all three generated outputs on the target filesystem, preserves complete backups, and durably writes and flushes a journal identifying every target, staged file, backup, expected content version, and phase before installing any target. It refreshes the asset database only after installation, validates the installed matching set, marks completion, and only then removes recovery material. Pre-install failures leave targets unchanged; after installation begins, journaled recovery deterministically restores the complete old set or completes the fully validated new set. Before later export or build, an unfinished journal blocks mixed-set use until recovery and revalidation succeed, failing closed if neither complete set is recoverable. No single OS operation is claimed to replace all files. Generated catalog, language-table outputs, and manifest are reviewed and committed together; a mixed working tree is not a published release. Identical authoritative input and approved limits must produce byte-identical output, without culture, timestamp, random, discovery, dictionary, filesystem, hash, or source-row ordering authority.
+
+12.5 Current implementation boundary
+
+GD65B1 completed its implementation slice with the separately authored `validation_limits.json`, a strict pure parser/conversion boundary, and initial workload-limit and test-only scalability tests. GD65B2A approves the future version-controlled authoring-source contract without creating the package. No generated catalog, English table, manifest, exporter, loader, build hook, scene assignment, or runtime behavior exists yet. Loading a future validated catalog will not activate gameplay, UI, saves, placement, capacity, route graphs, construction, or simulation. Save schema remains 6 and existing ordered two-room state remains authority. GD65B0C7 subsequently approves rows 66–70 and 72 without implementing them; GD65B0 and GD65B1 are complete, while GD65B implementation remains incomplete. The limits asset, strict parser/conversion boundary, and initial workload/scalability tests are present. Generated catalog, English table, manifest, exporter, deterministic byte generation, recovery, loading, composition-root assignment, pre-build integration, and complete evidence remain absent. Save schema remains 6; the catalog remains inactive; current runtime and save authority remain unchanged; and GD66 remains blocked.
+
+12.6 GD65B0C7 approved workload and test gate
+
+GD65B0C7 completes the 72-row GD65B0 approval register without implementing the production pipeline. The sole production workload-limit configuration authority is the separately authored Unity-imported `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json` `TextAsset`, with `MaximumTopLevelRecords = 128`, `MaximumNestedRecords = 512`, `MaximumMaterializedTiles = 4096`, `MaximumIssues = 256`, and `MaximumStringCharacters = 32768`. Export, pre-build, runtime loading, validation, and canonicalization must consume the same explicitly supplied parsed configuration. No compiled/build-tool/static/constructor/test/Bootstrap fallback, second writable asset, schema/catalog/save copy, or generated replacement is permitted. Missing, malformed, incomplete, nonpositive, overflowing, ambiguous, stage-inconsistent, or exceeded configuration fails closed and publishes no partial catalog or language collection.
+
+The bounds are validation safety envelopes, not schema, save, gameplay, progression, floor-count, floor-space, content-capacity, remote-payload, or permanent ceilings. Future increases normally update configuration, rerun evidence, and ship the updated imported content asset; they do not by themselves require code/schema/save migration, new stable IDs, canonical ordering, or validation reasons. Under the current Unity `TextAsset` pipeline a deployed update requires a content/application release; remote or independently downloadable limits are not approved.
+
+The future **Production Spatial Content Pipeline EditMode Suite** owns focused workload tests plus deterministic export, recoverable journal/transaction, production loading, every-entry-point pre-build, and scalability stages. Required responsibilities remain identifiable as `ProductionSpatialContentWorkloadLimitTests`, `ProductionSpatialContentExportTests`, `ProductionSpatialContentRecoveryTests`, `ProductionSpatialContentLoadingTests`, `ProductionSpatialContentBuildGateTests`, and `ProductionSpatialContentScalabilityTests`. Export evidence must include repeated byte hashes and canonical diff/no-diff; recovery evidence must cover deterministic interruptions throughout journal/staging/backup/install/validation/cleanup. QA owns matrix, evidence, verdict, and release gate; Engineering owns tests/seams/failure injection; Data owns production fixtures and canonical expectations; the primary developer runs Unity validation and supplies evidence at `docs/testing/evidence/gd65b/`.
+
+The gate is build-blocking: missing tests/evidence, changed limits, fallback authority, nondeterministic or invalid generated bytes, unresolved localization, mismatched manifest/schema/content versions, mixed sets, ignored journals, lossy recovery, bypassable pre-build checks, partial publication, Bootstrap fallback, generated limits, or a scalability fixture requiring code/schema changes blocks merge. The workload-limit and scalability fixtures now exist through GD65B1, but the other four named pipeline suites and complete evidence do not. No Unity validation is claimed here; GD65B remains incomplete. Export/deterministic bytes, recovery, loading/composition-root assignment, pre-build integration, generated records, and complete evidence remain later work. Save schema remains 6, the catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked until all required GD65B records, stages, tests, and evidence exist.
 
 # System Spec 20: Tutorial, Onboarding, and Unlock Sequencing
 
