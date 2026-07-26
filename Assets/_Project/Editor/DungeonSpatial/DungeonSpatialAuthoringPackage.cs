@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -22,7 +21,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         BlankRequiredValue = 24, InvalidInt32 = 25, Int32Overflow = 26, InvalidEnumToken = 27,
         DuplicatePrimaryKey = 28, DuplicateUniqueKey = 29, MissingForeignKey = 30,
         DuplicateAuthority = 31, NoncanonicalCommittedRowOrder = 32,
-        ProjectedCatalogInvalid = 33, ProjectedCatalogWorkloadExceeded = 34
+        ProjectedCatalogInvalid = 33, ProjectedCatalogWorkloadExceeded = 34,
+        InvalidJsonFieldType = 35, ManifestValueMismatch = 36, InvalidUtf8 = 37,
+        DuplicateSourcePath = 38, InvalidFormat = 39, InvalidSchema = 40
     }
 
     public sealed class DungeonSpatialAuthoringIssue
@@ -32,27 +33,34 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         public string TableId { get; internal set; }
         public string RecordKey { get; internal set; }
         public string Column { get; internal set; }
-        public override string ToString() => Diagnostic + ":" + RelativePath + ":" + TableId + ":" + RecordKey + ":" + Column;
+        public override string ToString() => string.Join(":", Diagnostic, RelativePath, TableId, RecordKey, Column);
     }
 
     public sealed class DungeonSpatialAuthoringSource
     {
-        private readonly SortedDictionary<string, byte[]> files;
+        private readonly SortedDictionary<string, byte[]> files = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
+        private readonly SortedSet<string> duplicates = new SortedSet<string>(StringComparer.Ordinal);
+
         public DungeonSpatialAuthoringSource(IEnumerable<KeyValuePair<string, byte[]>> sourceFiles)
         {
-            files = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
             if (sourceFiles == null) return;
-            foreach (var pair in sourceFiles)
-                files[pair.Key] = pair.Value == null ? null : (byte[])pair.Value.Clone();
+            foreach (KeyValuePair<string, byte[]> pair in sourceFiles)
+            {
+                if (files.ContainsKey(pair.Key)) duplicates.Add(pair.Key);
+                else files.Add(pair.Key, pair.Value == null ? null : (byte[])pair.Value.Clone());
+            }
         }
-        public IReadOnlyDictionary<string, byte[]> Snapshot() => files.ToDictionary(p => p.Key,
-            p => p.Value == null ? null : (byte[])p.Value.Clone(), StringComparer.Ordinal);
+
+        public IReadOnlyDictionary<string, byte[]> Snapshot() => files.ToDictionary(
+            pair => pair.Key, pair => pair.Value == null ? null : (byte[])pair.Value.Clone(), StringComparer.Ordinal);
+        internal string[] Paths => files.Keys.ToArray();
+        internal string[] DuplicatePaths => duplicates.ToArray();
         internal bool TryGet(string path, out byte[] bytes)
         {
             if (!files.TryGetValue(path, out byte[] stored)) { bytes = null; return false; }
-            bytes = stored == null ? null : (byte[])stored.Clone(); return true;
+            bytes = stored == null ? null : (byte[])stored.Clone();
+            return true;
         }
-        internal string[] Paths => files.Keys.ToArray();
     }
 
     public static class DungeonSpatialAuthoringRepository
@@ -62,7 +70,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         {
             if (!Directory.Exists(root)) return null;
             return new DungeonSpatialAuthoringSource(Directory.GetFiles(root, "*", SearchOption.AllDirectories)
-                .Select(path => new KeyValuePair<string, byte[]>(path.Substring(root.Length).TrimStart('/', '\\').Replace('\\', '/'), File.ReadAllBytes(path))));
+                .Select(path => new KeyValuePair<string, byte[]>(
+                    path.Substring(root.Length).TrimStart('/', '\\').Replace('\\', '/'), File.ReadAllBytes(path))));
         }
     }
 
@@ -77,162 +86,391 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         internal DungeonSpatialAuthoringResult(DungeonSpatialAuthoringProjection projection, IEnumerable<DungeonSpatialAuthoringIssue> issues)
         {
             Projection = projection;
-            Issues = issues.OrderBy(i => (int)i.Diagnostic).ThenBy(i => i.RelativePath, StringComparer.Ordinal)
-                .ThenBy(i => i.TableId, StringComparer.Ordinal).ThenBy(i => i.RecordKey, StringComparer.Ordinal)
-                .ThenBy(i => i.Column, StringComparer.Ordinal).ToArray();
+            Issues = issues.OrderBy(issue => (int)issue.Diagnostic)
+                .ThenBy(issue => issue.RelativePath, StringComparer.Ordinal)
+                .ThenBy(issue => issue.TableId, StringComparer.Ordinal)
+                .ThenBy(issue => issue.RecordKey, StringComparer.Ordinal)
+                .ThenBy(issue => issue.Column, StringComparer.Ordinal).ToArray();
         }
         public bool Success => Projection != null && Issues.Length == 0;
         public DungeonSpatialAuthoringProjection Projection { get; }
         public DungeonSpatialAuthoringIssue[] Issues { get; }
     }
 
-    public static class DungeonSpatialAuthoringPackageParser
+    public sealed class AuthoringSchema
     {
-        private const string ManifestPath = "authoring_manifest.json", SchemaPath = "authoring_schema.json";
-        private static readonly string[] ManifestFields = { "schema", "schemaVersion", "contentVersion", "catalogSchemaId", "catalogSchemaVersion", "stringTableSchemaId", "stringTableSchemaVersion", "requiredLanguage", "tables" };
-        private static readonly Table[] Tables =
-        {
-            T("floors", "FloorDefinitionId","FloorIndex","MinimumX","MinimumY","Width","Height","FinalFloorSpaceCapacity","OptionalBranchAllowance","EntranceStructureDefinitionId","CompletionStructureDefinitionId"),
-            T("floor_allowed_rooms","FloorDefinitionId","RoomDefinitionId"), T("floor_allowed_corridors","FloorDefinitionId","CorridorDefinitionId"),
-            T("rooms","RoomDefinitionId","Width","Height","MaximumConnectionCount","MonsterCapacity","TrapCapacity","LootCapacity","LocalizationKey"),
-            T("room_orientations","RoomDefinitionId","Orientation"), T("room_reserved_offsets","RoomDefinitionId","OffsetX","OffsetY"),
-            T("room_connection_points","RoomDefinitionId","ConnectionPointId","OffsetX","OffsetY","Facing","SocketTypeId"),
-            T("corridors","CorridorDefinitionId","LocalizationKey","Category","MinimumLength","MaximumLength","Width","MonsterCapacity","TrapCapacity","LootCapacity"),
-            T("corridor_orientations","CorridorDefinitionId","Orientation"), T("corridor_compatible_sockets","CorridorDefinitionId","SocketTypeId"),
-            T("fixed_structures","StructureDefinitionId","LocalizationKey","Kind","Width","Height","MaximumConnectionCount"),
-            T("fixed_structure_orientations","StructureDefinitionId","Orientation"), T("fixed_structure_reserved_offsets","StructureDefinitionId","OffsetX","OffsetY"),
-            T("fixed_structure_connection_points","StructureDefinitionId","ConnectionPointId","OffsetX","OffsetY","Facing","SocketTypeId"),
-            T("socket_types","SocketTypeId"), T("socket_compatibility","SocketTypeId","CompatibleSocketTypeId"), T("localization_en","Key","Text")
-        };
-        private static Table T(string id, params string[] columns) => new Table { Id=id, Path="tables/"+id+".csv", Columns=columns };
-
-        public static DungeonSpatialAuthoringResult ParseAndProject(DungeonSpatialAuthoringSource source, SpatialContentValidationWorkloadLimits limits, bool requireCanonicalRows = false)
-        {
-            var issues = new List<DungeonSpatialAuthoringIssue>();
-            if (source == null) { Add(issues, DungeonSpatialAuthoringDiagnostic.MissingSource); return Result(issues); }
-            if (!ReadText(source, ManifestPath, DungeonSpatialAuthoringDiagnostic.MissingManifest, issues, out string manifestText)) return Result(issues);
-            if (!StrictJson.TryParse(manifestText, out object manifestValue, out var jsonError)) { Add(issues, jsonError, ManifestPath); return Result(issues); }
-            var manifest = manifestValue as Dictionary<string, object>;
-            if (manifest == null) { Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidJsonRoot, ManifestPath); return Result(issues); }
-            ValidateFields(manifest, ManifestFields, ManifestPath, issues);
-            string schema = S(manifest,"schema"), contentVersion=S(manifest,"contentVersion"), catalogId=S(manifest,"catalogSchemaId"), stringId=S(manifest,"stringTableSchemaId"), language=S(manifest,"requiredLanguage");
-            int schemaVersion=I(manifest,"schemaVersion"), catalogVersion=I(manifest,"catalogSchemaVersion"), stringVersion=I(manifest,"stringTableSchemaVersion");
-            if (schema!="dungeon_spatial_authoring" || schemaVersion!=1) Add(issues,DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema,ManifestPath);
-            if (contentVersion!="0.1.0" || catalogId!="dungeon_spatial_content" || catalogVersion!=1 || stringId!="string_table" || stringVersion!=1 || language!="en") Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateAuthority,ManifestPath);
-            var listed = manifest.ContainsKey("tables") ? manifest["tables"] as List<object> : null;
-            string[] expected=Tables.Select(t=>t.Path).ToArray();
-            if (listed==null || listed.Any(v=>!(v is string)) || !listed.Cast<string>().SequenceEqual(expected, StringComparer.Ordinal) || listed.Cast<object>().Distinct().Count()!=listed.Count)
-                Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,ManifestPath);
-            if (!ReadText(source, SchemaPath, DungeonSpatialAuthoringDiagnostic.MissingSchema, issues, out string schemaText)) return Result(issues);
-            if (!StrictJson.TryParse(schemaText,out object schemaValue,out jsonError)) Add(issues,jsonError,SchemaPath);
-            else if (!ValidateSchema(schemaValue,issues)) Add(issues,DungeonSpatialAuthoringDiagnostic.ManifestSchemaTableMismatch,SchemaPath);
-            var approved = new HashSet<string>(expected.Concat(new[]{ManifestPath,SchemaPath,"README.md"}),StringComparer.Ordinal);
-            foreach(string path in source.Paths.Where(p=>!approved.Contains(p))) Add(issues,DungeonSpatialAuthoringDiagnostic.UnexpectedFile,path);
-            var rows=new Dictionary<string,List<string[]>>(StringComparer.Ordinal);
-            foreach(Table table in Tables)
-            {
-                if (!ReadText(source,table.Path,DungeonSpatialAuthoringDiagnostic.MissingTable,issues,out string csv)) continue;
-                if (!Csv.TryParse(csv,out List<string[]> parsed)) { Add(issues,DungeonSpatialAuthoringDiagnostic.MalformedCsv,table.Path,table.Id); continue; }
-                if (parsed.Count==0 || !parsed[0].SequenceEqual(table.Columns,StringComparer.Ordinal)) { DiagnoseHeader(parsed.Count==0?Array.Empty<string>():parsed[0],table,issues); continue; }
-                var body=parsed.Skip(1).ToList();
-                foreach(var row in body) if(row.Length!=table.Columns.Length) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidFieldCount,table.Path,table.Id);
-                if(body.Any(r=>r.Length==table.Columns.Length && r.Any(string.IsNullOrEmpty))) Add(issues,DungeonSpatialAuthoringDiagnostic.BlankRequiredValue,table.Path,table.Id);
-                rows[table.Id]=body.Where(r=>r.Length==table.Columns.Length).ToList();
-                if(requireCanonicalRows && !Keys(body).SequenceEqual(Keys(body).OrderBy(x=>x,StringComparer.Ordinal))) Add(issues,DungeonSpatialAuthoringDiagnostic.NoncanonicalCommittedRowOrder,table.Path,table.Id);
-            }
-            if(issues.Count>0) return Result(issues);
-            ValidateRows(rows,issues);
-            if(issues.Count>0) return Result(issues);
-            DungeonSpatialAuthoringProjection projection=Project(manifest,rows);
-            var keys=new HashSet<string>(projection.English.entries.Select(e=>e.key),StringComparer.Ordinal);
-            var validation=SpatialContentValidator.Validate(projection.Catalog,limits,keys);
-            if(!validation.IsValid) Add(issues, validation.Issues.Any(i=>i.Reason==SpatialContentValidationReason.WorkloadExceeded)?DungeonSpatialAuthoringDiagnostic.ProjectedCatalogWorkloadExceeded:DungeonSpatialAuthoringDiagnostic.ProjectedCatalogInvalid);
-            if(!SpatialContentCanonicalizer.TryCanonicalize(projection.Catalog,limits,out SpatialContentCatalog canonical)) Add(issues,DungeonSpatialAuthoringDiagnostic.ProjectedCatalogWorkloadExceeded);
-            if(issues.Count>0) return Result(issues);
-            projection.Catalog=canonical;
-            projection.English.entries=projection.English.entries.OrderBy(e=>e.key,StringComparer.Ordinal).ToArray();
-            return new DungeonSpatialAuthoringResult(projection,issues);
-        }
-
-        private static bool ValidateSchema(object value,List<DungeonSpatialAuthoringIssue> issues)
-        {
-            var root=value as Dictionary<string,object>; if(root==null) return false;
-            if(root.ContainsKey("schema")||root.ContainsKey("schemaVersion")) return false;
-            if(!root.TryGetValue("tables",out object tv) || !(tv is List<object> list) || list.Count!=Tables.Length) return false;
-            for(int i=0;i<Tables.Length;i++)
-            {
-                var t=list[i] as Dictionary<string,object>; if(t==null || S(t,"id")!=Tables[i].Id || S(t,"path")!=Tables[i].Path) return false;
-                if(!t.TryGetValue("columns",out object cv)||!(cv is List<object> cols)||cols.Count!=Tables[i].Columns.Length) return false;
-                for(int c=0;c<cols.Count;c++) if(!(cols[c] is Dictionary<string,object> col)||S(col,"name")!=Tables[i].Columns[c]) return false;
-            }
-            return true;
-        }
-
-        private static void ValidateRows(Dictionary<string,List<string[]>> r,List<DungeonSpatialAuthoringIssue> issues)
-        {
-            foreach(var pair in r)
-            {
-                var seen=new HashSet<string>(StringComparer.Ordinal); foreach(var row in pair.Value)
-                { string key=Key(pair.Key,row); if(!seen.Add(key)) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicatePrimaryKey,"tables/"+pair.Key+".csv",pair.Key,key); }
-            }
-            if(r["floors"].GroupBy(x=>x[1],StringComparer.Ordinal).Any(g=>g.Count()>1)) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateUniqueKey,Tables[0].Path,"floors");
-            foreach(var pair in r) foreach(var row in pair.Value) for(int c=0;c<row.Length;c++)
-            {
-                string col=Tables.First(t=>t.Id==pair.Key).Columns[c], value=row[c];
-                if(value!=value.Trim()) Add(issues,DungeonSpatialAuthoringDiagnostic.BlankRequiredValue,"tables/"+pair.Key+".csv",pair.Key,Key(pair.Key,row),col);
-                if(IsInt(col) && !TryInt(value,out _,out bool overflow)) Add(issues,overflow?DungeonSpatialAuthoringDiagnostic.Int32Overflow:DungeonSpatialAuthoringDiagnostic.InvalidInt32,"tables/"+pair.Key+".csv",pair.Key,Key(pair.Key,row),col);
-                if((col=="Orientation"||col=="Facing")&&!Enum.GetNames(typeof(CardinalOrientation)).Contains(value)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidEnumToken,"tables/"+pair.Key+".csv",pair.Key,Key(pair.Key,row),col);
-                if(col=="Category"&&value!="Straight") Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidEnumToken,"tables/"+pair.Key+".csv",pair.Key,Key(pair.Key,row),col);
-                if(col=="Kind"&&value!="Entrance"&&value!="CompletionTerminal") Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidEnumToken,"tables/"+pair.Key+".csv",pair.Key,Key(pair.Key,row),col);
-            }
-            var floors=Set(r,"floors",0); var rooms=Set(r,"rooms",0); var corridors=Set(r,"corridors",0); var fixeds=Set(r,"fixed_structures",0); var sockets=Set(r,"socket_types",0); var loc=Set(r,"localization_en",0);
-            FK(r,"floor_allowed_rooms",0,floors,issues); FK(r,"floor_allowed_rooms",1,rooms,issues); FK(r,"floor_allowed_corridors",0,floors,issues); FK(r,"floor_allowed_corridors",1,corridors,issues);
-            foreach(string t in new[]{"room_orientations","room_reserved_offsets","room_connection_points"}) FK(r,t,0,rooms,issues);
-            foreach(string t in new[]{"corridor_orientations","corridor_compatible_sockets"}) FK(r,t,0,corridors,issues);
-            foreach(string t in new[]{"fixed_structure_orientations","fixed_structure_reserved_offsets","fixed_structure_connection_points"}) FK(r,t,0,fixeds,issues);
-            foreach(string t in new[]{"room_connection_points","corridor_compatible_sockets","fixed_structure_connection_points"}) FK(r,t,r[t][0].Length-1,sockets,issues);
-            FK(r,"socket_compatibility",0,sockets,issues); FK(r,"socket_compatibility",1,sockets,issues);
-            FK(r,"rooms",7,loc,issues); FK(r,"corridors",1,loc,issues); FK(r,"fixed_structures",1,loc,issues);
-        }
-
-        private static DungeonSpatialAuthoringProjection Project(Dictionary<string,object> m,Dictionary<string,List<string[]>> r)
-        {
-            string[] Child(string table,string owner,int value)=>(r[table].Where(x=>x[0]==owner).Select(x=>x[value]).OrderBy(x=>x,StringComparer.Ordinal).ToArray());
-            TileCoordinate[] Offsets(string table,string owner)=>r[table].Where(x=>x[0]==owner).Select(x=>new TileCoordinate(P(x[1]),P(x[2]))).OrderBy(x=>x).ToArray();
-            SpatialConnectionPointDefinition[] Points(string table,string owner)=>r[table].Where(x=>x[0]==owner).OrderBy(x=>x[1],StringComparer.Ordinal).Select(x=>new SpatialConnectionPointDefinition{ConnectionPointId=x[1],Offset=new TileCoordinate(P(x[2]),P(x[3])),Facing=E<CardinalOrientation>(x[4]),SocketTypeId=x[5]}).ToArray();
-            var catalog=new SpatialContentCatalog { Metadata=new SpatialContentExportMetadata{SchemaId=S(m,"catalogSchemaId"),SchemaVersion=I(m,"catalogSchemaVersion"),ContentVersion=S(m,"contentVersion")},
-                Floors=r["floors"].Select(x=>new FloorSpatialConfiguration{FloorDefinitionId=x[0],FloorIndex=P(x[1]),Bounds=new RectangularFloorBounds(new TileCoordinate(P(x[2]),P(x[3])),P(x[4]),P(x[5])),FinalFloorSpaceCapacity=P(x[6]),OptionalBranchAllowance=P(x[7]),EntranceStructureDefinitionId=x[8],CompletionStructureDefinitionId=x[9],AllowedRoomDefinitionIds=Child("floor_allowed_rooms",x[0],1),AllowedCorridorDefinitionIds=Child("floor_allowed_corridors",x[0],1)}).ToArray(),
-                Rooms=r["rooms"].Select(x=>new RoomSpatialDefinition{RoomDefinitionId=x[0],GrossFootprint=new RectangularFootprintDefinition(P(x[1]),P(x[2])),MaximumConnectionCount=P(x[3]),MonsterCapacity=P(x[4]),TrapCapacity=P(x[5]),LootCapacity=P(x[6]),LocalizationKey=x[7],AllowedOrientations=Child("room_orientations",x[0],1).Select(E<CardinalOrientation>).ToArray(),ReservedTileOffsets=Offsets("room_reserved_offsets",x[0]),ConnectionPoints=Points("room_connection_points",x[0])}).ToArray(),
-                Corridors=r["corridors"].Select(x=>new CorridorSpatialDefinition{CorridorDefinitionId=x[0],LocalizationKey=x[1],Category=E<CorridorSpatialCategory>(x[2]),MinimumLength=P(x[3]),MaximumLength=P(x[4]),Width=P(x[5]),MonsterCapacity=P(x[6]),TrapCapacity=P(x[7]),LootCapacity=P(x[8]),AllowedOrientations=Child("corridor_orientations",x[0],1).Select(E<CardinalOrientation>).ToArray(),CompatibleSocketTypeIds=Child("corridor_compatible_sockets",x[0],1)}).ToArray(),
-                FixedStructures=r["fixed_structures"].Select(x=>new FixedSpatialStructureDefinition{StructureDefinitionId=x[0],LocalizationKey=x[1],Kind=E<FixedSpatialStructureKind>(x[2]),GrossFootprint=new RectangularFootprintDefinition(P(x[3]),P(x[4])),MaximumConnectionCount=P(x[5]),AllowedOrientations=Child("fixed_structure_orientations",x[0],1).Select(E<CardinalOrientation>).ToArray(),ReservedTileOffsets=Offsets("fixed_structure_reserved_offsets",x[0]),ConnectionPoints=Points("fixed_structure_connection_points",x[0])}).ToArray(),
-                SocketTypes=r["socket_types"].Select(x=>new SpatialSocketTypeDefinition{SocketTypeId=x[0],CompatibleSocketTypeIds=Child("socket_compatibility",x[0],1)}).ToArray() };
-            return new DungeonSpatialAuthoringProjection{Catalog=catalog,English=new StringTable{schema=S(m,"stringTableSchemaId"),schemaVersion=I(m,"stringTableSchemaVersion"),language=S(m,"requiredLanguage"),entries=r["localization_en"].Select(x=>new StringEntry{key=x[0],text=x[1]}).OrderBy(x=>x.key,StringComparer.Ordinal).ToArray()}};
-        }
-
-        private static bool ReadText(DungeonSpatialAuthoringSource s,string path,DungeonSpatialAuthoringDiagnostic missing,List<DungeonSpatialAuthoringIssue> issues,out string text)
-        {
-            text=null; if(!s.TryGet(path,out byte[] bytes)||bytes==null){Add(issues,missing,path);return false;} if(bytes.Length==0){Add(issues,DungeonSpatialAuthoringDiagnostic.EmptyFile,path);return false;}
-            if(bytes.Length>=3&&bytes[0]==0xef&&bytes[1]==0xbb&&bytes[2]==0xbf){Add(issues,DungeonSpatialAuthoringDiagnostic.BomPresent,path);return false;}
-            if(bytes.Contains((byte)'\r')){Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidLineEnding,path);return false;}
-            if(bytes[bytes.Length-1]!=(byte)'\n'||(bytes.Length>1&&bytes[bytes.Length-2]==(byte)'\n')){Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidTrailingNewline,path);return false;}
-            try{text=new UTF8Encoding(false,true).GetString(bytes);return true;}catch(DecoderFallbackException){Add(issues,DungeonSpatialAuthoringDiagnostic.MalformedCsv,path);return false;}
-        }
-        private static void ValidateFields(Dictionary<string,object> o,string[] allowed,string path,List<DungeonSpatialAuthoringIssue> issues){foreach(string k in o.Keys)if(!allowed.Contains(k))Add(issues,allowed.Any(a=>string.Equals(a,k,StringComparison.OrdinalIgnoreCase))?DungeonSpatialAuthoringDiagnostic.AmbiguousJsonField:DungeonSpatialAuthoringDiagnostic.UnknownJsonField,path,column:k);foreach(string k in allowed)if(!o.ContainsKey(k))Add(issues,DungeonSpatialAuthoringDiagnostic.MissingRequiredJsonField,path,column:k);}
-        private static void DiagnoseHeader(string[] h,Table t,List<DungeonSpatialAuthoringIssue> i){if(h.Distinct(StringComparer.Ordinal).Count()!=h.Length)Add(i,DungeonSpatialAuthoringDiagnostic.HeaderMismatch,t.Path,t.Id);foreach(string c in t.Columns.Except(h,StringComparer.Ordinal))Add(i,DungeonSpatialAuthoringDiagnostic.MissingColumn,t.Path,t.Id,column:c);foreach(string c in h.Except(t.Columns,StringComparer.Ordinal))Add(i,DungeonSpatialAuthoringDiagnostic.UnknownColumn,t.Path,t.Id,column:c);if(h.Length==t.Columns.Length)Add(i,DungeonSpatialAuthoringDiagnostic.HeaderMismatch,t.Path,t.Id);}
-        private static string Key(string t,string[] r){int[] x=t=="floors"||t=="rooms"||t=="corridors"||t=="fixed_structures"||t=="socket_types"||t=="localization_en"?new[]{0}:t=="room_reserved_offsets"||t=="fixed_structure_reserved_offsets"?new[]{0,1,2}:new[]{0,1};return string.Join("\u001f",x.Where(n=>n<r.Length).Select(n=>r[n]));}
-        private static IEnumerable<string> Keys(IEnumerable<string[]> rows)=>rows.Select(r=>string.Join("\u001f",r));
-        private static HashSet<string> Set(Dictionary<string,List<string[]>> r,string t,int c)=>new HashSet<string>(r[t].Select(x=>x[c]),StringComparer.Ordinal);
-        private static void FK(Dictionary<string,List<string[]>> r,string t,int c,HashSet<string> parent,List<DungeonSpatialAuthoringIssue> i){foreach(var row in r[t])if(!parent.Contains(row[c]))Add(i,DungeonSpatialAuthoringDiagnostic.MissingForeignKey,"tables/"+t+".csv",t,Key(t,row),Tables.First(x=>x.Id==t).Columns[c]);}
-        private static bool IsInt(string c)=>new[]{"FloorIndex","MinimumX","MinimumY","Width","Height","FinalFloorSpaceCapacity","OptionalBranchAllowance","MaximumConnectionCount","MonsterCapacity","TrapCapacity","LootCapacity","OffsetX","OffsetY","MinimumLength","MaximumLength"}.Contains(c);
-        private static bool TryInt(string s,out int value,out bool overflow){overflow=false;value=0;if(string.IsNullOrEmpty(s)||s[0]=='+'||(s.Length>1&&s[0]=='0')||(s.StartsWith("-0",StringComparison.Ordinal)))return false;long l;if(!long.TryParse(s,NumberStyles.AllowLeadingSign,CultureInfo.InvariantCulture,out l)){overflow=s.All(c=>c=='-'||(c>='0'&&c<='9'));return false;}if(l<int.MinValue||l>int.MaxValue){overflow=true;return false;}value=(int)l;return true;}
-        private static int P(string s){TryInt(s,out int v,out _);return v;} private static TEnum E<TEnum>(string s) where TEnum:struct=>(TEnum)Enum.Parse(typeof(TEnum),s,false);
-        private static string S(Dictionary<string,object> o,string k)=>o.TryGetValue(k,out object v)?v as string:null; private static int I(Dictionary<string,object> o,string k)=>o.TryGetValue(k,out object v)&&v is long?(int)(long)v:0;
-        private static DungeonSpatialAuthoringResult Result(List<DungeonSpatialAuthoringIssue> i)=>new DungeonSpatialAuthoringResult(null,i);
-        private static void Add(List<DungeonSpatialAuthoringIssue> i,DungeonSpatialAuthoringDiagnostic d,string p="",string t="",string r="",string column="")=>i.Add(new DungeonSpatialAuthoringIssue{Diagnostic=d,RelativePath=p??"",TableId=t??"",RecordKey=r??"",Column=column??""});
-        private sealed class Table{public string Id,Path;public string[] Columns;}
+        internal AuthoringSchema(IReadOnlyDictionary<string, string> formats, IReadOnlyDictionary<string, string[]> enums,
+            AuthoringTable[] tables, AuthoringForeignKey[] foreignKeys, AuthoringChildRelationship[] relationships)
+        { Formats = formats; Enums = enums; Tables = tables; ForeignKeys = foreignKeys; ChildRelationships = relationships; }
+        public IReadOnlyDictionary<string, string> Formats { get; }
+        public IReadOnlyDictionary<string, string[]> Enums { get; }
+        public AuthoringTable[] Tables { get; }
+        public AuthoringForeignKey[] ForeignKeys { get; }
+        public AuthoringChildRelationship[] ChildRelationships { get; }
+        public AuthoringTable Table(string id) => Tables.FirstOrDefault(table => table.Id == id);
+    }
+    public sealed class AuthoringTable
+    {
+        internal AuthoringTable(string id, string path, AuthoringColumn[] columns, string[] primaryKey, string[][] uniqueKeys, string[] canonicalOrder)
+        { Id=id; Path=path; Columns=columns; PrimaryKey=primaryKey; UniqueKeys=uniqueKeys; CanonicalOrder=canonicalOrder; }
+        public string Id { get; } public string Path { get; } public AuthoringColumn[] Columns { get; }
+        public string[] PrimaryKey { get; } public string[][] UniqueKeys { get; } public string[] CanonicalOrder { get; }
+        public int IndexOf(string name) => Array.FindIndex(Columns, column => column.Name == name);
+    }
+    public sealed class AuthoringColumn
+    {
+        internal AuthoringColumn(string name,string type,bool required,bool allowBlank,string enumId)
+        { Name=name; Type=type; Required=required; AllowBlank=allowBlank; EnumId=enumId; }
+        public string Name { get; } public string Type { get; } public bool Required { get; }
+        public bool AllowBlank { get; } public string EnumId { get; }
+    }
+    public sealed class AuthoringForeignKey
+    {
+        internal AuthoringForeignKey(string table,string[] columns,string[] referenceTables,string[] referenceColumns)
+        { Table=table; Columns=columns; ReferenceTables=referenceTables; ReferenceColumns=referenceColumns; }
+        public string Table { get; } public string[] Columns { get; } public string[] ReferenceTables { get; } public string[] ReferenceColumns { get; }
+    }
+    public sealed class AuthoringChildRelationship
+    {
+        internal AuthoringChildRelationship(string parent,string[] children) { Parent=parent; Children=children; }
+        public string Parent { get; } public string[] Children { get; }
     }
 
-    internal static class Csv
+    internal sealed class AuthoringManifest
+    {
+        internal string Schema, ContentVersion, CatalogSchemaId, StringTableSchemaId, RequiredLanguage;
+        internal int SchemaVersion, CatalogSchemaVersion, StringTableSchemaVersion;
+        internal string[] Tables;
+    }
+    internal sealed class AuthoringRows
+    {
+        internal AuthoringRows(AuthoringTable table, List<string[]> rows) { Table=table; Rows=rows; }
+        internal AuthoringTable Table { get; } internal List<string[]> Rows { get; }
+        internal string Value(string[] row,string column) => row[Table.IndexOf(column)];
+    }
+
+    public static class DungeonSpatialAuthoringPackageParser
+    {
+        private const string ManifestPath = "authoring_manifest.json";
+        private const string SchemaPath = "authoring_schema.json";
+        private static readonly string[] ManifestFields = { "schema", "schemaVersion", "contentVersion", "catalogSchemaId", "catalogSchemaVersion", "stringTableSchemaId", "stringTableSchemaVersion", "requiredLanguage", "tables" };
+        private static readonly string[] SchemaFields = { "formats", "enums", "tables", "foreignKeys", "childRelationships" };
+        private static readonly HashSet<string> ColumnTypes = new HashSet<string>(new[] { "spatialId", "ownerScopedId", "localizationKey", "localizedText", "int32", "enum" }, StringComparer.Ordinal);
+
+        public static DungeonSpatialAuthoringResult ParseAndProject(DungeonSpatialAuthoringSource source,
+            SpatialContentValidationWorkloadLimits limits, bool requireCanonicalRows = false)
+        {
+            var issues = new List<DungeonSpatialAuthoringIssue>();
+            if (source == null) { Add(issues, DungeonSpatialAuthoringDiagnostic.MissingSource); return Failed(issues); }
+            foreach (string path in source.DuplicatePaths) Add(issues, DungeonSpatialAuthoringDiagnostic.DuplicateSourcePath, path);
+
+            if (!ReadJson(source, ManifestPath, DungeonSpatialAuthoringDiagnostic.MissingManifest, issues, out Dictionary<string, object> manifestObject)) return Failed(issues);
+            AuthoringManifest manifest = ParseManifest(manifestObject, issues);
+            if (manifest == null || issues.Count != 0) return Failed(issues);
+            if (!ReadJson(source, SchemaPath, DungeonSpatialAuthoringDiagnostic.MissingSchema, issues, out Dictionary<string, object> schemaObject)) return Failed(issues);
+            AuthoringSchema schema = ParseSchema(schemaObject, issues);
+            if (schema == null || issues.Count != 0) return Failed(issues);
+            ValidateManifestTables(manifest, schema, issues);
+            if (issues.Count != 0) return Failed(issues);
+
+            HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath, "README.md" }), StringComparer.Ordinal);
+            foreach (string path in source.Paths.Where(path => !approved.Contains(path))) Add(issues, DungeonSpatialAuthoringDiagnostic.UnexpectedFile, path);
+
+            var tables = new Dictionary<string, AuthoringRows>(StringComparer.Ordinal);
+            foreach (string path in manifest.Tables)
+            {
+                AuthoringTable table = schema.Tables.Single(item => item.Path == path);
+                if (!ReadText(source, path, DungeonSpatialAuthoringDiagnostic.MissingTable, issues, out string csv)) continue;
+                if (!StrictCsv.TryParse(csv, out List<string[]> records)) { Add(issues, DungeonSpatialAuthoringDiagnostic.MalformedCsv, path, table.Id); continue; }
+                ParseTable(table, records, requireCanonicalRows, issues, out AuthoringRows parsed);
+                if (parsed != null) tables.Add(table.Id, parsed);
+            }
+            if (issues.Count != 0) return Failed(issues);
+            ValidateRows(schema, tables, issues);
+            if (issues.Count != 0) return Failed(issues);
+
+            DungeonSpatialAuthoringProjection projection;
+            try { projection = Project(manifest, tables); }
+            catch (KeyNotFoundException) { Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath); return Failed(issues); }
+            catch (InvalidOperationException) { Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath); return Failed(issues); }
+            HashSet<string> localizationKeys = new HashSet<string>(projection.English.entries.Select(entry => entry.key), StringComparer.Ordinal);
+            SpatialContentValidationResult validation = SpatialContentValidator.Validate(projection.Catalog, limits, localizationKeys);
+            if (!validation.IsValid)
+                Add(issues, validation.Issues.Any(issue => issue.Reason == SpatialContentValidationReason.WorkloadExceeded)
+                    ? DungeonSpatialAuthoringDiagnostic.ProjectedCatalogWorkloadExceeded : DungeonSpatialAuthoringDiagnostic.ProjectedCatalogInvalid);
+            if (!SpatialContentCanonicalizer.TryCanonicalize(projection.Catalog, limits, out SpatialContentCatalog canonical))
+                Add(issues, DungeonSpatialAuthoringDiagnostic.ProjectedCatalogWorkloadExceeded);
+            if (issues.Count != 0) return Failed(issues);
+            projection.Catalog = canonical;
+            projection.English.entries = projection.English.entries.OrderBy(entry => entry.key, StringComparer.Ordinal).ToArray();
+            return new DungeonSpatialAuthoringResult(projection, issues);
+        }
+
+        private static AuthoringManifest ParseManifest(Dictionary<string, object> root, List<DungeonSpatialAuthoringIssue> issues)
+        {
+            ValidateExactFields(root, ManifestFields, ManifestPath, issues);
+            string[] strings = { "schema", "contentVersion", "catalogSchemaId", "stringTableSchemaId", "requiredLanguage" };
+            string[] integers = { "schemaVersion", "catalogSchemaVersion", "stringTableSchemaVersion" };
+            foreach (string field in strings) if (root.TryGetValue(field, out object value) && !(value is string)) Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType, ManifestPath, column:field);
+            foreach (string field in integers) if (root.TryGetValue(field, out object value) && !(value is long)) Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType, ManifestPath, column:field);
+            if (root.TryGetValue("tables", out object paths) && !(paths is List<object>)) Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType, ManifestPath, column:"tables");
+            if (issues.Count != 0) return null;
+            var result = new AuthoringManifest {
+                Schema=(string)root["schema"], SchemaVersion=ToInt(root["schemaVersion"]), ContentVersion=(string)root["contentVersion"],
+                CatalogSchemaId=(string)root["catalogSchemaId"], CatalogSchemaVersion=ToInt(root["catalogSchemaVersion"]),
+                StringTableSchemaId=(string)root["stringTableSchemaId"], StringTableSchemaVersion=ToInt(root["stringTableSchemaVersion"]),
+                RequiredLanguage=(string)root["requiredLanguage"] };
+            List<object> list=(List<object>)root["tables"];
+            if (list.Any(value => !(value is string))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,ManifestPath,column:"tables");
+            else result.Tables=list.Cast<string>().ToArray();
+            foreach(string field in strings) if(string.IsNullOrWhiteSpace((string)root[field])) Add(issues,DungeonSpatialAuthoringDiagnostic.BlankRequiredValue,ManifestPath,column:field);
+            if(result.Schema!="dungeon_spatial_authoring" || result.SchemaVersion!=1) Add(issues,DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema,ManifestPath);
+            CheckManifest(result.ContentVersion=="0.1.0","contentVersion",issues);
+            CheckManifest(result.CatalogSchemaId=="dungeon_spatial_content" && result.CatalogSchemaVersion==1,"catalogSchemaId",issues);
+            CheckManifest(result.StringTableSchemaId=="string_table" && result.StringTableSchemaVersion==1,"stringTableSchemaId",issues);
+            CheckManifest(result.RequiredLanguage=="en","requiredLanguage",issues);
+            if(result.Tables!=null) ValidatePaths(result.Tables,issues);
+            return result;
+        }
+
+        private static AuthoringSchema ParseSchema(Dictionary<string, object> root,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            ValidateExactFields(root,SchemaFields,SchemaPath,issues);
+            if(root.ContainsKey("schema")||root.ContainsKey("schemaVersion")) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateAuthority,SchemaPath);
+            if(!TryObject(root,"formats",out Dictionary<string,object> formatObject) || !TryObject(root,"enums",out Dictionary<string,object> enumObject) ||
+                !TryArray(root,"tables",out List<object> tableArray) || !TryArray(root,"foreignKeys",out List<object> fkArray) || !TryArray(root,"childRelationships",out List<object> childArray))
+            { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            var formats=new Dictionary<string,string>(StringComparer.Ordinal);
+            ValidateExactFields(formatObject, new[] { "spatialId", "ownerScopedId", "localizationKey", "localizedText", "int32", "textNormalization" }, SchemaPath, issues);
+            foreach(var pair in formatObject) { if(!(pair.Value is string)||string.IsNullOrWhiteSpace((string)pair.Value)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath,column:pair.Key); else formats[pair.Key]=(string)pair.Value; }
+            foreach(string required in new[]{"spatialId","ownerScopedId","localizationKey","int32","textNormalization"}) if(!formats.ContainsKey(required)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,column:required);
+            var enums=new Dictionary<string,string[]>(StringComparer.Ordinal);
+            ValidateExactFields(enumObject, new[] { "CardinalOrientation", "CorridorSpatialCategory", "FixedSpatialStructureKind" }, SchemaPath, issues);
+            foreach(var pair in enumObject) { if(!(pair.Value is List<object> values)||values.Any(v=>!(v is string))||values.Count==0||values.Cast<string>().Distinct(StringComparer.Ordinal).Count()!=values.Count) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,column:pair.Key); else enums[pair.Key]=values.Cast<string>().ToArray(); }
+            var tables=new List<AuthoringTable>();
+            foreach(object value in tableArray) { AuthoringTable table=ParseSchemaTable(value,formats,enums,issues); if(table!=null) tables.Add(table); }
+            if(tables.Count!=17 || tables.Select(t=>t.Id).Distinct(StringComparer.Ordinal).Count()!=tables.Count || tables.Select(t=>t.Path).Distinct(StringComparer.Ordinal).Count()!=tables.Count) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath);
+            var tableIndex=tables.ToDictionary(t=>t.Id,StringComparer.Ordinal);
+            var foreignKeys=new List<AuthoringForeignKey>(); foreach(object value in fkArray) { AuthoringForeignKey key=ParseForeignKey(value,tableIndex,issues); if(key!=null) foreignKeys.Add(key); }
+            var relationships=new List<AuthoringChildRelationship>(); var owners=new Dictionary<string,string>(StringComparer.Ordinal);
+            foreach(object value in childArray) { AuthoringChildRelationship relation=ParseRelationship(value,tableIndex,owners,issues); if(relation!=null) relationships.Add(relation); }
+            return issues.Count==0 ? new AuthoringSchema(formats,enums,tables.ToArray(),foreignKeys.ToArray(),relationships.ToArray()) : null;
+        }
+        private static AuthoringTable ParseSchemaTable(object value,Dictionary<string,string> formats,Dictionary<string,string[]> enums,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            if(!(value is Dictionary<string,object> root)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            string[] fields={"id","path","columns","primaryKey","canonicalOrder"};
+            string[] optional={"uniqueKeys"}; ValidateExactFields(root,fields.Concat(optional).ToArray(),SchemaPath,issues,optional);
+            if(!GetString(root,"id",out string id)||!GetString(root,"path",out string path)||!TryArray(root,"columns",out List<object> columns)||
+               !StringArray(root,"primaryKey",out string[] primary)||!StringArray(root,"canonicalOrder",out string[] order))
+            { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            if(!IsNormalizedPath(path)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,SchemaPath,id);
+            if(IsNormalizedPath(path) && Path.GetFileNameWithoutExtension(path) != id) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id);
+            var parsedColumns=new List<AuthoringColumn>();
+            foreach(object item in columns)
+            {
+                if(!(item is Dictionary<string,object> column)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath,id); continue; }
+                string[] columnFields={"name","type","required","allowBlank","enum"}; ValidateExactFields(column,columnFields,SchemaPath,issues,new[]{"enum"});
+                if(!GetString(column,"name",out string name)||!GetString(column,"type",out string type)||!GetBool(column,"required",out bool required)||!GetBool(column,"allowBlank",out bool allowBlank))
+                { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath,id); continue; }
+                string enumId=column.TryGetValue("enum",out object enumValue)?enumValue as string:null;
+                if(!ColumnTypes.Contains(type)||(type!="enum"&&!formats.ContainsKey(type))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidFormat,SchemaPath,id,column:name);
+                if(type=="enum" && (enumId==null||!enums.ContainsKey(enumId))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:name);
+                if(type!="enum" && column.ContainsKey("enum")) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:name);
+                parsedColumns.Add(new AuthoringColumn(name,type,required,allowBlank,enumId));
+            }
+            if(parsedColumns.Select(c=>c.Name).Distinct(StringComparer.Ordinal).Count()!=parsedColumns.Count) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id);
+            string[][] unique=Array.Empty<string[]>();
+            if(root.TryGetValue("uniqueKeys",out object uniqueValue))
+            {
+                if(!(uniqueValue is List<object> arrays)||arrays.Any(item=>!(item is List<object>)||((List<object>)item).Any(x=>!(x is string)))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath,id);
+                else unique=arrays.Cast<List<object>>().Select(array=>array.Cast<string>().ToArray()).ToArray();
+            }
+            var names=new HashSet<string>(parsedColumns.Select(c=>c.Name),StringComparer.Ordinal);
+            foreach(string key in primary.Concat(order).Concat(unique.SelectMany(x=>x))) if(!names.Contains(key)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:key);
+            return new AuthoringTable(id,path,parsedColumns.ToArray(),primary,unique,order);
+        }
+
+        private static AuthoringForeignKey ParseForeignKey(object value,Dictionary<string,AuthoringTable> tables,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            if(!(value is Dictionary<string,object> root)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            ValidateExactFields(root,new[]{"table","columns","references"},SchemaPath,issues);
+            if(!GetString(root,"table",out string table)||!StringArray(root,"columns",out string[] columns)||!StringArray(root,"references",out string[] references)||columns.Length!=references.Length)
+            { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath); return null; }
+            if(!tables.TryGetValue(table,out AuthoringTable owner)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,table); return null; }
+            var referenceTables=new string[references.Length]; var referenceColumns=new string[references.Length];
+            for(int i=0;i<references.Length;i++)
+            {
+                int separator=references[i].IndexOf('.'); if(separator<=0||separator==references[i].Length-1) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,table,column:columns[i]); continue; }
+                referenceTables[i]=references[i].Substring(0,separator); referenceColumns[i]=references[i].Substring(separator+1);
+                if(owner.IndexOf(columns[i])<0||!tables.TryGetValue(referenceTables[i],out AuthoringTable target)||target.IndexOf(referenceColumns[i])<0) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,table,column:columns[i]);
+            }
+            return new AuthoringForeignKey(table,columns,referenceTables,referenceColumns);
+        }
+
+        private static AuthoringChildRelationship ParseRelationship(object value,Dictionary<string,AuthoringTable> tables,Dictionary<string,string> owners,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            if(!(value is Dictionary<string,object> root)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            ValidateExactFields(root,new[]{"parent","children"},SchemaPath,issues);
+            if(!GetString(root,"parent",out string parent)||!StringArray(root,"children",out string[] children)||!tables.ContainsKey(parent)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath); return null; }
+            foreach(string child in children)
+            {
+                if(!tables.ContainsKey(child)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,parent,column:child);
+                else if(owners.TryGetValue(child,out string existing)&&existing!=parent) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateAuthority,SchemaPath,child);
+                else owners[child]=parent;
+            }
+            return new AuthoringChildRelationship(parent,children);
+        }
+
+        private static void ValidateManifestTables(AuthoringManifest manifest,AuthoringSchema schema,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            string[] schemaPaths=schema.Tables.Select(table=>table.Path).ToArray();
+            foreach(string path in schemaPaths.Except(manifest.Tables,StringComparer.Ordinal)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,ManifestPath,column:path);
+            foreach(string path in manifest.Tables.Except(schemaPaths,StringComparer.Ordinal)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,ManifestPath,column:path);
+            if(!manifest.Tables.SequenceEqual(schemaPaths,StringComparer.Ordinal)) Add(issues,DungeonSpatialAuthoringDiagnostic.ManifestSchemaTableMismatch,ManifestPath);
+        }
+
+        private static void ParseTable(AuthoringTable table,List<string[]> records,bool requireCanonical,List<DungeonSpatialAuthoringIssue> issues,out AuthoringRows result)
+        {
+            result=null;
+            if(records.Count==0) { Add(issues,DungeonSpatialAuthoringDiagnostic.HeaderMismatch,table.Path,table.Id); return; }
+            string[] expected=table.Columns.Select(column=>column.Name).ToArray(); string[] header=records[0];
+            if(!header.SequenceEqual(expected,StringComparer.Ordinal))
+            {
+                if(header.Distinct(StringComparer.Ordinal).Count()!=header.Length) Add(issues,DungeonSpatialAuthoringDiagnostic.HeaderMismatch,table.Path,table.Id);
+                foreach(string column in expected.Except(header,StringComparer.Ordinal)) Add(issues,DungeonSpatialAuthoringDiagnostic.MissingColumn,table.Path,table.Id,column:column);
+                foreach(string column in header.Except(expected,StringComparer.Ordinal)) Add(issues,DungeonSpatialAuthoringDiagnostic.UnknownColumn,table.Path,table.Id,column:column);
+                if(header.Length==expected.Length) Add(issues,DungeonSpatialAuthoringDiagnostic.HeaderMismatch,table.Path,table.Id);
+                return;
+            }
+            List<string[]> rows=records.Skip(1).ToList();
+            foreach(string[] row in rows) if(row.Length!=expected.Length) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidFieldCount,table.Path,table.Id);
+            if(issues.Any(issue=>issue.RelativePath==table.Path)) return;
+            result=new AuthoringRows(table,rows);
+            if(requireCanonical)
+            {
+                string[] supplied=rows.Select(row=>BuildKey(table,row,table.CanonicalOrder)).ToArray();
+                if(!supplied.SequenceEqual(supplied.OrderBy(key=>key,StringComparer.Ordinal))) Add(issues,DungeonSpatialAuthoringDiagnostic.NoncanonicalCommittedRowOrder,table.Path,table.Id);
+            }
+        }
+
+        private static void ValidateRows(AuthoringSchema schema,Dictionary<string,AuthoringRows> tables,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            foreach(AuthoringRows data in tables.Values)
+            {
+                ValidateFields(schema,data,issues);
+                ValidateKey(data,data.Table.PrimaryKey,DungeonSpatialAuthoringDiagnostic.DuplicatePrimaryKey,issues);
+                foreach(string[] key in data.Table.UniqueKeys) ValidateKey(data,key,DungeonSpatialAuthoringDiagnostic.DuplicateUniqueKey,issues);
+            }
+            foreach(AuthoringForeignKey foreignKey in schema.ForeignKeys)
+            {
+                AuthoringRows source=tables[foreignKey.Table];
+                for(int mapping=0;mapping<foreignKey.Columns.Length;mapping++)
+                {
+                    int sourceIndex=source.Table.IndexOf(foreignKey.Columns[mapping]); AuthoringRows target=tables[foreignKey.ReferenceTables[mapping]];
+                    int targetIndex=target.Table.IndexOf(foreignKey.ReferenceColumns[mapping]);
+                    HashSet<string> values=new HashSet<string>(target.Rows.Select(row=>row[targetIndex]),StringComparer.Ordinal);
+                    foreach(string[] row in source.Rows.Where(row=>!values.Contains(row[sourceIndex]))) Add(issues,DungeonSpatialAuthoringDiagnostic.MissingForeignKey,source.Table.Path,source.Table.Id,BuildKey(source.Table,row,source.Table.PrimaryKey),foreignKey.Columns[mapping]);
+                }
+            }
+        }
+
+        private static void ValidateFields(AuthoringSchema schema,AuthoringRows data,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            foreach(string[] row in data.Rows) for(int index=0;index<data.Table.Columns.Length;index++)
+            {
+                AuthoringColumn column=data.Table.Columns[index]; string value=row[index]; string key=BuildKey(data.Table,row,data.Table.PrimaryKey);
+                if(column.Required&&value.Length==0&&!column.AllowBlank) { Add(issues,DungeonSpatialAuthoringDiagnostic.BlankRequiredValue,data.Table.Path,data.Table.Id,key,column.Name); continue; }
+                if(value.Length==0&&column.AllowBlank) continue;
+                DungeonSpatialAuthoringDiagnostic diagnostic=ValidateValue(schema,column,value);
+                if(diagnostic!=DungeonSpatialAuthoringDiagnostic.None) Add(issues,diagnostic,data.Table.Path,data.Table.Id,key,column.Name);
+            }
+        }
+
+        private static DungeonSpatialAuthoringDiagnostic ValidateValue(AuthoringSchema schema,AuthoringColumn column,string value)
+        {
+            if(value!=value.Trim()||value.Any(c=>c=='\t'||char.IsControl(c))) return DungeonSpatialAuthoringDiagnostic.InvalidFormat;
+            if(column.Type=="int32") { if(TryInt(value,out _,out bool overflow)) return DungeonSpatialAuthoringDiagnostic.None; return overflow?DungeonSpatialAuthoringDiagnostic.Int32Overflow:DungeonSpatialAuthoringDiagnostic.InvalidInt32; }
+            if(column.Type=="enum") return schema.Enums[column.EnumId].Contains(value,StringComparer.Ordinal)?DungeonSpatialAuthoringDiagnostic.None:DungeonSpatialAuthoringDiagnostic.InvalidEnumToken;
+            if(column.Type=="localizedText") return value.Length>0?DungeonSpatialAuthoringDiagnostic.None:DungeonSpatialAuthoringDiagnostic.BlankRequiredValue;
+            if(column.Type=="ownerScopedId") return IsIdentifier(value,false)?DungeonSpatialAuthoringDiagnostic.None:DungeonSpatialAuthoringDiagnostic.InvalidFormat;
+            if(column.Type=="spatialId") return IsIdentifier(value,true)?DungeonSpatialAuthoringDiagnostic.None:DungeonSpatialAuthoringDiagnostic.InvalidFormat;
+            if(column.Type=="localizationKey") return IsIdentifier(value,true)&&value.EndsWith(".display_name",StringComparison.Ordinal)?DungeonSpatialAuthoringDiagnostic.None:DungeonSpatialAuthoringDiagnostic.InvalidFormat;
+            return DungeonSpatialAuthoringDiagnostic.InvalidFormat;
+        }
+
+        private static bool IsIdentifier(string value,bool requirePeriod)
+        {
+            if(string.IsNullOrEmpty(value)||value[0]=='.'||value[value.Length-1]=='.'||value.Contains("..")||(requirePeriod&&!value.Contains("."))) return false;
+            return value.All(c=>(c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'||c=='.');
+        }
+        private static void ValidateKey(AuthoringRows data,string[] columns,DungeonSpatialAuthoringDiagnostic diagnostic,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            var seen=new HashSet<string>(StringComparer.Ordinal);
+            foreach(string[] row in data.Rows) { string key=BuildKey(data.Table,row,columns); if(!seen.Add(key)) Add(issues,diagnostic,data.Table.Path,data.Table.Id,key); }
+        }
+        private static string BuildKey(AuthoringTable table,string[] row,string[] columns) => string.Join("\u001f",columns.Select(column=>row[table.IndexOf(column)]));
+        private static DungeonSpatialAuthoringProjection Project(AuthoringManifest manifest,Dictionary<string,AuthoringRows> tables)
+        {
+            AuthoringRows floors=tables["floors"], rooms=tables["rooms"], corridors=tables["corridors"], structures=tables["fixed_structures"], sockets=tables["socket_types"], localization=tables["localization_en"];
+            string[] Children(string table,string owner,string column) => tables[table].Rows.Where(row=>tables[table].Value(row,tables[table].Table.Columns[0].Name)==owner).Select(row=>tables[table].Value(row,column)).OrderBy(value=>value,StringComparer.Ordinal).ToArray();
+            TileCoordinate[] Offsets(string table,string owner) => tables[table].Rows.Where(row=>tables[table].Value(row,tables[table].Table.Columns[0].Name)==owner).Select(row=>new TileCoordinate(ParseInt(tables[table].Value(row,"OffsetX")),ParseInt(tables[table].Value(row,"OffsetY")))).OrderBy(value=>value).ToArray();
+            SpatialConnectionPointDefinition[] Points(string table,string owner) => tables[table].Rows.Where(row=>tables[table].Value(row,tables[table].Table.Columns[0].Name)==owner).OrderBy(row=>tables[table].Value(row,"ConnectionPointId"),StringComparer.Ordinal).Select(row=>new SpatialConnectionPointDefinition { ConnectionPointId=tables[table].Value(row,"ConnectionPointId"), Offset=new TileCoordinate(ParseInt(tables[table].Value(row,"OffsetX")),ParseInt(tables[table].Value(row,"OffsetY"))), Facing=ParseEnum<CardinalOrientation>(tables[table].Value(row,"Facing")), SocketTypeId=tables[table].Value(row,"SocketTypeId") }).ToArray();
+            var catalog=new SpatialContentCatalog {
+                Metadata=new SpatialContentExportMetadata { SchemaId=manifest.CatalogSchemaId, SchemaVersion=manifest.CatalogSchemaVersion, ContentVersion=manifest.ContentVersion },
+                Floors=floors.Rows.Select(row=>new FloorSpatialConfiguration { FloorDefinitionId=floors.Value(row,"FloorDefinitionId"), FloorIndex=ParseInt(floors.Value(row,"FloorIndex")), Bounds=new RectangularFloorBounds(new TileCoordinate(ParseInt(floors.Value(row,"MinimumX")),ParseInt(floors.Value(row,"MinimumY"))),ParseInt(floors.Value(row,"Width")),ParseInt(floors.Value(row,"Height"))), FinalFloorSpaceCapacity=ParseInt(floors.Value(row,"FinalFloorSpaceCapacity")), OptionalBranchAllowance=ParseInt(floors.Value(row,"OptionalBranchAllowance")), EntranceStructureDefinitionId=floors.Value(row,"EntranceStructureDefinitionId"), CompletionStructureDefinitionId=floors.Value(row,"CompletionStructureDefinitionId"), AllowedRoomDefinitionIds=Children("floor_allowed_rooms",floors.Value(row,"FloorDefinitionId"),"RoomDefinitionId"), AllowedCorridorDefinitionIds=Children("floor_allowed_corridors",floors.Value(row,"FloorDefinitionId"),"CorridorDefinitionId") }).ToArray(),
+                Rooms=rooms.Rows.Select(row=>new RoomSpatialDefinition { RoomDefinitionId=rooms.Value(row,"RoomDefinitionId"), GrossFootprint=new RectangularFootprintDefinition(ParseInt(rooms.Value(row,"Width")),ParseInt(rooms.Value(row,"Height"))), MaximumConnectionCount=ParseInt(rooms.Value(row,"MaximumConnectionCount")), MonsterCapacity=ParseInt(rooms.Value(row,"MonsterCapacity")), TrapCapacity=ParseInt(rooms.Value(row,"TrapCapacity")), LootCapacity=ParseInt(rooms.Value(row,"LootCapacity")), LocalizationKey=rooms.Value(row,"LocalizationKey"), AllowedOrientations=Children("room_orientations",rooms.Value(row,"RoomDefinitionId"),"Orientation").Select(ParseEnum<CardinalOrientation>).ToArray(), ReservedTileOffsets=Offsets("room_reserved_offsets",rooms.Value(row,"RoomDefinitionId")), ConnectionPoints=Points("room_connection_points",rooms.Value(row,"RoomDefinitionId")) }).ToArray(),
+                Corridors=corridors.Rows.Select(row=>new CorridorSpatialDefinition { CorridorDefinitionId=corridors.Value(row,"CorridorDefinitionId"), LocalizationKey=corridors.Value(row,"LocalizationKey"), Category=ParseEnum<CorridorSpatialCategory>(corridors.Value(row,"Category")), MinimumLength=ParseInt(corridors.Value(row,"MinimumLength")), MaximumLength=ParseInt(corridors.Value(row,"MaximumLength")), Width=ParseInt(corridors.Value(row,"Width")), MonsterCapacity=ParseInt(corridors.Value(row,"MonsterCapacity")), TrapCapacity=ParseInt(corridors.Value(row,"TrapCapacity")), LootCapacity=ParseInt(corridors.Value(row,"LootCapacity")), AllowedOrientations=Children("corridor_orientations",corridors.Value(row,"CorridorDefinitionId"),"Orientation").Select(ParseEnum<CardinalOrientation>).ToArray(), CompatibleSocketTypeIds=Children("corridor_compatible_sockets",corridors.Value(row,"CorridorDefinitionId"),"SocketTypeId") }).ToArray(),
+                FixedStructures=structures.Rows.Select(row=>new FixedSpatialStructureDefinition { StructureDefinitionId=structures.Value(row,"StructureDefinitionId"), LocalizationKey=structures.Value(row,"LocalizationKey"), Kind=ParseEnum<FixedSpatialStructureKind>(structures.Value(row,"Kind")), GrossFootprint=new RectangularFootprintDefinition(ParseInt(structures.Value(row,"Width")),ParseInt(structures.Value(row,"Height"))), MaximumConnectionCount=ParseInt(structures.Value(row,"MaximumConnectionCount")), AllowedOrientations=Children("fixed_structure_orientations",structures.Value(row,"StructureDefinitionId"),"Orientation").Select(ParseEnum<CardinalOrientation>).ToArray(), ReservedTileOffsets=Offsets("fixed_structure_reserved_offsets",structures.Value(row,"StructureDefinitionId")), ConnectionPoints=Points("fixed_structure_connection_points",structures.Value(row,"StructureDefinitionId")) }).ToArray(),
+                SocketTypes=sockets.Rows.Select(row=>new SpatialSocketTypeDefinition { SocketTypeId=sockets.Value(row,"SocketTypeId"), CompatibleSocketTypeIds=Children("socket_compatibility",sockets.Value(row,"SocketTypeId"),"CompatibleSocketTypeId") }).ToArray() };
+            return new DungeonSpatialAuthoringProjection { Catalog=catalog, English=new StringTable { schema=manifest.StringTableSchemaId, schemaVersion=manifest.StringTableSchemaVersion, language=manifest.RequiredLanguage, entries=localization.Rows.Select(row=>new StringEntry { key=localization.Value(row,"Key"), text=localization.Value(row,"Text") }).OrderBy(entry=>entry.key,StringComparer.Ordinal).ToArray() } };
+        }
+
+        private static bool ReadJson(DungeonSpatialAuthoringSource source,string path,DungeonSpatialAuthoringDiagnostic missing,List<DungeonSpatialAuthoringIssue> issues,out Dictionary<string,object> root)
+        {
+            root=null; if(!ReadText(source,path,missing,issues,out string text)) return false;
+            if(!StrictJson.TryParse(text,out object value,out DungeonSpatialAuthoringDiagnostic error)) { Add(issues,error,path); return false; }
+            root=value as Dictionary<string,object>; if(root==null) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonRoot,path); return false; }
+            return true;
+        }
+        private static bool ReadText(DungeonSpatialAuthoringSource source,string path,DungeonSpatialAuthoringDiagnostic missing,List<DungeonSpatialAuthoringIssue> issues,out string text)
+        {
+            text=null; if(!source.TryGet(path,out byte[] bytes)||bytes==null) { Add(issues,missing,path); return false; }
+            if(bytes.Length==0) { Add(issues,DungeonSpatialAuthoringDiagnostic.EmptyFile,path); return false; }
+            if(bytes.Length>=3&&bytes[0]==0xef&&bytes[1]==0xbb&&bytes[2]==0xbf) { Add(issues,DungeonSpatialAuthoringDiagnostic.BomPresent,path); return false; }
+            if(bytes.Contains((byte)'\r')) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidLineEnding,path); return false; }
+            if(bytes[bytes.Length-1]!=(byte)'\n'||(bytes.Length>1&&bytes[bytes.Length-2]==(byte)'\n')) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidTrailingNewline,path); return false; }
+            if(bytes.Any(value=>(value<32&&value!=10)||value==127)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidFormat,path); return false; }
+            try { text=new UTF8Encoding(false,true).GetString(bytes); return true; }
+            catch(DecoderFallbackException) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidUtf8,path); return false; }
+        }
+        private static void ValidateExactFields(Dictionary<string,object> root,IEnumerable<string> fields,string path,List<DungeonSpatialAuthoringIssue> issues,IEnumerable<string> optional=null)
+        {
+            string[] allowed=fields.ToArray(); var optionalSet=new HashSet<string>(optional??Array.Empty<string>(),StringComparer.Ordinal);
+            foreach(string key in root.Keys) if(!allowed.Contains(key,StringComparer.Ordinal)) Add(issues,allowed.Any(field=>string.Equals(field,key,StringComparison.OrdinalIgnoreCase))?DungeonSpatialAuthoringDiagnostic.AmbiguousJsonField:DungeonSpatialAuthoringDiagnostic.UnknownJsonField,path,column:key);
+            foreach(string field in allowed) if(!optionalSet.Contains(field)&&!root.ContainsKey(field)) Add(issues,DungeonSpatialAuthoringDiagnostic.MissingRequiredJsonField,path,column:field);
+        }
+        private static void ValidatePaths(string[] paths,List<DungeonSpatialAuthoringIssue> issues)
+        {
+            var seen=new HashSet<string>(StringComparer.Ordinal);
+            foreach(string path in paths) { if(!seen.Add(path)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,ManifestPath,column:path); if(!IsNormalizedPath(path)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,ManifestPath,column:path); }
+        }
+        private static bool IsNormalizedPath(string path) => !string.IsNullOrWhiteSpace(path)&&!Path.IsPathRooted(path)&&!path.Contains("\\")&&!path.Split('/').Any(part=>part.Length==0||part=="."||part=="..")&&path==path.Trim();
+        private static void CheckManifest(bool valid,string field,List<DungeonSpatialAuthoringIssue> issues) { if(!valid) Add(issues,DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch,ManifestPath,column:field); }
+        private static bool TryObject(Dictionary<string,object> root,string field,out Dictionary<string,object> value) { value=root.TryGetValue(field,out object item)?item as Dictionary<string,object>:null; return value!=null; }
+        private static bool TryArray(Dictionary<string,object> root,string field,out List<object> value) { value=root.TryGetValue(field,out object item)?item as List<object>:null; return value!=null; }
+        private static bool StringArray(Dictionary<string,object> root,string field,out string[] value) { value=null; if(!TryArray(root,field,out List<object> list)||list.Any(item=>!(item is string))) return false; value=list.Cast<string>().ToArray(); return true; }
+        private static bool GetString(Dictionary<string,object> root,string field,out string value) { value=root.TryGetValue(field,out object item)?item as string:null; return value!=null; }
+        private static bool GetBool(Dictionary<string,object> root,string field,out bool value) { value=false; if(!root.TryGetValue(field,out object item)||!(item is bool)) return false; value=(bool)item; return true; }
+        private static int ToInt(object value) => value is long number&&number>=int.MinValue&&number<=int.MaxValue?(int)number:0;
+        private static bool TryInt(string value,out int result,out bool overflow) { result=0; overflow=false; if(string.IsNullOrEmpty(value)||value[0]=='+'||(value.Length>1&&value[0]=='0')||value.StartsWith("-0",StringComparison.Ordinal)) return false; if(!long.TryParse(value,NumberStyles.AllowLeadingSign,CultureInfo.InvariantCulture,out long number)) { overflow=value.All(c=>c=='-'||(c>='0'&&c<='9')); return false; } if(number<int.MinValue||number>int.MaxValue) { overflow=true; return false; } result=(int)number; return true; }
+        private static int ParseInt(string value) { TryInt(value,out int result,out _); return result; }
+        private static T ParseEnum<T>(string value) where T:struct => (T)Enum.Parse(typeof(T),value,false);
+        private static DungeonSpatialAuthoringResult Failed(List<DungeonSpatialAuthoringIssue> issues) => new DungeonSpatialAuthoringResult(null,issues);
+        private static void Add(List<DungeonSpatialAuthoringIssue> issues,DungeonSpatialAuthoringDiagnostic diagnostic,string path="",string table="",string record="",string column="") => issues.Add(new DungeonSpatialAuthoringIssue { Diagnostic=diagnostic, RelativePath=path??"", TableId=table??"", RecordKey=record??"", Column=column??"" });
+    }
+
+    internal static class StrictCsv
     {
         internal static bool TryParse(string text,out List<string[]> rows){rows=new List<string[]>();var row=new List<string>();var field=new StringBuilder();bool quoted=false,closed=false;for(int i=0;i<text.Length;i++){char c=text[i];if(quoted){if(c=='"'){if(i+1<text.Length&&text[i+1]=='"'){field.Append('"');i++;}else{quoted=false;closed=true;}}else if(c=='\n'||c=='\r')return false;else field.Append(c);}else{if(closed&&c!=','&&c!='\n')return false;if(c=='"'){if(field.Length!=0||closed)return false;quoted=true;}else if(c==','){row.Add(field.ToString());field.Clear();closed=false;}else if(c=='\n'){row.Add(field.ToString());if(row.Count==1&&row[0].Length==0)return false;rows.Add(row.ToArray());row.Clear();field.Clear();closed=false;}else{if(closed)return false;field.Append(c);}}}return !quoted&&row.Count==0&&field.Length==0&&!closed;}
     }

@@ -3,7 +3,9 @@
     "spatialId": "lowercase ASCII dot-separated stable identifier",
     "localizationKey": "lowercase ASCII dot-separated key",
     "int32": "invariant signed decimal ASCII without leading plus or leading zeroes",
-    "textNormalization": "source-preserving UTF-8; no implicit trim or normalization"
+    "textNormalization": "source-preserving UTF-8; no implicit trim or normalization",
+    "ownerScopedId": "lowercase ASCII owner-scoped identifier",
+    "localizedText": "nonblank source-preserving localized text"
   },
   "enums": {
     "CardinalOrientation": [
@@ -283,7 +285,7 @@
         },
         {
           "name": "ConnectionPointId",
-          "type": "spatialId",
+          "type": "ownerScopedId",
           "required": true,
           "allowBlank": false
         },
@@ -564,7 +566,7 @@
         },
         {
           "name": "ConnectionPointId",
-          "type": "spatialId",
+          "type": "ownerScopedId",
           "required": true,
           "allowBlank": false
         },
@@ -673,6 +675,17 @@
     }
   ],
   "foreignKeys": [
+    {
+      "table": "floors",
+      "columns": [
+        "EntranceStructureDefinitionId",
+        "CompletionStructureDefinitionId"
+      ],
+      "references": [
+        "fixed_structures.StructureDefinitionId",
+        "fixed_structures.StructureDefinitionId"
+      ]
+    },
     {
       "table": "floor_allowed_rooms",
       "columns": [

@@ -122,6 +122,112 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(failure.Issues.Select(x => x.ToString()), DungeonSpatialAuthoringPackageParser.ParseAndProject(Production(), low).Issues.Select(x => x.ToString()));
         }
 
+        [Test]
+        public void CommittedPackage_ProjectsEveryApprovedProductionValue()
+        {
+            DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(Production(), Limits());
+            Assert.That(result.Success, Is.True, string.Join("\n", result.Issues.Select(issue => issue.ToString())));
+            SpatialContentCatalog catalog = result.Projection.Catalog;
+            FloorSpatialConfiguration floor = catalog.Floors.Single();
+            Assert.Multiple(() =>
+            {
+                Assert.That(floor.FloorDefinitionId, Is.EqualTo("spatial.floor.01"));
+                Assert.That(floor.FloorIndex, Is.Zero); Assert.That(floor.Bounds.Minimum.X, Is.Zero); Assert.That(floor.Bounds.Minimum.Y, Is.Zero);
+                Assert.That(floor.Bounds.Width, Is.EqualTo(12)); Assert.That(floor.Bounds.Height, Is.EqualTo(12));
+                Assert.That(floor.FinalFloorSpaceCapacity, Is.EqualTo(60)); Assert.That(floor.OptionalBranchAllowance, Is.EqualTo(1));
+                Assert.That(floor.EntranceStructureDefinitionId, Is.EqualTo("spatial.fixed.entrance_hall"));
+                Assert.That(floor.CompletionStructureDefinitionId, Is.EqualTo("spatial.fixed.completion_terminal"));
+            });
+            CollectionAssert.AreEqual(new[] { "spatial.room.basic", "spatial.room.large_chamber", "spatial.room.rectangle" }, floor.AllowedRoomDefinitionIds);
+            CollectionAssert.AreEqual(new[] { "spatial.corridor.straight_stone" }, floor.AllowedCorridorDefinitionIds);
+            AssertRoom(catalog, "spatial.room.basic", 4, 4, 3, 2, 2, 2, new[] { CardinalOrientation.Zero },
+                new[] { "east:3:1:Ninety", "north:1:3:Zero", "south:1:0:OneEighty", "west:0:1:TwoSeventy" });
+            AssertRoom(catalog, "spatial.room.large_chamber", 5, 6, 3, 4, 4, 4, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
+                new[] { "east:4:2:Ninety", "north:2:5:Zero", "south:2:0:OneEighty", "west:0:2:TwoSeventy" });
+            AssertRoom(catalog, "spatial.room.rectangle", 3, 5, 3, 3, 1, 2, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
+                new[] { "east:2:2:Ninety", "north:1:4:Zero", "south:1:0:OneEighty", "west:0:2:TwoSeventy" });
+            CorridorSpatialDefinition corridor = catalog.Corridors.Single();
+            Assert.Multiple(() => { Assert.That(corridor.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone")); Assert.That(corridor.Category, Is.EqualTo(CorridorSpatialCategory.Straight)); Assert.That(corridor.MinimumLength, Is.EqualTo(1)); Assert.That(corridor.MaximumLength, Is.EqualTo(4)); Assert.That(corridor.Width, Is.EqualTo(1)); Assert.That(corridor.MonsterCapacity, Is.Zero); Assert.That(corridor.TrapCapacity, Is.EqualTo(1)); Assert.That(corridor.LootCapacity, Is.EqualTo(1)); });
+            CollectionAssert.AreEqual(new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety }, corridor.AllowedOrientations);
+            CollectionAssert.AreEqual(new[] { "spatial.socket.standard_passage" }, corridor.CompatibleSocketTypeIds);
+            AssertFixed(catalog, "spatial.fixed.entrance_hall", FixedSpatialStructureKind.Entrance, 3, 2, 1, 1, 1, CardinalOrientation.Zero);
+            AssertFixed(catalog, "spatial.fixed.completion_terminal", FixedSpatialStructureKind.CompletionTerminal, 2, 2, 1, 0, 0, CardinalOrientation.OneEighty);
+            SpatialSocketTypeDefinition socket = catalog.SocketTypes.Single(); Assert.That(socket.SocketTypeId, Is.EqualTo("spatial.socket.standard_passage")); CollectionAssert.AreEqual(new[] { socket.SocketTypeId }, socket.CompatibleSocketTypeIds);
+            CollectionAssert.AreEqual(new[] { "Straight Stone Corridor", "Completion Terminal", "Entrance Hall", "Basic Room", "Large Chamber", "Rectangle Room" }, result.Projection.English.entries.Select(entry => entry.text));
+            int nested = floor.AllowedRoomDefinitionIds.Length + floor.AllowedCorridorDefinitionIds.Length + catalog.Rooms.Sum(room => room.AllowedOrientations.Length + room.ReservedTileOffsets.Length + room.ConnectionPoints.Length) + corridor.AllowedOrientations.Length + corridor.CompatibleSocketTypeIds.Length + catalog.FixedStructures.Sum(item => item.AllowedOrientations.Length + item.ReservedTileOffsets.Length + item.ConnectionPoints.Length) + socket.CompatibleSocketTypeIds.Length + result.Projection.English.entries.Length;
+            Assert.That(nested, Is.EqualTo(41));
+        }
+
+        [Test]
+        public void EveryHeaderOnlyTable_FailsClosedWithoutThrowing()
+        {
+            foreach (string path in Production().Snapshot().Keys.Where(path => path.EndsWith(".csv", StringComparison.Ordinal)))
+            {
+                DungeonSpatialAuthoringResult result = null;
+                Assert.DoesNotThrow(() => result = Change(path, text => text.Substring(0, text.IndexOf('\n') + 1)));
+                if (path.EndsWith("room_reserved_offsets.csv", StringComparison.Ordinal) || path.EndsWith("fixed_structure_reserved_offsets.csv", StringComparison.Ordinal))
+                    Assert.That(result.Success, Is.True, path);
+                else
+                    Assert.That(result.Success, Is.False, path);
+            }
+        }
+
+        [Test]
+        public void NullEmptyAndInvalidUtf8Sources_FailClosedWithoutThrowing()
+        {
+            Assert.DoesNotThrow(() => Assert.That(DungeonSpatialAuthoringPackageParser.ParseAndProject(null, Limits()).Success, Is.False));
+            AssertNoThrowBytes("tables/rooms.csv", null, DungeonSpatialAuthoringDiagnostic.MissingTable);
+            AssertNoThrowBytes("tables/rooms.csv", Array.Empty<byte>(), DungeonSpatialAuthoringDiagnostic.EmptyFile);
+            AssertNoThrowBytes("authoring_schema.json", new byte[] { 0xff, (byte)'\n' }, DungeonSpatialAuthoringDiagnostic.InvalidUtf8);
+        }
+
+        [Test]
+        public void DuplicateSourcePath_IsRetainedAndFailsClosed()
+        {
+            var files = Production().Snapshot().ToList();
+            files.Add(new KeyValuePair<string, byte[]>(files[0].Key, files[0].Value));
+            DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(
+                new DungeonSpatialAuthoringSource(files), Limits());
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.DuplicateSourcePath), Is.True);
+        }
+
+        [TestCase("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": 1", DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType)]
+        [TestCase("\"schema\": \"dungeon_spatial_authoring\"", "\"schema\": \"test.schema\"", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
+        [TestCase("\"schemaVersion\": 1", "\"schemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
+        [TestCase("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"0.2.0\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"catalogSchemaId\": \"dungeon_spatial_content\"", "\"catalogSchemaId\": \"test.catalog\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"catalogSchemaVersion\": 1", "\"catalogSchemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"stringTableSchemaId\": \"string_table\"", "\"stringTableSchemaId\": \"test.table\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"stringTableSchemaVersion\": 1", "\"stringTableSchemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"requiredLanguage\": \"en\"", "\"requiredLanguage\": \"ja\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        public void ManifestValueAndTypeFailures_ArePrecise(string oldValue, string newValue, DungeonSpatialAuthoringDiagnostic diagnostic)
+        {
+            AssertChanged("authoring_manifest.json", text => text.Replace(oldValue, newValue), diagnostic);
+        }
+
+        [TestCase("\"type\": \"int32\"", "\"type\": \"testType\"")]
+        [TestCase("\"required\": true", "\"required\": \"true\"")]
+        [TestCase("\"allowBlank\": false", "\"allowBlank\": 0")]
+        [TestCase("\"enum\": \"CardinalOrientation\"", "\"enum\": \"TestEnum\"")]
+        [TestCase("\"primaryKey\": [", "\"primaryKey\": [\"UnknownColumn\",")]
+        [TestCase("\"canonicalOrder\": [", "\"canonicalOrder\": [\"UnknownColumn\",")]
+        [TestCase("\"parent\": \"floors\"", "\"parent\": \"test.parent\"")]
+        public void SchemaOwnedDimensions_AreParsedAndRejectedWhenInvalid(string oldValue, string newValue)
+        {
+            DungeonSpatialAuthoringResult result = Change("authoring_schema.json", text => text.Replace(oldValue, newValue));
+            Assert.That(result.Success, Is.False); Assert.That(result.Issues.Any(issue => issue.RelativePath == "authoring_schema.json"), Is.True);
+        }
+
+        [TestCase("EntranceStructureDefinitionId", "spatial.fixed.entrance_hall")]
+        [TestCase("CompletionStructureDefinitionId", "spatial.fixed.completion_terminal")]
+        public void FloorEndpointForeignKeys_AreSchemaValidatedWithExactIssue(string column, string value)
+        {
+            DungeonSpatialAuthoringResult result = Change("tables/floors.csv", text => text.Replace(value, "test.missing.fixed"));
+            DungeonSpatialAuthoringIssue issue = result.Issues.Single(item => item.Diagnostic == DungeonSpatialAuthoringDiagnostic.MissingForeignKey && item.Column == column);
+            Assert.That(issue.RelativePath, Is.EqualTo("tables/floors.csv")); Assert.That(issue.TableId, Is.EqualTo("floors")); Assert.That(issue.RecordKey, Is.EqualTo("spatial.floor.01"));
+        }
+
         private static DungeonSpatialAuthoringSource Without(string path) => new DungeonSpatialAuthoringSource(Production().Snapshot().Where(x => x.Key != path));
         private static void AssertManifestChange(Func<string, string> change, DungeonSpatialAuthoringDiagnostic expected) => AssertChanged("authoring_manifest.json", change, expected);
         private static void AssertTableChange(string path, Func<string, string> change, DungeonSpatialAuthoringDiagnostic expected) => AssertChanged(path, change, expected);
@@ -131,6 +237,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             files[path] = Encoding.UTF8.GetBytes(change(Encoding.UTF8.GetString(files[path])));
             var result = DungeonSpatialAuthoringPackageParser.ParseAndProject(new DungeonSpatialAuthoringSource(files), Limits());
             Assert.That(result.Success, Is.False); Assert.That(result.Issues.Any(x => x.Diagnostic == expected), Is.True, string.Join("\n", result.Issues.Select(x => x.ToString())));
+        }
+
+        private static DungeonSpatialAuthoringResult Change(string path, Func<string, string> change)
+        {
+            var files = Production().Snapshot().ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+            files[path] = Encoding.UTF8.GetBytes(change(Encoding.UTF8.GetString(files[path])));
+            return DungeonSpatialAuthoringPackageParser.ParseAndProject(new DungeonSpatialAuthoringSource(files), Limits());
+        }
+        private static void AssertNoThrowBytes(string path, byte[] bytes, DungeonSpatialAuthoringDiagnostic diagnostic)
+        {
+            var files = Production().Snapshot().ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal); files[path] = bytes;
+            DungeonSpatialAuthoringResult result = null; Assert.DoesNotThrow(() => result = DungeonSpatialAuthoringPackageParser.ParseAndProject(new DungeonSpatialAuthoringSource(files), Limits()));
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic == diagnostic), Is.True);
+        }
+        private static void AssertRoom(SpatialContentCatalog catalog,string id,int width,int height,int connections,int monsters,int traps,int loot,CardinalOrientation[] orientations,string[] points)
+        {
+            RoomSpatialDefinition room=catalog.Rooms.Single(item=>item.RoomDefinitionId==id); Assert.Multiple(()=>{Assert.That(room.GrossFootprint.Width,Is.EqualTo(width));Assert.That(room.GrossFootprint.Height,Is.EqualTo(height));Assert.That(room.MaximumConnectionCount,Is.EqualTo(connections));Assert.That(room.MonsterCapacity,Is.EqualTo(monsters));Assert.That(room.TrapCapacity,Is.EqualTo(traps));Assert.That(room.LootCapacity,Is.EqualTo(loot));Assert.That(room.ReservedTileOffsets,Is.Empty);}); CollectionAssert.AreEqual(orientations,room.AllowedOrientations); CollectionAssert.AreEqual(points,room.ConnectionPoints.Select(point=>$"{point.ConnectionPointId}:{point.Offset.X}:{point.Offset.Y}:{point.Facing}")); Assert.That(room.ConnectionPoints.All(point=>point.SocketTypeId=="spatial.socket.standard_passage"),Is.True);
+        }
+        private static void AssertFixed(SpatialContentCatalog catalog,string id,FixedSpatialStructureKind kind,int width,int height,int connections,int x,int y,CardinalOrientation facing)
+        {
+            FixedSpatialStructureDefinition item=catalog.FixedStructures.Single(value=>value.StructureDefinitionId==id); Assert.Multiple(()=>{Assert.That(item.Kind,Is.EqualTo(kind));Assert.That(item.GrossFootprint.Width,Is.EqualTo(width));Assert.That(item.GrossFootprint.Height,Is.EqualTo(height));Assert.That(item.MaximumConnectionCount,Is.EqualTo(connections));Assert.That(item.ReservedTileOffsets,Is.Empty);Assert.That(item.AllowedOrientations,Has.Length.EqualTo(4));Assert.That(item.ConnectionPoints.Single().Offset.X,Is.EqualTo(x));Assert.That(item.ConnectionPoints.Single().Offset.Y,Is.EqualTo(y));Assert.That(item.ConnectionPoints.Single().Facing,Is.EqualTo(facing));});
         }
     }
 }
