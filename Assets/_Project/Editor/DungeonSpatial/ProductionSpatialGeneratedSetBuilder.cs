@@ -27,10 +27,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 return Failure(ProductionSpatialGeneratedSetDiagnostic.MissingInput);
             var sourceKeys = projection.English.entries == null ? null : new HashSet<string>(
                 projection.English.entries.Where(entry => entry != null).Select(entry => entry.key), StringComparer.Ordinal);
-            long englishCharacters = (projection.English.schema?.Length ?? 0) +
-                (projection.English.language?.Length ?? 0);
+            long englishCharacters = 0L;
+            if (!TryAddCharacters(ref englishCharacters, projection.English.schema) ||
+                !TryAddCharacters(ref englishCharacters, projection.English.language))
+                return Failure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
             foreach (StringEntry entry in projection.English.entries ?? Array.Empty<StringEntry>())
-                englishCharacters += entry?.text?.Length ?? 0;
+                if (!TryAddCharacters(ref englishCharacters, entry?.text))
+                    return Failure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
             SpatialContentValidationResult validation = SpatialContentValidator.Validate(
                 projection.Catalog, limits, sourceKeys, englishCharacters);
             if (!validation.IsValid)
@@ -74,6 +77,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
 
         private static ProductionSpatialGeneratedSetBuildResult Failure(ProductionSpatialGeneratedSetDiagnostic diagnostic) =>
             new ProductionSpatialGeneratedSetBuildResult(null, new[] { diagnostic });
+
+        private static bool TryAddCharacters(ref long total, string value)
+        {
+            long additional = value?.Length ?? 0L;
+            if (additional < 0L || total < 0L || total > long.MaxValue - additional) return false;
+            total += additional;
+            return true;
+        }
     }
 }
 #endif

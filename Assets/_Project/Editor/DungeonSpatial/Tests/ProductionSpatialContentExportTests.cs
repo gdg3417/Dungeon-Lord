@@ -123,6 +123,99 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ParserTopLevelAndNestedRecordBoundariesPassAndOneOverFailsEarly()
+        {
+            ProductionSpatialGeneratedSet valid = Build().Output;
+            SpatialContentValidationWorkloadLimits production = Limits();
+            var exactTop = new SpatialContentValidationWorkloadLimits(8,
+                production.MaximumNestedRecords, production.MaximumMaterializedTiles,
+                production.MaximumIssues, production.MaximumStringCharacters);
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactTop).Success, Is.True);
+
+            ProductionSpatialGeneratedSet overTop = ReplaceCatalog(valid, catalog =>
+            {
+                RoomSpatialDefinition clone = JsonUtility.FromJson<RoomSpatialDefinition>(
+                    JsonUtility.ToJson(catalog.Rooms[0]));
+                catalog.Rooms = catalog.Rooms.Concat(new[] { clone }).ToArray();
+            });
+            AssertExactFailure(overTop, exactTop, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+
+            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 41,
+                production.MaximumMaterializedTiles, production.MaximumIssues,
+                production.MaximumStringCharacters);
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactNested).Success, Is.True);
+            ProductionSpatialGeneratedSet overNested = ReplaceEnglish(valid, table =>
+            {
+                StringEntry clone = JsonUtility.FromJson<StringEntry>(JsonUtility.ToJson(table.entries[0]));
+                table.entries = table.entries.Concat(new[] { clone }).ToArray();
+            });
+            AssertExactFailure(overNested, exactNested, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+        }
+
+        [Test]
+        public void ParserStringBoundaryPassesAndOversizedEnglishFailsEarlyWithoutMutation()
+        {
+            ProductionSpatialGeneratedSet valid = Build().Output;
+            byte[][] before = valid.Files.Select(file => file.Bytes).ToArray();
+            SpatialContentValidationWorkloadLimits production = Limits();
+            int exactCharacters = MinimumPassingStringLimit(valid, production);
+            var exact = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords,
+                production.MaximumNestedRecords, production.MaximumMaterializedTiles,
+                production.MaximumIssues, exactCharacters);
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exact).Success, Is.True);
+
+            ProductionSpatialGeneratedSet oneOver = ReplaceEnglish(valid,
+                table => table.entries[0].text += "x");
+            AssertExactFailure(oneOver, exact, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+            for (int index = 0; index < before.Length; index++)
+                CollectionAssert.AreEqual(before[index], valid.Files[index].Bytes);
+        }
+
+        [Test]
+        public void OversizedCatalogAndUnknownSubtreesStopAtCallerBudgetDeterministically()
+        {
+            ProductionSpatialGeneratedSet valid = Build().Output;
+            SpatialContentValidationWorkloadLimits production = Limits();
+            var oneNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 1,
+                production.MaximumMaterializedTiles, production.MaximumIssues,
+                production.MaximumStringCharacters);
+            ProductionSpatialGeneratedSet unknownArray = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknown\": [0, 1],"));
+            var arrayExpected = new[]
+            {
+                ProductionSpatialGeneratedSetDiagnostic.UnknownField,
+                ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded
+            };
+            ProductionSpatialGeneratedSetResult arrayFirst = ProductionSpatialGeneratedSetParser.ParseAndValidate(unknownArray, oneNested);
+            ProductionSpatialGeneratedSetResult arraySecond = ProductionSpatialGeneratedSetParser.ParseAndValidate(unknownArray, oneNested);
+            CollectionAssert.AreEqual(arrayExpected, arrayFirst.Diagnostics);
+            CollectionAssert.AreEqual(arrayFirst.Diagnostics, arraySecond.Diagnostics);
+            Assert.That(arrayFirst.Value, Is.Null);
+
+            const int unknownStringLimit = 64;
+            var oneCharacter = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords,
+                production.MaximumNestedRecords, production.MaximumMaterializedTiles,
+                production.MaximumIssues, unknownStringLimit);
+            ProductionSpatialGeneratedSet unknownString = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknown\": \"" +
+                    new string('x', unknownStringLimit + 1) + "\","));
+            Assert.DoesNotThrow(() => AssertExactFailure(unknownString, oneCharacter,
+                ProductionSpatialGeneratedSetDiagnostic.UnknownField,
+                ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded));
+
+            ProductionSpatialGeneratedSet broadMalformed = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                _ => "{\n  \"unknown\": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[\n");
+            ProductionSpatialGeneratedSetResult malformed = null;
+            Assert.DoesNotThrow(() => malformed = ProductionSpatialGeneratedSetParser.ParseAndValidate(broadMalformed, production));
+            Assert.That(malformed.Success, Is.False); Assert.That(malformed.Value, Is.Null);
+            CollectionAssert.AreEqual(malformed.Diagnostics,
+                ProductionSpatialGeneratedSetParser.ParseAndValidate(broadMalformed, production).Diagnostics);
+        }
+
+        [Test]
         public void ProductionSource_BuildsExactNormalizedByteStableInMemorySet()
         {
             ProductionSpatialGeneratedSetBuildResult first = Build();
@@ -314,6 +407,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 file.Path == path
                     ? new ProductionSpatialGeneratedFile(path, Encoding.UTF8.GetBytes(change(Encoding.UTF8.GetString(file.Bytes))))
                     : file));
+
+        private static ProductionSpatialGeneratedSet ReplaceCatalog(ProductionSpatialGeneratedSet source,
+            Action<SpatialContentCatalog> change)
+        {
+            SpatialContentCatalog catalog = JsonUtility.FromJson<SpatialContentCatalog>(Encoding.UTF8.GetString(
+                source.Files.Single(file => file.Path == ProductionSpatialGeneratedSetParser.CatalogPath).Bytes));
+            change(catalog);
+            return ReplaceBytes(source, ProductionSpatialGeneratedSetParser.CatalogPath,
+                ProductionSpatialGeneratedSetParser.SerializeCanonical(catalog));
+        }
+
+        private static ProductionSpatialGeneratedSet ReplaceEnglish(ProductionSpatialGeneratedSet source,
+            Action<StringTable> change)
+        {
+            StringTable table = JsonUtility.FromJson<StringTable>(Encoding.UTF8.GetString(
+                source.Files.Single(file => file.Path == ProductionSpatialGeneratedSetParser.EnglishPath).Bytes));
+            change(table);
+            return ReplaceBytes(source, ProductionSpatialGeneratedSetParser.EnglishPath,
+                ProductionSpatialGeneratedSetParser.SerializeCanonical(table));
+        }
+
+        private static ProductionSpatialGeneratedSet ReplaceBytes(ProductionSpatialGeneratedSet source,
+            string path, byte[] bytes) => new ProductionSpatialGeneratedSet(source.Files.Select(file =>
+                file.Path == path ? new ProductionSpatialGeneratedFile(path, bytes) : file));
+
+        private static int MinimumPassingStringLimit(ProductionSpatialGeneratedSet source,
+            SpatialContentValidationWorkloadLimits production)
+        {
+            int low = 1, high = production.MaximumStringCharacters;
+            while (low < high)
+            {
+                int middle = low + (high - low) / 2;
+                var limits = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords,
+                    production.MaximumNestedRecords, production.MaximumMaterializedTiles,
+                    production.MaximumIssues, middle);
+                if (ProductionSpatialGeneratedSetParser.ParseAndValidate(source, limits).Success) high = middle;
+                else low = middle + 1;
+            }
+            return low;
+        }
 
         private static string ReplaceFirst(string source, string oldValue, string newValue)
         {

@@ -115,9 +115,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (map.Keys.Any(path => Array.IndexOf(CanonicalPaths, path) < 0)) diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.ExtraOutput);
             if (diagnostics.HasAny) return diagnostics.Failure();
 
-            if (!TryObject<ProductionSpatialContentManifest>(map[ManifestPath], out var manifest, diagnostics) |
-                !TryObject<SpatialContentCatalog>(map[CatalogPath], out var catalog, diagnostics) |
-                !TryObject<StringTable>(map[EnglishPath], out var english, diagnostics))
+            var parseBudget = new StrictJsonWorkloadBudget(limits);
+            if (!TryObject<ProductionSpatialContentManifest>(map[ManifestPath], out var manifest, diagnostics, parseBudget) |
+                !TryObject<SpatialContentCatalog>(map[CatalogPath], out var catalog, diagnostics, parseBudget) |
+                !TryObject<StringTable>(map[EnglishPath], out var english, diagnostics, parseBudget))
                 return diagnostics.Failure();
 
             ValidateIdentities(manifest, catalog, english, diagnostics);
@@ -128,13 +129,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 .Concat((catalog?.FixedStructures ?? Array.Empty<FixedSpatialStructureDefinition>()).Select(value => value?.LocalizationKey)),
                 StringComparer.Ordinal);
             if (!keys.SetEquals(referencedKeys)) diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.LocalizationInvalid);
-            long englishCharacters = (english?.schema?.Length ?? 0) + (english?.language?.Length ?? 0);
+            long englishCharacters = 0L;
+            bool englishCharacterOverflow = !TryAddCharacters(ref englishCharacters, english?.schema) ||
+                !TryAddCharacters(ref englishCharacters, english?.language);
             foreach (StringEntry entry in english?.entries ?? Array.Empty<StringEntry>())
-            {
-                int length = entry?.text?.Length ?? 0;
-                if (englishCharacters > long.MaxValue - length) { englishCharacters = long.MaxValue; break; }
-                englishCharacters += length;
-            }
+                if (!TryAddCharacters(ref englishCharacters, entry?.text)) englishCharacterOverflow = true;
+            if (englishCharacterOverflow) diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
             SpatialContentValidationResult validation = SpatialContentValidator.Validate(catalog, limits, keys, englishCharacters);
             SpatialContentCatalog canonical = null;
             if (!validation.IsValid)
@@ -157,12 +157,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static byte[] SerializeCanonical(object value) => Utf8.GetBytes(JsonUtility.ToJson(value, true) + "\n");
 
         private static bool TryObject<T>(byte[] bytes, out T value,
-            DiagnosticCollector diagnostics) where T : class
+            DiagnosticCollector diagnostics, StrictJsonWorkloadBudget budget) where T : class
         {
             value = null;
             string json;
             if (!TryDecode(bytes, out json, diagnostics)) return false;
-            if (!StrictJson.TryParse(json, out JsonNode root, out var diagnostic))
+            if (!StrictJson.TryParse(json, typeof(T), diagnostics, budget, out JsonNode root, out var diagnostic))
             { diagnostics.Add(diagnostic); return false; }
             if (root.Kind != JsonKind.Object) { diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.InvalidJsonRoot); return false; }
             StrictJson.Validate(typeof(T), root, diagnostics);
@@ -208,16 +208,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DiagnosticCollector issues)
         {
             var keys = new HashSet<string>(StringComparer.Ordinal);
-            long count = 0, characters = (table?.schema?.Length ?? 0) + (table?.language?.Length ?? 0);
+            long count = 0L, characters = 0L;
+            bool overflow = !TryAddCharacters(ref characters, table?.schema) ||
+                !TryAddCharacters(ref characters, table?.language);
             if (table?.entries == null) { issues.Add(ProductionSpatialGeneratedSetDiagnostic.LocalizationInvalid); return keys; }
             foreach (StringEntry entry in table.entries)
             {
-                count++;
+                if (count == long.MaxValue) overflow = true; else count++;
                 if (entry == null || string.IsNullOrWhiteSpace(entry.key) || string.IsNullOrWhiteSpace(entry.text) || !keys.Add(entry.key))
                     issues.Add(ProductionSpatialGeneratedSetDiagnostic.LocalizationInvalid);
-                else characters += entry.key.Length + entry.text.Length;
+                else if (!TryAddCharacters(ref characters, entry.key) ||
+                    !TryAddCharacters(ref characters, entry.text)) overflow = true;
             }
-            if (!limits.IsValid || count > limits.MaximumNestedRecords || characters > limits.MaximumStringCharacters)
+            if (overflow || !limits.IsValid || count > limits.MaximumNestedRecords || characters > limits.MaximumStringCharacters)
                 issues.Add(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
             return keys;
         }
@@ -226,6 +229,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             path.IndexOf('\\') < 0 && path.IndexOf("..", StringComparison.Ordinal) < 0 &&
             path.IndexOf("//", StringComparison.Ordinal) < 0 && !path.Contains(":");
         private static bool BytesEqual(byte[] a, byte[] b) => a != null && b != null && a.SequenceEqual(b);
+        private static bool TryAddCharacters(ref long total, string value)
+        {
+            long additional = value?.Length ?? 0L;
+            if (additional < 0L || total < 0L || total > long.MaxValue - additional) return false;
+            total += additional;
+            return true;
+        }
         private static bool IsWorkloadFailure(SpatialContentValidationResult validation) => validation.Issues.Any(issue =>
             issue.Reason == SpatialContentValidationReason.WorkloadLimitsInvalid ||
             issue.Reason == SpatialContentValidationReason.WorkloadExceeded);
@@ -243,6 +253,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal DiagnosticCollector(int maximum) { this.maximum = maximum; }
         internal bool HasAny => diagnostics.Count != 0 || overflowed;
+        internal bool LimitExceeded => overflowed;
         internal void Add(ProductionSpatialGeneratedSetDiagnostic diagnostic)
         {
             if (overflowed) return;
@@ -270,12 +281,55 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal List<JsonNode> Items;
     }
 
+    internal sealed class StrictJsonWorkloadBudget
+    {
+        private readonly SpatialContentValidationWorkloadLimits limits;
+        private long topLevelRecords;
+        private long nestedRecords;
+        private long stringCharacters;
+        private long structuralRecords;
+        private long structuralStringCharacters;
+
+        internal StrictJsonWorkloadBudget(SpatialContentValidationWorkloadLimits limits) { this.limits = limits; }
+        internal int MaximumPropertyNameCharacters => limits.MaximumStringCharacters;
+
+        internal bool TryAddArrayItem(Type elementType, Type rootType, bool unknown)
+        {
+            if (rootType == typeof(ProductionSpatialContentManifest) || unknown)
+                return TryAdd(ref structuralRecords, 1L, limits.MaximumNestedRecords);
+            bool topLevel = !unknown && (elementType == typeof(FloorSpatialConfiguration) ||
+                elementType == typeof(RoomSpatialDefinition) || elementType == typeof(CorridorSpatialDefinition) ||
+                elementType == typeof(FixedSpatialStructureDefinition) ||
+                elementType == typeof(SpatialSocketTypeDefinition));
+            return topLevel
+                ? TryAdd(ref topLevelRecords, 1L, limits.MaximumTopLevelRecords)
+                : TryAdd(ref nestedRecords, 1L, limits.MaximumNestedRecords);
+        }
+
+        internal bool TryAddStringCharacter(Type rootType, bool unknown)
+        {
+            if (rootType == typeof(ProductionSpatialContentManifest) || unknown)
+                return TryAdd(ref structuralStringCharacters, 1L, limits.MaximumStringCharacters);
+            return TryAdd(ref stringCharacters, 1L, limits.MaximumStringCharacters);
+        }
+
+        private static bool TryAdd(ref long current, long amount, long maximum)
+        {
+            if (amount < 0L || current < 0L || maximum < 0L || current > maximum - amount) return false;
+            current += amount;
+            return true;
+        }
+    }
+
     internal static class StrictJson
     {
-        internal static bool TryParse(string text, out JsonNode node, out ProductionSpatialGeneratedSetDiagnostic diagnostic)
+        internal static bool TryParse(string text, Type rootType, DiagnosticCollector issues,
+            StrictJsonWorkloadBudget budget, out JsonNode node,
+            out ProductionSpatialGeneratedSetDiagnostic diagnostic)
         {
-            var reader = new Reader(text); node = null; diagnostic = ProductionSpatialGeneratedSetDiagnostic.None;
-            try { node = reader.Value(0); reader.Space(); if (!reader.End) throw new FormatException(); return true; }
+            var reader = new Reader(text, rootType, issues, budget);
+            node = null; diagnostic = ProductionSpatialGeneratedSetDiagnostic.None;
+            try { node = reader.Value(0, rootType, false); reader.Space(); if (!reader.End) throw new FormatException(); return true; }
             catch (JsonFailure failure) { diagnostic = failure.Diagnostic; return false; }
             catch { diagnostic = ProductionSpatialGeneratedSetDiagnostic.MalformedJson; return false; }
         }
@@ -321,34 +375,95 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private sealed class JsonFailure : Exception { internal JsonFailure(ProductionSpatialGeneratedSetDiagnostic d) { Diagnostic = d; } internal ProductionSpatialGeneratedSetDiagnostic Diagnostic; }
         private sealed class Reader
         {
-            private readonly string s; private int i; internal Reader(string value) { s = value; }
+            private readonly string s;
+            private readonly Type rootType;
+            private readonly DiagnosticCollector issues;
+            private readonly StrictJsonWorkloadBudget budget;
+            private int i;
+            internal Reader(string value, Type rootType, DiagnosticCollector issues,
+                StrictJsonWorkloadBudget budget)
+            { s = value; this.rootType = rootType; this.issues = issues; this.budget = budget; }
             internal bool End => i == s.Length; internal void Space() { while (i < s.Length && " \t\n\r".IndexOf(s[i]) >= 0) i++; }
-            internal JsonNode Value(int depth)
+            internal JsonNode Value(int depth, Type expectedType, bool unknown)
             {
                 if (depth > 64) throw new FormatException(); Space(); if (i >= s.Length) throw new FormatException();
-                char c = s[i]; if (c == '{') return Object(depth); if (c == '[') return Array(depth);
-                if (c == '"') return new JsonNode { Kind = JsonKind.String, Text = String() };
+                char c = s[i]; if (c == '{') return Object(depth, expectedType, unknown); if (c == '[') return Array(depth, expectedType, unknown);
+                if (c == '"') return new JsonNode { Kind = JsonKind.String, Text = String(true, unknown) };
                 if (c == 't' && Literal("true") || c == 'f' && Literal("false")) return new JsonNode { Kind = JsonKind.Boolean };
                 if (c == 'n' && Literal("null")) return new JsonNode { Kind = JsonKind.Null };
                 if (c == '-' || char.IsDigit(c)) return Number(); throw new FormatException();
             }
-            private JsonNode Object(int depth)
+            private JsonNode Object(int depth, Type expectedType, bool unknown)
             {
                 i++; var fields = new List<KeyValuePair<string, JsonNode>>(); var names = new HashSet<string>(StringComparer.Ordinal); Space();
                 if (Take('}')) return new JsonNode { Kind = JsonKind.Object, Fields = fields };
-                while (true) { Space(); string name = String(); if (!names.Add(name)) throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.DuplicateField); Space(); Need(':'); fields.Add(new KeyValuePair<string, JsonNode>(name, Value(depth + 1))); Space(); if (Take('}')) break; Need(','); }
+                FieldInfo[] expectedFields = unknown || expectedType == null
+                    ? Array.Empty<FieldInfo>()
+                    : expectedType.GetFields(BindingFlags.Instance | BindingFlags.Public);
+                while (true)
+                {
+                    Space(); string name = String(false, false);
+                    if (!names.Add(name)) throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.DuplicateField);
+                    Space(); Need(':');
+                    FieldInfo exact = expectedFields.FirstOrDefault(field => field.Name == name);
+                    if (exact == null)
+                    {
+                        FieldInfo ambiguous = expectedFields.FirstOrDefault(field =>
+                            string.Equals(field.Name, name, StringComparison.OrdinalIgnoreCase));
+                        issues.Add(ambiguous != null ? ProductionSpatialGeneratedSetDiagnostic.CaseAmbiguousField
+                            : ProductionSpatialGeneratedSetDiagnostic.UnknownField);
+                        if (issues.LimitExceeded) throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded);
+                        JsonNode invalidValue = Value(depth + 1, ambiguous?.FieldType, ambiguous == null);
+                        if (ambiguous != null)
+                            fields.Add(new KeyValuePair<string, JsonNode>(ambiguous.Name, invalidValue));
+                    }
+                    else fields.Add(new KeyValuePair<string, JsonNode>(name, Value(depth + 1, exact.FieldType, false)));
+                    Space(); if (Take('}')) break; Need(',');
+                }
                 return new JsonNode { Kind = JsonKind.Object, Fields = fields };
             }
-            private JsonNode Array(int depth)
+            private JsonNode Array(int depth, Type expectedType, bool unknown)
             {
                 i++; var items = new List<JsonNode>(); Space(); if (Take(']')) return new JsonNode { Kind = JsonKind.Array, Items = items };
-                while (true) { items.Add(Value(depth + 1)); Space(); if (Take(']')) break; Need(','); }
+                Type elementType = !unknown && expectedType != null && expectedType.IsArray
+                    ? expectedType.GetElementType() : null;
+                while (true)
+                {
+                    if (!budget.TryAddArrayItem(elementType, rootType, unknown))
+                        throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+                    JsonNode item = Value(depth + 1, elementType, unknown);
+                    if (!unknown) items.Add(item);
+                    Space(); if (Take(']')) break; Need(',');
+                }
                 return new JsonNode { Kind = JsonKind.Array, Items = items };
             }
             private JsonNode Number() { int start = i++; while (i < s.Length && "0123456789+-.eE".IndexOf(s[i]) >= 0) i++; return new JsonNode { Kind = JsonKind.Number, Text = s.Substring(start, i - start) }; }
-            private string String()
+            private string String(bool contentValue, bool unknown)
             {
-                Need('"'); var b = new StringBuilder(); while (i < s.Length) { char c = s[i++]; if (c == '"') return b.ToString(); if (c < 0x20) throw new FormatException(); if (c != '\\') { b.Append(c); continue; } if (i >= s.Length) throw new FormatException(); char e = s[i++]; if ("\"\\/".IndexOf(e) >= 0) b.Append(e); else if (e == 'b') b.Append('\b'); else if (e == 'f') b.Append('\f'); else if (e == 'n') b.Append('\n'); else if (e == 'r') b.Append('\r'); else if (e == 't') b.Append('\t'); else if (e == 'u' && i + 4 <= s.Length) { b.Append((char)Convert.ToInt32(s.Substring(i, 4), 16)); i += 4; } else throw new FormatException(); } throw new FormatException();
+                Need('"'); var b = new StringBuilder();
+                while (i < s.Length)
+                {
+                    char c = s[i++]; if (c == '"') return b.ToString(); if (c < 0x20) throw new FormatException();
+                    char decoded;
+                    if (c != '\\') decoded = c;
+                    else
+                    {
+                        if (i >= s.Length) throw new FormatException(); char e = s[i++];
+                        if ("\"\\/".IndexOf(e) >= 0) decoded = e;
+                        else if (e == 'b') decoded = '\b'; else if (e == 'f') decoded = '\f';
+                        else if (e == 'n') decoded = '\n'; else if (e == 'r') decoded = '\r';
+                        else if (e == 't') decoded = '\t';
+                        else if (e == 'u' && i + 4 <= s.Length)
+                        { decoded = (char)Convert.ToInt32(s.Substring(i, 4), 16); i += 4; }
+                        else throw new FormatException();
+                    }
+                    if ((contentValue || unknown) && !budget.TryAddStringCharacter(rootType, unknown))
+                        throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+                    if (!contentValue && b.Length >= budget.MaximumPropertyNameCharacters)
+                        throw new JsonFailure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+                    b.Append(decoded);
+                }
+                throw new FormatException();
             }
             private bool Literal(string value) { if (i + value.Length > s.Length || s.Substring(i, value.Length) != value) return false; i += value.Length; return true; }
             private bool Take(char c) { if (i < s.Length && s[i] == c) { i++; return true; } return false; }
