@@ -171,6 +171,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             AuthoringSchema schema = ParseSchema(schemaObject, issues);
             if (schema == null || issues.Count != 0) return Failed(issues);
             ValidateManifestTables(manifest, schema, issues);
+            ValidateProjectorCompatibility(schema, issues);
             if (issues.Count != 0) return Failed(issues);
 
             HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath, "README.md" }), StringComparer.Ordinal);
@@ -194,7 +195,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             catch (KeyNotFoundException) { Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath); return Failed(issues); }
             catch (InvalidOperationException) { Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath); return Failed(issues); }
             HashSet<string> localizationKeys = new HashSet<string>(projection.English.entries.Select(entry => entry.key), StringComparer.Ordinal);
-            SpatialContentValidationResult validation = SpatialContentValidator.Validate(projection.Catalog, limits, localizationKeys);
+            long additionalEnglishCharacters = CountAdditionalEnglishCharacters(projection.English);
+            SpatialContentValidationResult validation = SpatialContentValidator.Validate(
+                projection.Catalog, limits, localizationKeys, additionalEnglishCharacters);
             if (!validation.IsValid)
                 Add(issues, validation.Issues.Any(issue => issue.Reason == SpatialContentValidationReason.WorkloadExceeded)
                     ? DungeonSpatialAuthoringDiagnostic.ProjectedCatalogWorkloadExceeded : DungeonSpatialAuthoringDiagnostic.ProjectedCatalogInvalid);
@@ -249,11 +252,17 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             foreach(var pair in enumObject) { if(!(pair.Value is List<object> values)||values.Any(v=>!(v is string))||values.Count==0||values.Cast<string>().Distinct(StringComparer.Ordinal).Count()!=values.Count) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,column:pair.Key); else enums[pair.Key]=values.Cast<string>().ToArray(); }
             var tables=new List<AuthoringTable>();
             foreach(object value in tableArray) { AuthoringTable table=ParseSchemaTable(value,formats,enums,issues); if(table!=null) tables.Add(table); }
-            if(tables.Count!=17 || tables.Select(t=>t.Id).Distinct(StringComparer.Ordinal).Count()!=tables.Count || tables.Select(t=>t.Path).Distinct(StringComparer.Ordinal).Count()!=tables.Count) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath);
+            bool identitiesValid = tables.Count == 17 &&
+                tables.All(table => !string.IsNullOrWhiteSpace(table.Id) && !string.IsNullOrWhiteSpace(table.Path)) &&
+                tables.Select(table => table.Id).Distinct(StringComparer.Ordinal).Count() == tables.Count &&
+                tables.Select(table => table.Path).Distinct(StringComparer.Ordinal).Count() == tables.Count;
+            if (!identitiesValid) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath);
+            if (!identitiesValid) return null;
             var tableIndex=tables.ToDictionary(t=>t.Id,StringComparer.Ordinal);
             var foreignKeys=new List<AuthoringForeignKey>(); foreach(object value in fkArray) { AuthoringForeignKey key=ParseForeignKey(value,tableIndex,issues); if(key!=null) foreignKeys.Add(key); }
             var relationships=new List<AuthoringChildRelationship>(); var owners=new Dictionary<string,string>(StringComparer.Ordinal);
             foreach(object value in childArray) { AuthoringChildRelationship relation=ParseRelationship(value,tableIndex,owners,issues); if(relation!=null) relationships.Add(relation); }
+            ValidateRelationshipForeignKeys(relationships, foreignKeys, tableIndex, issues);
             return issues.Count==0 ? new AuthoringSchema(formats,enums,tables.ToArray(),foreignKeys.ToArray(),relationships.ToArray()) : null;
         }
         private static AuthoringTable ParseSchemaTable(object value,Dictionary<string,string> formats,Dictionary<string,string[]> enums,List<DungeonSpatialAuthoringIssue> issues)
@@ -264,6 +273,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             if(!GetString(root,"id",out string id)||!GetString(root,"path",out string path)||!TryArray(root,"columns",out List<object> columns)||
                !StringArray(root,"primaryKey",out string[] primary)||!StringArray(root,"canonicalOrder",out string[] order))
             { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
+            if (string.IsNullOrWhiteSpace(id)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath);
             if(!IsNormalizedPath(path)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidOrDuplicateTablePath,SchemaPath,id);
             if(IsNormalizedPath(path) && Path.GetFileNameWithoutExtension(path) != id) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id);
             var parsedColumns=new List<AuthoringColumn>();
@@ -274,6 +284,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 if(!GetString(column,"name",out string name)||!GetString(column,"type",out string type)||!GetBool(column,"required",out bool required)||!GetBool(column,"allowBlank",out bool allowBlank))
                 { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath,id); continue; }
                 string enumId=column.TryGetValue("enum",out object enumValue)?enumValue as string:null;
+                if (string.IsNullOrWhiteSpace(name)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id);
                 if(!ColumnTypes.Contains(type)||(type!="enum"&&!formats.ContainsKey(type))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidFormat,SchemaPath,id,column:name);
                 if(type=="enum" && (enumId==null||!enums.ContainsKey(enumId))) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:name);
                 if(type!="enum" && column.ContainsKey("enum")) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:name);
@@ -287,6 +298,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 else unique=arrays.Cast<List<object>>().Select(array=>array.Cast<string>().ToArray()).ToArray();
             }
             var names=new HashSet<string>(parsedColumns.Select(c=>c.Name),StringComparer.Ordinal);
+            if (primary.Length == 0 || order.Length == 0 || primary.Distinct(StringComparer.Ordinal).Count() != primary.Length ||
+                order.Distinct(StringComparer.Ordinal).Count() != order.Length || unique.Any(key => key.Length == 0 || key.Distinct(StringComparer.Ordinal).Count() != key.Length))
+                Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id);
             foreach(string key in primary.Concat(order).Concat(unique.SelectMany(x=>x))) if(!names.Contains(key)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,id,column:key);
             return new AuthoringTable(id,path,parsedColumns.ToArray(),primary,unique,order);
         }
@@ -295,7 +309,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         {
             if(!(value is Dictionary<string,object> root)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType,SchemaPath); return null; }
             ValidateExactFields(root,new[]{"table","columns","references"},SchemaPath,issues);
-            if(!GetString(root,"table",out string table)||!StringArray(root,"columns",out string[] columns)||!StringArray(root,"references",out string[] references)||columns.Length!=references.Length)
+            if(!GetString(root,"table",out string table)||!StringArray(root,"columns",out string[] columns)||!StringArray(root,"references",out string[] references)||columns.Length==0||columns.Length!=references.Length)
             { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath); return null; }
             if(!tables.TryGetValue(table,out AuthoringTable owner)) { Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,table); return null; }
             var referenceTables=new string[references.Length]; var referenceColumns=new string[references.Length];
@@ -316,10 +330,101 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             foreach(string child in children)
             {
                 if(!tables.ContainsKey(child)) Add(issues,DungeonSpatialAuthoringDiagnostic.InvalidSchema,SchemaPath,parent,column:child);
-                else if(owners.TryGetValue(child,out string existing)&&existing!=parent) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateAuthority,SchemaPath,child);
+                else if(owners.ContainsKey(child)) Add(issues,DungeonSpatialAuthoringDiagnostic.DuplicateAuthority,SchemaPath,child);
                 else owners[child]=parent;
             }
             return new AuthoringChildRelationship(parent,children);
+        }
+
+        private static void ValidateRelationshipForeignKeys(
+            IEnumerable<AuthoringChildRelationship> relationships,
+            IEnumerable<AuthoringForeignKey> foreignKeys,
+            IReadOnlyDictionary<string, AuthoringTable> tables,
+            List<DungeonSpatialAuthoringIssue> issues)
+        {
+            foreach (AuthoringChildRelationship relationship in relationships)
+            {
+                AuthoringTable parent = tables[relationship.Parent];
+                foreach (string childId in relationship.Children)
+                {
+                    AuthoringTable child = tables[childId];
+                    var ownerMappings = foreignKeys.Where(key => key.Table == childId)
+                        .SelectMany(key => key.Columns.Select((column, index) => new
+                        {
+                            Column = column,
+                            ReferenceTable = key.ReferenceTables[index],
+                            ReferenceColumn = key.ReferenceColumns[index]
+                        }))
+                        .Where(mapping => mapping.ReferenceTable == parent.Id).ToArray();
+                    bool ownsParent = ownerMappings.Length == parent.PrimaryKey.Length &&
+                        parent.PrimaryKey.All(parentColumn => ownerMappings.Count(mapping =>
+                            mapping.ReferenceColumn == parentColumn && child.IndexOf(mapping.Column) >= 0 &&
+                            child.Columns[child.IndexOf(mapping.Column)].Type ==
+                            parent.Columns[parent.IndexOf(parentColumn)].Type) == 1);
+                    if (!ownsParent)
+                        Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, childId);
+                }
+            }
+        }
+
+        private static void ValidateProjectorCompatibility(AuthoringSchema schema, List<DungeonSpatialAuthoringIssue> issues)
+        {
+            string[] orientationTokens = { "Zero", "Ninety", "OneEighty", "TwoSeventy" };
+            RequireEnum(schema, "CardinalOrientation", orientationTokens, issues);
+            RequireEnum(schema, "CorridorSpatialCategory", new[] { "Straight" }, issues);
+            RequireEnum(schema, "FixedSpatialStructureKind", new[] { "Entrance", "CompletionTerminal" }, issues);
+
+            var numericColumns = new HashSet<string>(new[]
+            {
+                "FloorIndex", "MinimumX", "MinimumY", "Width", "Height", "FinalFloorSpaceCapacity",
+                "OptionalBranchAllowance", "MaximumConnectionCount", "MonsterCapacity", "TrapCapacity",
+                "LootCapacity", "OffsetX", "OffsetY", "MinimumLength", "MaximumLength"
+            }, StringComparer.Ordinal);
+            foreach (AuthoringTable table in schema.Tables)
+            {
+                if (table.PrimaryKey.Length == 0 || table.CanonicalOrder.Length == 0)
+                    Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id);
+                foreach (AuthoringColumn column in table.Columns)
+                {
+                    string expectedType = ExpectedProjectionType(column.Name, numericColumns);
+                    if (column.Type != expectedType || !column.Required || column.AllowBlank)
+                        Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id, column: column.Name);
+                    string expectedEnum = ExpectedProjectionEnum(column.Name);
+                    if (expectedType == "enum" && column.EnumId != expectedEnum)
+                        Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id, column: column.Name);
+                }
+            }
+        }
+
+        private static string ExpectedProjectionType(string column, ISet<string> numericColumns)
+        {
+            if (numericColumns.Contains(column)) return "int32";
+            if (column == "Orientation" || column == "Facing" || column == "Category" || column == "Kind") return "enum";
+            if (column == "LocalizationKey" || column == "Key") return "localizationKey";
+            if (column == "Text") return "localizedText";
+            if (column == "ConnectionPointId") return "ownerScopedId";
+            return "spatialId";
+        }
+
+        private static string ExpectedProjectionEnum(string column)
+        {
+            if (column == "Orientation" || column == "Facing") return "CardinalOrientation";
+            if (column == "Category") return "CorridorSpatialCategory";
+            return "FixedSpatialStructureKind";
+        }
+
+        private static void RequireEnum(AuthoringSchema schema, string id, string[] expected, List<DungeonSpatialAuthoringIssue> issues)
+        {
+            if (!schema.Enums.TryGetValue(id, out string[] actual) || !actual.SequenceEqual(expected, StringComparer.Ordinal))
+                Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, column: id);
+        }
+
+        private static long CountAdditionalEnglishCharacters(StringTable table)
+        {
+            long characters = (table.schema?.Length ?? 0) + (table.language?.Length ?? 0);
+            foreach (StringEntry entry in table.entries ?? Array.Empty<StringEntry>())
+                characters += entry?.text?.Length ?? 0;
+            return characters;
         }
 
         private static void ValidateManifestTables(AuthoringManifest manifest,AuthoringSchema schema,List<DungeonSpatialAuthoringIssue> issues)
@@ -464,7 +569,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         private static bool GetBool(Dictionary<string,object> root,string field,out bool value) { value=false; if(!root.TryGetValue(field,out object item)||!(item is bool)) return false; value=(bool)item; return true; }
         private static int ToInt(object value) => value is long number&&number>=int.MinValue&&number<=int.MaxValue?(int)number:0;
         private static bool TryInt(string value,out int result,out bool overflow) { result=0; overflow=false; if(string.IsNullOrEmpty(value)||value[0]=='+'||(value.Length>1&&value[0]=='0')||value.StartsWith("-0",StringComparison.Ordinal)) return false; if(!long.TryParse(value,NumberStyles.AllowLeadingSign,CultureInfo.InvariantCulture,out long number)) { overflow=value.All(c=>c=='-'||(c>='0'&&c<='9')); return false; } if(number<int.MinValue||number>int.MaxValue) { overflow=true; return false; } result=(int)number; return true; }
-        private static int ParseInt(string value) { TryInt(value,out int result,out _); return result; }
+        private static int ParseInt(string value) => int.Parse(
+            value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
         private static T ParseEnum<T>(string value) where T:struct => (T)Enum.Parse(typeof(T),value,false);
         private static DungeonSpatialAuthoringResult Failed(List<DungeonSpatialAuthoringIssue> issues) => new DungeonSpatialAuthoringResult(null,issues);
         private static void Add(List<DungeonSpatialAuthoringIssue> issues,DungeonSpatialAuthoringDiagnostic diagnostic,string path="",string table="",string record="",string column="") => issues.Add(new DungeonSpatialAuthoringIssue { Diagnostic=diagnostic, RelativePath=path??"", TableId=table??"", RecordKey=record??"", Column=column??"" });
