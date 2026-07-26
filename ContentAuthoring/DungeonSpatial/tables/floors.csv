@@ -1,0 +1,2 @@
+FloorDefinitionId,FloorIndex,MinimumX,MinimumY,Width,Height,FinalFloorSpaceCapacity,OptionalBranchAllowance,EntranceStructureDefinitionId,CompletionStructureDefinitionId
+spatial.floor.01,0,0,0,12,12,60,1,spatial.fixed.entrance_hall,spatial.fixed.completion_terminal

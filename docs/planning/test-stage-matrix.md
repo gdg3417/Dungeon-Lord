@@ -55,3 +55,7 @@ GD65B1 leaves save schema 6, the inactive catalog, and current runtime/save auth
 
 
 **GD65B2A evidence boundary:** this packet is documentation-only and adds no Unity evidence or seventh named test class. The six approved identifiable responsibilities remain `ProductionSpatialContentWorkloadLimitTests`, `ProductionSpatialContentExportTests`, `ProductionSpatialContentRecoveryTests`, `ProductionSpatialContentLoadingTests`, `ProductionSpatialContentBuildGateTests`, and `ProductionSpatialContentScalabilityTests`. Future deterministic-export responsibilities include authoring-package parsing, exact schema validation, duplicate-authority rejection, foreign-key validation, normalized-text enforcement, and row-permutation byte determinism. Existing GD65B1 workload/scalability evidence is preserved. UAT remains not applicable while the catalog is inactive.
+
+## GD65B2B source-package coverage
+
+`ProductionSpatialContentExportTests` now begins its approved deterministic-export responsibility with Unit coverage for strict manifest/schema/CSV parsing and SIT coverage for package-to-detached-catalog/string-table projection through existing workload preflight, validation, and canonicalization. UAT is not applicable because GD65B2B does not publish or activate runtime content. Unity compilation and EditMode execution remain owner-run merge evidence.

@@ -1,0 +1,6 @@
+RoomDefinitionId,Orientation
+spatial.room.basic,Zero
+spatial.room.large_chamber,Ninety
+spatial.room.large_chamber,Zero
+spatial.room.rectangle,Ninety
+spatial.room.rectangle,Zero

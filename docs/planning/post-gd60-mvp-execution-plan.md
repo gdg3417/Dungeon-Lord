@@ -230,3 +230,7 @@ GD65B1 created the separately authored approved limits configuration, strict par
 ### GD65B2A reconciliation amendment
 
 Main is reconciled through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59`. GD65B1 is complete. GD65B2A approves the documentation-only [production authoring source contract](gd65b-production-authoring-source-contract.md); the future package is not implemented. **GD65B2B - Implement normalized production spatial authoring package and approved Floor 1 records** is next, with source-package parsing/schema/normalization/foreign-key/determinism tests but no runtime/save activation. Later MVP phase scope is unchanged. GD66 remains blocked until all GD65B records, stages, tests, generated outputs, and evidence are complete.
+
+### GD65B2B status
+
+GD65B2B implements the normalized authoring package, the approved Floor 1 records, strict editor-only parsing/projection, and focused source-package tests. GD65B2A remains the architecture contract. Deterministic runtime-output serialization, reparse/revalidation evidence, recoverable publication, production loading/composition assignment, pre-build gating, and complete evidence remain later GD65B packets. The catalog remains inactive, save schema remains 6, runtime/save authority is unchanged, and GD66 remains blocked.

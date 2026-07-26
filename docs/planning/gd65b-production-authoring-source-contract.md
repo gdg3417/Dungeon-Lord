@@ -141,3 +141,7 @@ The project owner approved this architecture in GD65B2A on 2026-07-25: normalize
 ## 16. Current implementation boundary
 
 At baseline `917b763dc0e5315fdd5d835da4b5f5de43f9ba59`, GD65B1's limits asset, strict parser/conversion boundary, and workload/scalability tests exist. The authoring package described here does not. Production records, English source entries, generated catalog/table/manifest, exporter, recovery, loader, composition assignment, pre-build integration, and complete evidence remain incomplete. Current abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema is 6; the spatial catalog is inactive; and GD66 is blocked.
+
+## 14. GD65B2B implementation status
+
+GD65B2B implements the approved package at `ContentAuthoring/DungeonSpatial/`, including the manifest-selected `dungeon_spatial_authoring` version 1 boundary, machine-readable schema, 17 normalized CSV tables, approved Floor 1 records, six English entries, and a strict editor-only parser/projector. The architecture decisions in this contract remain unchanged. Generated runtime JSON, deterministic output serialization, recoverable publication, loading/composition assignment, pre-build gating, activation, and complete GD65B evidence remain absent. Save schema remains 6, existing runtime/save authority is unchanged, the catalog remains inactive, and GD66 remains blocked.

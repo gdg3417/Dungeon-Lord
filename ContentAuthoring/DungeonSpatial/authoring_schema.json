@@ -1,0 +1,853 @@
+{
+  "formats": {
+    "spatialId": "lowercase ASCII dot-separated stable identifier",
+    "localizationKey": "lowercase ASCII dot-separated key",
+    "int32": "invariant signed decimal ASCII without leading plus or leading zeroes",
+    "textNormalization": "source-preserving UTF-8; no implicit trim or normalization"
+  },
+  "enums": {
+    "CardinalOrientation": [
+      "Zero",
+      "Ninety",
+      "OneEighty",
+      "TwoSeventy"
+    ],
+    "CorridorSpatialCategory": [
+      "Straight"
+    ],
+    "FixedSpatialStructureKind": [
+      "Entrance",
+      "CompletionTerminal"
+    ]
+  },
+  "tables": [
+    {
+      "id": "floors",
+      "path": "tables/floors.csv",
+      "columns": [
+        {
+          "name": "FloorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "FloorIndex",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MinimumX",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MinimumY",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Width",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Height",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "FinalFloorSpaceCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OptionalBranchAllowance",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "EntranceStructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "CompletionStructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "FloorDefinitionId"
+      ],
+      "canonicalOrder": [
+        "FloorDefinitionId"
+      ],
+      "uniqueKeys": [
+        [
+          "FloorIndex"
+        ]
+      ]
+    },
+    {
+      "id": "floor_allowed_rooms",
+      "path": "tables/floor_allowed_rooms.csv",
+      "columns": [
+        {
+          "name": "FloorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "RoomDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "FloorDefinitionId",
+        "RoomDefinitionId"
+      ],
+      "canonicalOrder": [
+        "FloorDefinitionId",
+        "RoomDefinitionId"
+      ]
+    },
+    {
+      "id": "floor_allowed_corridors",
+      "path": "tables/floor_allowed_corridors.csv",
+      "columns": [
+        {
+          "name": "FloorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "CorridorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "FloorDefinitionId",
+        "CorridorDefinitionId"
+      ],
+      "canonicalOrder": [
+        "FloorDefinitionId",
+        "CorridorDefinitionId"
+      ]
+    },
+    {
+      "id": "rooms",
+      "path": "tables/rooms.csv",
+      "columns": [
+        {
+          "name": "RoomDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Width",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Height",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MaximumConnectionCount",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MonsterCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "TrapCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "LootCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "LocalizationKey",
+          "type": "localizationKey",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "RoomDefinitionId"
+      ],
+      "canonicalOrder": [
+        "RoomDefinitionId"
+      ]
+    },
+    {
+      "id": "room_orientations",
+      "path": "tables/room_orientations.csv",
+      "columns": [
+        {
+          "name": "RoomDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Orientation",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CardinalOrientation"
+        }
+      ],
+      "primaryKey": [
+        "RoomDefinitionId",
+        "Orientation"
+      ],
+      "canonicalOrder": [
+        "RoomDefinitionId",
+        "Orientation"
+      ]
+    },
+    {
+      "id": "room_reserved_offsets",
+      "path": "tables/room_reserved_offsets.csv",
+      "columns": [
+        {
+          "name": "RoomDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetX",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetY",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "RoomDefinitionId",
+        "OffsetX",
+        "OffsetY"
+      ],
+      "canonicalOrder": [
+        "RoomDefinitionId",
+        "OffsetX",
+        "OffsetY"
+      ]
+    },
+    {
+      "id": "room_connection_points",
+      "path": "tables/room_connection_points.csv",
+      "columns": [
+        {
+          "name": "RoomDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "ConnectionPointId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetX",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetY",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Facing",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CardinalOrientation"
+        },
+        {
+          "name": "SocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "RoomDefinitionId",
+        "ConnectionPointId"
+      ],
+      "canonicalOrder": [
+        "RoomDefinitionId",
+        "ConnectionPointId"
+      ]
+    },
+    {
+      "id": "corridors",
+      "path": "tables/corridors.csv",
+      "columns": [
+        {
+          "name": "CorridorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "LocalizationKey",
+          "type": "localizationKey",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Category",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CorridorSpatialCategory"
+        },
+        {
+          "name": "MinimumLength",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MaximumLength",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Width",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MonsterCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "TrapCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "LootCapacity",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "CorridorDefinitionId"
+      ],
+      "canonicalOrder": [
+        "CorridorDefinitionId"
+      ]
+    },
+    {
+      "id": "corridor_orientations",
+      "path": "tables/corridor_orientations.csv",
+      "columns": [
+        {
+          "name": "CorridorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Orientation",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CardinalOrientation"
+        }
+      ],
+      "primaryKey": [
+        "CorridorDefinitionId",
+        "Orientation"
+      ],
+      "canonicalOrder": [
+        "CorridorDefinitionId",
+        "Orientation"
+      ]
+    },
+    {
+      "id": "corridor_compatible_sockets",
+      "path": "tables/corridor_compatible_sockets.csv",
+      "columns": [
+        {
+          "name": "CorridorDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "SocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "CorridorDefinitionId",
+        "SocketTypeId"
+      ],
+      "canonicalOrder": [
+        "CorridorDefinitionId",
+        "SocketTypeId"
+      ]
+    },
+    {
+      "id": "fixed_structures",
+      "path": "tables/fixed_structures.csv",
+      "columns": [
+        {
+          "name": "StructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "LocalizationKey",
+          "type": "localizationKey",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Kind",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "FixedSpatialStructureKind"
+        },
+        {
+          "name": "Width",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Height",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "MaximumConnectionCount",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "StructureDefinitionId"
+      ],
+      "canonicalOrder": [
+        "StructureDefinitionId"
+      ]
+    },
+    {
+      "id": "fixed_structure_orientations",
+      "path": "tables/fixed_structure_orientations.csv",
+      "columns": [
+        {
+          "name": "StructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Orientation",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CardinalOrientation"
+        }
+      ],
+      "primaryKey": [
+        "StructureDefinitionId",
+        "Orientation"
+      ],
+      "canonicalOrder": [
+        "StructureDefinitionId",
+        "Orientation"
+      ]
+    },
+    {
+      "id": "fixed_structure_reserved_offsets",
+      "path": "tables/fixed_structure_reserved_offsets.csv",
+      "columns": [
+        {
+          "name": "StructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetX",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetY",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "StructureDefinitionId",
+        "OffsetX",
+        "OffsetY"
+      ],
+      "canonicalOrder": [
+        "StructureDefinitionId",
+        "OffsetX",
+        "OffsetY"
+      ]
+    },
+    {
+      "id": "fixed_structure_connection_points",
+      "path": "tables/fixed_structure_connection_points.csv",
+      "columns": [
+        {
+          "name": "StructureDefinitionId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "ConnectionPointId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetX",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "OffsetY",
+          "type": "int32",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Facing",
+          "type": "enum",
+          "required": true,
+          "allowBlank": false,
+          "enum": "CardinalOrientation"
+        },
+        {
+          "name": "SocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "StructureDefinitionId",
+        "ConnectionPointId"
+      ],
+      "canonicalOrder": [
+        "StructureDefinitionId",
+        "ConnectionPointId"
+      ]
+    },
+    {
+      "id": "socket_types",
+      "path": "tables/socket_types.csv",
+      "columns": [
+        {
+          "name": "SocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "SocketTypeId"
+      ],
+      "canonicalOrder": [
+        "SocketTypeId"
+      ]
+    },
+    {
+      "id": "socket_compatibility",
+      "path": "tables/socket_compatibility.csv",
+      "columns": [
+        {
+          "name": "SocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "CompatibleSocketTypeId",
+          "type": "spatialId",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "SocketTypeId",
+        "CompatibleSocketTypeId"
+      ],
+      "canonicalOrder": [
+        "SocketTypeId",
+        "CompatibleSocketTypeId"
+      ]
+    },
+    {
+      "id": "localization_en",
+      "path": "tables/localization_en.csv",
+      "columns": [
+        {
+          "name": "Key",
+          "type": "localizationKey",
+          "required": true,
+          "allowBlank": false
+        },
+        {
+          "name": "Text",
+          "type": "localizedText",
+          "required": true,
+          "allowBlank": false
+        }
+      ],
+      "primaryKey": [
+        "Key"
+      ],
+      "canonicalOrder": [
+        "Key"
+      ]
+    }
+  ],
+  "foreignKeys": [
+    {
+      "table": "floor_allowed_rooms",
+      "columns": [
+        "FloorDefinitionId",
+        "RoomDefinitionId"
+      ],
+      "references": [
+        "floors.FloorDefinitionId",
+        "rooms.RoomDefinitionId"
+      ]
+    },
+    {
+      "table": "floor_allowed_corridors",
+      "columns": [
+        "FloorDefinitionId",
+        "CorridorDefinitionId"
+      ],
+      "references": [
+        "floors.FloorDefinitionId",
+        "corridors.CorridorDefinitionId"
+      ]
+    },
+    {
+      "table": "room_orientations",
+      "columns": [
+        "RoomDefinitionId"
+      ],
+      "references": [
+        "rooms.RoomDefinitionId"
+      ]
+    },
+    {
+      "table": "room_reserved_offsets",
+      "columns": [
+        "RoomDefinitionId"
+      ],
+      "references": [
+        "rooms.RoomDefinitionId"
+      ]
+    },
+    {
+      "table": "room_connection_points",
+      "columns": [
+        "RoomDefinitionId",
+        "SocketTypeId"
+      ],
+      "references": [
+        "rooms.RoomDefinitionId",
+        "socket_types.SocketTypeId"
+      ]
+    },
+    {
+      "table": "corridor_orientations",
+      "columns": [
+        "CorridorDefinitionId"
+      ],
+      "references": [
+        "corridors.CorridorDefinitionId"
+      ]
+    },
+    {
+      "table": "corridor_compatible_sockets",
+      "columns": [
+        "CorridorDefinitionId",
+        "SocketTypeId"
+      ],
+      "references": [
+        "corridors.CorridorDefinitionId",
+        "socket_types.SocketTypeId"
+      ]
+    },
+    {
+      "table": "fixed_structure_orientations",
+      "columns": [
+        "StructureDefinitionId"
+      ],
+      "references": [
+        "fixed_structures.StructureDefinitionId"
+      ]
+    },
+    {
+      "table": "fixed_structure_reserved_offsets",
+      "columns": [
+        "StructureDefinitionId"
+      ],
+      "references": [
+        "fixed_structures.StructureDefinitionId"
+      ]
+    },
+    {
+      "table": "fixed_structure_connection_points",
+      "columns": [
+        "StructureDefinitionId",
+        "SocketTypeId"
+      ],
+      "references": [
+        "fixed_structures.StructureDefinitionId",
+        "socket_types.SocketTypeId"
+      ]
+    },
+    {
+      "table": "socket_compatibility",
+      "columns": [
+        "SocketTypeId",
+        "CompatibleSocketTypeId"
+      ],
+      "references": [
+        "socket_types.SocketTypeId",
+        "socket_types.SocketTypeId"
+      ]
+    },
+    {
+      "table": "rooms",
+      "columns": [
+        "LocalizationKey"
+      ],
+      "references": [
+        "localization_en.Key"
+      ]
+    },
+    {
+      "table": "corridors",
+      "columns": [
+        "LocalizationKey"
+      ],
+      "references": [
+        "localization_en.Key"
+      ]
+    },
+    {
+      "table": "fixed_structures",
+      "columns": [
+        "LocalizationKey"
+      ],
+      "references": [
+        "localization_en.Key"
+      ]
+    }
+  ],
+  "childRelationships": [
+    {
+      "parent": "floors",
+      "children": [
+        "floor_allowed_rooms",
+        "floor_allowed_corridors"
+      ]
+    },
+    {
+      "parent": "rooms",
+      "children": [
+        "room_orientations",
+        "room_reserved_offsets",
+        "room_connection_points"
+      ]
+    },
+    {
+      "parent": "corridors",
+      "children": [
+        "corridor_orientations",
+        "corridor_compatible_sockets"
+      ]
+    },
+    {
+      "parent": "fixed_structures",
+      "children": [
+        "fixed_structure_orientations",
+        "fixed_structure_reserved_offsets",
+        "fixed_structure_connection_points"
+      ]
+    },
+    {
+      "parent": "socket_types",
+      "children": [
+        "socket_compatibility"
+      ]
+    }
+  ]
+}
