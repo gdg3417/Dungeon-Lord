@@ -449,3 +449,7 @@ This amendment does not alter or renumber any of the 72 approved rows and change
 ## GD65B2B implementation status
 
 GD65B2B materializes the unchanged 72-row approval register as the normalized source package and projects its six approved English entries into a detached editor-only `StringTable`. It changes no approved value and adds no new record. Generated runtime output and all activation/loading/save work remain absent; save schema remains 6 and GD66 remains blocked.
+
+## Current deterministic generated-set implementation step
+
+GD65B2B is complete. The current packet adds pure deterministic construction and strict atomic reparse/revalidation of the exact three approved generated outputs in memory. No generated runtime JSON is committed and no filesystem publication exists. Recoverable publication, loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. Save schema remains 6, the spatial catalog remains inactive, and current runtime/save authority is unchanged.
