@@ -735,6 +735,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(Enumerable.Range(1, 45), layoutReasons);
         }
 
+        [Test]
+        public void AdditionalStringCharacters_AccumulateWithLegacyWorkloadWithoutMutation()
+        {
+            SpatialContentCatalog catalog = Valid();
+            HashSet<string> localization = AllLocalizationKeys(catalog);
+            string catalogBefore = JsonUtility.ToJson(catalog);
+            string[] localizationBefore = localization.OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            int legacyCharacters = CountAuthoredCharacters(catalog) + localization.Sum(StringLength);
+            const int additional = 17;
+            SpatialContentValidationWorkloadLimits exact = Limits(characters: legacyCharacters + additional);
+
+            SpatialContentValidationResult legacy = SpatialContentValidator.Validate(catalog, exact, localization);
+            SpatialContentValidationResult zero = SpatialContentValidator.Validate(catalog, exact, localization, 0);
+            SpatialContentValidationResult boundary = SpatialContentValidator.Validate(catalog, exact, localization, additional);
+            SpatialContentValidationResult over = SpatialContentValidator.Validate(catalog, exact, localization, additional + 1);
+            SpatialContentValidationResult negative = SpatialContentValidator.Validate(catalog, exact, localization, -1);
+
+            Assert.That(legacy.IsValid, Is.True);
+            CollectionAssert.AreEqual(legacy.Issues.Select(issue => issue.Reason), zero.Issues.Select(issue => issue.Reason));
+            Assert.That(boundary.IsValid, Is.True);
+            Assert.That(over.Issues.Single().Reason, Is.EqualTo(SpatialContentValidationReason.WorkloadExceeded));
+            Assert.That(negative.Issues.Single().Reason, Is.EqualTo(SpatialContentValidationReason.WorkloadExceeded));
+            Assert.That(JsonUtility.ToJson(catalog), Is.EqualTo(catalogBefore));
+            CollectionAssert.AreEqual(localizationBefore, localization.OrderBy(value => value, StringComparer.Ordinal));
+        }
+
         private static HashSet<string> AllLocalizationKeys(SpatialContentCatalog catalog) =>
             new HashSet<string>(catalog.Rooms.Select(value => value.LocalizationKey)
                 .Concat(catalog.Corridors.Select(value => value.LocalizationKey))

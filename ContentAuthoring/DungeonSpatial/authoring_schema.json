@@ -1,11 +1,11 @@
 {
   "formats": {
-    "spatialId": "lowercase ASCII dot-separated stable identifier",
-    "localizationKey": "lowercase ASCII dot-separated key",
-    "int32": "invariant signed decimal ASCII without leading plus or leading zeroes",
-    "textNormalization": "source-preserving UTF-8; no implicit trim or normalization",
-    "ownerScopedId": "lowercase ASCII owner-scoped identifier",
-    "localizedText": "nonblank source-preserving localized text"
+    "spatialId": "lowercase_dot_identifier_v1",
+    "ownerScopedId": "lowercase_owner_identifier_v1",
+    "localizationKey": "display_name_localization_key_v1",
+    "localizedText": "nonblank_source_text_v1",
+    "int32": "invariant_int32_v1",
+    "textNormalization": "utf8_lf_single_newline_v1"
   },
   "enums": {
     "CardinalOrientation": [

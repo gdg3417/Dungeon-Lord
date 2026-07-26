@@ -276,6 +276,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.InvalidSchema), Is.True);
         }
 
+        [TestCase("\"tables\": [", "\"tables\": [{\"id\":\"extra\"},")]
+        [TestCase("\"name\": \"FloorIndex\"", "\"name\": \"ExtraColumn\"")]
+        [TestCase("\"FloorDefinitionId\",\n          \"type\": \"spatialId\"", "\"FloorIndex\",\n          \"type\": \"int32\"")]
+        [TestCase("\"primaryKey\": [\n        \"Key\"", "\"primaryKey\": [\n        \"Text\"")]
+        [TestCase("\"primaryKey\": [\n        \"RoomDefinitionId\"", "\"primaryKey\": [\n        \"LocalizationKey\"")]
+        [TestCase("\"RoomDefinitionId\",\n        \"ConnectionPointId\"", "\"RoomDefinitionId\"")]
+        [TestCase("\"canonicalOrder\": [\n        \"FloorDefinitionId\"", "\"canonicalOrder\": [\n        \"FloorIndex\"")]
+        [TestCase("\"uniqueKeys\": [\n        [\n          \"FloorIndex\"", "\"uniqueKeys\": [\n        [\n          \"FloorDefinitionId\"")]
+        [TestCase("\"primaryKey\": [\n        \"RoomDefinitionId\"", "\"uniqueKeys\": [[\"LocalizationKey\"]],\n      \"primaryKey\": [\n        \"RoomDefinitionId\"")]
+        [TestCase("\"EntranceStructureDefinitionId\",\n        \"CompletionStructureDefinitionId\"", "\"CompletionStructureDefinitionId\"")]
+        [TestCase("\"table\": \"rooms\",\n      \"columns\": [\n        \"LocalizationKey\"", "\"table\": \"rooms\",\n      \"columns\": [\n        \"RoomDefinitionId\"")]
+        [TestCase("\"RoomDefinitionId\",\n        \"SocketTypeId\"", "\"RoomDefinitionId\"")]
+        [TestCase("\"SocketTypeId\",\n        \"CompatibleSocketTypeId\"", "\"SocketTypeId\"")]
+        [TestCase("\"parent\": \"floors\",", "\"parent\": \"test.removed.floors\",")]
+        [TestCase("\"children\": [\n        \"floor_allowed_rooms\",\n        \"floor_allowed_corridors\"\n      ]", "\"children\": []")]
+        [TestCase("\"children\": [\n        \"socket_compatibility\"", "\"children\": [\n        \"socket_compatibility\",\n        \"room_orientations\"")]
+        public void ExactV1SchemaSignatureMutation_FailsBeforeProjectionAndIsDeterministic(string oldValue, string newValue)
+        {
+            DungeonSpatialAuthoringResult first = null;
+            Assert.DoesNotThrow(() => first = Change("authoring_schema.json", text => text.Replace(oldValue, newValue)));
+            DungeonSpatialAuthoringResult second = Change("authoring_schema.json", text => text.Replace(oldValue, newValue));
+            Assert.That(first.Success, Is.False); Assert.That(first.Projection, Is.Null);
+            Assert.That(first.Issues, Is.Not.Empty);
+            CollectionAssert.AreEqual(first.Issues.Select(issue => issue.ToString()), second.Issues.Select(issue => issue.ToString()));
+        }
+
+        [TestCase("lowercase_dot_identifier_v1", "lowercase_dot_identifier_v2")]
+        [TestCase("lowercase_owner_identifier_v1", "lowercase_owner_identifier_v2")]
+        [TestCase("display_name_localization_key_v1", "display_name_localization_key_v2")]
+        [TestCase("nonblank_source_text_v1", "nonblank_source_text_v2")]
+        [TestCase("invariant_int32_v1", "invariant_int32_v2")]
+        [TestCase("utf8_lf_single_newline_v1", "utf8_lf_single_newline_v2")]
+        public void V1FormatContractMutation_IsRejected(string oldValue, string newValue)
+        {
+            DungeonSpatialAuthoringResult result = Change("authoring_schema.json", text => text.Replace(oldValue, newValue));
+            Assert.That(result.Success, Is.False); Assert.That(result.Projection, Is.Null);
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.InvalidSchema), Is.True);
+        }
+
+        [TestCase("endpoint", "fixed_structures.StructureDefinitionId", "socket_types.SocketTypeId")]
+        [TestCase("localization", "localization_en.Key", "rooms.LocalizationKey")]
+        [TestCase("connection socket", "socket_types.SocketTypeId", "rooms.RoomDefinitionId")]
+        [TestCase("socket compatibility", "socket_types.SocketTypeId", "corridors.CorridorDefinitionId")]
+        public void ExactV1ForeignKeyMutation_IsRejectedAsInvalidSchema(string family, string oldValue, string newValue)
+        {
+            DungeonSpatialAuthoringResult result = Change("authoring_schema.json", text => text.Replace(oldValue, newValue));
+            Assert.That(result.Success, Is.False, family); Assert.That(result.Projection, Is.Null);
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.InvalidSchema), Is.True, family);
+        }
+
+        [Test]
+        public void DuplicateForeignKeyAndRemovedRelationship_AreRejectedBeforeRows()
+        {
+            foreach (Func<string, string> mutation in new Func<string, string>[]
+            {
+                schema => DuplicateFirstArrayObject(schema, "foreignKeys"),
+                schema => RemoveFirstArrayObject(schema, "childRelationships")
+            })
+            {
+                DungeonSpatialAuthoringResult result = null;
+                Assert.DoesNotThrow(() => result = Change("authoring_schema.json", mutation));
+                Assert.That(result.Success, Is.False); Assert.That(result.Projection, Is.Null);
+                Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.InvalidSchema), Is.True);
+            }
+        }
+
         [TestCase("\"id\": \"floors\"", "\"id\": \"rooms\"")]
         [TestCase("\"path\": \"tables/floors.csv\"", "\"path\": \"tables/rooms.csv\"")]
         [TestCase("\"id\": \"floors\"", "\"id\": \"\"")]
@@ -386,6 +452,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             SpatialContentValidationWorkloadLimits limits = Limits();
             return DungeonSpatialAuthoringPackageParser.ParseAndProject(Production(), new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords, limits.MaximumNestedRecords, limits.MaximumMaterializedTiles, limits.MaximumIssues, maximum));
+        }
+        private static string DuplicateFirstArrayObject(string json, string field)
+        {
+            int array = json.IndexOf("\"" + field + "\": [", StringComparison.Ordinal);
+            int start = json.IndexOf('{', array); int end = MatchingBrace(json, start);
+            return json.Insert(end + 1, "," + json.Substring(start, end - start + 1));
+        }
+        private static string RemoveFirstArrayObject(string json, string field)
+        {
+            int array = json.IndexOf("\"" + field + "\": [", StringComparison.Ordinal);
+            int start = json.IndexOf('{', array); int end = MatchingBrace(json, start);
+            int comma = json.IndexOf(',', end); return json.Remove(start, comma - start + 1);
+        }
+        private static int MatchingBrace(string text, int start)
+        {
+            int depth = 0;
+            for (int index = start; index < text.Length; index++)
+            {
+                if (text[index] == '{') depth++;
+                else if (text[index] == '}' && --depth == 0) return index;
+            }
+            throw new InvalidOperationException("Test fixture object was not closed.");
         }
     }
 }

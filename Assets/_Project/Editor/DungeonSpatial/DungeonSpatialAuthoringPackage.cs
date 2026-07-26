@@ -157,6 +157,62 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         private static readonly string[] SchemaFields = { "formats", "enums", "tables", "foreignKeys", "childRelationships" };
         private static readonly HashSet<string> ColumnTypes = new HashSet<string>(new[] { "spatialId", "ownerScopedId", "localizationKey", "localizedText", "int32", "enum" }, StringComparer.Ordinal);
 
+        private static readonly string[] V1FormatSignatures =
+        {
+            "spatialId=lowercase_dot_identifier_v1",
+            "ownerScopedId=lowercase_owner_identifier_v1",
+            "localizationKey=display_name_localization_key_v1",
+            "localizedText=nonblank_source_text_v1",
+            "int32=invariant_int32_v1",
+            "textNormalization=utf8_lf_single_newline_v1"
+        };
+        private static readonly string[] V1TableSignatures =
+        {
+            "floors|tables/floors.csv|FloorDefinitionId:spatialId:true:false:,FloorIndex:int32:true:false:,MinimumX:int32:true:false:,MinimumY:int32:true:false:,Width:int32:true:false:,Height:int32:true:false:,FinalFloorSpaceCapacity:int32:true:false:,OptionalBranchAllowance:int32:true:false:,EntranceStructureDefinitionId:spatialId:true:false:,CompletionStructureDefinitionId:spatialId:true:false:|FloorDefinitionId|FloorIndex|FloorDefinitionId",
+            "floor_allowed_rooms|tables/floor_allowed_rooms.csv|FloorDefinitionId:spatialId:true:false:,RoomDefinitionId:spatialId:true:false:|FloorDefinitionId,RoomDefinitionId||FloorDefinitionId,RoomDefinitionId",
+            "floor_allowed_corridors|tables/floor_allowed_corridors.csv|FloorDefinitionId:spatialId:true:false:,CorridorDefinitionId:spatialId:true:false:|FloorDefinitionId,CorridorDefinitionId||FloorDefinitionId,CorridorDefinitionId",
+            "rooms|tables/rooms.csv|RoomDefinitionId:spatialId:true:false:,Width:int32:true:false:,Height:int32:true:false:,MaximumConnectionCount:int32:true:false:,MonsterCapacity:int32:true:false:,TrapCapacity:int32:true:false:,LootCapacity:int32:true:false:,LocalizationKey:localizationKey:true:false:|RoomDefinitionId||RoomDefinitionId",
+            "room_orientations|tables/room_orientations.csv|RoomDefinitionId:spatialId:true:false:,Orientation:enum:true:false:CardinalOrientation|RoomDefinitionId,Orientation||RoomDefinitionId,Orientation",
+            "room_reserved_offsets|tables/room_reserved_offsets.csv|RoomDefinitionId:spatialId:true:false:,OffsetX:int32:true:false:,OffsetY:int32:true:false:|RoomDefinitionId,OffsetX,OffsetY||RoomDefinitionId,OffsetX,OffsetY",
+            "room_connection_points|tables/room_connection_points.csv|RoomDefinitionId:spatialId:true:false:,ConnectionPointId:ownerScopedId:true:false:,OffsetX:int32:true:false:,OffsetY:int32:true:false:,Facing:enum:true:false:CardinalOrientation,SocketTypeId:spatialId:true:false:|RoomDefinitionId,ConnectionPointId||RoomDefinitionId,ConnectionPointId",
+            "corridors|tables/corridors.csv|CorridorDefinitionId:spatialId:true:false:,LocalizationKey:localizationKey:true:false:,Category:enum:true:false:CorridorSpatialCategory,MinimumLength:int32:true:false:,MaximumLength:int32:true:false:,Width:int32:true:false:,MonsterCapacity:int32:true:false:,TrapCapacity:int32:true:false:,LootCapacity:int32:true:false:|CorridorDefinitionId||CorridorDefinitionId",
+            "corridor_orientations|tables/corridor_orientations.csv|CorridorDefinitionId:spatialId:true:false:,Orientation:enum:true:false:CardinalOrientation|CorridorDefinitionId,Orientation||CorridorDefinitionId,Orientation",
+            "corridor_compatible_sockets|tables/corridor_compatible_sockets.csv|CorridorDefinitionId:spatialId:true:false:,SocketTypeId:spatialId:true:false:|CorridorDefinitionId,SocketTypeId||CorridorDefinitionId,SocketTypeId",
+            "fixed_structures|tables/fixed_structures.csv|StructureDefinitionId:spatialId:true:false:,LocalizationKey:localizationKey:true:false:,Kind:enum:true:false:FixedSpatialStructureKind,Width:int32:true:false:,Height:int32:true:false:,MaximumConnectionCount:int32:true:false:|StructureDefinitionId||StructureDefinitionId",
+            "fixed_structure_orientations|tables/fixed_structure_orientations.csv|StructureDefinitionId:spatialId:true:false:,Orientation:enum:true:false:CardinalOrientation|StructureDefinitionId,Orientation||StructureDefinitionId,Orientation",
+            "fixed_structure_reserved_offsets|tables/fixed_structure_reserved_offsets.csv|StructureDefinitionId:spatialId:true:false:,OffsetX:int32:true:false:,OffsetY:int32:true:false:|StructureDefinitionId,OffsetX,OffsetY||StructureDefinitionId,OffsetX,OffsetY",
+            "fixed_structure_connection_points|tables/fixed_structure_connection_points.csv|StructureDefinitionId:spatialId:true:false:,ConnectionPointId:ownerScopedId:true:false:,OffsetX:int32:true:false:,OffsetY:int32:true:false:,Facing:enum:true:false:CardinalOrientation,SocketTypeId:spatialId:true:false:|StructureDefinitionId,ConnectionPointId||StructureDefinitionId,ConnectionPointId",
+            "socket_types|tables/socket_types.csv|SocketTypeId:spatialId:true:false:|SocketTypeId||SocketTypeId",
+            "socket_compatibility|tables/socket_compatibility.csv|SocketTypeId:spatialId:true:false:,CompatibleSocketTypeId:spatialId:true:false:|SocketTypeId,CompatibleSocketTypeId||SocketTypeId,CompatibleSocketTypeId",
+            "localization_en|tables/localization_en.csv|Key:localizationKey:true:false:,Text:localizedText:true:false:|Key||Key"
+        };
+        private static readonly string[] V1ForeignKeySignatures =
+        {
+            "floors|EntranceStructureDefinitionId,CompletionStructureDefinitionId|fixed_structures.StructureDefinitionId,fixed_structures.StructureDefinitionId",
+            "floor_allowed_rooms|FloorDefinitionId,RoomDefinitionId|floors.FloorDefinitionId,rooms.RoomDefinitionId",
+            "floor_allowed_corridors|FloorDefinitionId,CorridorDefinitionId|floors.FloorDefinitionId,corridors.CorridorDefinitionId",
+            "room_orientations|RoomDefinitionId|rooms.RoomDefinitionId",
+            "room_reserved_offsets|RoomDefinitionId|rooms.RoomDefinitionId",
+            "room_connection_points|RoomDefinitionId,SocketTypeId|rooms.RoomDefinitionId,socket_types.SocketTypeId",
+            "corridor_orientations|CorridorDefinitionId|corridors.CorridorDefinitionId",
+            "corridor_compatible_sockets|CorridorDefinitionId,SocketTypeId|corridors.CorridorDefinitionId,socket_types.SocketTypeId",
+            "fixed_structure_orientations|StructureDefinitionId|fixed_structures.StructureDefinitionId",
+            "fixed_structure_reserved_offsets|StructureDefinitionId|fixed_structures.StructureDefinitionId",
+            "fixed_structure_connection_points|StructureDefinitionId,SocketTypeId|fixed_structures.StructureDefinitionId,socket_types.SocketTypeId",
+            "socket_compatibility|SocketTypeId,CompatibleSocketTypeId|socket_types.SocketTypeId,socket_types.SocketTypeId",
+            "rooms|LocalizationKey|localization_en.Key",
+            "corridors|LocalizationKey|localization_en.Key",
+            "fixed_structures|LocalizationKey|localization_en.Key"
+        };
+        private static readonly string[] V1RelationshipSignatures =
+        {
+            "floors|floor_allowed_rooms,floor_allowed_corridors",
+            "rooms|room_orientations,room_reserved_offsets,room_connection_points",
+            "corridors|corridor_orientations,corridor_compatible_sockets",
+            "fixed_structures|fixed_structure_orientations,fixed_structure_reserved_offsets,fixed_structure_connection_points",
+            "socket_types|socket_compatibility"
+        };
+
         public static DungeonSpatialAuthoringResult ParseAndProject(DungeonSpatialAuthoringSource source,
             SpatialContentValidationWorkloadLimits limits, bool requireCanonicalRows = false)
         {
@@ -369,48 +425,39 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
 
         private static void ValidateProjectorCompatibility(AuthoringSchema schema, List<DungeonSpatialAuthoringIssue> issues)
         {
-            string[] orientationTokens = { "Zero", "Ninety", "OneEighty", "TwoSeventy" };
-            RequireEnum(schema, "CardinalOrientation", orientationTokens, issues);
+            string[] formats = schema.Formats.Select(pair => pair.Key + "=" + pair.Value).ToArray();
+            string[] tables = schema.Tables.Select(BuildTableSignature).ToArray();
+            string[] foreignKeys = schema.ForeignKeys.Select(key => key.Table + "|" +
+                string.Join(",", key.Columns) + "|" + string.Join(",", key.ReferenceTables
+                    .Select((table, index) => table + "." + key.ReferenceColumns[index]))).ToArray();
+            string[] relationships = schema.ChildRelationships.Select(relationship =>
+                relationship.Parent + "|" + string.Join(",", relationship.Children)).ToArray();
+
+            RequireExactSignature(formats.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
+                V1FormatSignatures.OrderBy(value => value, StringComparer.Ordinal).ToArray(), "formats", issues);
+            RequireExactSignature(tables, V1TableSignatures, "tables", issues);
+            RequireExactSignature(foreignKeys, V1ForeignKeySignatures, "foreignKeys", issues);
+            RequireExactSignature(relationships, V1RelationshipSignatures, "childRelationships", issues);
+            RequireEnum(schema, "CardinalOrientation", new[] { "Zero", "Ninety", "OneEighty", "TwoSeventy" }, issues);
             RequireEnum(schema, "CorridorSpatialCategory", new[] { "Straight" }, issues);
             RequireEnum(schema, "FixedSpatialStructureKind", new[] { "Entrance", "CompletionTerminal" }, issues);
-
-            var numericColumns = new HashSet<string>(new[]
-            {
-                "FloorIndex", "MinimumX", "MinimumY", "Width", "Height", "FinalFloorSpaceCapacity",
-                "OptionalBranchAllowance", "MaximumConnectionCount", "MonsterCapacity", "TrapCapacity",
-                "LootCapacity", "OffsetX", "OffsetY", "MinimumLength", "MaximumLength"
-            }, StringComparer.Ordinal);
-            foreach (AuthoringTable table in schema.Tables)
-            {
-                if (table.PrimaryKey.Length == 0 || table.CanonicalOrder.Length == 0)
-                    Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id);
-                foreach (AuthoringColumn column in table.Columns)
-                {
-                    string expectedType = ExpectedProjectionType(column.Name, numericColumns);
-                    if (column.Type != expectedType || !column.Required || column.AllowBlank)
-                        Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id, column: column.Name);
-                    string expectedEnum = ExpectedProjectionEnum(column.Name);
-                    if (expectedType == "enum" && column.EnumId != expectedEnum)
-                        Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, table.Id, column: column.Name);
-                }
-            }
         }
 
-        private static string ExpectedProjectionType(string column, ISet<string> numericColumns)
+        private static string BuildTableSignature(AuthoringTable table)
         {
-            if (numericColumns.Contains(column)) return "int32";
-            if (column == "Orientation" || column == "Facing" || column == "Category" || column == "Kind") return "enum";
-            if (column == "LocalizationKey" || column == "Key") return "localizationKey";
-            if (column == "Text") return "localizedText";
-            if (column == "ConnectionPointId") return "ownerScopedId";
-            return "spatialId";
+            string columns = string.Join(",", table.Columns.Select(column => string.Join(":",
+                column.Name, column.Type, column.Required.ToString().ToLowerInvariant(),
+                column.AllowBlank.ToString().ToLowerInvariant(), column.EnumId ?? string.Empty)));
+            string unique = string.Join(";", table.UniqueKeys.Select(key => string.Join(",", key)));
+            return string.Join("|", table.Id, table.Path, columns, string.Join(",", table.PrimaryKey),
+                unique, string.Join(",", table.CanonicalOrder));
         }
 
-        private static string ExpectedProjectionEnum(string column)
+        private static void RequireExactSignature(string[] actual, string[] expected, string section,
+            List<DungeonSpatialAuthoringIssue> issues)
         {
-            if (column == "Orientation" || column == "Facing") return "CardinalOrientation";
-            if (column == "Category") return "CorridorSpatialCategory";
-            return "FixedSpatialStructureKind";
+            if (!actual.SequenceEqual(expected, StringComparer.Ordinal))
+                Add(issues, DungeonSpatialAuthoringDiagnostic.InvalidSchema, SchemaPath, column: section);
         }
 
         private static void RequireEnum(AuthoringSchema schema, string id, string[] expected, List<DungeonSpatialAuthoringIssue> issues)
