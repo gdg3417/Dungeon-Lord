@@ -467,7 +467,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 i++; var fields = new List<KeyValuePair<string, JsonNode>>(); var names = new HashSet<string>(StringComparer.Ordinal); Space();
                 if (Take('}')) return new JsonNode { Kind = JsonKind.Object, Fields = fields };
                 FieldInfo[] expectedFields = unknown || expectedType == null
-                    ? Array.Empty<FieldInfo>()
+                    ? System.Array.Empty<FieldInfo>()
                     : expectedType.GetFields(BindingFlags.Instance | BindingFlags.Public);
                 while (true)
                 {
