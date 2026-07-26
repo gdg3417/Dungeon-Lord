@@ -216,6 +216,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ByteBackedReaderBoundsLongNumericTokensAndPreservesSuppliedBytes()
+        {
+            const int fixtureCharacters = 16384;
+            string longDigits = new string('9', fixtureCharacters);
+            ProductionSpatialGeneratedSet valid = Build().Output;
+
+            ProductionSpatialGeneratedSet integer = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": " + longDigits));
+            AssertRepeatedExactNoThrow(integer, ProductionSpatialGeneratedSetDiagnostic.IntegerOverflow);
+
+            ProductionSpatialGeneratedSet decimalValue = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": " + longDigits + ".0"));
+            AssertRepeatedExactNoThrow(decimalValue, ProductionSpatialGeneratedSetDiagnostic.UnsupportedNumber);
+
+            ProductionSpatialGeneratedSet exponent = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": 1e" + longDigits));
+            AssertRepeatedExactNoThrow(exponent, ProductionSpatialGeneratedSetDiagnostic.UnsupportedNumber);
+
+            ProductionSpatialGeneratedSet unknown = ReplaceJson(valid,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => ReplaceFirst(json, "{", "{\n  \"unknown\": " + longDigits + ","));
+            AssertRepeatedExactNoThrow(unknown, ProductionSpatialGeneratedSetDiagnostic.UnknownField);
+
+            byte[][] before = integer.Files.Select(file => file.Bytes).ToArray();
+            ProductionSpatialGeneratedSetParser.ParseAndValidate(integer, Limits());
+            for (int index = 0; index < before.Length; index++)
+                CollectionAssert.AreEqual(before[index], integer.Files[index].Bytes);
+        }
+
+        [Test]
+        public void ByteBackedReaderScansLargeWhitespaceWithoutWholeFileDecode()
+        {
+            const int whitespaceCharacters = 16384;
+            ProductionSpatialGeneratedSet whitespace = ReplaceJson(Build().Output,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => new string(' ', whitespaceCharacters) + json);
+            AssertRepeatedExactNoThrow(whitespace,
+                ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+        }
+
+        [Test]
         public void ProductionSource_BuildsExactNormalizedByteStableInMemorySet()
         {
             ProductionSpatialGeneratedSetBuildResult first = Build();
@@ -462,6 +506,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Success, Is.False); Assert.That(result.Value, Is.Null);
             CollectionAssert.AreEqual(expected.OrderBy(value => (int)value), result.Diagnostics,
                 string.Join(",", result.Diagnostics));
+        }
+
+        private static void AssertRepeatedExactNoThrow(ProductionSpatialGeneratedSet files,
+            params ProductionSpatialGeneratedSetDiagnostic[] expected)
+        {
+            ProductionSpatialGeneratedSetResult first = null, second = null;
+            Assert.DoesNotThrow(() => first = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
+            Assert.DoesNotThrow(() => second = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
+            Assert.That(first.Value, Is.Null); Assert.That(second.Value, Is.Null);
+            CollectionAssert.AreEqual(expected.OrderBy(value => (int)value), first.Diagnostics);
+            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics);
         }
 
         private static void AssertManifestFailure(byte[] replacement, ProductionSpatialGeneratedSetDiagnostic expected)
