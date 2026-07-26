@@ -98,40 +98,60 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             var values = new int[FieldNames.Length];
             var present = new bool[FieldNames.Length];
+            var canonicalSeen = new bool[FieldNames.Length];
+            SemanticFailure selectedFailure = default;
+            bool hasSemanticFailure = false;
             reader.SkipWhitespace();
             if (!reader.TryConsume('}'))
             {
                 while (true)
                 {
-                    if (!reader.TryReadString(out string propertyName))
+                    if (!reader.TryReadPropertyName(out string propertyName))
                         return Failure(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson);
 
                     int fieldIndex = CanonicalIndex(propertyName);
-                    if (fieldIndex < 0)
-                    {
-                        int ambiguousIndex = AmbiguousIndex(propertyName);
-                        return ambiguousIndex >= 0
-                            ? Failure(ProductionSpatialWorkloadLimitDiagnostic.AmbiguousField, Field(ambiguousIndex))
-                            : Failure(ProductionSpatialWorkloadLimitDiagnostic.UnknownField);
-                    }
-                    if (present[fieldIndex])
-                        return Failure(ProductionSpatialWorkloadLimitDiagnostic.DuplicateField, Field(fieldIndex));
+                    int ambiguousIndex = fieldIndex < 0 ? AmbiguousIndex(propertyName) : -1;
+                    ProductionSpatialWorkloadLimitField field = fieldIndex >= 0
+                        ? Field(fieldIndex)
+                        : ambiguousIndex >= 0 ? Field(ambiguousIndex) : ProductionSpatialWorkloadLimitField.None;
 
                     reader.SkipWhitespace();
                     if (!reader.TryConsume(':'))
-                        return Failure(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson, Field(fieldIndex));
+                        return Failure(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson, field);
                     reader.SkipWhitespace();
-                    NumberResult numberResult = reader.TryReadInteger(out int value);
-                    if (numberResult != NumberResult.Success)
-                        return Failure(numberResult == NumberResult.InvalidToken
-                            ? ProductionSpatialWorkloadLimitDiagnostic.InvalidNumericToken
-                            : ProductionSpatialWorkloadLimitDiagnostic.IntegerOverflowOrUnsupportedRepresentation,
-                            Field(fieldIndex));
-                    if (value <= 0)
-                        return Failure(ProductionSpatialWorkloadLimitDiagnostic.NonpositiveValue, Field(fieldIndex));
 
-                    present[fieldIndex] = true;
-                    values[fieldIndex] = value;
+                    NumberResult numberResult = reader.TryReadIntegerValue(out int value);
+                    if (numberResult == NumberResult.Malformed)
+                        return Failure(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson, field);
+
+                    if (fieldIndex < 0)
+                    {
+                        SelectFailure(ref selectedFailure, ref hasSemanticFailure, new SemanticFailure(
+                            ambiguousIndex >= 0
+                                ? ProductionSpatialWorkloadLimitDiagnostic.AmbiguousField
+                                : ProductionSpatialWorkloadLimitDiagnostic.UnknownField,
+                            field));
+                        // A case variant identifies the intended required slot for deterministic diagnostics,
+                        // but it never supplies a value or permits successful conversion.
+                        if (ambiguousIndex >= 0)
+                            present[ambiguousIndex] = true;
+                    }
+                    else
+                    {
+                        if (canonicalSeen[fieldIndex])
+                            SelectFailure(ref selectedFailure, ref hasSemanticFailure, new SemanticFailure(
+                                ProductionSpatialWorkloadLimitDiagnostic.DuplicateField, field));
+                        canonicalSeen[fieldIndex] = true;
+                        present[fieldIndex] = true;
+
+                        ProductionSpatialWorkloadLimitDiagnostic numericFailure = NumericFailure(numberResult, value);
+                        if (numericFailure != ProductionSpatialWorkloadLimitDiagnostic.None)
+                            SelectFailure(ref selectedFailure, ref hasSemanticFailure,
+                                new SemanticFailure(numericFailure, field));
+                        else
+                            values[fieldIndex] = value;
+                    }
+
                     reader.SkipWhitespace();
                     if (reader.TryConsume('}'))
                         break;
@@ -148,7 +168,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(ProductionSpatialWorkloadLimitDiagnostic.MalformedJson);
             for (int index = 0; index < present.Length; index++)
                 if (!present[index])
-                    return Failure(ProductionSpatialWorkloadLimitDiagnostic.MissingRequiredField, Field(index));
+                    SelectFailure(ref selectedFailure, ref hasSemanticFailure, new SemanticFailure(
+                        ProductionSpatialWorkloadLimitDiagnostic.MissingRequiredField, Field(index)));
+
+            if (hasSemanticFailure)
+                return Failure(selectedFailure.Diagnostic, selectedFailure.Field);
 
             var data = new SpatialContentValidationWorkloadLimitsData
             {
@@ -161,6 +185,51 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new ProductionSpatialContentWorkloadLimitParseResult(
                 new SpatialContentValidationWorkloadLimits(data.MaximumTopLevelRecords, data.MaximumNestedRecords,
                     data.MaximumMaterializedTiles, data.MaximumIssues, data.MaximumStringCharacters));
+        }
+
+        private static void SelectFailure(
+            ref SemanticFailure selected,
+            ref bool hasSelection,
+            SemanticFailure candidate)
+        {
+            // Semantic precedence is explicit diagnostic numeric order, then canonical field order.
+            // Therefore serialized property order can never select the reported failure.
+            if (!hasSelection || candidate.CompareTo(selected) < 0)
+            {
+                selected = candidate;
+                hasSelection = true;
+            }
+        }
+
+        private static ProductionSpatialWorkloadLimitDiagnostic NumericFailure(NumberResult result, int value)
+        {
+            if (result == NumberResult.InvalidToken)
+                return ProductionSpatialWorkloadLimitDiagnostic.InvalidNumericToken;
+            if (result == NumberResult.UnsupportedOrOverflow)
+                return ProductionSpatialWorkloadLimitDiagnostic.IntegerOverflowOrUnsupportedRepresentation;
+            return value <= 0
+                ? ProductionSpatialWorkloadLimitDiagnostic.NonpositiveValue
+                : ProductionSpatialWorkloadLimitDiagnostic.None;
+        }
+
+        private readonly struct SemanticFailure
+        {
+            public SemanticFailure(
+                ProductionSpatialWorkloadLimitDiagnostic diagnostic,
+                ProductionSpatialWorkloadLimitField field)
+            {
+                Diagnostic = diagnostic;
+                Field = field;
+            }
+
+            public ProductionSpatialWorkloadLimitDiagnostic Diagnostic { get; }
+            public ProductionSpatialWorkloadLimitField Field { get; }
+
+            public int CompareTo(SemanticFailure other)
+            {
+                int diagnostic = ((int)Diagnostic).CompareTo((int)other.Diagnostic);
+                return diagnostic != 0 ? diagnostic : ((int)Field).CompareTo((int)other.Field);
+            }
         }
 
         private static ProductionSpatialContentWorkloadLimitParseResult Failure(
@@ -187,10 +256,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return -1;
         }
 
-        private enum NumberResult { Success, InvalidToken, UnsupportedOrOverflow }
+        private enum NumberResult { Success, InvalidToken, UnsupportedOrOverflow, Malformed }
 
         private sealed class Reader
         {
+            private const int MaximumValueDepth = 16;
             private readonly string source;
             private int index;
 
@@ -212,7 +282,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return true;
             }
 
-            public bool TryReadString(out string value)
+            public bool TryReadPropertyName(out string value)
             {
                 value = null;
                 SkipWhitespace();
@@ -233,35 +303,147 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return false;
             }
 
-            public NumberResult TryReadInteger(out int value)
+            public NumberResult TryReadIntegerValue(out int value)
             {
                 value = 0;
-                if (IsAtEnd || (Peek != '-' && (Peek < '0' || Peek > '9')))
-                    return NumberResult.InvalidToken;
+                if (IsAtEnd)
+                    return NumberResult.Malformed;
+                if (Peek != '-' && (Peek < '0' || Peek > '9'))
+                    return TrySkipValue(0) ? NumberResult.InvalidToken : NumberResult.Malformed;
 
                 bool negative = TryConsume('-');
                 if (IsAtEnd || Peek < '0' || Peek > '9')
-                    return NumberResult.InvalidToken;
-                if (Peek == '0' && index + 1 < source.Length && source[index + 1] >= '0' && source[index + 1] <= '9')
-                    return NumberResult.UnsupportedOrOverflow;
+                    return NumberResult.Malformed;
 
+                bool unsupported = false;
                 long magnitude = 0;
-                while (!IsAtEnd && Peek >= '0' && Peek <= '9')
+                if (Peek == '0')
                 {
-                    int digit = Peek - '0';
-                    if (magnitude > (int.MaxValue - digit) / 10L)
-                    {
-                        while (!IsAtEnd && Peek >= '0' && Peek <= '9') index++;
-                        return NumberResult.UnsupportedOrOverflow;
-                    }
-                    magnitude = magnitude * 10 + digit;
                     index++;
+                    if (!IsAtEnd && Peek >= '0' && Peek <= '9')
+                    {
+                        unsupported = true;
+                        while (!IsAtEnd && Peek >= '0' && Peek <= '9') index++;
+                    }
                 }
-                if (!IsAtEnd && (Peek == '.' || Peek == 'e' || Peek == 'E'))
+                else
+                {
+                    while (!IsAtEnd && Peek >= '0' && Peek <= '9')
+                    {
+                        int digit = Peek - '0';
+                        if (magnitude > (int.MaxValue - digit) / 10L)
+                            unsupported = true;
+                        else if (!unsupported)
+                            magnitude = magnitude * 10 + digit;
+                        index++;
+                    }
+                }
+
+                if (!IsAtEnd && Peek == '.')
+                {
+                    unsupported = true;
+                    index++;
+                    if (IsAtEnd || Peek < '0' || Peek > '9')
+                        return NumberResult.Malformed;
+                    while (!IsAtEnd && Peek >= '0' && Peek <= '9') index++;
+                }
+                if (!IsAtEnd && (Peek == 'e' || Peek == 'E'))
+                {
+                    unsupported = true;
+                    index++;
+                    if (!IsAtEnd && (Peek == '+' || Peek == '-')) index++;
+                    if (IsAtEnd || Peek < '0' || Peek > '9')
+                        return NumberResult.Malformed;
+                    while (!IsAtEnd && Peek >= '0' && Peek <= '9') index++;
+                }
+
+                if (unsupported)
                     return NumberResult.UnsupportedOrOverflow;
                 value = negative ? -(int)magnitude : (int)magnitude;
                 return NumberResult.Success;
             }
+
+            private bool TrySkipValue(int depth)
+            {
+                if (depth > MaximumValueDepth || IsAtEnd)
+                    return false;
+                if (Peek == '"')
+                    return TrySkipString();
+                if (TryConsumeLiteral("true") || TryConsumeLiteral("false") || TryConsumeLiteral("null"))
+                    return true;
+                if (TryConsume('['))
+                    return TrySkipCollection(']', depth);
+                if (TryConsume('{'))
+                    return TrySkipObject(depth);
+                return false;
+            }
+
+            private bool TrySkipCollection(char end, int depth)
+            {
+                SkipWhitespace();
+                if (TryConsume(end)) return true;
+                while (TrySkipValue(depth + 1))
+                {
+                    SkipWhitespace();
+                    if (TryConsume(end)) return true;
+                    if (!TryConsume(',')) return false;
+                    SkipWhitespace();
+                }
+                return false;
+            }
+
+            private bool TrySkipObject(int depth)
+            {
+                SkipWhitespace();
+                if (TryConsume('}')) return true;
+                while (TrySkipString())
+                {
+                    SkipWhitespace();
+                    if (!TryConsume(':')) return false;
+                    SkipWhitespace();
+                    if (!TrySkipValue(depth + 1)) return false;
+                    SkipWhitespace();
+                    if (TryConsume('}')) return true;
+                    if (!TryConsume(',')) return false;
+                    SkipWhitespace();
+                }
+                return false;
+            }
+
+            private bool TrySkipString()
+            {
+                if (!TryConsume('"')) return false;
+                while (!IsAtEnd)
+                {
+                    char current = source[index++];
+                    if (current == '"') return true;
+                    if (current < 0x20) return false;
+                    if (current != '\\') continue;
+                    if (IsAtEnd) return false;
+                    char escaped = source[index++];
+                    if (escaped == 'u')
+                    {
+                        for (int count = 0; count < 4; count++)
+                            if (IsAtEnd || !IsHex(source[index++])) return false;
+                    }
+                    else if ("\"\\/bfnrt".IndexOf(escaped) < 0)
+                        return false;
+                }
+                return false;
+            }
+
+            private bool TryConsumeLiteral(string literal)
+            {
+                if (index + literal.Length > source.Length ||
+                    !string.Equals(source.Substring(index, literal.Length), literal, StringComparison.Ordinal))
+                    return false;
+                index += literal.Length;
+                return true;
+            }
+
+            private static bool IsHex(char value) =>
+                (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f') ||
+                (value >= 'A' && value <= 'F');
         }
     }
 }

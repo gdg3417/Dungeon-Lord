@@ -116,8 +116,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 ReservedTileOffsets = new[] { new TileCoordinate(1, 1), new TileCoordinate(0, 0) },
                 ConnectionPoints = new[]
                 {
-                    Point(id + ".point.b", width - 1, 0, CardinalOrientation.Zero),
-                    Point(id + ".point.a", 0, height - 1, CardinalOrientation.OneEighty)
+                    Point(id + ".point.b", width - 1, height / 2, CardinalOrientation.Ninety),
+                    Point(id + ".point.a", 0, height / 2, CardinalOrientation.TwoSeventy)
                 }
             };
 

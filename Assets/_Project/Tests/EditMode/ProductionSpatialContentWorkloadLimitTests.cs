@@ -142,6 +142,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var permutation = ProductionSpatialContentWorkloadLimitParser.Parse(reversed);
             Assert.That(source, Is.EqualTo(before));
             Assert.That(first.Success, Is.True);
+            Assert.That(permutation.Success, Is.True);
+            Assert.That(permutation.Diagnostic, Is.EqualTo(ProductionSpatialWorkloadLimitDiagnostic.None));
+            Assert.That(permutation.Field, Is.EqualTo(ProductionSpatialWorkloadLimitField.None));
             CollectionAssert.AreEqual(Values(first.Limits), Values(second.Limits));
             CollectionAssert.AreEqual(Values(first.Limits), Values(permutation.Limits));
 
@@ -151,6 +154,86 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(failure2.Field, Is.EqualTo(failure1.Field));
             CollectionAssert.AreNotEqual(Approved, Values(first.Limits));
         }
+
+        [Test]
+        public void MultipleNonpositiveFields_SelectCanonicalFieldIndependentOfPropertyOrder()
+        {
+            AssertSemanticPermutations(
+                new[]
+                {
+                    Property(Names[3], "0"), Property(Names[0], "-1"), Property(Names[1], "2"),
+                    Property(Names[2], "3"), Property(Names[4], "5")
+                },
+                ProductionSpatialWorkloadLimitDiagnostic.NonpositiveValue,
+                ProductionSpatialWorkloadLimitField.MaximumTopLevelRecords);
+        }
+
+        [Test]
+        public void MultipleUnsupportedFields_SelectCanonicalFieldIndependentOfPropertyOrder()
+        {
+            AssertSemanticPermutations(
+                new[]
+                {
+                    Property(Names[3], "1e2"), Property(Names[1], "2147483648"), Property(Names[0], "1"),
+                    Property(Names[2], "3"), Property(Names[4], "5")
+                },
+                ProductionSpatialWorkloadLimitDiagnostic.IntegerOverflowOrUnsupportedRepresentation,
+                ProductionSpatialWorkloadLimitField.MaximumNestedRecords);
+        }
+
+        [Test]
+        public void DuplicatePrecedesOtherSemanticFailuresIndependentOfPropertyOrder()
+        {
+            AssertSemanticPermutations(
+                new[]
+                {
+                    Property(Names[0], "0"), Property(Names[1], "2"), Property(Names[2], "3"),
+                    Property(Names[3], "4"), Property(Names[3], "6"), Property(Names[4], "5")
+                },
+                ProductionSpatialWorkloadLimitDiagnostic.DuplicateField,
+                ProductionSpatialWorkloadLimitField.MaximumIssues);
+        }
+
+        [Test]
+        public void AmbiguousFieldPrecedesOtherSemanticFailuresIndependentOfPropertyOrder()
+        {
+            AssertSemanticPermutations(
+                new[]
+                {
+                    Property(Names[0], "0"), Property(Names[1], "2"), Property(Names[2], "3"),
+                    Property("maximumissues", "4"), Property(Names[4], "5")
+                },
+                ProductionSpatialWorkloadLimitDiagnostic.AmbiguousField,
+                ProductionSpatialWorkloadLimitField.MaximumIssues);
+        }
+
+        private static void AssertSemanticPermutations(
+            string[] properties,
+            ProductionSpatialWorkloadLimitDiagnostic diagnostic,
+            ProductionSpatialWorkloadLimitField field)
+        {
+            foreach (string[] permutation in new[]
+            {
+                properties,
+                properties.Reverse().ToArray(),
+                properties.Skip(2).Concat(properties.Take(2)).ToArray()
+            })
+            {
+                string json = "{" + string.Join(",", permutation) + "}";
+                for (int repetition = 0; repetition < 2; repetition++)
+                {
+                    ProductionSpatialContentWorkloadLimitParseResult result =
+                        ProductionSpatialContentWorkloadLimitParser.Parse(json);
+                    Assert.That(result.Success, Is.False);
+                    Assert.That(result.Diagnostic, Is.EqualTo(diagnostic));
+                    Assert.That(result.Field, Is.EqualTo(field));
+                    Assert.That(result.Limits.IsValid, Is.False);
+                    CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 0 }, Values(result.Limits));
+                }
+            }
+        }
+
+        private static string Property(string name, string value) => "\"" + name + "\":" + value;
 
         private static void AssertDiagnostic(string json, ProductionSpatialWorkloadLimitDiagnostic expected) =>
             Assert.That(ProductionSpatialContentWorkloadLimitParser.Parse(json).Diagnostic, Is.EqualTo(expected));
