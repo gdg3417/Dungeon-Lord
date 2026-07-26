@@ -6,7 +6,7 @@
 | Packet | GD65B2A — version-controlled production authoring source approval |
 | Baseline | Main through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Approved future path | `ContentAuthoring/DungeonSpatial/` |
-| Approved | 2026-07-26 |
+| Approved | 2026-07-25 |
 
 ## 1. Decision summary
 
@@ -32,8 +32,8 @@ Only the manifest, schema, and manifest-listed tables described below will be wr
 
 | Artifact or system | Authority status | Boundary |
 |---|---|---|
-| `authoring_manifest.json` | Writable package-level authority | Owns package/schema/version expectations and ordered table list |
-| `authoring_schema.json` | Writable structural authority | Sole machine-readable table, column, type, key, relation, ordering, and representation definition |
+| `authoring_manifest.json` | Writable package-level authority | Sole writable owner of the selected authoring-package schema identity/version; also owns version expectations and the ordered table list |
+| `authoring_schema.json` | Writable structural authority | Owns structural and validation rules applicable to the manifest-selected authoring schema; does not duplicate the selected identity/version |
 | Manifest-listed CSV files under `tables/` | Writable record authority | Own normalized catalog records and production English spatial localization |
 | `validation_limits.json` | Separate writable configuration authority | Remains at its approved Unity path; never generated, copied into, or duplicated by this package |
 | Three approved runtime JSON files | Deterministic derived output | Reviewed and committed together; never manually edited |
@@ -58,9 +58,9 @@ ContentAuthoring/
       <normalized UTF-8 CSV tables>
 ```
 
-`authoring_manifest.json` is the sole package-level authority for the authoring-package schema identity/version, explicit ordered table file list, production content version used to derive records, expected catalog schema identity/version, expected string-table schema identity/version, and initial required language identity. A compatibility or minimum supported authoring-tool version may be added only when explicitly documented; this packet invents no value. These writable values must not be duplicated in CSV or schema files.
+`authoring_manifest.json` is the sole writable authority for the selected authoring-package schema identity and selected authoring-package schema version, explicit ordered table file list, production content version used to derive records, expected catalog schema identity/version, expected string-table schema identity/version, and initial required language identity. A compatibility or minimum supported authoring-tool version may be added only when explicitly documented; this packet invents no value. These writable values must not be duplicated in CSV or schema files.
 
-The authoring manifest is distinct from generated runtime `content_manifest.json`; the latter is derived. `authoring_schema.json` is the sole machine-readable definition of table names and exact paths; fixed column order and names; data types; required/optional status; primary, owner-scoped compound, and foreign keys; enums; null/blank rules; canonical row-order keys; string/integer representations; uniqueness; child relationships; and supported authoring schema version. GD65B2B will define exact tables and columns.
+The authoring manifest is distinct from generated runtime `content_manifest.json`; the latter is derived. `authoring_schema.json` is the sole machine-readable definition of table names and exact paths; fixed column order and names; data types; required/optional status; primary, owner-scoped compound, and foreign keys; enums; normalization and null/blank rules; canonical row-order keys; string/integer representations; uniqueness; child relationships; and validation rules applicable to the authoring schema identity/version selected by the manifest. It must not contain an independently writable duplicate of the selected package schema identity or version. Validation fails if the manifest selects an unsupported identity or version. GD65B2B will define exact tables and columns; this packet invents no authoring-package schema identity or numeric version.
 
 ## 6. Record families and relational decomposition
 
@@ -136,7 +136,7 @@ This packet creates no package directory, CSV, JSON schema/manifest, production 
 
 ## 15. Owner approval record
 
-The project owner approved this architecture in GD65B2A on 2026-07-26: normalized version-controlled tables and schemas at the exact future path are canonical; workbooks/cloud editors are adapters; runtime JSON is derived; Unity remains editor-service independent; and future integrations must produce validated Git-branch changes. This amendment sits outside and does not renumber or modify the existing 72-row production-value register.
+The project owner approved this architecture in GD65B2A on 2026-07-25: normalized version-controlled tables and schemas at the exact future path are canonical; workbooks/cloud editors are adapters; runtime JSON is derived; Unity remains editor-service independent; and future integrations must produce validated Git-branch changes. This amendment sits outside and does not renumber or modify the existing 72-row production-value register.
 
 ## 16. Current implementation boundary
 

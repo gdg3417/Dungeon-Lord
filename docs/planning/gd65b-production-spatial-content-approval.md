@@ -6,7 +6,7 @@
 | Starting baseline for this approval update | `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` (main through merged PR #179 / GD65B1) |
 | Packet | GD65B0 — Floor 1 spatial content authority and pipeline decision record |
 | Scope | Approval authority for Floor 1 production spatial records and their production pipeline |
-| Last reconciled | 2026-07-26 |
+| Last reconciled | 2026-07-25 |
 
 ## 1. Scope and authority
 
@@ -241,7 +241,7 @@ Rows 53–58 are `APPROVED` by GD65B0C5. Their explicitly authored namespace, si
 
 ### 8.1 Single production workload authority
 
-The sole future production authority is the separately authored Unity-imported `TextAsset` at `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`:
+The sole production workload-limit configuration authority is the separately authored Unity-imported `TextAsset` at `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`:
 
 ```text
 MaximumTopLevelRecords = 128
@@ -442,6 +442,6 @@ GD65B1 is complete and GD65B implementation remains incomplete. The separately a
 
 ## 15. GD65B2A authoring-source amendment (outside the 72-row register)
 
-Owner approval on 2026-07-26 supersedes the former current-direction assumption that a master workbook would own production authoring. The approved **future** single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization is the normalized Git package at `ContentAuthoring/DungeonSpatial/`, governed by the [GD65B production authoring source contract](gd65b-production-authoring-source-contract.md). Its future `authoring_manifest.json`, `authoring_schema.json`, and explicitly listed CSV tables have distinct, non-duplicated ownership. Workbooks, cloud editors, generated JSON, C# factories, duplicate assets, Bootstrap data, fixtures, and caches are not writable authority.
+Owner approval on 2026-07-25 supersedes the former current-direction assumption that a master workbook would own production authoring. The approved **future** single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization is the normalized Git package at `ContentAuthoring/DungeonSpatial/`, governed by the [GD65B production authoring source contract](gd65b-production-authoring-source-contract.md). Its future `authoring_manifest.json`, `authoring_schema.json`, and explicitly listed CSV tables have distinct, non-duplicated ownership. Workbooks, cloud editors, generated JSON, C# factories, duplicate assets, Bootstrap data, fixtures, and caches are not writable authority.
 
 This amendment does not alter or renumber any of the 72 approved rows and changes no approved value. The future package does not yet exist. The approved three generated outputs remain deterministic derived files that are never manually edited, while `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json` remains separately authored authority and must not be duplicated in the package. GD65B1 is complete, but generated records, exporter, recovery, loader, composition-root assignment, build gate, and complete evidence remain incomplete. Save schema remains 6, the catalog remains inactive, runtime/save authority remains unchanged, and GD66 remains blocked.
