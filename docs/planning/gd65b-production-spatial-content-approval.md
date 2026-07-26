@@ -2,11 +2,11 @@
 
 | Field | Decision |
 |---|---|
-| Status | **GD65B0 APPROVAL COMPLETE — 72/72 rows approved; GD65B implementation dependency gate open, implementation not complete** |
-| Starting baseline for this approval update | `e1bae81649e73452c76946689b93ba48eaebcb7d` (main through merged PR #177 / GD65B0C6) |
+| Status | **GD65B0 APPROVAL COMPLETE — 72/72 rows approved; GD65B1 complete; GD65B2A source contract approved; GD65B remains incomplete** |
+| Starting baseline for this approval update | `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` (main through merged PR #179 / GD65B1) |
 | Packet | GD65B0 — Floor 1 spatial content authority and pipeline decision record |
 | Scope | Approval authority for Floor 1 production spatial records and their production pipeline |
-| Last reconciled | 2026-07-25 |
+| Last reconciled | 2026-07-26 |
 
 ## 1. Scope and authority
 
@@ -30,6 +30,7 @@ The only register statuses are `APPROVED`, `INFERRED_NOT_APPROVED`, `UNAPPROVED`
 - Merged PR #175 / GD65B0C4 approved Floor 1 capacity and the remaining MVP connectable-shape profiles.
 - Merged PR #176 / GD65B0C5 approved six production spatial localization keys and reviewed English entries.
 - Merged PR #177 / GD65B0C6 approved the production paths, manifest/schema ownership, dedicated loading and assignment, three shared validation gates, language-pack extensibility, and recoverable transactional export ownership.
+- Merged PR #179 / GD65B1 implemented the separately authored limits asset, strict parser/conversion boundary, and initial workload/scalability tests.
 - [GD63](gd63-spatial-and-progression-design-decisions.md) and [Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) own approved qualitative spatial direction.
 - Specs 19, 27, 28, 36, and 37 constrain content pipeline, localization, saves, workloads, and evidence; none supplies missing production values.
 - GD66 depends on approved GD65B records for final migration mapping. Phase 2 alone may implement migration and switch runtime/save authority.
@@ -212,7 +213,7 @@ This is English-display-name authority only. Japanese and later-language entries
 
 Rows 59–65 are the primary exact authority. They approve the sole production directory `Assets/_Project/Data/Production/DungeonSpatial/`; generated catalog, initial English language-table, and domain-manifest paths; and authored `validation_limits.json` path. The domain manifest is the single production schema registry. `ContentService.LoadProductionSpatialContent(...)` owns dedicated validated loading from a read-only language-table collection, and `GameRoot` owns four logical serialized inputs including that collection, without editor fallback or runtime discovery. The initial collection contains only `string_table_en.json`; exactly one ordinal `language = "en"` pack remains mandatory fallback, while later language packs can be appended through data assignment without code, signature, ID, or key changes.
 
-Export, every-player-build preflight, and runtime load are required validation gates. `Tools/Dungeon Lord/Content/Export Production Spatial Content` and a command-line-callable editor entry point own canonicalization, ordinal localization/manifest ordering, deterministic JSON formatting, reparsing/revalidation, and recoverable transactional publication. The staged multi-file transaction uses same-filesystem temporary files, complete backups, a durable flushed journal, installed-set validation, and deterministic rollback or completion before later export/build; it never represents three files as one OS-atomic replacement. Generated catalog, language tables, and manifest are reviewed and committed together, and a mixed working tree is not a published release. Bootstrap remains prototype/validation infrastructure and is never production authority or fallback. The master authoring-source direction remains unchanged; no second writable source is approved.
+Export, every-player-build preflight, and runtime load are required validation gates. `Tools/Dungeon Lord/Content/Export Production Spatial Content` and a command-line-callable editor entry point own canonicalization, ordinal localization/manifest ordering, deterministic JSON formatting, reparsing/revalidation, and recoverable transactional publication. The staged multi-file transaction uses same-filesystem temporary files, complete backups, a durable flushed journal, installed-set validation, and deterministic rollback or completion before later export/build; it never represents three files as one OS-atomic replacement. Generated catalog, language tables, and manifest are reviewed and committed together, and a mixed working tree is not a published release. Bootstrap remains prototype/validation infrastructure and is never production authority or fallback. The newly approved version-controlled authoring-package direction applies; no second writable source is approved.
 
 This approval is documentation only: it creates no pipeline, production files, records, scene assignments, or gameplay readers. GD65B0C7 later approves numeric workload limits in rows 66–70 and production pipeline test ownership in row 72 without implementing them. The catalog remains inactive, save schema remains 6, and existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority.
 
@@ -436,4 +437,11 @@ This partial signoff did not open the GD65B gate. GD65B0C4 later approved capaci
 
 ## GD65B1 implementation status
 
-GD65B implementation has begun through GD65B1. The separately authored approved `validation_limits.json`, strict pure parsing/conversion boundary, and initial workload-limit and test-only 80-floor scalability tests now exist. The 72-row approval register and its statuses remain unchanged. GD65B is incomplete: generated catalog, English table, manifest, exporter/deterministic bytes, recovery, production loading/composition-root assignment, pre-build integration, remaining suites, and complete evidence do not yet exist. Save schema remains 6; the catalog remains inactive; existing runtime/save authority is unchanged. GD66 remains blocked until all required GD65B production records, stages, tests, and evidence exist.
+GD65B1 is complete and GD65B implementation remains incomplete. The separately authored approved `validation_limits.json`, strict pure parsing/conversion boundary, and initial workload-limit and test-only 80-floor scalability tests now exist. The 72-row approval register and its statuses remain unchanged. GD65B is incomplete: generated catalog, English table, manifest, exporter/deterministic bytes, recovery, production loading/composition-root assignment, pre-build integration, remaining suites, and complete evidence do not yet exist. Save schema remains 6; the catalog remains inactive; existing runtime/save authority is unchanged. GD66 remains blocked until all required GD65B production records, stages, tests, and evidence exist.
+
+
+## 15. GD65B2A authoring-source amendment (outside the 72-row register)
+
+Owner approval on 2026-07-26 supersedes the former current-direction assumption that a master workbook would own production authoring. The approved **future** single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization is the normalized Git package at `ContentAuthoring/DungeonSpatial/`, governed by the [GD65B production authoring source contract](gd65b-production-authoring-source-contract.md). Its future `authoring_manifest.json`, `authoring_schema.json`, and explicitly listed CSV tables have distinct, non-duplicated ownership. Workbooks, cloud editors, generated JSON, C# factories, duplicate assets, Bootstrap data, fixtures, and caches are not writable authority.
+
+This amendment does not alter or renumber any of the 72 approved rows and changes no approved value. The future package does not yet exist. The approved three generated outputs remain deterministic derived files that are never manually edited, while `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json` remains separately authored authority and must not be duplicated in the package. GD65B1 is complete, but generated records, exporter, recovery, loader, composition-root assignment, build gate, and complete evidence remain incomplete. Save schema remains 6, the catalog remains inactive, runtime/save authority remains unchanged, and GD66 remains blocked.

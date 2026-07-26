@@ -1,6 +1,6 @@
 # System Spec 19: Content Pipeline and Data Authoring
 
-Status: Locked v1
+Status: Locked v1 (GD65B2A authoring-source amendment approved 2026-07-26)
 
 Scope: MVP plus forward compatible
 
@@ -20,9 +20,11 @@ Core gameplay data is loaded from externalized tables so that balance and conten
 
 3\. Authoring Source of Truth
 
-3.1 Master spreadsheet
+3.1 Version-controlled authoring package
 
-A single master spreadsheet is the source of truth, with one tab per content domain: constants, rooms, tiles, monsters, loot items, loot tables, research nodes, events, and localization keys.
+Normalized UTF-8 text tables and machine-readable schemas committed to Git are the canonical production authoring authority. Flat and relational records use CSV; package metadata and schema definitions use JSON. Each production value has exactly one writable owner. Generated runtime data, workbooks, cloud editors, code records, duplicate assets, fixtures, caches, and unreviewed imports are not authoring authority.
+
+The approved future Dungeon Spatial package is `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree. Its exact contract is [GD65B production authoring source contract](../docs/planning/gd65b-production-authoring-source-contract.md). GD65B2A approves the path and contract but creates no package or authoring files.
 
 3.2 Solo authoring
 
@@ -32,7 +34,7 @@ In MVP, only the primary developer edits content. The pipeline still supports fu
 
 4.1 Export target
 
-The spreadsheet is exported to JSON for runtime loading. Export can be manual or scripted as a build step.
+The explicitly assigned version-controlled authoring package is strictly validated and exported to deterministic generated JSON for runtime loading. Export may be manually invoked or scripted, but runtime and player builds never read Excel, Google Sheets, a live database, a CMS, or another cloud authoring service. Workbooks and cloud editors are optional adapters only: proposed changes must become normalized, validated, Git-reviewable source-package changes before export.
 
 4.2 Schema
 
@@ -114,9 +116,9 @@ When online, the client checks for content updates and applies them. The player 
 
 A few minutes per balance change is acceptable. The workflow prioritizes correctness and safety over instant hot reload.
 
-10.2 Constants tab
+10.2 Normalized constants table
 
-All key coefficients are centralized in a constants tab so balance tuning does not require editing multiple tables.
+All key coefficients are centralized in an explicitly schema-owned normalized constants table so balance tuning does not require editing multiple tables. This amendment approves the concept, not a constants package, filename, schema, or value.
 
 11\. Forward Compatibility
 
@@ -128,11 +130,11 @@ Support explicit migration tables that map old ids to new ids when content is re
 
 Content removal should be rare. Prefer deprecating entries and mapping them to safe alternatives rather than deleting outright.
 
-12\. Production Dungeon Spatial pipeline ownership (approved; partial GD65B1 implementation)
+12\. Production Dungeon Spatial pipeline ownership (approved; GD65B1 complete, GD65B incomplete)
 
 12.1 Paths and writable authority
 
-GD65B0C6 approves `Assets/_Project/Data/Production/DungeonSpatial/` as the sole initial production Dungeon Spatial directory. The future generated, committed JSON `TextAsset` outputs are `dungeon_spatial_content.json`, `string_table_en.json`, and `content_manifest.json` in that directory. The separately authored configuration is `validation_limits.json` in the same directory and is read, never generated or replaced, by export. The catalog is one complete writable domain export; no per-definition or parallel writable source is approved. This does not weaken §3.1: implementation must reconcile export with the actual master authoring source rather than inventing a second workbook, JSON, C# source, or editor asset.
+GD65B0C6 approves `Assets/_Project/Data/Production/DungeonSpatial/` as the sole initial production Dungeon Spatial directory. The future generated, committed JSON `TextAsset` outputs are `dungeon_spatial_content.json`, `string_table_en.json`, and `content_manifest.json` in that directory. The separately authored configuration is `validation_limits.json` in the same directory and is read, never generated or replaced, by export. The catalog is one complete writable domain export; no per-definition or parallel writable source is approved. This does not weaken §3.1: the future `ContentAuthoring/DungeonSpatial/` package is the single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization. Its `authoring_manifest.json`, `authoring_schema.json`, and manifest-listed normalized CSV tables will be canonical when implemented. No workbook, cloud service, generated JSON, C# source, ScriptableObject, editor asset, Bootstrap data, fixture, or cache may duplicate that authority. `validation_limits.json` remains separately authored configuration authority outside both the generated set and authoring package.
 
 12.2 Format, manifest, and registration
 
@@ -148,7 +150,7 @@ The future editor command is `Tools/Dungeon Lord/Content/Export Production Spati
 
 12.5 Current implementation boundary
 
-GD65B1 begins implementation with the separately authored `validation_limits.json`, a strict pure parser/conversion boundary, and initial workload-limit and test-only scalability tests. No generated catalog, English table, manifest, exporter, loader, build hook, scene assignment, or runtime behavior exists yet. Loading a future validated catalog will not activate gameplay, UI, saves, placement, capacity, route graphs, construction, or simulation. Save schema remains 6 and existing ordered two-room state remains authority. GD65B0C7 subsequently approves rows 66–70 and 72 without implementing them; GD65B0 is complete and GD65B implementation has begun through GD65B1 but remains incomplete. The limits asset, strict parser/conversion boundary, and initial workload/scalability tests are present. Generated catalog, English table, manifest, exporter, deterministic byte generation, recovery, loading, composition-root assignment, pre-build integration, and complete evidence remain absent. Save schema remains 6; the catalog remains inactive; current runtime and save authority remain unchanged; and GD66 remains blocked.
+GD65B1 completed its implementation slice with the separately authored `validation_limits.json`, a strict pure parser/conversion boundary, and initial workload-limit and test-only scalability tests. GD65B2A approves the future version-controlled authoring-source contract without creating the package. No generated catalog, English table, manifest, exporter, loader, build hook, scene assignment, or runtime behavior exists yet. Loading a future validated catalog will not activate gameplay, UI, saves, placement, capacity, route graphs, construction, or simulation. Save schema remains 6 and existing ordered two-room state remains authority. GD65B0C7 subsequently approves rows 66–70 and 72 without implementing them; GD65B0 and GD65B1 are complete, while GD65B implementation remains incomplete. The limits asset, strict parser/conversion boundary, and initial workload/scalability tests are present. Generated catalog, English table, manifest, exporter, deterministic byte generation, recovery, loading, composition-root assignment, pre-build integration, and complete evidence remain absent. Save schema remains 6; the catalog remains inactive; current runtime and save authority remain unchanged; and GD66 remains blocked.
 
 12.6 GD65B0C7 approved workload and test gate
 
