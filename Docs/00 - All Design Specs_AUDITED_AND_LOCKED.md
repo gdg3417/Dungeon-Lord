@@ -4782,3 +4782,7 @@ Define the testing strategy and tooling needed to validate core invariants and p
 ## 8. Open questions
 
 None.
+
+## Spec 19 GD65B3B production spatial export status
+
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B adds one shared invocation boundary used by the approved editor menu and Unity command line, and commits the first deterministic three-file production spatial derived set. Normalized authoring remains the writable authority; `validation_limits.json` remains separate configuration authority. Production loading, `ContentService` publication, `GameRoot` assignment, pre-build recovery/validation, runtime catalog consumption, and spatial gameplay activation remain absent. Save schema remains 6 and existing runtime/save authority is unchanged. GD66 remains blocked; production loading and composition assignment is next.

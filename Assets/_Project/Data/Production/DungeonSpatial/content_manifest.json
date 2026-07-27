@@ -1,0 +1,15 @@
+{
+  "schema": "content_manifest",
+  "schemaVersion": 1,
+  "contentVersion": "0.1.0",
+  "requiredSchemas": [
+    {
+      "schemaId": "dungeon_spatial_content",
+      "schemaVersion": 1
+    },
+    {
+      "schemaId": "string_table",
+      "schemaVersion": 1
+    }
+  ]
+}

@@ -68,3 +68,7 @@ GD65B1 leaves save schema 6, the inactive catalog, and current runtime/save auth
 ### GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
+
+## GD65B3B evidence status
+
+GD65B3A is merged in PR #183 and passed owner-run Unity validation. GD65B3B adds focused EditMode responsibility for the shared editor/command-line invocation boundary, stable ordered diagnostics, committed generated-path completeness, fresh-build byte equality, repeated-build hashes, and source/limits non-mutation. The packet commits the three deterministic production outputs. Loading/composition, pre-build, runtime-consumption, spatial-gameplay, save, and migration stages remain out of scope and absent; GD66 remains blocked. The next planned packet is production loading and composition assignment.

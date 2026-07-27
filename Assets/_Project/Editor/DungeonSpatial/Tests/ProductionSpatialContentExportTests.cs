@@ -10,6 +10,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using System.Reflection;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -36,6 +37,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static ProductionSpatialGeneratedSetBuildResult Build()
         {
             return ProductionSpatialGeneratedSetBuilder.Build(Projection(), Limits());
+        }
+
+        [Test]
+        public void ExportAdaptersExposeApprovedMenuAndCommandLineThroughSharedBoundary()
+        {
+            MethodInfo menu = typeof(ProductionSpatialContentExportCommand).GetMethod(
+                nameof(ProductionSpatialContentExportCommand.ExportProductionSpatialContentMenu));
+            MethodInfo commandLine = typeof(ProductionSpatialContentExportCommand).GetMethod(
+                nameof(ProductionSpatialContentExportCommand.ExportProductionSpatialContentCommandLine));
+            Assert.That(menu, Is.Not.Null); Assert.That(commandLine, Is.Not.Null);
+            MenuItem attribute = menu.GetCustomAttributes(typeof(MenuItem), false).Cast<MenuItem>().Single();
+            Assert.That(attribute.menuItem, Is.EqualTo(ProductionSpatialContentExportCommand.MenuPath));
+            Assert.That(commandLine.IsPublic && commandLine.IsStatic, Is.True);
+
+            var success = new ProductionSpatialPublicationResult(
+                ProductionSpatialPublicationStatus.NoByteChangesNeeded,
+                Array.Empty<ProductionSpatialPublicationDiagnostic>());
+            Assert.That(ProductionSpatialContentExportCommand.Execute(() => success), Is.SameAs(success));
+        }
+
+        [Test]
+        public void ExportCommandFailureThrowsWithStableOrderedDiagnostics()
+        {
+            var failure = new ProductionSpatialPublicationResult(
+                ProductionSpatialPublicationStatus.PreInstallValidationFailure,
+                new[]
+                {
+                    ProductionSpatialPublicationDiagnostic.CandidateInvalid,
+                    ProductionSpatialPublicationDiagnostic.AuthoringReadFailed,
+                    ProductionSpatialPublicationDiagnostic.CandidateInvalid
+                });
+            const string expected = "Production spatial content export status: PreInstallValidationFailure. " +
+                "Diagnostics: AuthoringReadFailed, CandidateInvalid.";
+            Assert.That(ProductionSpatialContentExportCommand.FormatDiagnostics(failure), Is.EqualTo(expected));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                ProductionSpatialContentExportCommand.Execute(() => failure));
+            Assert.That(exception.Message, Is.EqualTo(expected));
         }
 
         [Test]
@@ -284,9 +322,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(manifest, Does.Not.Contain("minAppVersion"));
             Assert.That(manifest.IndexOf("dungeon_spatial_content", StringComparison.Ordinal),
                 Is.LessThan(manifest.IndexOf("string_table", StringComparison.Ordinal)));
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.CatalogPath), Is.False);
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.EnglishPath), Is.False);
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.ManifestPath), Is.False);
+        }
+
+        [Test]
+        public void CommittedGeneratedSetIsExactFreshBuildAndAuthoritiesRemainUnchanged()
+        {
+            DungeonSpatialAuthoringSource source = Production();
+            IReadOnlyDictionary<string, byte[]> sourceBefore = source.Snapshot();
+            byte[] limitsBefore = File.ReadAllBytes(LimitsPath);
+            ProductionSpatialGeneratedSet fresh = Build().Output;
+
+            string[] committedJson = Directory.GetFiles(
+                    Path.GetDirectoryName(ProductionSpatialGeneratedSetParser.ManifestPath), "*.json")
+                .Select(path => path.Replace('\\', '/'))
+                .Where(path => !string.Equals(path, LimitsPath, StringComparison.Ordinal))
+                .OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            CollectionAssert.AreEqual(ProductionSpatialGeneratedSetParser.RequiredPaths, committedJson);
+
+            var committed = new ProductionSpatialGeneratedSet(committedJson.Select(path =>
+                new ProductionSpatialGeneratedFile(path, File.ReadAllBytes(path))));
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(committed, Limits()).Success, Is.True);
+            foreach (ProductionSpatialGeneratedFile file in fresh.Files)
+                CollectionAssert.AreEqual(file.Bytes, File.ReadAllBytes(file.Path), file.Path);
+
+            CollectionAssert.AreEqual(limitsBefore, File.ReadAllBytes(LimitsPath));
+            foreach (KeyValuePair<string, byte[]> entry in sourceBefore)
+                CollectionAssert.AreEqual(entry.Value, source.Snapshot()[entry.Key], entry.Key);
         }
 
         [Test]

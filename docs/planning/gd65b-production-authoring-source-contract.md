@@ -154,3 +154,7 @@ GD65B2B is complete. The current packet adds pure deterministic construction and
 ### GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
+
+## GD65B3B implementation status
+
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B preserves `ContentAuthoring/DungeonSpatial/` as the single logical writable authority while adding shared editor/command-line publication invocation and committing the first three-file deterministic derived set. `validation_limits.json` remains separately authored and is not generated. Loading, `ContentService` publication, `GameRoot` assignment, pre-build gating, runtime consumption, and gameplay activation remain absent; save schema 6 and current runtime/save authority are unchanged. GD66 remains blocked, with production loading and composition assignment next.

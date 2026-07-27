@@ -243,3 +243,7 @@ PR #182 constructs the exact catalog, English table, and domain manifest in memo
 ### GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
+
+## GD65B3B current implementation status
+
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B adds the supported editor-menu and command-line invocation boundary and commits the first deterministic production spatial generated set. It does not add production loading, `ContentService` publication, `GameRoot` assignment, pre-build recovery/validation, runtime catalog consumption, or gameplay activation. Save schema remains 6 and the existing abstract placement, ordered two-room layout, and room-slot assignment authorities remain unchanged. GD66 remains blocked; production loading and composition assignment is the next planned packet.
