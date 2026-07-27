@@ -435,7 +435,7 @@ This partial signoff did not open the GD65B gate. GD65B0C4 later approved capaci
 - **Excluded scope:** the actual limits JSON; production records/catalog/manifest/language table; exporter, loader, recovery, build hook, scene assignments, tests/evidence/player-build evidence; catalog activation; save changes/migration; 80 production floors; 64 by 64 production floors; post-MVP progression; runtime streaming; mobile performance; balance; player UI; and fun proof.
 - **Gate effect:** all 72 rows are `APPROVED`; GD65B0 approval is complete and the GD65B implementation dependency gate is open. GD65B remains unimplemented, no production file or pipeline exists, save schema remains 6, and runtime/save authority is unchanged.
 
-## GD65B1 implementation status
+## Historical GD65B1 implementation status
 
 GD65B1 is complete and GD65B implementation remains incomplete. The separately authored approved `validation_limits.json`, strict pure parsing/conversion boundary, and initial workload-limit and test-only 80-floor scalability tests now exist. The 72-row approval register and its statuses remain unchanged. GD65B is incomplete: PR #182 completed deterministic generated-set bytes and GD65B3A adds recoverable publication/recovery, while committed generated files, production loading/composition-root assignment, pre-build integration, remaining suites, and complete evidence do not yet exist. Save schema remains 6; the catalog remains inactive; existing runtime/save authority is unchanged. GD66 remains blocked until all required GD65B production records, stages, tests, and evidence exist.
 
@@ -446,19 +446,19 @@ Owner approval on 2026-07-25 supersedes the former current-direction assumption 
 
 This amendment does not alter or renumber any of the 72 approved rows and changes no approved value. The future package does not yet exist. The approved three generated outputs remain deterministic derived files that are never manually edited, while `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json` remains separately authored authority and must not be duplicated in the package. GD65B1 is complete, but generated records, exporter, recovery, loader, composition-root assignment, build gate, and complete evidence remain incomplete. Save schema remains 6, the catalog remains inactive, runtime/save authority remains unchanged, and GD66 remains blocked.
 
-## GD65B2B implementation status
+## Historical GD65B2B implementation status
 
 GD65B2B materializes the unchanged 72-row approval register as the normalized source package and projects its six approved English entries into a detached editor-only `StringTable`. It changes no approved value and adds no new record. Deterministic runtime output construction exists in memory through PR #182 and GD65B3A adds recoverable publication/recovery; committed output and all activation/loading/save work remain absent; save schema remains 6 and GD66 remains blocked.
 
-## Current deterministic generated-set implementation step
+## Historical deterministic generated-set implementation step
 
 GD65B2B is complete. The current packet adds pure deterministic construction and strict atomic reparse/revalidation of the exact three approved generated outputs in memory. No generated runtime JSON is committed. GD65B3A adds recoverable filesystem publication/recovery without editor or command-line entry points; loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. Save schema remains 6, the spatial catalog remains inactive, and current runtime/save authority is unchanged.
 
 
-### GD65B3A recoverable publication status
+### Historical GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
 
 ## GD65B3B implementation status
 
-PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B implements the approved editor and command-line export invocation and commits the first reviewed deterministic manifest, catalog, and English-table generated set without changing this historical approval record or its decisions. Production loading, `ContentService` publication, `GameRoot` assignment, pre-build validation/recovery, runtime consumption, and gameplay activation remain absent. Save schema remains 6, existing runtime/save authority is unchanged, and GD66 remains blocked. Production loading and composition assignment is next.
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. No owner Unity result is yet claimed for GD65B3B in this PR. GD65B3B implements the approved editor and command-line export invocation and commits the first reviewed deterministic manifest, catalog, and English-table generated set without changing this historical approval record or its decisions. Production loading, `ContentService` publication, `GameRoot` assignment, pre-build validation/recovery, runtime consumption, and gameplay activation remain absent. Save schema remains 6, existing runtime/save authority is unchanged, and GD66 remains blocked. Production loading and composition assignment is next.
