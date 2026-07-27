@@ -161,7 +161,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
 
         [TestCase(ProductionSpatialPublicationFailurePoint.AfterJournalFlush, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
         [TestCase(ProductionSpatialPublicationFailurePoint.AfterFirstTargetReplacement, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
-        [TestCase(ProductionSpatialPublicationFailurePoint.AfterIntermediateTargetReplacement, ProductionSpatialPublicationStatus.RecoveryCompletedToPreviousSet, false)]
+        [TestCase(ProductionSpatialPublicationFailurePoint.AfterIntermediateTargetReplacement, ProductionSpatialPublicationStatus.RecoveryCompletedToNewSet, true)]
         [TestCase(ProductionSpatialPublicationFailurePoint.AfterAllTargetReplacementsBeforeInstalledValidation, ProductionSpatialPublicationStatus.RecoveryCompletedToNewSet, true)]
         [TestCase(ProductionSpatialPublicationFailurePoint.AfterInstalledValidationBeforeCleanup, ProductionSpatialPublicationStatus.RecoveryCompletedToNewSet, true)]
         public void CrossVersionInterruptions_SelectExactVersionedCompleteSet(
@@ -170,6 +170,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         {
             byte[][] candidate = CandidateBytes();
             byte[][] previous = WithContentVersion(candidate, PreviousTestContentVersion);
+            CollectionAssert.AreNotEqual(previous[0], candidate[0], "Versioned manifests must differ.");
+            CollectionAssert.AreNotEqual(previous[1], candidate[1], "Versioned catalogs must differ.");
+            CollectionAssert.AreEqual(previous[2], candidate[2], "Version changes must not alter English bytes.");
             InstallTargets(previous);
             Assert.That(Interrupt(point).Success, Is.False);
 

@@ -519,7 +519,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ProductionSpatialGeneratedSet blankCatalog = ReplaceCatalog(Build().Output,
                 catalog => catalog.Metadata.ContentVersion = string.Empty);
             AssertRepeatedExactNoThrow(blankCatalog,
-                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch,
+                ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
 
             ProductionSpatialGeneratedSet mismatched = ReplaceCatalog(Build().Output,
                 catalog => catalog.Metadata.ContentVersion = previousVersion);
@@ -620,8 +621,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.DoesNotThrow(() => first = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
             Assert.DoesNotThrow(() => second = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
             Assert.That(first.Value, Is.Null); Assert.That(second.Value, Is.Null);
-            CollectionAssert.AreEqual(expected.OrderBy(value => (int)value), first.Diagnostics);
-            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics);
+            ProductionSpatialGeneratedSetDiagnostic[] orderedExpected =
+                expected.OrderBy(value => (int)value).ToArray();
+            string message = "Expected: " + string.Join(", ", orderedExpected) +
+                "; Actual: " + string.Join(", ", first.Diagnostics);
+            CollectionAssert.AreEqual(orderedExpected, first.Diagnostics, message);
+            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics,
+                "Repeated diagnostics differed. " + message);
         }
 
         private static void AssertManifestFailure(byte[] replacement, ProductionSpatialGeneratedSetDiagnostic expected)
