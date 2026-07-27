@@ -230,7 +230,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             ValidateProjectorCompatibility(schema, issues);
             if (issues.Count != 0) return Failed(issues);
 
-            HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath, "README.md" }), StringComparer.Ordinal);
+            HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath }), StringComparer.Ordinal);
             foreach (string path in source.Paths.Where(path => !approved.Contains(path))) Add(issues, DungeonSpatialAuthoringDiagnostic.UnexpectedFile, path);
 
             var tables = new Dictionary<string, AuthoringRows>(StringComparer.Ordinal);

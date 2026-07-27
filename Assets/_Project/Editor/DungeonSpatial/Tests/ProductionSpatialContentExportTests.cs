@@ -343,7 +343,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             var committed = new ProductionSpatialGeneratedSet(committedJson.Select(path =>
                 new ProductionSpatialGeneratedFile(path, File.ReadAllBytes(path))));
-            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(committed, Limits()).Success, Is.True);
+            ProductionSpatialGeneratedSetResult committedResult =
+                ProductionSpatialGeneratedSetParser.ParseAndValidate(committed, Limits());
+            Assert.That(committedResult.Success, Is.True,
+                string.Join(", ", committedResult.Diagnostics));
             foreach (ProductionSpatialGeneratedFile file in fresh.Files)
                 CollectionAssert.AreEqual(file.Bytes, File.ReadAllBytes(file.Path), file.Path);
 
@@ -377,12 +380,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             foreach (string path in permutedFiles.Keys.Where(path => path.EndsWith(".csv", StringComparison.Ordinal)).ToArray())
             {
                 string[] lines = Encoding.UTF8.GetString(permutedFiles[path]).TrimEnd('\n').Split('\n');
-                permutedFiles[path] = Encoding.UTF8.GetBytes(lines[0] + "\n" + string.Join("\n", lines.Skip(1).Reverse()) + "\n");
+                if (lines.Length > 1)
+                    permutedFiles[path] = Encoding.UTF8.GetBytes(
+                        lines[0] + "\n" + string.Join("\n", lines.Skip(1).Reverse()) + "\n");
             }
             DungeonSpatialAuthoringResult canonical = DungeonSpatialAuthoringPackageParser.ParseAndProject(production, Limits());
             DungeonSpatialAuthoringResult rowPermutation = DungeonSpatialAuthoringPackageParser.ParseAndProject(
                 new DungeonSpatialAuthoringSource(permutedFiles), Limits());
-            Assert.That(canonical.Success && rowPermutation.Success, Is.True);
+            Assert.That(canonical.Success, Is.True,
+                string.Join("\n", canonical.Issues.Select(issue => issue.ToString())));
+            Assert.That(rowPermutation.Success, Is.True,
+                string.Join("\n", rowPermutation.Issues.Select(issue => issue.ToString())));
             ProductionSpatialGeneratedSetBuildResult first = ProductionSpatialGeneratedSetBuilder.Build(canonical.Projection, Limits());
             ProductionSpatialGeneratedSetBuildResult rows = ProductionSpatialGeneratedSetBuilder.Build(rowPermutation.Projection, Limits());
 
@@ -489,6 +497,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json => json.Replace("spatial.room.basic.display_name", "test.missing.localization"),
                 ProductionSpatialGeneratedSetDiagnostic.LocalizationInvalid,
                 ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
+        }
+
+        [Test]
+        public void GeneratedSetContentVersionsMustBeNonblankAndOrdinallyEqual()
+        {
+            const string previousVersion = "test.gd65b.previous.version";
+            ProductionSpatialGeneratedSet matching = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = previousVersion);
+            matching = ReplaceJson(matching, ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"contentVersion\": \"0.1.0\"",
+                    "\"contentVersion\": \"" + previousVersion + "\""));
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(matching, Limits()).Success, Is.True);
+
+            ProductionSpatialGeneratedSet blankManifest = ReplaceJson(Build().Output,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"\""));
+            AssertRepeatedExactNoThrow(blankManifest,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+
+            ProductionSpatialGeneratedSet blankCatalog = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = string.Empty);
+            AssertRepeatedExactNoThrow(blankCatalog,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+
+            ProductionSpatialGeneratedSet mismatched = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = previousVersion);
+            AssertRepeatedExactNoThrow(mismatched,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+
+            ProductionSpatialGeneratedSet current = Build().Output;
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(current, Limits()).Success, Is.True);
+            ProductionSpatialGeneratedSet repeated = Build().Output;
+            for (int index = 0; index < current.Files.Length; index++)
+                CollectionAssert.AreEqual(current.Files[index].Bytes, repeated.Files[index].Bytes);
         }
 
         [Test]
@@ -647,6 +689,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(Without(path), Limits());
             Assert.That(result.Success, Is.False); Assert.That(result.Issues.Any(x => x.Diagnostic == expected), Is.True);
+        }
+
+        [Test]
+        public void UnexpectedPackageReadmeFailsClosed()
+        {
+            var files = Production().Snapshot().ToDictionary(pair => pair.Key, pair => pair.Value,
+                StringComparer.Ordinal);
+            files.Add("README.md", Encoding.UTF8.GetBytes("test-only unexpected file\n"));
+            DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(
+                new DungeonSpatialAuthoringSource(files), Limits());
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic ==
+                DungeonSpatialAuthoringDiagnostic.UnexpectedFile && issue.RelativePath == "README.md"), Is.True);
         }
 
         [TestCase("tables/rooms.csv", "\ufeff")]

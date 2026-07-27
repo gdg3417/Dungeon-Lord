@@ -325,6 +325,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RequiredReferenceCollectionsRejectNullAndEmptyWithStablePaths()
+        {
+            var cases = new Action<SpatialContentCatalog>[]
+            {
+                catalog => catalog.Floors[0].AllowedRoomDefinitionIds = null,
+                catalog => catalog.Floors[0].AllowedRoomDefinitionIds = Array.Empty<string>(),
+                catalog => catalog.Floors[0].AllowedCorridorDefinitionIds = null,
+                catalog => catalog.Floors[0].AllowedCorridorDefinitionIds = Array.Empty<string>(),
+                catalog => catalog.Corridors[0].CompatibleSocketTypeIds = null,
+                catalog => catalog.Corridors[0].CompatibleSocketTypeIds = Array.Empty<string>(),
+                catalog => catalog.SocketTypes[0].CompatibleSocketTypeIds = null,
+                catalog => catalog.SocketTypes[0].CompatibleSocketTypeIds = Array.Empty<string>()
+            };
+            string[] paths =
+            {
+                "floors[0].allowedRooms", "floors[0].allowedRooms",
+                "floors[0].allowedCorridors", "floors[0].allowedCorridors",
+                "corridors[0].compatibleSockets", "corridors[0].compatibleSockets",
+                "socketTypes[0].compatible", "socketTypes[0].compatible"
+            };
+
+            for (int index = 0; index < cases.Length; index++)
+            {
+                SpatialContentCatalog catalog = Valid();
+                cases[index](catalog);
+                SpatialContentValidationIssue[] first = Validate(catalog).Issues;
+                SpatialContentValidationIssue[] second = Validate(catalog).Issues;
+                Assert.That(first.Any(issue => issue.Reason ==
+                    SpatialContentValidationReason.ForeignKeyMissing && issue.Path == paths[index]), Is.True);
+                CollectionAssert.AreEqual(first.Select(JsonUtility.ToJson), second.Select(JsonUtility.ToJson));
+            }
+
+            SpatialContentCatalog valid = Valid();
+            valid.Rooms[0].ReservedTileOffsets = Array.Empty<TileCoordinate>();
+            valid.FixedStructures[0].ReservedTileOffsets = Array.Empty<TileCoordinate>();
+            Assert.That(Validate(valid).IsValid, Is.True);
+        }
+
+        [Test]
         public void FootprintsReservedTilesAndOrientations_AreValidatedIndependently()
         {
             var catalog = Valid();

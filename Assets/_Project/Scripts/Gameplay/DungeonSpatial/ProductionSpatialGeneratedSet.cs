@@ -201,7 +201,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(ProductionSpatialGeneratedSetDiagnostic.StringTableIdentityMismatch);
             if (manifest == null || manifest.schema != "content_manifest" || manifest.schemaVersion != 1)
                 issues.Add(ProductionSpatialGeneratedSetDiagnostic.ManifestIdentityMismatch);
-            if (manifest?.contentVersion != "0.1.0" || catalog?.Metadata?.ContentVersion != "0.1.0")
+            if (string.IsNullOrWhiteSpace(manifest?.contentVersion) ||
+                string.IsNullOrWhiteSpace(catalog?.Metadata?.ContentVersion) ||
+                !string.Equals(manifest.contentVersion, catalog.Metadata.ContentVersion, StringComparison.Ordinal))
                 issues.Add(ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
             if (english?.language != "en") issues.Add(ProductionSpatialGeneratedSetDiagnostic.LanguageMismatch);
             var registrations = manifest?.requiredSchemas;
