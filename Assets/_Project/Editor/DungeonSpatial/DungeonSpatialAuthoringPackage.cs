@@ -412,9 +412,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                             ReferenceColumn = key.ReferenceColumns[index]
                         }))
                         .Where(mapping => mapping.ReferenceTable == parent.Id).ToArray();
-                    bool ownsParent = ownerMappings.Length == parent.PrimaryKey.Length &&
-                        parent.PrimaryKey.All(parentColumn => ownerMappings.Count(mapping =>
-                            mapping.ReferenceColumn == parentColumn && child.IndexOf(mapping.Column) >= 0 &&
+                    bool ownsParent = parent.PrimaryKey.All(parentColumn => ownerMappings.Count(mapping =>
+                            mapping.Column == parentColumn && mapping.ReferenceColumn == parentColumn &&
+                            child.IndexOf(mapping.Column) >= 0 &&
                             child.Columns[child.IndexOf(mapping.Column)].Type ==
                             parent.Columns[parent.IndexOf(parentColumn)].Type) == 1);
                     if (!ownsParent)

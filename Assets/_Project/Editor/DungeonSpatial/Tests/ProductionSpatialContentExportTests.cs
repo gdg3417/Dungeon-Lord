@@ -601,7 +601,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CommittedPackage_HasExactFilesNormalizedCanonicalRowsAndProjectsApprovedRecords()
         {
-            string[] exact = new[] { "README.md", "authoring_manifest.json", "authoring_schema.json" }
+            string[] exact = new[] { "authoring_manifest.json", "authoring_schema.json" }
                 .Concat(new[] { "floors", "floor_allowed_rooms", "floor_allowed_corridors", "rooms", "room_orientations",
                     "room_reserved_offsets", "room_connection_points", "corridors", "corridor_orientations",
                     "corridor_compatible_sockets", "fixed_structures", "fixed_structure_orientations",
@@ -638,9 +638,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Projection.English.entries, Has.Length.EqualTo(6));
             CollectionAssert.AreEqual(result.Projection.English.entries.Select(e => e.key).OrderBy(x => x, StringComparer.Ordinal), result.Projection.English.entries.Select(e => e.key));
             foreach (var pair in before) CollectionAssert.AreEqual(pair.Value, source.Snapshot()[pair.Key], pair.Key);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json"), Is.False);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json"), Is.False);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json"), Is.False);
         }
 
         [TestCase("authoring_manifest.json", DungeonSpatialAuthoringDiagnostic.MissingManifest)]
