@@ -10,6 +10,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 using System.Reflection;
 
 namespace DungeonBuilder.M0.Tests.EditMode
