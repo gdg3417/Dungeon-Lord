@@ -71,6 +71,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const string expected = "Production spatial content export status: PreInstallValidationFailure. " +
                 "Diagnostics: AuthoringReadFailed, CandidateInvalid.";
             Assert.That(ProductionSpatialContentExportCommand.FormatDiagnostics(failure), Is.EqualTo(expected));
+            LogAssert.Expect(LogType.Error, expected);
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
                 ProductionSpatialContentExportCommand.Execute(() => failure));
             Assert.That(exception.Message, Is.EqualTo(expected));
