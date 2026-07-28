@@ -82,14 +82,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!limitResult.Success)
                 return Failure(ProductionSpatialContentLoadingDiagnostic.InvalidWorkloadLimits);
             var parsed = new List<StringTable>();
-            var parsedAssets = new List<TextAsset>();
+            var parsedBytes = new List<byte[]>();
             var cumulativeBudget = new StrictJsonWorkloadBudget(limitResult.Limits);
             var cumulativeDiagnostics = new DiagnosticCollector(limitResult.Limits.MaximumIssues);
-            foreach (TextAsset asset in languageTables)
+            LanguageInput[] orderedInputs = languageTables
+                .Select(asset => new LanguageInput(asset.bytes))
+                .OrderBy(input => input.Bytes, ByteArrayComparer.Instance)
+                .ToArray();
+            foreach (LanguageInput input in orderedInputs)
             {
                 ProductionSpatialLanguageResult result =
                     ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
-                        asset.bytes, limitResult.Limits, cumulativeDiagnostics, cumulativeBudget);
+                        input.Bytes, limitResult.Limits, cumulativeDiagnostics, cumulativeBudget);
                 if (!result.Success)
                 {
                     return Failure((result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
@@ -100,7 +104,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (string.IsNullOrWhiteSpace(result.Value.language))
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.BlankLanguageIdentity);
                 parsed.Add(result.Value);
-                parsedAssets.Add(asset);
+                parsedBytes.Add(input.Bytes);
             }
 
             var groups = parsed.GroupBy(value => value.language, StringComparer.Ordinal).ToArray();
@@ -117,7 +121,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.ManifestPath, manifest.bytes),
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.CatalogPath, catalog.bytes),
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.EnglishPath,
-                    parsedAssets[englishIndex].bytes)
+                    parsedBytes[englishIndex])
             });
             ProductionSpatialGeneratedSetResult baseResult =
                 ProductionSpatialGeneratedSetParser.ParseAndValidateCompleteLoad(
@@ -149,6 +153,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static ProductionSpatialContentLoadResult Failure(
             IEnumerable<ProductionSpatialContentLoadingDiagnostic> diagnostics) =>
             new ProductionSpatialContentLoadResult(null, diagnostics);
+
+        private sealed class LanguageInput
+        {
+            internal LanguageInput(byte[] bytes)
+            {
+                Bytes = bytes;
+            }
+
+            internal byte[] Bytes { get; }
+        }
+
+        private sealed class ByteArrayComparer : IComparer<byte[]>
+        {
+            internal static readonly ByteArrayComparer Instance = new ByteArrayComparer();
+
+            public int Compare(byte[] left, byte[] right)
+            {
+                int sharedLength = Math.Min(left.Length, right.Length);
+                for (int index = 0; index < sharedLength; index++)
+                {
+                    int comparison = left[index].CompareTo(right[index]);
+                    if (comparison != 0) return comparison;
+                }
+
+                return left.Length.CompareTo(right.Length);
+            }
+        }
 
     }
 }

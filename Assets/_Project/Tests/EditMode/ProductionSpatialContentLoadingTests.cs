@@ -149,6 +149,64 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void MixedLanguageFailuresReturnIdenticalDiagnosticsForEveryPermutation()
+        {
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            TextAsset constrained = Limits(128, exactEnglishCharacters);
+            TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
+                new string('x', exactEnglishCharacters));
+            TextAsset malformed = new TextAsset("{\n");
+            TextAsset additional = Language("test-noncanonical", null);
+            TextAsset noncanonical = new TextAsset(additional.text.TrimEnd());
+
+            AssertEveryPermutationMatches(new[] { english, oversized, malformed }, constrained);
+            AssertEveryPermutationMatches(
+                new[] { english, oversized, malformed, noncanonical }, constrained);
+            AssertEveryPermutationMatches(
+                new[] { english, malformed, new TextAsset("{}\n"), noncanonical }, limits);
+        }
+
+        [Test]
+        public void DuplicateAndMissingEnglishDiagnosticsArePermutationIndependent()
+        {
+            TextAsset duplicate = Language("test-duplicate", null);
+            TextAsset missingA = Language("test-a", null);
+            TextAsset missingB = Language("test-b", null);
+
+            AssertEveryPermutationMatches(new[] { english, duplicate, duplicate }, limits);
+            AssertEveryPermutationMatches(new[] { missingA, missingB }, limits);
+        }
+
+        [Test]
+        public void EveryFailedPermutationPreservesPriorPublicationAndSources()
+        {
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
+                new string('x', exactEnglishCharacters));
+            TextAsset malformed = new TextAsset("{\n");
+            TextAsset[] source = { english, oversized, malformed };
+            byte[][] before = source.Select(asset => (byte[])asset.bytes.Clone()).ToArray();
+            ProductionSpatialContentLoadingDiagnostic[] expected = null;
+
+            foreach (TextAsset[] permutation in Permutations(source))
+            {
+                var service = new ContentService();
+                Assert.That(Load(service).Success, Is.True);
+                ProductionSpatialContentSnapshot published = service.ProductionSpatialContent;
+                ProductionSpatialContentLoadResult result = service.LoadProductionSpatialContent(
+                    manifest, catalog, permutation, Limits(128, exactEnglishCharacters));
+                Assert.That(result.Success, Is.False);
+                Assert.That(result.Value, Is.Null);
+                Assert.That(service.ProductionSpatialContent, Is.SameAs(published));
+                if (expected == null) expected = result.Diagnostics;
+                else CollectionAssert.AreEqual(expected, result.Diagnostics);
+            }
+
+            for (int index = 0; index < source.Length; index++)
+                CollectionAssert.AreEqual(before[index], source[index].bytes);
+        }
+
+        [Test]
         public void CumulativeFailureNeverPartiallyPublishesAndPreservesExactPriorSnapshot()
         {
             var service = new ContentService();
@@ -365,6 +423,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
                 result.Diagnostics);
             Assert.That(result.Value, Is.Null);
+        }
+
+        private void AssertEveryPermutationMatches(TextAsset[] source, TextAsset suppliedLimits)
+        {
+            byte[][] before = source.Select(asset => (byte[])asset.bytes.Clone()).ToArray();
+            ProductionSpatialContentLoadingDiagnostic[] expected = null;
+            int executions = 0;
+            foreach (TextAsset[] permutation in Permutations(source))
+            {
+                ProductionSpatialContentLoadResult result = LoadWithLimits(permutation, suppliedLimits);
+                Assert.That(result.Success, Is.False);
+                Assert.That(result.Value, Is.Null);
+                if (expected == null) expected = result.Diagnostics;
+                else CollectionAssert.AreEqual(expected, result.Diagnostics);
+                executions++;
+            }
+
+            Assert.That(executions, Is.GreaterThan(1));
+            CollectionAssert.AreEqual(expected,
+                LoadWithLimits((TextAsset[])source.Clone(), suppliedLimits).Diagnostics);
+            for (int index = 0; index < source.Length; index++)
+                CollectionAssert.AreEqual(before[index], source[index].bytes);
+        }
+
+        private static IEnumerable<TextAsset[]> Permutations(TextAsset[] source)
+        {
+            var working = (TextAsset[])source.Clone();
+            foreach (TextAsset[] permutation in Permutations(working, 0)) yield return permutation;
+        }
+
+        private static IEnumerable<TextAsset[]> Permutations(TextAsset[] working, int index)
+        {
+            if (index == working.Length)
+            {
+                yield return (TextAsset[])working.Clone();
+                yield break;
+            }
+
+            for (int swapIndex = index; swapIndex < working.Length; swapIndex++)
+            {
+                TextAsset temporary = working[index];
+                working[index] = working[swapIndex];
+                working[swapIndex] = temporary;
+                foreach (TextAsset[] permutation in Permutations(working, index + 1))
+                    yield return permutation;
+                temporary = working[index];
+                working[index] = working[swapIndex];
+                working[swapIndex] = temporary;
+            }
         }
 
         private int FindMinimumStringLimit(TextAsset[] languages, int nested)
