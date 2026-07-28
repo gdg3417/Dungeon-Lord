@@ -321,8 +321,7 @@ namespace DungeonBuilder.M0
                 productionSpatialManifest,
                 productionSpatialCatalog,
                 productionSpatialLanguageTables,
-                productionSpatialValidationLimits,
-                diagnostic => Logger?.Warn(diagnostic.ToString()));
+                productionSpatialValidationLimits);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {

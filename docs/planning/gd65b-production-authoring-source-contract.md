@@ -2,7 +2,8 @@
 
 | Field | Decision |
 |---|---|
-| Status | **APPROVED by owner — architecture contract only; not implemented** |
+| Historical packet status | **GD65B2A approved the architecture contract only; implementation followed in later packets** |
+| Current implementation | **GD65B2B package implemented; PR #182 deterministic construction; PR #183 recovery; PR #184 invocation/committed outputs; PR #185 inactive loading/composition pending review, Unity validation, and merge** |
 | Packet | GD65B2A — version-controlled production authoring source approval |
 | Baseline | Main through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Approved future path | `ContentAuthoring/DungeonSpatial/` |
@@ -12,7 +13,7 @@
 
 The single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization will be a normalized, version-controlled text package at `ContentAuthoring/DungeonSpatial/`. CSV owns flat and relational authoring records; JSON owns package metadata and the machine-readable schema. This location is outside Unity's `Assets` directory so source files are not treated as runtime assets or accidentally included in builds.
 
-GD65B2A approves this contract only. The path, package, tables, schema, manifest, exporter, and generated records do not yet exist. GD65B1 is complete; GD65B overall remains incomplete, the spatial catalog remains inactive, save schema remains 6, and current runtime/save authority is unchanged.
+Historically, GD65B2A approved this contract only and did not create the path, package, tables, schema, manifest, exporter, or generated records. GD65B2B later implemented the authoring package; PRs #182, #183, and #184 subsequently implemented deterministic construction, recoverable publication, and export invocation with committed generated outputs, respectively. GD65B1 is complete; GD65B overall remains incomplete, the spatial catalog remains inactive, save schema remains 6, and current runtime/save authority is unchanged.
 
 ## 2. Problem and rejected master-workbook authority
 
@@ -22,11 +23,11 @@ A workbook can remain a generated editor or review surface, but it is rejected a
 
 ## 3. Approved canonical source location
 
-The exact future canonical root is:
+The canonical root is:
 
 `ContentAuthoring/DungeonSpatial/`
 
-Only the manifest, schema, and manifest-listed tables described below will be writable production authoring authority. No filesystem discovery decides authority. This packet does **not** create the directory or any file beneath it.
+Only the manifest, schema, and manifest-listed tables described below are writable production authoring authority. No filesystem discovery decides authority. Historical note: GD65B2A did **not** create the directory or any file beneath it; GD65B2B subsequently did so.
 
 ## 4. Authority matrix
 

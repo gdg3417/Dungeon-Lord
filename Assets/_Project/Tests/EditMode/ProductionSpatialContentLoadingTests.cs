@@ -339,6 +339,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal) -
                 source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal));
             StringAssert.DoesNotContain("productionSpatial", fallback);
+            string initialization = source.Substring(
+                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal),
+                source.IndexOf("private void InitializeStructureSimulationPass", StringComparison.Ordinal) -
+                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal));
+            StringAssert.DoesNotContain("diagnostic.ToString", initialization);
+            StringAssert.DoesNotContain("Logger?.Warn", initialization);
         }
 
         private ProductionSpatialContentLoadResult Load(ContentService service) =>

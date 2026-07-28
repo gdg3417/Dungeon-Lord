@@ -38,7 +38,7 @@ This matrix defines Unit, SIT, UAT, required evidence, and build gate impact for
 
 ## GD65B production spatial content pipeline gate
 
-This focused gate supplements, and does not rewrite, the historical Sprint 2–4 matrix. GD65B0C7 approved the responsibilities. GD65B1 now adds the initial workload-limit and scalability EditMode fixtures, while the export, recovery, loading, and pre-build suites and complete evidence do not yet exist; GD65B remains incomplete.
+This focused gate supplements, and does not rewrite, the historical Sprint 2–4 matrix. GD65B0C7 approved the responsibilities. Current implementation includes workload/scalability, deterministic export through PR #182, recoverable publication through PR #183, export invocation and committed outputs through PR #184, and GD65B4 loading/composition in PR #185 pending review, Unity validation, and merge. Pre-build recovery/build-entry enforcement and complete evidence remain outstanding; GD65B remains incomplete.
 
 | Gate | Unit / EditMode | SIT | UAT | Required fixtures and evidence | Build impact |
 |---|---|---|---|---|---|
@@ -71,4 +71,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## GD65B3B evidence status
 
-PR #184 / GD65B3B is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 in the current PR implements strict production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition, pending review, Unity validation, and merge. The catalog remains inactive; existing abstract placements, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema remains 6. Pre-build recovery and validation, supported build-entry integration, evidence closeout, and final GD65B closure remain next. GD66 remains blocked.
+PR #184 owner validation passed 169 of 169 EditMode tests with zero PlayMode failures. The exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. PR #185 Unity evidence remains pending.
