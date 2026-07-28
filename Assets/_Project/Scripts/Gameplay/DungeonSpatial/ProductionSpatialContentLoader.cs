@@ -81,30 +81,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ProductionSpatialContentWorkloadLimitParser.Parse(limits);
             if (!limitResult.Success)
                 return Failure(ProductionSpatialContentLoadingDiagnostic.InvalidWorkloadLimits);
-            if (languageTables.Count > limitResult.Limits.MaximumNestedRecords)
-                return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
-
             var parsed = new List<StringTable>();
-            bool workloadFailure = false;
+            var parsedAssets = new List<TextAsset>();
+            var cumulativeBudget = new StrictJsonWorkloadBudget(limitResult.Limits);
+            var cumulativeDiagnostics = new DiagnosticCollector(limitResult.Limits.MaximumIssues);
             foreach (TextAsset asset in languageTables)
             {
                 ProductionSpatialLanguageResult result =
-                    ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(asset.bytes, limitResult.Limits);
+                    ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
+                        asset.bytes, limitResult.Limits, cumulativeDiagnostics, cumulativeBudget);
                 if (!result.Success)
                 {
-                    if (result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
+                    return Failure((result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
                         result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded))
-                        workloadFailure = true;
-                    else
-                        diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
-                    continue;
+                        ? ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded
+                        : ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
                 }
                 if (string.IsNullOrWhiteSpace(result.Value.language))
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.BlankLanguageIdentity);
                 parsed.Add(result.Value);
+                parsedAssets.Add(asset);
             }
 
-            if (workloadFailure) diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
             var groups = parsed.GroupBy(value => value.language, StringComparer.Ordinal).ToArray();
             if (!groups.Any(group => string.Equals(group.Key, "en", StringComparison.Ordinal)))
                 diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.MissingEnglish);
@@ -113,15 +111,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (diagnostics.Count != 0) return Failure(diagnostics);
 
             StringTable english = groups.Single(group => group.Key == "en").Single();
+            int englishIndex = parsed.FindIndex(value => ReferenceEquals(value, english));
             var supplied = new ProductionSpatialGeneratedSet(new[]
             {
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.ManifestPath, manifest.bytes),
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.CatalogPath, catalog.bytes),
                 new ProductionSpatialGeneratedFile(ProductionSpatialGeneratedSetParser.EnglishPath,
-                    ProductionSpatialGeneratedSetParser.SerializeCanonical(english))
+                    parsedAssets[englishIndex].bytes)
             });
             ProductionSpatialGeneratedSetResult baseResult =
-                ProductionSpatialGeneratedSetParser.ParseAndValidate(supplied, limitResult.Limits);
+                ProductionSpatialGeneratedSetParser.ParseAndValidateCompleteLoad(
+                    supplied, limitResult.Limits, english, cumulativeBudget, cumulativeDiagnostics);
             if (!baseResult.Success)
                 return Failure(baseResult.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
                     baseResult.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded)
@@ -130,25 +130,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             var requiredKeys = new HashSet<string>(baseResult.Value.English.entries.Select(entry => entry.key),
                 StringComparer.Ordinal);
-            long records = 0L;
-            long characters = 0L;
-            bool aggregateOverflow = false;
             foreach (StringTable table in parsed)
             {
-                aggregateOverflow |= !TryAdd(ref records, table.entries.LongLength);
-                aggregateOverflow |= !TryAdd(ref characters, table.schema?.Length ?? 0);
-                aggregateOverflow |= !TryAdd(ref characters, table.language?.Length ?? 0);
-                foreach (StringEntry entry in table.entries)
-                {
-                    aggregateOverflow |= !TryAdd(ref characters, entry.key?.Length ?? 0);
-                    aggregateOverflow |= !TryAdd(ref characters, entry.text?.Length ?? 0);
-                }
                 if (!requiredKeys.SetEquals(table.entries.Select(entry => entry.key)))
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid);
             }
-            if (aggregateOverflow || records > limitResult.Limits.MaximumNestedRecords ||
-                characters > limitResult.Limits.MaximumStringCharacters)
-                diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
             if (diagnostics.Count != 0) return Failure(diagnostics);
 
             StringTable[] ordered = parsed.OrderBy(value => value.language, StringComparer.Ordinal).ToArray();
@@ -164,11 +150,5 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             IEnumerable<ProductionSpatialContentLoadingDiagnostic> diagnostics) =>
             new ProductionSpatialContentLoadResult(null, diagnostics);
 
-        private static bool TryAdd(ref long total, long amount)
-        {
-            if (amount < 0L || total < 0L || total > long.MaxValue - amount) return false;
-            total += amount;
-            return true;
-        }
     }
 }

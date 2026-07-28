@@ -2,12 +2,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Implemented through GD65B3B in this PR; production loading/composition and pre-build closeout remain; GD66 blocked** |
+| Status | **GD65B4 loading/composition implemented in the current PR pending review, Unity validation, and merge; pre-build closeout remains; GD66 blocked** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline before this PR | Main through merged PR #183 / GD65B3A at `5316f07a9c87cc87cb23db39287cf36dedaf7171` |
+| Current implementation baseline before this PR | Main through merged PR #184 / GD65B3B at `04515d5c7c5a35d869bb725cd76d2a7c317403ee` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-27 |
+| Last reconciled | 2026-07-28 |
 
 ## 1. Authority and purpose
 
@@ -76,7 +76,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (implemented through GD65B3B in this PR; runtime remains inactive)
+### Phase 1 — Spatial domain foundation (GD65B4 implemented in the current PR pending review, Unity validation, and merge; runtime remains inactive)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
@@ -90,8 +90,8 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 8. **GD65B2B — Implement normalized production spatial authoring package and approved Floor 1 records (complete in PR #181):** created the schema and normalized table package, authored only the approved Floor 1 production records and English entries, and added source-package parsing and validation tests without activating runtime/save spatial authority.
 9. **GD65B2C / PR #182 — Deterministic generated output construction (complete):** constructs, canonically serializes, reparses, and validates the exact three-file set in memory.
 10. **GD65B3A / PR #183 — Recoverable publication core (complete):** adds journaled staging, backup, installation, recovery, refresh, installed-set validation, and cleanup without runtime activation.
-11. **GD65B3B — Export invocation and committed set (implemented by this PR, not yet merged):** adds the shared editor-menu/command-line invocation and commits the exact three generated production JSON files.
-12. **Remaining GD65B — Production loading and composition assignment:** load and publish the validated inactive catalog through the approved composition boundary without activating gameplay.
+11. **GD65B3B / PR #184 — Export invocation and committed set (complete):** added the shared editor-menu/command-line invocation and committed the exact three generated production JSON files. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained and two evidence placeholders remain unverified.
+12. **GD65B4 — Production loading and composition assignment (implemented in the current PR, pending review, Unity validation, and merge):** loads and atomically publishes the validated inactive catalog through the approved explicit composition boundary without activating gameplay.
 13. **Remaining GD65B — Pre-build recovery and validation plus closeout:** gate all player builds, complete required evidence, and close GD65B.
 14. **GD66 — Final save/migration design gate (blocked until GD65B closeout):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
@@ -251,10 +251,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## GD65B3B current implementation status
 
-PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B adds the supported editor-menu and command-line invocation boundary and commits the first deterministic production spatial generated set. It does not add production loading, `ContentService` publication, `GameRoot` assignment, pre-build recovery/validation, runtime catalog consumption, or gameplay activation. Save schema remains 6 and the existing abstract placement, ordered two-room layout, and room-slot assignment authorities remain unchanged. GD66 remains blocked; production loading and composition assignment is the next planned packet.
-
-## GD65B4 current implementation status (2026-07-28)
-
-PR #184 is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation for PR #184 passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 implements strict runtime production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition of the generated manifest, catalog, collection-based language tables, and separately authored workload limits. The catalog remains inactive: existing abstract placement, ordered two-room state, and room-slot assignments remain runtime and save authority; gameplay, simulation, player-facing output, and save data are unchanged, and save schema remains 6.
-
-GD65B remains incomplete. Pre-build recovery and validation, integration with every supported build entry point, evidence closeout, and the final GD65B gate remain next. GD66 remains blocked.
+PR #184 / GD65B3B is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 in the current PR implements strict production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition, pending review, Unity validation, and merge. The catalog remains inactive; existing abstract placements, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema remains 6. Pre-build recovery and validation, supported build-entry integration, evidence closeout, and final GD65B closure remain next. GD66 remains blocked.

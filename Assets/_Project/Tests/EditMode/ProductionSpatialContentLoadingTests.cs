@@ -1,6 +1,10 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
@@ -64,6 +68,100 @@ namespace DungeonBuilder.M0.Tests.EditMode
             callerCopy.entries[0].text = "mutated";
             Assert.That(service.ProductionSpatialContent.Languages[0].language, Is.EqualTo("en"));
             Assert.That(service.ProductionSpatialContent.Languages[0].entries[0].text, Is.Not.EqualTo("mutated"));
+        }
+
+        [Test]
+        public void BothLanguagePermutationsProduceEquivalentCanonicalPublicationWithoutMutatingInputs()
+        {
+            TextAsset additional = Language("test-language", null);
+            TextAsset[] forward = { english, additional };
+            TextAsset[] reverse = { additional, english };
+            byte[][] before = forward.Select(asset => (byte[])asset.bytes.Clone()).ToArray();
+            byte[] manifestBefore = (byte[])manifest.bytes.Clone();
+            byte[] catalogBefore = (byte[])catalog.bytes.Clone();
+            byte[] limitsBefore = (byte[])limits.bytes.Clone();
+
+            ProductionSpatialContentLoadResult first = LoadWith(manifest, catalog, forward);
+            ProductionSpatialContentLoadResult second = LoadWith(manifest, catalog, reverse);
+
+            Assert.That(first.Success, Is.True, Join(first));
+            Assert.That(second.Success, Is.True, Join(second));
+            Assert.That(Canonical(first.Value), Is.EqualTo(Canonical(second.Value)));
+            CollectionAssert.AreEqual(new[] { english, additional }, forward);
+            CollectionAssert.AreEqual(new[] { additional, english }, reverse);
+            CollectionAssert.AreEqual(before[0], english.bytes);
+            CollectionAssert.AreEqual(before[1], additional.bytes);
+            CollectionAssert.AreEqual(manifestBefore, manifest.bytes);
+            CollectionAssert.AreEqual(catalogBefore, catalog.bytes);
+            CollectionAssert.AreEqual(limitsBefore, limits.bytes);
+        }
+
+        [Test]
+        public void CompleteLoadUsesOneExactNestedRecordBoundary()
+        {
+            TextAsset additional = Language("test-language", null);
+            Assert.That(LoadWithLimits(new[] { english }, Limits(41, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(41, 32768));
+            Assert.That(LoadWithLimits(new[] { english, additional }, Limits(47, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(46, 32768));
+        }
+
+        [Test]
+        public void CompleteLoadUsesOneExactDerivedStringCharacterBoundary()
+        {
+            TextAsset additional = Language("test-language", null);
+            TextAsset[] languages = { english, additional };
+            int exact = FindMinimumStringLimit(languages, 47);
+
+            Assert.That(LoadWithLimits(languages, Limits(47, exact)).Success, Is.True);
+            AssertWorkloadFailure(languages, Limits(47, exact - 1));
+
+            TextAsset oneMoreCharacter = Language("test-language", table => table.entries[0].text += "x");
+            AssertWorkloadFailure(new[] { english, oneMoreCharacter }, Limits(47, exact));
+        }
+
+        [Test]
+        public void SharedStrictBudgetRejectsMultipleTablesAndStopsBeforeLaterMalformedInput()
+        {
+            TextAsset first = Language("test-a", null);
+            TextAsset second = Language("test-b", null);
+            TextAsset third = Language("test-c", null);
+            TextAsset constrained = Limits(47, 32768);
+
+            ProductionSpatialContentLoadResult forward = LoadWithLimits(
+                new[] { english, first, second, third }, constrained);
+            ProductionSpatialContentLoadResult reverse = LoadWithLimits(
+                new[] { third, second, first, english }, constrained);
+            CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                forward.Diagnostics);
+            CollectionAssert.AreEqual(forward.Diagnostics, reverse.Diagnostics);
+
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            TextAsset oversized = Language("test-large", table => table.entries[0].text +=
+                new string('x', exactEnglishCharacters));
+            TextAsset malformed = new TextAsset("{\n");
+            ProductionSpatialContentLoadResult stopped = LoadWithLimits(
+                new[] { english, oversized, malformed }, Limits(128, exactEnglishCharacters));
+            CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                stopped.Diagnostics);
+            CollectionAssert.AreEqual(stopped.Diagnostics, LoadWithLimits(
+                new[] { english, oversized, malformed }, Limits(128, exactEnglishCharacters)).Diagnostics);
+        }
+
+        [Test]
+        public void CumulativeFailureNeverPartiallyPublishesAndPreservesExactPriorSnapshot()
+        {
+            var service = new ContentService();
+            Assert.That(Load(service).Success, Is.True);
+            ProductionSpatialContentSnapshot before = service.ProductionSpatialContent;
+            TextAsset additional = Language("test-language", null);
+
+            ProductionSpatialContentLoadResult failure = service.LoadProductionSpatialContent(
+                manifest, catalog, new[] { english, additional }, Limits(41, 32768));
+
+            CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                failure.Diagnostics);
+            Assert.That(service.ProductionSpatialContent, Is.SameAs(before));
         }
 
         [TestCase("manifest")]
@@ -161,6 +259,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void EachGeneratedInputRejectsNoncanonicalBytes()
+        {
+            Assert.That(LoadWith(new TextAsset(manifest.text.TrimEnd()), catalog, new[] { english }).Success, Is.False);
+            Assert.That(LoadWith(manifest, new TextAsset(catalog.text.TrimEnd()), new[] { english }).Success, Is.False);
+            AssertFailure(new[] { new TextAsset(english.text.TrimEnd()) },
+                ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
+            TextAsset additional = Language("test-language", null);
+            AssertFailure(new[] { english, new TextAsset(additional.text.TrimEnd()) },
+                ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
+        }
+
+        [Test]
+        public void EveryPublishedGraphIsDetachedAndSaveAuthorityRemainsUnchanged()
+        {
+            ProductionSpatialContentSnapshot snapshot = LoadWith(
+                manifest, catalog, new[] { english }).Value;
+            ProductionSpatialContentManifest publishedManifest = snapshot.Manifest;
+            SpatialContentCatalog publishedCatalog = snapshot.Catalog;
+            IReadOnlyList<StringTable> publishedLanguages = snapshot.Languages;
+            publishedManifest.requiredSchemas[0].schemaId = "mutated";
+            publishedCatalog.Rooms[0].LocalizationKey = "mutated";
+            publishedCatalog.Rooms[0].ConnectionPoints[0].ConnectionPointId = "mutated";
+            publishedLanguages[0].entries[0].key = "mutated";
+
+            Assert.That(snapshot.Manifest.requiredSchemas[0].schemaId, Is.Not.EqualTo("mutated"));
+            Assert.That(snapshot.Catalog.Rooms[0].LocalizationKey, Is.Not.EqualTo("mutated"));
+            Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
+                Is.Not.EqualTo("mutated"));
+            Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(6));
+            Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
+                .Any(field => field.Name.IndexOf("spatial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
+        }
+
+        [Test]
+        public void ProductionPublicationHasNoGameplayPresenterUiPlacementSimulationOrRouteConsumer()
+        {
+            string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
+                .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
+                .ToArray();
+            CollectionAssert.IsEmpty(consumers);
+        }
+
+        [Test]
         public void FailurePreservesPriorPublicationAndDiagnosticsAreStableOrderedAndMirrored()
         {
             var service = new ContentService();
@@ -183,10 +326,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BootstrapSceneContainsOnlyExplicitProductionAssignments()
         {
-            string scene = System.IO.File.ReadAllText("Assets/_Project/Scenes/Bootstrap.unity");
+            string scene = File.ReadAllText("Assets/_Project/Scenes/Bootstrap.unity")
+                .Replace("\r\n", "\n").Replace("\r", "\n");
             StringAssert.Contains("productionSpatialManifest: {fileID: 4900000, guid: 65b3b00000000000000000000000000c", scene);
             StringAssert.Contains("productionSpatialCatalog: {fileID: 4900000, guid: 65b3b00000000000000000000000000d", scene);
             StringAssert.Contains("productionSpatialLanguageTables:\n  - {fileID: 4900000, guid: 65b3b00000000000000000000000000e", scene);
+            Assert.That(scene.Split(new[] { "productionSpatialLanguageTables:" }, StringSplitOptions.None),
+                Has.Length.EqualTo(2));
             StringAssert.Contains("productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6", scene);
             string source = System.IO.File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
             string fallback = source.Substring(source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal),
@@ -202,6 +348,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset suppliedCatalog, TextAsset[] languages) =>
             new ContentService().LoadProductionSpatialContent(
                 suppliedManifest, suppliedCatalog, languages, limits);
+
+        private ProductionSpatialContentLoadResult LoadWithLimits(TextAsset[] languages,
+            TextAsset suppliedLimits) => new ContentService().LoadProductionSpatialContent(
+                manifest, catalog, languages, suppliedLimits);
+
+        private void AssertWorkloadFailure(TextAsset[] languages, TextAsset suppliedLimits)
+        {
+            ProductionSpatialContentLoadResult result = LoadWithLimits(languages, suppliedLimits);
+            CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                result.Diagnostics);
+            Assert.That(result.Value, Is.Null);
+        }
+
+        private int FindMinimumStringLimit(TextAsset[] languages, int nested)
+        {
+            int low = 1;
+            int high = 32768;
+            while (low < high)
+            {
+                int middle = low + ((high - low) / 2);
+                if (LoadWithLimits(languages, Limits(nested, middle)).Success) high = middle;
+                else low = middle + 1;
+            }
+            Assert.That(LoadWithLimits(languages, Limits(nested, low)).Success, Is.True);
+            return low;
+        }
+
+        private static TextAsset Limits(int nested, int characters) => new TextAsset(
+            "{\n" +
+            "  \"MaximumTopLevelRecords\": 128,\n" +
+            "  \"MaximumNestedRecords\": " + nested + ",\n" +
+            "  \"MaximumMaterializedTiles\": 4096,\n" +
+            "  \"MaximumIssues\": 256,\n" +
+            "  \"MaximumStringCharacters\": " + characters + "\n" +
+            "}");
+
+        private static string Canonical(ProductionSpatialContentSnapshot snapshot) =>
+            Convert.ToBase64String(ProductionSpatialGeneratedSetParser.SerializeCanonical(snapshot.Manifest)) + "|" +
+            Convert.ToBase64String(ProductionSpatialGeneratedSetParser.SerializeCanonical(snapshot.Catalog)) + "|" +
+            string.Join("|", snapshot.Languages.Select(table => Convert.ToBase64String(
+                ProductionSpatialGeneratedSetParser.SerializeCanonical(table))));
 
         private TextAsset Language(string identity, Action<StringTable> mutate)
         {
