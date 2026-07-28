@@ -485,6 +485,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string path,
             IssueCollector issues)
         {
+            if (ids == null || ids.Length == 0)
+                issues.Add(SpatialContentValidationReason.ForeignKeyMissing, path);
             ForEach(ids, path, (id, idPath) => ValidateReference(id, index, idPath, issues));
         }
 

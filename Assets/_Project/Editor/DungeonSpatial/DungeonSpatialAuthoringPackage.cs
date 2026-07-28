@@ -230,7 +230,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             ValidateProjectorCompatibility(schema, issues);
             if (issues.Count != 0) return Failed(issues);
 
-            HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath, "README.md" }), StringComparer.Ordinal);
+            HashSet<string> approved = new HashSet<string>(manifest.Tables.Concat(new[] { ManifestPath, SchemaPath }), StringComparer.Ordinal);
             foreach (string path in source.Paths.Where(path => !approved.Contains(path))) Add(issues, DungeonSpatialAuthoringDiagnostic.UnexpectedFile, path);
 
             var tables = new Dictionary<string, AuthoringRows>(StringComparer.Ordinal);
@@ -412,9 +412,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                             ReferenceColumn = key.ReferenceColumns[index]
                         }))
                         .Where(mapping => mapping.ReferenceTable == parent.Id).ToArray();
-                    bool ownsParent = ownerMappings.Length == parent.PrimaryKey.Length &&
-                        parent.PrimaryKey.All(parentColumn => ownerMappings.Count(mapping =>
-                            mapping.ReferenceColumn == parentColumn && child.IndexOf(mapping.Column) >= 0 &&
+                    bool ownsParent = parent.PrimaryKey.All(parentColumn => ownerMappings.Count(mapping =>
+                            mapping.Column == parentColumn && mapping.ReferenceColumn == parentColumn &&
+                            child.IndexOf(mapping.Column) >= 0 &&
                             child.Columns[child.IndexOf(mapping.Column)].Type ==
                             parent.Columns[parent.IndexOf(parentColumn)].Type) == 1);
                     if (!ownsParent)

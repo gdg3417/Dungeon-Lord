@@ -138,19 +138,23 @@ This packet creates no package directory, CSV, JSON schema/manifest, production 
 
 The project owner approved this architecture in GD65B2A on 2026-07-25: normalized version-controlled tables and schemas at the exact future path are canonical; workbooks/cloud editors are adapters; runtime JSON is derived; Unity remains editor-service independent; and future integrations must produce validated Git-branch changes. This amendment sits outside and does not renumber or modify the existing 72-row production-value register.
 
-## 16. Current implementation boundary
+## 16. Historical GD65B1 implementation boundary
 
 At baseline `917b763dc0e5315fdd5d835da4b5f5de43f9ba59`, GD65B1's limits asset, strict parser/conversion boundary, and workload/scalability tests exist. The authoring package described here does not. Production records, English source entries, generated catalog/table/manifest, exporter, recovery, loader, composition assignment, pre-build integration, and complete evidence remain incomplete. Current abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema is 6; the spatial catalog is inactive; and GD66 is blocked.
 
-## 14. GD65B2B implementation status
+## 14. Historical GD65B2B implementation status
 
 GD65B2B implements the approved package at `ContentAuthoring/DungeonSpatial/`, including the manifest-selected `dungeon_spatial_authoring` version 1 boundary, machine-readable schema, 17 normalized CSV tables, approved Floor 1 records, six English entries, and a strict editor-only parser/projector. The architecture decisions in this contract remain unchanged. Generated runtime JSON remains uncommitted. PR #182 completed deterministic output serialization, and GD65B3A completes the recoverable publication/recovery core. Loading/composition assignment, pre-build gating, activation, and complete GD65B evidence remain absent. Save schema remains 6, existing runtime/save authority is unchanged, the catalog remains inactive, and GD66 remains blocked.
 
-## Current deterministic generated-set implementation step
+## Historical deterministic generated-set implementation step
 
 GD65B2B is complete. The current packet adds pure deterministic construction and strict atomic reparse/revalidation of the exact three approved generated outputs in memory. No generated runtime JSON is committed. GD65B3A adds recoverable filesystem publication/recovery without editor or command-line entry points; loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. Save schema remains 6, the spatial catalog remains inactive, and current runtime/save authority is unchanged.
 
 
-### GD65B3A recoverable publication status
+### Historical GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
+
+## GD65B3B implementation status
+
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. No owner Unity result is yet claimed for GD65B3B in this PR. GD65B3B preserves `ContentAuthoring/DungeonSpatial/` as the single logical writable authority while adding shared editor/command-line publication invocation and committing the first three-file deterministic derived set. `validation_limits.json` remains separately authored and is not generated. Loading, `ContentService` publication, `GameRoot` assignment, pre-build gating, runtime consumption, and gameplay activation remain absent; save schema 6 and current runtime/save authority are unchanged. GD66 remains blocked, with production loading and composition assignment next.

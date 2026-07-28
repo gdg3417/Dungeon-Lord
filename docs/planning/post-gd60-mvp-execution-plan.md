@@ -2,11 +2,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **GD65B0 and GD65B1 complete; GD65B2A source contract approved; GD65B remains incomplete** |
-| Starting baseline for this approval update | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
+| Status | **Implemented through GD65B3B in this PR; production loading/composition and pre-build closeout remain; GD66 blocked** |
+| Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
+| Current implementation baseline before this PR | Main through merged PR #183 / GD65B3A at `5316f07a9c87cc87cb23db39287cf36dedaf7171` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-25 |
+| Last reconciled | 2026-07-27 |
 
 ## 1. Authority and purpose
 
@@ -16,7 +17,7 @@ GD64 completed the inactive spatial contract and layout-validator alignment with
 
 Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B1 is complete and remaining GD65B implementation is unblocked.
 
-## 2. Current repository baseline during GD65B0 approvals
+## 2. Repository baseline and current implementation state
 
 ### Implemented capabilities
 
@@ -75,7 +76,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (GD65B0/GD65B1 complete; GD65B2A approved)
+### Phase 1 — Spatial domain foundation (implemented through GD65B3B in this PR; runtime remains inactive)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
@@ -87,8 +88,12 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 6. **GD65B1 — Production spatial workload configuration and scalability foundation (complete in PR #179):** implemented the separately authored limits asset, strict parser/conversion boundary, and initial workload/scalability tests without activation.
 7. **GD65B2A — Production authoring-source contract (approved documentation packet):** approves normalized version-controlled CSV/schema authority at `ContentAuthoring/DungeonSpatial/`; creates no package or Unity evidence.
 8. **GD65B2B — Implement normalized production spatial authoring package and approved Floor 1 records (complete in PR #181):** created the schema and normalized table package, authored only the approved Floor 1 production records and English entries, and added source-package parsing and validation tests without activating runtime/save spatial authority.
-9. **Remaining GD65B — Production export evidence:** implement deterministic generated output, recovery, loading/assignment, pre-build gating, remaining suites, and complete evidence.
-10. **GD66 — Final save/migration design gate:** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
+9. **GD65B2C / PR #182 — Deterministic generated output construction (complete):** constructs, canonically serializes, reparses, and validates the exact three-file set in memory.
+10. **GD65B3A / PR #183 — Recoverable publication core (complete):** adds journaled staging, backup, installation, recovery, refresh, installed-set validation, and cleanup without runtime activation.
+11. **GD65B3B — Export invocation and committed set (implemented by this PR, not yet merged):** adds the shared editor-menu/command-line invocation and commits the exact three generated production JSON files.
+12. **Remaining GD65B — Production loading and composition assignment:** load and publish the validated inactive catalog through the approved composition boundary without activating gameplay.
+13. **Remaining GD65B — Pre-build recovery and validation plus closeout:** gate all player builds, complete required evidence, and close GD65B.
+14. **GD66 — Final save/migration design gate (blocked until GD65B closeout):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
 **Phase boundary:** Phase 1 ends with GD66 design approval. It does not change schema, migrate legacy state, switch runtime readers, transition writable authority, or provide migration implementation evidence. Those actions belong exclusively to Phase 2.
 
@@ -227,19 +232,23 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic in-memory generated bytes; GD65B3A adds recoverable publication/recovery. Committed generated files, loader/composition-root assignment, pre-build integration, remaining suites, and complete evidence do not yet exist. It adds no runtime/save activation unless separately authorized. Save schema remains 6 and existing runtime/save authority is unchanged. GD66 remains after GD65B production records and pipeline evidence, and Phase 2 alone owns migration and authority transition.
 
 
-### GD65B2A reconciliation amendment
+### Historical GD65B2A reconciliation amendment
 
 Main is reconciled through merged PR #182 at `803a9b86984a96890c372d364c20d0149eebf107`. GD65B1 and GD65B2B are complete, and GD65B2A remains the approved source contract. PR #182 completed deterministic in-memory generated-set construction and strict reparse; GD65B3A adds recoverable publication/recovery without runtime/save activation. Later MVP phase scope is unchanged. GD66 remains blocked until all GD65B records, stages, tests, generated outputs, and evidence are complete.
 
-### GD65B2B status
+### Historical GD65B2B status
 
 GD65B2B implements the normalized authoring package, the approved Floor 1 records, strict editor-only parsing/projection, and focused source-package tests. GD65B2A remains the architecture contract. PR #182 completed deterministic runtime-output serialization and strict reparse/revalidation, and GD65B3A completes the recoverable publication/recovery core. Production loading/composition assignment, pre-build gating, and complete evidence remain later GD65B packets. The catalog remains inactive, save schema remains 6, runtime/save authority is unchanged, and GD66 remains blocked.
 
-### Current deterministic generated-set step
+### Historical deterministic generated-set step
 
 PR #182 constructs the exact catalog, English table, and domain manifest in memory and strictly reparses, validates, canonicalizes, and byte-compares the complete set. GD65B3A adds recoverable filesystem publication/recovery but no generated committed file or editor/command-line entry point. Loading/assignment, pre-build gating, evidence closeout, GD66, migration, and activation remain incomplete. The catalog remains inactive, save schema remains 6, and existing runtime/save authority is unchanged.
 
 
-### GD65B3A recoverable publication status
+### Historical GD65B3A recoverable publication status
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
+
+## GD65B3B current implementation status
+
+PR #183 / GD65B3A is merged and passed owner-run Unity validation. GD65B3B adds the supported editor-menu and command-line invocation boundary and commits the first deterministic production spatial generated set. It does not add production loading, `ContentService` publication, `GameRoot` assignment, pre-build recovery/validation, runtime catalog consumption, or gameplay activation. Save schema remains 6 and the existing abstract placement, ordered two-room layout, and room-slot assignment authorities remain unchanged. GD66 remains blocked; production loading and composition assignment is the next planned packet.

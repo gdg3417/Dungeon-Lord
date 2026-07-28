@@ -1,0 +1,285 @@
+{
+    "Metadata": {
+        "SchemaId": "dungeon_spatial_content",
+        "SchemaVersion": 1,
+        "ContentVersion": "0.1.0"
+    },
+    "Floors": [
+        {
+            "FloorDefinitionId": "spatial.floor.01",
+            "FloorIndex": 0,
+            "Bounds": {
+                "Minimum": {
+                    "X": 0,
+                    "Y": 0
+                },
+                "Width": 12,
+                "Height": 12
+            },
+            "FinalFloorSpaceCapacity": 60,
+            "OptionalBranchAllowance": 1,
+            "AllowedRoomDefinitionIds": [
+                "spatial.room.basic",
+                "spatial.room.large_chamber",
+                "spatial.room.rectangle"
+            ],
+            "AllowedCorridorDefinitionIds": [
+                "spatial.corridor.straight_stone"
+            ],
+            "EntranceStructureDefinitionId": "spatial.fixed.entrance_hall",
+            "CompletionStructureDefinitionId": "spatial.fixed.completion_terminal"
+        }
+    ],
+    "Rooms": [
+        {
+            "RoomDefinitionId": "spatial.room.basic",
+            "GrossFootprint": {
+                "Width": 4,
+                "Height": 4
+            },
+            "ReservedTileOffsets": [],
+            "MaximumConnectionCount": 3,
+            "MonsterCapacity": 2,
+            "TrapCapacity": 2,
+            "LootCapacity": 2,
+            "LocalizationKey": "spatial.room.basic.display_name",
+            "AllowedOrientations": [
+                0
+            ],
+            "ConnectionPoints": [
+                {
+                    "ConnectionPointId": "east",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 1
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "north",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 3
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "south",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "west",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 1
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                }
+            ]
+        },
+        {
+            "RoomDefinitionId": "spatial.room.large_chamber",
+            "GrossFootprint": {
+                "Width": 5,
+                "Height": 6
+            },
+            "ReservedTileOffsets": [],
+            "MaximumConnectionCount": 3,
+            "MonsterCapacity": 4,
+            "TrapCapacity": 4,
+            "LootCapacity": 4,
+            "LocalizationKey": "spatial.room.large_chamber.display_name",
+            "AllowedOrientations": [
+                0,
+                1
+            ],
+            "ConnectionPoints": [
+                {
+                    "ConnectionPointId": "east",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 2
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "north",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 5
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "south",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "west",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 2
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                }
+            ]
+        },
+        {
+            "RoomDefinitionId": "spatial.room.rectangle",
+            "GrossFootprint": {
+                "Width": 3,
+                "Height": 5
+            },
+            "ReservedTileOffsets": [],
+            "MaximumConnectionCount": 3,
+            "MonsterCapacity": 3,
+            "TrapCapacity": 1,
+            "LootCapacity": 2,
+            "LocalizationKey": "spatial.room.rectangle.display_name",
+            "AllowedOrientations": [
+                0,
+                1
+            ],
+            "ConnectionPoints": [
+                {
+                    "ConnectionPointId": "east",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 2
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "north",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 4
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "south",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "west",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 2
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                }
+            ]
+        }
+    ],
+    "Corridors": [
+        {
+            "CorridorDefinitionId": "spatial.corridor.straight_stone",
+            "LocalizationKey": "spatial.corridor.straight_stone.display_name",
+            "Category": 1,
+            "MinimumLength": 1,
+            "MaximumLength": 4,
+            "Width": 1,
+            "MonsterCapacity": 0,
+            "TrapCapacity": 1,
+            "LootCapacity": 1,
+            "AllowedOrientations": [
+                0,
+                1
+            ],
+            "CompatibleSocketTypeIds": [
+                "spatial.socket.standard_passage"
+            ]
+        }
+    ],
+    "FixedStructures": [
+        {
+            "StructureDefinitionId": "spatial.fixed.completion_terminal",
+            "LocalizationKey": "spatial.fixed.completion_terminal.display_name",
+            "Kind": 2,
+            "GrossFootprint": {
+                "Width": 2,
+                "Height": 2
+            },
+            "ReservedTileOffsets": [],
+            "AllowedOrientations": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "ConnectionPoints": [
+                {
+                    "ConnectionPointId": "route",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                }
+            ],
+            "MaximumConnectionCount": 1
+        },
+        {
+            "StructureDefinitionId": "spatial.fixed.entrance_hall",
+            "LocalizationKey": "spatial.fixed.entrance_hall.display_name",
+            "Kind": 1,
+            "GrossFootprint": {
+                "Width": 3,
+                "Height": 2
+            },
+            "ReservedTileOffsets": [],
+            "AllowedOrientations": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "ConnectionPoints": [
+                {
+                    "ConnectionPointId": "route",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                }
+            ],
+            "MaximumConnectionCount": 1
+        }
+    ],
+    "SocketTypes": [
+        {
+            "SocketTypeId": "spatial.socket.standard_passage",
+            "CompatibleSocketTypeIds": [
+                "spatial.socket.standard_passage"
+            ]
+        }
+    ]
+}

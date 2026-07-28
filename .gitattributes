@@ -1,0 +1,3 @@
+ContentAuthoring/DungeonSpatial/*.json text eol=lf
+ContentAuthoring/DungeonSpatial/tables/*.csv text eol=lf
+Assets/_Project/Data/Production/DungeonSpatial/*.json text eol=lf

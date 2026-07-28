@@ -1,0 +1,31 @@
+{
+    "schema": "string_table",
+    "schemaVersion": 1,
+    "language": "en",
+    "entries": [
+        {
+            "key": "spatial.corridor.straight_stone.display_name",
+            "text": "Straight Stone Corridor"
+        },
+        {
+            "key": "spatial.fixed.completion_terminal.display_name",
+            "text": "Completion Terminal"
+        },
+        {
+            "key": "spatial.fixed.entrance_hall.display_name",
+            "text": "Entrance Hall"
+        },
+        {
+            "key": "spatial.room.basic.display_name",
+            "text": "Basic Room"
+        },
+        {
+            "key": "spatial.room.large_chamber.display_name",
+            "text": "Large Chamber"
+        },
+        {
+            "key": "spatial.room.rectangle.display_name",
+            "text": "Rectangle Room"
+        }
+    ]
+}

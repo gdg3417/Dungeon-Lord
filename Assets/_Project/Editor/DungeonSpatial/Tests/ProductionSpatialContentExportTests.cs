@@ -10,6 +10,8 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
+using System.Reflection;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -36,6 +38,44 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static ProductionSpatialGeneratedSetBuildResult Build()
         {
             return ProductionSpatialGeneratedSetBuilder.Build(Projection(), Limits());
+        }
+
+        [Test]
+        public void ExportAdaptersExposeApprovedMenuAndCommandLineThroughSharedBoundary()
+        {
+            MethodInfo menu = typeof(ProductionSpatialContentExportCommand).GetMethod(
+                nameof(ProductionSpatialContentExportCommand.ExportProductionSpatialContentMenu));
+            MethodInfo commandLine = typeof(ProductionSpatialContentExportCommand).GetMethod(
+                nameof(ProductionSpatialContentExportCommand.ExportProductionSpatialContentCommandLine));
+            Assert.That(menu, Is.Not.Null); Assert.That(commandLine, Is.Not.Null);
+            MenuItem attribute = menu.GetCustomAttributes(typeof(MenuItem), false).Cast<MenuItem>().Single();
+            Assert.That(attribute.menuItem, Is.EqualTo(ProductionSpatialContentExportCommand.MenuPath));
+            Assert.That(commandLine.IsPublic && commandLine.IsStatic, Is.True);
+
+            var success = new ProductionSpatialPublicationResult(
+                ProductionSpatialPublicationStatus.NoByteChangesNeeded,
+                Array.Empty<ProductionSpatialPublicationDiagnostic>());
+            Assert.That(ProductionSpatialContentExportCommand.Execute(() => success), Is.SameAs(success));
+        }
+
+        [Test]
+        public void ExportCommandFailureThrowsWithStableOrderedDiagnostics()
+        {
+            var failure = new ProductionSpatialPublicationResult(
+                ProductionSpatialPublicationStatus.PreInstallValidationFailure,
+                new[]
+                {
+                    ProductionSpatialPublicationDiagnostic.CandidateInvalid,
+                    ProductionSpatialPublicationDiagnostic.AuthoringReadFailed,
+                    ProductionSpatialPublicationDiagnostic.CandidateInvalid
+                });
+            const string expected = "Production spatial content export status: PreInstallValidationFailure. " +
+                "Diagnostics: AuthoringReadFailed, CandidateInvalid.";
+            Assert.That(ProductionSpatialContentExportCommand.FormatDiagnostics(failure), Is.EqualTo(expected));
+            LogAssert.Expect(LogType.Error, expected);
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+                ProductionSpatialContentExportCommand.Execute(() => failure));
+            Assert.That(exception.Message, Is.EqualTo(expected));
         }
 
         [Test]
@@ -284,9 +324,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(manifest, Does.Not.Contain("minAppVersion"));
             Assert.That(manifest.IndexOf("dungeon_spatial_content", StringComparison.Ordinal),
                 Is.LessThan(manifest.IndexOf("string_table", StringComparison.Ordinal)));
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.CatalogPath), Is.False);
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.EnglishPath), Is.False);
-            Assert.That(File.Exists(ProductionSpatialGeneratedSetParser.ManifestPath), Is.False);
+        }
+
+        [Test]
+        public void CommittedGeneratedSetIsExactFreshBuildAndAuthoritiesRemainUnchanged()
+        {
+            DungeonSpatialAuthoringSource source = Production();
+            IReadOnlyDictionary<string, byte[]> sourceBefore = source.Snapshot();
+            byte[] limitsBefore = File.ReadAllBytes(LimitsPath);
+            ProductionSpatialGeneratedSet fresh = Build().Output;
+
+            string[] committedJson = Directory.GetFiles(
+                    Path.GetDirectoryName(ProductionSpatialGeneratedSetParser.ManifestPath), "*.json")
+                .Select(path => path.Replace('\\', '/'))
+                .Where(path => !string.Equals(path, LimitsPath, StringComparison.Ordinal))
+                .OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            CollectionAssert.AreEqual(ProductionSpatialGeneratedSetParser.RequiredPaths, committedJson);
+
+            var committed = new ProductionSpatialGeneratedSet(committedJson.Select(path =>
+                new ProductionSpatialGeneratedFile(path, File.ReadAllBytes(path))));
+            ProductionSpatialGeneratedSetResult committedResult =
+                ProductionSpatialGeneratedSetParser.ParseAndValidate(committed, Limits());
+            Assert.That(committedResult.Success, Is.True,
+                string.Join(", ", committedResult.Diagnostics));
+            foreach (ProductionSpatialGeneratedFile file in fresh.Files)
+                CollectionAssert.AreEqual(file.Bytes, File.ReadAllBytes(file.Path), file.Path);
+
+            CollectionAssert.AreEqual(limitsBefore, File.ReadAllBytes(LimitsPath));
+            foreach (KeyValuePair<string, byte[]> entry in sourceBefore)
+                CollectionAssert.AreEqual(entry.Value, source.Snapshot()[entry.Key], entry.Key);
         }
 
         [Test]
@@ -314,12 +380,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             foreach (string path in permutedFiles.Keys.Where(path => path.EndsWith(".csv", StringComparison.Ordinal)).ToArray())
             {
                 string[] lines = Encoding.UTF8.GetString(permutedFiles[path]).TrimEnd('\n').Split('\n');
-                permutedFiles[path] = Encoding.UTF8.GetBytes(lines[0] + "\n" + string.Join("\n", lines.Skip(1).Reverse()) + "\n");
+                if (lines.Length > 1)
+                    permutedFiles[path] = Encoding.UTF8.GetBytes(
+                        lines[0] + "\n" + string.Join("\n", lines.Skip(1).Reverse()) + "\n");
             }
             DungeonSpatialAuthoringResult canonical = DungeonSpatialAuthoringPackageParser.ParseAndProject(production, Limits());
             DungeonSpatialAuthoringResult rowPermutation = DungeonSpatialAuthoringPackageParser.ParseAndProject(
                 new DungeonSpatialAuthoringSource(permutedFiles), Limits());
-            Assert.That(canonical.Success && rowPermutation.Success, Is.True);
+            Assert.That(canonical.Success, Is.True,
+                string.Join("\n", canonical.Issues.Select(issue => issue.ToString())));
+            Assert.That(rowPermutation.Success, Is.True,
+                string.Join("\n", rowPermutation.Issues.Select(issue => issue.ToString())));
             ProductionSpatialGeneratedSetBuildResult first = ProductionSpatialGeneratedSetBuilder.Build(canonical.Projection, Limits());
             ProductionSpatialGeneratedSetBuildResult rows = ProductionSpatialGeneratedSetBuilder.Build(rowPermutation.Projection, Limits());
 
@@ -429,6 +500,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void GeneratedSetContentVersionsMustBeNonblankAndOrdinallyEqual()
+        {
+            const string previousVersion = "test.gd65b.previous.version";
+            ProductionSpatialGeneratedSet matching = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = previousVersion);
+            matching = ReplaceJson(matching, ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"contentVersion\": \"0.1.0\"",
+                    "\"contentVersion\": \"" + previousVersion + "\""));
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(matching, Limits()).Success, Is.True);
+
+            ProductionSpatialGeneratedSet blankManifest = ReplaceJson(Build().Output,
+                ProductionSpatialGeneratedSetParser.ManifestPath,
+                json => json.Replace("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"\""));
+            AssertRepeatedExactNoThrow(blankManifest,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+
+            ProductionSpatialGeneratedSet blankCatalog = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = string.Empty);
+            AssertRepeatedExactNoThrow(blankCatalog,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch,
+                ProductionSpatialGeneratedSetDiagnostic.CatalogInvalid);
+
+            ProductionSpatialGeneratedSet mismatched = ReplaceCatalog(Build().Output,
+                catalog => catalog.Metadata.ContentVersion = previousVersion);
+            AssertRepeatedExactNoThrow(mismatched,
+                ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
+
+            ProductionSpatialGeneratedSet current = Build().Output;
+            Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(current, Limits()).Success, Is.True);
+            ProductionSpatialGeneratedSet repeated = Build().Output;
+            for (int index = 0; index < current.Files.Length; index++)
+                CollectionAssert.AreEqual(current.Files[index].Bytes, repeated.Files[index].Bytes);
+        }
+
+        [Test]
         public void NoncanonicalBytesReturnOnlyNoncanonicalOutput()
         {
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
@@ -515,8 +621,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.DoesNotThrow(() => first = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
             Assert.DoesNotThrow(() => second = ProductionSpatialGeneratedSetParser.ParseAndValidate(files, Limits()));
             Assert.That(first.Value, Is.Null); Assert.That(second.Value, Is.Null);
-            CollectionAssert.AreEqual(expected.OrderBy(value => (int)value), first.Diagnostics);
-            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics);
+            ProductionSpatialGeneratedSetDiagnostic[] orderedExpected =
+                expected.OrderBy(value => (int)value).ToArray();
+            string message = "Expected: " + string.Join(", ", orderedExpected) +
+                "; Actual: " + string.Join(", ", first.Diagnostics);
+            CollectionAssert.AreEqual(orderedExpected, first.Diagnostics, message);
+            CollectionAssert.AreEqual(first.Diagnostics, second.Diagnostics,
+                "Repeated diagnostics differed. " + message);
         }
 
         private static void AssertManifestFailure(byte[] replacement, ProductionSpatialGeneratedSetDiagnostic expected)
@@ -538,7 +649,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CommittedPackage_HasExactFilesNormalizedCanonicalRowsAndProjectsApprovedRecords()
         {
-            string[] exact = new[] { "README.md", "authoring_manifest.json", "authoring_schema.json" }
+            string[] exact = new[] { "authoring_manifest.json", "authoring_schema.json" }
                 .Concat(new[] { "floors", "floor_allowed_rooms", "floor_allowed_corridors", "rooms", "room_orientations",
                     "room_reserved_offsets", "room_connection_points", "corridors", "corridor_orientations",
                     "corridor_compatible_sockets", "fixed_structures", "fixed_structure_orientations",
@@ -575,9 +686,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Projection.English.entries, Has.Length.EqualTo(6));
             CollectionAssert.AreEqual(result.Projection.English.entries.Select(e => e.key).OrderBy(x => x, StringComparer.Ordinal), result.Projection.English.entries.Select(e => e.key));
             foreach (var pair in before) CollectionAssert.AreEqual(pair.Value, source.Snapshot()[pair.Key], pair.Key);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json"), Is.False);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json"), Is.False);
-            Assert.That(File.Exists("Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json"), Is.False);
         }
 
         [TestCase("authoring_manifest.json", DungeonSpatialAuthoringDiagnostic.MissingManifest)]
@@ -587,6 +695,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(Without(path), Limits());
             Assert.That(result.Success, Is.False); Assert.That(result.Issues.Any(x => x.Diagnostic == expected), Is.True);
+        }
+
+        [Test]
+        public void UnexpectedPackageReadmeFailsClosed()
+        {
+            var files = Production().Snapshot().ToDictionary(pair => pair.Key, pair => pair.Value,
+                StringComparer.Ordinal);
+            files.Add("README.md", Encoding.UTF8.GetBytes("test-only unexpected file\n"));
+            DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(
+                new DungeonSpatialAuthoringSource(files), Limits());
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Issues.Any(issue => issue.Diagnostic ==
+                DungeonSpatialAuthoringDiagnostic.UnexpectedFile && issue.RelativePath == "README.md"), Is.True);
         }
 
         [TestCase("tables/rooms.csv", "\ufeff")]
