@@ -109,7 +109,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     continue;
                 }
                 if (string.IsNullOrWhiteSpace(result.Value.language))
+                {
+                    if (!TryConsumeIssue(ref accumulatedIssueCount, limitResult.Limits.MaximumIssues))
+                        return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.BlankLanguageIdentity);
+                }
                 parsed.Add(result.Value);
                 parsedBytes.Add(bytes);
             }
@@ -119,9 +123,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             var groups = parsed.GroupBy(value => value.language, StringComparer.Ordinal).ToArray();
             if (!groups.Any(group => string.Equals(group.Key, "en", StringComparison.Ordinal)))
+            {
+                if (!TryConsumeIssue(ref accumulatedIssueCount, limitResult.Limits.MaximumIssues))
+                    return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
                 diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.MissingEnglish);
+            }
             if (groups.Any(group => group.Count() != 1))
+            {
+                if (!TryConsumeIssue(ref accumulatedIssueCount, limitResult.Limits.MaximumIssues))
+                    return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
                 diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.DuplicateLanguageIdentity);
+            }
             if (diagnostics.Count != 0) return Failure(diagnostics);
 
             StringTable english = groups.Single(group => group.Key == "en").Single();
@@ -148,7 +160,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (StringTable table in parsed)
             {
                 if (!requiredKeys.SetEquals(table.entries.Select(entry => entry.key)))
+                {
+                    if (!TryConsumeIssue(ref accumulatedIssueCount, limitResult.Limits.MaximumIssues))
+                        return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid);
+                }
             }
             if (diagnostics.Count != 0) return Failure(diagnostics);
 
@@ -164,6 +180,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static ProductionSpatialContentLoadResult Failure(
             IEnumerable<ProductionSpatialContentLoadingDiagnostic> diagnostics) =>
             new ProductionSpatialContentLoadResult(null, diagnostics);
+
+        private static bool TryConsumeIssue(ref int accumulatedIssueCount, int maximumIssues)
+        {
+            if (accumulatedIssueCount < 0 || accumulatedIssueCount >= maximumIssues)
+                return false;
+            accumulatedIssueCount++;
+            return true;
+        }
 
     }
 }

@@ -230,6 +230,83 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void NoncanonicalDiagnosticsConsumeTheCumulativeIssueCapacity()
+        {
+            TextAsset first = NoncanonicalLanguage("test-noncanonical-a");
+            TextAsset second = NoncanonicalLanguage("test-noncanonical-b");
+            TextAsset malformed = new TextAsset("{\n");
+
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
+                LoadWithLimits(new[] { first }, Limits(512, 32768, 1)).Diagnostics);
+            AssertEveryPermutationMatches(new[] { first, second }, Limits(512, 32768, 1));
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { first, second }, Limits(512, 32768, 1)).Diagnostics);
+
+            TextAsset[] mixed = { english, first, malformed };
+            AssertEveryPermutationMatches(mixed, Limits(512, 32768, 2));
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
+                LoadWithLimits(mixed, Limits(512, 32768, 2)).Diagnostics);
+            AssertEveryPermutationMatches(mixed, Limits(512, 32768, 1));
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(mixed, Limits(512, 32768, 1)).Diagnostics);
+        }
+
+        [Test]
+        public void BlankLanguageAndMissingEnglishConsumeTheCumulativeIssueCapacity()
+        {
+            TextAsset blankA = Language("", null);
+            TextAsset blankB = Language("", table => table.entries[0].text += "x");
+            TextAsset duplicateA = Language("test-duplicate-budget", null);
+            TextAsset duplicateB = Language("test-duplicate-budget", table =>
+                table.entries[0].text += "x");
+
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.BlankLanguageIdentity },
+                LoadWithLimits(new[] { english, blankA }, Limits(512, 32768, 1)).Diagnostics);
+            AssertEveryPermutationMatches(
+                new[] { english, blankA, blankB }, Limits(512, 32768, 1));
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { english, blankA, blankB }, Limits(512, 32768, 1)).Diagnostics);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { blankA }, Limits(512, 32768, 1)).Diagnostics);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.DuplicateLanguageIdentity },
+                LoadWithLimits(new[] { english, duplicateA, duplicateB },
+                    Limits(512, 32768, 1)).Diagnostics);
+            AssertEveryPermutationMatches(
+                new[] { duplicateA, duplicateB }, Limits(512, 32768, 1));
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { duplicateA, duplicateB },
+                    Limits(512, 32768, 1)).Diagnostics);
+        }
+
+        [Test]
+        public void LocalizationCoverageDiagnosticsConsumeTheCumulativeIssueCapacity()
+        {
+            TextAsset invalidA = Language("test-coverage-a", table =>
+                table.entries[0].key = "test.coverage.extra.a");
+            TextAsset invalidB = Language("test-coverage-b", table =>
+                table.entries[0].key = "test.coverage.extra.b");
+
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid },
+                LoadWithLimits(new[] { english, invalidA }, Limits(512, 32768, 1)).Diagnostics);
+            ProductionSpatialContentLoadingDiagnostic[] expected =
+                { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded };
+            CollectionAssert.AreEqual(expected,
+                LoadWithLimits(new[] { english, invalidA, invalidB }, Limits(512, 32768, 1)).Diagnostics);
+            CollectionAssert.AreEqual(expected,
+                LoadWithLimits(new[] { invalidB, english, invalidA }, Limits(512, 32768, 1)).Diagnostics);
+        }
+
+        [Test]
         public void DuplicateAndMissingEnglishDiagnosticsArePermutationIndependent()
         {
             TextAsset duplicate = Language("test-duplicate", null);
@@ -586,6 +663,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             "    {}\n" +
             "  ]\n" +
             "}\n");
+
+        private TextAsset NoncanonicalLanguage(string identity)
+        {
+            TextAsset canonical = Language(identity, null);
+            return new TextAsset(canonical.text.TrimEnd());
+        }
 
         private void AssertFailure(TextAsset[] languages,
             ProductionSpatialContentLoadingDiagnostic diagnostic)

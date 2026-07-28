@@ -212,7 +212,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return new ProductionSpatialLanguageResult(null, diagnostics.Diagnostics);
             table.entries = table.entries.OrderBy(entry => entry.key, StringComparer.Ordinal).ToArray();
             if (!BytesEqual(bytes, SerializeCanonical(table)))
-                return LanguageFailure(ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+            {
+                diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+                return new ProductionSpatialLanguageResult(null, diagnostics.Diagnostics);
+            }
             return new ProductionSpatialLanguageResult(table,
                 Array.Empty<ProductionSpatialGeneratedSetDiagnostic>());
         }
