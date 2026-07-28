@@ -84,28 +84,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var parsed = new List<StringTable>();
             var parsedBytes = new List<byte[]>();
             var cumulativeBudget = new StrictJsonWorkloadBudget(limitResult.Limits);
-            var cumulativeDiagnostics = new DiagnosticCollector(limitResult.Limits.MaximumIssues);
-            LanguageInput[] orderedInputs = languageTables
-                .Select(asset => new LanguageInput(asset.bytes))
-                .OrderBy(input => input.Bytes, ByteArrayComparer.Instance)
-                .ToArray();
-            foreach (LanguageInput input in orderedInputs)
+            int accumulatedIssueCount = 0;
+            bool invalidLanguageFound = false;
+            foreach (TextAsset asset in languageTables)
             {
+                byte[] bytes = asset.bytes;
+                var tableDiagnostics = new DiagnosticCollector(
+                    limitResult.Limits.MaximumIssues - accumulatedIssueCount);
                 ProductionSpatialLanguageResult result =
                     ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
-                        input.Bytes, limitResult.Limits, cumulativeDiagnostics, cumulativeBudget);
+                        bytes, limitResult.Limits, tableDiagnostics, cumulativeBudget);
                 if (!result.Success)
                 {
-                    return Failure((result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
+                    if (result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
                         result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded))
-                        ? ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded
-                        : ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
+                        return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
+                    accumulatedIssueCount += result.Diagnostics.Length;
+                    invalidLanguageFound = true;
+                    continue;
                 }
                 if (string.IsNullOrWhiteSpace(result.Value.language))
                     diagnostics.Add(ProductionSpatialContentLoadingDiagnostic.BlankLanguageIdentity);
                 parsed.Add(result.Value);
-                parsedBytes.Add(input.Bytes);
+                parsedBytes.Add(bytes);
             }
+
+            if (invalidLanguageFound)
+                return Failure(ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable);
 
             var groups = parsed.GroupBy(value => value.language, StringComparer.Ordinal).ToArray();
             if (!groups.Any(group => string.Equals(group.Key, "en", StringComparison.Ordinal)))
@@ -125,7 +130,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             });
             ProductionSpatialGeneratedSetResult baseResult =
                 ProductionSpatialGeneratedSetParser.ParseAndValidateCompleteLoad(
-                    supplied, limitResult.Limits, english, cumulativeBudget, cumulativeDiagnostics);
+                    supplied, limitResult.Limits, english, cumulativeBudget,
+                    new DiagnosticCollector(limitResult.Limits.MaximumIssues - accumulatedIssueCount));
             if (!baseResult.Success)
                 return Failure(baseResult.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
                     baseResult.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded)
@@ -153,33 +159,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static ProductionSpatialContentLoadResult Failure(
             IEnumerable<ProductionSpatialContentLoadingDiagnostic> diagnostics) =>
             new ProductionSpatialContentLoadResult(null, diagnostics);
-
-        private sealed class LanguageInput
-        {
-            internal LanguageInput(byte[] bytes)
-            {
-                Bytes = bytes;
-            }
-
-            internal byte[] Bytes { get; }
-        }
-
-        private sealed class ByteArrayComparer : IComparer<byte[]>
-        {
-            internal static readonly ByteArrayComparer Instance = new ByteArrayComparer();
-
-            public int Compare(byte[] left, byte[] right)
-            {
-                int sharedLength = Math.Min(left.Length, right.Length);
-                for (int index = 0; index < sharedLength; index++)
-                {
-                    int comparison = left[index].CompareTo(right[index]);
-                    if (comparison != 0) return comparison;
-                }
-
-                return left.Length.CompareTo(right.Length);
-            }
-        }
 
     }
 }

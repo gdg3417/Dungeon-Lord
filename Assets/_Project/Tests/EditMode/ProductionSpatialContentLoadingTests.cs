@@ -160,10 +160,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset noncanonical = new TextAsset(additional.text.TrimEnd());
 
             AssertEveryPermutationMatches(new[] { english, oversized, malformed }, constrained);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { english, oversized, malformed }, constrained).Diagnostics);
             AssertEveryPermutationMatches(
                 new[] { english, oversized, malformed, noncanonical }, constrained);
             AssertEveryPermutationMatches(
                 new[] { english, malformed, new TextAsset("{}\n"), noncanonical }, limits);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
+                LoadWithLimits(new[] { english, malformed, new TextAsset("{}\n"), noncanonical },
+                    limits).Diagnostics);
+        }
+
+        [Test]
+        public void CumulativeDiagnosticLimitIsBoundedAndOrderIndependent()
+        {
+            TextAsset[] invalid = Enumerable.Range(0, 12)
+                .Select(index => new TextAsset(index % 2 == 0 ? "{\n" : "{}\n"))
+                .ToArray();
+            TextAsset constrained = Limits(512, 32768, 3);
+
+            ProductionSpatialContentLoadResult forward = LoadWithLimits(invalid, constrained);
+            TextAsset[] reverse = (TextAsset[])invalid.Clone();
+            Array.Reverse(reverse);
+            ProductionSpatialContentLoadResult reversed = LoadWithLimits(reverse, constrained);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                forward.Diagnostics);
+            CollectionAssert.AreEqual(forward.Diagnostics, reversed.Diagnostics);
+            CollectionAssert.AreEqual(forward.Diagnostics,
+                LoadWithLimits((TextAsset[])invalid.Clone(), constrained).Diagnostics);
         }
 
         [Test]
@@ -488,12 +515,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return low;
         }
 
-        private static TextAsset Limits(int nested, int characters) => new TextAsset(
+        private static TextAsset Limits(int nested, int characters, int issues = 256) => new TextAsset(
             "{\n" +
             "  \"MaximumTopLevelRecords\": 128,\n" +
             "  \"MaximumNestedRecords\": " + nested + ",\n" +
             "  \"MaximumMaterializedTiles\": 4096,\n" +
-            "  \"MaximumIssues\": 256,\n" +
+            "  \"MaximumIssues\": " + issues + ",\n" +
             "  \"MaximumStringCharacters\": " + characters + "\n" +
             "}");
 
