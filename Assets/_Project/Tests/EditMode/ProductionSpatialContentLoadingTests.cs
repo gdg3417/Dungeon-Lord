@@ -236,6 +236,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset second = NoncanonicalLanguage("test-noncanonical-b");
             TextAsset malformed = new TextAsset("{\n");
 
+            ProductionSpatialContentWorkloadLimitParseResult parsedLimits =
+                ProductionSpatialContentWorkloadLimitParser.Parse(limits);
+            Assert.That(parsedLimits.Success, Is.True);
+            StringTable decoded = JsonUtility.FromJson<StringTable>(first.text);
+            Assert.That(first.bytes.SequenceEqual(
+                ProductionSpatialGeneratedSetParser.SerializeCanonical(decoded)), Is.False);
+            ProductionSpatialLanguageResult direct =
+                ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
+                    first.bytes, parsedLimits.Limits);
+            Assert.That(direct.Success, Is.False);
+            Assert.That(direct.Value, Is.Null);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput },
+                direct.Diagnostics);
+            CollectionAssert.DoesNotContain(direct.Diagnostics,
+                ProductionSpatialGeneratedSetDiagnostic.InvalidTrailingNewline);
+            CollectionAssert.DoesNotContain(direct.Diagnostics,
+                ProductionSpatialGeneratedSetDiagnostic.MalformedJson);
+
             CollectionAssert.AreEqual(
                 new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
                 LoadWithLimits(new[] { first }, Limits(512, 32768, 1)).Diagnostics);
@@ -253,6 +272,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(
                 new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
                 LoadWithLimits(mixed, Limits(512, 32768, 1)).Diagnostics);
+
+            byte[][] before = mixed.Select(asset => (byte[])asset.bytes.Clone()).ToArray();
+            foreach (TextAsset[] permutation in Permutations(mixed))
+            {
+                var service = new ContentService();
+                Assert.That(Load(service).Success, Is.True);
+                ProductionSpatialContentSnapshot published = service.ProductionSpatialContent;
+                ProductionSpatialContentLoadResult failure = service.LoadProductionSpatialContent(
+                    manifest, catalog, permutation, Limits(512, 32768, 1));
+                CollectionAssert.AreEqual(
+                    new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                    failure.Diagnostics);
+                Assert.That(failure.Value, Is.Null);
+                Assert.That(service.ProductionSpatialContent, Is.SameAs(published));
+            }
+            for (int index = 0; index < mixed.Length; index++)
+                CollectionAssert.AreEqual(before[index], mixed[index].bytes);
         }
 
         [Test]
@@ -666,8 +702,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private TextAsset NoncanonicalLanguage(string identity)
         {
-            TextAsset canonical = Language(identity, null);
-            return new TextAsset(canonical.text.TrimEnd());
+            StringTable table = JsonUtility.FromJson<StringTable>(english.text);
+            table.language = identity;
+            foreach (StringEntry entry in table.entries) entry.text = "test:" + entry.key;
+            return new TextAsset(JsonUtility.ToJson(table, false) + "\n");
         }
 
         private void AssertFailure(TextAsset[] languages,
