@@ -462,3 +462,9 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 ## GD65B3B implementation status
 
 PR #183 / GD65B3A is merged and passed owner-run Unity validation. No owner Unity result is yet claimed for GD65B3B in this PR. GD65B3B implements the approved editor and command-line export invocation and commits the first reviewed deterministic manifest, catalog, and English-table generated set without changing this historical approval record or its decisions. Production loading, `ContentService` publication, `GameRoot` assignment, pre-build validation/recovery, runtime consumption, and gameplay activation remain absent. Save schema remains 6, existing runtime/save authority is unchanged, and GD66 remains blocked. Production loading and composition assignment is next.
+
+## GD65B4 current implementation status (2026-07-28)
+
+PR #184 is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation for PR #184 passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 implements strict runtime production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition of the generated manifest, catalog, collection-based language tables, and separately authored workload limits. The catalog remains inactive: existing abstract placement, ordered two-room state, and room-slot assignments remain runtime and save authority; gameplay, simulation, player-facing output, and save data are unchanged, and save schema remains 6.
+
+GD65B remains incomplete. Pre-build recovery and validation, integration with every supported build entry point, evidence closeout, and the final GD65B gate remain next. GD66 remains blocked.

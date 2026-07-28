@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -13,8 +14,25 @@ namespace DungeonBuilder.M0
         public DevCommands DevCommands { get; private set; }
         public StringTable Strings { get; private set; }
         public HeatRuntimeConfig HeatRuntime { get; private set; }
+        public ProductionSpatialContentSnapshot ProductionSpatialContent { get; private set; }
 
         private readonly Dictionary<string, string> _stringMap = new Dictionary<string, string>();
+
+        public ProductionSpatialContentLoadResult LoadProductionSpatialContent(
+            TextAsset manifest,
+            TextAsset catalog,
+            IReadOnlyList<TextAsset> languageTables,
+            TextAsset limits,
+            Action<ProductionSpatialContentLoadingDiagnostic> diagnosticSink = null)
+        {
+            ProductionSpatialContentLoadResult result = ProductionSpatialContentLoader.Load(
+                manifest, catalog, languageTables, limits);
+            foreach (ProductionSpatialContentLoadingDiagnostic diagnostic in result.Diagnostics)
+                diagnosticSink?.Invoke(diagnostic);
+            if (result.Success)
+                ProductionSpatialContent = result.Value;
+            return result;
+        }
 
         public void LoadAll(
             TextAsset contentBootstrapJson,

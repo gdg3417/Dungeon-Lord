@@ -158,3 +158,9 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 ## GD65B3B implementation status
 
 PR #183 / GD65B3A is merged and passed owner-run Unity validation. No owner Unity result is yet claimed for GD65B3B in this PR. GD65B3B preserves `ContentAuthoring/DungeonSpatial/` as the single logical writable authority while adding shared editor/command-line publication invocation and committing the first three-file deterministic derived set. `validation_limits.json` remains separately authored and is not generated. Loading, `ContentService` publication, `GameRoot` assignment, pre-build gating, runtime consumption, and gameplay activation remain absent; save schema 6 and current runtime/save authority are unchanged. GD66 remains blocked, with production loading and composition assignment next.
+
+## GD65B4 current implementation status (2026-07-28)
+
+PR #184 is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation for PR #184 passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 implements strict runtime production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition of the generated manifest, catalog, collection-based language tables, and separately authored workload limits. The catalog remains inactive: existing abstract placement, ordered two-room state, and room-slot assignments remain runtime and save authority; gameplay, simulation, player-facing output, and save data are unchanged, and save schema remains 6.
+
+GD65B remains incomplete. Pre-build recovery and validation, integration with every supported build entry point, evidence closeout, and the final GD65B gate remain next. GD66 remains blocked.

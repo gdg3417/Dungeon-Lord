@@ -4782,3 +4782,9 @@ Define the testing strategy and tooling needed to validate core invariants and p
 ## 8. Open questions
 
 None.
+
+## GD65B4 current implementation status (2026-07-28)
+
+PR #184 is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation for PR #184 passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 implements strict runtime production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition of the generated manifest, catalog, collection-based language tables, and separately authored workload limits. The catalog remains inactive: existing abstract placement, ordered two-room state, and room-slot assignments remain runtime and save authority; gameplay, simulation, player-facing output, and save data are unchanged, and save schema remains 6.
+
+GD65B remains incomplete. Pre-build recovery and validation, integration with every supported build entry point, evidence closeout, and the final GD65B gate remain next. GD66 remains blocked.
