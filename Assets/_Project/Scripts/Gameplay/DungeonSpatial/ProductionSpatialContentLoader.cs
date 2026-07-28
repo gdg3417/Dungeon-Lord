@@ -89,8 +89,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (TextAsset asset in languageTables)
             {
                 byte[] bytes = asset.bytes;
-                var tableDiagnostics = new DiagnosticCollector(
-                    limitResult.Limits.MaximumIssues - accumulatedIssueCount);
+                int remainingIssues = limitResult.Limits.MaximumIssues - accumulatedIssueCount;
+                if (remainingIssues < 0)
+                    return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
+                var tableDiagnostics = new DiagnosticCollector(remainingIssues);
                 ProductionSpatialLanguageResult result =
                     ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
                         bytes, limitResult.Limits, tableDiagnostics, cumulativeBudget);
@@ -99,7 +101,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded) ||
                         result.Diagnostics.Contains(ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded))
                         return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
-                    accumulatedIssueCount += result.Diagnostics.Length;
+                    int consumedIssues = tableDiagnostics.Diagnostics.Count();
+                    if (consumedIssues > remainingIssues)
+                        return Failure(ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded);
+                    accumulatedIssueCount += consumedIssues;
                     invalidLanguageFound = true;
                     continue;
                 }

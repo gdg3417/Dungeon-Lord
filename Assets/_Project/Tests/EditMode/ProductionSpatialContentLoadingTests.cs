@@ -194,6 +194,42 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RepeatedDiagnosticAttemptsConsumeExactCumulativeIssueCapacity()
+        {
+            TextAsset repeated = RepeatedMissingRequiredFieldLanguage();
+            TextAsset malformed = new TextAsset("{\n");
+
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
+                LoadWithLimits(new[] { repeated }, Limits(512, 32768, 3)).Diagnostics);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
+                LoadWithLimits(new[] { repeated }, Limits(512, 32768, 4)).Diagnostics);
+            CollectionAssert.AreEqual(
+                new[] { ProductionSpatialContentLoadingDiagnostic.InvalidLanguageTable },
+                LoadWithLimits(new[] { repeated, malformed }, Limits(512, 32768, 5)).Diagnostics);
+
+            TextAsset[] source = { english, repeated, malformed };
+            byte[][] before = source.Select(asset => (byte[])asset.bytes.Clone()).ToArray();
+            ProductionSpatialContentLoadingDiagnostic[] expected =
+                { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded };
+            foreach (TextAsset[] permutation in Permutations(source))
+            {
+                var service = new ContentService();
+                Assert.That(Load(service).Success, Is.True);
+                ProductionSpatialContentSnapshot published = service.ProductionSpatialContent;
+                ProductionSpatialContentLoadResult result = service.LoadProductionSpatialContent(
+                    manifest, catalog, permutation, Limits(512, 32768, 4));
+                CollectionAssert.AreEqual(expected, result.Diagnostics);
+                Assert.That(result.Value, Is.Null);
+                Assert.That(service.ProductionSpatialContent, Is.SameAs(published));
+            }
+
+            for (int index = 0; index < source.Length; index++)
+                CollectionAssert.AreEqual(before[index], source[index].bytes);
+        }
+
+        [Test]
         public void DuplicateAndMissingEnglishDiagnosticsArePermutationIndependent()
         {
             TextAsset duplicate = Language("test-duplicate", null);
@@ -539,6 +575,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return new TextAsset(System.Text.Encoding.UTF8.GetString(
                 ProductionSpatialGeneratedSetParser.SerializeCanonical(table)));
         }
+
+        private static TextAsset RepeatedMissingRequiredFieldLanguage() => new TextAsset(
+            "{\n" +
+            "  \"schema\": \"string_table\",\n" +
+            "  \"schemaVersion\": 1,\n" +
+            "  \"language\": \"test-repeated-diagnostics\",\n" +
+            "  \"entries\": [\n" +
+            "    {},\n" +
+            "    {}\n" +
+            "  ]\n" +
+            "}\n");
 
         private void AssertFailure(TextAsset[] languages,
             ProductionSpatialContentLoadingDiagnostic diagnostic)
