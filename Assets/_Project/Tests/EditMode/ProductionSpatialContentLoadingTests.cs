@@ -327,9 +327,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void LocalizationCoverageDiagnosticsConsumeTheCumulativeIssueCapacity()
         {
             TextAsset invalidA = Language("test-coverage-a", table =>
-                table.entries[0].key = "test.coverage.extra.a");
+                table.entries[table.entries.Length - 1].key = "test.coverage.extra.a");
             TextAsset invalidB = Language("test-coverage-b", table =>
-                table.entries[0].key = "test.coverage.extra.b");
+                table.entries[table.entries.Length - 1].key = "test.coverage.extra.b");
+
+            AssertStandaloneLanguageValid(invalidA);
+            AssertStandaloneLanguageValid(invalidB);
 
             CollectionAssert.AreEqual(
                 new[] { ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid },
@@ -479,8 +482,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertFailure(new[] { english, Language("test-language", table =>
                 table.entries = table.entries.Skip(1).ToArray()) },
                 ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid);
-            AssertFailure(new[] { english, Language("test-language", table =>
-                table.entries[0].key = "test.extra") },
+            TextAsset invalidCoverage = Language("test-language", table =>
+                table.entries[table.entries.Length - 1].key = "test.extra");
+            AssertStandaloneLanguageValid(invalidCoverage);
+            AssertFailure(new[] { english, invalidCoverage },
                 ProductionSpatialContentLoadingDiagnostic.LocalizationCoverageInvalid);
             AssertFailure(new[] { english, Language("test-language", table =>
                 table.entries[0].text = "") },
@@ -715,6 +720,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 manifest, catalog, languages, limits);
             Assert.That(result.Success, Is.False);
             CollectionAssert.Contains(result.Diagnostics, diagnostic);
+        }
+
+        private void AssertStandaloneLanguageValid(TextAsset asset)
+        {
+            ProductionSpatialContentWorkloadLimitParseResult parsedLimits =
+                ProductionSpatialContentWorkloadLimitParser.Parse(limits);
+            Assert.That(parsedLimits.Success, Is.True);
+            ProductionSpatialLanguageResult parsed =
+                ProductionSpatialGeneratedSetParser.ParseAndValidateLanguage(
+                    asset.bytes, parsedLimits.Limits);
+            Assert.That(parsed.Success, Is.True);
+            Assert.That(parsed.Value, Is.Not.Null);
+            Assert.That(parsed.Diagnostics, Is.Empty);
         }
 
         private static TextAsset Asset(string name)
