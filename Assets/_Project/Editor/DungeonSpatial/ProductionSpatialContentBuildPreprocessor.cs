@@ -1,22 +1,31 @@
 #if UNITY_EDITOR
 using DungeonBuilder.M0.Editor.DungeonSpatial;
+using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 
 namespace DungeonBuilder.M0.Editor.Build
 {
-    public sealed class ProductionSpatialContentBuildPreprocessor : IPreprocessBuildWithReport
+    public sealed class ProductionSpatialContentBuildPreprocessor : BuildPlayerProcessor
     {
-        public int callbackOrder => -1000;
+        private readonly ProductionSpatialContentBuildGate gate;
 
-        public void OnPreprocessBuild(BuildReport report)
+        public ProductionSpatialContentBuildPreprocessor() : this(new ProductionSpatialContentBuildGate()) { }
+
+        internal ProductionSpatialContentBuildPreprocessor(ProductionSpatialContentBuildGate gate)
         {
-            ValidateOrThrow(new ProductionSpatialContentBuildGate());
+            this.gate = gate;
         }
 
-        internal static void ValidateOrThrow(ProductionSpatialContentBuildGate gate)
+        public override int callbackOrder => -1000;
+
+        public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
-            ProductionSpatialBuildGateResult result = gate.Validate();
+            ValidateOrThrow(gate, buildPlayerContext.BuildPlayerOptions.scenes);
+        }
+
+        internal static void ValidateOrThrow(ProductionSpatialContentBuildGate gate, string[] attemptedScenes)
+        {
+            ProductionSpatialBuildGateResult result = gate.Validate(attemptedScenes);
             if (!result.Success)
                 throw new BuildFailedException("[ProductionSpatialBuildGate:" + result.Reason + "] " + result.Detail);
         }

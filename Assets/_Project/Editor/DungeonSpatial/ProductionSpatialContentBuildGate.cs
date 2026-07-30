@@ -25,7 +25,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         DuplicateGameRoot = 8,
         MissingAssignment = 9,
         WrongAssetAssignment = 10,
-        UnexpectedInternalValidationFailure = 11
+        UnexpectedInternalValidationFailure = 11,
+        InvalidBuildSceneComposition = 12
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -45,21 +46,21 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
     {
         private readonly Func<ProductionSpatialBuildGateResult> recover;
         private readonly Func<ProductionSpatialBuildGateResult> validateInstalled;
-        private readonly Func<ProductionSpatialBuildGateResult> validateComposition;
+        private readonly Func<string[], ProductionSpatialBuildGateResult> validateComposition;
 
         public ProductionSpatialContentBuildGate()
-            : this(Recover, ValidateInstalledSet, ValidateBootstrapComposition) { }
+            : this(Recover, ValidateInstalledSet, ValidateComposition) { }
 
         internal ProductionSpatialContentBuildGate(Func<ProductionSpatialBuildGateResult> recover,
             Func<ProductionSpatialBuildGateResult> validateInstalled,
-            Func<ProductionSpatialBuildGateResult> validateComposition)
+            Func<string[], ProductionSpatialBuildGateResult> validateComposition)
         {
             this.recover = recover ?? throw new ArgumentNullException(nameof(recover));
             this.validateInstalled = validateInstalled ?? throw new ArgumentNullException(nameof(validateInstalled));
             this.validateComposition = validateComposition ?? throw new ArgumentNullException(nameof(validateComposition));
         }
 
-        public ProductionSpatialBuildGateResult Validate()
+        public ProductionSpatialBuildGateResult Validate(string[] attemptedScenes)
         {
             try
             {
@@ -67,7 +68,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 if (!result.Success) return result;
                 result = validateInstalled();
                 if (!result.Success) return result;
-                return validateComposition();
+                return validateComposition(attemptedScenes);
             }
             catch (Exception exception)
             {
@@ -85,14 +86,12 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                     StableDetail(result.Status, result.Diagnostics));
         }
 
-        private static ProductionSpatialBuildGateResult ValidateInstalledSet()
+        internal static ProductionSpatialBuildGateResult ValidateInstalledSet()
         {
-            foreach (string path in ProductionSpatialGeneratedSetParser.RequiredPaths
-                         .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath }))
-            {
-                if (!File.Exists(path))
-                    return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, path);
-            }
+            ProductionSpatialBuildGateResult paths = ValidateRequiredPaths(
+                ProductionSpatialGeneratedSetParser.RequiredPaths
+                    .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath }), File.Exists);
+            if (!paths.Success) return paths;
 
             TextAsset manifest = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.ManifestPath);
             TextAsset catalog = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.CatalogPath);
@@ -101,21 +100,55 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             if (manifest == null || catalog == null || english == null || limits == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, "AssetDatabaseImport");
 
-            return FromLoadResult(ProductionSpatialContentLoader.Load(manifest, catalog,
-                new[] { english }, limits));
+            return ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
         }
 
-        private static ProductionSpatialBuildGateResult ValidateBootstrapComposition()
+        internal static ProductionSpatialBuildGateResult ValidateComposition(string[] attemptedScenes)
         {
-            if (!File.Exists(DevelopmentBuildUtility.BootstrapScenePath) ||
-                AssetDatabase.LoadAssetAtPath<SceneAsset>(DevelopmentBuildUtility.BootstrapScenePath) == null)
+            ProductionSpatialBuildGateResult scenes = ValidateBuildScenes(attemptedScenes);
+            return scenes.Success ? ValidateBootstrapComposition(DevelopmentBuildUtility.BootstrapScenePath) : scenes;
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateBuildScenes(string[] attemptedScenes)
+        {
+            return attemptedScenes != null && attemptedScenes.Length == 1 &&
+                   string.Equals(attemptedScenes[0], DevelopmentBuildUtility.BootstrapScenePath,
+                       StringComparison.Ordinal)
+                ? Success()
+                : Failure(ProductionSpatialBuildGateReason.InvalidBuildSceneComposition,
+                    attemptedScenes == null ? "Null" : string.Join(",", attemptedScenes));
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateRequiredPaths(IEnumerable<string> requiredPaths,
+            Func<string, bool> exists)
+        {
+            foreach (string path in requiredPaths)
+                if (!exists(path))
+                    return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, path);
+            return Success();
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateBootstrapComposition(string scenePath,
+            Action afterPreviewOpen = null, Func<string, Scene> openPreview = null)
+        {
+            if (!File.Exists(scenePath) || AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) == null)
                 return Failure(ProductionSpatialBuildGateReason.BootstrapSceneUnavailable,
-                    DevelopmentBuildUtility.BootstrapScenePath);
+                    scenePath);
 
             Scene scene = default;
             try
             {
-                scene = EditorSceneManager.OpenPreviewScene(DevelopmentBuildUtility.BootstrapScenePath);
+                scene = (openPreview ?? EditorSceneManager.OpenPreviewScene)(scenePath);
+            }
+            catch (Exception exception)
+            {
+                return Failure(ProductionSpatialBuildGateReason.BootstrapSceneUnavailable,
+                    exception.GetType().FullName);
+            }
+
+            try
+            {
+                afterPreviewOpen?.Invoke();
                 GameRoot[] roots = scene.GetRootGameObjects()
                     .SelectMany(root => root.GetComponentsInChildren<GameRoot>(true)).ToArray();
                 if (roots.Length == 0) return Failure(ProductionSpatialBuildGateReason.MissingGameRoot, "GameRoot");
@@ -137,14 +170,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                         .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length)
                     return Failure(ProductionSpatialBuildGateReason.WrongAssetAssignment, "ProductionSpatialContent");
 
-                return FromLoadResult(ProductionSpatialContentLoader.Load(gameRoot.productionSpatialManifest,
-                    gameRoot.productionSpatialCatalog, gameRoot.productionSpatialLanguageTables,
-                    gameRoot.productionSpatialValidationLimits));
-            }
-            catch (Exception exception)
-            {
-                return Failure(ProductionSpatialBuildGateReason.BootstrapSceneUnavailable,
-                    exception.GetType().FullName);
+                return ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
+                    gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits);
             }
             finally
             {
@@ -155,7 +182,11 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         private static bool ExactPath(UnityEngine.Object asset, string expected) =>
             string.Equals(AssetDatabase.GetAssetPath(asset), expected, StringComparison.Ordinal);
 
-        private static ProductionSpatialBuildGateResult FromLoadResult(ProductionSpatialContentLoadResult result)
+        internal static ProductionSpatialBuildGateResult ValidateLoadedAssets(TextAsset manifest, TextAsset catalog,
+            IReadOnlyList<TextAsset> languages, TextAsset limits) =>
+            FromLoadResult(ProductionSpatialContentLoader.Load(manifest, catalog, languages, limits));
+
+        internal static ProductionSpatialBuildGateResult FromLoadResult(ProductionSpatialContentLoadResult result)
         {
             if (result.Success) return Success();
             ProductionSpatialContentLoadingDiagnostic[] diagnostics = result.Diagnostics;
