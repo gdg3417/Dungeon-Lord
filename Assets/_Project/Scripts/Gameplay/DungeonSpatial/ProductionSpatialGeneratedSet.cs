@@ -83,6 +83,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public ProductionSpatialGeneratedSetDiagnostic[] Diagnostics { get; }
     }
 
+    public sealed class ProductionSpatialLanguageResult
+    {
+        internal ProductionSpatialLanguageResult(StringTable value,
+            IEnumerable<ProductionSpatialGeneratedSetDiagnostic> diagnostics)
+        { Value = value; Diagnostics = diagnostics.Distinct().OrderBy(item => (int)item).ToArray(); }
+        public bool Success => Value != null && Diagnostics.Length == 0;
+        public StringTable Value { get; }
+        public ProductionSpatialGeneratedSetDiagnostic[] Diagnostics { get; }
+    }
+
     public static class ProductionSpatialGeneratedSetParser
     {
         public const string ManifestPath = "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json";
@@ -96,8 +106,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static ProductionSpatialGeneratedSetResult ParseAndValidate(ProductionSpatialGeneratedSet supplied,
             SpatialContentValidationWorkloadLimits limits)
         {
+            return ParseAndValidate(supplied, limits, null, new StrictJsonWorkloadBudget(limits),
+                new DiagnosticCollector(limits.MaximumIssues), false);
+        }
+
+        internal static ProductionSpatialGeneratedSetResult ParseAndValidateCompleteLoad(
+            ProductionSpatialGeneratedSet supplied, SpatialContentValidationWorkloadLimits limits,
+            StringTable parsedEnglish, StrictJsonWorkloadBudget cumulativeBudget,
+            DiagnosticCollector cumulativeDiagnostics)
+        {
+            return ParseAndValidate(supplied, limits, parsedEnglish, cumulativeBudget,
+                cumulativeDiagnostics, true);
+        }
+
+        private static ProductionSpatialGeneratedSetResult ParseAndValidate(ProductionSpatialGeneratedSet supplied,
+            SpatialContentValidationWorkloadLimits limits, StringTable parsedEnglish,
+            StrictJsonWorkloadBudget parseBudget, DiagnosticCollector diagnostics,
+            bool englishAlreadyParsed)
+        {
             if (!limits.IsValid) return Failure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
-            var diagnostics = new DiagnosticCollector(limits.MaximumIssues);
             var files = supplied?.Files;
             if (files == null) return Failure(ProductionSpatialGeneratedSetDiagnostic.MissingInput);
             var map = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
@@ -116,10 +143,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (map.Keys.Any(path => Array.IndexOf(CanonicalPaths, path) < 0)) diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.ExtraOutput);
             if (diagnostics.HasAny) return diagnostics.Failure();
 
-            var parseBudget = new StrictJsonWorkloadBudget(limits);
-            if (!TryObject<ProductionSpatialContentManifest>(map[ManifestPath], out var manifest, diagnostics, parseBudget) |
-                !TryObject<SpatialContentCatalog>(map[CatalogPath], out var catalog, diagnostics, parseBudget) |
-                !TryObject<StringTable>(map[EnglishPath], out var english, diagnostics, parseBudget))
+            StringTable english = parsedEnglish;
+            bool parseFailed = !TryObject<ProductionSpatialContentManifest>(map[ManifestPath], out var manifest,
+                    diagnostics, parseBudget) |
+                !TryObject<SpatialContentCatalog>(map[CatalogPath], out var catalog, diagnostics, parseBudget);
+            if (!englishAlreadyParsed)
+                parseFailed |= !TryObject<StringTable>(map[EnglishPath], out english, diagnostics, parseBudget);
+            if (parseFailed)
                 return diagnostics.Failure();
 
             ValidateIdentities(manifest, catalog, english, diagnostics);
@@ -156,6 +186,39 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         public static byte[] SerializeCanonical(object value) => Utf8.GetBytes(JsonUtility.ToJson(value, true) + "\n");
+
+        // Dedicated runtime surface for an assigned language pack. Identity is read from the
+        // serialized payload; callers never infer it from an asset name or collection position.
+        public static ProductionSpatialLanguageResult ParseAndValidateLanguage(byte[] bytes,
+            SpatialContentValidationWorkloadLimits limits)
+        {
+            if (!limits.IsValid)
+                return LanguageFailure(ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
+            var diagnostics = new DiagnosticCollector(limits.MaximumIssues);
+            var budget = new StrictJsonWorkloadBudget(limits);
+            return ParseAndValidateLanguage(bytes, limits, diagnostics, budget);
+        }
+
+        internal static ProductionSpatialLanguageResult ParseAndValidateLanguage(byte[] bytes,
+            SpatialContentValidationWorkloadLimits limits, DiagnosticCollector diagnostics,
+            StrictJsonWorkloadBudget budget)
+        {
+            if (!TryObject<StringTable>(bytes, out StringTable table, diagnostics, budget))
+                return new ProductionSpatialLanguageResult(null, diagnostics.Diagnostics);
+            if (table.schema != "string_table" || table.schemaVersion != 1)
+                diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.StringTableIdentityMismatch);
+            ValidateEnglish(table, limits, diagnostics);
+            if (diagnostics.HasAny)
+                return new ProductionSpatialLanguageResult(null, diagnostics.Diagnostics);
+            table.entries = table.entries.OrderBy(entry => entry.key, StringComparer.Ordinal).ToArray();
+            if (!BytesEqual(bytes, SerializeCanonical(table)))
+            {
+                diagnostics.Add(ProductionSpatialGeneratedSetDiagnostic.NoncanonicalOutput);
+                return new ProductionSpatialLanguageResult(null, diagnostics.Diagnostics);
+            }
+            return new ProductionSpatialLanguageResult(table,
+                Array.Empty<ProductionSpatialGeneratedSetDiagnostic>());
+        }
 
         private static bool TryObject<T>(byte[] bytes, out T value,
             DiagnosticCollector diagnostics, StrictJsonWorkloadBudget budget) where T : class
@@ -250,6 +313,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             issue.Reason == SpatialContentValidationReason.WorkloadExceeded);
         private static ProductionSpatialGeneratedSetResult Failure(ProductionSpatialGeneratedSetDiagnostic diagnostic) =>
             new ProductionSpatialGeneratedSetResult(null, new[] { diagnostic });
+        private static ProductionSpatialLanguageResult LanguageFailure(ProductionSpatialGeneratedSetDiagnostic diagnostic) =>
+            new ProductionSpatialLanguageResult(null, new[] { diagnostic });
     }
 
     internal sealed class DiagnosticCollector
@@ -263,6 +328,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DiagnosticCollector(int maximum) { this.maximum = maximum; }
         internal bool HasAny => diagnostics.Count != 0 || overflowed;
         internal bool LimitExceeded => overflowed;
+        internal IEnumerable<ProductionSpatialGeneratedSetDiagnostic> Diagnostics => overflowed
+            ? diagnostics.Concat(new[] { ProductionSpatialGeneratedSetDiagnostic.DiagnosticLimitExceeded })
+            : diagnostics;
         internal void Add(ProductionSpatialGeneratedSetDiagnostic diagnostic)
         {
             if (overflowed) return;

@@ -3,6 +3,7 @@ using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,12 @@ namespace DungeonBuilder.M0
         public TextAsset structureSimulationConfigJson;
         public TextAsset runSimulationConfigJson;
         public TextAsset lootConfigJson;
+
+        [Header("Production Dungeon Spatial Content (inactive)")]
+        public TextAsset productionSpatialManifest;
+        public TextAsset productionSpatialCatalog;
+        public TextAsset[] productionSpatialLanguageTables;
+        public TextAsset productionSpatialValidationLimits;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -309,6 +316,12 @@ namespace DungeonBuilder.M0
                 Logger,
                 out string contentBanner
             );
+
+            Content.LoadProductionSpatialContent(
+                productionSpatialManifest,
+                productionSpatialCatalog,
+                productionSpatialLanguageTables,
+                productionSpatialValidationLimits);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {

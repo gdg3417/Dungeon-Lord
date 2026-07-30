@@ -476,6 +476,11 @@ MonoBehaviour:
   structureSimulationConfigJson: {fileID: 4900000, guid: 3afa8d197a0156a4eb59fd2f1db9c7d7, type: 3}
   runSimulationConfigJson: {fileID: 4900000, guid: 68a1e213feb467c488f7fa17303b1b95, type: 3}
   lootConfigJson: {fileID: 4900000, guid: c1f56adf81124ebaa284058f2f3ea123, type: 3}
+  productionSpatialManifest: {fileID: 4900000, guid: 65b3b00000000000000000000000000c, type: 3}
+  productionSpatialCatalog: {fileID: 4900000, guid: 65b3b00000000000000000000000000d, type: 3}
+  productionSpatialLanguageTables:
+  - {fileID: 4900000, guid: 65b3b00000000000000000000000000e, type: 3}
+  productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6, type: 3}
   overlay: {fileID: 1944002266}
 --- !u!4 &1479508743
 Transform:

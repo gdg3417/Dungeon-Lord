@@ -2,7 +2,8 @@
 
 | Field | Decision |
 |---|---|
-| Status | **APPROVED by owner — architecture contract only; not implemented** |
+| Historical packet status | **GD65B2A approved the architecture contract only; implementation followed in later packets** |
+| Current implementation | **GD65B2B package implemented; PR #182 deterministic construction; PR #183 recovery; PR #184 invocation/committed outputs; PR #185 inactive loading/composition pending review, Unity validation, and merge** |
 | Packet | GD65B2A — version-controlled production authoring source approval |
 | Baseline | Main through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Approved future path | `ContentAuthoring/DungeonSpatial/` |
@@ -12,7 +13,7 @@
 
 The single logical writable authority for production Dungeon Spatial catalog records and production English spatial localization will be a normalized, version-controlled text package at `ContentAuthoring/DungeonSpatial/`. CSV owns flat and relational authoring records; JSON owns package metadata and the machine-readable schema. This location is outside Unity's `Assets` directory so source files are not treated as runtime assets or accidentally included in builds.
 
-GD65B2A approves this contract only. The path, package, tables, schema, manifest, exporter, and generated records do not yet exist. GD65B1 is complete; GD65B overall remains incomplete, the spatial catalog remains inactive, save schema remains 6, and current runtime/save authority is unchanged.
+Historically, GD65B2A approved this contract only and did not create the path, package, tables, schema, manifest, exporter, or generated records. GD65B2B later implemented the authoring package; PRs #182, #183, and #184 subsequently implemented deterministic construction, recoverable publication, and export invocation with committed generated outputs, respectively. GD65B1 is complete; GD65B overall remains incomplete, the spatial catalog remains inactive, save schema remains 6, and current runtime/save authority is unchanged.
 
 ## 2. Problem and rejected master-workbook authority
 
@@ -22,11 +23,11 @@ A workbook can remain a generated editor or review surface, but it is rejected a
 
 ## 3. Approved canonical source location
 
-The exact future canonical root is:
+The canonical root is:
 
 `ContentAuthoring/DungeonSpatial/`
 
-Only the manifest, schema, and manifest-listed tables described below will be writable production authoring authority. No filesystem discovery decides authority. This packet does **not** create the directory or any file beneath it.
+Only the manifest, schema, and manifest-listed tables described below are writable production authoring authority. No filesystem discovery decides authority. Historical note: GD65B2A did **not** create the directory or any file beneath it; GD65B2B subsequently did so.
 
 ## 4. Authority matrix
 
@@ -157,4 +158,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## GD65B3B implementation status
 
-PR #183 / GD65B3A is merged and passed owner-run Unity validation. No owner Unity result is yet claimed for GD65B3B in this PR. GD65B3B preserves `ContentAuthoring/DungeonSpatial/` as the single logical writable authority while adding shared editor/command-line publication invocation and committing the first three-file deterministic derived set. `validation_limits.json` remains separately authored and is not generated. Loading, `ContentService` publication, `GameRoot` assignment, pre-build gating, runtime consumption, and gameplay activation remain absent; save schema 6 and current runtime/save authority are unchanged. GD66 remains blocked, with production loading and composition assignment next.
+PR #184 / GD65B3B is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 in the current PR implements strict production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition, pending review, Unity validation, and merge. The catalog remains inactive; existing abstract placements, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema remains 6. Pre-build recovery and validation, supported build-entry integration, evidence closeout, and final GD65B closure remain next. GD66 remains blocked.
