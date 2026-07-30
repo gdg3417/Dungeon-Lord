@@ -20,7 +20,13 @@ namespace DungeonBuilder.M0.Editor.Build
 
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
-            ValidateOrThrow(gate, buildPlayerContext.BuildPlayerOptions.scenes);
+            PrepareForBuild(gate, buildPlayerContext.BuildPlayerOptions);
+        }
+
+        internal static void PrepareForBuild(ProductionSpatialContentBuildGate gate,
+            BuildPlayerOptions buildPlayerOptions)
+        {
+            ValidateOrThrow(gate, buildPlayerOptions.scenes);
         }
 
         internal static void ValidateOrThrow(ProductionSpatialContentBuildGate gate, string[] attemptedScenes)

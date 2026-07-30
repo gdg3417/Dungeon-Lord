@@ -88,9 +88,11 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             string[] observed = null;
             var gate = Gate(composition: scenes => { observed = scenes; return ProductionSpatialContentBuildGate.Success(); });
             var callback = new ProductionSpatialContentBuildPreprocessor(gate);
-            callback.PrepareForBuild(new BuildPlayerContext(new BuildPlayerOptions { scenes = supplied }));
+            ProductionSpatialContentBuildPreprocessor.PrepareForBuild(gate,
+                new BuildPlayerOptions { scenes = supplied });
             Assert.That(observed, Is.SameAs(supplied));
             Assert.That(callback, Is.InstanceOf<BuildPlayerProcessor>());
+            Assert.That(callback.callbackOrder, Is.EqualTo(-1000));
         }
 
         [Test]
