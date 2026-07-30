@@ -1,5 +1,8 @@
 # SPEC LOCK SUMMARY (AUTHORITATIVE)
 
+**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+
+
 This document represents the original lock summary for Specs 1 through 37, with a GD61 status addendum for Spec 38.
 
 All contradictions identified during the original cross-spec review of Specs 1 through 37 were resolved. Those specifications retain their locked and audited status and are not broadly reopened by GD61.

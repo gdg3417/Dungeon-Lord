@@ -1,5 +1,8 @@
 # Sprint 2 to Sprint 4 Test-Stage Matrix
 
+**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+
+
 ## Purpose
 This matrix defines Unit, SIT, UAT, required evidence, and build gate impact for Sprint 2 through Sprint 4 tickets.
 

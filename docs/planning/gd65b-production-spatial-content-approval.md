@@ -1,5 +1,8 @@
 # GD65B production spatial content approval record
 
+**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+
+
 | Field | Decision |
 |---|---|
 | Status | **GD65B0 APPROVAL COMPLETE — 72/72 rows approved; GD65B1 complete; GD65B2A source contract approved; GD65B remains incomplete** |

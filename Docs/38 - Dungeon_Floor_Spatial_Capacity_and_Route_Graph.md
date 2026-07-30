@@ -1,5 +1,8 @@
 **System Spec 38: Dungeon Floor Spatial Capacity and Route Graph**
 
+**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+
+
 *Dungeon Builder, locked candidate specification for implementation planning*
 
 | Field | Decision |

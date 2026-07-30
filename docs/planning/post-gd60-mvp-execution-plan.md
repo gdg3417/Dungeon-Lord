@@ -2,12 +2,14 @@
 
 | Field | Decision |
 |---|---|
-| Status | **GD65B4 loading/composition implemented in the current PR pending review, Unity validation, and merge; pre-build closeout remains; GD66 blocked** |
+| Status | **PR #185 merged; GD65B5 build gate implemented pending owner Unity validation and evidence; GD65B incomplete; GD66 blocked** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Current implementation baseline before this PR | Main through merged PR #184 / GD65B3B at `04515d5c7c5a35d869bb725cd76d2a7c317403ee` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-28 |
+
+**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 ## 1. Authority and purpose
 
