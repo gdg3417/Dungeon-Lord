@@ -289,15 +289,38 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         private string CreateScene(string name, Action<GameRoot> configure, bool includeRoot = true, int count = 1)
         {
             string path = TestRoot + "/" + name + ".unity";
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
-            if (includeRoot)
-                for (int index = 0; index < count; index++)
+            Scene scene = SceneManager.CreateScene("TempBuildGate-" + name);
+            Exception originalException = null;
+            try
+            {
+                if (includeRoot)
+                    for (int index = 0; index < count; index++)
+                    {
+                        var gameObject = new GameObject("GameRoot" + index);
+                        SceneManager.MoveGameObjectToScene(gameObject, scene);
+                        GameRoot root = gameObject.AddComponent<GameRoot>();
+                        configure?.Invoke(root);
+                    }
+                Assert.That(EditorSceneManager.SaveScene(scene, path), Is.True);
+            }
+            catch (Exception exception)
+            {
+                originalException = exception;
+                throw;
+            }
+            finally
+            {
+                try
                 {
-                    GameRoot root = new GameObject("GameRoot" + index).AddComponent<GameRoot>();
-                    configure?.Invoke(root);
+                    if (scene.IsValid() && scene.isLoaded)
+                        Assert.That(EditorSceneManager.CloseScene(scene, true), Is.True);
                 }
-            Assert.That(EditorSceneManager.SaveScene(scene, path), Is.True);
-            Assert.That(EditorSceneManager.CloseScene(scene, true), Is.True);
+                catch when (originalException != null)
+                {
+                    // Preserve the fixture's original failure instead of replacing it with cleanup failure.
+                }
+            }
+            Assert.That(SceneManager.GetSceneByPath(path).isLoaded, Is.False);
             return path;
         }
 
