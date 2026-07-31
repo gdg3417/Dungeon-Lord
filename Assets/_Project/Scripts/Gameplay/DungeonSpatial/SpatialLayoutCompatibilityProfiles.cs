@@ -159,6 +159,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public T Value { get; }
     }
 
+    public sealed class CompatibilityConfigurationResolution<T> where T : class
+    {
+        internal CompatibilityConfigurationResolution(CompatibilitySelectionResult<T> selection,
+                                                       SpatialLayoutCompatibilitySnapshot snapshot)
+        {
+            Selection = selection;
+            Snapshot = snapshot;
+        }
+        public CompatibilitySelectionResult<T> Selection { get; }
+        public SpatialLayoutCompatibilitySnapshot Snapshot { get; }
+        public bool Success => Snapshot != null && Selection.Success;
+    }
+
     public sealed class SpatialLayoutCompatibilityResult
     {
         internal SpatialLayoutCompatibilityResult(SpatialLayoutCompatibilitySnapshot value,
@@ -228,6 +241,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (asset == null)
                 return Failure(SpatialLayoutCompatibilityDiagnostic.MissingInput, sink);
             return ParseAndValidate(asset.bytes, spatial, limits, sink, requireInactiveProduction);
+        }
+
+        public static CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> ResolveMigration(
+            TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int rawSchema, int targetSchema, int targetContractVersion)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            if (validation.Success)
+                return new CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile>(
+                    validation.Value.SelectMigration(rawSchema, targetSchema, targetContractVersion), validation.Value);
+            return new CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile>(
+                ClassifyMigrationFailure(asset, rawSchema), null);
+        }
+
+        public static CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile> ResolveStarter(
+            TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int targetSchema, int contractVersion)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            if (validation.Success)
+                return new CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile>(
+                    validation.Value.SelectStarter(targetSchema, contractVersion), validation.Value);
+            return new CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile>(
+                ClassifyStarterFailure(asset, targetSchema, contractVersion), null);
+        }
+
+        public static CompatibilityConfigurationResolution<CanonicalLayoutContractSelection> ResolveContract(
+            TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int targetSchema)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            if (validation.Success)
+                return new CompatibilityConfigurationResolution<CanonicalLayoutContractSelection>(
+                    validation.Value.SelectContract(targetSchema), validation.Value);
+            return new CompatibilityConfigurationResolution<CanonicalLayoutContractSelection>(
+                ClassifyContractFailure(asset, targetSchema), null);
         }
 
         public static SpatialLayoutCompatibilityResult ParseAndValidate(
@@ -381,11 +430,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             SpatialMigrationCompatibilityProfile[] supplied = data?.MigrationProfiles ??
                 Array.Empty<SpatialMigrationCompatibilityProfile>();
-            if (supplied.Any(value => !ValidMigration(value) ||
-                !Enum.IsDefined(typeof(CompatibilityProfileLifecycle), value.Lifecycle) ||
-                !ValidHash(value.CanonicalHash) || value.CanonicalHash != ComputeMigrationProfileHash(value)))
-                return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid,
-                    "gd66.profile.invalid");
             SpatialMigrationCompatibilityProfile[] active =
                 supplied
                     .Where(value => value != null && value.Lifecycle == CompatibilityProfileLifecycle.Active &&
@@ -395,14 +439,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (active.Length == 0)
                 return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Missing,
                                                                        "gd66.profile.missing");
-            if (active.Length > 1)
-                return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Duplicate,
-                                                                       "gd66.profile.duplicate");
             SpatialMigrationCompatibilityProfile match = active[0];
-            if (!ValidMigration(match) || !ValidHash(match.CanonicalHash) ||
-                match.CanonicalHash != ComputeMigrationProfileHash(match))
-                return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid,
-                                                                       "gd66.profile.invalid");
             if (match.TargetSchemaVersion != targetSchema ||
                 match.TargetCanonicalLayoutContractVersion != targetContractVersion)
                 return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.VersionMismatch,
@@ -415,11 +452,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             CanonicalStarterLayoutProfile[] supplied = data?.StarterProfiles ??
                 Array.Empty<CanonicalStarterLayoutProfile>();
-            if (supplied.Any(value => !ValidStarter(value) ||
-                !Enum.IsDefined(typeof(CompatibilityProfileLifecycle), value.Lifecycle) ||
-                !ValidHash(value.CanonicalHash) || value.CanonicalHash != ComputeStarterProfileHash(value)))
-                return Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid,
-                    "gd66.starter_profile.invalid");
             CanonicalStarterLayoutProfile[] activeForSchema =
                 supplied
                     .Where(value => value != null && value.Lifecycle == CompatibilityProfileLifecycle.Active &&
@@ -433,13 +465,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (active.Length == 0)
                 return Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.VersionMismatch,
                     "gd66.starter_profile.version_mismatch");
-            if (active.Length > 1)
-                return Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Duplicate,
-                                                                "gd66.starter_profile.duplicate");
-            if (!ValidStarter(active[0]) || !ValidHash(active[0].CanonicalHash) ||
-                active[0].CanonicalHash != ComputeStarterProfileHash(active[0]))
-                return Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid,
-                                                                "gd66.starter_profile.invalid");
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
@@ -454,9 +479,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (active.Length == 0)
                 return Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Missing,
                                                                    "gd66.layout_contract.selection_missing");
-            if (active.Length > 1)
-                return Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Duplicate,
-                                                                   "gd66.layout_contract.selection_duplicate");
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
@@ -480,6 +502,63 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     geometryId, geometryVersion, geometryHash)))
                 profile = null;
             return profile != null;
+        }
+
+        private static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> ClassifyMigrationFailure(
+            TextAsset asset, int rawSchema)
+        {
+            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
+            SpatialMigrationCompatibilityProfile[] matches = (candidate?.MigrationProfiles ??
+                Array.Empty<SpatialMigrationCompatibilityProfile>()).Where(value => value != null &&
+                value.Lifecycle == CompatibilityProfileLifecycle.Active && rawSchema >= value.MinimumSourceSchemaVersion &&
+                rawSchema <= value.MaximumSourceSchemaVersion).Take(2).ToArray();
+            return matches.Length > 1
+                ? Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Duplicate,
+                    "gd66.profile.duplicate")
+                : Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid,
+                    "gd66.profile.invalid");
+        }
+
+        private static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> ClassifyStarterFailure(
+            TextAsset asset, int targetSchema, int contractVersion)
+        {
+            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
+            CanonicalStarterLayoutProfile[] matches = (candidate?.StarterProfiles ??
+                Array.Empty<CanonicalStarterLayoutProfile>()).Where(value => value != null &&
+                value.Lifecycle == CompatibilityProfileLifecycle.Active && value.TargetSchemaVersion == targetSchema &&
+                value.CanonicalLayoutContractVersion == contractVersion).Take(2).ToArray();
+            return matches.Length > 1
+                ? Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Duplicate,
+                    "gd66.starter_profile.duplicate")
+                : Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid,
+                    "gd66.starter_profile.invalid");
+        }
+
+        private static CompatibilitySelectionResult<CanonicalLayoutContractSelection> ClassifyContractFailure(
+            TextAsset asset, int targetSchema)
+        {
+            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
+            int matches = (candidate?.ContractSelections ?? Array.Empty<CanonicalLayoutContractSelection>())
+                .Count(value => value != null && value.Lifecycle == CompatibilityProfileLifecycle.Active &&
+                    value.TargetSchemaVersion == targetSchema);
+            return matches > 1
+                ? Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Duplicate,
+                    "gd66.layout_contract.selection_duplicate")
+                : Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Invalid, string.Empty);
+        }
+
+        private static SpatialLayoutCompatibilityProfilesData DeserializeUntrusted(TextAsset asset)
+        {
+            if (asset == null)
+                return null;
+            try
+            {
+                return JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(asset.text);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static bool PrevalidateIdentities(SpatialLayoutCompatibilityProfilesData data,
@@ -732,6 +811,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         p.Role == CompatibilityRouteRole.Entrance     ? entrance.GrossFootprint
                         : p.Role == CompatibilityRouteRole.Completion ? completion.GrossFootprint
                                                                       : room.GrossFootprint;
+                    if (footprint == null || footprint.Width <= 0 || footprint.Height <= 0)
+                    {
+                        bad = true;
+                        continue;
+                    }
+                    long footprintArea = (long)footprint.Width * footprint.Height;
+                    if (footprintArea > limits.MaximumMaterializedTiles)
+                    {
+                        issues.Add(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+                        return;
+                    }
                     if (!TileFootprintResolver.TryResolveRectangle(
                             footprint, p.Anchor, p.Orientation,
                             new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles),
@@ -757,8 +847,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         !Adjacent(g, layout, edge, room, entrance, completion))
                         bad = true;
                 }
-                if (total != layout.ExpectedOccupiedTileTotal || total > floor.FinalFloorSpaceCapacity ||
-                    total > limits.MaximumMaterializedTiles)
+                if (total > limits.MaximumMaterializedTiles)
+                {
+                    issues.Add(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+                    return;
+                }
+                if (total != layout.ExpectedOccupiedTileTotal || total > floor.FinalFloorSpaceCapacity)
                     bad = true;
                 if (bad)
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry);
@@ -788,28 +882,50 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 a.Role == CompatibilityRouteRole.Completion ? completion.GrossFootprint : room.GrossFootprint;
             RectangularFootprintDefinition bf = b.Role == CompatibilityRouteRole.Entrance ? entrance.GrossFootprint :
                 b.Role == CompatibilityRouteRole.Completion ? completion.GrossFootprint : room.GrossFootprint;
-            TileCoordinate ac = TransformPoint(ap.Offset, a.Anchor, a.Orientation, af);
-            TileCoordinate bc = TransformPoint(bp.Offset, b.Anchor, b.Orientation, bf);
+            if (!TryTransformPoint(ap.Offset, a.Anchor, a.Orientation, af, out TileCoordinate ac) ||
+                !TryTransformPoint(bp.Offset, b.Anchor, b.Orientation, bf, out TileCoordinate bc))
+                return false;
             int aFacing = ((int)ap.Facing + (int)a.Orientation) % 4;
             int bFacing = ((int)bp.Facing + (int)b.Orientation) % 4;
             return Math.Abs(ac.X - bc.X) + Math.Abs(ac.Y - bc.Y) == 1 && (aFacing + 2) % 4 == bFacing;
         }
-        private static TileCoordinate TransformPoint(TileCoordinate offset, TileCoordinate anchor,
-                                                     CardinalOrientation orientation,
-                                                     RectangularFootprintDefinition footprint)
+        internal static bool TryTransformPoint(TileCoordinate offset, TileCoordinate anchor,
+                                               CardinalOrientation orientation,
+                                               RectangularFootprintDefinition footprint,
+                                               out TileCoordinate transformed)
         {
+            transformed = default;
+            if (footprint == null || footprint.Width <= 0 || footprint.Height <= 0 ||
+                !Enum.IsDefined(typeof(CardinalOrientation), orientation))
+                return false;
+            long relativeX;
+            long relativeY;
             switch (orientation)
             {
                 case CardinalOrientation.Ninety:
-                    return new TileCoordinate(anchor.X + footprint.Height - 1 - offset.Y, anchor.Y + offset.X);
+                    relativeX = offset.Y;
+                    relativeY = (long)footprint.Width - 1L - offset.X;
+                    break;
                 case CardinalOrientation.OneEighty:
-                    return new TileCoordinate(anchor.X + footprint.Width - 1 - offset.X,
-                        anchor.Y + footprint.Height - 1 - offset.Y);
+                    relativeX = (long)footprint.Width - 1L - offset.X;
+                    relativeY = (long)footprint.Height - 1L - offset.Y;
+                    break;
                 case CardinalOrientation.TwoSeventy:
-                    return new TileCoordinate(anchor.X + offset.Y, anchor.Y + footprint.Width - 1 - offset.X);
+                    relativeX = (long)footprint.Height - 1L - offset.Y;
+                    relativeY = offset.X;
+                    break;
                 default:
-                    return new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y);
+                    relativeX = offset.X;
+                    relativeY = offset.Y;
+                    break;
             }
+            long absoluteX = (long)anchor.X + relativeX;
+            long absoluteY = (long)anchor.Y + relativeY;
+            if (absoluteX < int.MinValue || absoluteX > int.MaxValue ||
+                absoluteY < int.MinValue || absoluteY > int.MaxValue)
+                return false;
+            transformed = new TileCoordinate((int)absoluteX, (int)absoluteY);
+            return true;
         }
         private static SpatialConnectionPointDefinition Point(CompatibilityRouteRole role, string id,
                                                               RoomSpatialDefinition room,
