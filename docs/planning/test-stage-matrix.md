@@ -1,9 +1,9 @@
 # Sprint 2 to Sprint 4 Test-Stage Matrix
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed and GD66 is active. Save schema remains 6; production Dungeon Spatial content remains inactive; the existing ordered two-room state remains runtime and save authority. No migration or writable-authority transition has occurred, and Phase 2 migration remains blocked until GD66 design approval.
+**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is active. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 
 ## Purpose
@@ -57,7 +57,7 @@ This focused gate supplements, and does not rewrite, the historical Sprint 2–4
 
 The two GD65B1 fixtures are an initial implementation only and do not mark all six responsibilities complete. Evidence belongs at `docs/testing/evidence/gd65b/`. QA owns the matrix/checklist/verdict/release gate; Engineering owns tests, deterministic seams/helpers, and failure injection; Data / Content Pipeline owns production/configuration/localization/manifest fixtures and canonical expectations; the primary developer/project owner runs complete Unity validation and supplies final evidence. Missing or ambiguous evidence, a failed required test, different limits, nondeterminism, mixed publication, ignored recovery, partial data, Bootstrap/test fallback, generated limits, bypassable build validation, or code/schema changes required by the 80-floor fixture is build-blocking. UAT is not applicable to this inactive technical pipeline and passing it proves neither fun nor mobile/runtime rendering performance.
 
-**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is active. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
+**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
 
 
 **GD65B2A evidence boundary:** this packet is documentation-only and adds no Unity evidence or seventh named test class. The six approved identifiable responsibilities remain `ProductionSpatialContentWorkloadLimitTests`, `ProductionSpatialContentExportTests`, `ProductionSpatialContentRecoveryTests`, `ProductionSpatialContentLoadingTests`, `ProductionSpatialContentBuildGateTests`, and `ProductionSpatialContentScalabilityTests`. Future deterministic-export responsibilities include authoring-package parsing, exact schema validation, duplicate-authority rejection, foreign-key validation, normalized-text enforcement, and row-permutation byte determinism. Existing GD65B1 workload/scalability evidence is preserved. UAT remains not applicable while the catalog is inactive.
@@ -66,7 +66,7 @@ The two GD65B1 fixtures are an initial implementation only and do not mark all s
 
 `ProductionSpatialContentExportTests` now begins its approved deterministic-export responsibility with Unit coverage for strict manifest/schema/CSV parsing and SIT coverage for package-to-detached-catalog/string-table projection through existing workload preflight, validation, and canonicalization. UAT is not applicable because GD65B2B does not publish or activate runtime content. Unity compilation and EditMode execution remain owner-run merge evidence.
 
-## Current GD65B deterministic generated-set coverage
+## Historical GD65B deterministic generated-set coverage
 
 `ProductionSpatialContentExportTests` retains deterministic-export ownership and adds Unit coverage for exact paths, normalized deterministic bytes, strict JSON structure, defensive copies, atomic failure diagnostics, workload/canonical validation, and byte-stable reserialization. SIT covers authoring projection through in-memory build and runtime-safe reparse. UAT, PlayMode, standalone-build, and save reopen testing are not applicable because the committed content remains inactive and is not published to runtime services. Unity compilation, focused EditMode execution, and the complete EditMode suite remain owner-run merge evidence when Unity is unavailable to Codex. GD65B3A adds focused recoverable publication/recovery tests; owner-run Unity evidence remains pending.
 
@@ -75,6 +75,6 @@ The two GD65B1 fixtures are an initial implementation only and do not mark all s
 
 PR #182 completed deterministic in-memory construction and strict complete-set reparse of the three approved generated outputs. GD65B3A adds the editor-only recoverable publication and recovery core with a strict durable journal, canonical three-file installation, complete-set readback validation, and deterministic failure injection. Editor-menu and Unity command-line entry points remain absent, and generated production files remain uncommitted. Production loading, `GameRoot` assignment, pre-build gating, and complete evidence remain incomplete. Save schema remains 6, the production spatial catalog remains inactive, runtime/save authority is unchanged, and GD66 remains blocked.
 
-## GD65B3B evidence status
+## Historical GD65B3B evidence status
 
 PR #184 owner validation passed 169 of 169 EditMode tests with zero PlayMode failures. The exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. PR #185 Unity evidence remains pending.
