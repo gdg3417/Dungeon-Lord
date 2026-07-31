@@ -169,25 +169,25 @@ Canonical identifier inputs must match lowercase ASCII `[a-z0-9]+(?:[._-][a-z0-9
 
 Runtime hashes, `GetHashCode`, GUIDs, timestamps, localization/UI text, player numbering, catalog positions, dictionary iteration, and incidental collection order are prohibited.
 
-### Injected compatibility-geometry profile
+### Distinct migration and native-starter profiles with shared geometry authority
 
-**GD66 decision:** all compatibility geometry/mapping values are owned by an injected typed `SpatialMigrationCompatibilityProfile`; candidate-building code contains no fallback constants. The future single writable authority is the version-controlled typed configuration asset `Assets/_Project/Data/Production/DungeonSpatial/spatial_migration_compatibility_profiles.json`, added only by Phase 2 after its schema review. It is configuration, not the production spatial-definition catalog or a generated output.
+The future direct-authored configuration file `Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json` is the single writable authority for three record collections:
 
-Each profile owns: ordinal `ProfileId`; positive `ProfileVersion`; inclusive source-schema minimum/maximum; target `FloorDefinitionId` and floor index; entrance definition, anchor, orientation, connection-point ID; ordinal legacy-room-to-production-definition mappings; Room 0/Room 1 anchors and orientations for R1/R2; completion definition, R1/R2 anchors, orientation and connection-point ID; ordered semantic route roles; direct-doorway source/destination role and socket definitions; expected socket type; and expected occupied totals 26/42 as assertions independently recomputed from definitions.
+1. immutable `CompatibilityLayoutGeometryRecord` records own definition IDs, R1/R2 anchors/orientations, connection-point/socket expectations, route roles/direct doorways, and expected recomputable totals;
+2. `SpatialMigrationCompatibilityProfile` records reference one geometry-record ID and are selected **only** for legacy migration by raw legacy source-schema range;
+3. `CanonicalStarterLayoutProfile` records reference one geometry-record ID and are selected **only** for native canonical empty-to-R1/content-container construction by exact `(TargetSchemaVersion, CanonicalLayoutContractVersion)`.
 
-Initial profile values are exactly: entrance `(0,0)/Zero/route`; Basic Room 0 `(0,2)/Zero`; Basic Room 1 `(0,6)/Zero`; R1 completion `(1,6)/Zero/route`; R2 completion `(1,10)/Zero/route`; target `spatial.floor.01` index 0; definitions and sockets in §12. These values must not also appear as runtime constants.
+Geometry values occur once in a geometry record, never duplicated between profile types or runtime constants. The initial shared record retains entrance `(0,0)/Zero/route`, Basic Room 0 `(0,2)/Zero`, Basic Room 1 `(0,6)/Zero`, R1 completion `(1,6)/Zero/route`, R2 completion `(1,10)/Zero/route`, `spatial.floor.01` index 0, and §12 definitions/sockets/totals.
 
-The loader validates and canonicalizes profiles by source minimum, source maximum, profile version, then ordinal profile ID. Overlapping applicable ranges or duplicate `(ProfileId,ProfileVersion)` fail. Exactly one compatible profile must match the raw source schema; missing, duplicate/overlap, malformed/referentially invalid, and unsupported-version cases use exact §19 codes. References resolve ordinally against the separately validated production catalog; orientations, sockets, mappings, bounds, footprints, capacity totals, and route roles must validate before injection. The composition root injects the one validated immutable profile into the candidate builder; the builder cannot discover files or construct a default.
+Both profile types use append-only `Lifecycle = Active | Retired`. Fresh migration considers only Active migration profiles and requires exactly one nonoverlapping source-range match. Native first-write considers only Active starter profiles and requires exactly one match for the target-schema/layout-contract key. Retired records are excluded from fresh selection. Unfinished migration recovery resolves a migration profile and shared geometry by exact ID/version/canonical hash; it never substitutes a starter profile or newer migration version. Migration selection uses `gd66.profile.missing`, `gd66.profile.duplicate`, `gd66.profile.invalid`, or `gd66.profile.version_mismatch`; starter selection uses `gd66.starter_profile.missing`, `gd66.starter_profile.duplicate`, `gd66.starter_profile.invalid`, or `gd66.starter_profile.version_mismatch`. Phase 2 fixtures prove selection purposes cannot cross.
 
-Profile versions are immutable compatibility contracts: edits that change migration output require a new version plus explicit source applicability; old versions remain available for deterministic retry/recovery as long as saves/journals reference them. Phase 2 tests must parse/canonical-round-trip the profile and independently recompute R1/R2 tiles, totals, adjacency, facings, bounds and capacity from profile plus production definitions.
+### Profile pipeline and build-gate ownership
 
-### Profile lifecycle, pipeline, and build-gate ownership
+The file is a **direct-authored, separately loaded production configuration input**, not registered in or generated by the spatial content manifest. Save/Data Engineering owns future input schema `spatial_layout_compatibility_profiles` version 1 and canonical JSON rules; this input-schema version is not a save-schema number. Phase 2 adds exactly one serialized `GameRoot`/production-composition assignment, `spatialLayoutCompatibilityProfilesJson`, alongside—not discovered from—the manifest/catalog/limits inputs. There is no export transformation: editor validation parses, ordinally canonicalizes in memory, reserializes, and requires byte equality.
 
-Each profile record has append-only `Lifecycle = Active | Retired`. Fresh migration selection considers only `Active` profiles; their source ranges must not overlap and exactly one must apply. `Retired` profiles are excluded from fresh selection but remain addressable for retry/recovery by exact `(ProfileId, ProfileVersion, CanonicalProfileSha256)`. Pinned lookup never substitutes a newer active version. A profile may not retire or be removed while a supported journal, backup, or committed marker can reference it unless release-retention evidence proves the exact canonical bytes remain shipped and readable. C and the journal persist the exact identity, lifecycle-independent version, and hash.
+Every player-build entry point must validate the explicit assignment, schema/canonical bytes, shared-record uniqueness/references, migration Active-range uniqueness, starter Active-key uniqueness, production references, geometry, and descriptor hashes. Defensive runtime composition repeats the pure validation and publishes neither migration nor canonical starter writer on failure. Runtime/editor/Bootstrap discovery, fallback asset, hardcoded default, generated replacement, and partial publication are prohibited.
 
-The profile file is a **direct-authored, separately loaded production configuration input**, not registered in or generated by the spatial content manifest. Save/Data Engineering owns future schema `spatial_migration_compatibility_profiles` version 1 and canonical JSON rules; this profile-schema version is content-input metadata, not a save-schema number. Phase 2 adds one explicit serialized `GameRoot`/production-composition assignment named `spatialMigrationCompatibilityProfilesJson`, injected alongside—not discovered from—the manifest/catalog/limits inputs. There is no export transformation: authors edit the authoritative file, while editor validation parses, ordinally canonicalizes in memory, reserializes, and requires byte equality before merge.
-
-The existing production pre-build gate must add the explicitly assigned profile bytes to every player-build entry point, validate schema/canonical bytes, active-range uniqueness, retired pinned lookup, production references, geometry and descriptor hashes, and fail the build on missing/invalid assignment. Defensive runtime composition repeats the same pure validation and publishes no migration service on failure. Runtime/editor/Bootstrap discovery, fallback asset, hardcoded default, generated replacement, and partial publication are prohibited. Phase 2 requires focused EditMode parser/canonicalization/profile-lifecycle/reference/geometry tests plus build-gate evidence for missing, duplicate, invalid, retired-pin, hash-mismatch, and every-entry-point enforcement before activation.
+Retired migration records and shared geometry must ship only for the supported unfinished-transaction recovery horizon established by release policy; finalized saves do not require historical profile/catalog/config bytes. Retirement/removal is blocked while a supported non-finalized journal may pin the record. Phase 2 requires focused EditMode selection/lifecycle/reference/canonicalization/geometry tests and build-gate evidence for missing, duplicate, invalid, cross-purpose selection, retired-pin during the recovery horizon, and every entry point.
 
 ### Future saved floor contract
 
@@ -251,10 +251,10 @@ After canonical activation, every edit builds a detached copy, validates the com
 
 | Canonical action | Required atomic result |
 |---|---|
-| First Basic room from `spatialFloors=[]` | Create Floor 0 binding, R1 fixed endpoints/room/edges from the injected active profile; semantics `CanonicalPlayerPlaced`; apply explicit room-placement effects once; immediate edit-mode save. |
-| First supported monster/trap/loot from empty | Create R1 Basic content container with semantics `ImplicitCompatibilityContainer`; add content; do not apply room-placement effects; immediate save. This value denotes implicit compatibility behavior regardless of whether created during migration or canonical content-first writing. |
+| First Basic room from `spatialFloors=[]` | Create Floor 0 binding, R1 fixed endpoints/room/edges from the selected Active `CanonicalStarterLayoutProfile` and its shared geometry record; semantics `CanonicalPlayerPlaced`; apply explicit room-placement effects once; immediate edit-mode save. |
+| First supported monster/trap/loot from empty | Select the same Active `CanonicalStarterLayoutProfile` by target-schema/layout-contract key; create its R1 Basic content container with semantics `ImplicitCompatibilityContainer`; add content; do not apply room-placement effects; immediate save. This value denotes implicit compatibility behavior regardless of whether created during migration or canonical content-first writing. |
 | Later explicit Basic placement into implicit container | Atomically change semantics to `CanonicalPlayerPlaced`, retain valid contents, and apply explicit room-placement effects exactly once. |
-| Room-option replacement | Resolve an approved production mapping/profile rule, validate footprint/connections/capacity/effects, then replace atomically; unsupported Narrow Hall is rejected before mutation. |
+| Room-option replacement | Resolve an approved production mapping and native starter/layout rule, validate footprint/connections/capacity/effects, then replace atomically; unsupported Narrow Hall is rejected before mutation. |
 | Remove room with contents | Reject `gd66.write.room_removal_has_contents`; no cascade or partial edit. |
 | Capacity-reducing replacement | Reject `gd66.write.capacity_reduction_invalid`; never truncate/reorder contents. |
 | No-op placement | Emit `gd66.diagnostic.canonical_write_noop`; do not advance sequence/revision or write bytes. |
@@ -279,41 +279,53 @@ The spatial transaction runs **before** existing `MigrationRunner`, `SaveMigrati
 10. Commit C or restore O under §16; only afterward expose normalized runtime state.
 11. For a successful future-target payload, run only target-schema normalization that cannot rewrite authority. For a valid route-empty legacy payload, build and atomically commit canonical empty C before exposing runtime state; existing legacy normalization never retains legacy writable authority. Existing legacy migration must never run before candidate selection.
 
-## 16. Migration input descriptor and atomic transaction
+## 16. Migration input descriptor, compact paths, and atomic transaction
 
-### Immutable `SpatialMigrationInputDescriptor`
+### Immutable input descriptor and compact identity
 
-Every attempt owns this immutable descriptor:
+Every migration attempt pins `SpatialMigrationInputDescriptor`: exact `OriginalPayloadSha256`; raw source version/envelope; selected target schema; authority-marker and migration-contract versions; migration-profile ID/version/hash; shared-geometry ID/version/hash; production manifest/catalog hashes; ordinal relevant validation-input hashes; legacy gameplay-config hash; and canonical serializer ID/version.
 
-1. `OriginalPayloadSha256` over exact O bytes.
-2. `RawSourceSchemaVersion` and exact `EnvelopeClassification` (`WrappedSaveRoot` or `UnwrappedSaveData`).
-3. selected `TargetSchemaVersion`.
-4. `CanonicalAuthorityMarkerVersion`.
-5. `MigrationContractVersion`.
-6. `CompatibilityProfileId`, `CompatibilityProfileVersion`, and `CanonicalCompatibilityProfileSha256`.
-7. `ProductionSpatialManifestSha256` and `ProductionSpatialCatalogSha256` over exact validated canonical bytes.
-8. an ordinal array `AdditionalValidationInputHashes` of `(InputId,CanonicalSha256)` for production strings/limits only when they affect validation/output.
-9. `LegacyGameplayContentConfigSha256` over the exact canonical config used for option/category/capacity/effect validation.
-10. `CanonicalSerializerId` and `CanonicalSerializerSchemaVersion`.
+Descriptor bytes are fixed-order, whitespace-free/BOM-free UTF-8 JSON with invariant integers, lowercase 64-character hashes, ordinal arrays, and no unknown/duplicate fields. `InputFingerprintSha256` hashes these bytes. `TransactionIdentitySha256` is SHA-256 of canonical bytes `{OriginalPayloadSha256,InputFingerprintSha256}` in that exact field order. Compact transaction ID is `gd66-{TransactionIdentitySha256}`: exactly 69 lowercase ASCII characters.
 
-Descriptor canonical serialization is UTF-8 JSON with the fixed field order above, invariant integers, lowercase 64-character SHA-256 hex, no insignificant whitespace/BOM, and `AdditionalValidationInputHashes` sorted ordinally by `InputId`; unknown/duplicate fields fail. `InputFingerprintSha256` is SHA-256 of those exact descriptor bytes. Transaction ID is `gd66-{OriginalPayloadSha256}-{InputFingerprintSha256}`. The journal stores `JournalSchemaVersion`, the full descriptor bytes, fingerprint, transaction ID, exact active/backup/staging paths, O/B/expected-C hashes, and append-only `Stage = DescriptorPinned | BackupVerified | CandidateVerified | Replaced | DurableVerified | OriginalRestored`; each transition is flushed before the next filesystem action. C's committed marker stores the complete canonical descriptor bytes and fingerprint plus `CreationKind=Migrated`; native new saves instead store `CreationKind=NativeCanonical` and no migration descriptor. The active file hash is verified externally from the journal to avoid a self-hash cycle.
+Same O and fingerprint may reuse verified B and must reproduce byte-identical C. Changed O creates a new attempt/B. Changed dependency, schema, marker, algorithm, profile, geometry, or serializer creates a distinct identity and cannot reuse candidate identity. Recovery never rebuilds C and resolves pinned dependencies exactly.
 
-Same O plus identical fingerprint may reuse verified B and must produce byte-identical C. Changed O creates a new transaction/B. Changed profile, catalog, manifest, relevant config, target schema, marker, algorithm, or serializer creates a different attempt, transaction ID, separately named/verified B, or candidate identity; it cannot reuse the prior attempt merely because O bytes match. Recovery never rebuilds C: it verifies staged/active C only against its journal-pinned descriptor and expected C hash. Pinned inputs are resolved by exact identity/hash, including Retired profiles; newer inputs are never substituted. Missing pinned input recovers verified O. Descriptor mismatch emits `gd66.transaction.input_fingerprint_mismatch`; a fresh attempt caused by dependency change emits `gd66.transaction.dependency_changed`; unavailable relevant config/serializer input emits `gd66.transaction.pinned_input_missing`, and mismatched canonical bytes/version emits `gd66.transaction.pinned_input_hash_mismatch`; profile and spatial pins use their more precise §19 codes.
+### Relative path contract and one-live-attempt rule
 
-### One complete replacement
+For active file `<stem><ext>` inside the normalized save directory, relative sibling names are:
 
-1. Read/preserve O and construct/pin the descriptor.
-2. Create, flush, reread, deserialize and hash-verify B at `{activeFile}.migration.{transactionId}.original`.
-3. Write/flush journal containing the complete pinned descriptor and hashes.
-4. Construct detached complete C with every future field, target schema, marker and descriptor fingerprint.
-5. Canonicalize, serialize, deserialize and fully validate C against pinned inputs; record exact C hash.
-6. Persist C with one journaled same-directory atomic replacement.
-7. Treat that replacement—not a later marker write—as the sole schema/topology/content authority transition.
-8. Reread and verify durable active bytes against pinned C hash/descriptor.
-9. If verification fails, atomically restore verified O; never rebuild against newer dependencies.
-10. Never perform a second schema/marker write or expose staging/journal/partial C.
+- journal: `<stem>.<transactionId>.journal.json`;
+- backup B: `<stem>.<transactionId>.original.bak`;
+- staging C: `<stem>.<transactionId>.candidate.tmp`;
+- finalization receipt: `<stem>.<transactionId>.finalized`.
 
-The journal coordinates recovery only and never becomes gameplay authority.
+`stem` is the already-approved active filename stem, limited to 80 UTF-16 code units. Each generated filename must be at most 180 UTF-16 code units, and the normalized absolute path must be at most 240 UTF-16 code units on Windows; platforms with a smaller reported limit use that smaller limit. Mobile paths use platform APIs, never manual separators. IDs/relative names must contain only approved ASCII filename characters; reject `/`, `\\`, drive/URI prefixes, `.`/`..` segments, rooted paths, normalization changes, symlink/reparse escape, or any resolved path outside the exact save directory. Backup, staging, and active files share that directory so replacement is same-volume/same-directory atomic. The journal records normalized relative filenames only and never trusts externally supplied absolute paths. Violations emit `gd66.transaction.path_invalid`.
+
+At most one non-finalized journal may exist for an active save path. Before repaired-O or dependency-changed work starts, the previous attempt must be completed, restored to verified O, or quarantined after verified O is established. Multiple live journals are never selected by timestamp, directory order, filename order, or hash order; emit `gd66.transaction.multiple_live_attempts` and fail closed until deterministic evidence selects verified O or C. Finalized retained audit records are not live.
+
+### Exact journal and stage sequence
+
+The journal stores `JournalSchemaVersion`, canonical descriptor/fingerprint/transaction ID, normalized relative filenames, O/B/expected-C hashes, and `Stage`. Each stage write is flushed and reread before proceeding; no stage precedes its filesystem verification:
+
+1. Read and verify O.
+2. Construct the immutable descriptor and compact transaction ID.
+3. Create, flush, reread, and verify journal at `DescriptorPinned`.
+4. Create, flush, reread, parse, and hash-verify B.
+5. Advance, flush, reread, and verify `BackupVerified`.
+6. Construct, canonicalize, serialize/deserialize, and fully validate C; record expected C hash.
+7. Advance, flush, reread, and verify `CandidateVerified`.
+8. Perform the single atomic replacement.
+9. Advance, flush, reread, and verify `Replaced`.
+10. Reread and durably verify active C against expected hash/descriptor.
+11. Advance, flush, reread, and verify `DurableVerified`.
+12. Create, flush, reread, and hash-verify the immutable finalization receipt containing transaction ID, descriptor fingerprint, and durable C hash; only then advance the journal to `Finalized` and apply cleanup/retention. If original restoration occurs, verify restoration before stage `OriginalRestored`. The receipt is not gameplay authority and does not rewrite C.
+
+The one replacement is the sole schema/topology/content authority transition. A sidecar journal coordinates recovery only.
+
+### Pin lifetime and finalized canonical loads
+
+Exact descriptor dependencies are mandatory only through unfinished recovery and committed-but-not-finalized durable verification/cleanup. `DurableVerified` is still non-finalized; a verified finalization receipt or retained journal stage `Finalized`, together with the matching complete target payload, ends pin requirements. Historical descriptor/fingerprint remains immutable audit evidence but is not a runtime dependency.
+
+A finalized canonical save (matching receipt or retained `Finalized` audit journal) loads normally by validating its target schema, marker/finalization state, canonical IDs, saved definition references, graph, contents, and compatibility with the **currently supported** catalog/content rules or later target-schema/content migrations. It does not require historical migration profile, geometry bytes, manifest/catalog hashes, gameplay config, or serializer implementation to remain shipped. Already-committed finalized validation therefore uses current supported inputs, not historical pins. A non-finalized C with available journal/pins completes durable verification/finalization; missing pins recover verified O. A finalized C with a valid finalization receipt but missing journal is normal and emits `gd66.success.already_committed`; a non-finalized C with missing/malformed journal uses the precise recovery code and never assumes finalization.
 
 ## 17. Writable-authority transition
 
@@ -349,7 +361,7 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.diagnostic.no_journal_legacy_valid` | nonfatal diagnostic | Yes | Unchanged verified O | Allowed | No | No journal exists and active legacy O is valid for a fresh attempt. |
 | `gd66.success.empty_migrated` | success | No | Verified C | Allowed | No | Canonical empty C durably committed. |
 | `gd66.success.migrated` | success | No | Verified C | Allowed | No | Populated canonical C durably committed. |
-| `gd66.success.already_committed` | success | No | Verified C | Allowed | No | Complete verified target payload already authoritative. |
+| `gd66.success.already_committed` | success | No | Verified C | Allowed | No | Finalized target C and receipt pass current target-schema/content validation; historical migration pins are not required. |
 | `gd66.success.recovered_original` | success | No | Verified O | Allowed | Yes | Verified O restored after interruption/failure. |
 | `gd66.route.duplicate_room_slot` | fatal failure | No | Verified O | Allowed | Yes | Duplicate assignment floor/room key. |
 | `gd66.route.duplicate_floor_node_revision` | fatal failure | No | Verified O | Allowed | Yes | Floor-node key/slot has tied greatest revision. |
@@ -390,7 +402,7 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.graph.terminal` | fatal failure | No | Verified O | Allowed | Yes | Completion-terminal semantics are invalid. |
 | `gd66.graph.ordering` | fatal failure | No | Verified O | Allowed | Yes | Candidate is not canonical/round-trip stable. |
 | `gd66.transaction.backup_failed` | recoverable failure | No | Verified O | Allowed | Yes | B creation, flush, readback, hash, or parse verification fails. |
-| `gd66.transaction.journal_invalid` | recoverable failure | No | Verified O | Allowed | Yes | Journal is missing, malformed, or hash-inconsistent. |
+| `gd66.transaction.journal_malformed_with_verified_original` | recoverable failure | No | Unchanged verified O | Allowed | Yes | Exactly one malformed live journal exists, O is independently verified, and no more precise stage/hash/path condition applies. |
 | `gd66.transaction.candidate_invalid` | fatal failure | No | Verified O | Allowed | Yes | Complete C serialization/deserialization or aggregate validation fails. |
 | `gd66.transaction.commit_failed` | recoverable failure | No | Verified O | Allowed | Yes | Single atomic replacement fails. |
 | `gd66.transaction.durability_failed` | recoverable failure | No | Verified O | Allowed | Yes | Committed bytes fail durable reread/hash/semantic verification. |
@@ -415,8 +427,17 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.transaction.backup_incomplete` | recoverable failure | No | Verified O | Allowed | No | Journal exists before B completed verification. |
 | `gd66.transaction.candidate_absent` | recoverable failure | No | Verified O | Allowed | No | Verified B exists but no staged/active C exists. |
 | `gd66.diagnostic.staged_candidate_verified` | nonfatal diagnostic | Yes | Unchanged verified O | Allowed | No | Complete staged C and pins validate while O remains active. |
-| `gd66.transaction.journal_missing_after_commit` | recoverable failure | No | Verified C | Allowed | No | Complete active C validates from marker/pins but journal is missing/malformed. |
+| `gd66.transaction.journal_missing_after_commit` | recoverable failure | No | No trusted active payload | Blocked | Yes | Non-finalized active C exists but its live journal is missing/malformed; exact descriptor pins are required to finish or restore O. |
 | `gd66.transaction.invalid_backup_with_committed_candidate` | recoverable failure | No | Verified C | Allowed | No | B is invalid but active C matches expected descriptor/hash. |
+| `gd66.starter_profile.missing` | recoverable failure | No | Unchanged verified C | Allowed | Yes | No Active starter profile matches target schema/layout-contract key. |
+| `gd66.starter_profile.duplicate` | fatal failure | No | Unchanged verified C | Allowed | Yes | Multiple Active starter profiles match one target key. |
+| `gd66.starter_profile.invalid` | recoverable failure | No | Unchanged verified C | Allowed | Yes | Starter profile/shared-geometry reference or production validation fails. |
+| `gd66.starter_profile.version_mismatch` | recoverable failure | No | Unchanged verified C | Allowed | Yes | Required starter layout-contract/profile version is unsupported. |
+| `gd66.transaction.multiple_live_attempts` | fatal failure | No | No trusted active payload | Blocked | Yes | More than one non-finalized journal exists for one active save path. |
+| `gd66.transaction.path_invalid` | recoverable failure | No | Unchanged verified O | Allowed | Yes | Generated relative filename/path violates grammar, normalization, containment, platform length, or same-directory rules. |
+| `gd66.diagnostic.replaced_candidate_pending_durability` | nonfatal diagnostic | No | Verified C | Blocked | No | Journal stage Replaced and active C hash matches, but durable verification is incomplete. |
+| `gd66.diagnostic.durable_candidate_pending_finalization` | nonfatal diagnostic | No | Verified C | Blocked | No | Stage DurableVerified is valid but finalization receipt/stage is incomplete. |
+| `gd66.transaction.finalization_receipt_invalid` | recoverable failure | No | Verified C | Blocked | Yes | Finalization receipt exists but hash/fingerprint/path validation fails. |
 | `gd66.success.native_canonical_save_created` | success | No | Verified C | Allowed | No | No-file path directly creates/persists canonical empty save. |
 | `gd66.write.native_save_persist_failed` | recoverable failure | No | No trusted active payload | Blocked | Yes | No-file canonical first persistence fails; no active save exists. |
 | `gd66.write.unsupported_room_selection` | recoverable failure | No | Unchanged verified C | Allowed | Yes | Canonical writer/UI attempts unsupported Narrow Hall. |
@@ -431,40 +452,43 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 
 Save/Migration Engineering emits only exact §19 codes. For each row with “Player key?” Yes, the key is `save.migration.spatial.` followed by the full code unchanged, including dots and underscores—for example `save.migration.spatial.gd66.content.outcome_mismatch`. No punctuation/case transformation or alias is allowed. UX/Localization must author that exact key before activation; GD66 adds no entries. Text never determines identity or gameplay.
 
-## 21. Exact interruption, recovery, rollback, retry, and idempotence
+## 21. Stage-exact interruption, recovery, rollback, retry, and idempotence
 
-Trusted evidence means exact bytes plus schema/marker/descriptor/hash validation. “Quarantine” retains bytes for support but never gameplay.
-
-| Observed state | Trusted evidence required | Resulting active payload / gameplay | Retain or quarantine | Exact code | Auto retry? | Player intervention? |
+| Observed state/stage | Trusted evidence | Result / gameplay | Retain/quarantine | Exact code | Auto retry? | Intervention? |
 |---|---|---|---|---|---:|---:|
-| No journal; active legacy O valid | O parses and source classification valid | Verified O; gameplay allowed on legacy authority; fresh attempt may start | retain O | `gd66.diagnostic.no_journal_legacy_valid` | Yes | No |
-| No journal; active complete target C valid | C schema/marker/descriptor fingerprint and current pinned inputs validate | Verified C; gameplay allowed | retain C | `gd66.success.already_committed` | No | No |
-| No journal; active contradictory/unknown | no trusted descriptor or classification | No trusted active payload; gameplay blocked | quarantine active | `gd66.authority.contradictory_state` | No | Yes |
-| Journal before B completion | journal descriptor valid; active O hash matches | Verified O; gameplay allowed after cleanup | retain O; quarantine journal/partial B | `gd66.transaction.backup_incomplete` | Yes | No |
-| Valid B; no C | B matches descriptor O hash | restore/retain Verified O; gameplay allowed | retain B/O/journal | `gd66.transaction.candidate_absent` | Yes | No |
-| Valid B and complete staged C | B and staged C match pinned descriptor/expected hashes | Verified O stays active; gameplay allowed; replacement may resume | retain all | `gd66.diagnostic.staged_candidate_verified` | Yes | No |
-| Active O with complete staged C | active O/B/C all pinned and hash-valid | Verified O until replacement; gameplay allowed | retain all | `gd66.diagnostic.staged_candidate_verified` | Yes | No |
-| Active C after replacement; valid journal | active C equals expected C hash/descriptor | Verified C; gameplay allowed; finalize cleanup | retain C/B per policy; journal until finalized | `gd66.success.migrated` | No | No |
-| Active complete C; journal missing/malformed | C marker descriptor and exact shipped pinned inputs validate independently | Verified C; gameplay allowed; quarantine journal | retain C; quarantine malformed journal | `gd66.transaction.journal_missing_after_commit` | No | No |
-| Active hash matches neither O nor C | B/journal may be valid but active is neither expected hash | restore Verified O if possible; gameplay only after restore | quarantine active/staged | `gd66.transaction.active_payload_unknown` | No | Yes if restore fails |
-| Invalid B; active O valid | O hash/parse valid | Unchanged Verified O; gameplay allowed | quarantine B/journal | `gd66.transaction.backup_failed` | Yes with new B | No |
-| Invalid B; active C valid | C matches descriptor/expected hash | Verified C; gameplay allowed | retain C; quarantine B | `gd66.transaction.invalid_backup_with_committed_candidate` | No | No |
-| Invalid O; valid B | B matches pinned original hash | restore Verified O from B; gameplay allowed afterward | retain B; quarantine invalid O | `gd66.success.recovered_original` | Yes | No |
-| Durable C verification failure | verified B/O | restore Verified O; gameplay allowed afterward | quarantine C; retain B/journal | `gd66.transaction.durability_failed` | Yes only with same pins | No |
-| O restoration failure | neither active O nor restoration write trusted | No trusted active payload; gameplay blocked | retain/quarantine all | `gd66.transaction.recovery_failed` | No | Yes |
-| Both O and C untrusted | no payload meets hashes/descriptor | No trusted active payload; gameplay blocked | quarantine all, never create replacement save | `gd66.transaction.no_trusted_active_payload` | No | Yes |
-| Stale journal for different O | active O hash differs from journal descriptor | Unchanged Verified O; gameplay allowed; stale attempt ignored | retain O; quarantine journal/B/C | `gd66.transaction.stale_journal_original_mismatch` | Yes as new transaction | No |
-| Journal input fingerprint mismatch | journal descriptor bytes/fingerprint disagree | Verified O if hash-valid; gameplay allowed on O | quarantine attempt | `gd66.transaction.input_fingerprint_mismatch` | No; fresh descriptor required | No |
-| Pinned profile unavailable | exact profile identity/version/hash unavailable | recover Verified O; gameplay allowed on O | retain O/B; quarantine C/journal | `gd66.transaction.pinned_profile_missing` | No until pin restored | Yes |
-| Pinned catalog/manifest unavailable | exact canonical bytes unavailable | recover Verified O; gameplay allowed on O | retain O/B; quarantine C/journal | `gd66.transaction.pinned_spatial_input_missing` | No until pin restored | Yes |
+| No live journal; legacy O valid | O source/hash valid | Verified O; gameplay allowed; fresh attempt | retain O | `gd66.diagnostic.no_journal_legacy_valid` | Yes | No |
+| No live journal; finalized C + receipt valid | current target validation plus receipt C hash/fingerprint | Verified C normal load; pins not required | retain C/receipt/audit | `gd66.success.already_committed` | No | No |
+| No journal/receipt; active unknown or contradictory | no deterministic trusted evidence | No trusted payload; gameplay blocked | quarantine active | `gd66.authority.contradictory_state` | No | Yes |
+| Multiple non-finalized journals | discovery proves more than one live attempt | fail closed until explicit evidence establishes O/C | quarantine none automatically | `gd66.transaction.multiple_live_attempts` | No | Yes |
+| `DescriptorPinned`; B absent/incomplete | journal descriptor valid; active O matches | Verified O; gameplay allowed after attempt quarantine | O; quarantine journal/partial B | `gd66.transaction.backup_incomplete` | Yes | No |
+| `BackupVerified`; C absent | verified B/O and stage | Verified O; gameplay allowed | retain O/B/journal | `gd66.transaction.candidate_absent` | Yes | No |
+| `CandidateVerified`; staged C valid, active O | B/C/descriptor hashes and stage | Verified O remains active; replacement may resume | retain all | `gd66.diagnostic.staged_candidate_verified` | Yes | No |
+| `Replaced`; active C valid | expected C hash/descriptor and verified B | Verified C provisionally; gameplay blocked until durable verification/finalization | retain all | `gd66.diagnostic.replaced_candidate_pending_durability` | Yes | No |
+| `DurableVerified`; receipt not complete | durable C, journal/pins, B | Verified C; gameplay may load only after finalization completes | retain all | `gd66.diagnostic.durable_candidate_pending_finalization` | Yes | No |
+| `Finalized` or valid receipt | C/receipt hash/fingerprint and current target validation | Verified C normal load; historical pins no longer required | retain C/receipt; audit per policy | `gd66.success.migrated` | No | No |
+| Finalized C; journal missing | valid receipt and current target validation | Verified C normal load | retain C/receipt | `gd66.success.already_committed` | No | No |
+| Finalization receipt invalid | durable C and journal/pins may be valid but receipt fails hash/path/fingerprint | finish finalization only from exact pins or restore O | quarantine receipt | `gd66.transaction.finalization_receipt_invalid` | Yes with exact pins | Maybe |
+| Non-finalized C; journal missing/malformed | C descriptor, expected pins, and B if available | gameplay blocked; finish only if exact evidence suffices, otherwise restore O | quarantine malformed/missing attempt evidence | `gd66.transaction.journal_missing_after_commit` | No | Yes if O unavailable |
+| Malformed journal; independently verified O; no other precise case | O hash/source valid and exactly one malformed live journal | Unchanged Verified O; gameplay allowed | quarantine journal | `gd66.transaction.journal_malformed_with_verified_original` | Yes as fresh attempt | No |
+| Active hash matches neither O nor C | descriptor/B may be valid | restore O if possible; otherwise block | quarantine active/staged | `gd66.transaction.active_payload_unknown` | No | Yes if restore fails |
+| Invalid B; active O valid | O hash/source valid | Unchanged Verified O | quarantine B/journal | `gd66.transaction.backup_failed` | Yes with new attempt | No |
+| Invalid B; finalized C/receipt valid | current target validation and receipt | Verified C normal load | quarantine B; retain C/receipt | `gd66.transaction.invalid_backup_with_committed_candidate` | No | No |
+| Invalid O; B valid before replacement | B matches descriptor O hash | restore Verified O | quarantine invalid O; retain B | `gd66.success.recovered_original` | Yes | No |
+| Durable C verification fails | verified O/B | restore Verified O | quarantine C; retain attempt | `gd66.transaction.durability_failed` | Same pins only | No |
+| O restoration fails | neither active O nor restoration trusted | No trusted payload; gameplay blocked | retain all for support | `gd66.transaction.recovery_failed` | No | Yes |
+| O and C both untrusted | no bytes meet descriptor/current target validation | No trusted payload; gameplay blocked | quarantine all | `gd66.transaction.no_trusted_active_payload` | No | Yes |
+| Journal pins another O | active verified O hash differs | Unchanged Verified O; quarantine stale attempt | retain O | `gd66.transaction.stale_journal_original_mismatch` | New attempt | No |
+| Journal fingerprint mismatch | descriptor bytes/fingerprint disagree | Verified O if independently valid | quarantine attempt | `gd66.transaction.input_fingerprint_mismatch` | Fresh attempt | No |
+| Required unfinished pin unavailable/mismatched | exact profile/geometry/catalog/config pin cannot validate | restore Verified O; never substitute | quarantine C/journal; retain O/B | the applicable exact pinned-input code from §19 | When pin restored | Maybe |
+| Path normalization/length/containment fails | independently verified O | Unchanged Verified O | create no attempt files | `gd66.transaction.path_invalid` | After configuration repair | No |
 
-Same O/same fingerprint retries deterministically and may reuse verified B; dependency changes form a new attempt; changed O always forms a new transaction/B. A complete verified C is the only already-current state. Rollback restores O atomically and binds topology/content readers together while leaving independent economic state as preserved in O. Backup retention is configuration-owned, but B/journal/pinned inputs cannot be removed before finalization or their supported recovery-retention horizon.
+Before any changed-dependency or repaired-O attempt, the sole prior live attempt must reach `Finalized`, restore verified O, or be quarantined after verified O is established. Finalized audit evidence is never counted as live. Same O/same fingerprint retries are deterministic; dependency or O changes produce a new compact identity only after this one-live-attempt gate.
 
 ## 22. Phase 2 dependency breakdown
 
-1. Add the direct-authored profile schema/input, explicit composition assignment, active/retired lifecycle validation, production reference validation, runtime validation, expanded every-entry-point pre-build gate, focused tests, and evidence.
+1. Add the direct-authored shared geometry, migration-profile, and native-starter-profile schema/input; distinct selection/lifecycle validation; explicit composition; runtime validation; expanded pre-build gate; focused tests/evidence.
 2. Add/round-trip inactive saved-floor/fixed/content/room-semantics shapes, canonical marker/native creation kind, and then select the target save schema.
-3. Add canonical serializer plus `SpatialMigrationInputDescriptor`, journal schema, exact hashes/pins, and retained pinned-input lookup.
+3. Add canonical serializer, compact `SpatialMigrationInputDescriptor` identity, relative-path validator, one-live-attempt discovery, exact journal stages, finalization receipt, and unfinished-attempt pin lookup.
 4. Add raw-byte/envelope/member interception before legacy normalization and direct no-file canonical `CreateNew`.
 5. Implement schema-specific topology selection, `FrozenLegacyRouteProjection`, profile-injected candidate construction, and exact fixtures.
 6. Implement detached canonical writer mutations and native first-write/origin transitions, including Narrow Hall UI/writer rejection and immediate-save rollback tests.
@@ -494,6 +518,10 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 - [x] Direct native new-save path and canonical first writes never create writable legacy route state.
 - [x] Native room semantics, mutation rollback, immediate save, and reopen behavior are exact.
 - [x] Narrow Hall has distinct legacy-repair and canonical-write rejection policies.
+- [x] Migration and native starter profiles have distinct selection keys and share one immutable geometry authority.
+- [x] Finalization receipt/stage ends historical pin requirements for normal canonical loads.
+- [x] Journal stages follow filesystem verification order and only one live attempt is permitted.
+- [x] Compact transaction filenames are relative, contained, length-bounded, and same-directory.
 - [x] Profile input has direct-authoring, composition, runtime, and expanded build-gate ownership.
 - [x] One complete atomic replacement is the sole schema/authority switch.
 - [x] No hidden fallback, partial publication, localized identity, or dual route/content writers.
