@@ -163,6 +163,40 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(activeAsset, manifest, catalog,
                 new[] { english }, limits).Reason,
                 Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
+
+            SpatialLayoutCompatibilityProfilesData invalidProfile = JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
+            CompatibilityLayoutGeometryRecord geometry = invalidProfile.GeometryRecords[0];
+            invalidProfile.MigrationProfiles = new[] { new SpatialMigrationCompatibilityProfile {
+                ProfileId = "test.migration", ProfileVersion = 1, CanonicalHash = "invalid",
+                Lifecycle = CompatibilityProfileLifecycle.Active, MinimumSourceSchemaVersion = 1,
+                MaximumSourceSchemaVersion = 6, TargetSchemaVersion = 8,
+                TargetCanonicalLayoutContractVersion = 1, GeometryId = geometry.GeometryId,
+                GeometryVersion = geometry.GeometryVersion, GeometryCanonicalHash = geometry.CanonicalHash } };
+            TextAsset invalidProfileAsset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(invalidProfile)));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(invalidProfileAsset, manifest,
+                catalog, new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+            invalidProfile.MigrationProfiles[0].CanonicalHash =
+                SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(invalidProfile.MigrationProfiles[0]);
+            TextAsset activeMigrationAsset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(invalidProfile)));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(activeMigrationAsset, manifest,
+                catalog, new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
+
+            SpatialLayoutCompatibilityProfilesData activeStarter = JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
+            var starter = new CanonicalStarterLayoutProfile { ProfileId = "test.starter", ProfileVersion = 1,
+                Lifecycle = CompatibilityProfileLifecycle.Active, TargetSchemaVersion = 8,
+                CanonicalLayoutContractVersion = 1, GeometryId = geometry.GeometryId,
+                GeometryVersion = geometry.GeometryVersion, GeometryCanonicalHash = geometry.CanonicalHash };
+            starter.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(starter);
+            activeStarter.StarterProfiles = new[] { starter };
+            TextAsset activeStarterAsset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(activeStarter)));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(activeStarterAsset, manifest,
+                catalog, new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
         }
 
         [TestCase(false)]

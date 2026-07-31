@@ -182,6 +182,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public SpatialLayoutCompatibilityProfilesData Value =>
             JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(Encoding.UTF8.GetString(bytes));
         public byte[] CanonicalBytes => (byte[])bytes.Clone();
+
+        public CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> SelectMigration(
+            int rawSchema, int targetSchema, int targetContractVersion)
+        {
+            return SpatialLayoutCompatibilityProfiles.SelectMigration(
+                Deserialize(), rawSchema, targetSchema, targetContractVersion);
+        }
+
+        public CompatibilitySelectionResult<CanonicalStarterLayoutProfile> SelectStarter(
+            int targetSchema, int contractVersion)
+        {
+            return SpatialLayoutCompatibilityProfiles.SelectStarter(Deserialize(), targetSchema, contractVersion);
+        }
+
+        public CompatibilitySelectionResult<CanonicalLayoutContractSelection> SelectContract(int targetSchema)
+        {
+            return SpatialLayoutCompatibilityProfiles.SelectContract(Deserialize(), targetSchema);
+        }
+
+        public bool TryRecoverMigration(string profileId, int profileVersion, string profileHash,
+                                        string geometryId, int geometryVersion, string geometryHash,
+                                        out SpatialMigrationCompatibilityProfile profile)
+        {
+            return SpatialLayoutCompatibilityProfiles.TryRecoverMigration(Deserialize(), profileId, profileVersion,
+                profileHash, geometryId, geometryVersion, geometryHash, out profile);
+        }
+
+        private SpatialLayoutCompatibilityProfilesData Deserialize()
+        {
+            return JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(Encoding.UTF8.GetString(bytes));
+        }
     }
 
     public static class SpatialLayoutCompatibilityProfiles
@@ -345,7 +376,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return copy;
         }
 
-        public static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> SelectMigration(
+        private static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> SelectMigration(
             SpatialLayoutCompatibilityProfilesData data, int rawSchema, int targetSchema, int targetContractVersion)
         {
             SpatialMigrationCompatibilityProfile[] supplied = data?.MigrationProfiles ??
@@ -379,7 +410,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(match));
         }
 
-        public static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> SelectStarter(
+        private static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> SelectStarter(
             SpatialLayoutCompatibilityProfilesData data, int targetSchema, int contractVersion)
         {
             CanonicalStarterLayoutProfile[] supplied = data?.StarterProfiles ??
@@ -412,7 +443,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
-        public static CompatibilitySelectionResult<CanonicalLayoutContractSelection> SelectContract(
+        private static CompatibilitySelectionResult<CanonicalLayoutContractSelection> SelectContract(
             SpatialLayoutCompatibilityProfilesData data, int targetSchema)
         {
             CanonicalLayoutContractSelection[] active =
@@ -429,7 +460,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
-        public static bool TryRecoverMigration(SpatialLayoutCompatibilityProfilesData data, string profileId,
+        private static bool TryRecoverMigration(SpatialLayoutCompatibilityProfilesData data, string profileId,
                                                int profileVersion, string profileHash, string geometryId,
                                                int geometryVersion, string geometryHash,
                                                out SpatialMigrationCompatibilityProfile profile)
@@ -451,28 +482,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return profile != null;
         }
 
-        public static bool TryRecoverStarter(SpatialLayoutCompatibilityProfilesData data, string profileId,
-                                             int profileVersion, string profileHash, string geometryId,
-                                             int geometryVersion, string geometryHash,
-                                             out CanonicalStarterLayoutProfile profile)
-        {
-            CanonicalStarterLayoutProfile[] matches =
-                (data?.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>())
-                    .Where(value => value != null && value.ProfileId == profileId &&
-                                    value.ProfileVersion == profileVersion && value.CanonicalHash == profileHash &&
-                                    value.GeometryId == geometryId && value.GeometryVersion == geometryVersion &&
-                                    value.GeometryCanonicalHash == geometryHash)
-                    .Take(2)
-                    .ToArray();
-            profile = matches.Length == 1 ? Clone(matches[0]) : null;
-            if (profile != null && (!ValidHash(profile.CanonicalHash) ||
-                profile.CanonicalHash != ComputeStarterProfileHash(profile) ||
-                !ReferenceExists(data.GeometryRecords ?? Array.Empty<CompatibilityLayoutGeometryRecord>(),
-                    geometryId, geometryVersion, geometryHash)))
-                profile = null;
-            return profile != null;
-        }
-
         private static bool PrevalidateIdentities(SpatialLayoutCompatibilityProfilesData data,
                                                   CompatibilityDiagnosticCollector issues)
         {
@@ -487,6 +496,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.DuplicateGeometry);
             foreach (CompatibilityLayoutGeometryRecord geometry in geometries.Where(value => value != null))
             {
+                if (issues.IsExhausted)
+                    return false;
                 if (geometry.Layouts == null || geometry.Layouts.Length == 0)
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.IncompleteGeometry);
                 else if (geometry.Layouts.Any(value => value == null) ||
@@ -496,14 +507,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                                                Array.Empty<CompatibilityLayoutVariant>())
                              .Where(value => value != null))
                 {
+                    if (issues.IsExhausted)
+                        return false;
                     if (layout.Placements == null || layout.Placements.Any(value => value == null) ||
                         HasDuplicate(layout.Placements, value => ((int)value.Role).ToString()))
                         issues.Add(SpatialLayoutCompatibilityDiagnostic.IncompleteGeometry);
+                    if (issues.IsExhausted)
+                        return false;
                     if (layout.Connections == null || layout.Connections.Any(value => value == null) ||
                         HasDuplicate(layout.Connections, ConnectionIdentity))
                         issues.Add(SpatialLayoutCompatibilityDiagnostic.IncompleteGeometry);
                 }
             }
+            if (issues.IsExhausted)
+                return false;
             if (HasDuplicate(data.MigrationProfiles ?? Array.Empty<SpatialMigrationCompatibilityProfile>(),
                              value => value == null ? "<null>" : value.ProfileId + "\0" + value.ProfileVersion) ||
                 HasDuplicate(data.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>(),
@@ -541,10 +558,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     !Stable(g.CompletionConnectionPointId) || !Stable(g.BasicRoomSouthConnectionPointId) ||
                     !Stable(g.BasicRoomNorthConnectionPointId))
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidStableId);
+                if (issues.IsExhausted)
+                    return;
                 if (g.GeometryVersion <= 0)
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidVersion);
+                if (issues.IsExhausted)
+                    return;
                 if (!ValidHash(g.CanonicalHash) || g.CanonicalHash != ComputeGeometryHash(g))
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidHash);
+                if (issues.IsExhausted)
+                    return;
                 ValidateGeometry(g, catalog, limits, issues);
             }
             foreach (var p in data.MigrationProfiles ?? Array.Empty<SpatialMigrationCompatibilityProfile>())
@@ -569,19 +592,43 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                               .OrderBy(x => x.MinimumSourceSchemaVersion)
                               .ToArray();
             for (int i = 1; i < activeM.Length; i++)
+            {
+                if (issues.IsExhausted)
+                    return;
                 if (activeM[i].MinimumSourceSchemaVersion <= activeM[i - 1].MaximumSourceSchemaVersion)
                     issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection);
-            if ((data.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>())
+            }
+            if (issues.IsExhausted)
+                return;
+            foreach (IGrouping<string, CanonicalStarterLayoutProfile> duplicate in
+                (data.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>())
                     .Where(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active)
                     .GroupBy(x => x.TargetSchemaVersion + "\0" + x.CanonicalLayoutContractVersion)
-                    .Any(g => g.Count() != 1) ||
-                (data.ContractSelections ?? Array.Empty<CanonicalLayoutContractSelection>())
-                    .Any(x => x == null || x.TargetSchemaVersion <= 0 || x.CanonicalLayoutContractVersion <= 0) ||
+                    .Where(group => group.Count() != 1))
+            {
+                if (issues.IsExhausted)
+                    return;
+                issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection);
+            }
+            foreach (CanonicalLayoutContractSelection selection in data.ContractSelections ??
+                Array.Empty<CanonicalLayoutContractSelection>())
+            {
+                if (issues.IsExhausted)
+                    return;
+                if (selection == null || !Enum.IsDefined(typeof(CompatibilityProfileLifecycle), selection.Lifecycle) ||
+                    selection.TargetSchemaVersion <= 0 || selection.CanonicalLayoutContractVersion <= 0)
+                    issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection);
+            }
+            foreach (IGrouping<int, CanonicalLayoutContractSelection> duplicate in
                 (data.ContractSelections ?? Array.Empty<CanonicalLayoutContractSelection>())
                     .Where(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active)
                     .GroupBy(x => x.TargetSchemaVersion)
-                    .Any(g => g.Count() != 1))
+                    .Where(group => group.Count() != 1))
+            {
+                if (issues.IsExhausted)
+                    return;
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection);
+            }
             if (production && ((data.MigrationProfiles ?? Array.Empty<SpatialMigrationCompatibilityProfile>())
                                    .Any(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active) ||
                                (data.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>())
@@ -803,21 +850,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             return !segmentStart;
         }
-        private static bool ValidHash(string s) =>
-            s != null && s.Length == 64 && s.All(c => c >= '0' && c <= '9' || c >= 'a' && c <= 'f');
-        private static T Clone<T>(T value)
-            where T : class => value == null ? null : JsonUtility.FromJson<T>(JsonUtility.ToJson(value)); private static string Sha256(string value)
+        private static bool ValidHash(string value)
         {
-            using (var sha = SHA256.Create()) return string.Concat(
-                sha.ComputeHash(Utf8.GetBytes(value)).Select(item => item.ToString("x2")));
+            return value != null && value.Length == 64 &&
+                value.All(character => character >= '0' && character <= '9' ||
+                    character >= 'a' && character <= 'f');
         }
-        private static bool ValidMigration(SpatialMigrationCompatibilityProfile value) =>
-            value != null && Stable(value.ProfileId) && value.ProfileVersion > 0 && value.MinimumSourceSchemaVersion >= 0 &&
-            value.MaximumSourceSchemaVersion >= value.MinimumSourceSchemaVersion
-            && value.TargetSchemaVersion > 0 && value.TargetCanonicalLayoutContractVersion > 0 && Stable(value.GeometryId);
-        private static bool ValidStarter(CanonicalStarterLayoutProfile value) =>
-            value != null && Stable(value.ProfileId) && value.ProfileVersion > 0 && value.TargetSchemaVersion > 0 &&
-            value.CanonicalLayoutContractVersion > 0 && Stable(value.GeometryId);
+        private static T Clone<T>(T value)
+            where T : class
+        {
+            return value == null ? null : JsonUtility.FromJson<T>(JsonUtility.ToJson(value));
+        }
+
+        private static string Sha256(string value)
+        {
+            using (var sha = SHA256.Create())
+            {
+                return string.Concat(sha.ComputeHash(Utf8.GetBytes(value)).Select(item => item.ToString("x2")));
+            }
+        }
+        private static bool ValidMigration(SpatialMigrationCompatibilityProfile value)
+        {
+            return value != null && Stable(value.ProfileId) && value.ProfileVersion > 0 &&
+                value.MinimumSourceSchemaVersion >= 0 &&
+                value.MaximumSourceSchemaVersion >= value.MinimumSourceSchemaVersion &&
+                value.TargetSchemaVersion > 0 && value.TargetCanonicalLayoutContractVersion > 0 &&
+                Stable(value.GeometryId);
+        }
+
+        private static bool ValidStarter(CanonicalStarterLayoutProfile value)
+        {
+            return value != null && Stable(value.ProfileId) && value.ProfileVersion > 0 &&
+                value.TargetSchemaVersion > 0 && value.CanonicalLayoutContractVersion > 0 &&
+                Stable(value.GeometryId);
+        }
         private static string ConnectionIdentity(CompatibilityLayoutConnection value) =>
             value == null ? "<null>"
                           : ConnectionIdentity(value.SourceRole, value.SourceConnectionPointId, value.DestinationRole,
@@ -831,10 +897,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             values.GroupBy(identity, StringComparer.Ordinal).Any(group => group.Count() != 1);
         private static CompatibilitySelectionResult<T> Selection<T>(CompatibilitySelectionStatus status, string code,
                                                                     T value = null)
-            where T : class => new CompatibilitySelectionResult<T>(status, code,
-      value); private static SpatialLayoutCompatibilityResult Failure(SpatialLayoutCompatibilityDiagnostic issue,
-      Action<SpatialLayoutCompatibilityDiagnostic> sink) => Finish(null,
-      new[] { issue }, sink);
+            where T : class
+        {
+            return new CompatibilitySelectionResult<T>(status, code, value);
+        }
+
+        private static SpatialLayoutCompatibilityResult Failure(SpatialLayoutCompatibilityDiagnostic issue,
+                                                                 Action<SpatialLayoutCompatibilityDiagnostic> sink)
+        {
+            return Finish(null, new[] { issue }, sink);
+        }
         private static SpatialLayoutCompatibilityResult Finish(SpatialLayoutCompatibilitySnapshot value,
                                                                IEnumerable<SpatialLayoutCompatibilityDiagnostic> issues,
                                                                Action<SpatialLayoutCompatibilityDiagnostic> sink)
@@ -851,6 +923,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly int maximum;
         private readonly SortedSet<SpatialLayoutCompatibilityDiagnostic> diagnostics =
             new SortedSet<SpatialLayoutCompatibilityDiagnostic>();
+        private int occurrenceCount;
         private bool overflowed;
 
         internal CompatibilityDiagnosticCollector(int maximum)
@@ -863,14 +936,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             overflowed ? new[] { SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded } : diagnostics;
         internal void Add(SpatialLayoutCompatibilityDiagnostic diagnostic)
         {
-            if (overflowed || diagnostics.Contains(diagnostic))
+            if (overflowed)
                 return;
-            if (diagnostics.Count >= maximum)
+            if (occurrenceCount >= maximum)
             {
                 diagnostics.Clear();
                 overflowed = true;
                 return;
             }
+            occurrenceCount++;
             diagnostics.Add(diagnostic);
         }
     }

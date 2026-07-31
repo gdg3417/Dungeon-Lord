@@ -60,19 +60,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void PurposeSelectors_RespectActiveAndRetiredLifecycle()
         {
-            SpatialMigrationCompatibilityProfile migrationProfile=new SpatialMigrationCompatibilityProfile{ProfileId="test.migration",ProfileVersion=1,Lifecycle=CompatibilityProfileLifecycle.Active,MinimumSourceSchemaVersion=1,MaximumSourceSchemaVersion=3,TargetSchemaVersion=10,TargetCanonicalLayoutContractVersion=2,GeometryId="test.geometry",GeometryVersion=1,GeometryCanonicalHash=new string('a',64)};
-            migrationProfile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(migrationProfile);
-            CanonicalStarterLayoutProfile starterProfile=new CanonicalStarterLayoutProfile{ProfileId="test.starter",ProfileVersion=1,Lifecycle=CompatibilityProfileLifecycle.Retired,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2,GeometryId="test.geometry",GeometryVersion=1,GeometryCanonicalHash=new string('a',64)};
-            starterProfile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(starterProfile);
-            var data=new SpatialLayoutCompatibilityProfilesData {
-                MigrationProfiles=new[]{migrationProfile}, StarterProfiles=new[]{starterProfile},
-                ContractSelections=new[]{new CanonicalLayoutContractSelection{Lifecycle=CompatibilityProfileLifecycle.Active,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}}
-            };
-            Assert.That(SpatialLayoutCompatibilityProfiles.SelectMigration(data,2,10,2).Code,Is.EqualTo(string.Empty));
-            Assert.That(SpatialLayoutCompatibilityProfiles.SelectMigration(data,4,10,2).Code,Is.EqualTo("gd66.profile.missing"));
-            Assert.That(SpatialLayoutCompatibilityProfiles.SelectStarter(data,10,2).Code,Is.EqualTo("gd66.starter_profile.missing"));
-            Assert.That(SpatialLayoutCompatibilityProfiles.SelectContract(data,10).Success,Is.True);
-            Assert.That(SpatialLayoutCompatibilityProfiles.SelectContract(data,11).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
+            SpatialMigrationCompatibilityProfile migrationProfile=Migration(CompatibilityProfileLifecycle.Active);
+            CanonicalStarterLayoutProfile starterProfile=Starter(CompatibilityProfileLifecycle.Retired);
+            SpatialLayoutCompatibilitySnapshot snapshot=ValidatedSnapshot(new[]{migrationProfile},new[]{starterProfile},
+                new[]{new CanonicalLayoutContractSelection{Lifecycle=CompatibilityProfileLifecycle.Active,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}});
+            Assert.That(snapshot.SelectMigration(2,10,2).Code,Is.EqualTo(string.Empty));
+            Assert.That(snapshot.SelectMigration(4,10,2).Code,Is.EqualTo("gd66.profile.missing"));
+            Assert.That(snapshot.SelectMigration(2,11,2).Code,Is.EqualTo("gd66.profile.version_mismatch"));
+            Assert.That(snapshot.SelectMigration(2,10,3).Code,Is.EqualTo("gd66.profile.version_mismatch"));
+            Assert.That(snapshot.SelectStarter(10,2).Code,Is.EqualTo("gd66.starter_profile.missing"));
+            Assert.That(snapshot.SelectContract(10).Success,Is.True);
+            Assert.That(snapshot.SelectContract(11).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
+            SpatialLayoutCompatibilityProfilesData detached=snapshot.Value;
+            detached.MigrationProfiles[0].GeometryCanonicalHash="mutated";
+            Assert.That(snapshot.SelectMigration(2,10,2).Success,Is.True);
         }
 
         [TestCase("bom")][TestCase("crlf")][TestCase("no-newline")][TestCase("two-newlines")]
@@ -99,17 +100,61 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void RetiredMigrationRecoveryRequiresCompletePinnedIdentity()
         {
-            var profile=new SpatialMigrationCompatibilityProfile{ProfileId="test.profile",ProfileVersion=2,Lifecycle=CompatibilityProfileLifecycle.Retired,MinimumSourceSchemaVersion=1,MaximumSourceSchemaVersion=6,TargetSchemaVersion=8,TargetCanonicalLayoutContractVersion=1,GeometryId="test.geometry",GeometryVersion=3,GeometryCanonicalHash=new string('b',64)};
-            profile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile);
-            var data=new SpatialLayoutCompatibilityProfilesData{MigrationProfiles=new[]{profile},GeometryRecords=new[]{
-                new CompatibilityLayoutGeometryRecord{GeometryId=profile.GeometryId,GeometryVersion=3,CanonicalHash=profile.GeometryCanonicalHash}}};
-            Assert.That(SpatialLayoutCompatibilityProfiles.TryRecoverMigration(data,profile.ProfileId,2,
-                profile.CanonicalHash,profile.GeometryId,3,profile.GeometryCanonicalHash,out var recovered),Is.True);
+            SpatialMigrationCompatibilityProfile profile=Migration(CompatibilityProfileLifecycle.Retired);
+            SpatialLayoutCompatibilitySnapshot snapshot=ValidatedSnapshot(new[]{profile},null,null);
+            Assert.That(snapshot.TryRecoverMigration(profile.ProfileId,profile.ProfileVersion,
+                profile.CanonicalHash,profile.GeometryId,profile.GeometryVersion,profile.GeometryCanonicalHash,out var recovered),Is.True);
             Assert.That(recovered.Lifecycle,Is.EqualTo(CompatibilityProfileLifecycle.Retired));
-            Assert.That(SpatialLayoutCompatibilityProfiles.TryRecoverMigration(data,profile.ProfileId,2,
-                new string('c',64),profile.GeometryId,3,profile.GeometryCanonicalHash,out _),Is.False);
-            Assert.That(SpatialLayoutCompatibilityProfiles.TryRecoverMigration(data,profile.ProfileId,2,
-                profile.CanonicalHash,profile.GeometryId,4,profile.GeometryCanonicalHash,out _),Is.False);
+            Assert.That(snapshot.TryRecoverMigration(profile.ProfileId,profile.ProfileVersion,
+                new string('c',64),profile.GeometryId,profile.GeometryVersion,profile.GeometryCanonicalHash,out _),Is.False);
+            Assert.That(snapshot.TryRecoverMigration(profile.ProfileId,profile.ProfileVersion,
+                profile.CanonicalHash,profile.GeometryId,profile.GeometryVersion+1,profile.GeometryCanonicalHash,out _),Is.False);
+        }
+
+        [Test] public void ActiveStarterSelectionUsesValidatedSnapshotAndExactKey()
+        {
+            SpatialLayoutCompatibilitySnapshot snapshot=ValidatedSnapshot(null,
+                new[]{Starter(CompatibilityProfileLifecycle.Active)},null);
+            Assert.That(snapshot.SelectStarter(10,2).Success,Is.True);
+            Assert.That(snapshot.SelectStarter(10,3).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
+            Assert.That(snapshot.SelectMigration(2,10,2).Code,Is.EqualTo("gd66.profile.missing"));
+        }
+
+        [Test] public void InvalidProfileReferencesAndStaleGeometryNeverPublishSelectableSnapshot()
+        {
+            SpatialLayoutCompatibilityProfilesData missing=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialMigrationCompatibilityProfile profile=Migration(CompatibilityProfileLifecycle.Active);
+            profile.GeometryId="missing.geometry"; profile.GeometryVersion=1; profile.GeometryCanonicalHash=missing.GeometryRecords[0].CanonicalHash;
+            profile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile);
+            missing.MigrationProfiles=new[]{profile};
+            Assert.That(ParseData(missing).Value,Is.Null);
+
+            SpatialLayoutCompatibilityProfilesData stale=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            stale.GeometryRecords[0].Layouts[0].Placements[0].Anchor.X++;
+            Assert.That(ParseData(stale).Value,Is.Null);
+        }
+
+        [Test] public void GeometryStructuralMutationsFailPureValidation()
+        {
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts=data.GeometryRecords[0].Layouts.Skip(1).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts=data.GeometryRecords[0].Layouts.Take(1).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].LayoutId="compat.layout.r2");
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements=data.GeometryRecords[0].Layouts[0].Placements.Skip(1).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Role=CompatibilityRouteRole.Entrance);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements=data.GeometryRecords[0].Layouts[0].Placements.Concat(new[]{new CompatibilityLayoutPlacement{Role=CompatibilityRouteRole.BasicRoom1,Anchor=new TileCoordinate(0,6),Orientation=CardinalOrientation.Zero}}).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections=data.GeometryRecords[0].Layouts[0].Connections.Skip(1).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections=data.GeometryRecords[0].Layouts[0].Connections.Concat(new[]{data.GeometryRecords[0].Layouts[0].Connections[0]}).ToArray());
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections[0].SourceConnectionPointId="north");
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections[0].DestinationConnectionPointId="north");
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections[0].SocketTypeId="wrong.socket");
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections[0].ConnectionKind=FloorRouteConnectionKind.PhysicalCorridor);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Connections[0].CorridorDefinitionId="spatial.corridor.straight_stone");
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Orientation=CardinalOrientation.Ninety);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[0].Anchor.X=99);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Anchor.Y=0);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Anchor.Y=4);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].FloorIndex=1);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].ExpectedOccupiedTileTotal=25);
         }
 
         [TestCase(".leading")][TestCase("trailing-")][TestCase("two..segments")]
@@ -139,6 +184,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[]{SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded},result.Diagnostics);
         }
 
+        [Test] public void DifferentSemanticReasonsAreAcceptedAtExactIssueBoundary()
+        {
+            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            data.GeometryRecords[0].GeometryId="INVALID"; data.GeometryRecords[0].GeometryVersion=0;
+            data.GeometryRecords[0].CanonicalHash="bad";
+            var exact=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
+                limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,3,limits.MaximumStringCharacters);
+            TextAsset asset=new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
+            CollectionAssert.AreEqual(new[]{SpatialLayoutCompatibilityDiagnostic.InvalidStableId,
+                SpatialLayoutCompatibilityDiagnostic.InvalidVersion,SpatialLayoutCompatibilityDiagnostic.InvalidHash},
+                SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,exact).Diagnostics);
+        }
+
+        [Test] public void RepeatedSemanticReasonsCountOccurrencesAtExactBoundary()
+        {
+            TextAsset invalid=RepeatedInvalidGeometryAsset(2);
+            var exact=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
+                limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,2,limits.MaximumStringCharacters);
+            SpatialLayoutCompatibilityResult exactResult=SpatialLayoutCompatibilityProfiles.ParseAndValidate(invalid,spatial,exact);
+            CollectionAssert.AreEqual(new[]{SpatialLayoutCompatibilityDiagnostic.InvalidStableId},exactResult.Diagnostics);
+            var oneOver=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
+                limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,1,limits.MaximumStringCharacters);
+            SpatialLayoutCompatibilityResult overflow=SpatialLayoutCompatibilityProfiles.ParseAndValidate(invalid,spatial,oneOver);
+            CollectionAssert.AreEqual(new[]{SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded},overflow.Diagnostics);
+            Assert.That(overflow.Value,Is.Null);
+            SpatialLayoutCompatibilityProfilesData reversed=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(invalid.text);
+            System.Array.Reverse(reversed.GeometryRecords);
+            TextAsset reversedAsset=new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(reversed)));
+            CollectionAssert.AreEqual(overflow.Diagnostics,
+                SpatialLayoutCompatibilityProfiles.ParseAndValidate(reversedAsset,spatial,oneOver).Diagnostics);
+        }
+
+        [Test] public void OverflowReloadPreservesPreviousPublishedSnapshot()
+        {
+            var service=new ContentService();
+            Assert.That(service.LoadSpatialLayoutCompatibilityProfiles(profiles,spatial,limits).Success,Is.True);
+            SpatialLayoutCompatibilitySnapshot previous=service.SpatialLayoutCompatibilityProfiles;
+            var oneIssue=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
+                limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,1,limits.MaximumStringCharacters);
+            Assert.That(service.LoadSpatialLayoutCompatibilityProfiles(RepeatedInvalidGeometryAsset(2),spatial,oneIssue).Success,Is.False);
+            Assert.That(service.SpatialLayoutCompatibilityProfiles,Is.SameAs(previous));
+        }
+
         [Test] public void Canonicalization_DetachesAndOrdersWithoutMutatingSource()
         {
             SpatialLayoutCompatibilityProfilesData source=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
@@ -152,6 +242,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static TextAsset Asset(string path)
         { TextAsset value=AssetDatabase.LoadAssetAtPath<TextAsset>(path); Assert.That(value,Is.Not.Null,path); return value; }
+        private SpatialLayoutCompatibilitySnapshot ValidatedSnapshot(
+            SpatialMigrationCompatibilityProfile[] migrations, CanonicalStarterLayoutProfile[] starters,
+            CanonicalLayoutContractSelection[] selections)
+        {
+            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            CompatibilityLayoutGeometryRecord geometry=data.GeometryRecords[0];
+            foreach(SpatialMigrationCompatibilityProfile profile in migrations??System.Array.Empty<SpatialMigrationCompatibilityProfile>())
+            { profile.GeometryId=geometry.GeometryId; profile.GeometryVersion=geometry.GeometryVersion; profile.GeometryCanonicalHash=geometry.CanonicalHash; profile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile); }
+            foreach(CanonicalStarterLayoutProfile profile in starters??System.Array.Empty<CanonicalStarterLayoutProfile>())
+            { profile.GeometryId=geometry.GeometryId; profile.GeometryVersion=geometry.GeometryVersion; profile.GeometryCanonicalHash=geometry.CanonicalHash; profile.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(profile); }
+            data.MigrationProfiles=migrations??System.Array.Empty<SpatialMigrationCompatibilityProfile>();
+            data.StarterProfiles=starters??System.Array.Empty<CanonicalStarterLayoutProfile>();
+            data.ContractSelections=selections??System.Array.Empty<CanonicalLayoutContractSelection>();
+            data=SpatialLayoutCompatibilityProfiles.Canonicalize(data);
+            TextAsset asset=new TextAsset(System.Text.Encoding.UTF8.GetString(SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
+            SpatialLayoutCompatibilityResult result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,limits);
+            Assert.That(result.Success,Is.True,string.Join(",",result.Diagnostics.Select(value=>value.ToString()).ToArray()));
+            return result.Value;
+        }
+        private static SpatialMigrationCompatibilityProfile Migration(CompatibilityProfileLifecycle lifecycle)
+        { return new SpatialMigrationCompatibilityProfile{ProfileId="test.migration",ProfileVersion=1,Lifecycle=lifecycle,MinimumSourceSchemaVersion=1,MaximumSourceSchemaVersion=3,TargetSchemaVersion=10,TargetCanonicalLayoutContractVersion=2}; }
+        private static CanonicalStarterLayoutProfile Starter(CompatibilityProfileLifecycle lifecycle)
+        { return new CanonicalStarterLayoutProfile{ProfileId="test.starter",ProfileVersion=1,Lifecycle=lifecycle,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}; }
+        private TextAsset RepeatedInvalidGeometryAsset(int count)
+        {
+            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            CompatibilityLayoutGeometryRecord template=data.GeometryRecords[0];
+            data.GeometryRecords=Enumerable.Range(0,count).Select(index=>
+            {
+                CompatibilityLayoutGeometryRecord copy=JsonUtility.FromJson<CompatibilityLayoutGeometryRecord>(JsonUtility.ToJson(template));
+                copy.GeometryId="INVALID"+index; copy.CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(copy); return copy;
+            }).ToArray();
+            data=SpatialLayoutCompatibilityProfiles.Canonicalize(data);
+            return new TextAsset(System.Text.Encoding.UTF8.GetString(SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
+        }
+        private SpatialLayoutCompatibilityResult ParseData(SpatialLayoutCompatibilityProfilesData data)
+        {
+            data=SpatialLayoutCompatibilityProfiles.Canonicalize(data);
+            TextAsset asset=new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
+            return SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,limits);
+        }
+        private void AssertGeometryMutationFails(System.Action<SpatialLayoutCompatibilityProfilesData> mutation)
+        {
+            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            mutation(data); data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
+            Assert.That(ParseData(data).Success,Is.False);
+        }
         private static void AssertPlacement(CompatibilityLayoutVariant layout,CompatibilityRouteRole role,int x,int y)
         { CompatibilityLayoutPlacement value=layout.Placements.Single(item=>item.Role==role); Assert.That(value.Anchor.X,Is.EqualTo(x)); Assert.That(value.Anchor.Y,Is.EqualTo(y)); Assert.That(value.Orientation,Is.EqualTo(CardinalOrientation.Zero)); }
         private static byte[] Mutate(byte[] source,string mutation)
