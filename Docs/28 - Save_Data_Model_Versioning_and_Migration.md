@@ -76,7 +76,7 @@ Save writes occur at fixed intervals plus key actions.
 
 - Any premium currency spend
 
-Tile placement or movement does not trigger an immediate save. It is covered by interval saves and other key actions.
+During edit mode, tile placement or movement triggers an immediate save, as required by INV-12; interval saves and other key actions remain additional safety boundaries.
 
 ## 5.3 Player feedback
 

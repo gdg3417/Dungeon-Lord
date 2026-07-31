@@ -1,5 +1,8 @@
 # GD62 spatial save migration proposal
 
+**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed and GD66 is active. Save schema remains 6; production Dungeon Spatial content remains inactive; the existing ordered two-room state remains runtime and save authority. No migration or writable-authority transition has occurred, and Phase 2 migration remains blocked until GD66 design approval.
+
+
 ## Status and authority
 
 This remains a **proposal**, not authorization or implementation. The current save root schema version remains **6**. GD62 added no `SaveData` field and did not change migration implementation; GD63 changes documentation only. The inactive `DungeonSpatial` graph is not runtime or save authority. Existing ordered two-room models retain both authorities until a separately reviewed migration.

@@ -1,6 +1,9 @@
 # GD65B production spatial content approval record
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is ready for final review and merge; merging it closes GD65B, after which GD66 is the next dependency-correct packet. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed and GD66 is active. Save schema remains 6; production Dungeon Spatial content remains inactive; the existing ordered two-room state remains runtime and save authority. No migration or writable-authority transition has occurred, and Phase 2 migration remains blocked until GD66 design approval.
+
+
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is active. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 
 | Field | Decision |
@@ -302,7 +305,7 @@ GD65B implementation cannot merge if a required test/evidence item is absent or 
 
 ### 8.7 Historical GD65B0C7 implementation boundary
 
-At the GD65B0C7 documentation-only baseline, these tests, fixtures, evidence, limits file, production files, and pipeline did not yet exist; that packet approved their future contract only and changed no code, JSON, assets, runtime/save authority, schema 6, migration, scene assignment, or catalog activation. Since then, GD65B2B implemented the authoring package, PR #182 deterministic construction, PR #183 recoverable publication, PR #184 export invocation and committed outputs, and PR #185 completed inactive loading/composition. PR #186 adds pre-build recovery/build-entry enforcement, and its required evidence passed; merging PR #186 closes GD65B.
+At the GD65B0C7 documentation-only baseline, these tests, fixtures, evidence, limits file, production files, and pipeline did not yet exist; that packet approved their future contract only and changed no code, JSON, assets, runtime/save authority, schema 6, migration, scene assignment, or catalog activation. Since then, GD65B2B implemented the authoring package, PR #182 deterministic construction, PR #183 recoverable publication, PR #184 export invocation and committed outputs, and PR #185 completed inactive loading/composition. PR #186 added pre-build recovery/build-entry enforcement, its required evidence passed, and it merged; GD65B is closed.
 
 ## 9. Downstream effects
 
@@ -321,7 +324,7 @@ Later work must preserve deterministic validation; stable IDs; ordinal canonical
 
 **GD65B0 approval is complete.** The register contains exactly 72 rows: 72 `APPROVED`, 0 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. No approval row is unresolved. The dependency gate for GD65B implementation is open, and GD65B implementation is the next dependency-correct packet.
 
-**Current reconciliation:** Production records, the limits asset, generated files, exporter, recovery service, inactive loading/scene assignment, and pre-build enforcement now exist through PRs #181–#186. Required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`. PR #186 is ready for final review; merging it closes GD65B. The catalog remains inactive; save schema remains 6; existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority. GD66 must not begin until GD65B closes; Phase 2 alone may migrate or switch authority.
+**Current reconciliation:** Production records, the limits asset, generated files, exporter, recovery service, inactive loading/scene assignment, and pre-build enforcement now exist through PRs #181–#186. Required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`. PR #186 is merged; GD65B is closed and GD66 is active. The catalog remains inactive; save schema remains 6; existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority. GD66 must not begin until GD65B closes; Phase 2 alone may migrate or switch authority.
 
 ## 12. Non-goals
 
@@ -464,4 +467,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## GD65B3B implementation status
 
-**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is ready for final review, and merging it closes GD65B and makes GD66 next. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
+**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is active. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.

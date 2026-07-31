@@ -1,6 +1,9 @@
 **System Spec 38: Dungeon Floor Spatial Capacity and Route Graph**
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is ready for final review and merge; merging it closes GD65B, after which GD66 is the next dependency-correct packet. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed and GD66 is active. Save schema remains 6; production Dungeon Spatial content remains inactive; the existing ordered two-room state remains runtime and save authority. No migration or writable-authority transition has occurred, and Phase 2 migration remains blocked until GD66 design approval.
+
+
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is active. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 
 *Dungeon Builder, locked candidate specification for implementation planning*
@@ -118,7 +121,7 @@ GD65B0C6 approves the future production catalog at `Assets/_Project/Data/Product
 
 The dedicated `ContentService.LoadProductionSpatialContent(...)` path implemented by PR #185 takes an explicitly injected read-only language-table collection, parses every table under one cumulative workload boundary, ordinally validates language IDs, rejects null/blank/duplicate IDs, requires exactly one English fallback, validates all packs, and publishes no partial result. `GameRoot` owns four logical serialized inputs, with the language-table input as a collection whose only initial member is `string_table_en.json`; future packs append through data assignment without changing code, signatures, spatial IDs, or localization keys. Editor fallback and runtime discovery remain prohibited. Export, every-player-build preflight, and defensive runtime loading remain three required gates sharing the same pure validation rules and configured limits; the pre-build gate is still outstanding.
 
-Implementation now includes the GD65B2B authoring package, PR #182 deterministic generated-set construction, PR #183 recoverable publication, PR #184 export invocation and committed manifest/catalog/English outputs, PR #185 inactive loading/composition, and PR #186 validated pre-build recovery/build-entry enforcement. Merging PR #186 closes GD65B. Existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority; save schema remains 6; the catalog remains inactive; and GD66 remains blocked.
+Implementation now includes the GD65B2B authoring package, PR #182 deterministic generated-set construction, PR #183 recoverable publication, PR #184 export invocation and committed manifest/catalog/English outputs, PR #185 inactive loading/composition, and PR #186 validated pre-build recovery/build-entry enforcement. PR #186 is merged and GD65B is closed. Existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority; save schema remains 6; the catalog remains inactive; and GD66 remains blocked.
 
 # 5. Corridor contract
 
@@ -256,7 +259,7 @@ The approved future production-validation configuration is `MaximumTopLevelRecor
 
 Future tests must construct 80 unique test-namespace floors with integer indexes 0–79, four current-pattern allowlist references per floor, current record shape/equivalent test definitions, valid metadata/references/localization, and a test-only 64 by 64 boundary. The fixture must validate and canonicalize deterministically with the same caller-supplied production values, require no code/schema/enum/save/API change, and fail with `WorkloadExceeded` under a deliberately lower test limit. A test-only area 4,096 passes and 4,097 fails. This proves configuration/schema extensibility only; it does not approve 80 production floors, 64 by 64 production geometry, progression, rendering, streaming, performance, or balance.
 
-`FloorSpatialConfiguration[]` remains an uncapped-by-schema array and `FloorIndex` remains an integer. Workload values are never catalog/save fields or gameplay limits. Raising them normally requires configuration review, evidence, validation, and an updated Unity content/application release, not by itself schema/save migration or architecture reconstruction. GD65B5 implementation and validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is ready for final review, and merging it closes GD65B and makes GD66 next. The catalog remains inactive, save schema remains 6, and existing abstract placements, ordered two-room layout, and room-slot assignments remain runtime/save authority.
+`FloorSpatialConfiguration[]` remains an uncapped-by-schema array and `FloorIndex` remains an integer. Workload values are never catalog/save fields or gameplay limits. Raising them normally requires configuration review, evidence, validation, and an updated Unity content/application release, not by itself schema/save migration or architecture reconstruction. GD65B5 implementation and validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is active. The catalog remains inactive, save schema remains 6, and existing abstract placements, ordered two-room layout, and room-slot assignments remain runtime/save authority.
 
 
 # 18. Historical GD65B2A authoring-source dependency status

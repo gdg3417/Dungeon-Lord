@@ -1,5 +1,8 @@
 # GD63 spatial and progression design decisions
 
+**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed and GD66 is active. Save schema remains 6; production Dungeon Spatial content remains inactive; the existing ordered two-room state remains runtime and save authority. No migration or writable-authority transition has occurred, and Phase 2 migration remains blocked until GD66 design approval.
+
+
 | Field | Decision |
 |---|---|
 | Status | **Authoritative approved design direction** |
