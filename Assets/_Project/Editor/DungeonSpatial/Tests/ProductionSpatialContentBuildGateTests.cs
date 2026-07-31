@@ -139,6 +139,32 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 new[] { new TextAsset("{}") }, limits).Reason, Is.EqualTo(ProductionSpatialBuildGateReason.LocalizationFailure));
         }
 
+        [Test]
+        public void CompatibilityFailuresUseAppendedStableReasons()
+        {
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(new TextAsset("{}\n"), manifest,
+                catalog, new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+
+            TextAsset production = Load(SpatialLayoutCompatibilityProfiles.ProductionPath);
+            SpatialLayoutCompatibilityProfilesData empty = JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
+            empty.GeometryRecords = Array.Empty<CompatibilityLayoutGeometryRecord>();
+            TextAsset emptyAsset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(empty)));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(emptyAsset, manifest, catalog,
+                new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+
+            SpatialLayoutCompatibilityProfilesData active = JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
+            active.ContractSelections = new[] { new CanonicalLayoutContractSelection { TargetSchemaVersion = 8,
+                CanonicalLayoutContractVersion = 1, Lifecycle = CompatibilityProfileLifecycle.Active } };
+            TextAsset activeAsset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(active)));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateCompatibility(activeAsset, manifest, catalog,
+                new[] { english }, limits).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void OneActiveOrInactiveCorrectGameRootPasses(bool inactive)

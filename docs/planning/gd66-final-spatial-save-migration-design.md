@@ -2,7 +2,7 @@
 
 ## 1. Status and approval boundary
 
-**Status: CANDIDATE FOR APPROVAL in PR #187.** This documentation-only packet is based on merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902`. Until PR #187 is approved and merged, save schema remains **6**, production Dungeon Spatial content remains **inactive**, and the existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. No migration, serialized-shape change, runtime activation, or writable-authority transition occurs here. Phase 2 exclusively owns implementation after this design merges.
+**Status: APPROVED in merged PR #187.** This design is the approved Phase 2 basis. PR #188 implements only the inactive Phase 2A configuration foundation; save schema remains **6**, no future target save schema is selected, production Dungeon Spatial gameplay remains **inactive**, and the existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. No migration, serialized-shape change, runtime activation, or writable-authority transition occurs here. Phase 2 exclusively owns implementation after this design merges.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -10,7 +10,7 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 
 | Item | Reconciled state |
 |---|---|
-| Repository | `main` through merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902`; GD66 is a candidate for approval in PR #187 |
+| Repository | `main` through merged PR #187 at `173d073a1d08b62eddca44a5798a211bb3f72570`; GD66 approved |
 | Save root | `SaveRoot.schemaVersion`; `SaveMigration.LatestSchemaVersion = 6` |
 | Route topology | ordered MVP representations; no spatial graph authority |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
@@ -563,7 +563,3 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 ## 25. Candidate approval statement
 
 PR #187 proposes approval of this route precedence, independent economic-structure preservation, canonical room-content and saved-floor contracts, raw-load interception, schema-specific fixtures, stable identities/geometry, and one-replacement transaction for later Phase 2 implementation. It is not repository-approved until merged and changes no present behavior. Unsupported states retain O with stable diagnostics; Phase 2 remains blocked until this candidate is approved and merged.
-
-### Phase 2A inactive compatibility-profile foundation (current)
-
-PR #187 is merged and GD66 is approved. Phase 2 is active; this packet began from `main` at `173d073a1d08b62eddca44a5798a211bb3f72570` and adds only the inactive, direct-authored spatial-layout compatibility-profile configuration foundation. Save schema remains 6, no future target save schema has been selected, and no migration or spatial authority transition is active. The next dependency is the complete inactive canonical serialized save shape together with explicit future target-schema selection, unless implementation evidence identifies a smaller prerequisite.

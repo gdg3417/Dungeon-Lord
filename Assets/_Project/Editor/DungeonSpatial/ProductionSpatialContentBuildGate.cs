@@ -27,9 +27,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         WrongAssetAssignment = 10,
         UnexpectedInternalValidationFailure = 11,
         InvalidBuildSceneComposition = 12,
-        MissingCompatibilityProfile = 13,
-        InvalidCompatibilityProfile = 14,
-        UnauthorizedActiveCompatibilitySelection = 15
+        InvalidCompatibilityProfile = 13,
+        UnauthorizedActiveCompatibilitySelection = 14
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -202,7 +201,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits) : loaded;
         }
 
-        private static ProductionSpatialBuildGateResult ValidateCompatibility(TextAsset compatibility,
+        internal static ProductionSpatialBuildGateResult ValidateCompatibility(TextAsset compatibility,
             TextAsset manifest, TextAsset catalog, IReadOnlyList<TextAsset> languages, TextAsset limits)
         {
             ProductionSpatialContentLoadResult spatial = ProductionSpatialContentLoader.Load(manifest, catalog, languages, limits);
