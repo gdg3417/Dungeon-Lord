@@ -2,14 +2,14 @@
 
 | Field | Decision |
 |---|---|
-| Status | **PR #185 merged; GD65B5 build gate implemented pending owner Unity validation and evidence; GD65B incomplete; GD66 blocked** |
+| Status | **GD65B5 implementation and validation passed in PR #186; merge closes GD65B and makes GD66 next** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Current implementation baseline before this PR | Main through merged PR #184 / GD65B3B at `04515d5c7c5a35d869bb725cd76d2a7c317403ee` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-28 |
 
-**GD65B5 implementation status (pending owner validation):** PR #185 is merged. GD65B5 now adds the remaining shared player-build gate in recovery, installed-set validation, and Bootstrap-composition order. Owner Unity 6000.3.2f1 validation and closeout evidence remain pending, so GD65B remains incomplete and GD66 remains blocked. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is ready for final review and merge; merging it closes GD65B, after which GD66 is the next dependency-correct packet. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 ## 1. Authority and purpose
 
@@ -78,7 +78,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (GD65B4 implemented in the current PR pending review, Unity validation, and merge; runtime remains inactive)
+### Phase 1 — Spatial domain foundation (GD65B5 validated in PR #186 awaiting merge; runtime remains inactive)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
@@ -92,10 +92,10 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 8. **GD65B2B — Implement normalized production spatial authoring package and approved Floor 1 records (complete in PR #181):** created the schema and normalized table package, authored only the approved Floor 1 production records and English entries, and added source-package parsing and validation tests without activating runtime/save spatial authority.
 9. **GD65B2C / PR #182 — Deterministic generated output construction (complete):** constructs, canonically serializes, reparses, and validates the exact three-file set in memory.
 10. **GD65B3A / PR #183 — Recoverable publication core (complete):** adds journaled staging, backup, installation, recovery, refresh, installed-set validation, and cleanup without runtime activation.
-11. **GD65B3B / PR #184 — Export invocation and committed set (complete):** added the shared editor-menu/command-line invocation and committed the exact three generated production JSON files. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained and two evidence placeholders remain unverified.
-12. **GD65B4 — Production loading and composition assignment (implemented in the current PR, pending review, Unity validation, and merge):** loads and atomically publishes the validated inactive catalog through the approved explicit composition boundary without activating gameplay.
-13. **Remaining GD65B — Pre-build recovery and validation plus closeout:** gate all player builds, complete required evidence, and close GD65B.
-14. **GD66 — Final save/migration design gate (blocked until GD65B closeout):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
+11. **GD65B3B / PR #184 — Export invocation and committed set (complete):** added the shared editor-menu/command-line invocation and committed the exact three generated production JSON files. Its historical evidence gaps are reconciled by the stronger final GD65B5 evidence.
+12. **GD65B4 / PR #185 — Production loading and composition assignment (complete):** loads and atomically publishes the validated inactive catalog through the approved explicit composition boundary without activating gameplay.
+13. **GD65B5 / PR #186 — Pre-build recovery, validation, and closeout (validated; awaiting merge):** all player builds are gated and required evidence passed; merging PR #186 closes GD65B.
+14. **GD66 — Final save/migration design gate (next after PR #186 merges and closes GD65B):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
 **Phase boundary:** Phase 1 ends with GD66 design approval. It does not change schema, migrate legacy state, switch runtime readers, transition writable authority, or provide migration implementation evidence. Those actions belong exclusively to Phase 2.
 
@@ -231,7 +231,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 **GD65B implementation: GD65B1 complete, dependency gate open, overall packet incomplete.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
 
-GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic generated-set construction; PR #183 added recoverable publication/recovery; and PR #184 added export invocation and committed generated files. PR #185 implements strict inactive loading and explicit composition pending review, Unity validation, and merge. Pre-build recovery/build-entry enforcement, complete evidence, and final GD65B closure remain outstanding. No runtime/save activation is authorized: save schema remains 6 and existing abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority. GD66 remains blocked, and Phase 2 alone owns migration and authority transition.
+GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic generated-set construction; PR #183 added recoverable publication/recovery; and PR #184 added export invocation and committed generated files. PR #185 completed strict inactive loading and explicit composition. PR #186 implements the pre-build recovery/build-entry gate, and required owner validation and evidence passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; merging PR #186 closes GD65B. No runtime/save activation is authorized: save schema remains 6 and existing abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority. GD66 remains blocked, and Phase 2 alone owns migration and authority transition.
 
 
 ### Historical GD65B2A reconciliation amendment
@@ -253,4 +253,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## GD65B3B current implementation status
 
-PR #184 / GD65B3B is merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`. Owner validation passed 169 of 169 EditMode tests with zero PlayMode failures; the exact final PlayMode count was not retained, and the two PR #184 evidence placeholders remain unverified. GD65B4 in the current PR implements strict production spatial loading, atomic inactive `ContentService` publication, and explicit `GameRoot`/`Bootstrap.unity` composition, pending review, Unity validation, and merge. The catalog remains inactive; existing abstract placements, ordered two-room state, and room-slot assignments remain runtime/save authority; save schema remains 6. Pre-build recovery and validation, supported build-entry integration, evidence closeout, and final GD65B closure remain next. GD66 remains blocked.
+**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is ready for final review, and merging it closes GD65B and makes GD66 next. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
