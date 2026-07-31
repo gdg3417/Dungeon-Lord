@@ -149,34 +149,39 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             try
             {
                 afterPreviewOpen?.Invoke();
-                GameRoot[] roots = scene.GetRootGameObjects()
-                    .SelectMany(root => root.GetComponentsInChildren<GameRoot>(true)).ToArray();
-                if (roots.Length == 0) return Failure(ProductionSpatialBuildGateReason.MissingGameRoot, "GameRoot");
-                if (roots.Length != 1) return Failure(ProductionSpatialBuildGateReason.DuplicateGameRoot, roots.Length.ToString());
-
-                GameRoot gameRoot = roots[0];
-                if (gameRoot.productionSpatialManifest == null || gameRoot.productionSpatialCatalog == null ||
-                    gameRoot.productionSpatialValidationLimits == null || gameRoot.productionSpatialLanguageTables == null ||
-                    gameRoot.productionSpatialLanguageTables.Length == 0 ||
-                    gameRoot.productionSpatialLanguageTables.Any(asset => asset == null))
-                    return Failure(ProductionSpatialBuildGateReason.MissingAssignment, "ProductionSpatialContent");
-
-                if (!ExactPath(gameRoot.productionSpatialManifest, ProductionSpatialGeneratedSetParser.ManifestPath) ||
-                    !ExactPath(gameRoot.productionSpatialCatalog, ProductionSpatialGeneratedSetParser.CatalogPath) ||
-                    !ExactPath(gameRoot.productionSpatialValidationLimits, ProductionSpatialContentPublicationService.LimitsPath) ||
-                    !gameRoot.productionSpatialLanguageTables.Any(asset =>
-                        ExactPath(asset, ProductionSpatialGeneratedSetParser.EnglishPath)) ||
-                    gameRoot.productionSpatialLanguageTables.Select(AssetDatabase.GetAssetPath)
-                        .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length)
-                    return Failure(ProductionSpatialBuildGateReason.WrongAssetAssignment, "ProductionSpatialContent");
-
-                return ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
-                    gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits);
+                return ValidateOpenSceneComposition(scene);
             }
             finally
             {
                 if (scene.IsValid()) EditorSceneManager.ClosePreviewScene(scene);
             }
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateOpenSceneComposition(Scene scene)
+        {
+            GameRoot[] roots = scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<GameRoot>(true)).ToArray();
+            if (roots.Length == 0) return Failure(ProductionSpatialBuildGateReason.MissingGameRoot, "GameRoot");
+            if (roots.Length != 1) return Failure(ProductionSpatialBuildGateReason.DuplicateGameRoot, roots.Length.ToString());
+
+            GameRoot gameRoot = roots[0];
+            if (gameRoot.productionSpatialManifest == null || gameRoot.productionSpatialCatalog == null ||
+                gameRoot.productionSpatialValidationLimits == null || gameRoot.productionSpatialLanguageTables == null ||
+                gameRoot.productionSpatialLanguageTables.Length == 0 ||
+                gameRoot.productionSpatialLanguageTables.Any(asset => asset == null))
+                return Failure(ProductionSpatialBuildGateReason.MissingAssignment, "ProductionSpatialContent");
+
+            if (!ExactPath(gameRoot.productionSpatialManifest, ProductionSpatialGeneratedSetParser.ManifestPath) ||
+                !ExactPath(gameRoot.productionSpatialCatalog, ProductionSpatialGeneratedSetParser.CatalogPath) ||
+                !ExactPath(gameRoot.productionSpatialValidationLimits, ProductionSpatialContentPublicationService.LimitsPath) ||
+                !gameRoot.productionSpatialLanguageTables.Any(asset =>
+                    ExactPath(asset, ProductionSpatialGeneratedSetParser.EnglishPath)) ||
+                gameRoot.productionSpatialLanguageTables.Select(AssetDatabase.GetAssetPath)
+                    .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length)
+                return Failure(ProductionSpatialBuildGateReason.WrongAssetAssignment, "ProductionSpatialContent");
+
+            return ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
+                gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits);
         }
 
         private static bool ExactPath(UnityEngine.Object asset, string expected) =>
