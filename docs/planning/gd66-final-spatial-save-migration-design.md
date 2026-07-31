@@ -563,3 +563,7 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 ## 25. Candidate approval statement
 
 PR #187 proposes approval of this route precedence, independent economic-structure preservation, canonical room-content and saved-floor contracts, raw-load interception, schema-specific fixtures, stable identities/geometry, and one-replacement transaction for later Phase 2 implementation. It is not repository-approved until merged and changes no present behavior. Unsupported states retain O with stable diagnostics; Phase 2 remains blocked until this candidate is approved and merged.
+
+### Phase 2A inactive compatibility-profile foundation (current)
+
+PR #187 is merged and GD66 is approved. Phase 2 is active; this packet began from `main` at `173d073a1d08b62eddca44a5798a211bb3f72570` and adds only the inactive, direct-authored spatial-layout compatibility-profile configuration foundation. Save schema remains 6, no future target save schema has been selected, and no migration or spatial authority transition is active. The next dependency is the complete inactive canonical serialized save shape together with explicit future target-schema selection, unless implementation evidence identifies a smaller prerequisite.

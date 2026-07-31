@@ -265,3 +265,7 @@ Future tests must construct 80 unique test-namespace floors with integer indexes
 # 18. Historical GD65B2A authoring-source dependency status
 
 GD65B1 is complete at merged PR #179. GD65B2A approves only the future normalized, version-controlled Dungeon Spatial source contract at `ContentAuthoring/DungeonSpatial/`; it does not create that package. No production authoring tables, production records, generated catalog/English table/manifest, exporter, recovery, loader, composition assignment, pre-build integration, or catalog activation exists yet. Spatial design, geometry, capacity, route, connection, and progression decisions are unchanged. Save schema remains 6, current runtime/save authority remains unchanged, and GD66 remains blocked until GD65B is complete.
+
+### Phase 2A inactive compatibility-profile foundation (current)
+
+PR #187 is merged and GD66 is approved. Phase 2 is active; this packet began from `main` at `173d073a1d08b62eddca44a5798a211bb3f72570` and adds only the inactive, direct-authored spatial-layout compatibility-profile configuration foundation. Save schema remains 6, no future target save schema has been selected, and no migration or spatial authority transition is active. The next dependency is the complete inactive canonical serialized save shape together with explicit future target-schema selection, unless implementation evidence identifies a smaller prerequisite.

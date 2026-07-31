@@ -378,7 +378,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             bool topLevel = !unknown && (elementType == typeof(FloorSpatialConfiguration) ||
                 elementType == typeof(RoomSpatialDefinition) || elementType == typeof(CorridorSpatialDefinition) ||
                 elementType == typeof(FixedSpatialStructureDefinition) ||
-                elementType == typeof(SpatialSocketTypeDefinition));
+                elementType == typeof(SpatialSocketTypeDefinition) ||
+                elementType == typeof(CompatibilityLayoutGeometryRecord) ||
+                elementType == typeof(SpatialMigrationCompatibilityProfile) ||
+                elementType == typeof(CanonicalStarterLayoutProfile) ||
+                elementType == typeof(CanonicalLayoutContractSelection));
             return topLevel
                 ? TryAdd(ref topLevelRecords, 1L, limits.MaximumTopLevelRecords)
                 : TryAdd(ref nestedRecords, 1L, limits.MaximumNestedRecords);

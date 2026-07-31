@@ -257,3 +257,7 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 ## Historical GD65B3B implementation status
 
 **Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
+
+### Phase 2A inactive compatibility-profile foundation (current)
+
+PR #187 is merged and GD66 is approved. Phase 2 is active; this packet began from `main` at `173d073a1d08b62eddca44a5798a211bb3f72570` and adds only the inactive, direct-authored spatial-layout compatibility-profile configuration foundation. Save schema remains 6, no future target save schema has been selected, and no migration or spatial authority transition is active. The next dependency is the complete inactive canonical serialized save shape together with explicit future target-schema selection, unless implementation evidence identifies a smaller prerequisite.

@@ -1,0 +1,143 @@
+{
+    "Schema": "spatial_layout_compatibility_profiles",
+    "SchemaVersion": 1,
+    "GeometryRecords": [
+        {
+            "GeometryId": "compat.geometry.r1-r2",
+            "GeometryVersion": 1,
+            "CanonicalHash": "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db",
+            "FloorDefinitionId": "spatial.floor.01",
+            "FloorIndex": 0,
+            "EntranceStructureDefinitionId": "spatial.fixed.entrance_hall",
+            "EntranceConnectionPointId": "route",
+            "CompletionStructureDefinitionId": "spatial.fixed.completion_terminal",
+            "CompletionConnectionPointId": "route",
+            "BasicRoomDefinitionId": "spatial.room.basic",
+            "BasicRoomSouthConnectionPointId": "south",
+            "BasicRoomNorthConnectionPointId": "north",
+            "SocketTypeId": "spatial.socket.standard_passage",
+            "Layouts": [
+                {
+                    "LayoutId": "compat.layout.r1",
+                    "Placements": [
+                        {
+                            "Role": 1,
+                            "Anchor": {
+                                "X": 0,
+                                "Y": 0
+                            },
+                            "Orientation": 0
+                        },
+                        {
+                            "Role": 2,
+                            "Anchor": {
+                                "X": 0,
+                                "Y": 2
+                            },
+                            "Orientation": 0
+                        },
+                        {
+                            "Role": 4,
+                            "Anchor": {
+                                "X": 1,
+                                "Y": 6
+                            },
+                            "Orientation": 0
+                        }
+                    ],
+                    "Connections": [
+                        {
+                            "SourceRole": 1,
+                            "SourceConnectionPointId": "route",
+                            "DestinationRole": 2,
+                            "DestinationConnectionPointId": "south",
+                            "SocketTypeId": "spatial.socket.standard_passage",
+                            "ConnectionKind": 1,
+                            "CorridorDefinitionId": ""
+                        },
+                        {
+                            "SourceRole": 2,
+                            "SourceConnectionPointId": "north",
+                            "DestinationRole": 4,
+                            "DestinationConnectionPointId": "route",
+                            "SocketTypeId": "spatial.socket.standard_passage",
+                            "ConnectionKind": 1,
+                            "CorridorDefinitionId": ""
+                        }
+                    ],
+                    "ExpectedOccupiedTileTotal": 26
+                },
+                {
+                    "LayoutId": "compat.layout.r2",
+                    "Placements": [
+                        {
+                            "Role": 1,
+                            "Anchor": {
+                                "X": 0,
+                                "Y": 0
+                            },
+                            "Orientation": 0
+                        },
+                        {
+                            "Role": 2,
+                            "Anchor": {
+                                "X": 0,
+                                "Y": 2
+                            },
+                            "Orientation": 0
+                        },
+                        {
+                            "Role": 3,
+                            "Anchor": {
+                                "X": 0,
+                                "Y": 6
+                            },
+                            "Orientation": 0
+                        },
+                        {
+                            "Role": 4,
+                            "Anchor": {
+                                "X": 1,
+                                "Y": 10
+                            },
+                            "Orientation": 0
+                        }
+                    ],
+                    "Connections": [
+                        {
+                            "SourceRole": 1,
+                            "SourceConnectionPointId": "route",
+                            "DestinationRole": 2,
+                            "DestinationConnectionPointId": "south",
+                            "SocketTypeId": "spatial.socket.standard_passage",
+                            "ConnectionKind": 1,
+                            "CorridorDefinitionId": ""
+                        },
+                        {
+                            "SourceRole": 2,
+                            "SourceConnectionPointId": "north",
+                            "DestinationRole": 3,
+                            "DestinationConnectionPointId": "south",
+                            "SocketTypeId": "spatial.socket.standard_passage",
+                            "ConnectionKind": 1,
+                            "CorridorDefinitionId": ""
+                        },
+                        {
+                            "SourceRole": 3,
+                            "SourceConnectionPointId": "north",
+                            "DestinationRole": 4,
+                            "DestinationConnectionPointId": "route",
+                            "SocketTypeId": "spatial.socket.standard_passage",
+                            "ConnectionKind": 1,
+                            "CorridorDefinitionId": ""
+                        }
+                    ],
+                    "ExpectedOccupiedTileTotal": 42
+                }
+            ]
+        }
+    ],
+    "MigrationProfiles": [],
+    "StarterProfiles": [],
+    "ContractSelections": []
+}

@@ -54,7 +54,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         public void ProductionGate_SuccessPreservesRequiredFilesByteForByte()
         {
             string[] paths = ProductionSpatialGeneratedSetParser.RequiredPaths
-                .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath }).ToArray();
+                .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath,
+                    SpatialLayoutCompatibilityProfiles.ProductionPath }).ToArray();
             byte[][] before = paths.Select(File.ReadAllBytes).ToArray();
             Assert.That(RealValidationWithoutRecovery().Validate(BootstrapOnly()).Success, Is.True);
             for (int index = 0; index < paths.Length; index++)
@@ -192,6 +193,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase("languages-empty")]
         [TestCase("language-null-entry")]
         [TestCase("limits")]
+        [TestCase("compatibility")]
         public void MissingAssignmentsAreClassified(string field)
         {
             ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
@@ -202,6 +204,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 if (field == "languages-empty") root.productionSpatialLanguageTables = Array.Empty<TextAsset>();
                 if (field == "language-null-entry") root.productionSpatialLanguageTables = new TextAsset[] { null };
                 if (field == "limits") root.productionSpatialValidationLimits = null;
+                if (field == "compatibility") root.spatialLayoutCompatibilityProfilesJson = null;
                 return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.MissingAssignment));
@@ -211,12 +214,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase("catalog")]
         [TestCase("english")]
         [TestCase("limits")]
+        [TestCase("compatibility")]
         public void ByteIdenticalCopiedRequiredAssignmentsAreRejected(string field)
         {
             string source = field == "manifest" ? ProductionSpatialGeneratedSetParser.ManifestPath :
                 field == "catalog" ? ProductionSpatialGeneratedSetParser.CatalogPath :
                 field == "english" ? ProductionSpatialGeneratedSetParser.EnglishPath :
-                ProductionSpatialContentPublicationService.LimitsPath;
+                field == "limits" ? ProductionSpatialContentPublicationService.LimitsPath :
+                SpatialLayoutCompatibilityProfiles.ProductionPath;
             string copy = TestRoot + "/copied-" + field + ".json";
             Assert.That(AssetDatabase.CopyAsset(source, copy), Is.True);
             TextAsset copied = Load(copy);
@@ -226,6 +231,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 if (field == "catalog") root.productionSpatialCatalog = copied;
                 if (field == "english") root.productionSpatialLanguageTables = new[] { copied };
                 if (field == "limits") root.productionSpatialValidationLimits = copied;
+                if (field == "compatibility") root.spatialLayoutCompatibilityProfilesJson = copied;
                 return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.WrongAssetAssignment));
