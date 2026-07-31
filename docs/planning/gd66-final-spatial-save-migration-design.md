@@ -41,21 +41,33 @@ Only competing route/room-topology representations participate:
 2. `mvpDungeonFloorLayout`
 3. `mvpDungeonPlacements`
 
-The highest semantically present route representation is the sole route migration input. No cross-model category or record overlay is permitted. Lower route representations are diagnostics/rollback evidence only. A valid winner is not rejected when a lower route model disagrees (`gd66.route.lower_authority_conflict`, nonfatal); an invalid winner fails without fall-through.
+The highest semantically present representation is the sole **topology winner**. Lower models never add rooms, room identity, endpoints, edges, or geometry. An invalid winner fails without topology fall-through. `dungeonLayout` remains expressly outside this precedence; repository history supplies no approved room ID in `DungeonSlot.StructureId`.
 
-`dungeonLayout` is expressly outside this precedence. Repository history provides no evidence that `placement.option.room.basic` or another room option was persisted as a `DungeonSlot.StructureId`; therefore GD66 approves no historical `dungeonLayout` route fixture or room mapping. Any later evidence must identify an exact source schema and persisted ID in a separately reviewed amendment.
+### Frozen effective-content compatibility projection
 
-## 6. Semantic-presence rules
+After topology selection and before candidate construction, Phase 2 must run a named `FrozenLegacyRouteProjection` stage using the exact resolver behavior applicable to the raw source schema:
 
-Presence is captured from raw JSON member evidence before constructors, field initializers, `MigrateToLatest`, starter-node creation, backfill, filtering, or option fallback:
+1. Resolve winner revisions/duplicates first.
+2. Compute the current ordered runtime projection without mutating O or invoking current backfills early.
+3. Permit lower route models to contribute **room-content evidence only** when that schema's historical resolver makes the record effective—for example, v4–v6 floor nodes completed by effective placement categories.
+4. Never let lower records change topology, room option/identity, explicit-versus-implicit semantics, or geometry; never revive filtered, invalid, or superseded records. An effective lower room record is representable only as exact agreement with the winner; otherwise it fails `gd66.content.outcome_mismatch` (including lower Narrow Hall or malformed room data).
+5. Copy effective lower content into canonical `RoomContents` and emit `gd66.diagnostic.lower_effective_content_contributed`. Ineffective disagreement emits `gd66.diagnostic.lower_ineffective_conflict` and remains evidence only.
+6. Emit agreement only when candidate topology, content multiplicity/order, explicit-room semantics, and ordered run inputs equal the frozen projection.
+7. If an effective lower contribution cannot be represented exactly, fail `gd66.content.outcome_mismatch`; effective content is never silently discarded.
+
+Thus lower disagreement is not blanket-nonfatal: only an ineffective conflict is nonfatal. Duplicate/revision ambiguity in either effective source fails before projection.
+
+## 6. Semantic-presence and canonical empty-state rules
+
+Presence is captured from raw JSON member evidence before constructors, initializers, `MigrateToLatest`, starter nodes, backfill, filtering, or fallback:
 
 | Route model | Absent | Present |
 |---|---|---|
-| assignments | member absent/null; `Rooms` absent/null/empty; only null elements | any non-null room record, including malformed/out-of-range records |
-| floor layout | member absent/null; or exact empty starter shell: expected four Floor 0 nodes, expected slot IDs/indices, blank category/option, revision 0, no extras | any assignment, nonzero revision, unexpected/missing/extra identity, or malformed non-null node |
+| assignments | member absent/null; `Rooms` absent/null/empty; only null elements | any non-null record, including malformed/out-of-range records |
+| floor layout | member absent/null; or exact empty starter shell with four expected blank Floor 0 nodes/revision 0/no extras | any assignment, nonzero revision, unexpected/missing/extra identity, or malformed non-null node |
 | placements | member absent/null; `Entries` absent/null/empty; only null elements | any non-null entry, including malformed IDs/revisions |
 
-An entirely absent route produces no active spatial floor. It does not manufacture endpoints or an implicit Basic room. Independently present `dungeonLayout`/`structureRuntime` never makes route topology present.
+Raw route absence creates no room, endpoint, or `SavedSpatialFloor`, but **does migrate authority**. Detached C contains the selected future schema, canonical authority marker, `spatialFloors = []`, and every unrelated field including `dungeonLayout`/`structureRuntime`. Empty canonical validation requires all graph, fixed, and room-content collections to be absent because there is no floor record. C is backed up, verified, and atomically committed exactly like a populated candidate, emitting `gd66.success.empty_migrated`. The replacement makes empty canonical topology/content writable authority; future construction starts canonically, never in legacy fields. Reload emits `gd66.success.already_committed`. No implicit room or endpoint-only graph is created.
 
 ## 7. Duplicate and conflict rules
 
@@ -65,43 +77,71 @@ Strings use ordinal equality/sorting without trimming or case folding.
 |---|---|---|
 | assignments | `(FloorIndex, RoomIndex)` | fatal `gd66.route.duplicate_room_slot`; no per-record revision exists, so current last-list-record behavior is not durable authority |
 | floor layout | `(FloorIndex, NodeIndex)` or nonempty `SlotId` | uniquely greatest nonnegative `Revision` wins; a tied maximum is fatal `gd66.route.duplicate_floor_node_revision` |
-| placements | `CategoryId` | uniquely greatest nonnegative `Revision` wins; a tied maximum is fatal `gd66.route.duplicate_category_revision` |
+| placements | `CategoryId` | uniquely greatest nonnegative `Revision` wins; a tied maximum is fatal `gd66.route.duplicate_placement_revision` |
 
 Candidate floor, room, fixed, content-assignment, node, or edge ID collisions fail `gd66.id.collision`. Valid concurrent economic structures are neither duplicates nor conflicts with route state.
 
 ## 8. Exact schemas 1 through 6 fixture matrix
 
-Commit history establishes these writer eras: v1 predates the wrapped v2 dungeon-layout foundation; v2 introduced/backfilled `dungeonLayout` and then `structureRuntime`; v3 added `mvpDungeonPlacements`; v4 added `mvpDungeonFloorLayout`; v5 added `mvpRoomSlotAssignments`; v6 changed no route representation. Raw member evidence—not what the current initializer would synthesize—controls each fixture.
+`O`, `B`, and `C` mean original, verified backup, and complete candidate. Every valid empty schema emits `gd66.diagnostic.no_legacy_route`, then migrates to canonical `spatialFloors = []` through B and one atomic replacement; failures keep O; every successful reload emits `gd66.success.already_committed`.
 
-`O` is original, `B` verified backup, `C` complete future candidate. `E`, `R1`, and `R2` are §12 geometry. Every successful legacy fixture migrates once to the as-yet-unselected future target schema; only a complete future-target payload is an already-current no-op.
+### Schema 1 envelope fixtures
 
-| Source | Fields that may genuinely exist / historical default | Required exact fixtures and winner | Expected result; preserved independent state; transaction behavior |
-|---|---|---|---|
-| v1 | unwrapped or early root `SaveData`; no repository evidence of an MVP route member; no route default is inferred | `v1-unwrapped-empty`, `v1-corrupt`, `v1-unwrapped-with-unknown-extra` → no winner | empty route → `gd66.success.no_layout`; exact non-route fields preserved. Corrupt → `gd66.payload.unreadable`. Unwrapped source schema must be classified as v1, never current. No graph commit for no-layout. |
-| v2 | `dungeonLayout`; later v2 payloads may include `structureRuntime`; migration backfilled empty 5×6 structure slots and runtime shell | `v2-empty-structures`, `v2-three-supported-structures`, `v2-malformed-structure-slot`; no route winner | no spatial route. Preserve exact supported structure placement/runtime state and continued writability; malformed independent structure state is handled by its existing subsystem, not converted to route. No route conflict or graph commit. |
-| v3 | v2 fields plus `mvpDungeonPlacements`; null collection/list and `NextRevision<1` were backfilled | `v3-empty-placement-member`, `v3-basic-room0`, `v3-basic-plus-content`, `v3-narrow-hall`, `v3-duplicate-revision`, each crossed with populated v2 structures; placements wins when present | empty → no layout. Basic → R1 and room-content migration. Narrow Hall → unmapped. Duplicate → fatal. Always preserve structures/runtime. Attempted migration: B; success one C; failure O remains; identical retry deterministic. |
-| v4 | v3 fields plus `mvpDungeonFloorLayout`; initial empty starter nodes were backfilled; later backfill could derive nodes from placements | `v4-empty-starter`, `v4-floor-basic`, `v4-floor-and-placement-agree`, `v4-floor-and-placement-conflict`, `v4-floor-duplicate`, with/without supported structures; floor wins only when raw-present | exact raw empty starter lets placements win or no route. Valid floor Basic → R1. Lower placements only diagnostic. Invalid present floor fails without placements fallback. Structures/runtime preserved. |
-| v5 | v4 fields plus `mvpRoomSlotAssignments`; null rooms/list and revision shell backfilled | `v5-empty-assignments`, `v5-room0-basic`, `v5-two-basic`, `v5-assignments-and-lower-agree`, `v5-assignments-and-lower-conflict`, `v5-duplicate-room`, `v5-room-gap`, `v5-content-over-capacity`, with populated structures/runtime | raw-empty assignments do not block floor/placements. Present assignments wins: R1/R2 plus exact content. Narrow Hall/unmapped, duplicate/gap/capacity failures leave O. Structures/runtime unchanged and writable. |
-| v6 | same route fields as v5; current normalizer can synthesize all shells and overlay floor nodes from placements | all v5 cases as v6 plus `v6-normalized-shell-vs-raw-absence`, `v6-interrupted-before-replace`, `v6-interrupted-after-replace`, `v6-retry-failed-candidate` | raw evidence prevents synthesized fields becoming winner. A legacy v6 success migrates exactly once; it is not “current-version idempotence.” Journal recovery selects verified O or verified complete C. |
-| future target | saved floor binding, fixed structures, room contents, complete graph, target schema and canonical marker all present | `target-complete-current`, `target-marker-missing`, `target-schema-missing`, `target-partial-graph`, `target-contradictory-legacy-write` | complete verified target → `gd66.success.already_committed`, no new backup/write. Any incomplete/contradictory target recovers verified O/C or fails `gd66.transaction.unrecoverable`; never legacy-fallbacks silently. |
+A wrapped v1 payload is a JSON object with an ordinal `schema = "save_root"`, integral `schemaVersion = 1`, and a present non-null `primary` object. An unwrapped v1 is a JSON object lacking root-envelope members but containing at least one recognized `SaveData` member. Raw bytes, recognized values, and unknown members are preserved in O/B; C must preserve all semantically representable unrelated values, and Phase 2 must use a lossless extension-data mechanism for unknown members or fail `gd66.payload.unknown_member_unpreservable`.
 
-Every schema also requires malformed ID, missing/invalid production Basic definition, ID collision, corrupt JSON, backup-verification failure, durable-verification failure, retry, and lower-route agreement/conflict variants where that schema can contain the relevant route field.
+| Fixture | Expected classification/result |
+|---|---|
+| `v1-wrapped-valid-primary` | `gd66.diagnostic.payload_wrapped_v1`; empty canonical commit, `gd66.success.empty_migrated` |
+| `v1-wrapped-empty-primary` | wrapped diagnostic; empty canonical commit |
+| `v1-wrapped-null-primary` | `gd66.payload.null_primary`, fatal; B verified, O active, retry after repair |
+| `v1-wrapped-missing-schema-token` | `gd66.payload.missing_schema_token`, fatal; do not reinterpret as unwrapped |
+| `v1-wrapped-malformed-schema-token` | `gd66.payload.invalid_schema_token`, fatal |
+| `v1-unwrapped-save-data` | `gd66.diagnostic.payload_unwrapped_v1`; preserve recognized/unknown members; empty canonical commit |
+| `v1-unwrapped-empty-save` | unwrapped diagnostic only when an approved recognized member exists; empty canonical commit |
+| `v1-unwrapped-unknown-members` | `gd66.payload.ambiguous_envelope` unless at least one recognized `SaveData` member disambiguates; if disambiguated, unknown-member preservation rule applies |
+| `v1-ambiguous-envelope` | `gd66.payload.ambiguous_envelope`, fatal |
+| `v1-corrupt-json` | `gd66.payload.unreadable`, fatal |
 
-## 9. Semantic compatibility route
+Wrapping an unwrapped payload in detached memory never assigns schema 6. Its raw classification/source version remains v1 through candidate validation.
 
-Supported topology is distinct entrance → internal legacy Room 0 → optional internal legacy Room 1 → distinct completion. Localized “Room 1/Room 2” labels never define identity. Room 1 without Room 0 fails `gd66.route.gap`. Empty route evidence produces no floor graph.
+### Schema eras and required fixtures
+
+| Source | Genuine fields | Empty and populated fixtures / expected behavior |
+|---|---|---|
+| v2 | `dungeonLayout`; later `structureRuntime`; no route representation | `v2-empty`, `v2-supported-economic-structures`, `v2-malformed-economic-slot`: valid route-empty cases commit canonical empty authority; independent structures/runtime preserved and remain writable. |
+| v3 | v2 plus `mvpDungeonPlacements` | `v3-empty`, Basic R1, Narrow Hall, duplicate revision, invalid/category-wrong content, every content-only and explicit-Basic combination below; all valid empty/content cases commit C. |
+| v4 | v3 plus `mvpDungeonFloorLayout` and starter shells | all v3 cases plus floor Basic; floor+placement agreement; floor room plus lower monster/trap/loot; partial floor categories completed by placements; effective/ineffective conflicts; duplicate ambiguity; lower content without explicit room; lower Narrow Hall/malformed room. |
+| v5 | v4 plus `mvpRoomSlotAssignments` | all v4 cases plus R2, duplicate room, route gap, assignment arrays, content over capacity; raw-empty assignments allow historical floor/placement projection before canonical commit. |
+| v6 | same route representations as v5 | all v5 cases plus normalized-shell-vs-raw-absence, interruption before/after replacement, retry, and contradictory marker. v6 migrates once; it is not already-current. |
+| future target | complete target schema/marker and canonical collections | complete populated or empty C → `gd66.success.already_committed`; missing schema/marker or partial state → contradictory/recovery codes. |
+
+### Content-combination fixture set
+
+For every applicable v3, v4, v5, and v6 winner, executable Phase 2 fixtures must cover: monster only; trap only; loot only; monster+trap; monster+loot; trap+loot; monster+trap+loot; explicit Basic plus each of those seven combinations; no explicit room plus effective lower-model content; each category over capacity; invalid option; category-wrong option. V4–v6 additionally cover floor room plus each lower category, partial floor categories completed by placements, agreement, ineffective disagreement, effective disagreement, revision ambiguity, lower content without explicit room, and lower Narrow Hall/malformed room.
+
+Expected supported content-only geometry is R1. Exact content order/multiplicity and explicit/implicit semantics must equal `FrozenLegacyRouteProjection`. Capacity/invalid/unrepresentable cases fail their exact §19 code. Every schema also covers missing/invalid profile/content definitions, ID collision, corrupt JSON, backup/journal/candidate/commit/durability/recovery failure, retry, and populated independent economic state.
+
+## 9. Semantic compatibility route and content-only compatibility
+
+Normal supported topology is entrance → Room 0 → optional Room 1 → completion. Room 1 without Room 0 fails `gd66.route.gap`; labels never define identity.
+
+A semantically present winner (or effective lower content admitted by `FrozenLegacyRouteProjection`) with supported monster/trap/loot content but no explicit room creates the R1 Basic room solely as an **implicit compatibility content container**. This emits `gd66.diagnostic.missing_explicit_room_supported_content` and `gd66.diagnostic.implicit_basic_container_created`.
+
+Canonical owner `SavedSpatialFloor.RoomContents.RoomSemantics` contains exactly one record per room with `RoomInstanceId` and `LegacyRoomOriginKind`, whose allowed values are `ExplicitLegacyRoom` and `ImplicitCompatibilityContainer`. Records canonicalize by ordinal room ID; missing/duplicate semantics fail candidate validation. The field round-trips and participates in frozen-projection equality.
+
+An implicit container does not enter the ordered room-placement effect projection and never invents Basic-room simulation effects; its contents retain historical ordering/outcomes. This is a narrow historical rule for valid supported content, not fallback for a blank/malformed/unmapped/missing explicit room ID. Narrow Hall stays unmapped. Any unsupported or outcome-changing projection fails `gd66.content.outcome_mismatch`.
 
 ## 10. Content compatibility mapping
 
 | Legacy value | Decision |
 |---|---|
-| `placement.option.room.basic` | direct room mapping to verified `spatial.room.basic` (4×4; production capacities 2 monster, 2 trap, 2 loot) |
-| implicit Basic created only by current resolver/default | no migration input; raw absence remains no route |
-| blank/malformed room option | `gd66.content.invalid_legacy_room` |
-| `placement.option.room.narrow_hall` | `gd66.content.unmapped_legacy_room`; it is a room, never `spatial.corridor.straight_stone`, Rectangle Room, or another substitute |
-| `dungeonLayout` structure IDs | no room mapping; preserve independently, including the three supported economic IDs |
+| explicit `placement.option.room.basic` | direct `spatial.room.basic`; `LegacyRoomOriginKind=ExplicitLegacyRoom` |
+| supported content with no room record | approved R1 Basic container; `LegacyRoomOriginKind=ImplicitCompatibilityContainer`; no explicit-room effect |
+| blank/malformed explicit room | `gd66.content.invalid_legacy_room`; never implicit-container fallback |
+| `placement.option.room.narrow_hall` | `gd66.content.unmapped_narrow_hall`; never corridor/Rectangle/substitute |
+| `dungeonLayout` structure IDs | no room mapping; preserved independently |
 
-No safe fallback is approved. Missing mapped production definition fails `gd66.content.missing_production_room`; an invalid record fails `gd66.content.invalid_production_room`. O remains active and no partial graph/content state is published.
+No general safe fallback exists. Production/profile resolution and content errors use exact §19 codes; O remains active on failure.
 
 ## 11. Stable ID derivation and saved floor binding
 
@@ -118,6 +158,18 @@ Canonical identifier inputs must match lowercase ASCII `[a-z0-9]+(?:[._-][a-z0-9
 | room-content assignment | `{roomInstanceId}.content.{category}.{sequence:D4}` where category is `monster`, `trap`, or `loot` |
 
 Runtime hashes, `GetHashCode`, GUIDs, timestamps, localization/UI text, player numbering, catalog positions, dictionary iteration, and incidental collection order are prohibited.
+
+### Injected compatibility-geometry profile
+
+**GD66 decision:** all compatibility geometry/mapping values are owned by an injected typed `SpatialMigrationCompatibilityProfile`; candidate-building code contains no fallback constants. The future single writable authority is the version-controlled typed configuration asset `Assets/_Project/Data/Production/DungeonSpatial/spatial_migration_compatibility_profiles.json`, added only by Phase 2 after its schema review. It is configuration, not the production spatial-definition catalog or a generated output.
+
+Each profile owns: ordinal `ProfileId`; positive `ProfileVersion`; inclusive source-schema minimum/maximum; target `FloorDefinitionId` and floor index; entrance definition, anchor, orientation, connection-point ID; ordinal legacy-room-to-production-definition mappings; Room 0/Room 1 anchors and orientations for R1/R2; completion definition, R1/R2 anchors, orientation and connection-point ID; ordered semantic route roles; direct-doorway source/destination role and socket definitions; expected socket type; and expected occupied totals 26/42 as assertions independently recomputed from definitions.
+
+Initial profile values are exactly: entrance `(0,0)/Zero/route`; Basic Room 0 `(0,2)/Zero`; Basic Room 1 `(0,6)/Zero`; R1 completion `(1,6)/Zero/route`; R2 completion `(1,10)/Zero/route`; target `spatial.floor.01` index 0; definitions and sockets in §12. These values must not also appear as runtime constants.
+
+The loader validates and canonicalizes profiles by source minimum, source maximum, profile version, then ordinal profile ID. Overlapping applicable ranges or duplicate `(ProfileId,ProfileVersion)` fail. Exactly one compatible profile must match the raw source schema; missing, duplicate/overlap, malformed/referentially invalid, and unsupported-version cases use exact §19 codes. References resolve ordinally against the separately validated production catalog; orientations, sockets, mappings, bounds, footprints, capacity totals, and route roles must validate before injection. The composition root injects the one validated immutable profile into the candidate builder; the builder cannot discover files or construct a default.
+
+Profile versions are immutable compatibility contracts: edits that change migration output require a new version plus explicit source applicability; old versions remain available for deterministic retry/recovery as long as saves/journals reference them. Phase 2 tests must parse/canonical-round-trip the profile and independently recompute R1/R2 tiles, totals, adjacency, facings, bounds and capacity from profile plus production definitions.
 
 ### Future saved floor contract
 
@@ -160,11 +212,11 @@ Each `SavedSpatialFloor.FixedStructures` record contains `FixedStructureInstance
 
 ### Nonspatial room contents
 
-**Phase 2 serialized owner:** `SavedSpatialFloor.RoomContents`, a `FloorRoomContentState` containing `Assignments` and `NextSequence`. Each `RoomContentAssignment` contains `AssignmentId`, `RoomInstanceId`, `CategoryId`, `OptionId`, and nonnegative `Sequence`. This is a separate writable **room-content authority**, not route-topology authority and not tile occupancy. It adds no monster/trap/loot coordinates.
+**Phase 2 serialized owner:** `SavedSpatialFloor.RoomContents`, a `FloorRoomContentState` containing `Assignments`, `RoomSemantics`, and `NextSequence`. Each `RoomContentAssignment` contains `AssignmentId`, `RoomInstanceId`, `CategoryId`, `OptionId`, and nonnegative `Sequence`. This is a separate writable **room-content authority**, not route-topology authority and not tile occupancy. It adds no monster/trap/loot coordinates.
 
 - Categories are exactly `placement.category.monster`, `.trap`, and `.loot_node`; room options remain owned by room instances.
 - Records canonicalize by ordinal `RoomInstanceId`, fixed category rank monster/trap/loot, ascending `Sequence`, then ordinal `AssignmentId` and `OptionId`.
-- `AssignmentId` uses §11. Duplicate IDs or duplicate `(RoomInstanceId, CategoryId, Sequence)` fail. `NextSequence` must exceed every sequence and future writers allocate it monotonically; deletion never renumbers survivors.
+- `AssignmentId` uses §11. Duplicate IDs or duplicate `(RoomInstanceId, CategoryId, Sequence)` fail `gd66.content.duplicate_assignment`. `RoomSemantics` has exactly one ordinally sorted record per canonical room; missing, duplicate, unknown-kind, or projection-inconsistent records fail `gd66.content.room_semantics_invalid`. `NextSequence` must exceed every sequence and future writers allocate it monotonically; deletion never renumbers survivors.
 - Option IDs must be exact known legacy gameplay options in the stated category. Blank, malformed, category-wrong, or missing configured effect/capacity references fail; there is no fallback.
 - Counts per room/category must not exceed the mapped production room's Monster/Trap/Loot capacity. Capacity failure is `gd66.content.room_capacity_exceeded`.
 - Assignments migration copies `MonsterOptionIds`, `TrapOptionIds`, and `LootNodeOptionIds` from each winning room in exact stored array order into increasing sequence values. Array index is source evidence only; the resulting explicit sequence becomes authority.
@@ -173,7 +225,7 @@ Each `SavedSpatialFloor.FixedStructures` record contains `FixedStructureInstance
 - Before atomic replacement, legacy readers/writers remain active. After replacement, run readers project ordered content from `RoomContents`; placement writers target only `RoomContents`; topology writers target only graph/floor records. Legacy route/content fields become read-only rollback evidence. `dungeonLayout` economic writers remain independent and active.
 - Rollback atomically restores O, returning route and room-content readers/writers together to legacy authority.
 
-The first Phase 2 shape PR must round-trip floor binding, fixed structures, and room contents while inactive, before any candidate builder.
+The first Phase 2 shape PR must round-trip floor binding, fixed structures, room assignments, and explicit/implicit `RoomSemantics` while inactive, before any candidate builder.
 
 ## 15. Raw-load interception and candidate validation sequence
 
@@ -189,7 +241,7 @@ The spatial transaction runs **before** existing `MigrationRunner`, `SaveMigrati
 8. Build the complete saved floor, fixed, room-content and graph candidate.
 9. Canonicalize and validate IDs, definition binding/index, mappings, contents/capacity/outcome projection, footprints, bounds, overlap, endpoints, adjacency/sockets, reachability, terminal semantics and ordering.
 10. Commit C or restore O under §16; only afterward expose normalized runtime state.
-11. For a successful future-target payload, run only target-schema normalization that cannot rewrite authority. For no-layout/no-migration legacy payloads, existing migrations may run after raw evidence is retained. Existing legacy migration must never run before candidate selection.
+11. For a successful future-target payload, run only target-schema normalization that cannot rewrite authority. For a valid route-empty legacy payload, build and atomically commit canonical empty C before exposing runtime state; existing legacy normalization never retains legacy writable authority. Existing legacy migration must never run before candidate selection.
 
 ## 16. Atomic migration transaction
 
@@ -220,13 +272,75 @@ Marker/schema/graph/content disagreement is `gd66.authority.contradictory_state`
 
 Current schema is 6. GD66 neither increments it nor approves a specific future number. Phase 2 must select a version greater than the then-current `LatestSchemaVersion` only when the complete serialized floor/fixed/content/marker shape is finalized. That selected version appears only in fully validated C and becomes active only through §16's single replacement.
 
-## 19. Failure reason-code taxonomy
+## 19. Authoritative exact reason-code table
 
-Append-only stable families are: `gd66.payload.*` (unreadable, ambiguous_unwrapped_schema); `gd66.route.*` (duplicate, range, gap, lower conflict); `gd66.id.*` (malformed, collision); `gd66.floor.*` (missing_definition, invalid_definition, index_mismatch, duplicate); `gd66.content.*` (invalid/unmapped room, invalid/category-wrong/missing option, duplicate_assignment, room_capacity_exceeded, outcome_mismatch); `gd66.geometry.*`; `gd66.graph.*`; `gd66.transaction.*` (backup, candidate, commit, durable verification, interrupted, unrecoverable); `gd66.authority.contradictory_state`; and `gd66.success.no_layout`, `.migrated`, `.already_committed`, `.recovered_original`.
+This table is the sole code registry. Codes are append-only and ordinal. “O active” is state immediately after emission.
+
+| Exact code | Classification | Continue C? | O active? | Player key? | Exact condition |
+|---|---|---:|---:|---:|---|
+| `gd66.diagnostic.payload_wrapped_v1` | nonfatal diagnostic | Yes | Yes | No | Valid wrapped schema-1 root classified. |
+| `gd66.diagnostic.payload_unwrapped_v1` | nonfatal diagnostic | Yes | Yes | No | Recognized unwrapped schema-1 `SaveData` classified. |
+| `gd66.payload.unreadable` | fatal failure | No | Yes | Yes | JSON bytes cannot be parsed. |
+| `gd66.payload.ambiguous_envelope` | fatal failure | No | Yes | Yes | Payload cannot be safely classified wrapped/unwrapped. |
+| `gd66.payload.missing_schema_token` | fatal failure | No | Yes | Yes | Root-shaped payload omits `schema`. |
+| `gd66.payload.invalid_schema_token` | fatal failure | No | Yes | Yes | Root-shaped payload has wrong/malformed schema token or nonintegral version. |
+| `gd66.payload.null_primary` | fatal failure | No | Yes | Yes | Wrapped root `primary` is explicitly null. |
+| `gd66.payload.unknown_member_unpreservable` | fatal failure | No | Yes | Yes | Unknown source member cannot be losslessly retained. |
+| `gd66.diagnostic.no_legacy_route` | nonfatal diagnostic | Yes | Yes | No | Valid legacy payload has no semantic route; empty C begins. |
+| `gd66.success.empty_migrated` | success | No | No | No | Canonical empty C durably committed. |
+| `gd66.success.migrated` | success | No | No | No | Populated canonical C durably committed. |
+| `gd66.success.already_committed` | success | No | No | No | Complete verified target payload already authoritative. |
+| `gd66.success.recovered_original` | success | No | Yes | Yes | Verified O restored after interruption/failure. |
+| `gd66.route.duplicate_room_slot` | fatal failure | No | Yes | Yes | Duplicate assignment floor/room key. |
+| `gd66.route.duplicate_floor_node_revision` | fatal failure | No | Yes | Yes | Floor-node key/slot has tied greatest revision. |
+| `gd66.route.duplicate_placement_revision` | fatal failure | No | Yes | Yes | Placement category has tied greatest revision. |
+| `gd66.route.record_out_of_range` | fatal failure | No | Yes | Yes | Floor, room, node, slot, revision, or sequence is out of range. |
+| `gd66.route.gap` | fatal failure | No | Yes | Yes | Room 1 exists without Room 0. |
+| `gd66.diagnostic.lower_model_agreement` | nonfatal diagnostic | Yes | Yes | No | Effective lower projection exactly agrees. |
+| `gd66.diagnostic.lower_ineffective_conflict` | nonfatal diagnostic | Yes | Yes | No | Lower disagreement is historically filtered/ineffective. |
+| `gd66.diagnostic.lower_effective_content_contributed` | nonfatal diagnostic | Yes | Yes | No | Historical resolver makes lower content effective and it is copied. |
+| `gd66.diagnostic.missing_explicit_room_supported_content` | nonfatal diagnostic | Yes | Yes | No | Supported effective content has no explicit room. |
+| `gd66.diagnostic.implicit_basic_container_created` | nonfatal diagnostic | Yes | Yes | No | R1 implicit Basic container created without room effect. |
+| `gd66.content.outcome_mismatch` | fatal failure | No | Yes | Yes | Canonical projection cannot preserve effective run inputs/semantics exactly. |
+| `gd66.content.invalid_legacy_room` | fatal failure | No | Yes | Yes | Explicit room ID is blank, malformed, or category-wrong. |
+| `gd66.content.unmapped_narrow_hall` | fatal failure | No | Yes | Yes | Effective explicit Narrow Hall has no room mapping. |
+| `gd66.content.missing_production_room` | recoverable failure | No | Yes | Yes | Mapped production room definition is absent. |
+| `gd66.content.invalid_production_room` | recoverable failure | No | Yes | Yes | Mapped production room definition fails validation. |
+| `gd66.content.invalid_option` | fatal failure | No | Yes | Yes | Content option is blank, malformed, unknown, or lacks required config. |
+| `gd66.content.category_mismatch` | fatal failure | No | Yes | Yes | Content option does not belong to recorded category. |
+| `gd66.content.room_capacity_exceeded` | fatal failure | No | Yes | Yes | Per-room category count exceeds mapped room capacity. |
+| `gd66.content.duplicate_assignment` | fatal failure | No | Yes | Yes | Assignment ID or room/category/sequence duplicates. |
+| `gd66.content.room_semantics_invalid` | fatal failure | No | Yes | Yes | Room semantics missing, duplicated, or inconsistent with frozen projection. |
+| `gd66.floor.missing_definition` | recoverable failure | No | Yes | Yes | Saved/profile floor definition is absent. |
+| `gd66.floor.invalid_definition` | recoverable failure | No | Yes | Yes | Target floor definition fails production validation. |
+| `gd66.floor.index_mismatch` | fatal failure | No | Yes | Yes | Saved/profile index differs from authored floor index. |
+| `gd66.floor.duplicate_binding` | fatal failure | No | Yes | Yes | Floor instance ID or index duplicates. |
+| `gd66.profile.missing` | recoverable failure | No | Yes | Yes | No profile applies to raw source schema. |
+| `gd66.profile.duplicate` | fatal failure | No | Yes | Yes | Profile identity/version duplicates or applicability overlaps. |
+| `gd66.profile.invalid` | recoverable failure | No | Yes | Yes | Profile structure, mapping, geometry, socket, total, or reference is invalid. |
+| `gd66.profile.version_mismatch` | recoverable failure | No | Yes | Yes | Journal/source requires unsupported profile version. |
+| `gd66.id.malformed` | fatal failure | No | Yes | Yes | Persistent ID violates exact grammar. |
+| `gd66.id.collision` | fatal failure | No | Yes | Yes | Any canonical persistent ID collides. |
+| `gd66.geometry.bounds` | fatal failure | No | Yes | Yes | Occupied tile lies outside profile target floor. |
+| `gd66.geometry.overlap` | fatal failure | No | Yes | Yes | Physical footprints overlap. |
+| `gd66.geometry.capacity` | fatal failure | No | Yes | Yes | Tile union exceeds capacity or expected total differs. |
+| `gd66.geometry.socket` | fatal failure | No | Yes | Yes | Connection point/socket type/facing is incompatible. |
+| `gd66.geometry.adjacency` | fatal failure | No | Yes | Yes | Direct-doorway endpoints are not adjacent. |
+| `gd66.graph.endpoint` | fatal failure | No | Yes | Yes | Entrance/completion endpoint missing, duplicate, or wrong kind. |
+| `gd66.graph.reachability` | fatal failure | No | Yes | Yes | Required semantic route is unreachable. |
+| `gd66.graph.terminal` | fatal failure | No | Yes | Yes | Completion-terminal semantics are invalid. |
+| `gd66.graph.ordering` | fatal failure | No | Yes | Yes | Candidate is not canonical/round-trip stable. |
+| `gd66.transaction.backup_failed` | recoverable failure | No | Yes | Yes | B creation, flush, readback, hash, or parse verification fails. |
+| `gd66.transaction.journal_invalid` | recoverable failure | No | Yes | Yes | Journal is missing, malformed, or hash-inconsistent. |
+| `gd66.transaction.candidate_invalid` | fatal failure | No | Yes | Yes | Complete C serialization/deserialization or aggregate validation fails. |
+| `gd66.transaction.commit_failed` | recoverable failure | No | Yes | Yes | Single atomic replacement fails. |
+| `gd66.transaction.durability_failed` | recoverable failure | No | Yes | Yes | Committed bytes fail durable reread/hash/semantic verification. |
+| `gd66.transaction.recovery_failed` | fatal failure | No | Yes | Yes | Neither verified O nor complete verified C can be restored. |
+| `gd66.authority.contradictory_state` | recoverable failure | No | Yes | Yes | Schema, marker, canonical fields, or writer evidence disagree. |
 
 ## 20. Player messaging and localization ownership
 
-Save/Migration Engineering emits codes; UX/Localization owns future `save.migration.spatial.<reason>.player_message` mappings and language tables. GD66 adds no entry or English. IDs, UI labels, localization keys and localized text never determine migration identity or gameplay.
+Save/Migration Engineering emits only exact §19 codes. For each row with “Player key?” Yes, the key is `save.migration.spatial.` followed by the full code unchanged, including dots and underscores—for example `save.migration.spatial.gd66.content.outcome_mismatch`. No punctuation/case transformation or alias is allowed. UX/Localization must author that exact key before activation; GD66 adds no entries. Text never determines identity or gameplay.
 
 ## 21. Backup, rollback, retry, and idempotence
 
@@ -234,13 +348,14 @@ O stays active until the one replacement. Failed C never changes authority. Retr
 
 ## 22. Phase 2 dependency breakdown
 
-1. Add and round-trip the inactive `SavedSpatialFloor` binding, fixed structures, `FloorRoomContentState`, complete canonical marker, and transaction metadata shape; verify then-current schema and select the target version.
-2. Add raw-byte/root-version/member-presence interception before all existing legacy normalization, including unwrapped v1 classification.
-3. Implement pure schema-specific route selection and complete detached candidate construction with exact fixtures in §8.
-4. Implement definition/content/outcome/geometry/graph canonical validation and stable codes.
-5. Implement verified B, journal, one atomic C replacement, durable reread and O recovery with failure injection.
-6. In one activation packet, bind canonical topology and room-content readers/writers after replacement while preserving independent economic-structure readers/writers.
-7. Add localization mappings and full lifecycle/edit-mode immediate-save, recovery, EditMode/PlayMode/build evidence before activation approval.
+1. Add, validate, and inject the inactive `SpatialMigrationCompatibilityProfile` configuration with independent R1/R2 recomputation and no runtime fallback constants.
+2. Add and round-trip the inactive `SavedSpatialFloor` binding, fixed structures, `FloorRoomContentState` including `RoomSemantics`, complete canonical marker, and transaction metadata shape; verify then-current schema and select the target version.
+3. Add raw-byte/root-version/member-presence interception before all existing legacy normalization, including unwrapped v1 classification.
+4. Implement pure schema-specific route selection and complete detached candidate construction with exact fixtures in §8.
+5. Implement definition/content/outcome/geometry/graph canonical validation and stable codes.
+6. Implement verified B, journal, one atomic C replacement, durable reread and O recovery with failure injection.
+7. In one activation packet, bind canonical topology and room-content readers/writers after replacement while preserving independent economic-structure readers/writers.
+8. Add localization mappings and full lifecycle/edit-mode immediate-save, recovery, EditMode/PlayMode/build evidence before activation approval.
 
 ## 23. Explicit non-goals
 
@@ -254,6 +369,10 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 - [x] Saved floor instance binds explicitly to production definition/index.
 - [x] Raw presence precedes every current normalization/backfill.
 - [x] Schema-specific v1–v6 fixtures and true future-target idempotence are defined.
+- [x] Content-only and effective-lower projections preserve explicit/implicit semantics and outcomes.
+- [x] Injected compatibility profile owns all migration geometry with no runtime fallback.
+- [x] Exact reason registry has no aliases, wildcard definitions, duplicates, or undefined references.
+- [x] Wrapped/unwrapped v1 and canonical empty transitions are exact.
 - [x] R1/R2 production geometry remains proven.
 - [x] One complete atomic replacement is the sole schema/authority switch.
 - [x] No hidden fallback, partial publication, localized identity, or dual route/content writers.
