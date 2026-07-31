@@ -142,21 +142,48 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase(true)]
         public void OneActiveOrInactiveCorrectGameRootPasses(bool inactive)
         {
-            ProductionSpatialBuildGateResult result = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 root.gameObject.SetActive(!inactive);
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
-            Assert.That(result.Success, Is.True);
+            Assert.That(result.Success, Is.True, result.Reason + ":" + result.Detail);
         }
 
         [Test]
-        public void MissingAndDuplicateGameRootsAreClassified()
+        public void BlankPreviewSceneIsClassifiedAsMissingGameRoot()
         {
-            Assert.That(ValidatePreviewComposition(null, false).Reason,
-                Is.EqualTo(ProductionSpatialBuildGateReason.MissingGameRoot));
-            Assert.That(ValidatePreviewComposition(AssignValid, true, 2).Reason,
-                Is.EqualTo(ProductionSpatialBuildGateReason.DuplicateGameRoot));
+            Scene scene = EditorSceneManager.NewPreviewScene();
+            Exception originalException = null;
+            try
+            {
+                Assert.That(ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene).Reason,
+                    Is.EqualTo(ProductionSpatialBuildGateReason.MissingGameRoot));
+            }
+            catch (Exception exception)
+            {
+                originalException = exception;
+                throw;
+            }
+            finally
+            {
+                try
+                {
+                    if (scene.IsValid()) EditorSceneManager.ClosePreviewScene(scene);
+                }
+                catch when (originalException != null)
+                {
+                    // Preserve the original test failure.
+                }
+            }
+        }
+
+        [Test]
+        public void DuplicateDiscoveredGameRootCountIsClassified()
+        {
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
+                ProductionSpatialContentBuildGate.ValidateGameRootComposition(new[] { root, root }));
+            Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.DuplicateGameRoot));
         }
 
         [TestCase("manifest")]
@@ -167,15 +194,15 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase("limits")]
         public void MissingAssignmentsAreClassified(string field)
         {
-            ProductionSpatialBuildGateResult result = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 if (field == "manifest") root.productionSpatialManifest = null;
                 if (field == "catalog") root.productionSpatialCatalog = null;
                 if (field == "languages-null") root.productionSpatialLanguageTables = null;
                 if (field == "languages-empty") root.productionSpatialLanguageTables = Array.Empty<TextAsset>();
                 if (field == "language-null-entry") root.productionSpatialLanguageTables = new TextAsset[] { null };
                 if (field == "limits") root.productionSpatialValidationLimits = null;
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.MissingAssignment));
         }
@@ -193,13 +220,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             string copy = TestRoot + "/copied-" + field + ".json";
             Assert.That(AssetDatabase.CopyAsset(source, copy), Is.True);
             TextAsset copied = Load(copy);
-            ProductionSpatialBuildGateResult result = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 if (field == "manifest") root.productionSpatialManifest = copied;
                 if (field == "catalog") root.productionSpatialCatalog = copied;
                 if (field == "english") root.productionSpatialLanguageTables = new[] { copied };
                 if (field == "limits") root.productionSpatialValidationLimits = copied;
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.WrongAssetAssignment));
         }
@@ -207,10 +234,10 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [Test]
         public void DuplicateLanguagePathIsRejected()
         {
-            ProductionSpatialBuildGateResult result = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 root.productionSpatialLanguageTables = new[] { english, english };
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.WrongAssetAssignment));
         }
@@ -219,18 +246,18 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         public void AdditionalLanguagesUseCompleteLoaderValidation()
         {
             TextAsset valid = CreateAdditionalLanguage("zz", true);
-            ProductionSpatialBuildGateResult validResult = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult validResult = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 root.productionSpatialLanguageTables = new[] { english, valid };
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
-            Assert.That(validResult.Success, Is.True);
+            Assert.That(validResult.Success, Is.True, validResult.Reason + ":" + validResult.Detail);
 
             TextAsset invalid = CreateAdditionalLanguage("bad", false);
-            ProductionSpatialBuildGateResult invalidResult = ValidatePreviewComposition(root =>
+            ProductionSpatialBuildGateResult invalidResult = WithCanonicalBootstrapPreview((scene, root) =>
             {
-                AssignValid(root);
                 root.productionSpatialLanguageTables = new[] { english, invalid };
+                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(invalidResult.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.LocalizationFailure));
         }
@@ -266,13 +293,23 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         public void PreviewFixturePreservesNormalEditorSceneSetup()
         {
             Scene activeBefore = SceneManager.GetActiveScene();
-            int countBefore = SceneManager.sceneCount;
+            SceneSetup[] setupBefore = EditorSceneManager.GetSceneManagerSetup();
             bool dirtyBefore = activeBefore.IsValid() && activeBefore.isDirty;
-            Assert.That(ValidatePreviewComposition(AssignValid).Success, Is.True);
+            ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
+                ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene));
+            Assert.That(result.Success, Is.True, result.Reason + ":" + result.Detail);
             Scene activeAfter = SceneManager.GetActiveScene();
+            SceneSetup[] setupAfter = EditorSceneManager.GetSceneManagerSetup();
             Assert.That(activeAfter.handle, Is.EqualTo(activeBefore.handle));
-            Assert.That(SceneManager.sceneCount, Is.EqualTo(countBefore));
+            Assert.That(activeAfter.path, Is.EqualTo(activeBefore.path));
             Assert.That(activeAfter.IsValid() && activeAfter.isDirty, Is.EqualTo(dirtyBefore));
+            Assert.That(setupAfter.Length, Is.EqualTo(setupBefore.Length));
+            for (int index = 0; index < setupBefore.Length; index++)
+            {
+                Assert.That(setupAfter[index].path, Is.EqualTo(setupBefore[index].path));
+                Assert.That(setupAfter[index].isLoaded, Is.EqualTo(setupBefore[index].isLoaded));
+                Assert.That(setupAfter[index].isActive, Is.EqualTo(setupBefore[index].isActive));
+            }
         }
 
         [Test]
@@ -294,21 +331,18 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             return Load(path);
         }
 
-        private ProductionSpatialBuildGateResult ValidatePreviewComposition(
-            Action<GameRoot> configure, bool includeRoot = true, int count = 1)
+        private T WithCanonicalBootstrapPreview<T>(Func<Scene, GameRoot, T> action)
         {
-            Scene scene = EditorSceneManager.NewPreviewScene();
+            Scene scene = EditorSceneManager.OpenPreviewScene(DevelopmentBuildUtility.BootstrapScenePath);
             Exception originalException = null;
             try
             {
-                if (includeRoot)
-                    for (int index = 0; index < count; index++)
-                    {
-                        GameObject gameObject = ObjectFactory.CreateGameObject(scene, HideFlags.None,
-                            "GameRoot" + index, typeof(GameRoot));
-                        configure?.Invoke(gameObject.GetComponent<GameRoot>());
-                    }
-                return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
+                Assert.That(EditorSceneManager.IsPreviewScene(scene), Is.True);
+                GameRoot[] roots = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<GameRoot>(true)).ToArray();
+                Assert.That(roots.Length, Is.EqualTo(1),
+                    "Canonical Bootstrap preview fixture must contain exactly one GameRoot.");
+                return action(scene, roots[0]);
             }
             catch (Exception exception)
             {
@@ -326,14 +360,6 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                     // Preserve the fixture's original failure instead of replacing it with cleanup failure.
                 }
             }
-        }
-
-        private void AssignValid(GameRoot root)
-        {
-            root.productionSpatialManifest = manifest;
-            root.productionSpatialCatalog = catalog;
-            root.productionSpatialLanguageTables = new[] { english };
-            root.productionSpatialValidationLimits = limits;
         }
 
         private static TextAsset Load(string path) => AssetDatabase.LoadAssetAtPath<TextAsset>(path);

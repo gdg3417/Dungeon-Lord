@@ -161,8 +161,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         {
             GameRoot[] roots = scene.GetRootGameObjects()
                 .SelectMany(root => root.GetComponentsInChildren<GameRoot>(true)).ToArray();
-            if (roots.Length == 0) return Failure(ProductionSpatialBuildGateReason.MissingGameRoot, "GameRoot");
-            if (roots.Length != 1) return Failure(ProductionSpatialBuildGateReason.DuplicateGameRoot, roots.Length.ToString());
+            return ValidateGameRootComposition(roots);
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateGameRootComposition(
+            IReadOnlyList<GameRoot> roots)
+        {
+            if (roots.Count == 0) return Failure(ProductionSpatialBuildGateReason.MissingGameRoot, "GameRoot");
+            if (roots.Count != 1) return Failure(ProductionSpatialBuildGateReason.DuplicateGameRoot, roots.Count.ToString());
 
             GameRoot gameRoot = roots[0];
             if (gameRoot.productionSpatialManifest == null || gameRoot.productionSpatialCatalog == null ||
