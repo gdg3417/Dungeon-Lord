@@ -191,7 +191,10 @@ namespace DungeonBuilder.M0.Tests
             if (target == "origin") floor.RoomContents.RoomSemantics[0].LegacyRoomOriginKind = (LegacyRoomOriginKind)99;
             DetachedCanonicalSpatialSaveState copy = Canonicalize(source);
             AssertIssue(copy, issue);
-            Assert.That(JsonUtility.ToJson(copy), Does.Contain("99"));
+            if (target == "floor")
+                Assert.That(copy.Floors[0].FloorIndex, Is.EqualTo(-1));
+            else
+                Assert.That(JsonUtility.ToJson(copy), Does.Contain("99"));
         }
 
         [TestCase("layout")]
