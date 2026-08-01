@@ -399,8 +399,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(overflow.Value,Is.Null);
             SpatialLayoutCompatibilityProfilesData reversed=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(invalid.text);
             System.Array.Reverse(reversed.GeometryRecords);
-            TextAsset reversedAsset=new TextAsset(System.Text.Encoding.UTF8.GetString(
-                SpatialLayoutCompatibilityProfiles.SerializeCanonical(reversed)));
+            TextAsset reversedAsset=CanonicalAsset(reversed);
             CollectionAssert.AreEqual(overflow.Diagnostics,
                 SpatialLayoutCompatibilityProfiles.ParseAndValidate(reversedAsset,spatial,oneOver).Diagnostics);
         }

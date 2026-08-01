@@ -332,12 +332,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DungeonSpatialAuthoringSource source = Production();
             IReadOnlyDictionary<string, byte[]> sourceBefore = source.Snapshot();
             byte[] limitsBefore = File.ReadAllBytes(LimitsPath);
+            byte[] compatibilityBefore = File.ReadAllBytes(SpatialLayoutCompatibilityProfiles.ProductionPath);
             ProductionSpatialGeneratedSet fresh = Build().Output;
 
             string[] committedJson = Directory.GetFiles(
                     Path.GetDirectoryName(ProductionSpatialGeneratedSetParser.ManifestPath), "*.json")
                 .Select(path => path.Replace('\\', '/'))
-                .Where(path => !string.Equals(path, LimitsPath, StringComparison.Ordinal))
+                .Where(path => !string.Equals(path, LimitsPath, StringComparison.Ordinal) &&
+                    !string.Equals(path, SpatialLayoutCompatibilityProfiles.ProductionPath, StringComparison.Ordinal))
                 .OrderBy(path => path, StringComparer.Ordinal).ToArray();
             CollectionAssert.AreEqual(ProductionSpatialGeneratedSetParser.RequiredPaths, committedJson);
 
@@ -351,6 +353,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(file.Bytes, File.ReadAllBytes(file.Path), file.Path);
 
             CollectionAssert.AreEqual(limitsBefore, File.ReadAllBytes(LimitsPath));
+            CollectionAssert.AreEqual(compatibilityBefore,
+                File.ReadAllBytes(SpatialLayoutCompatibilityProfiles.ProductionPath));
             foreach (KeyValuePair<string, byte[]> entry in sourceBefore)
                 CollectionAssert.AreEqual(entry.Value, source.Snapshot()[entry.Key], entry.Key);
         }

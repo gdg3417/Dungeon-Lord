@@ -212,7 +212,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             SpatialLayoutCompatibilityResult result = SpatialLayoutCompatibilityProfiles.ParseAndValidate(
                 compatibility, spatial.Value, parsedLimits.Limits, null, true);
             if (result.Success) return Success();
-            return Failure(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.UnauthorizedActiveProductionSelection)
+            bool onlyUnauthorized = result.Diagnostics.Length == 1 &&
+                result.Diagnostics[0] == SpatialLayoutCompatibilityDiagnostic.UnauthorizedActiveProductionSelection;
+            return Failure(onlyUnauthorized
                 ? ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection
                 : ProductionSpatialBuildGateReason.InvalidCompatibilityProfile,
                 StableDetail(null, result.Diagnostics));

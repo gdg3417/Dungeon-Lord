@@ -536,10 +536,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ProductionPublicationHasNoGameplayPresenterUiPlacementSimulationOrRouteConsumer()
         {
+            const string compositionPath = "Assets/_Project/Scripts/Core/GameRoot.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
+                .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            CollectionAssert.IsEmpty(consumers);
+            CollectionAssert.AreEqual(new[] { compositionPath }, consumers);
+            string composition = File.ReadAllText(compositionPath);
+            Assert.That(Regex.Matches(composition, @"\.ProductionSpatialContent\b").Count, Is.EqualTo(2));
+            Assert.That(Regex.IsMatch(composition,
+                @"Content\.LoadSpatialLayoutCompatibilityProfiles[\s\S]{0,200}Content\.ProductionSpatialContent"),
+                Is.True);
         }
 
         [Test]
