@@ -472,7 +472,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return copy;
         }
 
-        private static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> SelectMigration(
+        internal static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> SelectMigration(
             SpatialLayoutCompatibilityProfilesData data, int rawSchema, int targetSchema, int targetContractVersion)
         {
             SpatialMigrationCompatibilityProfile[] supplied = data?.MigrationProfiles ??
@@ -494,7 +494,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(match));
         }
 
-        private static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> SelectStarter(
+        internal static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> SelectStarter(
             SpatialLayoutCompatibilityProfilesData data, int targetSchema, int contractVersion)
         {
             CanonicalStarterLayoutProfile[] supplied = data?.StarterProfiles ??
@@ -515,7 +515,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
-        private static CompatibilitySelectionResult<CanonicalLayoutContractSelection> SelectContract(
+        internal static CompatibilitySelectionResult<CanonicalLayoutContractSelection> SelectContract(
             SpatialLayoutCompatibilityProfilesData data, int targetSchema)
         {
             CanonicalLayoutContractSelection[] active =
@@ -529,7 +529,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return Selection(CompatibilitySelectionStatus.Success, string.Empty, Clone(active[0]));
         }
 
-        private static bool TryRecoverMigration(SpatialLayoutCompatibilityProfilesData data, string profileId,
+        internal static bool TryRecoverMigration(SpatialLayoutCompatibilityProfilesData data, string profileId,
                                                int profileVersion, string profileHash, string geometryId,
                                                int geometryVersion, string geometryHash,
                                                out SpatialMigrationCompatibilityProfile profile)

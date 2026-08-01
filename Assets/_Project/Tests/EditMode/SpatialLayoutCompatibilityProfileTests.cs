@@ -107,7 +107,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset extreme=CanonicalAsset(data); byte[] before=(byte[])extreme.bytes.Clone();
             SpatialLayoutCompatibilityResult result=null;
             Assert.DoesNotThrow(()=>result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(extreme,spatial,limits));
-            Assert.That(result.Success,Is.False); Assert.That(result.Diagnostics,Does.Contain(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry));
+            Assert.That(result.Success,Is.False); Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry),Is.True);
             CollectionAssert.AreEqual(before,extreme.bytes);
 
             Assert.That(SpatialLayoutCompatibilityProfiles.TryTransformPoint(new TileCoordinate(1,1),
@@ -425,8 +425,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 limits.MaximumNestedRecords,41,limits.MaximumIssues,limits.MaximumStringCharacters);
             SpatialLayoutCompatibilityResult result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(profiles,spatial,oneOver);
             Assert.That(result.Value,Is.Null);
-            Assert.That(result.Diagnostics,Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
-            Assert.That(result.Diagnostics,Does.Not.Contain(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry));
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.True);
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry),Is.False);
         }
 
         [Test] public void StrictCompatibilityWorkloadDimensionsHonorExactAndOneOverBoundaries()
@@ -442,8 +442,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
             SpatialContentValidationWorkloadLimits topOne=Limits(1,limits.MaximumNestedRecords,
                 limits.MaximumMaterializedTiles,limits.MaximumStringCharacters);
-            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(twoTopLevel,spatial,topOne).Diagnostics,
-                Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
+            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(twoTopLevel,spatial,topOne).Diagnostics
+                .Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.True);
         }
 
         [TestCase("bom",SpatialLayoutCompatibilityDiagnostic.InvalidEncoding)]
@@ -579,14 +579,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private void AssertWorkloadBoundary(TextAsset asset,int top,int nested,int characters)
         {
             Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,
-                Limits(top,nested,limits.MaximumMaterializedTiles,characters)).Diagnostics,
-                Does.Not.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
+                Limits(top,nested,limits.MaximumMaterializedTiles,characters)).Diagnostics
+                .Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.False);
             Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,
-                Limits(top,nested-1,limits.MaximumMaterializedTiles,characters)).Diagnostics,
-                Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
+                Limits(top,nested-1,limits.MaximumMaterializedTiles,characters)).Diagnostics
+                .Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.True);
             Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,
-                Limits(top,nested,limits.MaximumMaterializedTiles,characters-1)).Diagnostics,
-                Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
+                Limits(top,nested,limits.MaximumMaterializedTiles,characters-1)).Diagnostics
+                .Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.True);
         }
         private void AssertResolverFailure(byte[] bytes,SpatialContentValidationWorkloadLimits suppliedLimits,
             SpatialLayoutCompatibilityDiagnostic expected)
