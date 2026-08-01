@@ -39,7 +39,7 @@ namespace DungeonBuilder.M0.Tests
         }
 
         [Test]
-        public void EveryNestedCollection_UsesRequiredCanonicalOrdering()
+        public void EveryNestedCollection_UsesRequiredCanonicalOrdering_SourceAndDestinationPrecedeEdgeId()
         {
             SavedSpatialFloor floor = Floor("floor.a", 0, "room.b", "room.a");
             Array.Reverse(floor.Layout.Rooms); Array.Reverse(floor.Layout.Nodes); Array.Reverse(floor.Layout.Edges);
@@ -49,7 +49,9 @@ namespace DungeonBuilder.M0.Tests
             floor = canonical.Floors[0];
             CollectionAssert.AreEqual(new[] { "room.a", "room.b" }, floor.Layout.Rooms.Select(x => x.RoomInstanceId));
             CollectionAssert.AreEqual(new[] { FloorId(floor) + ".node.entrance", "room.a.node", "room.b.node", FloorId(floor) + ".node.completion" }, floor.Layout.Nodes.Select(x => x.NodeId));
-            CollectionAssert.AreEqual(new[] { FloorId(floor) + ".edge.00", FloorId(floor) + ".edge.01", FloorId(floor) + ".edge.02" }, floor.Layout.Edges.Select(x => x.EdgeId));
+            CollectionAssert.AreEqual(new[] { FloorId(floor) + ".edge.00", FloorId(floor) + ".edge.02", FloorId(floor) + ".edge.01" }, floor.Layout.Edges.Select(x => x.EdgeId));
+            CollectionAssert.AreEqual(new[] { FloorId(floor) + ".node.entrance", "room.a.node", "room.b.node" },
+                floor.Layout.Edges.Select(x => x.SourceNodeId));
             CollectionAssert.AreEqual(new[] { FloorId(floor) + ".fixed.completion", FloorId(floor) + ".fixed.entrance" }, floor.FixedStructures.Select(x => x.FixedStructureInstanceId));
             CollectionAssert.AreEqual(new[] { CanonicalSpatialSaveContracts.MonsterCategoryId, CanonicalSpatialSaveContracts.TrapCategoryId, CanonicalSpatialSaveContracts.LootNodeCategoryId }, floor.RoomContents.Assignments.Where(x => x.RoomInstanceId == "room.a").Select(x => x.CategoryId));
             CollectionAssert.AreEqual(new[] { "room.a", "room.b" }, floor.RoomContents.RoomSemantics.Select(x => x.RoomInstanceId));
@@ -282,6 +284,98 @@ namespace DungeonBuilder.M0.Tests
             DetachedCanonicalSpatialSaveState canonical = Canonicalize(state);
             Assert.That(Validate(canonical, true).IsValid, Is.True);
             AssertStableRoundTrip(canonical);
+        }
+
+        [TestCase("transaction")]
+        [TestCase("fingerprint")]
+        public void MalformedMigratedAuditIdentifiers_AreRejected(string field)
+        {
+            DetachedCanonicalSpatialSaveState state = State(Floor("floor.a", 0, "room.a"));
+            state.Authority.CreationKind = CanonicalSpatialCreationKind.Migrated;
+            state.Authority.MigrationTransactionId = field == "transaction" ? "Bad Transaction" : "transaction.01";
+            state.Authority.MigrationDescriptorFingerprint = field == "fingerprint" ? "Bad Fingerprint" : "fingerprint.01";
+            AssertIssue(state, CanonicalSpatialSaveValidationIssue.MalformedPersistentId);
+        }
+
+        [Test]
+        public void ValidAbsenceNullAndEmpty_CanonicalizeToIdenticalUnityJson()
+        {
+            DetachedCanonicalSpatialSaveState nullState = State(Floor("floor.a", 0, "room.a"));
+            DetachedCanonicalSpatialSaveState emptyState = State(Floor("floor.a", 0, "room.a"));
+            FloorRouteNode nullEntrance = nullState.Floors[0].Layout.Nodes.Single(x => x.Kind == FloorRouteNodeKind.Entrance);
+            FloorRouteNode emptyEntrance = emptyState.Floors[0].Layout.Nodes.Single(x => x.Kind == FloorRouteNodeKind.Entrance);
+            FloorRouteEdge nullEdge = nullState.Floors[0].Layout.Edges[0];
+            FloorRouteEdge emptyEdge = emptyState.Floors[0].Layout.Edges[0];
+            nullEntrance.RoomInstanceId = null; emptyEntrance.RoomInstanceId = string.Empty;
+            nullEdge.CorridorDefinitionId = null; emptyEdge.CorridorDefinitionId = string.Empty;
+            nullEdge.OptionalBranchId = null; emptyEdge.OptionalBranchId = string.Empty;
+
+            string nullJson = JsonUtility.ToJson(Canonicalize(nullState));
+            string emptyJson = JsonUtility.ToJson(Canonicalize(emptyState));
+            Assert.That(nullJson, Is.EqualTo(emptyJson));
+        }
+
+        [Test]
+        public void MalformedNonemptyOptionalValues_ArePreservedAndRejected()
+        {
+            DetachedCanonicalSpatialSaveState state = State(Floor("floor.a", 0, "room.a"));
+            FloorRouteEdge edge = state.Floors[0].Layout.Edges[0];
+            edge.CorridorDefinitionId = " "; edge.OptionalBranchId = "Bad Branch";
+            DetachedCanonicalSpatialSaveState canonical = Canonicalize(state);
+            FloorRouteEdge copied = canonical.Floors[0].Layout.Edges.Single(x => x.EdgeId == edge.EdgeId);
+            Assert.That(copied.CorridorDefinitionId, Is.EqualTo(" "));
+            Assert.That(copied.OptionalBranchId, Is.EqualTo("Bad Branch"));
+            Assert.That(Validate(canonical).Issues, Does.Contain(CanonicalSpatialSaveValidationIssue.MalformedPersistentId));
+            Assert.That(Validate(canonical).Issues, Does.Contain(CanonicalSpatialSaveValidationIssue.InvalidDirectDoorwayShape));
+            Assert.That(Validate(canonical).Issues, Does.Contain(CanonicalSpatialSaveValidationIssue.InvalidEdgeBranchShape));
+        }
+
+        [TestCase(FloorRouteNodeKind.Entrance)]
+        [TestCase(FloorRouteNodeKind.Exit)]
+        [TestCase(FloorRouteNodeKind.Descent)]
+        [TestCase(FloorRouteNodeKind.Completion)]
+        public void NonRoomNodesRejectNonemptyRoomReferences(FloorRouteNodeKind kind)
+        {
+            DetachedCanonicalSpatialSaveState state = State(Floor("floor.a", 0, "room.a"));
+            FloorRouteNode node = state.Floors[0].Layout.Nodes.First();
+            node.Kind = kind; node.RoomInstanceId = "room.a";
+            DetachedCanonicalSpatialSaveState canonical = Canonicalize(state);
+            Assert.That(canonical.Floors[0].Layout.Nodes.Single(x => x.NodeId == node.NodeId).RoomInstanceId, Is.EqualTo("room.a"));
+            AssertIssue(canonical, CanonicalSpatialSaveValidationIssue.NonRoomNodeHasRoomReference);
+        }
+
+        [TestCase("null-footprint")]
+        [TestCase("null-tiles")]
+        [TestCase("empty-tiles")]
+        public void PhysicalCorridorRequiresNonemptyFootprint(string shape)
+        {
+            DetachedCanonicalSpatialSaveState state = State(Floor("floor.a", 0, "room.a"));
+            FloorRouteEdge edge = state.Floors[0].Layout.Edges[0];
+            edge.ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor;
+            edge.CorridorDefinitionId = "corridor.a";
+            if (shape == "null-footprint") edge.Footprint = null;
+            if (shape == "null-tiles") edge.Footprint = new ResolvedTileFootprint { OccupiedTiles = null };
+            if (shape == "empty-tiles") edge.Footprint = new ResolvedTileFootprint { OccupiedTiles = Array.Empty<TileCoordinate>() };
+            DetachedCanonicalSpatialSaveState canonical = Canonicalize(state);
+            if (shape == "null-tiles")
+            {
+                Assert.That(edge.Footprint.OccupiedTiles, Is.Null);
+                Assert.That(canonical.Floors[0].Layout.Edges[0].Footprint.OccupiedTiles, Is.Empty);
+            }
+            AssertIssue(canonical, CanonicalSpatialSaveValidationIssue.InvalidPhysicalCorridorShape);
+        }
+
+        [Test]
+        public void PhysicalCorridorWithDefinitionAndTiles_IsStructurallyValid()
+        {
+            DetachedCanonicalSpatialSaveState state = State(Floor("floor.a", 0, "room.a"));
+            FloorRouteEdge edge = state.Floors[0].Layout.Edges[0];
+            edge.ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor;
+            edge.CorridorDefinitionId = "corridor.a";
+            edge.Footprint = new ResolvedTileFootprint { OccupiedTiles = new[] { new TileCoordinate(2, 0), new TileCoordinate(1, 0) } };
+            DetachedCanonicalSpatialSaveState canonical = Canonicalize(state);
+            Assert.That(Validate(canonical).IsValid, Is.True);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 0), new TileCoordinate(2, 0) }, canonical.Floors[0].Layout.Edges[0].Footprint.OccupiedTiles);
         }
 
         [TestCase("layout-version", CanonicalSpatialSaveValidationIssue.InvalidLayoutContractVersion)]

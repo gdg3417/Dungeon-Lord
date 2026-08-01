@@ -131,7 +131,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         DuplicateRoomSemantics = 39,
         UnknownRoomSemantics = 40,
         InvalidRoomOriginKind = 41,
-        NonCanonicalOrdering = 42
+        NonCanonicalOrdering = 42,
+        NonRoomNodeHasRoomReference = 43,
+        InvalidPhysicalCorridorShape = 44
     }
 
     public sealed class CanonicalSpatialSaveValidationResult
@@ -273,7 +275,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static FloorRouteNode CopyNode(FloorRouteNode node) => node == null ? null : new FloorRouteNode
         {
-            NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind, RoomInstanceId = node.RoomInstanceId
+            NodeId = node.NodeId, FloorId = node.FloorId, Kind = node.Kind,
+            RoomInstanceId = node.Kind != FloorRouteNodeKind.Room && node.RoomInstanceId == null
+                ? string.Empty : node.RoomInstanceId
         };
 
         private static FloorRouteEdge CopyEdge(FloorRouteEdge edge)
@@ -283,15 +287,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (edge.Footprint != null)
             {
                 TileCoordinate[] tiles = edge.Footprint.OccupiedTiles == null
-                    ? null : (TileCoordinate[])edge.Footprint.OccupiedTiles.Clone();
-                if (tiles != null) Array.Sort(tiles);
+                    ? Array.Empty<TileCoordinate>() : (TileCoordinate[])edge.Footprint.OccupiedTiles.Clone();
+                Array.Sort(tiles);
                 footprint = new ResolvedTileFootprint { OccupiedTiles = tiles };
             }
             return new FloorRouteEdge
             {
-                EdgeId = edge.EdgeId, CorridorDefinitionId = edge.CorridorDefinitionId, FloorId = edge.FloorId,
+                EdgeId = edge.EdgeId,
+                CorridorDefinitionId = edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                    string.IsNullOrEmpty(edge.CorridorDefinitionId) ? string.Empty : edge.CorridorDefinitionId,
+                FloorId = edge.FloorId,
                 SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId, Footprint = footprint,
-                Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId,
+                Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
                 ConnectionKind = edge.ConnectionKind
             };
         }
@@ -336,6 +343,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (marker.CreationKind == CanonicalSpatialCreationKind.NativeCanonical &&
                 (!string.IsNullOrEmpty(marker.MigrationTransactionId) || !string.IsNullOrEmpty(marker.MigrationDescriptorFingerprint)))
                 Add(issues, CanonicalSpatialSaveValidationIssue.NativeMarkerHasMigrationIdentity);
+            if (!string.IsNullOrEmpty(marker.MigrationTransactionId)) CheckId(marker.MigrationTransactionId, issues);
+            if (!string.IsNullOrEmpty(marker.MigrationDescriptorFingerprint)) CheckId(marker.MigrationDescriptorFingerprint, issues);
         }
 
         private static void ValidateFloor(SavedSpatialFloor floor, HashSet<string> instanceIds,
@@ -372,6 +381,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     CheckId(node.RoomInstanceId, issues);
                     if (!roomIds.Contains(node.RoomInstanceId)) Add(issues, CanonicalSpatialSaveValidationIssue.UnknownRoomReference);
                 }
+                else if (Enum.IsDefined(typeof(FloorRouteNodeKind), node.Kind) && !string.IsNullOrEmpty(node.RoomInstanceId))
+                    Add(issues, CanonicalSpatialSaveValidationIssue.NonRoomNodeHasRoomReference);
             }
             foreach (FloorRouteEdge edge in edges)
             {
@@ -391,6 +402,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     Add(issues, CanonicalSpatialSaveValidationIssue.InvalidDirectDoorwayShape);
                 if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor && string.IsNullOrEmpty(edge.CorridorDefinitionId))
                     Add(issues, CanonicalSpatialSaveValidationIssue.MalformedPersistentId);
+                if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
+                    (edge.Footprint == null || edge.Footprint.OccupiedTiles == null || edge.Footprint.OccupiedTiles.Length == 0))
+                    Add(issues, CanonicalSpatialSaveValidationIssue.InvalidPhysicalCorridorShape);
                 if (classificationValid && ((edge.Classification == RouteClassification.Required && !string.IsNullOrEmpty(edge.OptionalBranchId)) ||
                     (edge.Classification == RouteClassification.Optional && !IsPersistentId(edge.OptionalBranchId))))
                     Add(issues, CanonicalSpatialSaveValidationIssue.InvalidEdgeBranchShape);
