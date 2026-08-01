@@ -1,6 +1,6 @@
 # SPEC LOCK SUMMARY (AUTHORITATIVE)
 
-**Current Phase 2 status (2026-07-31):** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
+**Current Phase 2 status (2026-08-01):** PR #188 is merged, Phase 2A is complete, and `main` is at `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains 6 and no future target schema is selected. No migration, raw interception, transaction, reader/writer activation, localization, or gameplay change exists; production migration profiles, starter profiles, and canonical contract selections remain inactive. UAT is not applicable to this inactive technical data contract.
 
 **GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 

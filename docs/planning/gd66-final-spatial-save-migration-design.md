@@ -2,7 +2,7 @@
 
 ## 1. Status and approval boundary
 
-**Status: APPROVED in merged PR #187.** This design is the approved Phase 2 basis. PR #188 implements only the inactive Phase 2A configuration foundation; save schema remains **6**, no future target save schema is selected, production Dungeon Spatial gameplay remains **inactive**, and the existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. No migration, serialized-shape change, runtime activation, or writable-authority transition occurs here. Phase 2 exclusively owns implementation after this design merges.
+**Status: APPROVED in merged PR #187.** PR #188 is merged, Phase 2A is complete, and its `main` baseline is `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains **6** and no future target schema is selected. Production migration profiles, starter profiles, canonical contract selections, and Dungeon Spatial gameplay remain inactive. No migration, raw interception, transaction, live persistence, reader/writer activation, localization, or gameplay change exists; UAT is not applicable to this inactive technical data contract. The existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. Phase 2 is not complete.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 

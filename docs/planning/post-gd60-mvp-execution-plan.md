@@ -1,16 +1,16 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2 status (2026-07-31):** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
+**Current Phase 2 status (2026-08-01):** PR #188 is merged, Phase 2A is complete, and `main` is at `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains 6 and no future target schema is selected. No migration, raw interception, transaction, reader/writer activation, localization, or gameplay change exists; production migration profiles, starter profiles, and canonical contract selections remain inactive. UAT is not applicable to this inactive technical data contract.
 
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 2 active; PR #188 is the inactive Phase 2A implementation packet** |
+| Status | **Phase 2 active; Phase 2A complete; Phase 2B1 detached inactive saved shape current** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main through merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902` |
+| Current implementation baseline | Main through merged PR #188 at `a1a0cd996a9269c1026fee4c982782de7dc4d88d` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-07-31 |
+| Last reconciled | 2026-08-01 |
 
 **GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 

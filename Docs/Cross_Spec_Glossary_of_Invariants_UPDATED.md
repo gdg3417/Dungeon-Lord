@@ -1,5 +1,7 @@
 **Cross Spec Glossary of Invariants**
 
+**Current Phase 2 status (2026-08-01):** PR #188 is merged, Phase 2A is complete, and `main` is at `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains 6 and no future target schema is selected. No migration, raw interception, transaction, reader/writer activation, localization, or gameplay change exists; production migration profiles, starter profiles, and canonical contract selections remain inactive. UAT is not applicable to this inactive technical data contract.
+
 *Dungeon Builder, locked global invariants*
 
 | Status | Locked |
