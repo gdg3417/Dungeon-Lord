@@ -1,13 +1,13 @@
 # Dungeon-Lord
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Current Phase 2 status (2026-07-31):** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
 
 
 Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic, config-owned simulation systems and legacy-safe iteration.
 
 ## Current status
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet activate physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
 
@@ -37,7 +37,7 @@ The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/
 
 GD65B0C7 approves exactly rows 66–70 and 72 and closes the register at 72 of 72 `APPROVED`. The sole production workload-limit configuration authority, `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`, will provide `MaximumTopLevelRecords = 128`, `MaximumNestedRecords = 512`, `MaximumMaterializedTiles = 4096`, `MaximumIssues = 256`, and `MaximumStringCharacters = 32768` to export, pre-build, runtime-load validation, and canonicalization. These are configuration-owned workload safety bounds—not gameplay, floor-count, floor-space, schema, save, or permanent post-MVP ceilings—and missing or invalid configuration fails closed without a hardcoded or test-default fallback. The 4,096 tile bound applies to one materialized footprint or floor boundary, never cumulative dungeon capacity or Floor 1 capacity 60.
 
-The **Production Spatial Content Pipeline EditMode Suite** now covers all six GD65B responsibilities, and the final complete EditMode suite passed 202/202 at the tested SHA. Its test-only 80-floor fixture remains a scalability contract, not approval for production floors or geometry. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. Save schema remains 6, the catalog remains inactive, and runtime/save authority is unchanged.
+The **Production Spatial Content Pipeline EditMode Suite** now covers all six GD65B responsibilities, and the final complete EditMode suite passed 202/202 at the tested SHA. Its test-only 80-floor fixture remains a scalability contract, not approval for production floors or geometry. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. Save schema remains 6, the catalog remains inactive, and runtime/save authority is unchanged.
 
 
 ## Dungeon Spatial authoring source

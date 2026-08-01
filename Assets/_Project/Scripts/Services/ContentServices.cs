@@ -15,6 +15,7 @@ namespace DungeonBuilder.M0
         public StringTable Strings { get; private set; }
         public HeatRuntimeConfig HeatRuntime { get; private set; }
         public ProductionSpatialContentSnapshot ProductionSpatialContent { get; private set; }
+        public SpatialLayoutCompatibilitySnapshot SpatialLayoutCompatibilityProfiles { get; private set; }
 
         private readonly Dictionary<string, string> _stringMap = new Dictionary<string, string>();
 
@@ -31,6 +32,18 @@ namespace DungeonBuilder.M0
                 diagnosticSink?.Invoke(diagnostic);
             if (result.Success)
                 ProductionSpatialContent = result.Value;
+            return result;
+        }
+
+        public SpatialLayoutCompatibilityResult LoadSpatialLayoutCompatibilityProfiles(
+            TextAsset profiles, ProductionSpatialContentSnapshot spatial,
+            SpatialContentValidationWorkloadLimits limits,
+            Action<SpatialLayoutCompatibilityDiagnostic> diagnosticSink = null)
+        {
+            SpatialLayoutCompatibilityResult result = Gameplay.DungeonSpatial.SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                profiles, spatial, limits, diagnosticSink, true);
+            if (result.Success)
+                SpatialLayoutCompatibilityProfiles = result.Value;
             return result;
         }
 

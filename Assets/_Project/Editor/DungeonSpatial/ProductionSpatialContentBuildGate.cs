@@ -26,7 +26,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         MissingAssignment = 9,
         WrongAssetAssignment = 10,
         UnexpectedInternalValidationFailure = 11,
-        InvalidBuildSceneComposition = 12
+        InvalidBuildSceneComposition = 12,
+        InvalidCompatibilityProfile = 13,
+        UnauthorizedActiveCompatibilitySelection = 14
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -90,17 +92,20 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         {
             ProductionSpatialBuildGateResult paths = ValidateRequiredPaths(
                 ProductionSpatialGeneratedSetParser.RequiredPaths
-                    .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath }), File.Exists);
+                    .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath,
+                        SpatialLayoutCompatibilityProfiles.ProductionPath }), File.Exists);
             if (!paths.Success) return paths;
 
             TextAsset manifest = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.ManifestPath);
             TextAsset catalog = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.CatalogPath);
             TextAsset english = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.EnglishPath);
             TextAsset limits = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialContentPublicationService.LimitsPath);
-            if (manifest == null || catalog == null || english == null || limits == null)
+            TextAsset compatibility = AssetDatabase.LoadAssetAtPath<TextAsset>(SpatialLayoutCompatibilityProfiles.ProductionPath);
+            if (manifest == null || catalog == null || english == null || limits == null || compatibility == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, "AssetDatabaseImport");
 
-            return ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
+            ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
+            return loaded.Success ? ValidateCompatibility(compatibility, manifest, catalog, new[] { english }, limits) : loaded;
         }
 
         internal static ProductionSpatialBuildGateResult ValidateComposition(string[] attemptedScenes)
@@ -174,7 +179,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             if (gameRoot.productionSpatialManifest == null || gameRoot.productionSpatialCatalog == null ||
                 gameRoot.productionSpatialValidationLimits == null || gameRoot.productionSpatialLanguageTables == null ||
                 gameRoot.productionSpatialLanguageTables.Length == 0 ||
-                gameRoot.productionSpatialLanguageTables.Any(asset => asset == null))
+                gameRoot.productionSpatialLanguageTables.Any(asset => asset == null) ||
+                gameRoot.spatialLayoutCompatibilityProfilesJson == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingAssignment, "ProductionSpatialContent");
 
             if (!ExactPath(gameRoot.productionSpatialManifest, ProductionSpatialGeneratedSetParser.ManifestPath) ||
@@ -183,11 +189,35 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 !gameRoot.productionSpatialLanguageTables.Any(asset =>
                     ExactPath(asset, ProductionSpatialGeneratedSetParser.EnglishPath)) ||
                 gameRoot.productionSpatialLanguageTables.Select(AssetDatabase.GetAssetPath)
-                    .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length)
+                    .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length ||
+                !ExactPath(gameRoot.spatialLayoutCompatibilityProfilesJson,
+                    SpatialLayoutCompatibilityProfiles.ProductionPath))
                 return Failure(ProductionSpatialBuildGateReason.WrongAssetAssignment, "ProductionSpatialContent");
 
-            return ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
+            ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
                 gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits);
+            return loaded.Success ? ValidateCompatibility(gameRoot.spatialLayoutCompatibilityProfilesJson,
+                gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,
+                gameRoot.productionSpatialLanguageTables, gameRoot.productionSpatialValidationLimits) : loaded;
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidateCompatibility(TextAsset compatibility,
+            TextAsset manifest, TextAsset catalog, IReadOnlyList<TextAsset> languages, TextAsset limits)
+        {
+            ProductionSpatialContentLoadResult spatial = ProductionSpatialContentLoader.Load(manifest, catalog, languages, limits);
+            ProductionSpatialContentWorkloadLimitParseResult parsedLimits =
+                ProductionSpatialContentWorkloadLimitParser.Parse(limits);
+            if (!spatial.Success || !parsedLimits.Success)
+                return Failure(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile, "Dependency");
+            SpatialLayoutCompatibilityResult result = SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                compatibility, spatial.Value, parsedLimits.Limits, null, true);
+            if (result.Success) return Success();
+            bool onlyUnauthorized = result.Diagnostics.Length == 1 &&
+                result.Diagnostics[0] == SpatialLayoutCompatibilityDiagnostic.UnauthorizedActiveProductionSelection;
+            return Failure(onlyUnauthorized
+                ? ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection
+                : ProductionSpatialBuildGateReason.InvalidCompatibilityProfile,
+                StableDetail(null, result.Diagnostics));
         }
 
         private static bool ExactPath(UnityEngine.Object asset, string expected) =>

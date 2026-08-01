@@ -1,18 +1,18 @@
 # Post-GD60 MVP Execution Plan
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Current Phase 2 status (2026-07-31):** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
 
 
 | Field | Decision |
 |---|---|
-| Status | **GD65B closed by merged PR #186; GD66 candidate active in PR #187** |
+| Status | **Phase 2 active; PR #188 is the inactive Phase 2A implementation packet** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Current implementation baseline | Main through merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-07-31 |
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 ## 1. Authority and purpose
 
@@ -81,7 +81,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Status: complete.** Required documents agreed on baseline, authority, scope, and sequence; documentation validation passed. The fantasy questions remain explicit and fun was not claimed as proven.
 
-### Phase 1 — Spatial domain foundation (GD65B closed; GD66 candidate active in PR #187; runtime remains inactive)
+### Phase 1 — Spatial domain foundation (complete through approved GD66; runtime remains inactive)
 
 1. **GD62 — Spatial contracts and validator foundation (complete but inactive):** tile coordinates, rectangular and straight-corridor footprints, floor/room/corridor/node/edge contracts, stable IDs, ordinal canonical ordering, pure deterministic validation with stable reason codes 1–39, and Unity JSON round-trip coverage. Its capacity and edge contracts predate the GD63 decisions and require GD64 alignment.
 2. **GD63 — Approved decisions and planning reconciliation (complete):** lock spatial, editing, route, progression, and MVP-content direction; document the inactive GD62 delta; reconcile Spec 38 and migration planning.
@@ -98,7 +98,7 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 11. **GD65B3B / PR #184 — Export invocation and committed set (complete):** added the shared editor-menu/command-line invocation and committed the exact three generated production JSON files. Its historical evidence gaps are reconciled by the stronger final GD65B5 evidence.
 12. **GD65B4 / PR #185 — Production loading and composition assignment (complete):** loads and atomically publishes the validated inactive catalog through the approved explicit composition boundary without activating gameplay.
 13. **GD65B5 / PR #186 — Pre-build recovery, validation, and closeout (complete; merged):** all player builds are gated, required evidence passed, PR #186 merged, and GD65B is closed.
-14. **GD66 — Final save/migration design gate (candidate active in PR #187 after merged PR #186 closed GD65B):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
+14. **GD66 — Final save/migration design gate (approved in merged PR #187):** after GD65B content exists, approve stable ID derivation, deterministic straight-line coordinates/orientations, direct-doorway mapping, fixtures, missing-content/fallback policy, backup, rollback, and recovery design without migrating live state.
 
 **Phase boundary:** Phase 1 ends with GD66 design approval. It does not change schema, migrate legacy state, switch runtime readers, transition writable authority, or provide migration implementation evidence. Those actions belong exclusively to Phase 2.
 
@@ -234,7 +234,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 **GD66 candidate approval is active in PR #187; GD65B is closed through merged PR #186.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
 
-GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic generated-set construction; PR #183 added recoverable publication/recovery; and PR #184 added export invocation and committed generated files. PR #185 completed strict inactive loading and explicit composition. PR #186 implemented the pre-build recovery/build-entry gate, required owner validation and evidence passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`, and the PR is merged; GD65B is closed. No runtime/save activation is authorized: save schema remains 6 and existing abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority. GD66 is a candidate for approval in PR #187, and Phase 2 migration/authority implementation remains blocked until it is approved and merged.
+GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic generated-set construction; PR #183 added recoverable publication/recovery; and PR #184 added export invocation and committed generated files. PR #185 completed strict inactive loading and explicit composition. PR #186 implemented the pre-build recovery/build-entry gate, required owner validation and evidence passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`, and the PR is merged; GD65B is closed. No runtime/save activation is authorized: save schema remains 6 and existing abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority. GD66 was subsequently approved in merged PR #187, and Phase 2 migration/authority implementation remains blocked until it is approved and merged.
 
 
 ### Historical GD65B2A reconciliation amendment
@@ -256,4 +256,4 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 
 ## Historical GD65B3B implementation status
 
-**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
+**Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.

@@ -35,6 +35,7 @@ namespace DungeonBuilder.M0
         public TextAsset productionSpatialCatalog;
         public TextAsset[] productionSpatialLanguageTables;
         public TextAsset productionSpatialValidationLimits;
+        public TextAsset spatialLayoutCompatibilityProfilesJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -322,6 +323,12 @@ namespace DungeonBuilder.M0
                 productionSpatialCatalog,
                 productionSpatialLanguageTables,
                 productionSpatialValidationLimits);
+
+            ProductionSpatialContentWorkloadLimitParseResult spatialLimits =
+                ProductionSpatialContentWorkloadLimitParser.Parse(productionSpatialValidationLimits);
+            if (spatialLimits.Success && Content.ProductionSpatialContent != null)
+                Content.LoadSpatialLayoutCompatibilityProfiles(spatialLayoutCompatibilityProfilesJson,
+                    Content.ProductionSpatialContent, spatialLimits.Limits);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {

@@ -2,7 +2,7 @@
 
 ## 1. Status and approval boundary
 
-**Status: CANDIDATE FOR APPROVAL in PR #187.** This documentation-only packet is based on merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902`. Until PR #187 is approved and merged, save schema remains **6**, production Dungeon Spatial content remains **inactive**, and the existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. No migration, serialized-shape change, runtime activation, or writable-authority transition occurs here. Phase 2 exclusively owns implementation after this design merges.
+**Status: APPROVED in merged PR #187.** This design is the approved Phase 2 basis. PR #188 implements only the inactive Phase 2A configuration foundation; save schema remains **6**, no future target save schema is selected, production Dungeon Spatial gameplay remains **inactive**, and the existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. No migration, serialized-shape change, runtime activation, or writable-authority transition occurs here. Phase 2 exclusively owns implementation after this design merges.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -10,7 +10,7 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 
 | Item | Reconciled state |
 |---|---|
-| Repository | `main` through merged PR #186 at `7f62709c9c73164c549ee31a403c410f8c05c902`; GD66 is a candidate for approval in PR #187 |
+| Repository | `main` through merged PR #187 at `173d073a1d08b62eddca44a5798a211bb3f72570`; GD66 approved |
 | Save root | `SaveRoot.schemaVersion`; `SaveMigration.LatestSchemaVersion = 6` |
 | Route topology | ordered MVP representations; no spatial graph authority |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
