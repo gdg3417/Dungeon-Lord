@@ -162,13 +162,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class CompatibilityConfigurationResolution<T> where T : class
     {
         internal CompatibilityConfigurationResolution(CompatibilitySelectionResult<T> selection,
-                                                       SpatialLayoutCompatibilitySnapshot snapshot)
+                                                       SpatialLayoutCompatibilitySnapshot snapshot,
+                                                       IEnumerable<SpatialLayoutCompatibilityDiagnostic> diagnostics)
         {
             Selection = selection;
             Snapshot = snapshot;
+            Diagnostics = diagnostics.Distinct().OrderBy(value => (int)value).ToArray();
         }
         public CompatibilitySelectionResult<T> Selection { get; }
         public SpatialLayoutCompatibilitySnapshot Snapshot { get; }
+        public SpatialLayoutCompatibilityDiagnostic[] Diagnostics { get; }
         public bool Success => Snapshot != null && Selection.Success;
     }
 
@@ -238,51 +241,92 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
             Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool requireInactiveProduction = false)
         {
-            if (asset == null)
-                return Failure(SpatialLayoutCompatibilityDiagnostic.MissingInput, sink);
-            return ParseAndValidate(asset.bytes, spatial, limits, sink, requireInactiveProduction);
+            return ParseAndValidate(asset == null ? null : asset.bytes, spatial, limits, sink,
+                requireInactiveProduction);
         }
 
         public static CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> ResolveMigration(
             TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
             int rawSchema, int targetSchema, int targetContractVersion)
         {
-            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            return ResolveMigration(asset == null ? null : asset.bytes, spatial, limits, rawSchema, targetSchema,
+                targetContractVersion);
+        }
+
+        public static CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> ResolveMigration(
+            byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int rawSchema, int targetSchema, int targetContractVersion)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidateCore(
+                bytes, spatial, limits, null, false, out SpatialLayoutCompatibilityProfilesData candidate);
             if (validation.Success)
                 return new CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile>(
-                    validation.Value.SelectMigration(rawSchema, targetSchema, targetContractVersion), validation.Value);
+                    validation.Value.SelectMigration(rawSchema, targetSchema, targetContractVersion), validation.Value,
+                    validation.Diagnostics);
             return new CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile>(
-                ClassifyMigrationFailure(asset, rawSchema), null);
+                candidate == null || HasStructuralFailure(validation.Diagnostics)
+                    ? Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid, string.Empty)
+                    : ClassifyMigrationFailure(candidate, rawSchema), null, validation.Diagnostics);
         }
 
         public static CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile> ResolveStarter(
             TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
             int targetSchema, int contractVersion)
         {
-            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            return ResolveStarter(asset == null ? null : asset.bytes, spatial, limits, targetSchema, contractVersion);
+        }
+
+        public static CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile> ResolveStarter(
+            byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int targetSchema, int contractVersion)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidateCore(
+                bytes, spatial, limits, null, false, out SpatialLayoutCompatibilityProfilesData candidate);
             if (validation.Success)
                 return new CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile>(
-                    validation.Value.SelectStarter(targetSchema, contractVersion), validation.Value);
+                    validation.Value.SelectStarter(targetSchema, contractVersion), validation.Value,
+                    validation.Diagnostics);
             return new CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile>(
-                ClassifyStarterFailure(asset, targetSchema, contractVersion), null);
+                candidate == null || HasStructuralFailure(validation.Diagnostics)
+                    ? Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid, string.Empty)
+                    : ClassifyStarterFailure(candidate, targetSchema, contractVersion), null, validation.Diagnostics);
         }
 
         public static CompatibilityConfigurationResolution<CanonicalLayoutContractSelection> ResolveContract(
             TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
             int targetSchema)
         {
-            SpatialLayoutCompatibilityResult validation = ParseAndValidate(asset, spatial, limits);
+            return ResolveContract(asset == null ? null : asset.bytes, spatial, limits, targetSchema);
+        }
+
+        public static CompatibilityConfigurationResolution<CanonicalLayoutContractSelection> ResolveContract(
+            byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            int targetSchema)
+        {
+            SpatialLayoutCompatibilityResult validation = ParseAndValidateCore(
+                bytes, spatial, limits, null, false, out SpatialLayoutCompatibilityProfilesData candidate);
             if (validation.Success)
                 return new CompatibilityConfigurationResolution<CanonicalLayoutContractSelection>(
-                    validation.Value.SelectContract(targetSchema), validation.Value);
+                    validation.Value.SelectContract(targetSchema), validation.Value, validation.Diagnostics);
             return new CompatibilityConfigurationResolution<CanonicalLayoutContractSelection>(
-                ClassifyContractFailure(asset, targetSchema), null);
+                candidate == null || HasStructuralFailure(validation.Diagnostics)
+                    ? Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Invalid, string.Empty)
+                    : ClassifyContractFailure(candidate, targetSchema), null, validation.Diagnostics);
         }
 
         public static SpatialLayoutCompatibilityResult ParseAndValidate(
             byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
             Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool requireInactiveProduction = false)
         {
+            return ParseAndValidateCore(bytes, spatial, limits, sink, requireInactiveProduction, out _);
+        }
+
+        private static SpatialLayoutCompatibilityResult ParseAndValidateCore(
+            byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
+            Action<SpatialLayoutCompatibilityDiagnostic> sink, bool requireInactiveProduction,
+            out SpatialLayoutCompatibilityProfilesData candidate)
+        {
+            candidate = null;
             var issues = new CompatibilityDiagnosticCollector(limits.MaximumIssues);
             if (bytes == null)
             {
@@ -350,11 +394,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (data == null || data.Schema != "spatial_layout_compatibility_profiles" || data.SchemaVersion != 1)
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidSchema);
-            if (!PrevalidateIdentities(data, issues))
-                return Finish(null, issues.Diagnostics, sink);
             SpatialLayoutCompatibilityProfilesData canonical = Canonicalize(data);
+            candidate = canonical;
             if (!bytes.SequenceEqual(SerializeCanonical(canonical)))
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.NoncanonicalInput);
+            if (!PrevalidateIdentities(canonical, issues))
+                return Finish(null, issues.Diagnostics, sink);
             Validate(canonical, spatial?.Catalog, limits, issues, requireInactiveProduction);
             return !issues.HasAny ? Finish(new SpatialLayoutCompatibilitySnapshot(canonical), issues.Diagnostics, sink)
                                   : Finish(null, issues.Diagnostics, sink);
@@ -505,9 +550,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> ClassifyMigrationFailure(
-            TextAsset asset, int rawSchema)
+            SpatialLayoutCompatibilityProfilesData candidate, int rawSchema)
         {
-            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
             SpatialMigrationCompatibilityProfile[] matches = (candidate?.MigrationProfiles ??
                 Array.Empty<SpatialMigrationCompatibilityProfile>()).Where(value => value != null &&
                 value.Lifecycle == CompatibilityProfileLifecycle.Active && rawSchema >= value.MinimumSourceSchemaVersion &&
@@ -520,9 +564,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> ClassifyStarterFailure(
-            TextAsset asset, int targetSchema, int contractVersion)
+            SpatialLayoutCompatibilityProfilesData candidate, int targetSchema, int contractVersion)
         {
-            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
             CanonicalStarterLayoutProfile[] matches = (candidate?.StarterProfiles ??
                 Array.Empty<CanonicalStarterLayoutProfile>()).Where(value => value != null &&
                 value.Lifecycle == CompatibilityProfileLifecycle.Active && value.TargetSchemaVersion == targetSchema &&
@@ -535,9 +578,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static CompatibilitySelectionResult<CanonicalLayoutContractSelection> ClassifyContractFailure(
-            TextAsset asset, int targetSchema)
+            SpatialLayoutCompatibilityProfilesData candidate, int targetSchema)
         {
-            SpatialLayoutCompatibilityProfilesData candidate = DeserializeUntrusted(asset);
             int matches = (candidate?.ContractSelections ?? Array.Empty<CanonicalLayoutContractSelection>())
                 .Count(value => value != null && value.Lifecycle == CompatibilityProfileLifecycle.Active &&
                     value.TargetSchemaVersion == targetSchema);
@@ -547,18 +589,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Invalid, string.Empty);
         }
 
-        private static SpatialLayoutCompatibilityProfilesData DeserializeUntrusted(TextAsset asset)
+        private static bool HasStructuralFailure(IEnumerable<SpatialLayoutCompatibilityDiagnostic> diagnostics)
         {
-            if (asset == null)
-                return null;
-            try
-            {
-                return JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(asset.text);
-            }
-            catch
-            {
-                return null;
-            }
+            return diagnostics.Any(value => value == SpatialLayoutCompatibilityDiagnostic.MissingInput ||
+                value == SpatialLayoutCompatibilityDiagnostic.EmptyInput ||
+                value == SpatialLayoutCompatibilityDiagnostic.InvalidEncoding ||
+                value == SpatialLayoutCompatibilityDiagnostic.InvalidJson ||
+                value == SpatialLayoutCompatibilityDiagnostic.InvalidSchema ||
+                value == SpatialLayoutCompatibilityDiagnostic.NoncanonicalInput ||
+                value == SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
         }
 
         private static bool PrevalidateIdentities(SpatialLayoutCompatibilityProfilesData data,
@@ -840,12 +879,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             bad = true;
                     }
                 }
+                if (bad)
+                {
+                    issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry);
+                    continue;
+                }
                 foreach (var edge in layout.Connections ?? Array.Empty<CompatibilityLayoutConnection>())
                 {
                     if (edge == null || edge.ConnectionKind != FloorRouteConnectionKind.DirectDoorway ||
                         edge.CorridorDefinitionId != "" || edge.SocketTypeId != g.SocketTypeId ||
                         !Adjacent(g, layout, edge, room, entrance, completion))
                         bad = true;
+                }
+                if (bad)
+                {
+                    issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry);
+                    continue;
                 }
                 if (total > limits.MaximumMaterializedTiles)
                 {
@@ -887,7 +936,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return false;
             int aFacing = ((int)ap.Facing + (int)a.Orientation) % 4;
             int bFacing = ((int)bp.Facing + (int)b.Orientation) % 4;
-            return Math.Abs(ac.X - bc.X) + Math.Abs(ac.Y - bc.Y) == 1 && (aFacing + 2) % 4 == bFacing;
+            long deltaX = Math.Abs((long)ac.X - bc.X);
+            long deltaY = Math.Abs((long)ac.Y - bc.Y);
+            return deltaX + deltaY == 1L && (aFacing + 2) % 4 == bFacing;
         }
         internal static bool TryTransformPoint(TileCoordinate offset, TileCoordinate anchor,
                                                CardinalOrientation orientation,
@@ -1018,11 +1069,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new CompatibilitySelectionResult<T>(status, code, value);
         }
 
-        private static SpatialLayoutCompatibilityResult Failure(SpatialLayoutCompatibilityDiagnostic issue,
-                                                                 Action<SpatialLayoutCompatibilityDiagnostic> sink)
-        {
-            return Finish(null, new[] { issue }, sink);
-        }
         private static SpatialLayoutCompatibilityResult Finish(SpatialLayoutCompatibilitySnapshot value,
                                                                IEnumerable<SpatialLayoutCompatibilityDiagnostic> issues,
                                                                Action<SpatialLayoutCompatibilityDiagnostic> sink)

@@ -87,7 +87,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(before,bytes,mutation);
         }
 
-        [Test] public void GeometryAndProfileHashesCoverEveryCanonicalFieldMutation()
+        [Test] public void GeometryTotalAndMigrationRangeMutationsChangeCanonicalHashes()
         {
             SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
             string geometryHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
@@ -96,6 +96,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var profile=new SpatialMigrationCompatibilityProfile{ProfileId="test.profile",ProfileVersion=1,Lifecycle=CompatibilityProfileLifecycle.Retired,MinimumSourceSchemaVersion=1,MaximumSourceSchemaVersion=6,TargetSchemaVersion=8,TargetCanonicalLayoutContractVersion=1,GeometryId="test.geometry",GeometryVersion=1,GeometryCanonicalHash=new string('a',64)};
             string hash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile); profile.MaximumSourceSchemaVersion++;
             Assert.That(SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile),Is.Not.EqualTo(hash));
+        }
+
+        [Test] public void ExtremeCoordinatesFailWithoutOverflowAndPreservePublishedSnapshot()
+        {
+            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            data.GeometryRecords[0].Layouts[0].Placements[0].Anchor=new TileCoordinate(int.MinValue,int.MinValue);
+            data.GeometryRecords[0].Layouts[0].Placements[1].Anchor=new TileCoordinate(int.MaxValue,int.MaxValue);
+            data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
+            TextAsset extreme=CanonicalAsset(data); byte[] before=(byte[])extreme.bytes.Clone();
+            SpatialLayoutCompatibilityResult result=null;
+            Assert.DoesNotThrow(()=>result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(extreme,spatial,limits));
+            Assert.That(result.Success,Is.False); Assert.That(result.Diagnostics,Does.Contain(SpatialLayoutCompatibilityDiagnostic.InvalidGeometry));
+            CollectionAssert.AreEqual(before,extreme.bytes);
+
+            Assert.That(SpatialLayoutCompatibilityProfiles.TryTransformPoint(new TileCoordinate(1,1),
+                new TileCoordinate(int.MaxValue,int.MaxValue),CardinalOrientation.Zero,
+                new RectangularFootprintDefinition(2,2),out _),Is.False);
+            var service=new ContentService(); Assert.That(service.LoadSpatialLayoutCompatibilityProfiles(profiles,spatial,limits).Success,Is.True);
+            SpatialLayoutCompatibilitySnapshot previous=service.SpatialLayoutCompatibilityProfiles;
+            Assert.DoesNotThrow(()=>service.LoadSpatialLayoutCompatibilityProfiles(extreme,spatial,limits));
+            Assert.That(service.SpatialLayoutCompatibilityProfiles,Is.SameAs(previous));
         }
 
         [Test] public void RetiredMigrationRecoveryRequiresCompletePinnedIdentity()
@@ -138,6 +159,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> duplicateMigrationResult=
                 SpatialLayoutCompatibilityProfiles.ResolveMigration(ConfigurationAsset(new[]{migration,duplicateMigration},null,null,true),spatial,limits,2,10,2);
             Assert.That(duplicateMigrationResult.Selection.Code,Is.EqualTo("gd66.profile.duplicate")); Assert.That(duplicateMigrationResult.Snapshot,Is.Null);
+            SpatialLayoutCompatibilityProfilesData duplicateAndInvalid=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(
+                ConfigurationAsset(new[]{migration,duplicateMigration},null,null,true).text);
+            duplicateAndInvalid.MigrationProfiles[0].CanonicalHash="invalid";
+            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveMigration(CanonicalAsset(duplicateAndInvalid),spatial,limits,2,10,2).Selection.Code,
+                Is.EqualTo("gd66.profile.duplicate"));
 
             Assert.That(SpatialLayoutCompatibilityProfiles.ResolveStarter(profiles,spatial,limits,10,2).Selection.Code,
                 Is.EqualTo("gd66.starter_profile.missing"));
@@ -354,6 +380,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
         }
 
+        [TestCase("bom",SpatialLayoutCompatibilityDiagnostic.InvalidEncoding)]
+        [TestCase("crlf",SpatialLayoutCompatibilityDiagnostic.InvalidEncoding)]
+        [TestCase("no-newline",SpatialLayoutCompatibilityDiagnostic.InvalidEncoding)]
+        [TestCase("invalid-utf8",SpatialLayoutCompatibilityDiagnostic.InvalidEncoding)]
+        [TestCase("malformed",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("trailing",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("duplicate",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("unknown",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("ambiguous",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("missing",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("wrong-type",SpatialLayoutCompatibilityDiagnostic.InvalidJson)]
+        [TestCase("noncanonical",SpatialLayoutCompatibilityDiagnostic.NoncanonicalInput)]
+        [TestCase("schema-id",SpatialLayoutCompatibilityDiagnostic.InvalidSchema)]
+        [TestCase("schema-version",SpatialLayoutCompatibilityDiagnostic.InvalidSchema)]
+        public void AllResolversPreserveStrictStructuralDiagnostics(string mutation,
+            SpatialLayoutCompatibilityDiagnostic expected)
+        {
+            byte[] bytes=Mutate(profiles.bytes,mutation); byte[] before=(byte[])bytes.Clone();
+            AssertResolverFailure(bytes,limits,expected); CollectionAssert.AreEqual(before,bytes);
+        }
+
+        [Test] public void AllResolversPreserveMissingAndWorkloadDiagnostics()
+        {
+            AssertResolverFailure(null,limits,SpatialLayoutCompatibilityDiagnostic.MissingInput);
+            AssertResolverFailure(new byte[0],limits,SpatialLayoutCompatibilityDiagnostic.EmptyInput);
+            AssertResolverFailure(RepeatedInvalidGeometryAsset(2).bytes,Limits(1,limits.MaximumNestedRecords,
+                limits.MaximumMaterializedTiles,limits.MaximumStringCharacters),
+                SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+            AssertResolverFailure(profiles.bytes,Limits(1,13,limits.MaximumMaterializedTiles,
+                limits.MaximumStringCharacters),SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+            AssertResolverFailure(profiles.bytes,Limits(1,14,limits.MaximumMaterializedTiles,
+                AuthoredCharacters(JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text))-1),
+                SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+            AssertResolverFailure(profiles.bytes,Limits(1,14,41,limits.MaximumStringCharacters),
+                SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+            var oneIssue=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
+                limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,1,limits.MaximumStringCharacters);
+            AssertResolverFailure(RepeatedInvalidGeometryAsset(2).bytes,oneIssue,
+                SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
+        }
+
         [Test] public void Canonicalization_DetachesAndOrdersWithoutMutatingSource()
         {
             SpatialLayoutCompatibilityProfilesData source=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
@@ -455,6 +522,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Limits(top,nested,limits.MaximumMaterializedTiles,characters-1)).Diagnostics,
                 Does.Contain(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded));
         }
+        private void AssertResolverFailure(byte[] bytes,SpatialContentValidationWorkloadLimits suppliedLimits,
+            SpatialLayoutCompatibilityDiagnostic expected)
+        {
+            AssertFailedResolution(SpatialLayoutCompatibilityProfiles.ResolveMigration(bytes,spatial,suppliedLimits,2,10,2),expected);
+            AssertFailedResolution(SpatialLayoutCompatibilityProfiles.ResolveStarter(bytes,spatial,suppliedLimits,10,2),expected);
+            AssertFailedResolution(SpatialLayoutCompatibilityProfiles.ResolveContract(bytes,spatial,suppliedLimits,10),expected);
+        }
+        private static void AssertFailedResolution<T>(CompatibilityConfigurationResolution<T> result,
+            SpatialLayoutCompatibilityDiagnostic expected) where T:class
+        {
+            Assert.That(result.Snapshot,Is.Null); Assert.That(result.Selection.Value,Is.Null);
+            Assert.That(result.Selection.Code,Is.EqualTo(string.Empty));
+            CollectionAssert.AreEqual(new[]{expected},result.Diagnostics);
+        }
         private SpatialContentValidationWorkloadLimits Limits(int top,int nested,int tiles,int characters)
         { return new SpatialContentValidationWorkloadLimits(top,nested,tiles,limits.MaximumIssues,characters); }
         private static int AuthoredCharacters(SpatialLayoutCompatibilityProfilesData data)
@@ -493,6 +574,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             else if(mutation=="overflow") json=json.Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": 999999999999");
             else if(mutation=="unknown-enum") json=json.Replace("\"Role\": 1", "\"Role\": 99");
             else if(mutation=="noncanonical") json=json.Replace("    \"Schema\"", "  \"Schema\"");
+            else if(mutation=="schema-id") json=json.Replace("spatial_layout_compatibility_profiles","wrong_schema");
+            else if(mutation=="schema-version") json=json.Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": 2");
             return System.Text.Encoding.UTF8.GetBytes(json);
         }
     }
