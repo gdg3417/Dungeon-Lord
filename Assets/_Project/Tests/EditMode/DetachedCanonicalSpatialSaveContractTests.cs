@@ -63,7 +63,8 @@ namespace DungeonBuilder.M0.Tests
             DetachedCanonicalSpatialSaveState source = State(Floor("floor.b", 1, "room.b"), Floor("floor.a", 0, "room.a"));
             Array.Reverse(source.Floors[0].FixedStructures);
             Assert.That(Validate(source, true).Issues, Does.Contain(CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering));
-            Assert.That(Validate(Canonicalize(source), true).Issues, Does.Not.Contain(CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering));
+            Assert.That(Validate(Canonicalize(source), true).Issues.Contains(
+                CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering), Is.False);
         }
 
         [TestCase("room")]
