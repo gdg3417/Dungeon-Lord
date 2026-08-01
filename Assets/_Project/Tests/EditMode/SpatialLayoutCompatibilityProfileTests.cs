@@ -187,6 +187,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo("gd66.layout_contract.selection_duplicate"));
         }
 
+        [Test]
+        public void MigrationDuplicateClassificationCoversIdentityAndGlobalRangeOverlapInEitherOrder()
+        {
+            AssertMigrationDuplicatePair(Migration(CompatibilityProfileLifecycle.Active),
+                Migration(CompatibilityProfileLifecycle.Active),2);
+            AssertMigrationDuplicatePair(Migration(CompatibilityProfileLifecycle.Active),
+                Migration(CompatibilityProfileLifecycle.Retired),2);
+            AssertMigrationDuplicatePair(Migration(CompatibilityProfileLifecycle.Retired),
+                Migration(CompatibilityProfileLifecycle.Retired),99);
+
+            SpatialMigrationCompatibilityProfile first=Migration(CompatibilityProfileLifecycle.Active);
+            SpatialMigrationCompatibilityProfile second=Migration(CompatibilityProfileLifecycle.Active);
+            second.ProfileId="test.migration.second"; second.MinimumSourceSchemaVersion=3; second.MaximumSourceSchemaVersion=5;
+            AssertMigrationDuplicatePair(first,second,2);
+            AssertMigrationDuplicatePair(first,second,99);
+
+            SpatialMigrationCompatibilityProfile nonoverlap=Migration(CompatibilityProfileLifecycle.Active);
+            nonoverlap.ProfileId="test.migration.nonoverlap"; nonoverlap.MinimumSourceSchemaVersion=4; nonoverlap.MaximumSourceSchemaVersion=6;
+            CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> valid=
+                SpatialLayoutCompatibilityProfiles.ResolveMigration(ConfigurationAsset(new[]{first,nonoverlap},null,null,true),spatial,limits,2,10,2);
+            Assert.That(valid.Selection.Code,Is.EqualTo(string.Empty)); Assert.That(valid.Success,Is.True);
+        }
+
+        [Test]
+        public void ResolutionStableCodesAreIsolatedToTheirRequestedPurpose()
+        {
+            SpatialMigrationCompatibilityProfile migration=Migration(CompatibilityProfileLifecycle.Active);
+            CanonicalStarterLayoutProfile starter=Starter(CompatibilityProfileLifecycle.Active);
+            CanonicalLayoutContractSelection contract=new CanonicalLayoutContractSelection{Lifecycle=CompatibilityProfileLifecycle.Active,
+                TargetSchemaVersion=10,CanonicalLayoutContractVersion=2};
+
+            TextAsset invalidStarter=ConfigurationAsset(new[]{migration},new[]{starter},null,true);
+            SpatialLayoutCompatibilityProfilesData invalidStarterData=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(invalidStarter.text);
+            invalidStarterData.StarterProfiles[0].CanonicalHash="invalid"; invalidStarter=CanonicalAsset(invalidStarterData);
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveMigration(invalidStarter,spatial,limits,2,10,2));
+
+            TextAsset invalidContract=ConfigurationAsset(new[]{migration},new[]{starter},new[]{new CanonicalLayoutContractSelection{
+                Lifecycle=(CompatibilityProfileLifecycle)99,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}},true);
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveMigration(invalidContract,spatial,limits,2,10,2));
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveStarter(invalidContract,spatial,limits,10,2));
+
+            TextAsset invalidMigration=ConfigurationAsset(new[]{migration},new[]{starter},new[]{contract},true);
+            SpatialLayoutCompatibilityProfilesData invalidMigrationData=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(invalidMigration.text);
+            invalidMigrationData.MigrationProfiles[0].CanonicalHash="invalid"; invalidMigration=CanonicalAsset(invalidMigrationData);
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveStarter(invalidMigration,spatial,limits,10,2));
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveContract(invalidMigration,spatial,limits,10));
+
+            TextAsset invalidStarterWithContract=ConfigurationAsset(null,new[]{starter},new[]{contract},true);
+            SpatialLayoutCompatibilityProfilesData invalidStarterWithContractData=
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(invalidStarterWithContract.text);
+            invalidStarterWithContractData.StarterProfiles[0].CanonicalHash="invalid";
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveContract(CanonicalAsset(invalidStarterWithContractData),
+                spatial,limits,10));
+
+            TextAsset starterOnlyInvalid=ConfigurationAsset(null,new[]{starter},null,true);
+            SpatialLayoutCompatibilityProfilesData starterOnlyData=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(starterOnlyInvalid.text);
+            starterOnlyData.StarterProfiles[0].CanonicalHash="invalid";
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveMigration(CanonicalAsset(starterOnlyData),spatial,limits,2,10,2));
+            TextAsset migrationOnlyInvalid=ConfigurationAsset(new[]{migration},null,null,true);
+            SpatialLayoutCompatibilityProfilesData migrationOnlyData=
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(migrationOnlyInvalid.text);
+            migrationOnlyData.MigrationProfiles[0].CanonicalHash="invalid";
+            AssertNoStableCode(SpatialLayoutCompatibilityProfiles.ResolveStarter(CanonicalAsset(migrationOnlyData),
+                spatial,limits,10,2));
+        }
+
         [Test] public void InvalidProfileReferencesAndStaleGeometryNeverPublishSelectableSnapshot()
         {
             SpatialLayoutCompatibilityProfilesData missing=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
@@ -535,6 +601,34 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Snapshot,Is.Null); Assert.That(result.Selection.Value,Is.Null);
             Assert.That(result.Selection.Code,Is.EqualTo(string.Empty));
             CollectionAssert.AreEqual(new[]{expected},result.Diagnostics);
+        }
+        private void AssertMigrationDuplicatePair(SpatialMigrationCompatibilityProfile first,
+            SpatialMigrationCompatibilityProfile second,int rawSchema)
+        {
+            TextAsset forward=ConfigurationAsset(new[]{first,second},null,null,true);
+            TextAsset reverse=ConfigurationAsset(new[]{second,first},null,null,true);
+            AssertMigrationDuplicate(SpatialLayoutCompatibilityProfiles.ResolveMigration(forward,spatial,limits,rawSchema,10,2));
+            AssertMigrationDuplicate(SpatialLayoutCompatibilityProfiles.ResolveMigration(reverse,spatial,limits,rawSchema,10,2));
+            if(first.ProfileId==second.ProfileId&&first.ProfileVersion==second.ProfileVersion)
+            {
+                SpatialLayoutCompatibilityProfilesData mismatchedGeometry=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(forward.text);
+                mismatchedGeometry.MigrationProfiles[1].GeometryVersion++;
+                mismatchedGeometry.MigrationProfiles[1].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(
+                    mismatchedGeometry.MigrationProfiles[1]);
+                AssertMigrationDuplicate(SpatialLayoutCompatibilityProfiles.ResolveMigration(CanonicalAsset(mismatchedGeometry),
+                    spatial,limits,rawSchema,10,2));
+            }
+        }
+        private static void AssertMigrationDuplicate(
+            CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> result)
+        {
+            Assert.That(result.Selection.Code,Is.EqualTo("gd66.profile.duplicate"));
+            Assert.That(result.Snapshot,Is.Null); Assert.That(result.Selection.Value,Is.Null);
+        }
+        private static void AssertNoStableCode<T>(CompatibilityConfigurationResolution<T> result) where T:class
+        {
+            Assert.That(result.Selection.Code,Is.EqualTo(string.Empty)); Assert.That(result.Snapshot,Is.Null);
+            Assert.That(result.Selection.Value,Is.Null); Assert.That(result.Diagnostics,Is.Not.Empty);
         }
         private SpatialContentValidationWorkloadLimits Limits(int top,int nested,int tiles,int characters)
         { return new SpatialContentValidationWorkloadLimits(top,nested,tiles,limits.MaximumIssues,characters); }

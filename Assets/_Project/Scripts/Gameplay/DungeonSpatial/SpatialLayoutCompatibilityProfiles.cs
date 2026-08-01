@@ -266,7 +266,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile>(
                 candidate == null || HasStructuralFailure(validation.Diagnostics)
                     ? Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid, string.Empty)
-                    : ClassifyMigrationFailure(candidate, rawSchema), null, validation.Diagnostics);
+                    : ClassifyMigrationFailure(candidate, spatial?.Catalog, limits, rawSchema), null,
+                validation.Diagnostics);
         }
 
         public static CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile> ResolveStarter(
@@ -289,7 +290,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new CompatibilityConfigurationResolution<CanonicalStarterLayoutProfile>(
                 candidate == null || HasStructuralFailure(validation.Diagnostics)
                     ? Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid, string.Empty)
-                    : ClassifyStarterFailure(candidate, targetSchema, contractVersion), null, validation.Diagnostics);
+                    : ClassifyStarterFailure(candidate, spatial?.Catalog, limits, targetSchema, contractVersion), null,
+                validation.Diagnostics);
         }
 
         public static CompatibilityConfigurationResolution<CanonicalLayoutContractSelection> ResolveContract(
@@ -550,31 +552,39 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> ClassifyMigrationFailure(
-            SpatialLayoutCompatibilityProfilesData candidate, int rawSchema)
+            SpatialLayoutCompatibilityProfilesData candidate, SpatialContentCatalog catalog,
+            SpatialContentValidationWorkloadLimits limits, int rawSchema)
         {
-            SpatialMigrationCompatibilityProfile[] matches = (candidate?.MigrationProfiles ??
-                Array.Empty<SpatialMigrationCompatibilityProfile>()).Where(value => value != null &&
-                value.Lifecycle == CompatibilityProfileLifecycle.Active && rawSchema >= value.MinimumSourceSchemaVersion &&
-                rawSchema <= value.MaximumSourceSchemaVersion).Take(2).ToArray();
-            return matches.Length > 1
-                ? Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Duplicate,
-                    "gd66.profile.duplicate")
-                : Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid,
-                    "gd66.profile.invalid");
+            SpatialMigrationCompatibilityProfile[] profiles = candidate?.MigrationProfiles ??
+                Array.Empty<SpatialMigrationCompatibilityProfile>();
+            if (HasMigrationDuplicate(profiles))
+                return Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Duplicate,
+                    "gd66.profile.duplicate");
+            SpatialMigrationCompatibilityProfile[] relevant = profiles.Where(value => value != null &&
+                value.Lifecycle != CompatibilityProfileLifecycle.Retired &&
+                rawSchema >= value.MinimumSourceSchemaVersion && rawSchema <= value.MaximumSourceSchemaVersion).ToArray();
+            return relevant.Length != 0 && HasPurposeValidationFailure(candidate, catalog, limits, relevant, null)
+                ? Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid,
+                    "gd66.profile.invalid")
+                : Selection<SpatialMigrationCompatibilityProfile>(CompatibilitySelectionStatus.Invalid, string.Empty);
         }
 
         private static CompatibilitySelectionResult<CanonicalStarterLayoutProfile> ClassifyStarterFailure(
-            SpatialLayoutCompatibilityProfilesData candidate, int targetSchema, int contractVersion)
+            SpatialLayoutCompatibilityProfilesData candidate, SpatialContentCatalog catalog,
+            SpatialContentValidationWorkloadLimits limits, int targetSchema, int contractVersion)
         {
-            CanonicalStarterLayoutProfile[] matches = (candidate?.StarterProfiles ??
+            CanonicalStarterLayoutProfile[] relevant = (candidate?.StarterProfiles ??
                 Array.Empty<CanonicalStarterLayoutProfile>()).Where(value => value != null &&
-                value.Lifecycle == CompatibilityProfileLifecycle.Active && value.TargetSchemaVersion == targetSchema &&
-                value.CanonicalLayoutContractVersion == contractVersion).Take(2).ToArray();
-            return matches.Length > 1
+                value.Lifecycle != CompatibilityProfileLifecycle.Retired && value.TargetSchemaVersion == targetSchema &&
+                value.CanonicalLayoutContractVersion == contractVersion).ToArray();
+            int activeMatches = relevant.Count(value => value.Lifecycle == CompatibilityProfileLifecycle.Active);
+            return activeMatches > 1
                 ? Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Duplicate,
                     "gd66.starter_profile.duplicate")
-                : Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid,
-                    "gd66.starter_profile.invalid");
+                : relevant.Length != 0 && HasPurposeValidationFailure(candidate, catalog, limits, null, relevant)
+                    ? Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid,
+                        "gd66.starter_profile.invalid")
+                    : Selection<CanonicalStarterLayoutProfile>(CompatibilitySelectionStatus.Invalid, string.Empty);
         }
 
         private static CompatibilitySelectionResult<CanonicalLayoutContractSelection> ClassifyContractFailure(
@@ -587,6 +597,59 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Duplicate,
                     "gd66.layout_contract.selection_duplicate")
                 : Selection<CanonicalLayoutContractSelection>(CompatibilitySelectionStatus.Invalid, string.Empty);
+        }
+
+        private static bool HasMigrationDuplicate(IEnumerable<SpatialMigrationCompatibilityProfile> supplied)
+        {
+            SpatialMigrationCompatibilityProfile[] profiles = supplied.Where(value => value != null).ToArray();
+            if (profiles.GroupBy(value => new { value.ProfileId, value.ProfileVersion }).Any(group => group.Count() > 1))
+                return true;
+            SpatialMigrationCompatibilityProfile[] active = profiles
+                .Where(value => value.Lifecycle == CompatibilityProfileLifecycle.Active)
+                .OrderBy(value => value.MinimumSourceSchemaVersion)
+                .ThenBy(value => value.MaximumSourceSchemaVersion)
+                .ThenBy(value => value.ProfileId, StringComparer.Ordinal)
+                .ThenBy(value => value.ProfileVersion)
+                .ToArray();
+            for (int first = 0; first < active.Length; first++)
+                for (int second = first + 1; second < active.Length; second++)
+                    if (active[first].MinimumSourceSchemaVersion <= active[second].MaximumSourceSchemaVersion &&
+                        active[second].MinimumSourceSchemaVersion <= active[first].MaximumSourceSchemaVersion)
+                        return true;
+            return false;
+        }
+
+        private static bool HasPurposeValidationFailure(SpatialLayoutCompatibilityProfilesData candidate,
+            SpatialContentCatalog catalog, SpatialContentValidationWorkloadLimits limits,
+            SpatialMigrationCompatibilityProfile[] migrations, CanonicalStarterLayoutProfile[] starters)
+        {
+            migrations = migrations ?? Array.Empty<SpatialMigrationCompatibilityProfile>();
+            starters = starters ?? Array.Empty<CanonicalStarterLayoutProfile>();
+            var referencedIdentities = new HashSet<string>(migrations.Select(value =>
+                    GeometryIdentity(value.GeometryId, value.GeometryVersion))
+                .Concat(starters.Select(value => GeometryIdentity(value.GeometryId, value.GeometryVersion))),
+                StringComparer.Ordinal);
+            var isolated = new SpatialLayoutCompatibilityProfilesData
+            {
+                Schema = candidate.Schema,
+                SchemaVersion = candidate.SchemaVersion,
+                GeometryRecords = (candidate.GeometryRecords ?? Array.Empty<CompatibilityLayoutGeometryRecord>())
+                    .Where(value => value != null && referencedIdentities.Contains(
+                        GeometryIdentity(value.GeometryId, value.GeometryVersion))).ToArray(),
+                MigrationProfiles = migrations,
+                StarterProfiles = starters,
+                ContractSelections = Array.Empty<CanonicalLayoutContractSelection>()
+            };
+            var issues = new CompatibilityDiagnosticCollector(limits.MaximumIssues);
+            if (!PrevalidateIdentities(isolated, issues))
+                return true;
+            Validate(isolated, catalog, limits, issues, false);
+            return issues.HasAny;
+        }
+
+        private static string GeometryIdentity(string id, int version)
+        {
+            return (id ?? string.Empty) + "\0" + version;
         }
 
         private static bool HasStructuralFailure(IEnumerable<SpatialLayoutCompatibilityDiagnostic> diagnostics)
