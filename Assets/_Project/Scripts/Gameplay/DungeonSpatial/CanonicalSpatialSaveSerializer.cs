@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -84,7 +83,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ValidateNode(root, typeof(DetachedCanonicalSpatialSaveState), null, null, issues);
                 if (issues.Count != 0) return Result<DetachedCanonicalSpatialSaveState>(null, issues);
 
-                var value = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(Encoding.UTF8.GetString(bytes));
+                object materialized;
+                if (!TryMaterialize(root, typeof(DetachedCanonicalSpatialSaveState), issues, out materialized))
+                    return Result<DetachedCanonicalSpatialSaveState>(null, issues);
+                var value = (DetachedCanonicalSpatialSaveState)materialized;
                 ValidateAuthority(value == null ? null : value.Authority, issues);
                 if (issues.Count == 0) NormalizeNativeAuthorityForCanonicalBytes(value == null ? null : value.Authority);
                 if (issues.Count == 0 && !CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true).IsValid)
@@ -143,6 +145,68 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Write(writer, field.GetValue(value), field.FieldType);
             }
             writer.Token("}");
+        }
+
+        private static bool TryMaterialize(ContractJsonNode node, Type type,
+            SpatialIssueCollector issues, out object value)
+        {
+            value = null;
+            try
+            {
+                value = Materialize(node, type);
+                return true;
+            }
+            catch (OverflowException)
+            {
+                issues.Add(SpatialContractIssue.IntegerOverflow);
+            }
+            catch (InvalidCastException)
+            {
+                issues.Add(SpatialContractIssue.WrongFieldType);
+            }
+            catch
+            {
+                issues.Add(SpatialContractIssue.InvalidField);
+            }
+            return false;
+        }
+
+        private static object Materialize(ContractJsonNode node, Type type)
+        {
+            if (node.Kind == ContractJsonKind.Null)
+            {
+                if (type.IsValueType) throw new InvalidCastException();
+                return null;
+            }
+            if (type == typeof(string)) return node.Text;
+            if (type == typeof(int))
+                return int.Parse(node.Text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+            if (type == typeof(long))
+                return long.Parse(node.Text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+            if (type.IsEnum)
+            {
+                int numeric = int.Parse(node.Text, NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture);
+                return Enum.ToObject(type, numeric);
+            }
+            if (type.IsArray)
+            {
+                Type elementType = type.GetElementType();
+                Array array = Array.CreateInstance(elementType, node.Items.Count);
+                for (int index = 0; index < node.Items.Count; index++)
+                    array.SetValue(Materialize(node.Items[index], elementType), index);
+                return array;
+            }
+
+            object instance = Activator.CreateInstance(type);
+            string[] names = Fields[type];
+            for (int index = 0; index < names.Length; index++)
+            {
+                FieldInfo field = type.GetField(names[index], BindingFlags.Instance | BindingFlags.Public);
+                if (field == null) throw new MissingFieldException(type.FullName, names[index]);
+                field.SetValue(instance, Materialize(ContractJson.Field(node, index), field.FieldType));
+            }
+            return instance;
         }
 
         private static void NormalizeNativeAuthorityForCanonicalBytes(

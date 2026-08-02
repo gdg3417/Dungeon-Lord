@@ -276,7 +276,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json.IndexOf("\"Floors\"", StringComparison.Ordinal));
             SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
                 CanonicalSpatialSaveSerializer.Parse(serialized.Value, SaveLimits);
-            Assert.IsTrue(parsed.IsValid);
+            Assert.IsTrue(parsed.IsValid, string.Join(", ", parsed.Issues));
+            Assert.IsNull(parsed.Value.Authority.MigrationTransactionId);
+            Assert.IsNull(parsed.Value.Authority.MigrationDescriptorFingerprint);
+            Assert.AreEqual(long.MaxValue - 1, parsed.Value.Floors[0].RoomContents.NextSequence);
+            Assert.AreEqual(long.MaxValue - 2,
+                parsed.Value.Floors[0].RoomContents.Assignments[0].Sequence);
+            Assert.IsFalse(json.Contains("footprintPresence"));
+            if (physicalCorridor)
+            {
+                CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 0), new TileCoordinate(2, 0) },
+                    parsed.Value.Floors[0].Layout.Edges[0].Footprint.OccupiedTiles);
+                Assert.IsTrue(parsed.Value.Floors[0].Layout.Edges.Skip(1).All(edge => edge.Footprint == null));
+            }
+            else
+            {
+                Assert.IsTrue(parsed.Value.Floors[0].Layout.Edges.All(edge => edge.Footprint == null));
+            }
+            Assert.IsTrue(parsed.Value.Floors[0].Layout.Edges
+                .Where(edge => edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
+                .All(edge => edge.CorridorDefinitionId == string.Empty &&
+                    edge.OptionalBranchId == string.Empty));
             CollectionAssert.AreEqual(serialized.Value,
                 CanonicalSpatialSaveSerializer.Serialize(parsed.Value, SaveLimits).Value);
             Assert.AreSame(floorArray, source.Floors);
@@ -290,6 +310,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (physicalCorridor)
             { Assert.AreSame(footprint, sourceEdges[0].Footprint); Assert.AreSame(tiles, footprint.OccupiedTiles); }
             Assert.AreEqual(snapshot, Snapshot(source));
+        }
+
+        [Test]
+        public void PrivateFootprintPresence_IsNotPartOfCanonicalParserContract()
+        {
+            byte[] bytes = CanonicalSpatialSaveSerializer.Serialize(Populated(1, false), SaveLimits).Value;
+            string json = Encoding.UTF8.GetString(bytes).Replace(
+                "\"ConnectionKind\":1}",
+                "\"ConnectionKind\":1,\"footprintPresence\":0}");
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
+                CanonicalSpatialSaveSerializer.Parse(Encoding.UTF8.GetBytes(json), SaveLimits);
+            Assert.IsFalse(parsed.IsValid);
+            CollectionAssert.Contains(parsed.Issues, SpatialContractIssue.UnknownField);
         }
 
         [Test]
@@ -680,7 +713,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 AssignmentId = room.RoomInstanceId + ".content.monster.0001", RoomInstanceId = room.RoomInstanceId,
                 CategoryId = CanonicalSpatialSaveContracts.MonsterCategoryId,
-                OptionId = "placement.option.monster.goblin", Sequence = (long)index + 1
+                OptionId = "placement.option.monster.goblin", Sequence = index == 0 ? long.MaxValue - 2 : index + 1
             }).ToArray();
             return new DetachedCanonicalSpatialSaveState
             {
