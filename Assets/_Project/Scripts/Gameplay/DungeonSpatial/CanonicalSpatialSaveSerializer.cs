@@ -48,6 +48,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             try
             {
+                ValidateAuthority(source == null ? null : source.Authority, issues);
+                if (issues.Count != 0) return Result<byte[]>(null, issues);
                 DetachedCanonicalSpatialSaveState canonical;
                 if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical) ||
                     !CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid)
@@ -55,13 +57,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!DeclaredFieldsMatchSerializableFields())
                 { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
 
-                var builder = new StringBuilder();
-                Write(builder, canonical, typeof(DetachedCanonicalSpatialSaveState));
-                byte[] bytes = ContractJson.Bytes(builder.ToString());
-                if (bytes.Length > limits.Serialized.MaximumInputBytes)
-                { issues.Add(SpatialContractIssue.InputByteLimitExceeded); return Result<byte[]>(null, issues); }
-                return Result(bytes, issues);
+                var writer = new ContractJsonWriter(limits.Serialized);
+                Write(writer, canonical, typeof(DetachedCanonicalSpatialSaveState));
+                return Result(writer.Finish(), issues);
             }
+            catch (ContractJsonBudgetException failure)
+            { issues.Add(failure.Issue); return Result<byte[]>(null, issues); }
             catch
             { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
         }
@@ -82,7 +83,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (issues.Count != 0) return Result<DetachedCanonicalSpatialSaveState>(null, issues);
 
                 var value = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(Encoding.UTF8.GetString(bytes));
-                if (!CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true).IsValid)
+                ValidateAuthority(value == null ? null : value.Authority, issues);
+                if (issues.Count == 0 && !CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true).IsValid)
                     issues.Add(SpatialContractIssue.StructuralValidationFailed);
                 if (issues.Count == 0)
                 {
@@ -107,32 +109,55 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        private static void Write(StringBuilder builder, object value, Type type)
+        private static void Write(ContractJsonWriter writer, object value, Type type)
         {
-            if (value == null) { builder.Append("null"); return; }
-            if (type == typeof(string)) { ContractJson.AppendString(builder, (string)value); return; }
+            writer.Node();
+            if (value == null) { writer.Token("null"); return; }
+            if (type == typeof(string)) { writer.String((string)value); return; }
             if (type.IsEnum)
-            { builder.Append(Convert.ToInt32(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture)); return; }
+            { writer.Token(Convert.ToInt32(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture)); return; }
             if (type == typeof(int) || type == typeof(long))
-            { builder.Append(Convert.ToString(value, CultureInfo.InvariantCulture)); return; }
+            { writer.Token(Convert.ToString(value, CultureInfo.InvariantCulture)); return; }
             if (type.IsArray)
             {
-                builder.Append('['); int index = 0;
+                writer.Token("["); int index = 0;
                 foreach (object item in (IEnumerable)value)
-                { if (index++ != 0) builder.Append(','); Write(builder, item, type.GetElementType()); }
-                builder.Append(']'); return;
+                {
+                    writer.Record();
+                    if (index++ != 0) writer.Token(",");
+                    Write(writer, item, type.GetElementType());
+                }
+                writer.Token("]"); return;
             }
 
-            builder.Append('{'); string[] names = Fields[type];
+            writer.Token("{"); string[] names = Fields[type];
             for (int index = 0; index < names.Length; index++)
             {
-                if (index != 0) builder.Append(',');
-                ContractJson.AppendString(builder, names[index]); builder.Append(':');
+                if (index != 0) writer.Token(",");
+                writer.String(names[index]); writer.Token(":");
                 FieldInfo field = type.GetField(names[index], BindingFlags.Instance | BindingFlags.Public);
                 if (field == null) throw new MissingFieldException();
-                Write(builder, field.GetValue(value), field.FieldType);
+                Write(writer, field.GetValue(value), field.FieldType);
             }
-            builder.Append('}');
+            writer.Token("}");
+        }
+
+        private static void ValidateAuthority(CanonicalSpatialAuthorityMarker marker,
+            SpatialIssueCollector issues)
+        {
+            if (marker == null) return;
+            if (marker.CreationKind == CanonicalSpatialCreationKind.NativeCanonical)
+            {
+                if (!string.IsNullOrEmpty(marker.MigrationTransactionId) ||
+                    !string.IsNullOrEmpty(marker.MigrationDescriptorFingerprint))
+                    issues.Add(SpatialContractIssue.InvalidIdentity);
+                return;
+            }
+            if (marker.CreationKind != CanonicalSpatialCreationKind.Migrated) return;
+            if (!SpatialMigrationTransactionIdentity.IsCanonicalTransactionId(marker.MigrationTransactionId))
+                issues.Add(SpatialContractIssue.InvalidIdentity);
+            if (!SpatialContractSha256.IsCanonical(marker.MigrationDescriptorFingerprint))
+                issues.Add(SpatialContractIssue.InvalidHash);
         }
 
         private static void ValidateNode(ContractJsonNode node, Type type, SpatialIssueCollector issues)

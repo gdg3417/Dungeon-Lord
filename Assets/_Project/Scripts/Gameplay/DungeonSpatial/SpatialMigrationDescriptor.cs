@@ -96,11 +96,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 Validate(value, issues);
                 if (issues.Count != 0) return Result<byte[]>(null, issues);
-                byte[] bytes = ContractJson.Bytes(BuildCanonical(value));
-                if (bytes.Length > limits.MaximumInputBytes)
-                { issues.Add(SpatialContractIssue.InputByteLimitExceeded); return Result<byte[]>(null, issues); }
-                return Result(bytes, issues);
+                var writer = new ContractJsonWriter(limits);
+                WriteCanonical(writer, value);
+                return Result(writer.Finish(), issues);
             }
+            catch (ContractJsonBudgetException failure)
+            { issues.Add(failure.Issue); return Result<byte[]>(null, issues); }
             catch
             { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
         }
@@ -116,23 +117,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode node;
                 if (!ContractJson.TryParse(bytes, limits, issues, out node))
                     return Result<SpatialMigrationInputDescriptor>(null, issues);
-                if (!ContractJson.ValidateShape(node, Names, issues))
+                SpatialMigrationInputDescriptor descriptor;
+                if (!TryParseNode(node, issues, out descriptor))
                     return Result<SpatialMigrationInputDescriptor>(null, issues);
+                SpatialContractResult<byte[]> canonical = Serialize(descriptor, limits);
+                if (!canonical.IsValid || !bytes.SequenceEqual(canonical.Value))
+                    issues.Add(SpatialContractIssue.NonCanonicalBytes);
+                return Result(issues.Count == 0 ? descriptor : null, issues);
+            }
+            catch
+            { issues.Add(SpatialContractIssue.MalformedJson); return Result<SpatialMigrationInputDescriptor>(null, issues); }
+        }
 
-                int[] integers = new int[Names.Length];
-                string[] strings = new string[Names.Length];
-                foreach (int index in new[] { 1, 2, 3, 4, 5, 7, 10, 17 })
-                    if (!ContractJson.Int(ContractJson.Field(node, index), out integers[index]))
-                        issues.Add(ContractJson.Field(node, index).Kind == ContractJsonKind.Number
-                            ? SpatialContractIssue.IntegerOverflow : SpatialContractIssue.WrongFieldType);
-                foreach (int index in new[] { 0, 6, 8, 9, 11, 12, 13, 15, 16 })
-                    if (!ContractJson.String(ContractJson.Field(node, index), out strings[index]))
-                        issues.Add(SpatialContractIssue.WrongFieldType);
+        internal static bool TryParseNode(ContractJsonNode node, SpatialIssueCollector issues,
+            out SpatialMigrationInputDescriptor descriptor)
+        {
+            descriptor = null;
+            if (!ContractJson.ValidateShape(node, Names, issues)) return false;
+            int[] integers = new int[Names.Length];
+            string[] strings = new string[Names.Length];
+            foreach (int index in new[] { 1, 2, 3, 4, 5, 7, 10, 17 })
+                if (!ContractJson.Int(ContractJson.Field(node, index), out integers[index]))
+                    issues.Add(ContractJson.Field(node, index).Kind == ContractJsonKind.Number
+                        ? SpatialContractIssue.IntegerOverflow : SpatialContractIssue.WrongFieldType);
+            foreach (int index in new[] { 0, 6, 8, 9, 11, 12, 13, 15, 16 })
+                if (!ContractJson.String(ContractJson.Field(node, index), out strings[index]))
+                    issues.Add(SpatialContractIssue.WrongFieldType);
 
-                var hashes = new List<SpatialValidationInputHash>();
-                ContractJsonNode array = ContractJson.Field(node, 14);
-                if (array.Kind != ContractJsonKind.Array) issues.Add(SpatialContractIssue.WrongFieldType);
-                else foreach (ContractJsonNode item in array.Items)
+            var hashes = new List<SpatialValidationInputHash>();
+            ContractJsonNode array = ContractJson.Field(node, 14);
+            if (array.Kind != ContractJsonKind.Array) issues.Add(SpatialContractIssue.WrongFieldType);
+            else
+            {
+                string previous = null;
+                foreach (ContractJsonNode item in array.Items)
                 {
                     if (issues.IsExhausted) break;
                     if (!ContractJson.ValidateShape(item, HashNames, issues)) continue;
@@ -140,24 +158,57 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (!ContractJson.String(ContractJson.Field(item, 0), out inputId) ||
                         !ContractJson.String(ContractJson.Field(item, 1), out sha256))
                         issues.Add(SpatialContractIssue.WrongFieldType);
-                    else hashes.Add(new SpatialValidationInputHash(inputId, sha256));
+                    else
+                    {
+                        if (previous != null && StringComparer.Ordinal.Compare(previous, inputId) >= 0)
+                            issues.Add(SpatialContractIssue.NonCanonicalBytes);
+                        previous = inputId;
+                        hashes.Add(new SpatialValidationInputHash(inputId, sha256));
+                    }
                 }
-                if (issues.Count != 0) return Result<SpatialMigrationInputDescriptor>(null, issues);
-
-                var descriptor = new SpatialMigrationInputDescriptor(strings[0], integers[1],
-                    (SpatialRawEnvelopeClassification)integers[2], integers[3], integers[4], integers[5],
-                    strings[6], integers[7], strings[8], strings[9], integers[10], strings[11], strings[12],
-                    strings[13], hashes, strings[15], strings[16], integers[17]);
-                Validate(descriptor, issues);
-                if (issues.Count == 0)
-                {
-                    SpatialContractResult<byte[]> again = Serialize(descriptor, limits);
-                    if (!again.IsValid || !bytes.SequenceEqual(again.Value)) issues.Add(SpatialContractIssue.NonCanonicalBytes);
-                }
-                return Result(issues.Count == 0 ? descriptor : null, issues);
             }
-            catch
-            { issues.Add(SpatialContractIssue.MalformedJson); return Result<SpatialMigrationInputDescriptor>(null, issues); }
+            if (issues.Count != 0) return false;
+            descriptor = new SpatialMigrationInputDescriptor(strings[0], integers[1],
+                (SpatialRawEnvelopeClassification)integers[2], integers[3], integers[4], integers[5],
+                strings[6], integers[7], strings[8], strings[9], integers[10], strings[11], strings[12],
+                strings[13], hashes, strings[15], strings[16], integers[17]);
+            Validate(descriptor, issues);
+            return issues.Count == 0;
+        }
+
+        internal static void WriteCanonical(ContractJsonWriter writer,
+            SpatialMigrationInputDescriptor value)
+        {
+            writer.Node(); writer.Token("{");
+            WriteStringProperty(writer, Names[0], value.OriginalPayloadSha256, true);
+            WriteIntegerProperty(writer, Names[1], value.RawSourceSchemaVersion);
+            WriteIntegerProperty(writer, Names[2], (int)value.RawEnvelopeClassification);
+            WriteIntegerProperty(writer, Names[3], value.SelectedTargetSchemaVersion);
+            WriteIntegerProperty(writer, Names[4], value.AuthorityMarkerContractVersion);
+            WriteIntegerProperty(writer, Names[5], value.MigrationContractVersion);
+            WriteStringProperty(writer, Names[6], value.MigrationProfileId);
+            WriteIntegerProperty(writer, Names[7], value.MigrationProfileVersion);
+            WriteStringProperty(writer, Names[8], value.MigrationProfileCanonicalHash);
+            WriteStringProperty(writer, Names[9], value.SharedGeometryId);
+            WriteIntegerProperty(writer, Names[10], value.SharedGeometryVersion);
+            WriteStringProperty(writer, Names[11], value.SharedGeometryCanonicalHash);
+            WriteStringProperty(writer, Names[12], value.ProductionManifestSha256);
+            WriteStringProperty(writer, Names[13], value.ProductionCatalogSha256);
+            writer.Token(","); writer.String(Names[14]); writer.Token(":");
+            writer.Node(); writer.Token("[");
+            SpatialValidationInputHash[] hashes = value.ValidationInputHashes;
+            for (int index = 0; index < hashes.Length; index++)
+            {
+                writer.Record(); if (index != 0) writer.Token(",");
+                writer.Node(); writer.Token("{");
+                WriteStringProperty(writer, HashNames[0], hashes[index].InputId, true);
+                WriteStringProperty(writer, HashNames[1], hashes[index].Sha256); writer.Token("}");
+            }
+            writer.Token("]");
+            WriteStringProperty(writer, Names[15], value.LegacyGameplayConfigurationSha256);
+            WriteStringProperty(writer, Names[16], value.CanonicalSerializerId);
+            WriteIntegerProperty(writer, Names[17], value.CanonicalSerializerVersion);
+            writer.Token("}");
         }
 
         public static string ComputeInputFingerprint(SpatialMigrationInputDescriptor value,
@@ -167,39 +218,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return result.IsValid ? SpatialContractSha256.Compute(result.Value) : null;
         }
 
-        private static string BuildCanonical(SpatialMigrationInputDescriptor value)
-        {
-            var builder = new StringBuilder(); builder.Append('{');
-            AddString(builder, Names[0], value.OriginalPayloadSha256, true);
-            AddInteger(builder, Names[1], value.RawSourceSchemaVersion);
-            AddInteger(builder, Names[2], (int)value.RawEnvelopeClassification);
-            AddInteger(builder, Names[3], value.SelectedTargetSchemaVersion);
-            AddInteger(builder, Names[4], value.AuthorityMarkerContractVersion);
-            AddInteger(builder, Names[5], value.MigrationContractVersion);
-            AddString(builder, Names[6], value.MigrationProfileId);
-            AddInteger(builder, Names[7], value.MigrationProfileVersion);
-            AddString(builder, Names[8], value.MigrationProfileCanonicalHash);
-            AddString(builder, Names[9], value.SharedGeometryId);
-            AddInteger(builder, Names[10], value.SharedGeometryVersion);
-            AddString(builder, Names[11], value.SharedGeometryCanonicalHash);
-            AddString(builder, Names[12], value.ProductionManifestSha256);
-            AddString(builder, Names[13], value.ProductionCatalogSha256);
-            builder.Append(','); ContractJson.AppendString(builder, Names[14]); builder.Append(":");
-            builder.Append('['); SpatialValidationInputHash[] hashes = value.ValidationInputHashes;
-            for (int index = 0; index < hashes.Length; index++)
-            {
-                if (index != 0) builder.Append(','); builder.Append('{');
-                AddString(builder, HashNames[0], hashes[index].InputId, true);
-                AddString(builder, HashNames[1], hashes[index].Sha256); builder.Append('}');
-            }
-            builder.Append(']');
-            AddString(builder, Names[15], value.LegacyGameplayConfigurationSha256);
-            AddString(builder, Names[16], value.CanonicalSerializerId);
-            AddInteger(builder, Names[17], value.CanonicalSerializerVersion);
-            builder.Append('}'); return builder.ToString();
-        }
-
-        private static void Validate(SpatialMigrationInputDescriptor descriptor, SpatialIssueCollector issues)
+        internal static void Validate(SpatialMigrationInputDescriptor descriptor, SpatialIssueCollector issues)
         {
             if (descriptor == null) { issues.Add(SpatialContractIssue.InvalidField); return; }
             foreach (string hash in new[] { descriptor.OriginalPayloadSha256,
@@ -207,7 +226,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 descriptor.ProductionManifestSha256, descriptor.ProductionCatalogSha256,
                 descriptor.LegacyGameplayConfigurationSha256 })
             { if (!SpatialContractSha256.IsCanonical(hash)) issues.Add(SpatialContractIssue.InvalidHash); if (issues.IsExhausted) return; }
-
             if (descriptor.RawSourceSchemaVersion < 1 || descriptor.SelectedTargetSchemaVersion < 1 ||
                 descriptor.AuthorityMarkerContractVersion != SpatialMigrationContractIdentity.AuthorityMarkerContractVersion ||
                 descriptor.MigrationContractVersion != SpatialMigrationContractIdentity.MigrationContractVersion ||
@@ -220,7 +238,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !SpatialContractSha256.IsStableId(descriptor.CanonicalSerializerId) ||
                 !string.Equals(descriptor.CanonicalSerializerId, SpatialMigrationContractIdentity.CanonicalSerializerId,
                     StringComparison.Ordinal)) issues.Add(SpatialContractIssue.InvalidStableId);
-
             var ids = new HashSet<string>(StringComparer.Ordinal);
             foreach (SpatialValidationInputHash hash in descriptor.ValidationInputHashes)
             {
@@ -231,10 +248,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private static void AddString(StringBuilder builder, string name, string value, bool first = false)
-        { if (!first) builder.Append(','); ContractJson.AppendString(builder, name); builder.Append(':'); ContractJson.AppendString(builder, value); }
-        private static void AddInteger(StringBuilder builder, string name, int value)
-        { builder.Append(','); ContractJson.AppendString(builder, name); builder.Append(':').Append(value.ToString(CultureInfo.InvariantCulture)); }
+        private static void WriteStringProperty(ContractJsonWriter writer, string name, string value,
+            bool first = false)
+        {
+            if (!first) writer.Token(","); writer.String(name); writer.Token(":");
+            writer.Node(); writer.String(value);
+        }
+
+        private static void WriteIntegerProperty(ContractJsonWriter writer, string name, int value)
+        {
+            writer.Token(","); writer.String(name); writer.Token(":"); writer.Node();
+            writer.Token(value.ToString(CultureInfo.InvariantCulture));
+        }
+
         private static SpatialContractResult<T> Result<T>(T value, SpatialIssueCollector issues) =>
             new SpatialContractResult<T>(value, issues.ToArray());
     }

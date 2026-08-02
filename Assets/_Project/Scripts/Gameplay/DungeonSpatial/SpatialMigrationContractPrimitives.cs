@@ -131,6 +131,94 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
     }
 
+    internal sealed class ContractJsonWorkloadBudget
+    {
+        private readonly SpatialSerializedInputLimits limits;
+        private int nodes;
+        private int records;
+        private int stringCharacters;
+        private int bytes;
+
+        internal ContractJsonWorkloadBudget(SpatialSerializedInputLimits limits)
+        {
+            this.limits = limits;
+        }
+
+        internal bool TryNode() => TryAdd(ref nodes, 1, limits.MaximumParsedNodes);
+        internal bool TryRecord() => TryAdd(ref records, 1, limits.MaximumCollectionRecords);
+        internal bool TryString(int utf16Units) => TryAdd(ref stringCharacters, utf16Units,
+            limits.MaximumStringCharacters);
+        internal bool TryBytes(int count) => TryAdd(ref bytes, count, limits.MaximumInputBytes);
+
+        private static bool TryAdd(ref int current, int amount, int maximum)
+        {
+            if (amount < 0 || current < 0 || maximum < 0 || current > maximum - amount) return false;
+            current += amount;
+            return true;
+        }
+    }
+
+    internal sealed class ContractJsonWriter
+    {
+        private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
+        private readonly StringBuilder builder = new StringBuilder();
+        private readonly ContractJsonWorkloadBudget budget;
+
+        internal ContractJsonWriter(SpatialSerializedInputLimits limits)
+            : this(new ContractJsonWorkloadBudget(limits)) { }
+
+        internal ContractJsonWriter(ContractJsonWorkloadBudget budget)
+        {
+            this.budget = budget;
+        }
+
+        internal ContractJsonWorkloadBudget Budget => budget;
+
+        internal void Node()
+        {
+            if (!budget.TryNode()) throw new ContractJsonBudgetException(SpatialContractIssue.WorkloadExceeded);
+        }
+
+        internal void Record()
+        {
+            if (!budget.TryRecord()) throw new ContractJsonBudgetException(SpatialContractIssue.WorkloadExceeded);
+        }
+
+        internal void Token(string value)
+        {
+            if (!budget.TryBytes(value.Length))
+                throw new ContractJsonBudgetException(SpatialContractIssue.InputByteLimitExceeded);
+            builder.Append(value);
+        }
+
+        internal void String(string value)
+        {
+            if (value == null) value = string.Empty;
+            if (!budget.TryString(value.Length)) throw new ContractJsonBudgetException(SpatialContractIssue.WorkloadExceeded);
+            var encoded = new StringBuilder();
+            ContractJson.AppendEscapedString(encoded, value);
+            string text = encoded.ToString();
+            int byteCount = Utf8.GetByteCount(text);
+            if (!budget.TryBytes(byteCount))
+                throw new ContractJsonBudgetException(SpatialContractIssue.InputByteLimitExceeded);
+            builder.Append(text);
+        }
+
+        internal void AppendPrecounted(string value)
+        {
+            builder.Append(value);
+        }
+
+        internal string FinishText() => builder.ToString();
+        internal byte[] Finish() => Utf8.GetBytes(builder.ToString());
+    }
+
+    internal sealed class ContractJsonBudgetException : Exception
+    {
+        internal ContractJsonBudgetException(SpatialContractIssue issue) { Issue = issue; }
+        internal SpatialContractIssue Issue { get; }
+    }
+
     internal enum ContractJsonKind { Object, Array, String, Number, Null }
 
     internal sealed class ContractJsonNode
@@ -147,7 +235,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal static byte[] Bytes(string text) => Utf8.GetBytes(text);
 
-        internal static void AppendString(StringBuilder builder, string value)
+        internal static void AppendEscapedString(StringBuilder builder, string value)
         {
             if (value == null) value = string.Empty;
             builder.Append('"');
@@ -190,16 +278,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { issues.Add(SpatialContractIssue.InputByteLimitExceeded); return false; }
             if (bytes.Length >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf)
             { issues.Add(SpatialContractIssue.BomPresent); return false; }
-
             string text;
             try { text = Utf8.GetString(bytes); }
             catch (DecoderFallbackException) { issues.Add(SpatialContractIssue.InvalidUtf8); return false; }
             if (text.Length == 0 || char.IsWhiteSpace(text[0]) || char.IsWhiteSpace(text[text.Length - 1]))
             { issues.Add(SpatialContractIssue.LeadingOrTrailingWhitespace); return false; }
-
             try
             {
-                node = new Reader(text, limits).Read();
+                node = new Reader(text, new ContractJsonWorkloadBudget(limits)).Read();
                 return true;
             }
             catch (JsonFailure failure) { issues.Add(failure.Issue); }
@@ -211,7 +297,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (node == null || node.Kind != ContractJsonKind.Object)
             { issues.Add(SpatialContractIssue.WrongFieldType); return false; }
-
             bool valid = true;
             if (node.Fields.Count != fields.Length)
             { issues.Add(SpatialContractIssue.InvalidField); valid = false; }
@@ -227,17 +312,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     issues.Add(ambiguous ? SpatialContractIssue.CaseAmbiguousField : SpatialContractIssue.UnknownField);
                     valid = false;
                 }
-                else if (exact != index)
-                { issues.Add(SpatialContractIssue.WrongFieldOrder); valid = false; }
+                else if (exact != index) { issues.Add(SpatialContractIssue.WrongFieldOrder); valid = false; }
             }
             return valid && !issues.IsExhausted;
-        }
-
-        internal static string Compact(ContractJsonNode node)
-        {
-            var builder = new StringBuilder();
-            AppendNode(builder, node);
-            return builder.ToString();
         }
 
         internal static ContractJsonNode Field(ContractJsonNode node, int index) => node.Fields[index].Value;
@@ -247,7 +324,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return node.Kind == ContractJsonKind.Number && int.TryParse(node.Text,
                 NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value);
         }
-
         internal static bool Long(ContractJsonNode node, out long value)
         {
             value = 0L;
@@ -257,163 +333,160 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static bool String(ContractJsonNode node, out string value)
         { value = node.Kind == ContractJsonKind.String ? node.Text : null; return value != null; }
 
-        private static void AppendNode(StringBuilder builder, ContractJsonNode node)
-        {
-            if (node.Kind == ContractJsonKind.Object)
-            {
-                builder.Append('{');
-                for (int index = 0; index < node.Fields.Count; index++)
-                {
-                    if (index != 0) builder.Append(',');
-                    AppendString(builder, node.Fields[index].Key);
-                    builder.Append(':');
-                    AppendNode(builder, node.Fields[index].Value);
-                }
-                builder.Append('}');
-            }
-            else if (node.Kind == ContractJsonKind.Array)
-            {
-                builder.Append('[');
-                for (int index = 0; index < node.Items.Count; index++)
-                { if (index != 0) builder.Append(','); AppendNode(builder, node.Items[index]); }
-                builder.Append(']');
-            }
-            else if (node.Kind == ContractJsonKind.String) AppendString(builder, node.Text);
-            else if (node.Kind == ContractJsonKind.Number) builder.Append(node.Text);
-            else builder.Append("null");
-        }
-
         private sealed class JsonFailure : Exception
         {
             internal JsonFailure(SpatialContractIssue issue) { Issue = issue; }
             internal SpatialContractIssue Issue { get; }
         }
 
+        private sealed class Frame
+        {
+            internal ContractJsonNode Node;
+            internal int State;
+            internal bool AfterComma;
+            internal string PendingName;
+            internal HashSet<string> Names;
+        }
+
         private sealed class Reader
         {
             private readonly string source;
-            private readonly SpatialSerializedInputLimits limits;
+            private readonly ContractJsonWorkloadBudget budget;
             private int position;
-            private int nodes;
-            private int records;
-            private int stringCharacters;
 
-            internal Reader(string source, SpatialSerializedInputLimits limits)
-            { this.source = source; this.limits = limits; }
+            internal Reader(string source, ContractJsonWorkloadBudget budget)
+            { this.source = source; this.budget = budget; }
 
             internal ContractJsonNode Read()
             {
-                ContractJsonNode node = Value();
-                if (position != source.Length) throw new JsonFailure(SpatialContractIssue.MalformedJson);
-                return node;
+                ContractJsonNode root = ReadValue();
+                var stack = new Stack<Frame>();
+                if (IsContainer(root)) stack.Push(NewFrame(root));
+                while (stack.Count != 0)
+                {
+                    Frame frame = stack.Peek();
+                    if (frame.Node.Kind == ContractJsonKind.Object)
+                        StepObject(stack, frame);
+                    else StepArray(stack, frame);
+                }
+                if (position != source.Length) Fail(SpatialContractIssue.MalformedJson);
+                return root;
             }
 
-            private ContractJsonNode Value()
+            private void StepObject(Stack<Frame> stack, Frame frame)
             {
-                if (++nodes > limits.MaximumParsedNodes) throw new JsonFailure(SpatialContractIssue.WorkloadExceeded);
-                if (position >= source.Length) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                if (frame.State == 0)
+                {
+                    if (Take('}'))
+                    {
+                        if (frame.AfterComma) Fail(SpatialContractIssue.MalformedJson);
+                        stack.Pop(); return;
+                    }
+                    string name = ReadString();
+                    if (!frame.Names.Add(name)) Fail(SpatialContractIssue.DuplicateField);
+                    Need(':'); frame.PendingName = name; frame.State = 1;
+                }
+                else if (frame.State == 1)
+                {
+                    ContractJsonNode child = ReadValue();
+                    frame.Node.Fields.Add(new KeyValuePair<string, ContractJsonNode>(frame.PendingName, child));
+                    frame.State = 2;
+                    if (IsContainer(child)) stack.Push(NewFrame(child));
+                }
+                else
+                {
+                    if (Take('}')) { stack.Pop(); return; }
+                    Need(','); frame.State = 0; frame.AfterComma = true;
+                }
+            }
+
+            private void StepArray(Stack<Frame> stack, Frame frame)
+            {
+                if (frame.State == 0)
+                {
+                    if (Take(']'))
+                    {
+                        if (frame.AfterComma) Fail(SpatialContractIssue.MalformedJson);
+                        stack.Pop(); return;
+                    }
+                    if (!budget.TryRecord()) Fail(SpatialContractIssue.WorkloadExceeded);
+                    ContractJsonNode child = ReadValue();
+                    frame.Node.Items.Add(child); frame.State = 1;
+                    if (IsContainer(child)) stack.Push(NewFrame(child));
+                }
+                else
+                {
+                    if (Take(']')) { stack.Pop(); return; }
+                    Need(','); frame.State = 0; frame.AfterComma = true;
+                }
+            }
+
+            private ContractJsonNode ReadValue()
+            {
+                if (!budget.TryNode()) Fail(SpatialContractIssue.WorkloadExceeded);
+                if (position >= source.Length) Fail(SpatialContractIssue.MalformedJson);
                 char current = source[position];
-                if (current == '{') return Object();
-                if (current == '[') return Array();
+                if (current == '{')
+                { position++; return new ContractJsonNode { Kind = ContractJsonKind.Object,
+                    Fields = new List<KeyValuePair<string, ContractJsonNode>>() }; }
+                if (current == '[')
+                { position++; return new ContractJsonNode { Kind = ContractJsonKind.Array,
+                    Items = new List<ContractJsonNode>() }; }
                 if (current == '"') return new ContractJsonNode { Kind = ContractJsonKind.String, Text = ReadString() };
                 if (current == 'n' && position + 4 <= source.Length && source.Substring(position, 4) == "null")
                 { position += 4; return new ContractJsonNode { Kind = ContractJsonKind.Null }; }
-                return Number();
+                return ReadNumber();
             }
 
-            private ContractJsonNode Object()
+            private ContractJsonNode ReadNumber()
             {
-                position++;
-                var fields = new List<KeyValuePair<string, ContractJsonNode>>();
-                var names = new HashSet<string>(StringComparer.Ordinal);
-                if (Take('}')) return new ContractJsonNode { Kind = ContractJsonKind.Object, Fields = fields };
-                while (true)
-                {
-                    string name = ReadString();
-                    if (!names.Add(name)) throw new JsonFailure(SpatialContractIssue.DuplicateField);
-                    Need(':');
-                    fields.Add(new KeyValuePair<string, ContractJsonNode>(name, Value()));
-                    if (Take('}')) break;
-                    Need(',');
-                }
-                return new ContractJsonNode { Kind = ContractJsonKind.Object, Fields = fields };
-            }
-
-            private ContractJsonNode Array()
-            {
-                position++;
-                var items = new List<ContractJsonNode>();
-                if (Take(']')) return new ContractJsonNode { Kind = ContractJsonKind.Array, Items = items };
-                while (true)
-                {
-                    if (++records > limits.MaximumCollectionRecords)
-                        throw new JsonFailure(SpatialContractIssue.WorkloadExceeded);
-                    items.Add(Value());
-                    if (Take(']')) break;
-                    Need(',');
-                }
-                return new ContractJsonNode { Kind = ContractJsonKind.Array, Items = items };
-            }
-
-            private ContractJsonNode Number()
-            {
-                int start = position;
-                Take('-');
-                if (position >= source.Length || !char.IsDigit(source[position]))
-                    throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                int start = position; Take('-');
+                if (position >= source.Length || !char.IsDigit(source[position])) Fail(SpatialContractIssue.MalformedJson);
                 if (source[position] == '0' && position + 1 < source.Length && char.IsDigit(source[position + 1]))
-                    throw new JsonFailure(SpatialContractIssue.UnsupportedNumber);
+                    Fail(SpatialContractIssue.UnsupportedNumber);
                 while (position < source.Length && char.IsDigit(source[position])) position++;
                 if (position < source.Length && (source[position] == '.' || source[position] == 'e' ||
-                    source[position] == 'E' || source[position] == '+'))
-                    throw new JsonFailure(SpatialContractIssue.UnsupportedNumber);
+                    source[position] == 'E' || source[position] == '+')) Fail(SpatialContractIssue.UnsupportedNumber);
                 return new ContractJsonNode { Kind = ContractJsonKind.Number,
                     Text = source.Substring(start, position - start) };
             }
 
             private string ReadString()
             {
-                Need('"');
-                var builder = new StringBuilder();
+                Need('"'); var builder = new StringBuilder();
                 while (position < source.Length)
                 {
                     char character = source[position++];
                     if (character == '"') return builder.ToString();
-                    if (character < 0x20) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                    if (character < 0x20) Fail(SpatialContractIssue.MalformedJson);
                     if (character == '\\') character = Escape();
                     AppendUnicode(builder, character);
                 }
-                throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                Fail(SpatialContractIssue.MalformedJson); return null;
             }
 
             private char Escape()
             {
-                if (position >= source.Length) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                if (position >= source.Length) Fail(SpatialContractIssue.MalformedJson);
                 char escape = source[position++];
                 if (escape == '"' || escape == '\\' || escape == '/') return escape;
                 if (escape == 'b') return '\b'; if (escape == 'f') return '\f';
                 if (escape == 'n') return '\n'; if (escape == 'r') return '\r'; if (escape == 't') return '\t';
-                if (escape != 'u' || position + 4 > source.Length)
-                    throw new JsonFailure(SpatialContractIssue.MalformedJson);
-                int value;
-                if (!int.TryParse(source.Substring(position, 4), NumberStyles.HexNumber,
-                    CultureInfo.InvariantCulture, out value)) throw new JsonFailure(SpatialContractIssue.MalformedJson);
-                position += 4;
-                return (char)value;
+                if (escape != 'u') Fail(SpatialContractIssue.MalformedJson);
+                return ReadHexCodeUnit();
             }
 
             private void AppendUnicode(StringBuilder builder, char character)
             {
-                if (char.IsLowSurrogate(character)) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                if (char.IsLowSurrogate(character)) Fail(SpatialContractIssue.MalformedJson);
                 if (char.IsHighSurrogate(character))
                 {
                     char low;
                     if (position < source.Length && source[position] == '\\' && position + 6 <= source.Length &&
-                        source[position + 1] == 'u')
-                    { position += 2; low = ReadHexCodeUnit(); }
+                        source[position + 1] == 'u') { position += 2; low = ReadHexCodeUnit(); }
                     else if (position < source.Length) low = source[position++];
-                    else throw new JsonFailure(SpatialContractIssue.MalformedJson);
-                    if (!char.IsLowSurrogate(low)) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                    else { Fail(SpatialContractIssue.MalformedJson); return; }
+                    if (!char.IsLowSurrogate(low)) Fail(SpatialContractIssue.MalformedJson);
                     AddStringUnits(2); builder.Append(character).Append(low); return;
                 }
                 AddStringUnits(1); builder.Append(character);
@@ -421,25 +494,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             private char ReadHexCodeUnit()
             {
-                if (position + 4 > source.Length) throw new JsonFailure(SpatialContractIssue.MalformedJson);
+                if (position + 4 > source.Length) { Fail(SpatialContractIssue.MalformedJson); return '\0'; }
                 int value;
                 if (!int.TryParse(source.Substring(position, 4), NumberStyles.HexNumber,
-                    CultureInfo.InvariantCulture, out value)) throw new JsonFailure(SpatialContractIssue.MalformedJson);
-                position += 4;
-                return (char)value;
+                    CultureInfo.InvariantCulture, out value)) { Fail(SpatialContractIssue.MalformedJson); return '\0'; }
+                position += 4; return (char)value;
             }
 
             private void AddStringUnits(int amount)
-            {
-                if (stringCharacters > limits.MaximumStringCharacters - amount)
-                    throw new JsonFailure(SpatialContractIssue.WorkloadExceeded);
-                stringCharacters += amount;
-            }
-
+            { if (!budget.TryString(amount)) Fail(SpatialContractIssue.WorkloadExceeded); }
+            private static bool IsContainer(ContractJsonNode node) =>
+                node.Kind == ContractJsonKind.Object || node.Kind == ContractJsonKind.Array;
+            private static Frame NewFrame(ContractJsonNode node) => new Frame
+            { Node = node, Names = node.Kind == ContractJsonKind.Object
+                ? new HashSet<string>(StringComparer.Ordinal) : null };
             private bool Take(char expected)
             { if (position < source.Length && source[position] == expected) { position++; return true; } return false; }
-            private void Need(char expected)
-            { if (!Take(expected)) throw new JsonFailure(SpatialContractIssue.MalformedJson); }
+            private void Need(char expected) { if (!Take(expected)) Fail(SpatialContractIssue.MalformedJson); }
+            private static void Fail(SpatialContractIssue issue) { throw new JsonFailure(issue); }
         }
     }
 }

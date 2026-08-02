@@ -16,6 +16,123 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static readonly CanonicalSpatialSerializationLimits SaveLimits = new CanonicalSpatialSerializationLimits(
             Limits, new CanonicalSpatialSaveWorkloadLimits(2000, 2000));
 
+        [Test]
+        public void AuthorityMarker_RequiresExactNativeAndMigratedIdentities()
+        {
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, null, true);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, "stable.id", null, false);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, H1, false);
+            string transaction = SpatialMigrationTransactionIdentity.CreateTransactionId(H2);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1, true);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, null, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, null, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "wrong-" + H2, H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + new string('A', 64), H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + H2.Substring(1), H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "stable.looking.id", H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, new string('A', 64), false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1.Substring(1), false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, "stable.looking.id", false);
+        }
+
+        [Test]
+        public void DeepJson_UsesExplicitStackAtExactNodeBoundaryAndOneOver()
+        {
+            const int depth = 512;
+            string json = new string('[', depth) + "0" + new string(']', depth);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            var exact = new SpatialSerializedInputLimits(bytes.Length, depth + 1, depth, 0, 10);
+            SpatialContractResult<SpatialMigrationInputDescriptor> exactResult =
+                SpatialMigrationDescriptorContracts.Parse(bytes, exact);
+            Assert.IsFalse(exactResult.IsValid);
+            CollectionAssert.Contains(exactResult.Issues, SpatialContractIssue.WrongFieldType);
+            var oneOver = new SpatialSerializedInputLimits(bytes.Length, depth, depth, 0, 10);
+            SpatialContractResult<SpatialMigrationInputDescriptor> overResult =
+                SpatialMigrationDescriptorContracts.Parse(bytes, oneOver);
+            Assert.IsFalse(overResult.IsValid);
+            CollectionAssert.Contains(overResult.Issues, SpatialContractIssue.WorkloadExceeded);
+        }
+
+        [Test]
+        public void SerializationBudgets_EnforceNodesRecordsAndStringsForEveryContract()
+        {
+            AssertSerializationBoundaries(
+                limits => CanonicalSpatialSaveSerializer.Serialize(Populated(2, true),
+                    new CanonicalSpatialSerializationLimits(limits, SaveLimits.Spatial)).IsValid);
+            AssertSerializationBoundaries(
+                limits => SpatialMigrationDescriptorContracts.Serialize(Descriptor(), limits).IsValid);
+            AssertSerializationBoundaries(
+                limits => SpatialMigrationJournalContracts.Serialize(
+                    ValidJournal(SpatialMigrationJournalStage.Finalized), limits).IsValid);
+        }
+
+        [Test]
+        public void SerializationByteBudgets_AreExactForAllContracts()
+        {
+            byte[] spatial = CanonicalSpatialSaveSerializer.Serialize(Populated(1, false), SaveLimits).Value;
+            Assert.IsTrue(CanonicalSpatialSaveSerializer.Serialize(Populated(1, false),
+                new CanonicalSpatialSerializationLimits(
+                    new SpatialSerializedInputLimits(spatial.Length, 20000, 2000, 20000, 10),
+                    SaveLimits.Spatial)).IsValid);
+            CollectionAssert.Contains(CanonicalSpatialSaveSerializer.Serialize(Populated(1, false),
+                new CanonicalSpatialSerializationLimits(
+                    new SpatialSerializedInputLimits(spatial.Length - 1, 20000, 2000, 20000, 10),
+                    SaveLimits.Spatial)).Issues, SpatialContractIssue.InputByteLimitExceeded);
+
+            byte[] descriptor = SpatialMigrationDescriptorContracts.Serialize(Descriptor(), Limits).Value;
+            Assert.IsTrue(SpatialMigrationDescriptorContracts.Serialize(Descriptor(),
+                new SpatialSerializedInputLimits(descriptor.Length, 20000, 2000, 20000, 10)).IsValid);
+            CollectionAssert.Contains(SpatialMigrationDescriptorContracts.Serialize(Descriptor(),
+                new SpatialSerializedInputLimits(descriptor.Length - 1, 20000, 2000, 20000, 10)).Issues,
+                SpatialContractIssue.InputByteLimitExceeded);
+
+            SpatialMigrationJournal journal = ValidJournal(SpatialMigrationJournalStage.Finalized);
+            byte[] journalBytes = SpatialMigrationJournalContracts.Serialize(journal, Limits).Value;
+            Assert.IsTrue(SpatialMigrationJournalContracts.Serialize(journal,
+                new SpatialSerializedInputLimits(journalBytes.Length, 20000, 2000, 20000, 10)).IsValid);
+            CollectionAssert.Contains(SpatialMigrationJournalContracts.Serialize(journal,
+                new SpatialSerializedInputLimits(journalBytes.Length - 1, 20000, 2000, 20000, 10)).Issues,
+                SpatialContractIssue.InputByteLimitExceeded);
+        }
+
+        [Test]
+        public void JournalDescriptor_IsParsedOnceAtExactCombinedWorkloadBoundaries()
+        {
+            SpatialMigrationJournal journal = ValidJournal(SpatialMigrationJournalStage.Finalized);
+            const int high = 200000;
+            int nodes = Minimum(limit => SpatialMigrationJournalContracts.Serialize(journal,
+                new SpatialSerializedInputLimits(high, limit, high, high, 10)).IsValid);
+            int records = Minimum(limit => SpatialMigrationJournalContracts.Serialize(journal,
+                new SpatialSerializedInputLimits(high, high, limit, high, 10)).IsValid);
+            int strings = Minimum(limit => SpatialMigrationJournalContracts.Serialize(journal,
+                new SpatialSerializedInputLimits(high, high, high, limit, 10)).IsValid);
+            var exact = new SpatialSerializedInputLimits(high, nodes, records, strings, 10);
+            byte[] bytes = SpatialMigrationJournalContracts.Serialize(journal, exact).Value;
+            Assert.IsTrue(SpatialMigrationJournalContracts.Parse(bytes, exact).IsValid);
+            var oneNodeOver = new SpatialSerializedInputLimits(high, nodes - 1, records, strings, 10);
+            CollectionAssert.Contains(SpatialMigrationJournalContracts.Parse(bytes, oneNodeOver).Issues,
+                SpatialContractIssue.WorkloadExceeded);
+        }
+
+        [Test]
+        public void WindowsReservedDeviceNames_AreRejectedPlatformIndependently()
+        {
+            var names = new List<string> { "CON", "PRN", "AUX", "NUL" };
+            for (int index = 1; index <= 9; index++)
+            { names.Add("COM" + index); names.Add("LPT" + index); }
+            string transaction = SpatialMigrationTransactionIdentity.CreateTransactionId(H1);
+            foreach (string name in names)
+            {
+                Assert.IsFalse(SpatialMigrationSidecarPaths.IsValidRelativeFilename(name, 180), name);
+                Assert.IsFalse(SpatialMigrationSidecarPaths.IsValidRelativeFilename(name + ".json", 180), name);
+                Assert.IsFalse(SpatialMigrationSidecarPaths.Derive(name + ".json", transaction).IsValid, name);
+            }
+            Assert.IsFalse(SpatialMigrationSidecarPaths.IsValidRelativeFilename("Con.json", 180));
+            Assert.IsTrue(SpatialMigrationSidecarPaths.IsValidRelativeFilename("console.json", 180));
+            Assert.IsTrue(SpatialMigrationSidecarPaths.IsValidRelativeFilename("com10.json", 180));
+        }
+
         [TestCase(null, null, true)]
         [TestCase(H2, null, true)]
         [TestCase("bad", null, false)]
@@ -111,8 +228,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void PopulatedR1AndR2_RoundTripWithoutMutation(int rooms, bool physicalCorridor)
         {
             DetachedCanonicalSpatialSaveState source = Populated(rooms, physicalCorridor);
-            RoomSpatialInstance[] sourceRooms = source.Floors[0].Layout.Rooms;
-            string[] order = sourceRooms.Select(room => room.RoomInstanceId).ToArray();
+            SavedSpatialFloor[] floorArray = source.Floors;
+            FloorSpatialLayout layout = source.Floors[0].Layout;
+            RoomSpatialInstance[] sourceRooms = layout.Rooms;
+            FloorRouteNode[] sourceNodes = layout.Nodes;
+            FloorRouteEdge[] sourceEdges = layout.Edges;
+            SavedFixedSpatialStructure[] sourceFixed = source.Floors[0].FixedStructures;
+            RoomContentAssignment[] sourceAssignments = source.Floors[0].RoomContents.Assignments;
+            CanonicalRoomSemantics[] sourceSemantics = source.Floors[0].RoomContents.RoomSemantics;
+            ResolvedTileFootprint footprint = physicalCorridor ? sourceEdges[0].Footprint : null;
+            TileCoordinate[] tiles = footprint == null ? null : footprint.OccupiedTiles;
+            string snapshot = Snapshot(source);
             SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(source, SaveLimits);
             Assert.IsTrue(serialized.IsValid);
             Assert.AreNotEqual(0xef, serialized.Value[0]);
@@ -126,8 +252,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.IsTrue(parsed.IsValid);
             CollectionAssert.AreEqual(serialized.Value,
                 CanonicalSpatialSaveSerializer.Serialize(parsed.Value, SaveLimits).Value);
-            Assert.AreSame(sourceRooms, source.Floors[0].Layout.Rooms);
-            CollectionAssert.AreEqual(order, source.Floors[0].Layout.Rooms.Select(room => room.RoomInstanceId));
+            Assert.AreSame(floorArray, source.Floors);
+            Assert.AreSame(layout, source.Floors[0].Layout);
+            Assert.AreSame(sourceRooms, layout.Rooms);
+            Assert.AreSame(sourceNodes, layout.Nodes);
+            Assert.AreSame(sourceEdges, layout.Edges);
+            Assert.AreSame(sourceFixed, source.Floors[0].FixedStructures);
+            Assert.AreSame(sourceAssignments, source.Floors[0].RoomContents.Assignments);
+            Assert.AreSame(sourceSemantics, source.Floors[0].RoomContents.RoomSemantics);
+            if (physicalCorridor)
+            { Assert.AreSame(footprint, sourceEdges[0].Footprint); Assert.AreSame(tiles, footprint.OccupiedTiles); }
+            Assert.AreEqual(snapshot, Snapshot(source));
         }
 
         [Test]
@@ -208,6 +343,67 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void DescriptorEveryFieldMutation_ChangesCanonicalBytesAndFingerprint()
+        {
+            byte[] baseline = SpatialMigrationDescriptorContracts.Serialize(Descriptor(), Limits).Value;
+            string json = Encoding.UTF8.GetString(baseline);
+            var mutations = new[]
+            {
+                new[] { "\"OriginalPayloadSha256\":\"" + H0, "\"OriginalPayloadSha256\":\"" + H2 },
+                new[] { "\"RawSourceSchemaVersion\":6", "\"RawSourceSchemaVersion\":5" },
+                new[] { "\"RawEnvelopeClassification\":1", "\"RawEnvelopeClassification\":2" },
+                new[] { "\"SelectedTargetSchemaVersion\":7", "\"SelectedTargetSchemaVersion\":8" },
+                new[] { "\"AuthorityMarkerContractVersion\":1", "\"AuthorityMarkerContractVersion\":2" },
+                new[] { "\"MigrationContractVersion\":1", "\"MigrationContractVersion\":2" },
+                new[] { "compat.profile.migration.schema_1_6_to_7.contract_1", "compat.profile.changed" },
+                new[] { "\"MigrationProfileVersion\":1", "\"MigrationProfileVersion\":2" },
+                new[] { "\"MigrationProfileCanonicalHash\":\"" + H1, "\"MigrationProfileCanonicalHash\":\"" + H2 },
+                new[] { "compat.geometry.r1-r2", "compat.geometry.changed" },
+                new[] { "\"SharedGeometryVersion\":1", "\"SharedGeometryVersion\":2" },
+                new[] { "\"SharedGeometryCanonicalHash\":\"" + H2, "\"SharedGeometryCanonicalHash\":\"" + H0 },
+                new[] { "\"ProductionManifestSha256\":\"" + H1, "\"ProductionManifestSha256\":\"" + H0 },
+                new[] { "\"ProductionCatalogSha256\":\"" + H2, "\"ProductionCatalogSha256\":\"" + H0 },
+                new[] { "validation.limits", "validation.changed" },
+                new[] { "\"Sha256\":\"" + H0, "\"Sha256\":\"" + H2 },
+                new[] { "\"LegacyGameplayConfigurationSha256\":\"" + H1, "\"LegacyGameplayConfigurationSha256\":\"" + H0 },
+                new[] { SpatialMigrationContractIdentity.CanonicalSerializerId, "gd66.serializer.changed" },
+                new[] { "\"CanonicalSerializerVersion\":1", "\"CanonicalSerializerVersion\":2" }
+            };
+            string baselineFingerprint = SpatialContractSha256.Compute(baseline);
+            foreach (string[] mutation in mutations)
+            {
+                string changed = json.Replace(mutation[0], mutation[1]);
+                Assert.AreNotEqual(json, changed, mutation[0]);
+                byte[] changedBytes = Encoding.UTF8.GetBytes(changed);
+                Assert.IsFalse(baseline.SequenceEqual(changedBytes), mutation[0]);
+                Assert.AreNotEqual(baselineFingerprint, SpatialContractSha256.Compute(changedBytes), mutation[0]);
+            }
+            string transactionIdentity = SpatialMigrationTransactionIdentity.ComputeIdentity(H0, baselineFingerprint);
+            Assert.AreNotEqual(H0, baselineFingerprint);
+            Assert.AreNotEqual(H0, transactionIdentity);
+            Assert.AreNotEqual(baselineFingerprint, transactionIdentity);
+        }
+
+        [Test]
+        public void DescriptorNoncanonicalValidationRecordOrder_IsRejected()
+        {
+            var descriptor = new SpatialMigrationInputDescriptor(H0, 6,
+                SpatialRawEnvelopeClassification.WrappedSaveRoot, 7, 1, 1,
+                "compat.profile.migration.schema_1_6_to_7.contract_1", 1, H1,
+                "compat.geometry.r1-r2", 1, H2, H1, H2,
+                new[] { new SpatialValidationInputHash("validation.a", H0),
+                    new SpatialValidationInputHash("validation.z", H1) }, H1,
+                SpatialMigrationContractIdentity.CanonicalSerializerId, 1);
+            string json = Encoding.UTF8.GetString(
+                SpatialMigrationDescriptorContracts.Serialize(descriptor, Limits).Value);
+            string first = "{\"InputId\":\"validation.a\",\"Sha256\":\"" + H0 + "\"}";
+            string second = "{\"InputId\":\"validation.z\",\"Sha256\":\"" + H1 + "\"}";
+            string reversed = json.Replace(first + "," + second, second + "," + first);
+            Assert.IsFalse(SpatialMigrationDescriptorContracts.Parse(
+                Encoding.UTF8.GetBytes(reversed), Limits).IsValid);
+        }
+
+        [Test]
         public void CompleteJournalTransitionMatrix_IsExact()
         {
             SpatialMigrationJournalStage[] stages = (SpatialMigrationJournalStage[])
@@ -247,6 +443,95 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationSidecarPaths.MaximumGeneratedFilenameCharacters));
             Assert.AreEqual(240, SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters);
             // Pure lexical validation intentionally defers symlink/reparse-point verification to the executor.
+        }
+
+        private static void AssertAuthority(CanonicalSpatialCreationKind kind, string transaction,
+            string fingerprint, bool expected)
+        {
+            DetachedCanonicalSpatialSaveState state = EmptyState();
+            state.Authority.CreationKind = kind;
+            state.Authority.MigrationTransactionId = transaction;
+            state.Authority.MigrationDescriptorFingerprint = fingerprint;
+            SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(state, SaveLimits);
+            Assert.AreEqual(expected, serialized.IsValid, kind + " serialize " + transaction + " " + fingerprint);
+            byte[] valid = CanonicalSpatialSaveSerializer.Serialize(EmptyState(), SaveLimits).Value;
+            string json = Encoding.UTF8.GetString(valid)
+                .Replace("\"CreationKind\":1", "\"CreationKind\":" + (int)kind)
+                .Replace("\"MigrationTransactionId\":null", "\"MigrationTransactionId\":" + JsonValue(transaction))
+                .Replace("\"MigrationDescriptorFingerprint\":null",
+                    "\"MigrationDescriptorFingerprint\":" + JsonValue(fingerprint));
+            Assert.AreEqual(expected, CanonicalSpatialSaveSerializer.Parse(
+                Encoding.UTF8.GetBytes(json), SaveLimits).IsValid, kind + " parse");
+        }
+
+        private static string JsonValue(string value) => value == null ? "null" : "\"" + value + "\"";
+
+        private static void AssertSerializationBoundaries(Func<SpatialSerializedInputLimits, bool> serialize)
+        {
+            const int high = 200000;
+            int nodes = Minimum(limit => serialize(new SpatialSerializedInputLimits(high, limit, high, high, 10)));
+            int records = Minimum(limit => serialize(new SpatialSerializedInputLimits(high, high, limit, high, 10)));
+            int strings = Minimum(limit => serialize(new SpatialSerializedInputLimits(high, high, high, limit, 10)));
+            Assert.IsTrue(serialize(new SpatialSerializedInputLimits(high, nodes, records, strings, 10)));
+            Assert.IsFalse(serialize(new SpatialSerializedInputLimits(high, nodes - 1, records, strings, 10)));
+            if (records > 0) Assert.IsFalse(serialize(new SpatialSerializedInputLimits(high, nodes, records - 1, strings, 10)));
+            Assert.IsFalse(serialize(new SpatialSerializedInputLimits(high, nodes, records, strings - 1, 10)));
+        }
+
+        private static int Minimum(Func<int, bool> accepts)
+        {
+            int low = 0, high = 200000;
+            while (low < high)
+            {
+                int middle = low + (high - low) / 2;
+                if (accepts(middle)) high = middle; else low = middle + 1;
+            }
+            return low;
+        }
+
+        private static string Snapshot(DetachedCanonicalSpatialSaveState state)
+        {
+            var text = new StringBuilder();
+            CanonicalSpatialAuthorityMarker authority = state.Authority;
+            text.Append(authority.CanonicalLayoutContractVersion).Append('|').Append((int)authority.CreationKind)
+                .Append('|').Append(authority.MigrationTransactionId).Append('|')
+                .Append(authority.MigrationDescriptorFingerprint);
+            foreach (SavedSpatialFloor floor in state.Floors)
+            {
+                text.Append("|F:").Append(floor.FloorInstanceId).Append(':').Append(floor.FloorDefinitionId)
+                    .Append(':').Append(floor.FloorIndex).Append(':').Append(floor.Layout.FloorId);
+                foreach (RoomSpatialInstance room in floor.Layout.Rooms)
+                    text.Append("|R:").Append(room.RoomInstanceId).Append(':').Append(room.RoomDefinitionId)
+                        .Append(':').Append(room.FloorId).Append(':').Append(room.Anchor.X).Append(':')
+                        .Append(room.Anchor.Y).Append(':').Append((int)room.Orientation);
+                foreach (FloorRouteNode node in floor.Layout.Nodes)
+                    text.Append("|N:").Append(node.NodeId).Append(':').Append(node.FloorId).Append(':')
+                        .Append((int)node.Kind).Append(':').Append(node.RoomInstanceId);
+                foreach (FloorRouteEdge edge in floor.Layout.Edges)
+                {
+                    text.Append("|E:").Append(edge.EdgeId).Append(':').Append(edge.CorridorDefinitionId)
+                        .Append(':').Append(edge.FloorId).Append(':').Append(edge.SourceNodeId).Append(':')
+                        .Append(edge.DestinationNodeId).Append(':').Append((int)edge.Classification).Append(':')
+                        .Append(edge.OptionalBranchId).Append(':').Append((int)edge.ConnectionKind);
+                    if (edge.Footprint != null) foreach (TileCoordinate tile in edge.Footprint.OccupiedTiles)
+                        text.Append(':').Append(tile.X).Append(',').Append(tile.Y);
+                }
+                foreach (SavedFixedSpatialStructure fixedStructure in floor.FixedStructures)
+                    text.Append("|X:").Append(fixedStructure.FixedStructureInstanceId).Append(':')
+                        .Append(fixedStructure.FixedStructureDefinitionId).Append(':')
+                        .Append(fixedStructure.FloorInstanceId).Append(':').Append(fixedStructure.Anchor.X)
+                        .Append(':').Append(fixedStructure.Anchor.Y).Append(':')
+                        .Append((int)fixedStructure.Orientation).Append(':').Append((int)fixedStructure.Kind);
+                foreach (RoomContentAssignment assignment in floor.RoomContents.Assignments)
+                    text.Append("|A:").Append(assignment.AssignmentId).Append(':').Append(assignment.RoomInstanceId)
+                        .Append(':').Append(assignment.CategoryId).Append(':').Append(assignment.OptionId)
+                        .Append(':').Append(assignment.Sequence);
+                foreach (CanonicalRoomSemantics semantics in floor.RoomContents.RoomSemantics)
+                    text.Append("|S:").Append(semantics.RoomInstanceId).Append(':')
+                        .Append((int)semantics.LegacyRoomOriginKind);
+                text.Append("|Q:").Append(floor.RoomContents.NextSequence);
+            }
+            return text.ToString();
         }
 
         private static SpatialContractIssue[] ParseLowLevelThroughDescriptorShape(byte[] bytes, int strings)

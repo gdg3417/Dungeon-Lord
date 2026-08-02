@@ -65,29 +65,36 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!limits.IsValid) { issues.Add(SpatialContractIssue.InvalidLimits); return Result<byte[]>(null, issues); }
             try
             {
-                Validate(journal, limits, issues);
+                ValidateBasic(journal, issues);
+                SpatialMigrationDescriptorContracts.Validate(journal == null ? null : journal.Descriptor, issues);
                 if (issues.Count != 0) return Result<byte[]>(null, issues);
-                byte[] descriptor = SpatialMigrationDescriptorContracts.Serialize(journal.Descriptor, limits).Value;
-                var builder = new StringBuilder(); builder.Append('{');
-                AddInteger(builder, Names[0], journal.JournalSchemaVersion, true);
-                builder.Append(','); ContractJson.AppendString(builder, Names[1]); builder.Append(':')
-                    .Append(Encoding.UTF8.GetString(descriptor));
-                AddString(builder, Names[2], journal.DescriptorFingerprintSha256);
-                AddString(builder, Names[3], journal.TransactionIdentitySha256);
-                AddString(builder, Names[4], journal.TransactionId);
-                AddString(builder, Names[5], journal.RelativeJournalFilename);
-                AddString(builder, Names[6], journal.RelativeOriginalBackupFilename);
-                AddString(builder, Names[7], journal.RelativeCandidateStagingFilename);
-                AddNullable(builder, Names[8], journal.RelativeFinalizedReceiptFilename);
-                AddString(builder, Names[9], journal.OriginalPayloadSha256);
-                AddNullable(builder, Names[10], journal.BackupPayloadSha256);
-                AddNullable(builder, Names[11], journal.ExpectedCandidateSha256);
-                AddInteger(builder, Names[12], (int)journal.Stage); builder.Append('}');
-                byte[] bytes = ContractJson.Bytes(builder.ToString());
-                if (bytes.Length > limits.MaximumInputBytes)
-                { issues.Add(SpatialContractIssue.InputByteLimitExceeded); return Result<byte[]>(null, issues); }
-                return Result(bytes, issues);
+
+                var writer = new ContractJsonWriter(limits);
+                writer.Node(); writer.Token("{");
+                WriteIntegerProperty(writer, Names[0], journal.JournalSchemaVersion, true);
+                writer.Token(","); writer.String(Names[1]); writer.Token(":");
+                var descriptorWriter = new ContractJsonWriter(writer.Budget);
+                SpatialMigrationDescriptorContracts.WriteCanonical(descriptorWriter, journal.Descriptor);
+                byte[] descriptorBytes = descriptorWriter.Finish();
+                writer.AppendPrecounted(Encoding.UTF8.GetString(descriptorBytes));
+                ValidateIdentity(journal, descriptorBytes, issues);
+                if (issues.Count != 0) return Result<byte[]>(null, issues);
+                WriteStringProperty(writer, Names[2], journal.DescriptorFingerprintSha256);
+                WriteStringProperty(writer, Names[3], journal.TransactionIdentitySha256);
+                WriteStringProperty(writer, Names[4], journal.TransactionId);
+                WriteStringProperty(writer, Names[5], journal.RelativeJournalFilename);
+                WriteStringProperty(writer, Names[6], journal.RelativeOriginalBackupFilename);
+                WriteStringProperty(writer, Names[7], journal.RelativeCandidateStagingFilename);
+                WriteNullableProperty(writer, Names[8], journal.RelativeFinalizedReceiptFilename);
+                WriteStringProperty(writer, Names[9], journal.OriginalPayloadSha256);
+                WriteNullableProperty(writer, Names[10], journal.BackupPayloadSha256);
+                WriteNullableProperty(writer, Names[11], journal.ExpectedCandidateSha256);
+                WriteIntegerProperty(writer, Names[12], (int)journal.Stage);
+                writer.Token("}");
+                return Result(writer.Finish(), issues);
             }
+            catch (ContractJsonBudgetException failure)
+            { issues.Add(failure.Issue); return Result<byte[]>(null, issues); }
             catch { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
         }
 
@@ -99,14 +106,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try
             {
                 ContractJsonNode node;
-                if (!ContractJson.TryParse(bytes, limits, issues, out node)) return Result<SpatialMigrationJournal>(null, issues);
-                if (!ContractJson.ValidateShape(node, Names, issues)) return Result<SpatialMigrationJournal>(null, issues);
+                if (!ContractJson.TryParse(bytes, limits, issues, out node))
+                    return Result<SpatialMigrationJournal>(null, issues);
+                if (!ContractJson.ValidateShape(node, Names, issues))
+                    return Result<SpatialMigrationJournal>(null, issues);
                 int version, stage;
                 if (!ContractJson.Int(ContractJson.Field(node, 0), out version) ||
-                    !ContractJson.Int(ContractJson.Field(node, 12), out stage)) issues.Add(SpatialContractIssue.WrongFieldType);
-                var descriptor = SpatialMigrationDescriptorContracts.Parse(
-                    ContractJson.Bytes(ContractJson.Compact(ContractJson.Field(node, 1))), limits);
-                if (!descriptor.IsValid) issues.Add(SpatialContractIssue.InvalidField);
+                    !ContractJson.Int(ContractJson.Field(node, 12), out stage))
+                    issues.Add(SpatialContractIssue.WrongFieldType);
+                SpatialMigrationInputDescriptor descriptor;
+                if (!SpatialMigrationDescriptorContracts.TryParseNode(
+                    ContractJson.Field(node, 1), issues, out descriptor))
+                    return Result<SpatialMigrationJournal>(null, issues);
                 string[] values = new string[12];
                 for (int index = 2; index <= 7; index++)
                     if (!ContractJson.String(ContractJson.Field(node, index), out values[index]))
@@ -118,14 +129,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         issues.Add(SpatialContractIssue.WrongFieldType);
                 }
                 if (issues.Count != 0) return Result<SpatialMigrationJournal>(null, issues);
-                var journal = new SpatialMigrationJournal(version, descriptor.Value, values[2], values[3],
-                    values[4], values[5], values[6], values[7], values[8], values[9], values[10], values[11],
+                var journal = new SpatialMigrationJournal(version, descriptor, values[2], values[3], values[4],
+                    values[5], values[6], values[7], values[8], values[9], values[10], values[11],
                     (SpatialMigrationJournalStage)stage);
-                Validate(journal, limits, issues);
+                ValidateBasic(journal, issues);
+                SpatialContractResult<byte[]> canonicalDescriptor =
+                    SpatialMigrationDescriptorContracts.Serialize(descriptor, limits);
+                if (!canonicalDescriptor.IsValid) issues.Add(SpatialContractIssue.InvalidField);
+                else ValidateIdentity(journal, canonicalDescriptor.Value, issues);
                 if (issues.Count == 0)
                 {
                     SpatialContractResult<byte[]> again = Serialize(journal, limits);
-                    if (!again.IsValid || !bytes.SequenceEqual(again.Value)) issues.Add(SpatialContractIssue.NonCanonicalBytes);
+                    if (!again.IsValid || !bytes.SequenceEqual(again.Value))
+                        issues.Add(SpatialContractIssue.NonCanonicalBytes);
                 }
                 return Result(issues.Count == 0 ? journal : null, issues);
             }
@@ -151,16 +167,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 (to == SpatialMigrationJournalStage.Finalized || to == SpatialMigrationJournalStage.OriginalRestored);
         }
 
-        private static void Validate(SpatialMigrationJournal journal, SpatialSerializedInputLimits limits,
+        private static void ValidateBasic(SpatialMigrationJournal journal,
             SpatialIssueCollector issues)
         {
             if (journal == null || journal.JournalSchemaVersion != SpatialMigrationContractIdentity.JournalSchemaVersion)
             { issues.Add(SpatialContractIssue.InvalidIdentity); return; }
             if (!Enum.IsDefined(typeof(SpatialMigrationJournalStage), journal.Stage))
             { issues.Add(SpatialContractIssue.InvalidStage); return; }
-            SpatialContractResult<byte[]> descriptor = SpatialMigrationDescriptorContracts.Serialize(journal.Descriptor, limits);
-            if (!descriptor.IsValid) { issues.Add(SpatialContractIssue.InvalidField); return; }
-            string fingerprint = SpatialContractSha256.Compute(descriptor.Value);
+            ValidateNames(journal, issues);
+            ValidateStageData(journal, issues);
+            foreach (string hash in new[] { journal.DescriptorFingerprintSha256,
+                journal.TransactionIdentitySha256, journal.OriginalPayloadSha256 })
+            { if (!SpatialContractSha256.IsCanonical(hash)) issues.Add(SpatialContractIssue.InvalidHash); if (issues.IsExhausted) return; }
+        }
+
+        private static void ValidateIdentity(SpatialMigrationJournal journal, byte[] descriptorBytes,
+            SpatialIssueCollector issues)
+        {
+            string fingerprint = SpatialContractSha256.Compute(descriptorBytes);
             string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(
                 journal.Descriptor.OriginalPayloadSha256, fingerprint);
             string transactionId = SpatialMigrationTransactionIdentity.CreateTransactionId(identity);
@@ -169,11 +193,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !string.Equals(transactionId, journal.TransactionId, StringComparison.Ordinal) ||
                 !string.Equals(journal.Descriptor.OriginalPayloadSha256, journal.OriginalPayloadSha256,
                     StringComparison.Ordinal)) issues.Add(SpatialContractIssue.InvalidIdentity);
-            ValidateNames(journal, issues);
-            ValidateStageData(journal, issues);
-            foreach (string hash in new[] { journal.DescriptorFingerprintSha256,
-                journal.TransactionIdentitySha256, journal.OriginalPayloadSha256 })
-            { if (!SpatialContractSha256.IsCanonical(hash)) issues.Add(SpatialContractIssue.InvalidHash); if (issues.IsExhausted) return; }
         }
 
         private static void ValidateNames(SpatialMigrationJournal journal, SpatialIssueCollector issues)
@@ -224,12 +243,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(SpatialContractIssue.InvalidStageData);
         }
 
-        private static void AddString(StringBuilder builder, string name, string value)
-        { builder.Append(','); ContractJson.AppendString(builder, name); builder.Append(':'); ContractJson.AppendString(builder, value); }
-        private static void AddNullable(StringBuilder builder, string name, string value)
-        { builder.Append(','); ContractJson.AppendString(builder, name); builder.Append(':'); if (value == null) builder.Append("null"); else ContractJson.AppendString(builder, value); }
-        private static void AddInteger(StringBuilder builder, string name, int value, bool first = false)
-        { if (!first) builder.Append(','); ContractJson.AppendString(builder, name); builder.Append(':').Append(value.ToString(CultureInfo.InvariantCulture)); }
+        private static void WriteStringProperty(ContractJsonWriter writer, string name, string value,
+            bool first = false)
+        {
+            if (!first) writer.Token(","); writer.String(name); writer.Token(":");
+            writer.Node(); writer.String(value);
+        }
+
+        private static void WriteNullableProperty(ContractJsonWriter writer, string name, string value)
+        {
+            writer.Token(","); writer.String(name); writer.Token(":"); writer.Node();
+            if (value == null) writer.Token("null"); else writer.String(value);
+        }
+
+        private static void WriteIntegerProperty(ContractJsonWriter writer, string name, int value,
+            bool first = false)
+        {
+            if (!first) writer.Token(","); writer.String(name); writer.Token(":"); writer.Node();
+            writer.Token(value.ToString(CultureInfo.InvariantCulture));
+        }
+
         private static SpatialContractResult<T> Result<T>(T value, SpatialIssueCollector issues) =>
             new SpatialContractResult<T>(value, issues.ToArray());
     }

@@ -82,6 +82,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Uri.IsWellFormedUriString(value, UriKind.Absolute) || Path.IsPathRooted(value)) return false;
             foreach (char character in value)
                 if (character < 0x20 || "<>\"|?*".IndexOf(character) >= 0) return false;
+            string deviceToken = value.Split('.')[0];
+            if (IsWindowsReservedDeviceToken(deviceToken)) return false;
             try
             {
                 return string.Equals(Path.GetFileName(value), value, StringComparison.Ordinal) &&
@@ -89,6 +91,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         StringComparison.Ordinal);
             }
             catch { return false; }
+        }
+
+        private static bool IsWindowsReservedDeviceToken(string value)
+        {
+            if (string.Equals(value, "CON", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "PRN", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "AUX", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "NUL", StringComparison.OrdinalIgnoreCase)) return true;
+            if (value == null || value.Length != 4) return false;
+            char suffix = value[3];
+            if (suffix < '1' || suffix > '9') return false;
+            string prefix = value.Substring(0, 3);
+            return string.Equals(prefix, "COM", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(prefix, "LPT", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
