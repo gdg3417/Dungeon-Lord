@@ -21,6 +21,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public static class CanonicalSpatialSaveSerializer
     {
+        internal sealed class SerializedMembers
+        {
+            internal SerializedMembers(byte[] authority, byte[] floors)
+            { Authority = authority; Floors = floors; }
+            internal byte[] Authority { get; }
+            internal byte[] Floors { get; }
+        }
         private static readonly Dictionary<Type, string[]> Fields = new Dictionary<Type, string[]>
         {
             { typeof(DetachedCanonicalSpatialSaveState), new[] { "Authority", "Floors" } },
@@ -66,6 +73,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { issues.Add(failure.Issue); return Result<byte[]>(null, issues); }
             catch
             { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
+        }
+
+        internal static SpatialContractResult<SerializedMembers> SerializeMembers(
+            DetachedCanonicalSpatialSaveState source, CanonicalSpatialSerializationLimits limits)
+        {
+            SpatialContractResult<byte[]> complete = Serialize(source, limits);
+            if (!complete.IsValid)
+                return new SpatialContractResult<SerializedMembers>(null, complete.Issues);
+            try
+            {
+                DetachedCanonicalSpatialSaveState canonical;
+                if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical))
+                    return new SpatialContractResult<SerializedMembers>(null,
+                        new[] { SpatialContractIssue.StructuralValidationFailed });
+                var authorityWriter = new ContractJsonWriter(limits.Serialized);
+                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
+                var floorsWriter = new ContractJsonWriter(limits.Serialized);
+                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]));
+                return new SpatialContractResult<SerializedMembers>(
+                    new SerializedMembers(authorityWriter.Finish(), floorsWriter.Finish()),
+                    Array.Empty<SpatialContractIssue>());
+            }
+            catch (ContractJsonBudgetException failure)
+            {
+                return new SpatialContractResult<SerializedMembers>(null, new[] { failure.Issue });
+            }
+            catch
+            {
+                return new SpatialContractResult<SerializedMembers>(null,
+                    new[] { SpatialContractIssue.InvalidField });
+            }
         }
 
         public static SpatialContractResult<DetachedCanonicalSpatialSaveState> Parse(byte[] bytes,

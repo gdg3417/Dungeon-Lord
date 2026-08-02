@@ -22,7 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string json = "{\"rootBefore\":[1,{\"x\":true}],\"schema\":\"save_root\",\"schemaVersion\":" + schema +
                 ",\"primary\":{\"saveVersion\":null,\"dungeonLayout\":{\"Slots\":[]},\"unknown\":1.00},\"rootAfter\":false}";
             RawSavePayloadClassification classification = Classify(json);
-            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                 classification, EmptySpatial(), SpatialLimits, WholeLimits);
             Assert.That(result.IsSuccess, Is.True);
             string candidate = Encoding.UTF8.GetString(result.Candidate.GetBytes());
@@ -37,7 +37,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void UnwrappedSchemaOne_RemainsHistoricalAndDoesNotAcquireCurrentDefaults()
         {
-            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                 Classify("{\"saveVersion\":1,\"custom\":null}"), EmptySpatial(), SpatialLimits, WholeLimits);
             Assert.That(result.IsSuccess, Is.True);
             string candidate = Encoding.UTF8.GetString(result.Candidate.GetBytes());
@@ -49,7 +49,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ReservedUnknownMember_FailsWithoutCandidateBytes()
         {
-            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                 Classify("{\"saveVersion\":1,\"spatialFloors\":[]}"), EmptySpatial(), SpatialLimits, WholeLimits);
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Candidate, Is.Null);
@@ -60,7 +60,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void UnknownNonBmpMemberName_IsPreservedAsUtf8()
         {
             const string name = "unknown_\U0001F409";
-            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                 Classify("{\"saveVersion\":1,\"" + name + "\":true}"), EmptySpatial(), SpatialLimits, WholeLimits);
 
             Assert.That(result.IsSuccess, Is.True);
@@ -70,7 +70,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void InvalidCandidate_UsesRegisteredTransactionReason()
         {
-            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                 null, EmptySpatial(), SpatialLimits, WholeLimits);
 
             Assert.That(result.IsSuccess, Is.False);

@@ -49,7 +49,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string WorkloadExceededReason = "gd66.payload.workload_exceeded";
         public const string CandidateInvalidReason = "gd66.transaction.candidate_invalid";
 
-        public static DetachedWholeSaveResult Build(RawSavePayloadClassification source,
+        internal static DetachedWholeSaveResult BuildPrepared(RawSavePayloadClassification source,
             DetachedCanonicalSpatialSaveState spatial, CanonicalSpatialSerializationLimits spatialLimits,
             DetachedWholeSaveLimits limits)
         {
@@ -58,11 +58,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? 1 : source?.SchemaVersion ?? 0;
             if (source == null || !source.IsSuccess || sourceVersion < 1 || sourceVersion > 6)
                 return Failure(CandidateInvalidReason);
-            SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(spatial, spatialLimits);
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> serialized =
+                CanonicalSpatialSaveSerializer.SerializeMembers(spatial, spatialLimits);
             if (!serialized.IsValid) return Failure(CandidateInvalidReason);
-
-            if (!TryExtractCanonicalSpatialMembers(serialized.Value, out byte[] authority, out byte[] floors))
-                return Failure(CandidateInvalidReason);
+            byte[] authority = serialized.Value.Authority;
+            byte[] floors = serialized.Value.Floors;
             var output = new BoundedOutput(limits.MaximumCandidateBytes);
             try
             {
@@ -118,54 +118,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static int CheckedAdd(int value, int addition, int maximum)
         { if (addition > maximum - value) throw new BudgetException(); return value + addition; }
         private static DetachedWholeSaveResult Failure(string reason) => new DetachedWholeSaveResult(null, reason);
-        private static bool TryExtractCanonicalSpatialMembers(byte[] value,
-            out byte[] authority, out byte[] floors)
-        {
-            authority = null; floors = null;
-            try
-            {
-                string json = new UTF8Encoding(false, true).GetString(value);
-                const string authorityName = "{\"Authority\":";
-                const string floorsName = ",\"Floors\":";
-                if (!json.StartsWith(authorityName, StringComparison.Ordinal)) return false;
-                int authorityStart = authorityName.Length;
-                int authorityEnd = FindCompleteValueEnd(json, authorityStart);
-                if (authorityEnd < 0 || !json.Substring(authorityEnd).StartsWith(floorsName, StringComparison.Ordinal))
-                    return false;
-                int floorsStart = authorityEnd + floorsName.Length;
-                int floorsEnd = FindCompleteValueEnd(json, floorsStart);
-                if (floorsEnd != json.Length - 1 || json[floorsEnd] != '}') return false;
-                authority = Encoding.UTF8.GetBytes(json.Substring(authorityStart, authorityEnd - authorityStart));
-                floors = Encoding.UTF8.GetBytes(json.Substring(floorsStart, floorsEnd - floorsStart));
-                return true;
-            }
-            catch { return false; }
-        }
-
-        private static int FindCompleteValueEnd(string json, int start)
-        {
-            int depth = 0; bool quoted = false; bool escaped = false;
-            for (int index = start; index < json.Length; index++)
-            {
-                char current = json[index];
-                if (quoted)
-                {
-                    if (escaped) escaped = false;
-                    else if (current == '\\') escaped = true;
-                    else if (current == '"') quoted = false;
-                    continue;
-                }
-                if (current == '"') { quoted = true; continue; }
-                if (current == '{' || current == '[') depth++;
-                else if (current == '}' || current == ']')
-                {
-                    if (depth == 0) return index;
-                    depth--;
-                }
-                else if (current == ',' && depth == 0) return index;
-            }
-            return -1;
-        }
         private static void Member(BoundedOutput output, ref bool first, string name, byte[] value)
         { if (!first) output.Ascii(","); first = false; output.String(name); output.Ascii(":"); output.Bytes(value); }
 
