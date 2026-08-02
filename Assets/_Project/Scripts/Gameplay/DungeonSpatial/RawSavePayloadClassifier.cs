@@ -90,26 +90,35 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             get
             {
                 if (_nodes == null || _layoutMembers == null || _nodeMembers == null ||
-                    _layoutMembers.Count != 2 || _nodeMembers.Count != 6) return false;
+                    _nodes.Count == 0 || _layoutMembers.Count != 2 || _nodeMembers.Count != 6 ||
+                    ExpectedNextRevision != 1) return false;
                 var identities = new HashSet<string>(StringComparer.Ordinal);
+                var slotIds = new HashSet<string>(StringComparer.Ordinal);
                 for (int i = 0; i < _nodes.Count; i++)
                 {
                     RawLegacyBlankFloorNodeContract node = _nodes[i];
-                    if (node == null || !node.IsValid || !identities.Add(node.FloorIndex.ToString(CultureInfo.InvariantCulture) + ":" + node.NodeIndex.ToString(CultureInfo.InvariantCulture))) return false;
+                    if (node == null || !node.IsValid || node.FloorIndex != 0 || node.NodeIndex < 0 ||
+                        node.SlotId.Length == 0 || node.CategoryId.Length != 0 || node.OptionId.Length != 0 ||
+                        node.Revision != 0 ||
+                        !identities.Add(node.FloorIndex.ToString(CultureInfo.InvariantCulture) + ":" + node.NodeIndex.ToString(CultureInfo.InvariantCulture)) ||
+                        !slotIds.Add(node.SlotId)) return false;
                 }
-                return Unique(_layoutMembers) && Unique(_nodeMembers) &&
-                    Contains(_layoutMembers, "Nodes") && Contains(_layoutMembers, "NextRevision") &&
-                    Contains(_nodeMembers, "FloorIndex") && Contains(_nodeMembers, "NodeIndex") &&
-                    Contains(_nodeMembers, "SlotId") && Contains(_nodeMembers, "CategoryId") &&
-                    Contains(_nodeMembers, "OptionId") && Contains(_nodeMembers, "Revision");
+                string[] layout = { "Nodes", "NextRevision" };
+                string[] nodeMembers = { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" };
+                return ExactMembers(_layoutMembers, layout, FieldOrderingIsSignificant) &&
+                    ExactMembers(_nodeMembers, nodeMembers, FieldOrderingIsSignificant);
             }
         }
         private static ReadOnlyCollection<T> Copy<T>(IEnumerable<T> values) =>
             values == null ? null : new ReadOnlyCollection<T>(new List<T>(values));
-        private static bool Unique(IReadOnlyList<string> values)
-        { var set = new HashSet<string>(StringComparer.Ordinal); for (int i = 0; i < values.Count; i++) if (values[i] == null || !set.Add(values[i])) return false; return true; }
-        private static bool Contains(IReadOnlyList<string> values, string expected)
-        { for (int i = 0; i < values.Count; i++) if (values[i] == expected) return true; return false; }
+        private static bool ExactMembers(IReadOnlyList<string> actual, IReadOnlyList<string> expected, bool ordered)
+        {
+            var set = new HashSet<string>(StringComparer.Ordinal);
+            for (int i = 0; i < actual.Count; i++)
+                if (actual[i] == null || !set.Add(actual[i]) || (ordered && actual[i] != expected[i])) return false;
+            for (int i = 0; i < expected.Count; i++) if (!set.Contains(expected[i])) return false;
+            return true;
+        }
     }
 
     public sealed class RawSaveMemberEvidence
@@ -188,8 +197,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RawSavePayloadClassificationLimits limits, RawSaveEnvelopeVersionContract versionContract,
             RawLegacyBlankFloorContract blankFloorContract)
         {
-            if (!limits.IsValid || !versionContract.IsValid || blankFloorContract == null || !blankFloorContract.IsValid)
-                return Failed(WorkloadExceededReason, 0);
+            if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits));
+            if (!versionContract.IsValid) throw new ArgumentOutOfRangeException(nameof(versionContract));
+            if (blankFloorContract == null) throw new ArgumentNullException(nameof(blankFloorContract));
+            if (!blankFloorContract.IsValid) throw new ArgumentException(null, nameof(blankFloorContract));
             if (sourceBytes == null) return Failed(UnreadableReason, 0);
             if (sourceBytes.Length > limits.MaximumInputBytes) return Failed(WorkloadExceededReason, limits.MaximumInputBytes);
             byte[] owned = (byte[])sourceBytes.Clone();

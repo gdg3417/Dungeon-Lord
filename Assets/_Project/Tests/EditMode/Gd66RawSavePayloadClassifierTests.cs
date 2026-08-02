@@ -329,18 +329,79 @@ namespace DungeonBuilder.M0.Tests
                 Is.EqualTo(RawLegacyRoutePresence.Present));
 
             var fiveNodes = Enumerable.Range(0, 5).Select(index => new RawLegacyBlankFloorNodeContract(
-                2, index, "test.slot." + index, "", "", 0)).ToArray();
-            var five = Contract(fiveNodes, 3);
+                0, index, "test.slot." + index, "", "", 0)).ToArray();
+            var five = Contract(fiveNodes, 1);
             Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(Shell(five)), Limits(), Versions, five).FloorLayoutPresence,
                 Is.EqualTo(RawLegacyRoutePresence.Absent));
 
-            var mutable = fiveNodes.ToList(); var owned = Contract(mutable, 3); mutable.Clear();
+            var mutable = fiveNodes.ToList(); var owned = Contract(mutable, 1); mutable.Clear();
             Assert.That(owned.OrderedNodes.Count, Is.EqualTo(5));
-            var invalid = Contract(new[] { new RawLegacyBlankFloorNodeContract(0, 0, null, "", "", 0) }, 1);
-            Assert.That(invalid.IsValid, Is.False);
-            var duplicate = Contract(new[] { fiveNodes[0], fiveNodes[0] }, 3);
-            Assert.That(duplicate.IsValid, Is.False);
-            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes("{\"saveVersion\":1}"), Limits(), Versions, duplicate).FailureReason,
+            var exposed = (System.Collections.Generic.IList<RawLegacyBlankFloorNodeContract>)owned.OrderedNodes;
+            Assert.Throws<NotSupportedException>(() => exposed.Add(fiveNodes[0]));
+        }
+
+        [Test]
+        public void BlankFloorContract_FailsClosedForEveryPopulatedOrInvalidShape()
+        {
+            var first = Node(0, 0, "slot.a"); var second = Node(0, 1, "slot.b");
+            var invalid = new[] {
+                Contract(Array.Empty<RawLegacyBlankFloorNodeContract>(), 1),
+                new RawLegacyBlankFloorContract(1, null, true, true, LayoutMemberNames(), NodeMemberNames()),
+                Contract(new[] { Node(1, 0, "slot.a") }, 1),
+                Contract(new[] { Node(0, -1, "slot.a") }, 1),
+                Contract(new[] { Node(0, 0, null) }, 1),
+                Contract(new[] { Node(0, 0, "") }, 1),
+                Contract(new[] { first, Node(0, 0, "slot.b") }, 1),
+                Contract(new[] { first, Node(0, 1, "slot.a") }, 1),
+                Contract(new[] { new RawLegacyBlankFloorNodeContract(0, 0, "slot.a", "populated", "", 0) }, 1),
+                Contract(new[] { new RawLegacyBlankFloorNodeContract(0, 0, "slot.a", "", "populated", 0) }, 1),
+                Contract(new[] { new RawLegacyBlankFloorNodeContract(0, 0, "slot.a", "", "", 1) }, 1),
+                Contract(new[] { first }, 2),
+                ContractWithMembers(new[] { first }, new[] { "Nodes" }, NodeMemberNames()),
+                ContractWithMembers(new[] { first }, new[] { "Nodes", "NextRevision", "Extra" }, NodeMemberNames()),
+                ContractWithMembers(new[] { first }, new[] { "Nodes", "Substitute" }, NodeMemberNames()),
+                ContractWithMembers(new[] { first }, new[] { "Nodes", "Nodes" }, NodeMemberNames()),
+                ContractWithMembers(new[] { first }, new[] { "NextRevision", "Nodes" }, NodeMemberNames()),
+                ContractWithMembers(new[] { first }, LayoutMemberNames(), new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId" }),
+                ContractWithMembers(new[] { first }, LayoutMemberNames(), new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision", "Extra" }),
+                ContractWithMembers(new[] { first }, LayoutMemberNames(), new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Substitute" }),
+                ContractWithMembers(new[] { first }, LayoutMemberNames(), new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "OptionId" })
+            };
+            foreach (RawLegacyBlankFloorContract contract in invalid)
+            {
+                Assert.That(contract.IsValid, Is.False);
+                Assert.Throws<ArgumentException>(() => RawSavePayloadClassifier.Classify(
+                    Encoding.UTF8.GetBytes("{\"mvpDungeonFloorLayout\":null}"), Limits(), Versions, contract));
+            }
+            Assert.That(Contract(new[] { first, second }, 1).IsValid, Is.True);
+        }
+
+        [Test]
+        public void ContractCollections_AreDefensivelyCopiedAndReadOnly()
+        {
+            var nodes = new System.Collections.Generic.List<RawLegacyBlankFloorNodeContract> { Node(0, 0, "slot.a") };
+            var layout = new System.Collections.Generic.List<string>(LayoutMemberNames());
+            var members = new System.Collections.Generic.List<string>(NodeMemberNames());
+            var contract = new RawLegacyBlankFloorContract(1, nodes, true, true, layout, members);
+            nodes.Clear(); layout.Clear(); members.Clear();
+            Assert.That(contract.IsValid, Is.True);
+            Assert.That(contract.OrderedNodes.Count, Is.EqualTo(1));
+            Assert.Throws<NotSupportedException>(() => ((System.Collections.Generic.IList<string>)contract.PermittedLayoutMembers).Add("Extra"));
+            Assert.Throws<NotSupportedException>(() => ((System.Collections.Generic.IList<string>)contract.PermittedNodeMembers).Add("Extra"));
+        }
+
+        [Test]
+        public void InvalidCallerContracts_ThrowBeforePayloadClassification()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => RawSavePayloadClassifier.Classify(null,
+                default(RawSavePayloadClassificationLimits), Versions, BlankFloor()));
+            Assert.Throws<ArgumentOutOfRangeException>(() => RawSavePayloadClassifier.Classify(null,
+                Limits(), new RawSaveEnvelopeVersionContract(2, 1), BlankFloor()));
+            Assert.Throws<ArgumentNullException>(() => RawSavePayloadClassifier.Classify(null, Limits(), Versions, null));
+            RawLegacyBlankFloorContract invalid = Contract(Array.Empty<RawLegacyBlankFloorNodeContract>(), 1);
+            Assert.Throws<ArgumentException>(() => RawSavePayloadClassifier.Classify(null, Limits(), Versions, invalid));
+            byte[] oversized = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
+            Assert.That(RawSavePayloadClassifier.Classify(oversized, Limits(bytes: oversized.Length - 1), Versions, BlankFloor()).FailureReason,
                 Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
         }
 
@@ -373,10 +434,15 @@ namespace DungeonBuilder.M0.Tests
             Assert.Fail("test scan budget search did not converge"); return -1;
         }
 
+        private static RawLegacyBlankFloorNodeContract Node(int floor, int index, string slot) =>
+            new RawLegacyBlankFloorNodeContract(floor, index, slot, "", "", 0);
+        private static string[] LayoutMemberNames() => new[] { "Nodes", "NextRevision" };
+        private static string[] NodeMemberNames() => new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" };
         private static RawLegacyBlankFloorContract Contract(System.Collections.Generic.IEnumerable<RawLegacyBlankFloorNodeContract> nodes, int nextRevision) =>
-            new RawLegacyBlankFloorContract(nextRevision, nodes, true, true,
-                new[] { "Nodes", "NextRevision" },
-                new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" });
+            new RawLegacyBlankFloorContract(nextRevision, nodes, true, true, LayoutMemberNames(), NodeMemberNames());
+        private static RawLegacyBlankFloorContract ContractWithMembers(System.Collections.Generic.IEnumerable<RawLegacyBlankFloorNodeContract> nodes,
+            System.Collections.Generic.IEnumerable<string> layout, System.Collections.Generic.IEnumerable<string> members) =>
+            new RawLegacyBlankFloorContract(1, nodes, true, true, layout, members);
 
         private static string Shell(RawLegacyBlankFloorContract contract)
         {
