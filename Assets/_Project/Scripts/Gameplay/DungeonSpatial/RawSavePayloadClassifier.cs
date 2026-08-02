@@ -46,6 +46,72 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool Accepts(int value) => IsValid && value >= MinimumVersion && value <= MaximumVersion;
     }
 
+    public sealed class RawLegacyBlankFloorNodeContract
+    {
+        public RawLegacyBlankFloorNodeContract(int floorIndex, int nodeIndex, string slotId,
+            string categoryId, string optionId, int revision)
+        { FloorIndex = floorIndex; NodeIndex = nodeIndex; SlotId = slotId; CategoryId = categoryId;
+          OptionId = optionId; Revision = revision; }
+        public int FloorIndex { get; }
+        public int NodeIndex { get; }
+        public string SlotId { get; }
+        public string CategoryId { get; }
+        public string OptionId { get; }
+        public int Revision { get; }
+        internal bool IsValid => SlotId != null && CategoryId != null && OptionId != null;
+    }
+
+    public sealed class RawLegacyBlankFloorContract
+    {
+        private readonly ReadOnlyCollection<RawLegacyBlankFloorNodeContract> _nodes;
+        private readonly ReadOnlyCollection<string> _layoutMembers;
+        private readonly ReadOnlyCollection<string> _nodeMembers;
+
+        public RawLegacyBlankFloorContract(int expectedNextRevision,
+            IEnumerable<RawLegacyBlankFloorNodeContract> orderedNodes, bool fieldOrderingIsSignificant,
+            bool nodeOrderingIsSignificant, IEnumerable<string> permittedLayoutMembers,
+            IEnumerable<string> permittedNodeMembers)
+        {
+            ExpectedNextRevision = expectedNextRevision;
+            FieldOrderingIsSignificant = fieldOrderingIsSignificant;
+            NodeOrderingIsSignificant = nodeOrderingIsSignificant;
+            _nodes = Copy(orderedNodes);
+            _layoutMembers = Copy(permittedLayoutMembers);
+            _nodeMembers = Copy(permittedNodeMembers);
+        }
+        public int ExpectedNextRevision { get; }
+        public bool FieldOrderingIsSignificant { get; }
+        public bool NodeOrderingIsSignificant { get; }
+        public IReadOnlyList<RawLegacyBlankFloorNodeContract> OrderedNodes => _nodes;
+        public IReadOnlyList<string> PermittedLayoutMembers => _layoutMembers;
+        public IReadOnlyList<string> PermittedNodeMembers => _nodeMembers;
+        public bool IsValid
+        {
+            get
+            {
+                if (_nodes == null || _layoutMembers == null || _nodeMembers == null ||
+                    _layoutMembers.Count != 2 || _nodeMembers.Count != 6) return false;
+                var identities = new HashSet<string>(StringComparer.Ordinal);
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    RawLegacyBlankFloorNodeContract node = _nodes[i];
+                    if (node == null || !node.IsValid || !identities.Add(node.FloorIndex.ToString(CultureInfo.InvariantCulture) + ":" + node.NodeIndex.ToString(CultureInfo.InvariantCulture))) return false;
+                }
+                return Unique(_layoutMembers) && Unique(_nodeMembers) &&
+                    Contains(_layoutMembers, "Nodes") && Contains(_layoutMembers, "NextRevision") &&
+                    Contains(_nodeMembers, "FloorIndex") && Contains(_nodeMembers, "NodeIndex") &&
+                    Contains(_nodeMembers, "SlotId") && Contains(_nodeMembers, "CategoryId") &&
+                    Contains(_nodeMembers, "OptionId") && Contains(_nodeMembers, "Revision");
+            }
+        }
+        private static ReadOnlyCollection<T> Copy<T>(IEnumerable<T> values) =>
+            values == null ? null : new ReadOnlyCollection<T>(new List<T>(values));
+        private static bool Unique(IReadOnlyList<string> values)
+        { var set = new HashSet<string>(StringComparer.Ordinal); for (int i = 0; i < values.Count; i++) if (values[i] == null || !set.Add(values[i])) return false; return true; }
+        private static bool Contains(IReadOnlyList<string> values, string expected)
+        { for (int i = 0; i < values.Count; i++) if (values[i] == expected) return true; return false; }
+    }
+
     public sealed class RawSaveMemberEvidence
     {
         private readonly byte[] _bytes;
@@ -119,13 +185,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             new ReadOnlyCollection<string>((string[])SaveDataMembers.Clone());
 
         public static RawSavePayloadClassification Classify(byte[] sourceBytes,
-            RawSavePayloadClassificationLimits limits, RawSaveEnvelopeVersionContract versionContract)
+            RawSavePayloadClassificationLimits limits, RawSaveEnvelopeVersionContract versionContract,
+            RawLegacyBlankFloorContract blankFloorContract)
         {
-            if (!limits.IsValid || !versionContract.IsValid)
+            if (!limits.IsValid || !versionContract.IsValid || blankFloorContract == null || !blankFloorContract.IsValid)
                 return Failed(WorkloadExceededReason, 0);
             if (sourceBytes == null) return Failed(UnreadableReason, 0);
+            if (sourceBytes.Length > limits.MaximumInputBytes) return Failed(WorkloadExceededReason, limits.MaximumInputBytes);
             byte[] owned = (byte[])sourceBytes.Clone();
-            if (owned.Length > limits.MaximumInputBytes) return Failed(WorkloadExceededReason, limits.MaximumInputBytes);
             Node root; string reason; int offset;
             if (!Scanner.TryParse(owned, limits, out root, out reason, out offset)) return Failed(reason, offset);
             if (root.Kind != RawJsonValueKind.Object) return Failed(AmbiguousEnvelopeReason, root.Start);
@@ -176,7 +243,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion,
                 Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
                 Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
-                ArrayAuthority(payload, "mvpRoomSlotAssignments", "Rooms"), FloorAuthority(payload),
+                ArrayAuthority(payload, "mvpRoomSlotAssignments", "Rooms"), FloorAuthority(payload, blankFloorContract),
                 ArrayAuthority(payload, "mvpDungeonPlacements", "Entries"));
         }
 
@@ -272,25 +339,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             for (int i = 0; i < array.Elements.Count; i++) if (array.Elements[i].Kind != RawJsonValueKind.Null) return RawLegacyRoutePresence.Present;
             return RawLegacyRoutePresence.Absent;
         }
-        private static RawLegacyRoutePresence FloorAuthority(Node payload)
+        private static RawLegacyRoutePresence FloorAuthority(Node payload, RawLegacyBlankFloorContract contract)
         {
             Node layout = Find(payload, "mvpDungeonFloorLayout");
             if (layout == null || layout.Kind == RawJsonValueKind.Null) return RawLegacyRoutePresence.Absent;
             if (layout.Kind != RawJsonValueKind.Object) return RawLegacyRoutePresence.Present;
-            if (layout.Members.Count != 2) return RawLegacyRoutePresence.Present;
+            if (!MembersMatch(layout, contract.PermittedLayoutMembers, contract.FieldOrderingIsSignificant)) return RawLegacyRoutePresence.Present;
             Node nodes = Find(layout, "Nodes");
-            if (nodes == null || nodes.Kind != RawJsonValueKind.Array || nodes.Elements.Count != 4) return RawLegacyRoutePresence.Present;
+            if (nodes == null || nodes.Kind != RawJsonValueKind.Array || nodes.Elements.Count != contract.OrderedNodes.Count) return RawLegacyRoutePresence.Present;
             Node next = Find(layout, "NextRevision");
-            if (next == null || next.Kind != RawJsonValueKind.Number || next.Text != "1") return RawLegacyRoutePresence.Present;
-            for (int i = 0; i < 4; i++) if (!BlankNode(nodes.Elements[i], i)) return RawLegacyRoutePresence.Present;
+            if (next == null || next.Kind != RawJsonValueKind.Number || next.Text != contract.ExpectedNextRevision.ToString(CultureInfo.InvariantCulture)) return RawLegacyRoutePresence.Present;
+            if (contract.NodeOrderingIsSignificant)
+            { for (int i = 0; i < contract.OrderedNodes.Count; i++) if (!BlankNode(nodes.Elements[i], contract.OrderedNodes[i], contract)) return RawLegacyRoutePresence.Present; }
+            else
+            {
+                var matched = new bool[contract.OrderedNodes.Count];
+                for (int i = 0; i < nodes.Elements.Count; i++)
+                { bool found = false; for (int j = 0; j < contract.OrderedNodes.Count; j++) if (!matched[j] && BlankNode(nodes.Elements[i], contract.OrderedNodes[j], contract)) { matched[j] = true; found = true; break; } if (!found) return RawLegacyRoutePresence.Present; }
+            }
             return RawLegacyRoutePresence.Absent;
         }
-        private static bool BlankNode(Node node, int index)
+        private static bool BlankNode(Node node, RawLegacyBlankFloorNodeContract expected, RawLegacyBlankFloorContract contract)
         {
-            if (node == null || node.Kind != RawJsonValueKind.Object || node.Members.Count != 6) return false;
-            return Integer(Find(node, "FloorIndex"), 0) && Integer(Find(node, "NodeIndex"), index) &&
-                StringValue(Find(node, "SlotId"), "mvp.floor.00.node." + index.ToString("D2", CultureInfo.InvariantCulture)) &&
-                StringValue(Find(node, "CategoryId"), "") && StringValue(Find(node, "OptionId"), "") && Integer(Find(node, "Revision"), 0);
+            if (node == null || node.Kind != RawJsonValueKind.Object || !MembersMatch(node, contract.PermittedNodeMembers, contract.FieldOrderingIsSignificant)) return false;
+            return Integer(Find(node, "FloorIndex"), expected.FloorIndex) && Integer(Find(node, "NodeIndex"), expected.NodeIndex) &&
+                StringValue(Find(node, "SlotId"), expected.SlotId) && StringValue(Find(node, "CategoryId"), expected.CategoryId) &&
+                StringValue(Find(node, "OptionId"), expected.OptionId) && Integer(Find(node, "Revision"), expected.Revision);
+        }
+        private static bool MembersMatch(Node node, IReadOnlyList<string> expected, bool ordered)
+        {
+            if (node.Members.Count != expected.Count) return false;
+            for (int i = 0; i < expected.Count; i++)
+            {
+                if (ordered) { if (node.Members[i].Name != expected[i]) return false; }
+                else if (Find(node, expected[i]) == null) return false;
+            }
+            return true;
         }
         private static bool Integer(Node node, int expected) => node != null && node.Kind == RawJsonValueKind.Number && node.Text == expected.ToString(CultureInfo.InvariantCulture);
         private static bool StringValue(Node node, string expected) => node != null && node.Kind == RawJsonValueKind.String && node.Text == expected;
@@ -304,118 +388,193 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static class Scanner
         {
+            private sealed class WorkBudget
+            {
+                private readonly long _maximum; private long _used;
+                public WorkBudget(int maximum) { _maximum = maximum; }
+                public bool Exceeded { get; private set; }
+                public int FailureOffset { get; private set; }
+                public void ExceededByLimit(int offset) { Exceeded = true; FailureOffset = offset; }
+                public bool Charge(int offset)
+                {
+                    if (Exceeded) return false;
+                    if (_used == long.MaxValue || ++_used > _maximum)
+                    { Exceeded = true; FailureOffset = offset; return false; }
+                    return true;
+                }
+            }
             private sealed class Frame
             {
-                public Node Node; public int State; public string Name; public bool CanClose = true; public readonly HashSet<string> Names = new HashSet<string>(StringComparer.Ordinal);
+                public Node Node; public int State; public string Name; public bool CanClose = true;
+                public readonly HashSet<string> Names = new HashSet<string>(StringComparer.Ordinal);
             }
-            public static bool TryParse(byte[] bytes, RawSavePayloadClassificationLimits limits, out Node root, out string reason, out int errorOffset)
+            public static bool TryParse(byte[] bytes, RawSavePayloadClassificationLimits limits,
+                out Node root, out string reason, out int errorOffset)
             {
                 root = null; reason = UnreadableReason; errorOffset = 0;
+                var budget = new WorkBudget(limits.MaximumScanWork);
                 if (bytes.Length >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf) return false;
-                int p = 0, work = 0; var stack = new Stack<Frame>(); Skip(bytes, ref p, ref work);
-                Node first; if (!Value(bytes, ref p, limits, ref work, out first, out reason, out errorOffset)) return false;
-                root = first; if (first.Kind == RawJsonValueKind.Object || first.Kind == RawJsonValueKind.Array) stack.Push(new Frame { Node = first });
+                int p = 0; var stack = new Stack<Frame>();
+                if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
+                Node first; if (!Value(bytes, ref p, limits, budget, out first)) return Failure(budget, p, out reason, out errorOffset);
+                root = first; if (Container(first)) stack.Push(new Frame { Node = first });
                 while (stack.Count != 0)
                 {
-                    if (work > limits.MaximumScanWork || p > limits.MaximumScanWork) { reason = WorkloadExceededReason; errorOffset = p; return false; }
-                    Frame f = stack.Peek(); Skip(bytes, ref p, ref work);
+                    Frame f = stack.Peek();
+                    if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
                     if (f.Node.Kind == RawJsonValueKind.Object)
                     {
                         if (f.State == 0)
                         {
-                            if (f.CanClose && Take(bytes, ref p, (byte)'}', ref work)) { f.Node.End = p; stack.Pop(); continue; }
-                            string name; if (!String(bytes, ref p, limits, ref work, out name, out reason, out errorOffset)) return false;
+                            bool closing;
+                            if (!Check(bytes, p, (byte)'}', budget, out closing)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (f.CanClose && closing) { p++; f.Node.End = p; stack.Pop(); continue; }
+                            string name; if (!String(bytes, ref p, limits, budget, out name)) return Failure(budget, p, out reason, out errorOffset);
                             if (!f.Names.Add(name)) { errorOffset = p; return false; }
                             if (f.Names.Count > limits.MaximumObjectMembers) { reason = WorkloadExceededReason; errorOffset = p; return false; }
-                            f.Name = name; Skip(bytes, ref p, ref work); if (!Take(bytes, ref p, (byte)':', ref work)) { errorOffset = p; return false; }
-                            Skip(bytes, ref p, ref work); Node child; if (!Value(bytes, ref p, limits, ref work, out child, out reason, out errorOffset)) return false;
+                            f.Name = name;
+                            if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
+                            bool colon; if (!Check(bytes, p, (byte)':', budget, out colon)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (!colon) { errorOffset = p; return false; } p++;
+                            if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
+                            Node child; if (!Value(bytes, ref p, limits, budget, out child)) return Failure(budget, p, out reason, out errorOffset);
                             f.Node.Members.Add(new Member { Name = f.Name, Value = child }); f.State = 1; f.CanClose = true;
-                            if ((child.Kind == RawJsonValueKind.Object || child.Kind == RawJsonValueKind.Array)) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
+                            if (Container(child)) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
                         }
-                        else { if (Take(bytes, ref p, (byte)',', ref work)) { f.State = 0; f.CanClose = false; } else if (Take(bytes, ref p, (byte)'}', ref work)) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } }
+                        else
+                        {
+                            bool comma; if (!Check(bytes, p, (byte)',', budget, out comma)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (comma) { p++; f.State = 0; f.CanClose = false; continue; }
+                            bool close; if (!Check(bytes, p, (byte)'}', budget, out close)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (!close) { errorOffset = p; return false; } p++; f.Node.End = p; stack.Pop();
+                        }
                     }
                     else
                     {
-                        if (f.State == 0 && f.CanClose && Take(bytes, ref p, (byte)']', ref work)) { f.Node.End = p; stack.Pop(); continue; }
-                        if (f.State == 1) { if (Take(bytes, ref p, (byte)',', ref work)) { f.State = 0; f.CanClose = false; } else if (Take(bytes, ref p, (byte)']', ref work)) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } continue; }
-                        Node child; if (!Value(bytes, ref p, limits, ref work, out child, out reason, out errorOffset)) return false;
-                        f.Node.Elements.Add(child); f.CanClose = true; if (f.Node.Elements.Count > limits.MaximumArrayElements) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
-                        f.State = 1; if (child.Kind == RawJsonValueKind.Object || child.Kind == RawJsonValueKind.Array) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
+                        if (f.State == 0 && f.CanClose)
+                        {
+                            bool emptyClose; if (!Check(bytes, p, (byte)']', budget, out emptyClose)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (emptyClose) { p++; f.Node.End = p; stack.Pop(); continue; }
+                        }
+                        if (f.State == 1)
+                        {
+                            bool comma; if (!Check(bytes, p, (byte)',', budget, out comma)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (comma) { p++; f.State = 0; f.CanClose = false; continue; }
+                            bool close; if (!Check(bytes, p, (byte)']', budget, out close)) return BudgetFailure(budget, out reason, out errorOffset);
+                            if (!close) { errorOffset = p; return false; } p++; f.Node.End = p; stack.Pop(); continue;
+                        }
+                        Node child; if (!Value(bytes, ref p, limits, budget, out child)) return Failure(budget, p, out reason, out errorOffset);
+                        f.Node.Elements.Add(child); f.CanClose = true;
+                        if (f.Node.Elements.Count > limits.MaximumArrayElements) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
+                        f.State = 1; if (Container(child)) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
                     }
                 }
-                Skip(bytes, ref p, ref work); if (p != bytes.Length) { errorOffset = p; return false; }
-                if (work > limits.MaximumScanWork || p > limits.MaximumScanWork) { reason = WorkloadExceededReason; errorOffset = p; return false; }
+                if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
+                if (p != bytes.Length) { errorOffset = p; return false; }
                 return true;
             }
-            private static bool Value(byte[] b, ref int p, RawSavePayloadClassificationLimits l, ref int work, out Node n, out string reason, out int error)
+            private static bool Value(byte[] b, ref int p, RawSavePayloadClassificationLimits limits,
+                WorkBudget budget, out Node node)
             {
-                n = null; reason = UnreadableReason; error = p; if (p >= b.Length) return false; int start = p; byte c = b[p];
-                if (c == (byte)'{' || c == (byte)'[') { p++; work++; n = new Node { Start = start, Kind = c == '{' ? RawJsonValueKind.Object : RawJsonValueKind.Array }; return true; }
-                if (c == (byte)'"') { string s; if (!String(b, ref p, l, ref work, out s, out reason, out error)) return false; n = new Node { Start = start, End = p, Kind = RawJsonValueKind.String, Text = s }; return true; }
-                if ((c == (byte)'t' && Literal(b, ref p, "true", ref work)) || (c == (byte)'f' && Literal(b, ref p, "false", ref work))) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Boolean }; return true; }
-                if (c == (byte)'n' && Literal(b, ref p, "null", ref work)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Null }; return true; }
-                string number; if (Number(b, ref p, ref work, out number)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Number, Text = number }; return true; }
+                node = null; if (p >= b.Length || !budget.Charge(p)) return false;
+                int start = p; byte c = b[p++];
+                if (c == '{' || c == '[') { node = new Node { Start = start, Kind = c == '{' ? RawJsonValueKind.Object : RawJsonValueKind.Array }; return true; }
+                if (c == '"') { string text; if (!StringContents(b, ref p, limits, budget, out text)) return false; node = new Node { Start = start, End = p, Kind = RawJsonValueKind.String, Text = text }; return true; }
+                if (c == 't' || c == 'f' || c == 'n')
+                {
+                    string literal = c == 't' ? "true" : c == 'f' ? "false" : "null";
+                    if (!LiteralRemainder(b, ref p, literal, budget)) return false;
+                    node = new Node { Start = start, End = p, Kind = c == 'n' ? RawJsonValueKind.Null : RawJsonValueKind.Boolean }; return true;
+                }
+                string number; if (Number(b, ref p, start, c, budget, out number)) { node = new Node { Start = start, End = p, Kind = RawJsonValueKind.Number, Text = number }; return true; }
                 return false;
             }
-            private static bool Number(byte[] b, ref int p, ref int work, out string text)
+            private static bool Number(byte[] b, ref int p, int start, byte first, WorkBudget budget, out string text)
             {
-                int s = p; text = null; if (p < b.Length && b[p] == '-') p++; if (p >= b.Length) { p = s; return false; }
-                if (b[p] == '0') p++; else { if (b[p] < '1' || b[p] > '9') { p = s; return false; } while (p < b.Length && b[p] >= '0' && b[p] <= '9') p++; }
-                if (p < b.Length && b[p] == '.') { p++; int d = p; while (p < b.Length && b[p] >= '0' && b[p] <= '9') p++; if (p == d) { p = s; return false; } }
-                if (p < b.Length && (b[p] == 'e' || b[p] == 'E')) { p++; if (p < b.Length && (b[p] == '+' || b[p] == '-')) p++; int d = p; while (p < b.Length && b[p] >= '0' && b[p] <= '9') p++; if (p == d) { p = s; return false; } }
-                work += p - s; text = Encoding.ASCII.GetString(b, s, p - s); return true;
+                text = null; byte c = first;
+                if (c == '-') { if (!Consume(b, ref p, budget, out c)) return false; }
+                if (c == '0') { }
+                else if (c >= '1' && c <= '9') { while (p < b.Length && b[p] >= '0' && b[p] <= '9') if (!Consume(b, ref p, budget, out c)) return false; }
+                else return false;
+                if (p < b.Length && b[p] == '.')
+                {
+                    if (!Consume(b, ref p, budget, out c)) return false; int digits = p;
+                    while (p < b.Length && b[p] >= '0' && b[p] <= '9') if (!Consume(b, ref p, budget, out c)) return false;
+                    if (p == digits) return false;
+                }
+                if (p < b.Length && (b[p] == 'e' || b[p] == 'E'))
+                {
+                    if (!Consume(b, ref p, budget, out c)) return false;
+                    if (p < b.Length && (b[p] == '+' || b[p] == '-')) if (!Consume(b, ref p, budget, out c)) return false;
+                    int digits = p; while (p < b.Length && b[p] >= '0' && b[p] <= '9') if (!Consume(b, ref p, budget, out c)) return false;
+                    if (p == digits) return false;
+                }
+                text = Encoding.ASCII.GetString(b, start, p - start); return true;
             }
-            private static bool String(byte[] b, ref int p, RawSavePayloadClassificationLimits l, ref int work, out string value, out string reason, out int error)
+            private static bool String(byte[] b, ref int p, RawSavePayloadClassificationLimits limits,
+                WorkBudget budget, out string value)
             {
-                value = null; reason = UnreadableReason; error = p;
-                if (!Take(b, ref p, (byte)'"', ref work)) return false;
-                int rawStart = p; var chars = new StringBuilder();
+                value = null; bool quote; if (!Check(b, p, (byte)'"', budget, out quote) || !quote) return false; p++;
+                return StringContents(b, ref p, limits, budget, out value);
+            }
+            private static bool StringContents(byte[] b, ref int p, RawSavePayloadClassificationLimits limits,
+                WorkBudget budget, out string value)
+            {
+                value = null; int rawStart = p; var chars = new StringBuilder();
                 while (p < b.Length)
                 {
-                    byte c = b[p++]; work++;
+                    byte c; if (!Consume(b, ref p, budget, out c)) return false;
                     if (c == '"') { value = chars.ToString(); return true; }
-                    if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                    if (c < 0x20) { error = p - 1; return false; }
+                    if (p - rawStart > limits.MaximumStringBytes) { budget.ExceededByLimit(p - 1); return false; }
+                    if (c < 0x20) return false;
                     if (c == '\\')
                     {
-                        if (p >= b.Length) return false; byte e = b[p++]; work++;
-                        if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                        if (e == '"' || e == '\\' || e == '/') chars.Append((char)e);
-                        else if (e == 'b') chars.Append('\b'); else if (e == 'f') chars.Append('\f');
-                        else if (e == 'n') chars.Append('\n'); else if (e == 'r') chars.Append('\r'); else if (e == 't') chars.Append('\t');
-                        else if (e == 'u')
+                        byte escape; if (!Consume(b, ref p, budget, out escape)) return false;
+                        if (p - rawStart > limits.MaximumStringBytes) { budget.ExceededByLimit(p - 1); return false; }
+                        if (escape == '"' || escape == '\\' || escape == '/') chars.Append((char)escape);
+                        else if (escape == 'b') chars.Append('\b'); else if (escape == 'f') chars.Append('\f'); else if (escape == 'n') chars.Append('\n'); else if (escape == 'r') chars.Append('\r'); else if (escape == 't') chars.Append('\t');
+                        else if (escape == 'u')
                         {
-                            int code; if (!Hex(b, ref p, ref work, out code)) return false;
-                            if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                            if (code >= 0xd800 && code <= 0xdbff)
+                            int high; if (!Hex(b, ref p, budget, out high)) return false;
+                            if (p - rawStart > limits.MaximumStringBytes) { budget.ExceededByLimit(p - 1); return false; }
+                            if (high >= 0xd800 && high <= 0xdbff)
                             {
-                                if (p + 2 > b.Length || b[p++] != '\\' || b[p++] != 'u') return false; work += 2;
-                                if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                                int low; if (!Hex(b, ref p, ref work, out low) || low < 0xdc00 || low > 0xdfff) return false;
-                                if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                                chars.Append(char.ConvertFromUtf32(0x10000 + ((code - 0xd800) << 10) + low - 0xdc00));
+                                byte slash, u; if (!Consume(b, ref p, budget, out slash) || !Consume(b, ref p, budget, out u) || slash != '\\' || u != 'u') return false;
+                                int low; if (!Hex(b, ref p, budget, out low) || low < 0xdc00 || low > 0xdfff) return false;
+                                if (p - rawStart > limits.MaximumStringBytes) { budget.ExceededByLimit(p - 1); return false; }
+                                chars.Append(char.ConvertFromUtf32(0x10000 + ((high - 0xd800) << 10) + low - 0xdc00));
                             }
-                            else if (code >= 0xdc00 && code <= 0xdfff) return false; else chars.Append((char)code);
+                            else if (high >= 0xdc00 && high <= 0xdfff) return false; else chars.Append((char)high);
                         }
                         else return false; continue;
                     }
                     if (c < 0x80) { chars.Append((char)c); continue; }
-                    int count = c < 0xe0 ? 2 : c < 0xf0 ? 3 : c < 0xf5 ? 4 : 0;
-                    if (count == 0 || p + count - 1 > b.Length) return false;
+                    int count = c < 0xe0 ? 2 : c < 0xf0 ? 3 : c < 0xf5 ? 4 : 0; if (count == 0) return false;
                     int cp = c & (0x7f >> count);
-                    for (int i = 1; i < count; i++) { byte x = b[p++]; work++; if ((x & 0xc0) != 0x80) return false; cp = (cp << 6) | (x & 0x3f); }
-                    if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                    for (int i = 1; i < count; i++) { byte continuation; if (!Consume(b, ref p, budget, out continuation) || (continuation & 0xc0) != 0x80) return false; cp = (cp << 6) | (continuation & 0x3f); }
+                    if (p - rawStart > limits.MaximumStringBytes) { budget.ExceededByLimit(p - 1); return false; }
                     if ((count == 2 && cp < 0x80) || (count == 3 && cp < 0x800) || (count == 4 && cp < 0x10000) || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return false;
                     chars.Append(char.ConvertFromUtf32(cp));
                 }
                 return false;
             }
-            private static bool Hex(byte[] b, ref int p, ref int work, out int value)
-            { value = 0; if (p + 4 > b.Length) return false; for (int i = 0; i < 4; i++) { int h = b[p++]; work++; int d = h >= '0' && h <= '9' ? h - '0' : h >= 'a' && h <= 'f' ? h - 'a' + 10 : h >= 'A' && h <= 'F' ? h - 'A' + 10 : -1; if (d < 0) return false; value = value * 16 + d; } return true; }
-            private static bool Literal(byte[] b, ref int p, string value, ref int work)
-            { if (p + value.Length > b.Length) return false; for (int i = 0; i < value.Length; i++) if (b[p + i] != value[i]) return false; p += value.Length; work += value.Length; return true; }
-            private static void Skip(byte[] b, ref int p, ref int work) { while (p < b.Length && (b[p] == 0x20 || b[p] == 0x09 || b[p] == 0x0a || b[p] == 0x0d)) { p++; work++; } }
-            private static bool Take(byte[] b, ref int p, byte expected, ref int work) { work++; if (p >= b.Length || b[p] != expected) return false; p++; return true; }
+            private static bool Hex(byte[] b, ref int p, WorkBudget budget, out int value)
+            {
+                value = 0; for (int i = 0; i < 4; i++) { byte c; if (!Consume(b, ref p, budget, out c)) return false; int digit = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; if (digit < 0) return false; value = value * 16 + digit; } return true;
+            }
+            private static bool LiteralRemainder(byte[] b, ref int p, string literal, WorkBudget budget)
+            { for (int i = 1; i < literal.Length; i++) { byte c; if (!Consume(b, ref p, budget, out c) || c != literal[i]) return false; } return true; }
+            private static bool Skip(byte[] b, ref int p, WorkBudget budget)
+            { while (p < b.Length && (b[p] == 0x20 || b[p] == 0x09 || b[p] == 0x0a || b[p] == 0x0d)) { byte ignored; if (!Consume(b, ref p, budget, out ignored)) return false; } return true; }
+            private static bool Check(byte[] b, int p, byte expected, WorkBudget budget, out bool matches)
+            { matches = false; if (!budget.Charge(p)) return false; matches = p < b.Length && b[p] == expected; return true; }
+            private static bool Consume(byte[] b, ref int p, WorkBudget budget, out byte value)
+            { value = 0; if (!budget.Charge(p)) return false; if (p >= b.Length) return false; value = b[p++]; return true; }
+            private static bool Container(Node node) => node.Kind == RawJsonValueKind.Object || node.Kind == RawJsonValueKind.Array;
+            private static bool Failure(WorkBudget budget, int offset, out string reason, out int errorOffset)
+            { if (budget.Exceeded) return BudgetFailure(budget, out reason, out errorOffset); reason = UnreadableReason; errorOffset = offset; return false; }
+            private static bool BudgetFailure(WorkBudget budget, out string reason, out int errorOffset)
+            { reason = WorkloadExceededReason; errorOffset = budget.FailureOffset; return false; }
         }
     }
 }

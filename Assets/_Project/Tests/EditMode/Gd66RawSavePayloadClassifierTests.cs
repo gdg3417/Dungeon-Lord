@@ -14,8 +14,17 @@ namespace DungeonBuilder.M0.Tests
             int members = 100, int elements = 100, int strings = 1000, int work = 50000) =>
             new RawSavePayloadClassificationLimits(bytes, depth, members, elements, strings, work);
         private static readonly RawSaveEnvelopeVersionContract Versions = new RawSaveEnvelopeVersionContract(1, 6);
+        private static RawLegacyBlankFloorContract BlankFloor()
+        {
+            MvpDungeonFloorLayoutState starter = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            return new RawLegacyBlankFloorContract(starter.NextRevision,
+                starter.Nodes.Select(node => new RawLegacyBlankFloorNodeContract(node.FloorIndex, node.NodeIndex,
+                    node.SlotId, node.CategoryId, node.OptionId, node.Revision)), true, true,
+                new[] { "Nodes", "NextRevision" },
+                new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" });
+        }
         private static RawSavePayloadClassification Classify(string json, RawSavePayloadClassificationLimits? limits = null) =>
-            RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(json), limits ?? Limits(), Versions);
+            RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(json), limits ?? Limits(), Versions, BlankFloor());
 
         [Test]
         public void WrappedAndUnwrapped_AreDistinguishedWithoutInventingUnwrappedVersion()
@@ -66,8 +75,8 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void Utf8BomAndMalformedUtf8_AreRejected()
         {
-            Assert.That(RawSavePayloadClassifier.Classify(new byte[] { 0xef, 0xbb, 0xbf, (byte)'{' , (byte)'}' }, Limits(), Versions).IsSuccess, Is.False);
-            Assert.That(RawSavePayloadClassifier.Classify(new byte[] { (byte)'{', (byte)'\"', 0xc0, 0xaf, (byte)'\"', (byte)':', (byte)'1', (byte)'}' }, Limits(), Versions).IsSuccess, Is.False);
+            Assert.That(RawSavePayloadClassifier.Classify(new byte[] { 0xef, 0xbb, 0xbf, (byte)'{' , (byte)'}' }, Limits(), Versions, BlankFloor()).IsSuccess, Is.False);
+            Assert.That(RawSavePayloadClassifier.Classify(new byte[] { (byte)'{', (byte)'\"', 0xc0, 0xaf, (byte)'\"', (byte)':', (byte)'1', (byte)'}' }, Limits(), Versions, BlankFloor()).IsSuccess, Is.False);
         }
 
         [Test]
@@ -82,7 +91,7 @@ namespace DungeonBuilder.M0.Tests
         public void RecognizedEvidence_PreservesAbsentNullValueSpanAndOwnership()
         {
             byte[] input = Encoding.UTF8.GetBytes("{\"saveVersion\":null,\"contentVersion\":\"v\"}");
-            RawSavePayloadClassification result = RawSavePayloadClassifier.Classify(input, Limits(), Versions);
+            RawSavePayloadClassification result = RawSavePayloadClassifier.Classify(input, Limits(), Versions, BlankFloor());
             RawSaveMemberEvidence absent = result.Members.Single(x => x.Name == "totalTicks");
             RawSaveMemberEvidence nil = result.Members.Single(x => x.Name == "saveVersion");
             RawSaveMemberEvidence value = result.Members.Single(x => x.Name == "contentVersion");
@@ -150,8 +159,8 @@ namespace DungeonBuilder.M0.Tests
         public void Limits_AreBoundaryCheckedAndFailuresDeterministic()
         {
             byte[] input = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
-            Assert.That(RawSavePayloadClassifier.Classify(input, Limits(input.Length), Versions).IsSuccess, Is.True);
-            Assert.That(RawSavePayloadClassifier.Classify(input, Limits(input.Length - 1), Versions).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(RawSavePayloadClassifier.Classify(input, Limits(input.Length), Versions, BlankFloor()).IsSuccess, Is.True);
+            Assert.That(RawSavePayloadClassifier.Classify(input, Limits(input.Length - 1), Versions, BlankFloor()).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(Classify("{\"saveVersion\":[1,2]}", Limits(elements: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(Classify("{\"saveVersion\":1,\"contentVersion\":2}", Limits(members: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(Classify("{\"saveVersion\":\"ab\"}", Limits(strings: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
@@ -192,7 +201,7 @@ namespace DungeonBuilder.M0.Tests
         public void RootEnvelopeEvidence_IsExplicitRawAndDefensivelyOwned()
         {
             byte[] source = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":1.0,\"primary\":{\"saveVersion\":1}}");
-            RawSavePayloadClassification wrapped = RawSavePayloadClassifier.Classify(source, Limits(), Versions);
+            RawSavePayloadClassification wrapped = RawSavePayloadClassifier.Classify(source, Limits(), Versions, BlankFloor());
             Assert.That(wrapped.RootSchemaEvidence.Kind, Is.EqualTo(RawJsonValueKind.String));
             Assert.That(wrapped.RootSchemaVersionEvidence.Kind, Is.EqualTo(RawJsonValueKind.Number));
             Assert.That(wrapped.RootPrimaryEvidence.Kind, Is.EqualTo(RawJsonValueKind.Object));
@@ -241,7 +250,7 @@ namespace DungeonBuilder.M0.Tests
                 new byte[] { (byte)'{', (byte)'\"', 0xed, 0xa0, 0x80, (byte)'\"', (byte)':', (byte)'1', (byte)'}' }
             };
             foreach (byte[] bytes in invalid)
-                Assert.That(RawSavePayloadClassifier.Classify(bytes, Limits(), Versions).FailureReason, Is.EqualTo(RawSavePayloadClassifier.UnreadableReason));
+                Assert.That(RawSavePayloadClassifier.Classify(bytes, Limits(), Versions, BlankFloor()).FailureReason, Is.EqualTo(RawSavePayloadClassifier.UnreadableReason));
         }
 
         private static void AssertRoute(string outer, RawSavePayloadClassification result, RawLegacyRoutePresence expected)
@@ -284,8 +293,8 @@ namespace DungeonBuilder.M0.Tests
         public void EveryWorkloadLimit_HasExactAndOneOverBoundaries()
         {
             byte[] one = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
-            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length), Versions).IsSuccess, Is.True);
-            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length - 1), Versions).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length), Versions, BlankFloor()).IsSuccess, Is.True);
+            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length - 1), Versions, BlankFloor()).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(Classify("{\"saveVersion\":1}", Limits(members: 1)).IsSuccess, Is.True);
             Assert.That(Classify("{\"saveVersion\":1,\"contentVersion\":2}", Limits(members: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(Classify("{\"saveVersion\":[null]}", Limits(elements: 1)).IsSuccess, Is.True);
@@ -297,11 +306,92 @@ namespace DungeonBuilder.M0.Tests
         }
 
         [Test]
+        public void OversizedInput_IsRejectedBeforeParsingOrEvidenceConstruction()
+        {
+            byte[] oversized = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
+            RawSavePayloadClassification result = RawSavePayloadClassifier.Classify(oversized,
+                Limits(bytes: oversized.Length - 1), Versions, BlankFloor());
+            Assert.That(result.FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(result.Members, Is.Empty);
+            Assert.That(result.RootSchemaEvidence.State, Is.EqualTo(RawSaveMemberState.Absent));
+        }
+
+        [Test]
+        public void BlankFloorContract_IsInjectedValidatedAndDefensivelyOwned()
+        {
+            RawLegacyBlankFloorContract current = BlankFloor(); string shell = Shell(current);
+            Assert.That(Classify(shell).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
+            var changedNodes = current.OrderedNodes.Select((node, index) => new RawLegacyBlankFloorNodeContract(
+                node.FloorIndex, node.NodeIndex, index == 0 ? node.SlotId + ".different" : node.SlotId,
+                node.CategoryId, node.OptionId, node.Revision)).ToArray();
+            var changed = Contract(changedNodes, current.ExpectedNextRevision);
+            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(shell), Limits(), Versions, changed).FloorLayoutPresence,
+                Is.EqualTo(RawLegacyRoutePresence.Present));
+
+            var fiveNodes = Enumerable.Range(0, 5).Select(index => new RawLegacyBlankFloorNodeContract(
+                2, index, "test.slot." + index, "", "", 0)).ToArray();
+            var five = Contract(fiveNodes, 3);
+            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(Shell(five)), Limits(), Versions, five).FloorLayoutPresence,
+                Is.EqualTo(RawLegacyRoutePresence.Absent));
+
+            var mutable = fiveNodes.ToList(); var owned = Contract(mutable, 3); mutable.Clear();
+            Assert.That(owned.OrderedNodes.Count, Is.EqualTo(5));
+            var invalid = Contract(new[] { new RawLegacyBlankFloorNodeContract(0, 0, null, "", "", 0) }, 1);
+            Assert.That(invalid.IsValid, Is.False);
+            var duplicate = Contract(new[] { fiveNodes[0], fiveNodes[0] }, 3);
+            Assert.That(duplicate.IsValid, Is.False);
+            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes("{\"saveVersion\":1}"), Limits(), Versions, duplicate).FailureReason,
+                Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+        }
+
+        [TestCase("                    {\"saveVersion\":1}")]
+        [TestCase("{\"saveVersion\":1}                    ")]
+        [TestCase("{\"averyveryverylongmembername\":0,\"saveVersion\":1}")]
+        [TestCase("{\"saveVersion\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}")]
+        [TestCase("{\"saveVersion\":\"éééééééééééééééé\"}")]
+        [TestCase("{\"saveVersion\":\"\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\"}")]
+        [TestCase("{\"saveVersion\":123456789012345678901234567890}")]
+        [TestCase("{\"saveVersion\":123456789012345678901234567890e+}")]
+        [TestCase("{\"saveVersion\":truX}")]
+        [TestCase("{\"saveVersion\":[[[[[[[[[[null]]]]]]]]]]}")]
+        [TestCase("{\"saveVersion\":1,}")]
+        public void ScanWork_IsFailFastAtEveryTokenFamily(string json)
+        {
+            int exact = FirstNonWorkloadBudget(json);
+            RawSavePayloadClassification atBoundary = Classify(json, Limits(work: exact));
+            Assert.That(atBoundary.FailureReason, Is.Not.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            RawSavePayloadClassification first = Classify(json, Limits(work: exact - 1));
+            RawSavePayloadClassification second = Classify(json, Limits(work: exact - 1));
+            Assert.That(first.FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(second.FailureByteOffset, Is.EqualTo(first.FailureByteOffset));
+        }
+
+        private static int FirstNonWorkloadBudget(string json)
+        {
+            for (int work = 1; work < 10000; work++)
+                if (Classify(json, Limits(work: work)).FailureReason != RawSavePayloadClassifier.WorkloadExceededReason) return work;
+            Assert.Fail("test scan budget search did not converge"); return -1;
+        }
+
+        private static RawLegacyBlankFloorContract Contract(System.Collections.Generic.IEnumerable<RawLegacyBlankFloorNodeContract> nodes, int nextRevision) =>
+            new RawLegacyBlankFloorContract(nextRevision, nodes, true, true,
+                new[] { "Nodes", "NextRevision" },
+                new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" });
+
+        private static string Shell(RawLegacyBlankFloorContract contract)
+        {
+            string nodes = string.Join(",", contract.OrderedNodes.Select(node => "{\"FloorIndex\":" + node.FloorIndex +
+                ",\"NodeIndex\":" + node.NodeIndex + ",\"SlotId\":\"" + node.SlotId + "\",\"CategoryId\":\"" + node.CategoryId +
+                "\",\"OptionId\":\"" + node.OptionId + "\",\"Revision\":" + node.Revision + "}"));
+            return "{\"mvpDungeonFloorLayout\":{\"Nodes\":[" + nodes + "],\"NextRevision\":" + contract.ExpectedNextRevision + "}}";
+        }
+
+        [Test]
         public void RepeatedClassification_IsDeterministicAndInputUnchanged()
         {
             byte[] input = Encoding.UTF8.GetBytes("{\"saveVersion\":1,\"unknown\":true}"); byte[] before = (byte[])input.Clone();
-            RawSavePayloadClassification a = RawSavePayloadClassifier.Classify(input, Limits(), Versions);
-            RawSavePayloadClassification b = RawSavePayloadClassifier.Classify(input, Limits(), Versions);
+            RawSavePayloadClassification a = RawSavePayloadClassifier.Classify(input, Limits(), Versions, BlankFloor());
+            RawSavePayloadClassification b = RawSavePayloadClassifier.Classify(input, Limits(), Versions, BlankFloor());
             Assert.That(b.Envelope, Is.EqualTo(a.Envelope)); Assert.That(b.UnknownPrimaryMembers[0].ByteOffset, Is.EqualTo(a.UnknownPrimaryMembers[0].ByteOffset));
             CollectionAssert.AreEqual(before, input);
         }
