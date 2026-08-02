@@ -230,8 +230,6 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 ["geometry id"] = data => PointStarterAtAdditionalGeometry(data,
                     "compat.geometry.alternate", 1),
                 ["geometry version"] = data => PointStarterAtAdditionalGeometry(data,
-                    data.GeometryRecords[0].GeometryId, 2),
-                ["geometry hash"] = data => PointStarterAtAdditionalGeometry(data,
                     data.GeometryRecords[0].GeometryId, 2)
             };
             foreach (KeyValuePair<string, Action<SpatialLayoutCompatibilityProfilesData>> mutation in mutations)
@@ -247,6 +245,21 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         }
 
         [Test]
+        public void CompatibilityReleasePolicyRejectsCrossProfileGeometryHashMismatch()
+        {
+            SpatialLayoutCompatibilityProfilesData data = ProductionCompatibilityData();
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(data), Is.True);
+            string migrationGeometryId = data.MigrationProfiles[0].GeometryId;
+            int migrationGeometryVersion = data.MigrationProfiles[0].GeometryVersion;
+            data.StarterProfiles[0].GeometryCanonicalHash = new string('a', 64);
+            data.StarterProfiles[0].CanonicalHash =
+                SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(data.StarterProfiles[0]);
+            Assert.That(data.StarterProfiles[0].GeometryId, Is.EqualTo(migrationGeometryId));
+            Assert.That(data.StarterProfiles[0].GeometryVersion, Is.EqualTo(migrationGeometryVersion));
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(data), Is.False);
+        }
+
+        [Test]
         public void InvalidProfileHashAndMissingGeometryReferenceRemainInvalidConfiguration()
         {
             SpatialLayoutCompatibilityProfilesData invalidHash = ProductionCompatibilityData();
@@ -259,6 +272,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             missingGeometry.StarterProfiles[0].CanonicalHash =
                 SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(missingGeometry.StarterProfiles[0]);
             Assert.That(ValidateCompatibility(missingGeometry).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+
+            SpatialLayoutCompatibilityProfilesData mismatchedGeometryHash = ProductionCompatibilityData();
+            mismatchedGeometryHash.StarterProfiles[0].GeometryCanonicalHash = new string('b', 64);
+            mismatchedGeometryHash.StarterProfiles[0].CanonicalHash =
+                SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(
+                    mismatchedGeometryHash.StarterProfiles[0]);
+            Assert.That(ValidateCompatibility(mismatchedGeometryHash).Reason,
                 Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
         }
 
@@ -277,6 +298,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             CanonicalStarterLayoutProfile retiredStarter = Clone(data.StarterProfiles[0]);
             retiredStarter.ProfileId = "compat.profile.starter.retired";
             retiredStarter.Lifecycle = CompatibilityProfileLifecycle.Retired;
+            retiredStarter.TargetSchemaVersion = 8;
             retiredStarter.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(retiredStarter);
             data.MigrationProfiles = data.MigrationProfiles.Concat(new[] { retiredMigration }).ToArray();
             data.StarterProfiles = data.StarterProfiles.Concat(new[] { retiredStarter }).ToArray();
