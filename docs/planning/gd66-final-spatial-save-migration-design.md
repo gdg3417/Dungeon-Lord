@@ -1,8 +1,8 @@
 # GD66 final spatial save and migration design
 
-**Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
+**Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B2 status (2026-08-02):** PR #189 completed Phase 2B1 on merged baseline `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0`. Phase 2B2 selects future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Production now contains one Active `(7, 1)` contract selection, migration profile `compat.profile.migration.schema_1_6_to_7.contract_1`, and starter profile `compat.profile.starter.schema_7.contract_1`, both bound to `compat.geometry.r1-r2` version 1. Live save schema remains **6**; live saves contain no canonical spatial fields, and no migration, serialization, transaction, reader, writer, localization, tuning, or gameplay authority is activated. The next dependency remains serialization and migration-foundation work, subject to reassessment after Phase 2B2 merges.
+**Current Phase 2B4A status (2026-08-02):** Phase 2B2 selected future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Phase 2B3 added detached canonical serialization and pinned migration contracts. Phase 2B4A adds only detached raw-payload classification and evidence capture. Its fail-fast result contains exactly zero or one diagnostic (there is no configurable diagnostic-count limit). Caller limits define total input bytes, maximum simultaneously open container depth, members per object, elements per array, raw UTF-8 bytes inside each string (escape bytes included; quotes excluded), and total charged lexical operations (every consumed byte plus each explicit delimiter-alternative inspection). Every charged scanner operation checks the total immediately, so workload exhaustion takes precedence exactly when it occurs before a syntax failure. The caller also supplies an immutable, fail-closed schema-specific blank-floor contract: it can represent only one-or-more blank Floor 0 nodes, unique nonnegative node and nonempty slot identities, empty category/option values, node revision 0, next revision 1, and the exact permitted layout/node members under its ordering policy. Node count and slot IDs are injected historical authority rather than runtime tuning; the classifier embeds neither. Invalid limits, version contracts, and blank-floor contracts throw before payload inspection or cloning. `gd66.payload.workload_exceeded` is reserved exclusively for actual exhaustion of valid configured payload workloads. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 is future-selected, not live. Candidate construction, transactions, runtime interception, readers, writers, and gameplay authority remain deferred.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -356,7 +356,7 @@ Phase 2 fixtures cover no-file creation, default preservation, empty canonical r
 
 ## 18. Schema-version policy
 
-Current schema is 6. GD66 neither increments it nor approves a specific future number. Phase 2 must select a version greater than the then-current `LatestSchemaVersion` only when the complete serialized floor/fixed/content/marker shape is finalized. That selected version appears only in fully validated C and becomes active only through §16's single replacement.
+Current live schema is 6. Phase 2B2 selected schema 7 as the future GD66 target, but did not increment `SaveMigration.LatestSchemaVersion` or activate schema 7. Schema 7 may appear only in detached configuration and a future fully validated candidate C until it becomes active through §16's single replacement.
 
 ## 19. Authoritative exact reason-code table
 
@@ -471,6 +471,8 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.write.capacity_reduction_invalid` | recoverable failure | No | Unchanged verified C | Allowed | Yes | Replacement would make retained contents exceed capacity. |
 | `gd66.diagnostic.canonical_write_noop` | nonfatal diagnostic | No | Unchanged verified C | Allowed | No | Requested canonical placement is semantically identical. |
 | `gd66.content.migration_blocked_narrow_hall` | recoverable failure | No | Verified O | Allowed | Yes | Legacy O contains effective Narrow Hall with no production room mapping. |
+| `gd66.payload.invalid_primary` | fatal failure | No | No trusted active payload | Blocked | Yes | Wrapped root has a present, non-null `primary` whose JSON value is not an object. |
+| `gd66.payload.workload_exceeded` | fatal failure | No | No trusted active payload | Blocked | Yes | Detached raw classification exceeds a caller-supplied input, nesting, per-object member, per-array element, per-string byte, or total scan-work limit. |
 
 ## 20. Player messaging and localization ownership
 
