@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 
@@ -29,6 +30,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 BindingFlags.Public | BindingFlags.Static), Is.Null);
         }
 
+        [Test]
+        public void Preparation_RejectsClassificationFromDifferentOriginalBytes()
+        {
+            byte[] saveA = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
+            byte[] saveB = Encoding.UTF8.GetBytes("{\"saveVersion\":2}");
+            RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(saveA,
+                new RawSavePayloadClassificationLimits(1024, 16, 32, 32, 256, 4096),
+                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor());
+            var inputs = new DetachedSpatialMigrationPreparationInputs(saveB, classification, null,
+                null, null, null, default(CanonicalSpatialSerializationLimits),
+                default(DetachedWholeSaveLimits));
+
+            DetachedSpatialMigrationPreparationResult result = DetachedSpatialMigrationPreparer.Prepare(inputs);
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo("gd66.transaction.input_fingerprint_mismatch"));
+        }
+
         [TestCase("gd66.transaction.pinned_input_hash_mismatch")]
         [TestCase("gd66.content.duplicate_assignment")]
         [TestCase("gd66.content.outcome_mismatch")]
@@ -39,6 +58,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             Assert.That(reason, Does.StartWith("gd66."));
         }
+
+        private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
+            new[]
+            {
+                new RawLegacyBlankFloorNodeContract(0, 0, "slot.0", "", "", 0),
+                new RawLegacyBlankFloorNodeContract(0, 1, "slot.1", "", "", 0),
+                new RawLegacyBlankFloorNodeContract(0, 2, "slot.2", "", "", 0),
+                new RawLegacyBlankFloorNodeContract(0, 3, "slot.3", "", "", 0)
+            }, true, true, new[] { "Nodes", "NextRevision" },
+            new[] { "FloorIndex", "NodeIndex", "SlotId", "CategoryId", "OptionId", "Revision" });
     }
 }
 #endif

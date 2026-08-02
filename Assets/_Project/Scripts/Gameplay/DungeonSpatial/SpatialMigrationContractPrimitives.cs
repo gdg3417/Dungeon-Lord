@@ -449,8 +449,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (source[position] == '0' && position + 1 < source.Length && char.IsDigit(source[position + 1]))
                     Fail(SpatialContractIssue.UnsupportedNumber);
                 while (position < source.Length && char.IsDigit(source[position])) position++;
-                if (position < source.Length && (source[position] == '.' || source[position] == 'e' ||
-                    source[position] == 'E' || source[position] == '+')) Fail(SpatialContractIssue.UnsupportedNumber);
+                if (position < source.Length && source[position] == '.')
+                {
+                    position++;
+                    if (position >= source.Length || !char.IsDigit(source[position])) Fail(SpatialContractIssue.MalformedJson);
+                    while (position < source.Length && char.IsDigit(source[position])) position++;
+                }
+                if (position < source.Length && (source[position] == 'e' || source[position] == 'E'))
+                {
+                    position++; if (position < source.Length && (source[position] == '+' || source[position] == '-')) position++;
+                    if (position >= source.Length || !char.IsDigit(source[position])) Fail(SpatialContractIssue.MalformedJson);
+                    while (position < source.Length && char.IsDigit(source[position])) position++;
+                }
                 return new ContractJsonNode { Kind = ContractJsonKind.Number,
                     Text = source.Substring(start, position - start) };
             }

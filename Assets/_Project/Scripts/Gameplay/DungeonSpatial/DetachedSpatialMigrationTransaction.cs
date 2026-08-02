@@ -79,6 +79,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedSpatialMigrationTransaction
     {
         public const string SuccessReason = "gd66.success.migrated";
+        public const string EmptySuccessReason = "gd66.success.empty_migrated";
         public const string BackupFailedReason = "gd66.transaction.backup_failed";
         public const string CandidateFailedReason = "gd66.transaction.candidate_invalid";
         public const string ReplacementFailedReason = "gd66.transaction.commit_failed";
@@ -93,6 +94,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string BackupIncompleteReason = "gd66.transaction.backup_incomplete";
         public const string AlreadyCommittedReason = "gd66.success.already_committed";
         public const string RecoveredOriginalReason = "gd66.success.recovered_original";
+        public const string ReplacedPendingDurabilityReason = "gd66.diagnostic.replaced_candidate_pending_durability";
         public const string PathInvalidReason = "gd66.transaction.path_invalid";
 
         private readonly ISpatialMigrationFileSystem fileSystem;
@@ -107,7 +109,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedPreparedSpatialMigrationAttempt attempt)
         {
             if (attempt == null) return Failure(PathInvalidReason, null, SpatialTrustedPayload.None);
-            return ExecutePrepared(activePath, attempt.GetOriginalBytes(), attempt.Candidate, attempt.Descriptor);
+            DetachedSpatialMigrationOutcome outcome = ExecutePrepared(activePath, attempt.GetOriginalBytes(),
+                attempt.Candidate, attempt.Descriptor);
+            return outcome.IsSuccess && attempt.IsEmptyMigration && outcome.Reason == SuccessReason
+                ? new DetachedSpatialMigrationOutcome(true, EmptySuccessReason, outcome.Stage,
+                    outcome.TrustedPayload) : outcome;
         }
 
         private DetachedSpatialMigrationOutcome ExecutePrepared(string activePath, byte[] exactOriginalBytes,
@@ -248,7 +254,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!activeCandidate) return Restore(journalPath, backupPath, activePath, directory, journal, backup);
                 try { fileSystem.FlushDirectory(directory); }
-                catch { return Failure(DurabilityFailedReason, journal.Stage, SpatialTrustedPayload.Candidate); }
+                catch { return Restore(journalPath, backupPath, activePath, directory, journal, backup,
+                    DurabilityFailedReason); }
                 active = fileSystem.ReadAllBytes(activePath);
                 if (!HashIs(active, journal.ExpectedCandidateSha256) || !IsCanonicalSchemaSeven(active))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup);
@@ -272,7 +279,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private DetachedSpatialMigrationOutcome Restore(string journalPath, string backupPath, string activePath,
-            string directory, SpatialMigrationJournal journal, byte[] verifiedBackup)
+            string directory, SpatialMigrationJournal journal, byte[] verifiedBackup,
+            string restoredFailureReason = null)
         {
             if (!HashIs(verifiedBackup, journal.OriginalPayloadSha256))
                 return Failure(NoTrustedPayloadReason, journal.Stage, SpatialTrustedPayload.None);
@@ -280,15 +288,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!Same(fileSystem.ReadAllBytes(backupPath), verifiedBackup))
                     return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
-                fileSystem.ReplaceSameDirectoryAtomic(backupPath, activePath);
+                string restoreRelative = Path.GetFileName(backupPath) + ".restore";
+                if (!Resolve(directory, restoreRelative, out string restoreStaging) ||
+                    !fileSystem.IsPathContainedWithoutRedirection(directory, restoreStaging))
+                    return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
+                if (!fileSystem.Exists(restoreStaging))
+                    fileSystem.WriteAllBytesDurable(restoreStaging, verifiedBackup);
+                if (!Same(fileSystem.ReadAllBytes(restoreStaging), verifiedBackup))
+                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                fileSystem.ReplaceSameDirectoryAtomic(restoreStaging, activePath);
                 fileSystem.FlushDirectory(directory);
                 if (!HashIs(fileSystem.ReadAllBytes(activePath), journal.OriginalPayloadSha256))
                     return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
                 SpatialMigrationJournal restored = CopyStage(journal, SpatialMigrationJournalStage.OriginalRestored);
                 if (!RewriteJournal(journalPath, restored))
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.Original);
-                return new DetachedSpatialMigrationOutcome(true, RecoveredOriginalReason,
-                    restored.Stage, SpatialTrustedPayload.Original);
+                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                return restoredFailureReason == null
+                    ? new DetachedSpatialMigrationOutcome(true, RecoveredOriginalReason,
+                        restored.Stage, SpatialTrustedPayload.Original)
+                    : Failure(restoredFailureReason, restored.Stage, SpatialTrustedPayload.Original);
             }
             catch { return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None); }
         }
@@ -349,28 +367,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     try { fileSystem.ReplaceSameDirectoryAtomic(stagingPath, activePath); }
                     catch
                     {
-                        return Failure(ReplacementFailedReason, persisted,
-                            Same(fileSystem.ReadAllBytes(activePath), original)
-                                ? SpatialTrustedPayload.Original : SpatialTrustedPayload.None);
+                        if (Same(fileSystem.ReadAllBytes(activePath), original))
+                            return Failure(ReplacementFailedReason, persisted, SpatialTrustedPayload.Original);
+                        return Restore(journalPath, backupPath, activePath, directory, journal,
+                            fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason);
                     }
                 }
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.Replaced);
-                if (!RewriteJournal(journalPath, next)) return Failure(ReplacementFailedReason, persisted, SpatialTrustedPayload.Candidate);
+                if (!RewriteJournal(journalPath, next)) return Failure(ReplacedPendingDurabilityReason,
+                    persisted, SpatialTrustedPayload.Candidate);
                 journal = next; persisted = journal.Stage;
             }
             if (persisted == SpatialMigrationJournalStage.Replaced)
             {
                 if (!Same(fileSystem.ReadAllBytes(activePath), candidateBytes))
-                    return Failure(DurabilityFailedReason, persisted,
-                        Same(fileSystem.ReadAllBytes(activePath), original)
-                            ? SpatialTrustedPayload.Original : SpatialTrustedPayload.None);
+                {
+                    if (Same(fileSystem.ReadAllBytes(activePath), original))
+                        return Failure(DurabilityFailedReason, persisted, SpatialTrustedPayload.Original);
+                    return Restore(journalPath, backupPath, activePath, directory, journal,
+                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason);
+                }
                 try { fileSystem.FlushDirectory(directory); }
-                catch { return Failure(DurabilityFailedReason, persisted, SpatialTrustedPayload.Candidate); }
+                catch
+                {
+                    byte[] backupSnapshot = fileSystem.ReadAllBytes(backupPath);
+                    return Restore(journalPath, backupPath, activePath, directory, journal,
+                        backupSnapshot, DurabilityFailedReason);
+                }
                 if (!Same(fileSystem.ReadAllBytes(activePath), candidateBytes))
-                    return Failure(DurabilityFailedReason, persisted,
-                        Same(fileSystem.ReadAllBytes(activePath), original)
-                            ? SpatialTrustedPayload.Original : SpatialTrustedPayload.None);
+                    return Restore(journalPath, backupPath, activePath, directory, journal,
+                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.DurableVerified);
                 if (!RewriteJournal(journalPath, next)) return Failure(DurabilityFailedReason, persisted, SpatialTrustedPayload.Candidate);
@@ -450,58 +477,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private bool IsCanonicalSchemaSeven(byte[] bytes)
         {
-            if (bytes == null) return false;
-            try
-            {
-                var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
-                if (!ContractJson.TryParse(bytes, limits, issues, out ContractJsonNode root) ||
-                    root.Kind != ContractJsonKind.Object || root.Fields.Count < 3 ||
-                    root.Fields[0].Key != "schema" || root.Fields[1].Key != "schemaVersion" ||
-                    root.Fields[2].Key != "primary" || root.Fields[0].Value.Kind != ContractJsonKind.String ||
-                    root.Fields[0].Value.Text != "save_root" || root.Fields[1].Value.Kind != ContractJsonKind.Number ||
-                    root.Fields[1].Value.Text != "7" || root.Fields[2].Value.Kind != ContractJsonKind.Object)
-                    return false;
-                ContractJsonNode primary = root.Fields[2].Value;
-                ContractJsonNode authority = null, floors = null;
-                for (int index = 0; index < primary.Fields.Count; index++)
-                {
-                    if (primary.Fields[index].Key == "canonicalSpatialAuthority") authority = primary.Fields[index].Value;
-                    if (primary.Fields[index].Key == "spatialFloors") floors = primary.Fields[index].Value;
-                }
-                if (authority == null || floors == null) return false;
-                var writer = new ContractJsonWriter(limits);
-                writer.Node(); writer.Token("{"); writer.String("Authority"); writer.Token(":");
-                WriteNode(writer, authority); writer.Token(","); writer.String("Floors"); writer.Token(":");
-                WriteNode(writer, floors); writer.Token("}");
-                var spatialLimits = new CanonicalSpatialSerializationLimits(limits,
-                    new CanonicalSpatialSaveWorkloadLimits(limits.MaximumCollectionRecords,
-                        limits.MaximumCollectionRecords));
-                return CanonicalSpatialSaveSerializer.Parse(writer.Finish(), spatialLimits).IsValid;
-            }
-            catch { return false; }
-        }
-
-        private static void WriteNode(ContractJsonWriter writer, ContractJsonNode node)
-        {
-            writer.Node();
-            if (node.Kind == ContractJsonKind.Null) { writer.Token("null"); return; }
-            if (node.Kind == ContractJsonKind.String) { writer.String(node.Text); return; }
-            if (node.Kind == ContractJsonKind.Number || node.Kind == ContractJsonKind.Boolean)
-            { writer.Token(node.Text); return; }
-            if (node.Kind == ContractJsonKind.Array)
-            {
-                writer.Token("[");
-                for (int index = 0; index < node.Items.Count; index++)
-                { if (index != 0) writer.Token(","); writer.Record(); WriteNode(writer, node.Items[index]); }
-                writer.Token("]"); return;
-            }
-            writer.Token("{");
-            for (int index = 0; index < node.Fields.Count; index++)
-            {
-                if (index != 0) writer.Token(",");
-                writer.String(node.Fields[index].Key); writer.Token(":"); WriteNode(writer, node.Fields[index].Value);
-            }
-            writer.Token("}");
+            var completeLimits = new CanonicalSpatialSerializationLimits(limits,
+                new CanonicalSpatialSaveWorkloadLimits(limits.MaximumCollectionRecords,
+                    limits.MaximumCollectionRecords));
+            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, completeLimits).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)

@@ -103,6 +103,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 output.Ascii("}");
                 byte[] candidate = output.Finish();
+                DetachedCompleteSaveValidationResult validation =
+                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, spatialLimits);
+                if (!validation.IsValid) return Failure(CandidateInvalidReason);
                 return new DetachedWholeSaveResult(
                     new DetachedWholeSaveCandidate(candidate, SpatialContractSha256.Compute(candidate),
                         spatial.Authority.MigrationTransactionId,
