@@ -1,6 +1,6 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2B4B/2B5 implementation status (2026-08-02):** Phase 2B4A is merged. This PR adds detached whole-save candidate serialization and an explicitly invoked, injected filesystem transaction boundary. Owner-run Unity evidence remains pending. The engine is inactive; live schema remains **6**, selected schema 7 remains inactive, and `SaveService`, `GameRoot`, ordinary no-file creation, runtime route readers/writers, and runtime room-content authority remain unchanged. Final live activation remains Phase 2B6; GD66 is not complete.
+**Current Phase 2B4B/2B5 implementation status (2026-08-02):** Phase 2B4A is merged. This PR adds detached whole-save candidate serialization and an explicitly invoked, injected filesystem transaction boundary. The generic managed runtime filesystem intentionally fails closed at directory durability; Phase 2B6 must supply or select a supported platform implementation with a real directory-sync primitive before activation. Owner-run Unity evidence remains pending. The engine is inactive; live schema remains **6**, selected schema 7 remains inactive, and `SaveService`, `GameRoot`, ordinary no-file creation, runtime route readers/writers, and runtime room-content authority remain unchanged. Final live activation remains Phase 2B6; GD66 is not complete.
 
 
 | Field | Decision |

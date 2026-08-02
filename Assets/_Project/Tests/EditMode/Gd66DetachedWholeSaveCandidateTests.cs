@@ -68,14 +68,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Candidate_ExposesItsBoundMigrationIdentity()
+        public void InvalidCandidate_UsesRegisteredTransactionReason()
         {
             DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
-                Classify("{\"saveVersion\":1}"), EmptySpatial(), SpatialLimits, WholeLimits);
+                null, EmptySpatial(), SpatialLimits, WholeLimits);
 
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Candidate.MigrationTransactionId, Is.EqualTo("gd66-" + new string('1', 64)));
-            Assert.That(result.Candidate.MigrationDescriptorFingerprint, Is.EqualTo(new string('2', 64)));
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo("gd66.transaction.candidate_invalid"));
+        }
+
+        [Test]
+        public void GenericRuntimeFileSystem_FailsClosedForDirectoryDurability()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() =>
+                new RuntimeSpatialMigrationFileSystem().FlushDirectory(System.IO.Path.GetTempPath()));
         }
 
         private static DetachedCanonicalSpatialSaveState EmptySpatial() => new DetachedCanonicalSpatialSaveState
