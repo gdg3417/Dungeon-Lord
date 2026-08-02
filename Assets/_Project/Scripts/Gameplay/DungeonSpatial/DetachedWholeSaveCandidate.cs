@@ -21,9 +21,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedWholeSaveCandidate
     {
         private readonly byte[] bytes;
-        internal DetachedWholeSaveCandidate(byte[] value, string hash)
-        { bytes = (byte[])value.Clone(); Sha256 = hash; }
+        internal DetachedWholeSaveCandidate(byte[] value, string hash, string transactionId,
+            string descriptorFingerprint)
+        { bytes = (byte[])value.Clone(); Sha256 = hash; MigrationTransactionId = transactionId;
+          MigrationDescriptorFingerprint = descriptorFingerprint; }
         public string Sha256 { get; }
+        public string MigrationTransactionId { get; }
+        public string MigrationDescriptorFingerprint { get; }
         public byte[] GetBytes() => (byte[])bytes.Clone();
     }
 
@@ -102,7 +106,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 output.Ascii("}");
                 byte[] candidate = output.Finish();
                 return new DetachedWholeSaveResult(
-                    new DetachedWholeSaveCandidate(candidate, SpatialContractSha256.Compute(candidate)), null);
+                    new DetachedWholeSaveCandidate(candidate, SpatialContractSha256.Compute(candidate),
+                        spatial.Authority.MigrationTransactionId,
+                        spatial.Authority.MigrationDescriptorFingerprint), null);
             }
             catch (BudgetException) { return Failure(WorkloadExceededReason); }
             catch { return Failure(CandidateInvalidReason); }
@@ -137,13 +143,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             internal void String(string text)
             {
                 if (text == null) throw new BudgetException(); Ascii("\"");
+                int segmentStart = 0;
                 for (int i = 0; i < text.Length; i++)
                 {
                     char c = text[i];
+                    if (c != '"' && c != '\\' && c >= 0x20) continue;
+                    if (i > segmentStart) Bytes(Encoding.UTF8.GetBytes(text.Substring(segmentStart, i - segmentStart)));
                     if (c == '"' || c == '\\') Ascii("\\" + c);
-                    else if (c < 0x20) Ascii("\\u" + ((int)c).ToString("x4"));
-                    else Bytes(Encoding.UTF8.GetBytes(new[] { c }));
+                    else Ascii("\\u" + ((int)c).ToString("x4"));
+                    segmentStart = i + 1;
                 }
+                if (segmentStart < text.Length) Bytes(Encoding.UTF8.GetBytes(text.Substring(segmentStart)));
                 Ascii("\"");
             }
             internal byte[] Finish() => value.ToArray();

@@ -56,6 +56,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Reason, Is.EqualTo("gd66.payload.unknown_member_unpreservable"));
         }
 
+        [Test]
+        public void UnknownNonBmpMemberName_IsPreservedAsUtf8()
+        {
+            const string name = "unknown_\U0001F409";
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+                Classify("{\"saveVersion\":1,\"" + name + "\":true}"), EmptySpatial(), SpatialLimits, WholeLimits);
+
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(Encoding.UTF8.GetString(result.Candidate.GetBytes()), Does.Contain("\"" + name + "\":true"));
+        }
+
+        [Test]
+        public void Candidate_ExposesItsBoundMigrationIdentity()
+        {
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.Build(
+                Classify("{\"saveVersion\":1}"), EmptySpatial(), SpatialLimits, WholeLimits);
+
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Candidate.MigrationTransactionId, Is.EqualTo("gd66-" + new string('1', 64)));
+            Assert.That(result.Candidate.MigrationDescriptorFingerprint, Is.EqualTo(new string('2', 64)));
+        }
+
         private static DetachedCanonicalSpatialSaveState EmptySpatial() => new DetachedCanonicalSpatialSaveState
         {
             Authority = new CanonicalSpatialAuthorityMarker
