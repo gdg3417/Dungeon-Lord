@@ -331,7 +331,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[0].Anchor.X=99);
             AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Anchor.Y=0);
             AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].Placements[1].Anchor.Y=4);
-            AssertGeometryMutationFails(data=>data.GeometryRecords[0].FloorIndex=1);
+            AssertGeometryMutationFails(data=>data.GeometryRecords[0].FloorIndex=1,
+                SpatialLayoutCompatibilityDiagnostic.InvalidProductionReference);
             AssertGeometryMutationFails(data=>data.GeometryRecords[0].Layouts[0].ExpectedOccupiedTileTotal=25);
         }
 
@@ -614,6 +615,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             data.GeometryRecords[0].CanonicalHash=
                 SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
             AssertGeometryDiagnostic(ParseData(data));
+        }
+        private void AssertGeometryMutationFails(
+            System.Action<SpatialLayoutCompatibilityProfilesData> mutation,
+            SpatialLayoutCompatibilityDiagnostic expected)
+        {
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
+            mutation(data);
+            data.GeometryRecords[0].CanonicalHash=
+                SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
+            SpatialLayoutCompatibilityResult result=ParseData(data);
+            Assert.That(result.Success,Is.False);
+            Assert.That(result.Diagnostics.Contains(expected),Is.True,
+                string.Join(",",result.Diagnostics.Select(value=>value.ToString()).ToArray()));
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection),
+                Is.False);
         }
         private SpatialLayoutCompatibilityProfilesData GeometryOnlyData()
         {
