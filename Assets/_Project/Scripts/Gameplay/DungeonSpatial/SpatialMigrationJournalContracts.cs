@@ -110,9 +110,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Result<SpatialMigrationJournal>(null, issues);
                 if (!ContractJson.ValidateShape(node, Names, issues))
                     return Result<SpatialMigrationJournal>(null, issues);
-                int version, stage;
-                if (!ContractJson.Int(ContractJson.Field(node, 0), out version) ||
-                    !ContractJson.Int(ContractJson.Field(node, 12), out stage))
+                int version;
+                int stage;
+                bool versionParsed = ContractJson.Int(
+                    ContractJson.Field(node, 0), out version);
+                bool stageParsed = ContractJson.Int(
+                    ContractJson.Field(node, 12), out stage);
+                if (!versionParsed || !stageParsed)
                     issues.Add(SpatialContractIssue.WrongFieldType);
                 SpatialMigrationInputDescriptor descriptor;
                 if (!SpatialMigrationDescriptorContracts.TryParseNode(
