@@ -1,13 +1,13 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2 status (2026-08-01):** PR #188 is merged, Phase 2A is complete, and `main` is at `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains 6 and no future target schema is selected. No migration, raw interception, transaction, reader/writer activation, localization, or gameplay change exists; production migration profiles, starter profiles, and canonical contract selections remain inactive. UAT is not applicable to this inactive technical data contract.
+**Current Phase 2B2 status (2026-08-02):** PR #189 completed Phase 2B1 on merged baseline `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0`. Phase 2B2 selects future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Production now contains one Active `(7, 1)` contract selection, migration profile `compat.profile.migration.schema_1_6_to_7.contract_1`, and starter profile `compat.profile.starter.schema_7.contract_1`, both bound to `compat.geometry.r1-r2` version 1. Live save schema remains **6**; live saves contain no canonical spatial fields, and no migration, serialization, transaction, reader, writer, localization, tuning, or gameplay authority is activated. The next dependency remains serialization and migration-foundation work, subject to reassessment after Phase 2B2 merges.
 
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 2 active; Phase 2A complete; Phase 2B1 detached inactive saved shape current** |
+| Status | **Phase 2 active; Phase 2B1 complete; Phase 2B2 release identity selected** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main through merged PR #188 at `a1a0cd996a9269c1026fee4c982782de7dc4d88d` |
+| Current implementation baseline | Main through merged PR #189 at `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-08-01 |

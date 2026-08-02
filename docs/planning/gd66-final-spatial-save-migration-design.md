@@ -2,7 +2,7 @@
 
 ## 1. Status and approval boundary
 
-**Status: APPROVED in merged PR #187.** PR #188 is merged, Phase 2A is complete, and its `main` baseline is `a1a0cd996a9269c1026fee4c982782de7dc4d88d`. Phase 2B1 is the current detached inactive saved-shape packet. Save schema remains **6** and no future target schema is selected. Production migration profiles, starter profiles, canonical contract selections, and Dungeon Spatial gameplay remain inactive. No migration, raw interception, transaction, live persistence, reader/writer activation, localization, or gameplay change exists; UAT is not applicable to this inactive technical data contract. The existing ordered two-room route models, independent `dungeonLayout` economic structures, and `structureRuntime` remain their current runtime/save authorities. Phase 2 is not complete.
+**Current Phase 2B2 status (2026-08-02):** PR #189 completed Phase 2B1 on merged baseline `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0`. Phase 2B2 selects future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Production now contains one Active `(7, 1)` contract selection, migration profile `compat.profile.migration.schema_1_6_to_7.contract_1`, and starter profile `compat.profile.starter.schema_7.contract_1`, both bound to `compat.geometry.r1-r2` version 1. Live save schema remains **6**; live saves contain no canonical spatial fields, and no migration, serialization, transaction, reader, writer, localization, tuning, or gameplay authority is activated. The next dependency remains serialization and migration-foundation work, subject to reassessment after Phase 2B2 merges.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 

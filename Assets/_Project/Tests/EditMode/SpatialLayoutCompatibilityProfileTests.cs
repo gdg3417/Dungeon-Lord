@@ -24,17 +24,49 @@ namespace DungeonBuilder.M0.Tests.EditMode
             profiles=Asset(SpatialLayoutCompatibilityProfiles.ProductionPath);
         }
 
-        [Test] public void ProductionConfiguration_IsCanonicalInactiveAndRecomputesR1R2()
+        [Test] public void ProductionConfiguration_IsCanonicalAuthorizedReleaseAndRecomputesEveryHash()
         {
             SpatialLayoutCompatibilityResult result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(profiles,spatial,limits,null,true);
             Assert.That(result.Success,Is.True,string.Join(",",result.Diagnostics.Select(x=>x.ToString()).ToArray()));
             SpatialLayoutCompatibilityProfilesData data=result.Value.Value;
+            CompatibilityLayoutGeometryRecord geometry=data.GeometryRecords[0];
             Assert.That(data.GeometryRecords,Has.Length.EqualTo(1));
             Assert.That(data.GeometryRecords[0].Layouts.Select(x=>x.ExpectedOccupiedTileTotal).ToArray(),Is.EqualTo(new[]{26,42}));
-            Assert.That(data.MigrationProfiles,Is.Empty); Assert.That(data.StarterProfiles,Is.Empty); Assert.That(data.ContractSelections,Is.Empty);
+            Assert.That(data.MigrationProfiles,Has.Length.EqualTo(1));
+            Assert.That(data.StarterProfiles,Has.Length.EqualTo(1));
+            Assert.That(data.ContractSelections,Has.Length.EqualTo(1));
+            SpatialMigrationCompatibilityProfile migration=data.MigrationProfiles[0];
+            CanonicalStarterLayoutProfile starter=data.StarterProfiles[0];
+            CanonicalLayoutContractSelection contract=data.ContractSelections[0];
+            Assert.That(geometry.GeometryId,Is.EqualTo(CompatibilityReleasePolicy.GeometryId));
+            Assert.That(geometry.GeometryVersion,Is.EqualTo(CompatibilityReleasePolicy.GeometryVersion));
+            Assert.That(geometry.CanonicalHash,Is.EqualTo(CompatibilityReleasePolicy.GeometryCanonicalHash));
+            Assert.That(SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(geometry),Is.EqualTo(geometry.CanonicalHash));
+            Assert.That(migration.ProfileId,Is.EqualTo(CompatibilityReleasePolicy.MigrationProfileId));
+            Assert.That(migration.ProfileVersion,Is.EqualTo(1));
+            Assert.That(migration.MinimumSourceSchemaVersion,Is.EqualTo(1));
+            Assert.That(migration.MaximumSourceSchemaVersion,Is.EqualTo(6));
+            Assert.That(migration.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(migration.TargetCanonicalLayoutContractVersion,Is.EqualTo(1));
+            Assert.That(migration.GeometryCanonicalHash,Is.EqualTo(geometry.CanonicalHash));
+            Assert.That(SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(migration),Is.EqualTo(migration.CanonicalHash));
+            Assert.That(migration.CanonicalHash,Is.EqualTo(CompatibilityReleasePolicy.MigrationProfileCanonicalHash));
+            Assert.That(starter.ProfileId,Is.EqualTo(CompatibilityReleasePolicy.StarterProfileId));
+            Assert.That(starter.ProfileVersion,Is.EqualTo(1));
+            Assert.That(starter.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(starter.CanonicalLayoutContractVersion,Is.EqualTo(1));
+            Assert.That(starter.GeometryCanonicalHash,Is.EqualTo(geometry.CanonicalHash));
+            Assert.That(SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(starter),Is.EqualTo(starter.CanonicalHash));
+            Assert.That(starter.CanonicalHash,Is.EqualTo(CompatibilityReleasePolicy.StarterProfileCanonicalHash));
+            Assert.That(contract.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(contract.CanonicalLayoutContractVersion,Is.EqualTo(1));
+            Assert.That(contract.Lifecycle,Is.EqualTo(CompatibilityProfileLifecycle.Active));
+            Assert.That(result.Value.SelectContract(7).Value.CanonicalLayoutContractVersion,Is.EqualTo(1));
+            Assert.That(result.Value.SelectMigration(1,7,1).Success,Is.True);
+            Assert.That(result.Value.SelectMigration(6,7,1).Success,Is.True);
+            Assert.That(result.Value.SelectStarter(7,1).Success,Is.True);
             Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(6));
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
-            CompatibilityLayoutGeometryRecord geometry=data.GeometryRecords[0];
             Assert.That(geometry.FloorDefinitionId,Is.EqualTo("spatial.floor.01")); Assert.That(geometry.FloorIndex,Is.EqualTo(0));
             Assert.That(geometry.BasicRoomDefinitionId,Is.EqualTo("spatial.room.basic"));
             Assert.That(geometry.EntranceStructureDefinitionId,Is.EqualTo("spatial.fixed.entrance_hall"));
@@ -143,7 +175,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void ConfigurationResolutionExposesEveryApprovedStableSelectionCodeWithoutPublishingFailures()
         {
-            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveMigration(profiles,spatial,limits,2,10,2).Selection.Code,
+            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveMigration(profiles,spatial,limits,0,7,1).Selection.Code,
                 Is.EqualTo("gd66.profile.missing"));
             SpatialMigrationCompatibilityProfile migration=Migration(CompatibilityProfileLifecycle.Active);
             TextAsset validMigration=ConfigurationAsset(new[]{migration},null,null,true);
@@ -431,7 +463,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void StrictCompatibilityWorkloadDimensionsHonorExactAndOneOverBoundaries()
         {
             SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
-            AssertWorkloadBoundary(profiles,1,14,AuthoredCharacters(data));
+            AssertWorkloadBoundary(profiles,4,14,AuthoredCharacters(data));
 
             CompatibilityLayoutGeometryRecord copy=JsonUtility.FromJson<CompatibilityLayoutGeometryRecord>(
                 JsonUtility.ToJson(data.GeometryRecords[0]));
@@ -439,7 +471,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             data.GeometryRecords=new[]{data.GeometryRecords[0],copy}; data=SpatialLayoutCompatibilityProfiles.Canonicalize(data);
             TextAsset twoTopLevel=new TextAsset(System.Text.Encoding.UTF8.GetString(
                 SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
-            SpatialContentValidationWorkloadLimits topOne=Limits(1,limits.MaximumNestedRecords,
+            SpatialContentValidationWorkloadLimits topOne=Limits(4,limits.MaximumNestedRecords,
                 limits.MaximumMaterializedTiles,limits.MaximumStringCharacters);
             Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(twoTopLevel,spatial,topOne).Diagnostics
                 .Contains(SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded),Is.True);
@@ -473,12 +505,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertResolverFailure(RepeatedInvalidGeometryAsset(2).bytes,Limits(1,limits.MaximumNestedRecords,
                 limits.MaximumMaterializedTiles,limits.MaximumStringCharacters),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(1,13,limits.MaximumMaterializedTiles,
+            AssertResolverFailure(profiles.bytes,Limits(4,13,limits.MaximumMaterializedTiles,
                 limits.MaximumStringCharacters),SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(1,14,limits.MaximumMaterializedTiles,
+            AssertResolverFailure(profiles.bytes,Limits(4,14,limits.MaximumMaterializedTiles,
                 AuthoredCharacters(JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text))-1),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(1,14,41,limits.MaximumStringCharacters),
+            AssertResolverFailure(profiles.bytes,Limits(4,14,41,limits.MaximumStringCharacters),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
             var oneIssue=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
                 limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,1,limits.MaximumStringCharacters);
@@ -644,6 +676,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             { total+=(layout.LayoutId??string.Empty).Length; foreach(CompatibilityLayoutConnection connection in layout.Connections)
                 total+=(connection.SourceConnectionPointId??string.Empty).Length+(connection.DestinationConnectionPointId??string.Empty).Length+
                     (connection.SocketTypeId??string.Empty).Length+(connection.CorridorDefinitionId??string.Empty).Length; }
+            foreach(SpatialMigrationCompatibilityProfile profile in data.MigrationProfiles)
+                total+=(profile.ProfileId??string.Empty).Length+(profile.CanonicalHash??string.Empty).Length+
+                    (profile.GeometryId??string.Empty).Length+(profile.GeometryCanonicalHash??string.Empty).Length;
+            foreach(CanonicalStarterLayoutProfile profile in data.StarterProfiles)
+                total+=(profile.ProfileId??string.Empty).Length+(profile.CanonicalHash??string.Empty).Length+
+                    (profile.GeometryId??string.Empty).Length+(profile.GeometryCanonicalHash??string.Empty).Length;
             return total;
         }
         private static void AssertPlacement(CompatibilityLayoutVariant layout,CompatibilityRouteRole role,int x,int y)

@@ -199,6 +199,44 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
         }
 
+        [Test]
+        public void ProductionAuthorizationRejectsEveryIncompleteOrContradictoryActiveRelease()
+        {
+            TextAsset production = Load(SpatialLayoutCompatibilityProfiles.ProductionPath);
+            var mutations = new Action<SpatialLayoutCompatibilityProfilesData>[]
+            {
+                data => data.MigrationProfiles = Array.Empty<SpatialMigrationCompatibilityProfile>(),
+                data => data.StarterProfiles = Array.Empty<CanonicalStarterLayoutProfile>(),
+                data => data.ContractSelections = Array.Empty<CanonicalLayoutContractSelection>(),
+                data => data.MigrationProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                data => data.StarterProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                data => data.ContractSelections[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                data => data.MigrationProfiles[0].MinimumSourceSchemaVersion = 2,
+                data => data.MigrationProfiles[0].MaximumSourceSchemaVersion = 5,
+                data => data.MigrationProfiles[0].TargetSchemaVersion = 8,
+                data => data.StarterProfiles[0].CanonicalLayoutContractVersion = 2,
+                data => data.ContractSelections[0].TargetSchemaVersion = 8
+            };
+            foreach (Action<SpatialLayoutCompatibilityProfilesData> mutate in mutations)
+            {
+                SpatialLayoutCompatibilityProfilesData data =
+                    JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
+                mutate(data);
+                if (data.MigrationProfiles.Length == 1)
+                    data.MigrationProfiles[0].CanonicalHash =
+                        SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(data.MigrationProfiles[0]);
+                if (data.StarterProfiles.Length == 1)
+                    data.StarterProfiles[0].CanonicalHash =
+                        SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(data.StarterProfiles[0]);
+                TextAsset asset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                    SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
+                ProductionSpatialBuildGateResult result = ProductionSpatialContentBuildGate.ValidateCompatibility(
+                    asset, manifest, catalog, new[] { english }, limits);
+                Assert.That(result.Reason,
+                    Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
+            }
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void OneActiveOrInactiveCorrectGameRootPasses(bool inactive)

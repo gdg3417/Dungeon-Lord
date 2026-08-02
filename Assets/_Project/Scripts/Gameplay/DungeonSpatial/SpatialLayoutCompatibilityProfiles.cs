@@ -231,6 +231,62 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
     }
 
+    public static class CompatibilityReleasePolicy
+    {
+        public const int MinimumLegacySchemaVersion = 1;
+        public const int MaximumLegacySchemaVersion = 6;
+        public const int TargetSchemaVersion = 7;
+        public const int CanonicalLayoutContractVersion = 1;
+        public const string GeometryId = "compat.geometry.r1-r2";
+        public const int GeometryVersion = 1;
+        public const string GeometryCanonicalHash =
+            "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db";
+        public const string MigrationProfileId = "compat.profile.migration.schema_1_6_to_7.contract_1";
+        public const string MigrationProfileCanonicalHash =
+            "88d1548225b55533c023f9bc2216a3362b8cb2b9935d9d3d601710bf1077bbbf";
+        public const string StarterProfileId = "compat.profile.starter.schema_7.contract_1";
+        public const string StarterProfileCanonicalHash =
+            "8ed993e71714e1466fff45445462baa1dc5f5eff9289f2f183a08742ed033007";
+
+        public static bool IsAuthorized(SpatialLayoutCompatibilityProfilesData data)
+        {
+            if (data == null) return false;
+            SpatialMigrationCompatibilityProfile[] migrations = (data.MigrationProfiles ??
+                Array.Empty<SpatialMigrationCompatibilityProfile>())
+                .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
+            CanonicalStarterLayoutProfile[] starters = (data.StarterProfiles ??
+                Array.Empty<CanonicalStarterLayoutProfile>())
+                .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
+            CanonicalLayoutContractSelection[] contracts = (data.ContractSelections ??
+                Array.Empty<CanonicalLayoutContractSelection>())
+                .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
+            if (migrations.Length != 1 || starters.Length != 1 || contracts.Length != 1) return false;
+
+            SpatialMigrationCompatibilityProfile migration = migrations[0];
+            CanonicalStarterLayoutProfile starter = starters[0];
+            CanonicalLayoutContractSelection contract = contracts[0];
+            return migration.ProfileId == MigrationProfileId && migration.ProfileVersion == 1 &&
+                   migration.CanonicalHash == MigrationProfileCanonicalHash &&
+                   migration.MinimumSourceSchemaVersion == MinimumLegacySchemaVersion &&
+                   migration.MaximumSourceSchemaVersion == MaximumLegacySchemaVersion &&
+                   migration.TargetSchemaVersion == TargetSchemaVersion &&
+                   migration.TargetCanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   HasApprovedGeometry(migration.GeometryId, migration.GeometryVersion,
+                       migration.GeometryCanonicalHash) &&
+                   starter.ProfileId == StarterProfileId && starter.ProfileVersion == 1 &&
+                   starter.CanonicalHash == StarterProfileCanonicalHash &&
+                   starter.TargetSchemaVersion == TargetSchemaVersion &&
+                   starter.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   HasApprovedGeometry(starter.GeometryId, starter.GeometryVersion,
+                       starter.GeometryCanonicalHash) &&
+                   contract.TargetSchemaVersion == TargetSchemaVersion &&
+                   contract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion;
+        }
+
+        private static bool HasApprovedGeometry(string id, int version, string hash) =>
+            id == GeometryId && version == GeometryVersion && hash == GeometryCanonicalHash;
+    }
+
     public static class SpatialLayoutCompatibilityProfiles
     {
         public const string ProductionPath =
@@ -810,12 +866,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return;
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection);
             }
-            if (production && ((data.MigrationProfiles ?? Array.Empty<SpatialMigrationCompatibilityProfile>())
-                                   .Any(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active) ||
-                               (data.StarterProfiles ?? Array.Empty<CanonicalStarterLayoutProfile>())
-                                   .Any(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active) ||
-                               (data.ContractSelections ?? Array.Empty<CanonicalLayoutContractSelection>())
-                                   .Any(x => x?.Lifecycle == CompatibilityProfileLifecycle.Active)))
+            if (production && !CompatibilityReleasePolicy.IsAuthorized(data))
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.UnauthorizedActiveProductionSelection);
         }
         private static void ValidateGeometry(CompatibilityLayoutGeometryRecord g, SpatialContentCatalog c,
