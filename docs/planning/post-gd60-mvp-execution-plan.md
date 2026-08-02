@@ -1,6 +1,6 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2B2 status (2026-08-02):** PR #189 completed Phase 2B1 on merged baseline `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0`. Phase 2B2 selects future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Production now contains one Active `(7, 1)` contract selection, migration profile `compat.profile.migration.schema_1_6_to_7.contract_1`, and starter profile `compat.profile.starter.schema_7.contract_1`, both bound to `compat.geometry.r1-r2` version 1. Live save schema remains **6**; live saves contain no canonical spatial fields, and no migration, serialization, transaction, reader, writer, localization, tuning, or gameplay authority is activated. The next dependency remains serialization and migration-foundation work, subject to reassessment after Phase 2B2 merges.
+**Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
 
 
 | Field | Decision |
