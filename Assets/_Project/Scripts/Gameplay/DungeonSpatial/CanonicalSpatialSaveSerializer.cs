@@ -51,8 +51,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ValidateAuthority(source == null ? null : source.Authority, issues);
                 if (issues.Count != 0) return Result<byte[]>(null, issues);
                 DetachedCanonicalSpatialSaveState canonical;
-                if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical) ||
-                    !CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid)
+                if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical))
+                { issues.Add(SpatialContractIssue.StructuralValidationFailed); return Result<byte[]>(null, issues); }
+                NormalizeNativeAuthorityForCanonicalBytes(canonical.Authority);
+                if (!CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid)
                 { issues.Add(SpatialContractIssue.StructuralValidationFailed); return Result<byte[]>(null, issues); }
                 if (!DeclaredFieldsMatchSerializableFields())
                 { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
@@ -84,6 +86,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 var value = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(Encoding.UTF8.GetString(bytes));
                 ValidateAuthority(value == null ? null : value.Authority, issues);
+                if (issues.Count == 0) NormalizeNativeAuthorityForCanonicalBytes(value == null ? null : value.Authority);
                 if (issues.Count == 0 && !CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true).IsValid)
                     issues.Add(SpatialContractIssue.StructuralValidationFailed);
                 if (issues.Count == 0)
@@ -140,6 +143,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Write(writer, field.GetValue(value), field.FieldType);
             }
             writer.Token("}");
+        }
+
+        private static void NormalizeNativeAuthorityForCanonicalBytes(
+            CanonicalSpatialAuthorityMarker marker)
+        {
+            if (marker == null || marker.CreationKind != CanonicalSpatialCreationKind.NativeCanonical) return;
+            marker.MigrationTransactionId = null;
+            marker.MigrationDescriptorFingerprint = null;
         }
 
         private static void ValidateAuthority(CanonicalSpatialAuthorityMarker marker,

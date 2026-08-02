@@ -21,22 +21,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void AuthorityMarker_RequiresExactNativeAndMigratedIdentities()
         {
-            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, null, true);
-            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, string.Empty, string.Empty, true);
-            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, "stable.id", null, false);
-            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, H1, false);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, null, true, true);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, string.Empty, string.Empty, true, false);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, "stable.id", null, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, H1, false, false);
             string transaction = SpatialMigrationTransactionIdentity.CreateTransactionId(H2);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1, true);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, null, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, null, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, H1, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "wrong-" + H2, H1, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + new string('A', 64), H1, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + H2.Substring(1), H1, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "stable.looking.id", H1, false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, new string('A', 64), false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1.Substring(1), false);
-            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, "stable.looking.id", false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1, true, true);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, null, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, null, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, null, H1, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "wrong-" + H2, H1, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + new string('A', 64), H1, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "gd66-" + H2.Substring(1), H1, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, "stable.looking.id", H1, false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, new string('A', 64), false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1.Substring(1), false, false);
+            AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, "stable.looking.id", false, false);
         }
 
         [Test]
@@ -473,22 +473,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static void AssertAuthority(CanonicalSpatialCreationKind kind, string transaction,
-            string fingerprint, bool expected)
+            string fingerprint, bool expectedSerialization, bool expectedParsing)
         {
             DetachedCanonicalSpatialSaveState state = EmptyState();
             state.Authority.CreationKind = kind;
             state.Authority.MigrationTransactionId = transaction;
             state.Authority.MigrationDescriptorFingerprint = fingerprint;
             SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(state, SaveLimits);
-            Assert.AreEqual(expected, serialized.IsValid, kind + " serialize " + transaction + " " + fingerprint);
+            Assert.AreEqual(expectedSerialization, serialized.IsValid,
+                kind + " serialize " + transaction + " " + fingerprint);
+            Assert.AreEqual(transaction, state.Authority.MigrationTransactionId);
+            Assert.AreEqual(fingerprint, state.Authority.MigrationDescriptorFingerprint);
+            if (expectedSerialization && kind == CanonicalSpatialCreationKind.NativeCanonical)
+            {
+                string emitted = Encoding.UTF8.GetString(serialized.Value);
+                Assert.IsTrue(emitted.Contains("\"MigrationTransactionId\":null"));
+                Assert.IsTrue(emitted.Contains("\"MigrationDescriptorFingerprint\":null"));
+            }
+
             byte[] valid = CanonicalSpatialSaveSerializer.Serialize(EmptyState(), SaveLimits).Value;
             string json = Encoding.UTF8.GetString(valid)
                 .Replace("\"CreationKind\":1", "\"CreationKind\":" + (int)kind)
                 .Replace("\"MigrationTransactionId\":null", "\"MigrationTransactionId\":" + JsonValue(transaction))
                 .Replace("\"MigrationDescriptorFingerprint\":null",
                     "\"MigrationDescriptorFingerprint\":" + JsonValue(fingerprint));
-            Assert.AreEqual(expected, CanonicalSpatialSaveSerializer.Parse(
-                Encoding.UTF8.GetBytes(json), SaveLimits).IsValid, kind + " parse");
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
+                CanonicalSpatialSaveSerializer.Parse(Encoding.UTF8.GetBytes(json), SaveLimits);
+            Assert.AreEqual(expectedParsing, parsed.IsValid, kind + " parse");
+            if (kind == CanonicalSpatialCreationKind.NativeCanonical &&
+                transaction == string.Empty && fingerprint == string.Empty)
+                CollectionAssert.Contains(parsed.Issues, SpatialContractIssue.NonCanonicalBytes);
         }
 
         private static string JsonValue(string value) => value == null ? "null" : "\"" + value + "\"";
