@@ -13,23 +13,27 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public readonly struct RawSavePayloadClassificationLimits
     {
+        // Input and scan work are totals. Nesting is the maximum number of simultaneously
+        // open containers. Member/element limits apply independently to each container.
+        // String bytes are raw UTF-8 bytes between quotes, including escape bytes.
+        // Scan work charges consumed lexical bytes and every delimiter inspection (including
+        // failed delimiter alternatives), making it distinct from the input byte limit.
         public RawSavePayloadClassificationLimits(int maximumInputBytes, int maximumNestingDepth,
             int maximumObjectMembers, int maximumArrayElements, int maximumStringBytes,
-            int maximumDiagnostics, int maximumScanWork)
+            int maximumScanWork)
         { MaximumInputBytes = maximumInputBytes; MaximumNestingDepth = maximumNestingDepth;
           MaximumObjectMembers = maximumObjectMembers; MaximumArrayElements = maximumArrayElements;
-          MaximumStringBytes = maximumStringBytes; MaximumDiagnostics = maximumDiagnostics;
+          MaximumStringBytes = maximumStringBytes;
           MaximumScanWork = maximumScanWork; }
         public int MaximumInputBytes { get; }
         public int MaximumNestingDepth { get; }
         public int MaximumObjectMembers { get; }
         public int MaximumArrayElements { get; }
         public int MaximumStringBytes { get; }
-        public int MaximumDiagnostics { get; }
         public int MaximumScanWork { get; }
         public bool IsValid => MaximumInputBytes > 0 && MaximumNestingDepth > 0 &&
             MaximumObjectMembers > 0 && MaximumArrayElements > 0 && MaximumStringBytes > 0 &&
-            MaximumDiagnostics > 0 && MaximumScanWork > 0;
+            MaximumScanWork > 0;
     }
 
     public readonly struct RawSaveEnvelopeVersionContract
@@ -71,10 +75,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class RawSavePayloadClassification
     {
         internal RawSavePayloadClassification(RawSaveEnvelopeKind envelope, string reason, int reasonOffset,
-            int? schemaVersion, IList<RawSaveMemberEvidence> members,
+            int? schemaVersion, RawSaveMemberEvidence rootSchema, RawSaveMemberEvidence rootSchemaVersion,
+            RawSaveMemberEvidence rootPrimary, IList<RawSaveMemberEvidence> members,
             IList<RawUnknownMemberEvidence> rootUnknown, IList<RawUnknownMemberEvidence> primaryUnknown,
             RawLegacyRoutePresence assignments, RawLegacyRoutePresence floor, RawLegacyRoutePresence placements)
         { Envelope = envelope; FailureReason = reason; FailureByteOffset = reasonOffset; SchemaVersion = schemaVersion;
+          RootSchemaEvidence = rootSchema; RootSchemaVersionEvidence = rootSchemaVersion; RootPrimaryEvidence = rootPrimary;
           Members = new ReadOnlyCollection<RawSaveMemberEvidence>(new List<RawSaveMemberEvidence>(members));
           UnknownRootMembers = new ReadOnlyCollection<RawUnknownMemberEvidence>(new List<RawUnknownMemberEvidence>(rootUnknown));
           UnknownPrimaryMembers = new ReadOnlyCollection<RawUnknownMemberEvidence>(new List<RawUnknownMemberEvidence>(primaryUnknown));
@@ -84,6 +90,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string FailureReason { get; }
         public int FailureByteOffset { get; }
         public int? SchemaVersion { get; }
+        public RawSaveMemberEvidence RootSchemaEvidence { get; }
+        public RawSaveMemberEvidence RootSchemaVersionEvidence { get; }
+        public RawSaveMemberEvidence RootPrimaryEvidence { get; }
         public IReadOnlyList<RawSaveMemberEvidence> Members { get; }
         public IReadOnlyList<RawUnknownMemberEvidence> UnknownRootMembers { get; }
         public IReadOnlyList<RawUnknownMemberEvidence> UnknownPrimaryMembers { get; }
@@ -130,17 +139,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (schema.Kind != RawJsonValueKind.String || !string.Equals(schema.Text, "save_root", StringComparison.Ordinal))
                     return Failed("gd66.payload.invalid_schema", schema.Start);
                 if (schemaVersion == null) return Failed("gd66.payload.missing_schema_version", root.Start);
-                decimal numericVersion;
-                if (schemaVersion.Kind != RawJsonValueKind.Number || !TryIntegral(schemaVersion.Text, out numericVersion))
+                int parsedVersion; int versionRelation;
+                if (schemaVersion.Kind != RawJsonValueKind.Number ||
+                    !TryClassifyIntegralVersion(schemaVersion.Text, versionContract, out parsedVersion, out versionRelation))
                     return Failed("gd66.payload.nonintegral_schema_version", schemaVersion.Start);
-                if (numericVersion > int.MaxValue)
+                if (versionRelation > 0)
                     return Failed("gd66.payload.newer_than_application", schemaVersion.Start);
-                if (numericVersion < int.MinValue)
-                    return Failed("gd66.payload.unsupported_legacy_version", schemaVersion.Start);
-                int parsedVersion = decimal.ToInt32(numericVersion);
-                if (parsedVersion > versionContract.MaximumVersion)
-                    return Failed("gd66.payload.newer_than_application", schemaVersion.Start);
-                if (!versionContract.Accepts(parsedVersion))
+                if (versionRelation < 0)
                     return Failed("gd66.payload.unsupported_legacy_version", schemaVersion.Start);
                 if (primary == null) return Failed("gd66.payload.missing_primary", root.Start);
                 if (primary.Kind == RawJsonValueKind.Null) return Failed("gd66.payload.null_primary", primary.Start);
@@ -168,22 +173,77 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? Unknown(root, owned, true, false)
                 : new List<RawUnknownMemberEvidence>();
             var unknownPrimary = Unknown(payload, owned, false, true);
-            return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion, evidence, unknownRoot, unknownPrimary,
+            return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion,
+                Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
+                Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
                 ArrayAuthority(payload, "mvpRoomSlotAssignments", "Rooms"), FloorAuthority(payload),
                 ArrayAuthority(payload, "mvpDungeonPlacements", "Entries"));
         }
 
         private static RawSavePayloadClassification Failed(string reason, int offset) =>
             new RawSavePayloadClassification(RawSaveEnvelopeKind.Invalid, reason, offset, null,
-                Array.Empty<RawSaveMemberEvidence>(), Array.Empty<RawUnknownMemberEvidence>(),
+                Absent("schema"), Absent("schemaVersion"), Absent("primary"), Array.Empty<RawSaveMemberEvidence>(), Array.Empty<RawUnknownMemberEvidence>(),
                 Array.Empty<RawUnknownMemberEvidence>(), RawLegacyRoutePresence.Absent,
                 RawLegacyRoutePresence.Absent, RawLegacyRoutePresence.Absent);
 
-        private static bool TryIntegral(string text, out decimal value)
+        // Analyzes the JSON token as decimal digits plus a base-10 shift. No fixed-width
+        // numeric type is used until the normalized value is proven to be in contract range.
+        private static bool TryClassifyIntegralVersion(string token, RawSaveEnvelopeVersionContract contract,
+            out int value, out int relation)
         {
-            return decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) &&
-                   decimal.Truncate(value) == value;
+            value = 0; relation = 0; int p = 0; bool negative = token[p] == '-'; if (negative) p++;
+            int exponentMarker = token.IndexOfAny(new[] { 'e', 'E' }, p);
+            int mantissaEnd = exponentMarker < 0 ? token.Length : exponentMarker;
+            int dot = token.IndexOf('.', p, mantissaEnd - p);
+            int fractionDigits = dot < 0 ? 0 : mantissaEnd - dot - 1;
+            var digits = new StringBuilder(mantissaEnd - p);
+            for (int i = p; i < mantissaEnd; i++) if (token[i] != '.') digits.Append(token[i]);
+            long exponent = 0;
+            if (exponentMarker >= 0)
+            {
+                int e = exponentMarker + 1; bool exponentNegative = token[e] == '-'; if (token[e] == '+' || token[e] == '-') e++;
+                for (; e < token.Length; e++) exponent = exponent > 1000000 ? 1000001 : exponent * 10 + token[e] - '0';
+                if (exponentNegative) exponent = -exponent;
+            }
+            long shift = exponent - fractionDigits;
+            string all = digits.ToString(); int first = 0; while (first < all.Length && all[first] == '0') first++;
+            if (first == all.Length) { value = 0; relation = contract.Accepts(0) ? 0 : 0 < contract.MinimumVersion ? -1 : 1; return true; }
+            if (shift < 0)
+            {
+                long removed = -shift; if (removed > all.Length) return false;
+                for (int i = all.Length - (int)removed; i < all.Length; i++) if (all[i] != '0') return false;
+                all = all.Substring(0, all.Length - (int)removed); shift = 0;
+                first = 0; while (first < all.Length && all[first] == '0') first++;
+                if (first == all.Length) { value = 0; relation = contract.Accepts(0) ? 0 : 0 < contract.MinimumVersion ? -1 : 1; return true; }
+            }
+            long normalizedLength = all.Length - first + shift;
+            string bound = (negative ? Math.Abs((long)contract.MinimumVersion) : (long)contract.MaximumVersion).ToString(CultureInfo.InvariantCulture);
+            if (normalizedLength != bound.Length) relation = normalizedLength > bound.Length ? (negative ? -1 : 1) : 0;
+            else
+            {
+                int compare = 0;
+                for (int i = 0; i < normalizedLength; i++)
+                {
+                    char digit = i < all.Length - first ? all[first + i] : '0';
+                    if (digit != bound[i]) { compare = digit > bound[i] ? 1 : -1; break; }
+                }
+                if (compare > 0) relation = negative ? -1 : 1;
+            }
+            if (relation != 0) return true;
+            long parsed = 0; for (int i = first; i < all.Length; i++) parsed = parsed * 10 + all[i] - '0';
+            for (long i = 0; i < shift; i++) parsed *= 10;
+            if (negative) parsed = -parsed;
+            if (parsed < contract.MinimumVersion) { relation = -1; return true; }
+            if (parsed > contract.MaximumVersion) { relation = 1; return true; }
+            value = (int)parsed; return true;
         }
+
+        private static RawSaveMemberEvidence Absent(string name) =>
+            new RawSaveMemberEvidence(name, RawSaveMemberState.Absent, RawJsonValueKind.None, -1, null);
+        private static RawSaveMemberEvidence Evidence(string name, Node value, byte[] bytes) => value == null
+            ? Absent(name)
+            : new RawSaveMemberEvidence(name, value.Kind == RawJsonValueKind.Null ? RawSaveMemberState.Null : RawSaveMemberState.NonNull,
+                value.Kind, value.Start, Slice(bytes, value.Start, value.End));
         private static Node Find(Node node, string name)
         { for (int i = 0; i < node.Members.Count; i++) if (string.Equals(node.Members[i].Name, name, StringComparison.Ordinal)) return node.Members[i].Value; return null; }
         private static byte[] Slice(byte[] bytes, int start, int end)
@@ -203,8 +263,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
         private static RawLegacyRoutePresence ArrayAuthority(Node payload, string outer, string inner)
         {
-            Node container = Find(payload, outer); if (container == null || container.Kind != RawJsonValueKind.Object) return RawLegacyRoutePresence.Absent;
-            Node array = Find(container, inner); if (array == null || array.Kind != RawJsonValueKind.Array) return RawLegacyRoutePresence.Absent;
+            Node container = Find(payload, outer);
+            if (container == null || container.Kind == RawJsonValueKind.Null) return RawLegacyRoutePresence.Absent;
+            if (container.Kind != RawJsonValueKind.Object) return RawLegacyRoutePresence.Present;
+            Node array = Find(container, inner);
+            if (array == null || array.Kind == RawJsonValueKind.Null) return RawLegacyRoutePresence.Absent;
+            if (array.Kind != RawJsonValueKind.Array) return RawLegacyRoutePresence.Present;
             for (int i = 0; i < array.Elements.Count; i++) if (array.Elements[i].Kind != RawJsonValueKind.Null) return RawLegacyRoutePresence.Present;
             return RawLegacyRoutePresence.Absent;
         }
@@ -242,7 +306,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             private sealed class Frame
             {
-                public Node Node; public int State; public string Name; public readonly HashSet<string> Names = new HashSet<string>(StringComparer.Ordinal);
+                public Node Node; public int State; public string Name; public bool CanClose = true; public readonly HashSet<string> Names = new HashSet<string>(StringComparer.Ordinal);
             }
             public static bool TryParse(byte[] bytes, RawSavePayloadClassificationLimits limits, out Node root, out string reason, out int errorOffset)
             {
@@ -259,23 +323,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     {
                         if (f.State == 0)
                         {
-                            if (Take(bytes, ref p, (byte)'}')) { f.Node.End = p; stack.Pop(); continue; }
+                            if (f.CanClose && Take(bytes, ref p, (byte)'}', ref work)) { f.Node.End = p; stack.Pop(); continue; }
                             string name; if (!String(bytes, ref p, limits, ref work, out name, out reason, out errorOffset)) return false;
                             if (!f.Names.Add(name)) { errorOffset = p; return false; }
                             if (f.Names.Count > limits.MaximumObjectMembers) { reason = WorkloadExceededReason; errorOffset = p; return false; }
-                            f.Name = name; Skip(bytes, ref p, ref work); if (!Take(bytes, ref p, (byte)':')) { errorOffset = p; return false; }
+                            f.Name = name; Skip(bytes, ref p, ref work); if (!Take(bytes, ref p, (byte)':', ref work)) { errorOffset = p; return false; }
                             Skip(bytes, ref p, ref work); Node child; if (!Value(bytes, ref p, limits, ref work, out child, out reason, out errorOffset)) return false;
-                            f.Node.Members.Add(new Member { Name = f.Name, Value = child }); f.State = 1;
+                            f.Node.Members.Add(new Member { Name = f.Name, Value = child }); f.State = 1; f.CanClose = true;
                             if ((child.Kind == RawJsonValueKind.Object || child.Kind == RawJsonValueKind.Array)) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
                         }
-                        else { if (Take(bytes, ref p, (byte)',')) f.State = 0; else if (Take(bytes, ref p, (byte)'}')) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } }
+                        else { if (Take(bytes, ref p, (byte)',', ref work)) { f.State = 0; f.CanClose = false; } else if (Take(bytes, ref p, (byte)'}', ref work)) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } }
                     }
                     else
                     {
-                        if (f.State == 0 && Take(bytes, ref p, (byte)']')) { f.Node.End = p; stack.Pop(); continue; }
-                        if (f.State == 1) { if (Take(bytes, ref p, (byte)',')) f.State = 0; else if (Take(bytes, ref p, (byte)']')) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } continue; }
+                        if (f.State == 0 && f.CanClose && Take(bytes, ref p, (byte)']', ref work)) { f.Node.End = p; stack.Pop(); continue; }
+                        if (f.State == 1) { if (Take(bytes, ref p, (byte)',', ref work)) { f.State = 0; f.CanClose = false; } else if (Take(bytes, ref p, (byte)']', ref work)) { f.Node.End = p; stack.Pop(); } else { errorOffset = p; return false; } continue; }
                         Node child; if (!Value(bytes, ref p, limits, ref work, out child, out reason, out errorOffset)) return false;
-                        f.Node.Elements.Add(child); if (f.Node.Elements.Count > limits.MaximumArrayElements) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
+                        f.Node.Elements.Add(child); f.CanClose = true; if (f.Node.Elements.Count > limits.MaximumArrayElements) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
                         f.State = 1; if (child.Kind == RawJsonValueKind.Object || child.Kind == RawJsonValueKind.Array) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
                     }
                 }
@@ -288,8 +352,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 n = null; reason = UnreadableReason; error = p; if (p >= b.Length) return false; int start = p; byte c = b[p];
                 if (c == (byte)'{' || c == (byte)'[') { p++; work++; n = new Node { Start = start, Kind = c == '{' ? RawJsonValueKind.Object : RawJsonValueKind.Array }; return true; }
                 if (c == (byte)'"') { string s; if (!String(b, ref p, l, ref work, out s, out reason, out error)) return false; n = new Node { Start = start, End = p, Kind = RawJsonValueKind.String, Text = s }; return true; }
-                if (Literal(b, ref p, "true", ref work) || Literal(b, ref p, "false", ref work)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Boolean }; return true; }
-                if (Literal(b, ref p, "null", ref work)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Null }; return true; }
+                if ((c == (byte)'t' && Literal(b, ref p, "true", ref work)) || (c == (byte)'f' && Literal(b, ref p, "false", ref work))) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Boolean }; return true; }
+                if (c == (byte)'n' && Literal(b, ref p, "null", ref work)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Null }; return true; }
                 string number; if (Number(b, ref p, ref work, out number)) { n = new Node { Start = start, End = p, Kind = RawJsonValueKind.Number, Text = number }; return true; }
                 return false;
             }
@@ -303,33 +367,55 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             private static bool String(byte[] b, ref int p, RawSavePayloadClassificationLimits l, ref int work, out string value, out string reason, out int error)
             {
-                value = null; reason = UnreadableReason; error = p; if (!Take(b, ref p, (byte)'"')) return false; int content = p;
-                var chars = new StringBuilder(); int byteCount = 0;
+                value = null; reason = UnreadableReason; error = p;
+                if (!Take(b, ref p, (byte)'"', ref work)) return false;
+                int rawStart = p; var chars = new StringBuilder();
                 while (p < b.Length)
                 {
-                    byte c = b[p++]; work++; if (++byteCount > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
-                    if (c == '"') { value = chars.ToString(); return true; } if (c < 0x20) { error = p - 1; return false; }
+                    byte c = b[p++]; work++;
+                    if (c == '"') { value = chars.ToString(); return true; }
+                    if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                    if (c < 0x20) { error = p - 1; return false; }
                     if (c == '\\')
                     {
-                        if (p >= b.Length) return false; byte e = b[p++]; work++; byteCount++;
-                        if (e == '"' || e == '\\' || e == '/') chars.Append((char)e); else if (e == 'b') chars.Append('\b'); else if (e == 'f') chars.Append('\f'); else if (e == 'n') chars.Append('\n'); else if (e == 'r') chars.Append('\r'); else if (e == 't') chars.Append('\t');
-                        else if (e == 'u') { int code; if (!Hex(b, ref p, ref work, ref byteCount, out code)) return false; if (code >= 0xd800 && code <= 0xdbff) { if (p + 2 > b.Length || b[p++] != '\\' || b[p++] != 'u') return false; work += 2; byteCount += 2; int low; if (!Hex(b, ref p, ref work, ref byteCount, out low) || low < 0xdc00 || low > 0xdfff) return false; chars.Append(char.ConvertFromUtf32(0x10000 + ((code - 0xd800) << 10) + low - 0xdc00)); } else if (code >= 0xdc00 && code <= 0xdfff) return false; else chars.Append((char)code); }
+                        if (p >= b.Length) return false; byte e = b[p++]; work++;
+                        if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                        if (e == '"' || e == '\\' || e == '/') chars.Append((char)e);
+                        else if (e == 'b') chars.Append('\b'); else if (e == 'f') chars.Append('\f');
+                        else if (e == 'n') chars.Append('\n'); else if (e == 'r') chars.Append('\r'); else if (e == 't') chars.Append('\t');
+                        else if (e == 'u')
+                        {
+                            int code; if (!Hex(b, ref p, ref work, out code)) return false;
+                            if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                            if (code >= 0xd800 && code <= 0xdbff)
+                            {
+                                if (p + 2 > b.Length || b[p++] != '\\' || b[p++] != 'u') return false; work += 2;
+                                if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                                int low; if (!Hex(b, ref p, ref work, out low) || low < 0xdc00 || low > 0xdfff) return false;
+                                if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
+                                chars.Append(char.ConvertFromUtf32(0x10000 + ((code - 0xd800) << 10) + low - 0xdc00));
+                            }
+                            else if (code >= 0xdc00 && code <= 0xdfff) return false; else chars.Append((char)code);
+                        }
                         else return false; continue;
                     }
                     if (c < 0x80) { chars.Append((char)c); continue; }
-                    int count = c < 0xe0 ? 2 : c < 0xf0 ? 3 : c < 0xf5 ? 4 : 0; if (count == 0 || p + count - 1 > b.Length) return false;
-                    int cp = c & (0x7f >> count); for (int i = 1; i < count; i++) { byte x = b[p++]; work++; byteCount++; if ((x & 0xc0) != 0x80) return false; cp = (cp << 6) | (x & 0x3f); }
+                    int count = c < 0xe0 ? 2 : c < 0xf0 ? 3 : c < 0xf5 ? 4 : 0;
+                    if (count == 0 || p + count - 1 > b.Length) return false;
+                    int cp = c & (0x7f >> count);
+                    for (int i = 1; i < count; i++) { byte x = b[p++]; work++; if ((x & 0xc0) != 0x80) return false; cp = (cp << 6) | (x & 0x3f); }
+                    if (p - rawStart > l.MaximumStringBytes) { reason = WorkloadExceededReason; error = p - 1; return false; }
                     if ((count == 2 && cp < 0x80) || (count == 3 && cp < 0x800) || (count == 4 && cp < 0x10000) || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) return false;
                     chars.Append(char.ConvertFromUtf32(cp));
                 }
-                error = content; return false;
+                return false;
             }
-            private static bool Hex(byte[] b, ref int p, ref int work, ref int byteCount, out int value)
-            { value = 0; if (p + 4 > b.Length) return false; for (int i = 0; i < 4; i++) { int h = b[p++]; work++; byteCount++; int d = h >= '0' && h <= '9' ? h - '0' : h >= 'a' && h <= 'f' ? h - 'a' + 10 : h >= 'A' && h <= 'F' ? h - 'A' + 10 : -1; if (d < 0) return false; value = value * 16 + d; } return true; }
+            private static bool Hex(byte[] b, ref int p, ref int work, out int value)
+            { value = 0; if (p + 4 > b.Length) return false; for (int i = 0; i < 4; i++) { int h = b[p++]; work++; int d = h >= '0' && h <= '9' ? h - '0' : h >= 'a' && h <= 'f' ? h - 'a' + 10 : h >= 'A' && h <= 'F' ? h - 'A' + 10 : -1; if (d < 0) return false; value = value * 16 + d; } return true; }
             private static bool Literal(byte[] b, ref int p, string value, ref int work)
             { if (p + value.Length > b.Length) return false; for (int i = 0; i < value.Length; i++) if (b[p + i] != value[i]) return false; p += value.Length; work += value.Length; return true; }
             private static void Skip(byte[] b, ref int p, ref int work) { while (p < b.Length && (b[p] == 0x20 || b[p] == 0x09 || b[p] == 0x0a || b[p] == 0x0d)) { p++; work++; } }
-            private static bool Take(byte[] b, ref int p, byte expected) { if (p >= b.Length || b[p] != expected) return false; p++; return true; }
+            private static bool Take(byte[] b, ref int p, byte expected, ref int work) { work++; if (p >= b.Length || b[p] != expected) return false; p++; return true; }
         }
     }
 }

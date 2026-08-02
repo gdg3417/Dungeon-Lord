@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests
@@ -10,8 +11,8 @@ namespace DungeonBuilder.M0.Tests
     public sealed class Gd66RawSavePayloadClassifierTests
     {
         private static RawSavePayloadClassificationLimits Limits(int bytes = 10000, int depth = 32,
-            int members = 100, int elements = 100, int strings = 1000, int diagnostics = 1, int work = 50000) =>
-            new RawSavePayloadClassificationLimits(bytes, depth, members, elements, strings, diagnostics, work);
+            int members = 100, int elements = 100, int strings = 1000, int work = 50000) =>
+            new RawSavePayloadClassificationLimits(bytes, depth, members, elements, strings, work);
         private static readonly RawSaveEnvelopeVersionContract Versions = new RawSaveEnvelopeVersionContract(1, 6);
         private static RawSavePayloadClassification Classify(string json, RawSavePayloadClassificationLimits? limits = null) =>
             RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(json), limits ?? Limits(), Versions);
@@ -120,11 +121,29 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void ExactOrderedFourNodeStarterShell_IsAbsent_AndDeviationIsPresent()
         {
-            string nodes = string.Join(",", Enumerable.Range(0, 4).Select(i => "{\"FloorIndex\":0,\"NodeIndex\":" + i + ",\"SlotId\":\"mvp.floor.00.node." + i.ToString("D2") + "\",\"CategoryId\":\"\",\"OptionId\":\"\",\"Revision\":0}"));
-            string shell = "{\"mvpDungeonFloorLayout\":{\"Nodes\":[" + nodes + "],\"NextRevision\":1}}";
+            MvpDungeonFloorLayoutState starter = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            string[] nodeRecords = starter.Nodes.Select(node => "{\"FloorIndex\":" + node.FloorIndex + ",\"NodeIndex\":" + node.NodeIndex +
+                ",\"SlotId\":\"" + node.SlotId + "\",\"CategoryId\":\"" + node.CategoryId + "\",\"OptionId\":\"" + node.OptionId +
+                "\",\"Revision\":" + node.Revision + "}").ToArray();
+            string nodes = string.Join(",", nodeRecords);
+            string shell = "{\"mvpDungeonFloorLayout\":{\"Nodes\":[" + nodes + "],\"NextRevision\":" + starter.NextRevision + "}}";
             Assert.That(Classify(shell).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
             Assert.That(Classify(shell.Replace("node.03", "node.xx")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
             Assert.That(Classify("{\"mvpDungeonFloorLayout\":{\"Nodes\":[null],\"NextRevision\":1}}").FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"FloorIndex\":0", "\"FloorIndex\":1")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"NodeIndex\":0", "\"NodeIndex\":9")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"CategoryId\":\"\"", "\"CategoryId\":\"x\"")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"OptionId\":\"\"", "\"OptionId\":\"x\"")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"Revision\":0", "\"Revision\":1")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace(",\"Revision\":0", "")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("\"Revision\":0", "\"Revision\":0,\"Extra\":0")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("[" + nodes + "]", "[" + string.Join(",", nodeRecords.Reverse()) + "]")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace("," + nodeRecords[3], "")).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify(shell.Replace(nodes, nodes + "," + nodeRecords[3])).FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify("{\"mvpDungeonFloorLayout\":[]}").FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify("{\"mvpDungeonFloorLayout\":{\"Nodes\":42,\"NextRevision\":1}}").FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify("{\"mvpDungeonFloorLayout\":{\"Nodes\":[],\"NextRevision\":2}}").FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+            Assert.That(Classify("{\"mvpDungeonFloorLayout\":{\"Nodes\":[]}}").FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
         }
 
         [Test]
@@ -140,6 +159,141 @@ namespace DungeonBuilder.M0.Tests
             RawSavePayloadClassification first = Classify(nested, Limits(depth: 8)); RawSavePayloadClassification second = Classify(nested, Limits(depth: 8));
             Assert.That(first.FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
             Assert.That(second.FailureByteOffset, Is.EqualTo(first.FailureByteOffset));
+        }
+
+        [TestCase("{\"saveVersion\":1,}")]
+        [TestCase("{\"saveVersion\":[1,]}")]
+        [TestCase("{\"saveVersion\":{\"x\":1,}}")]
+        [TestCase("{\"saveVersion\":[{\"x\":1,}]}")]
+        [TestCase("{\"saveVersion\":[,1]}")]
+        [TestCase("{\"saveVersion\" 1}")]
+        [TestCase("{\"saveVersion\":}")]
+        [TestCase("{\"saveVersion\":[1")]
+        public void StructuralJsonErrors_AreUnreadable(string json)
+        { Assert.That(Classify(json).FailureReason, Is.EqualTo(RawSavePayloadClassifier.UnreadableReason)); }
+
+        [TestCase("1", true, null)]
+        [TestCase("1.0", true, null)]
+        [TestCase("10e-1", true, null)]
+        [TestCase("1e0", true, null)]
+        [TestCase("1.5", false, "gd66.payload.nonintegral_schema_version")]
+        [TestCase("15e-1", false, "gd66.payload.nonintegral_schema_version")]
+        [TestCase("2147483648", false, "gd66.payload.newer_than_application")]
+        [TestCase("999999999999999999999999999999999999999999", false, "gd66.payload.newer_than_application")]
+        [TestCase("-999999999999999999999999999999999999999999", false, "gd66.payload.unsupported_legacy_version")]
+        public void VersionTokens_AreClassifiedWithoutFixedWidthParsing(string token, bool success, string reason)
+        {
+            RawSavePayloadClassification result = Classify("{\"schema\":\"save_root\",\"schemaVersion\":" + token + ",\"primary\":{}}");
+            Assert.That(result.IsSuccess, Is.EqualTo(success));
+            if (!success) Assert.That(result.FailureReason, Is.EqualTo(reason));
+        }
+
+        [Test]
+        public void RootEnvelopeEvidence_IsExplicitRawAndDefensivelyOwned()
+        {
+            byte[] source = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":1.0,\"primary\":{\"saveVersion\":1}}");
+            RawSavePayloadClassification wrapped = RawSavePayloadClassifier.Classify(source, Limits(), Versions);
+            Assert.That(wrapped.RootSchemaEvidence.Kind, Is.EqualTo(RawJsonValueKind.String));
+            Assert.That(wrapped.RootSchemaVersionEvidence.Kind, Is.EqualTo(RawJsonValueKind.Number));
+            Assert.That(wrapped.RootPrimaryEvidence.Kind, Is.EqualTo(RawJsonValueKind.Object));
+            CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("1.0"), wrapped.RootSchemaVersionEvidence.GetRawValueBytes());
+            int offset = wrapped.RootSchemaVersionEvidence.ByteOffset; source[offset] = (byte)'9';
+            byte[] returned = wrapped.RootSchemaVersionEvidence.GetRawValueBytes(); returned[0] = (byte)'8';
+            CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("1.0"), wrapped.RootSchemaVersionEvidence.GetRawValueBytes());
+            RawSavePayloadClassification unwrapped = Classify("{\"saveVersion\":1}");
+            Assert.That(unwrapped.RootSchemaEvidence.State, Is.EqualTo(RawSaveMemberState.Absent));
+            Assert.That(unwrapped.RootSchemaVersionEvidence.State, Is.EqualTo(RawSaveMemberState.Absent));
+            Assert.That(unwrapped.RootPrimaryEvidence.State, Is.EqualTo(RawSaveMemberState.Absent));
+        }
+
+        [TestCase("mvpRoomSlotAssignments", "Rooms")]
+        [TestCase("mvpDungeonPlacements", "Entries")]
+        public void MalformedNonNullRouteShapes_ArePresent(string outer, string inner)
+        {
+            string[] outerValues = { "false", "1", "\"x\"", "[]" };
+            foreach (string value in outerValues) AssertRoute(outer, Classify("{\"" + outer + "\":" + value + "}"), RawLegacyRoutePresence.Present);
+            string[] nestedValues = { "false", "1", "\"x\"", "{}" };
+            foreach (string value in nestedValues) AssertRoute(outer, Classify("{\"" + outer + "\":{\"" + inner + "\":" + value + "}}"), RawLegacyRoutePresence.Present);
+            AssertRoute(outer, Classify("{\"" + outer + "\":null}"), RawLegacyRoutePresence.Absent);
+            AssertRoute(outer, Classify("{\"" + outer + "\":{\"" + inner + "\":null}}"), RawLegacyRoutePresence.Absent);
+            AssertRoute(outer, Classify("{\"" + outer + "\":{\"" + inner + "\":[]}}"), RawLegacyRoutePresence.Absent);
+            AssertRoute(outer, Classify("{\"" + outer + "\":{\"" + inner + "\":[null,{}]}}"), RawLegacyRoutePresence.Present);
+        }
+
+        [TestCase("aaaaaaaaaaaa", 12)]
+        [TestCase("éééééé", 12)]
+        [TestCase("\\n\\n\\n\\n\\n\\n", 12)]
+        [TestCase("\\u0061\\u0061", 12)]
+        [TestCase("\\uD83D\\uDE00", 12)]
+        public void MaximumStringBytes_CountsRawInteriorBytes(string rawJsonString, int rawBytes)
+        {
+            string json = "{\"s\":\"" + rawJsonString + "\",\"saveVersion\":1}";
+            Assert.That(Classify(json, Limits(strings: rawBytes)).IsSuccess, Is.True);
+            Assert.That(Classify(json, Limits(strings: rawBytes - 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+        }
+
+        [Test]
+        public void InvalidUtf8Forms_AreUnreadable()
+        {
+            byte[][] invalid = {
+                new byte[] { (byte)'{', (byte)'\"', 0x80, (byte)'\"', (byte)':', (byte)'1', (byte)'}' },
+                new byte[] { (byte)'{', (byte)'\"', 0xf5, 0x80, 0x80, 0x80, (byte)'\"', (byte)':', (byte)'1', (byte)'}' },
+                new byte[] { (byte)'{', (byte)'\"', 0xed, 0xa0, 0x80, (byte)'\"', (byte)':', (byte)'1', (byte)'}' }
+            };
+            foreach (byte[] bytes in invalid)
+                Assert.That(RawSavePayloadClassifier.Classify(bytes, Limits(), Versions).FailureReason, Is.EqualTo(RawSavePayloadClassifier.UnreadableReason));
+        }
+
+        private static void AssertRoute(string outer, RawSavePayloadClassification result, RawLegacyRoutePresence expected)
+        {
+            RawLegacyRoutePresence actual = outer == "mvpRoomSlotAssignments" ? result.RoomSlotAssignmentsPresence : result.DungeonPlacementsPresence;
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void EveryPinnedMember_HasAbsentNullAndNonNullRawEvidence()
+        {
+            RawSavePayloadClassification absent = Classify("{\"schema\":\"save_root\",\"schemaVersion\":1,\"primary\":{}}");
+            Assert.That(absent.Members.Count, Is.EqualTo(RawSavePayloadClassifier.RecognizedSaveDataMemberNames.Count));
+            foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
+            {
+                Assert.That(absent.Members.Single(x => x.Name == name).State, Is.EqualTo(RawSaveMemberState.Absent));
+                RawSaveMemberEvidence nil = Classify("{\"" + name + "\":null}").Members.Single(x => x.Name == name);
+                Assert.That(nil.State, Is.EqualTo(RawSaveMemberState.Null)); Assert.That(nil.Kind, Is.EqualTo(RawJsonValueKind.Null));
+                CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("null"), nil.GetRawValueBytes());
+                RawSaveMemberEvidence value = Classify("{\"" + name + "\":[]}").Members.Single(x => x.Name == name);
+                Assert.That(value.State, Is.EqualTo(RawSaveMemberState.NonNull)); Assert.That(value.Kind, Is.EqualTo(RawJsonValueKind.Array));
+                CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("[]"), value.GetRawValueBytes());
+            }
+        }
+
+        [Test]
+        public void UnknownMembers_PreserveEveryKindOrderOwnershipAndReadOnlyCollections()
+        {
+            string json = "{\"saveVersion\":1,\"o\":{},\"a\":[],\"s\":\"x\",\"n\":2,\"t\":true,\"f\":false,\"z\":null}";
+            RawSavePayloadClassification result = Classify(json);
+            CollectionAssert.AreEqual(new[] { "o", "a", "s", "n", "t", "f", "z" }, result.UnknownPrimaryMembers.Select(x => x.Name));
+            CollectionAssert.AreEqual(new[] { RawJsonValueKind.Object, RawJsonValueKind.Array, RawJsonValueKind.String,
+                RawJsonValueKind.Number, RawJsonValueKind.Boolean, RawJsonValueKind.Boolean, RawJsonValueKind.Null }, result.UnknownPrimaryMembers.Select(x => x.Kind));
+            byte[] bytes = result.UnknownPrimaryMembers[0].GetRawValueBytes(); bytes[0] = 0;
+            CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("{}"), result.UnknownPrimaryMembers[0].GetRawValueBytes());
+            Assert.Throws<NotSupportedException>(() => ((System.Collections.Generic.IList<RawUnknownMemberEvidence>)result.UnknownPrimaryMembers).Add(result.UnknownPrimaryMembers[0]));
+        }
+
+        [Test]
+        public void EveryWorkloadLimit_HasExactAndOneOverBoundaries()
+        {
+            byte[] one = Encoding.UTF8.GetBytes("{\"saveVersion\":1}");
+            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length), Versions).IsSuccess, Is.True);
+            Assert.That(RawSavePayloadClassifier.Classify(one, Limits(bytes: one.Length - 1), Versions).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(Classify("{\"saveVersion\":1}", Limits(members: 1)).IsSuccess, Is.True);
+            Assert.That(Classify("{\"saveVersion\":1,\"contentVersion\":2}", Limits(members: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(Classify("{\"saveVersion\":[null]}", Limits(elements: 1)).IsSuccess, Is.True);
+            Assert.That(Classify("{\"saveVersion\":[null,null]}", Limits(elements: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(Classify("{\"saveVersion\":[]}", Limits(depth: 2)).IsSuccess, Is.True);
+            Assert.That(Classify("{\"saveVersion\":[]}", Limits(depth: 1)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(Classify("{\"saveVersion\":1}", Limits(work: 19)).IsSuccess, Is.True);
+            Assert.That(Classify("{\"saveVersion\":1}", Limits(work: 18)).FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
         }
 
         [Test]

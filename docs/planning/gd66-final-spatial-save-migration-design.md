@@ -2,7 +2,7 @@
 
 **Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B4A status (2026-08-02):** Phase 2B2 selected future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Phase 2B3 added detached canonical serialization and pinned migration contracts. Phase 2B4A adds only detached raw-payload classification and evidence capture. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 is future-selected, not live. Candidate construction, transactions, runtime interception, readers, writers, and gameplay authority remain deferred.
+**Current Phase 2B4A status (2026-08-02):** Phase 2B2 selected future target save schema **7**, canonical layout contract version **1**, and legacy migration inputs **1 through 6**. Phase 2B3 added detached canonical serialization and pinned migration contracts. Phase 2B4A adds only detached raw-payload classification and evidence capture. Its fail-fast result contains exactly zero or one diagnostic (there is no configurable diagnostic-count limit). Caller limits define total input bytes, maximum simultaneously open container depth, members per object, elements per array, raw UTF-8 bytes inside each string (escape bytes included; quotes excluded), and total lexical byte-inspection operations. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 is future-selected, not live. Candidate construction, transactions, runtime interception, readers, writers, and gameplay authority remain deferred.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -428,8 +428,6 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.payload.unsupported_legacy_version` | fatal failure | No | No trusted active payload | Blocked | Yes | Source version is below/within legacy range but no migration contract supports it. |
 | `gd66.payload.newer_than_application` | fatal failure | No | No trusted active payload | Blocked | Yes | Source save version is greater than application latest supported version. |
 | `gd66.payload.missing_primary` | fatal failure | No | No trusted active payload | Blocked | Yes | Wrapped root omits `primary`. |
-| `gd66.payload.invalid_primary` | fatal failure | No | No trusted active payload | Blocked | Yes | Wrapped root has a present, non-null `primary` whose JSON value is not an object. |
-| `gd66.payload.workload_exceeded` | fatal failure | No | No trusted active payload | Blocked | Yes | Detached raw classification exceeds a caller-supplied input, nesting, member, element, string, diagnostic, or total scan-work limit. |
 | `gd66.transaction.input_fingerprint_mismatch` | recoverable failure | No | Verified O | Allowed | Yes | Journal descriptor bytes do not hash to stored fingerprint or expected attempt. |
 | `gd66.transaction.dependency_changed` | nonfatal diagnostic | No | Unchanged verified O | Allowed | No | Same O is evaluated with changed profile/catalog/config/schema/marker/algorithm/serializer; create new attempt. |
 | `gd66.transaction.pinned_input_missing` | recoverable failure | No | Verified O | Allowed | Yes | Any descriptor-pinned required input is unavailable. |
@@ -473,6 +471,8 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 | `gd66.write.capacity_reduction_invalid` | recoverable failure | No | Unchanged verified C | Allowed | Yes | Replacement would make retained contents exceed capacity. |
 | `gd66.diagnostic.canonical_write_noop` | nonfatal diagnostic | No | Unchanged verified C | Allowed | No | Requested canonical placement is semantically identical. |
 | `gd66.content.migration_blocked_narrow_hall` | recoverable failure | No | Verified O | Allowed | Yes | Legacy O contains effective Narrow Hall with no production room mapping. |
+| `gd66.payload.invalid_primary` | fatal failure | No | No trusted active payload | Blocked | Yes | Wrapped root has a present, non-null `primary` whose JSON value is not an object. |
+| `gd66.payload.workload_exceeded` | fatal failure | No | No trusted active payload | Blocked | Yes | Detached raw classification exceeds a caller-supplied input, nesting, per-object member, per-array element, per-string byte, or total scan-work limit. |
 
 ## 20. Player messaging and localization ownership
 
