@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -234,23 +235,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class CompatibilityReleasePolicy
     {
         public const int MinimumLegacySchemaVersion = 1;
-        public const int MaximumLegacySchemaVersion = 6;
-        public const int TargetSchemaVersion = 7;
         public const int CanonicalLayoutContractVersion = 1;
-        public const string GeometryId = "compat.geometry.r1-r2";
-        public const int GeometryVersion = 1;
-        public const string GeometryCanonicalHash =
-            "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db";
-        public const string MigrationProfileId = "compat.profile.migration.schema_1_6_to_7.contract_1";
-        public const string MigrationProfileCanonicalHash =
-            "88d1548225b55533c023f9bc2216a3362b8cb2b9935d9d3d601710bf1077bbbf";
-        public const string StarterProfileId = "compat.profile.starter.schema_7.contract_1";
-        public const string StarterProfileCanonicalHash =
-            "8ed993e71714e1466fff45445462baa1dc5f5eff9289f2f183a08742ed033007";
+        public const int InitialProfileVersion = 1;
 
         public static bool IsAuthorized(SpatialLayoutCompatibilityProfilesData data)
         {
-            if (data == null) return false;
+            if (data == null || !TryGetTargetSchemaVersion(out int targetSchemaVersion)) return false;
             SpatialMigrationCompatibilityProfile[] migrations = (data.MigrationProfiles ??
                 Array.Empty<SpatialMigrationCompatibilityProfile>())
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
@@ -262,29 +252,51 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
             if (migrations.Length != 1 || starters.Length != 1 || contracts.Length != 1) return false;
 
+            CanonicalLayoutContractSelection contract = contracts[0];
             SpatialMigrationCompatibilityProfile migration = migrations[0];
             CanonicalStarterLayoutProfile starter = starters[0];
-            CanonicalLayoutContractSelection contract = contracts[0];
-            return migration.ProfileId == MigrationProfileId && migration.ProfileVersion == 1 &&
-                   migration.CanonicalHash == MigrationProfileCanonicalHash &&
+            return contract.TargetSchemaVersion == targetSchemaVersion &&
+                   contract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   migration.ProfileId == MigrationProfileId(targetSchemaVersion) &&
+                   migration.ProfileVersion == InitialProfileVersion &&
                    migration.MinimumSourceSchemaVersion == MinimumLegacySchemaVersion &&
-                   migration.MaximumSourceSchemaVersion == MaximumLegacySchemaVersion &&
-                   migration.TargetSchemaVersion == TargetSchemaVersion &&
-                   migration.TargetCanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
-                   HasApprovedGeometry(migration.GeometryId, migration.GeometryVersion,
-                       migration.GeometryCanonicalHash) &&
-                   starter.ProfileId == StarterProfileId && starter.ProfileVersion == 1 &&
-                   starter.CanonicalHash == StarterProfileCanonicalHash &&
-                   starter.TargetSchemaVersion == TargetSchemaVersion &&
-                   starter.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
-                   HasApprovedGeometry(starter.GeometryId, starter.GeometryVersion,
-                       starter.GeometryCanonicalHash) &&
-                   contract.TargetSchemaVersion == TargetSchemaVersion &&
-                   contract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion;
+                   migration.MaximumSourceSchemaVersion == SaveMigration.LatestSchemaVersion &&
+                   migration.TargetSchemaVersion == contract.TargetSchemaVersion &&
+                   migration.TargetCanonicalLayoutContractVersion == contract.CanonicalLayoutContractVersion &&
+                   starter.ProfileId == StarterProfileId(targetSchemaVersion) &&
+                   starter.ProfileVersion == InitialProfileVersion &&
+                   starter.TargetSchemaVersion == contract.TargetSchemaVersion &&
+                   starter.CanonicalLayoutContractVersion == contract.CanonicalLayoutContractVersion &&
+                   string.Equals(migration.GeometryId, starter.GeometryId, StringComparison.Ordinal) &&
+                   migration.GeometryVersion == starter.GeometryVersion &&
+                   string.Equals(migration.GeometryCanonicalHash, starter.GeometryCanonicalHash,
+                       StringComparison.Ordinal);
         }
 
-        private static bool HasApprovedGeometry(string id, int version, string hash) =>
-            id == GeometryId && version == GeometryVersion && hash == GeometryCanonicalHash;
+        private static bool TryGetTargetSchemaVersion(out int targetSchemaVersion)
+        {
+            targetSchemaVersion = 0;
+            if (SaveMigration.LatestSchemaVersion < MinimumLegacySchemaVersion) return false;
+            try
+            {
+                targetSchemaVersion = checked(SaveMigration.LatestSchemaVersion + 1);
+                return targetSchemaVersion > SaveMigration.LatestSchemaVersion;
+            }
+            catch (OverflowException)
+            {
+                return false;
+            }
+        }
+
+        private static string MigrationProfileId(int targetSchemaVersion) =>
+            "compat.profile.migration.schema_" + MinimumLegacySchemaVersion.ToString(CultureInfo.InvariantCulture) +
+            "_" + SaveMigration.LatestSchemaVersion.ToString(CultureInfo.InvariantCulture) + "_to_" +
+            targetSchemaVersion.ToString(CultureInfo.InvariantCulture) + ".contract_" +
+            CanonicalLayoutContractVersion.ToString(CultureInfo.InvariantCulture);
+
+        private static string StarterProfileId(int targetSchemaVersion) =>
+            "compat.profile.starter.schema_" + targetSchemaVersion.ToString(CultureInfo.InvariantCulture) +
+            ".contract_" + CanonicalLayoutContractVersion.ToString(CultureInfo.InvariantCulture);
     }
 
     public static class SpatialLayoutCompatibilityProfiles
@@ -295,10 +307,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static SpatialLayoutCompatibilityResult ParseAndValidate(
             TextAsset asset, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
-            Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool requireInactiveProduction = false)
+            Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool enforceProductionReleasePolicy = false)
         {
             return ParseAndValidate(asset == null ? null : asset.bytes, spatial, limits, sink,
-                requireInactiveProduction);
+                enforceProductionReleasePolicy);
         }
 
         public static CompatibilityConfigurationResolution<SpatialMigrationCompatibilityProfile> ResolveMigration(
@@ -374,14 +386,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static SpatialLayoutCompatibilityResult ParseAndValidate(
             byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
-            Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool requireInactiveProduction = false)
+            Action<SpatialLayoutCompatibilityDiagnostic> sink = null, bool enforceProductionReleasePolicy = false)
         {
-            return ParseAndValidateCore(bytes, spatial, limits, sink, requireInactiveProduction, out _);
+            return ParseAndValidateCore(bytes, spatial, limits, sink, enforceProductionReleasePolicy, out _);
         }
 
         private static SpatialLayoutCompatibilityResult ParseAndValidateCore(
             byte[] bytes, ProductionSpatialContentSnapshot spatial, SpatialContentValidationWorkloadLimits limits,
-            Action<SpatialLayoutCompatibilityDiagnostic> sink, bool requireInactiveProduction,
+            Action<SpatialLayoutCompatibilityDiagnostic> sink, bool enforceProductionReleasePolicy,
             out SpatialLayoutCompatibilityProfilesData candidate)
         {
             candidate = null;
@@ -458,7 +470,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(SpatialLayoutCompatibilityDiagnostic.NoncanonicalInput);
             if (!PrevalidateIdentities(canonical, issues))
                 return Finish(null, issues.Diagnostics, sink);
-            Validate(canonical, spatial?.Catalog, limits, issues, requireInactiveProduction);
+            Validate(canonical, spatial?.Catalog, limits, issues, enforceProductionReleasePolicy);
             return !issues.HasAny ? Finish(new SpatialLayoutCompatibilitySnapshot(canonical), issues.Diagnostics, sink)
                                   : Finish(null, issues.Diagnostics, sink);
         }

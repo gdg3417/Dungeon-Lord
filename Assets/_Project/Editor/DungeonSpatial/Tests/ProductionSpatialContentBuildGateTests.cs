@@ -200,41 +200,97 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         }
 
         [Test]
-        public void ProductionAuthorizationRejectsEveryIncompleteOrContradictoryActiveRelease()
+        public void ProductionAuthorizationRejectsCompleteStructurallyValidMutationMatrix()
         {
-            TextAsset production = Load(SpatialLayoutCompatibilityProfiles.ProductionPath);
-            var mutations = new Action<SpatialLayoutCompatibilityProfilesData>[]
+            var mutations = new Dictionary<string, Action<SpatialLayoutCompatibilityProfilesData>>
             {
-                data => data.MigrationProfiles = Array.Empty<SpatialMigrationCompatibilityProfile>(),
-                data => data.StarterProfiles = Array.Empty<CanonicalStarterLayoutProfile>(),
-                data => data.ContractSelections = Array.Empty<CanonicalLayoutContractSelection>(),
-                data => data.MigrationProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
-                data => data.StarterProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
-                data => data.ContractSelections[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
-                data => data.MigrationProfiles[0].MinimumSourceSchemaVersion = 2,
-                data => data.MigrationProfiles[0].MaximumSourceSchemaVersion = 5,
-                data => data.MigrationProfiles[0].TargetSchemaVersion = 8,
-                data => data.StarterProfiles[0].CanonicalLayoutContractVersion = 2,
-                data => data.ContractSelections[0].TargetSchemaVersion = 8
+                ["missing migration"] = data => data.MigrationProfiles = Array.Empty<SpatialMigrationCompatibilityProfile>(),
+                ["missing starter"] = data => data.StarterProfiles = Array.Empty<CanonicalStarterLayoutProfile>(),
+                ["missing contract"] = data => data.ContractSelections = Array.Empty<CanonicalLayoutContractSelection>(),
+                ["retired migration"] = data => data.MigrationProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                ["retired starter"] = data => data.StarterProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                ["retired contract"] = data => data.ContractSelections[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
+                ["additional active migration"] = AddActiveMigration,
+                ["additional active starter"] = AddActiveStarter,
+                ["additional active contract"] = data => data.ContractSelections = data.ContractSelections.Concat(new[] {
+                    new CanonicalLayoutContractSelection { TargetSchemaVersion = 8,
+                        CanonicalLayoutContractVersion = 1, Lifecycle = CompatibilityProfileLifecycle.Active }}).ToArray(),
+                ["migration minimum"] = data => data.MigrationProfiles[0].MinimumSourceSchemaVersion = 2,
+                ["migration maximum"] = data => data.MigrationProfiles[0].MaximumSourceSchemaVersion = 5,
+                ["migration target"] = data => data.MigrationProfiles[0].TargetSchemaVersion = 8,
+                ["migration contract"] = data => data.MigrationProfiles[0].TargetCanonicalLayoutContractVersion = 2,
+                ["migration id"] = data => data.MigrationProfiles[0].ProfileId = "compat.profile.migration.unauthorized",
+                ["migration version"] = data => data.MigrationProfiles[0].ProfileVersion = 2,
+                ["starter target"] = data => data.StarterProfiles[0].TargetSchemaVersion = 8,
+                ["starter contract"] = data => data.StarterProfiles[0].CanonicalLayoutContractVersion = 2,
+                ["starter id"] = data => data.StarterProfiles[0].ProfileId = "compat.profile.starter.unauthorized",
+                ["starter version"] = data => data.StarterProfiles[0].ProfileVersion = 2,
+                ["contract target"] = data => data.ContractSelections[0].TargetSchemaVersion = 8,
+                ["contract version"] = data => data.ContractSelections[0].CanonicalLayoutContractVersion = 2,
+                ["geometry id"] = data => PointStarterAtAdditionalGeometry(data,
+                    "compat.geometry.alternate", 1),
+                ["geometry version"] = data => PointStarterAtAdditionalGeometry(data,
+                    data.GeometryRecords[0].GeometryId, 2),
+                ["geometry hash"] = data => PointStarterAtAdditionalGeometry(data,
+                    data.GeometryRecords[0].GeometryId, 2)
             };
-            foreach (Action<SpatialLayoutCompatibilityProfilesData> mutate in mutations)
+            foreach (KeyValuePair<string, Action<SpatialLayoutCompatibilityProfilesData>> mutation in mutations)
             {
-                SpatialLayoutCompatibilityProfilesData data =
-                    JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(production.text);
-                mutate(data);
-                if (data.MigrationProfiles.Length == 1)
-                    data.MigrationProfiles[0].CanonicalHash =
-                        SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(data.MigrationProfiles[0]);
-                if (data.StarterProfiles.Length == 1)
-                    data.StarterProfiles[0].CanonicalHash =
-                        SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(data.StarterProfiles[0]);
-                TextAsset asset = new TextAsset(System.Text.Encoding.UTF8.GetString(
-                    SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
-                ProductionSpatialBuildGateResult result = ProductionSpatialContentBuildGate.ValidateCompatibility(
-                    asset, manifest, catalog, new[] { english }, limits);
+                SpatialLayoutCompatibilityProfilesData data = ProductionCompatibilityData();
+                mutation.Value(data);
+                RecomputeProfileHashes(data);
+                ProductionSpatialBuildGateResult result = ValidateCompatibility(data);
                 Assert.That(result.Reason,
-                    Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection));
+                    Is.EqualTo(ProductionSpatialBuildGateReason.UnauthorizedActiveCompatibilitySelection),
+                    mutation.Key + ":" + result.Detail);
             }
+        }
+
+        [Test]
+        public void InvalidProfileHashAndMissingGeometryReferenceRemainInvalidConfiguration()
+        {
+            SpatialLayoutCompatibilityProfilesData invalidHash = ProductionCompatibilityData();
+            invalidHash.MigrationProfiles[0].CanonicalHash = "invalid";
+            Assert.That(ValidateCompatibility(invalidHash).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+
+            SpatialLayoutCompatibilityProfilesData missingGeometry = ProductionCompatibilityData();
+            missingGeometry.StarterProfiles[0].GeometryId = "compat.geometry.missing";
+            missingGeometry.StarterProfiles[0].CanonicalHash =
+                SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(missingGeometry.StarterProfiles[0]);
+            Assert.That(ValidateCompatibility(missingGeometry).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidCompatibilityProfile));
+        }
+
+        [Test]
+        public void ExactActiveReleaseAllowsStructurallyValidRetiredRecoveryRecords()
+        {
+            SpatialLayoutCompatibilityProfilesData data = ProductionCompatibilityData();
+            SpatialMigrationCompatibilityProfile retiredMigration = Clone(data.MigrationProfiles[0]);
+            retiredMigration.ProfileId = "compat.profile.migration.retired";
+            retiredMigration.Lifecycle = CompatibilityProfileLifecycle.Retired;
+            retiredMigration.MinimumSourceSchemaVersion = 8;
+            retiredMigration.MaximumSourceSchemaVersion = 8;
+            SpatialLayoutCompatibilityProfilesData temporary = new SpatialLayoutCompatibilityProfilesData {
+                MigrationProfiles = new[] { retiredMigration }};
+            RecomputeProfileHashes(temporary);
+            CanonicalStarterLayoutProfile retiredStarter = Clone(data.StarterProfiles[0]);
+            retiredStarter.ProfileId = "compat.profile.starter.retired";
+            retiredStarter.Lifecycle = CompatibilityProfileLifecycle.Retired;
+            retiredStarter.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(retiredStarter);
+            data.MigrationProfiles = data.MigrationProfiles.Concat(new[] { retiredMigration }).ToArray();
+            data.StarterProfiles = data.StarterProfiles.Concat(new[] { retiredStarter }).ToArray();
+            data.ContractSelections = data.ContractSelections.Concat(new[] {
+                new CanonicalLayoutContractSelection { TargetSchemaVersion = 8,
+                    CanonicalLayoutContractVersion = 1, Lifecycle = CompatibilityProfileLifecycle.Retired }}).ToArray();
+            Assert.That(ValidateCompatibility(data).Success, Is.True);
+            SpatialLayoutCompatibilityResult parsed = SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(
+                    SpatialLayoutCompatibilityProfiles.Canonicalize(data)), ProductionSnapshot(), ParsedLimits());
+            Assert.That(parsed.Value.SelectMigration(8, 7, 1).Code, Is.EqualTo("gd66.profile.missing"));
+            Assert.That(parsed.Value.SelectStarter(8, 1).Code, Is.EqualTo("gd66.starter_profile.missing"));
+            Assert.That(parsed.Value.SelectContract(8).Code,
+                Is.EqualTo("gd66.layout_contract.selection_missing"));
         }
 
         [TestCase(false)]
@@ -465,6 +521,67 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 }
             }
         }
+
+        private SpatialLayoutCompatibilityProfilesData ProductionCompatibilityData() =>
+            JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(
+                Load(SpatialLayoutCompatibilityProfiles.ProductionPath).text);
+
+        private ProductionSpatialBuildGateResult ValidateCompatibility(SpatialLayoutCompatibilityProfilesData data)
+        {
+            TextAsset asset = new TextAsset(System.Text.Encoding.UTF8.GetString(
+                SpatialLayoutCompatibilityProfiles.SerializeCanonical(
+                    SpatialLayoutCompatibilityProfiles.Canonicalize(data))));
+            return ProductionSpatialContentBuildGate.ValidateCompatibility(asset, manifest, catalog,
+                new[] { english }, limits);
+        }
+
+        private ProductionSpatialContentSnapshot ProductionSnapshot() =>
+            ProductionSpatialContentLoader.Load(manifest, catalog, new[] { english }, limits).Value;
+
+        private SpatialContentValidationWorkloadLimits ParsedLimits() =>
+            ProductionSpatialContentWorkloadLimitParser.Parse(limits).Limits;
+
+        private static void RecomputeProfileHashes(SpatialLayoutCompatibilityProfilesData data)
+        {
+            foreach (SpatialMigrationCompatibilityProfile profile in data.MigrationProfiles ??
+                Array.Empty<SpatialMigrationCompatibilityProfile>())
+                profile.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(profile);
+            foreach (CanonicalStarterLayoutProfile profile in data.StarterProfiles ??
+                Array.Empty<CanonicalStarterLayoutProfile>())
+                profile.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(profile);
+        }
+
+        private static void AddActiveMigration(SpatialLayoutCompatibilityProfilesData data)
+        {
+            SpatialMigrationCompatibilityProfile profile = Clone(data.MigrationProfiles[0]);
+            profile.ProfileId = "compat.profile.migration.additional";
+            profile.MinimumSourceSchemaVersion = 8;
+            profile.MaximumSourceSchemaVersion = 8;
+            data.MigrationProfiles = data.MigrationProfiles.Concat(new[] { profile }).ToArray();
+        }
+
+        private static void AddActiveStarter(SpatialLayoutCompatibilityProfilesData data)
+        {
+            CanonicalStarterLayoutProfile profile = Clone(data.StarterProfiles[0]);
+            profile.ProfileId = "compat.profile.starter.additional";
+            profile.TargetSchemaVersion = 8;
+            data.StarterProfiles = data.StarterProfiles.Concat(new[] { profile }).ToArray();
+        }
+
+        private static void PointStarterAtAdditionalGeometry(SpatialLayoutCompatibilityProfilesData data,
+            string geometryId, int geometryVersion)
+        {
+            CompatibilityLayoutGeometryRecord geometry = Clone(data.GeometryRecords[0]);
+            geometry.GeometryId = geometryId;
+            geometry.GeometryVersion = geometryVersion;
+            geometry.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(geometry);
+            data.GeometryRecords = data.GeometryRecords.Concat(new[] { geometry }).ToArray();
+            data.StarterProfiles[0].GeometryId = geometry.GeometryId;
+            data.StarterProfiles[0].GeometryVersion = geometry.GeometryVersion;
+            data.StarterProfiles[0].GeometryCanonicalHash = geometry.CanonicalHash;
+        }
+
+        private static T Clone<T>(T value) => JsonUtility.FromJson<T>(JsonUtility.ToJson(value));
 
         private static TextAsset Load(string path) => AssetDatabase.LoadAssetAtPath<TextAsset>(path);
         private static string[] BootstrapOnly() => new[] { DevelopmentBuildUtility.BootstrapScenePath };
