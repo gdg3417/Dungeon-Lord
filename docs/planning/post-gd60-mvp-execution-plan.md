@@ -1,13 +1,13 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
+**Current Phase 2B4B/2B5 implementation status (2026-08-02):** Phase 2B4A is merged. This PR adds detached whole-save candidate serialization and an explicitly invoked, injected filesystem transaction boundary. Owner-run Unity evidence remains pending. The engine is inactive; live schema remains **6**, selected schema 7 remains inactive, and `SaveService`, `GameRoot`, ordinary no-file creation, runtime route readers/writers, and runtime room-content authority remain unchanged. Final live activation remains Phase 2B6; GD66 is not complete.
 
 
 | Field | Decision |
 |---|---|
 | Status | **Phase 2 active; Phase 2B1 complete; Phase 2B2 release identity selected** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main through merged PR #189 at `b375cb8a0b1f2bbd4ea1317bfec2850ca8320ec0` |
+| Current implementation baseline | Main through merged PR #192 at `01b9623c834ca321655d4932a20b4730cb16adc5` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-08-01 |
