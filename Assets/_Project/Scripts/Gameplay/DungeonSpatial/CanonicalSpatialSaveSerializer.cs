@@ -79,7 +79,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode root;
                 if (!ContractJson.TryParse(bytes, limits.Serialized, issues, out root))
                     return Result<DetachedCanonicalSpatialSaveState>(null, issues);
-                ValidateNode(root, typeof(DetachedCanonicalSpatialSaveState), issues);
+                ValidateNode(root, typeof(DetachedCanonicalSpatialSaveState), null, null, issues);
                 if (issues.Count != 0) return Result<DetachedCanonicalSpatialSaveState>(null, issues);
 
                 var value = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(Encoding.UTF8.GetString(bytes));
@@ -160,11 +160,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(SpatialContractIssue.InvalidHash);
         }
 
-        private static void ValidateNode(ContractJsonNode node, Type type, SpatialIssueCollector issues)
+        private static void ValidateNode(ContractJsonNode node, Type type, Type declaringType,
+            string fieldName, SpatialIssueCollector issues)
         {
             if (issues.IsExhausted) return;
             if (type == typeof(string))
-            { if (node.Kind != ContractJsonKind.String) issues.Add(SpatialContractIssue.WrongFieldType); return; }
+            {
+                bool nullableAuthorityField = declaringType == typeof(CanonicalSpatialAuthorityMarker) &&
+                    (fieldName == nameof(CanonicalSpatialAuthorityMarker.MigrationTransactionId) ||
+                     fieldName == nameof(CanonicalSpatialAuthorityMarker.MigrationDescriptorFingerprint));
+                if (node.Kind != ContractJsonKind.String &&
+                    !(nullableAuthorityField && node.Kind == ContractJsonKind.Null))
+                    issues.Add(SpatialContractIssue.WrongFieldType);
+                return;
+            }
             if (type == typeof(int) || type == typeof(long) || type.IsEnum)
             {
                 if (node.Kind != ContractJsonKind.Number)
@@ -182,14 +191,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (node.Kind != ContractJsonKind.Array)
                 { issues.Add(SpatialContractIssue.WrongFieldType); return; }
                 foreach (ContractJsonNode item in node.Items)
-                { ValidateNode(item, type.GetElementType(), issues); if (issues.IsExhausted) break; }
+                { ValidateNode(item, type.GetElementType(), null, null, issues); if (issues.IsExhausted) break; }
                 return;
             }
             if (node.Kind == ContractJsonKind.Null) return;
             string[] names = Fields[type];
             if (!ContractJson.ValidateShape(node, names, issues)) return;
             for (int index = 0; index < names.Length && !issues.IsExhausted; index++)
-                ValidateNode(ContractJson.Field(node, index), type.GetField(names[index]).FieldType, issues);
+                ValidateNode(ContractJson.Field(node, index), type.GetField(names[index]).FieldType,
+                    type, names[index], issues);
         }
 
         private static SpatialContractResult<T> Result<T>(T value, SpatialIssueCollector issues) =>

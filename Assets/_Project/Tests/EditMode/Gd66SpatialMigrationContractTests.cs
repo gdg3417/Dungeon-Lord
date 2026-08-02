@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
@@ -125,3 +127,5 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationContractIdentity.CanonicalSerializerId, 1);
     }
 }
+
+#endif

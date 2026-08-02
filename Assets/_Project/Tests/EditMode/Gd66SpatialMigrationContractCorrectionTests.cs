@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void AuthorityMarker_RequiresExactNativeAndMigratedIdentities()
         {
             AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, null, true);
+            AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, string.Empty, string.Empty, true);
             AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, "stable.id", null, false);
             AssertAuthority(CanonicalSpatialCreationKind.NativeCanonical, null, H1, false);
             string transaction = SpatialMigrationTransactionIdentity.CreateTransactionId(H2);
@@ -34,6 +37,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, new string('A', 64), false);
             AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, H1.Substring(1), false);
             AssertAuthority(CanonicalSpatialCreationKind.Migrated, transaction, "stable.looking.id", false);
+        }
+
+        [Test]
+        public void NonAuthorityStringField_RejectsJsonNullWithWrongFieldType()
+        {
+            byte[] bytes = CanonicalSpatialSaveSerializer.Serialize(Populated(1, false), SaveLimits).Value;
+            string json = Encoding.UTF8.GetString(bytes).Replace(
+                "\"FloorInstanceId\":\"floor.a\"", "\"FloorInstanceId\":null");
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> result =
+                CanonicalSpatialSaveSerializer.Parse(Encoding.UTF8.GetBytes(json), SaveLimits);
+            Assert.IsFalse(result.IsValid);
+            CollectionAssert.Contains(result.Issues, SpatialContractIssue.WrongFieldType);
         }
 
         [Test]
@@ -169,16 +184,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void EveryParserBudget_HasExactBoundaryAndOneOverBehavior()
         {
             byte[] bytes = SpatialMigrationDescriptorContracts.Serialize(Descriptor(), Limits).Value;
+            const int high = 200000;
+            int minimumNodes = Minimum(limit => SpatialMigrationDescriptorContracts.Parse(bytes,
+                new SpatialSerializedInputLimits(bytes.Length, limit, high, high, 10)).IsValid);
+            int minimumRecords = Minimum(limit => SpatialMigrationDescriptorContracts.Parse(bytes,
+                new SpatialSerializedInputLimits(bytes.Length, high, limit, high, 10)).IsValid);
+            int minimumStrings = Minimum(limit => SpatialMigrationDescriptorContracts.Parse(bytes,
+                new SpatialSerializedInputLimits(bytes.Length, high, high, limit, 10)).IsValid);
+
             Assert.IsTrue(SpatialMigrationDescriptorContracts.Parse(bytes,
-                new SpatialSerializedInputLimits(bytes.Length, 1000, 10, 1000, 10)).IsValid);
-            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length - 1, 1000, 10, 1000, 10),
+                new SpatialSerializedInputLimits(bytes.Length, minimumNodes, high, high, 10)).IsValid);
+            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, minimumNodes - 1, high, high, 10),
+                SpatialContractIssue.WorkloadExceeded);
+            Assert.IsTrue(SpatialMigrationDescriptorContracts.Parse(bytes,
+                new SpatialSerializedInputLimits(bytes.Length, high, minimumRecords, high, 10)).IsValid);
+            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, high, minimumRecords - 1, high, 10),
+                SpatialContractIssue.WorkloadExceeded);
+            Assert.IsTrue(SpatialMigrationDescriptorContracts.Parse(bytes,
+                new SpatialSerializedInputLimits(bytes.Length, high, high, minimumStrings, 10)).IsValid);
+            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, high, high, minimumStrings - 1, 10),
+                SpatialContractIssue.WorkloadExceeded);
+            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length - 1, high, high, high, 10),
                 SpatialContractIssue.InputByteLimitExceeded);
-            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, 1, 10, 1000, 10),
-                SpatialContractIssue.WorkloadExceeded);
-            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, 1000, 0, 1000, 10),
-                SpatialContractIssue.WorkloadExceeded);
-            AssertIssue(bytes, new SpatialSerializedInputLimits(bytes.Length, 1000, 10, 0, 10),
-                SpatialContractIssue.WorkloadExceeded);
         }
 
         [Test]
@@ -667,3 +694,5 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+
+#endif
