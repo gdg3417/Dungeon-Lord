@@ -145,7 +145,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void ExtremeCoordinatesFailWithoutOverflowAndPreservePublishedSnapshot()
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             data.GeometryRecords[0].Layouts[0].Placements[0].Anchor=new TileCoordinate(int.MinValue,int.MinValue);
             data.GeometryRecords[0].Layouts[0].Placements[1].Anchor=new TileCoordinate(int.MaxValue,int.MaxValue);
             data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
@@ -360,7 +360,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomSpatialDefinition basic=catalog.Rooms.Single(value=>value.RoomDefinitionId=="spatial.room.basic");
             basic.AllowedOrientations=new[]{CardinalOrientation.Zero,CardinalOrientation.Ninety};
             var rotatedSpatial=new ProductionSpatialContentSnapshot(spatial.Manifest,catalog,spatial.Languages);
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             string sourceBefore=profiles.text; string catalogBefore=JsonUtility.ToJson(catalog);
             SetRotated(data.GeometryRecords[0].Layouts[0],new[]{new TileCoordinate(0,1),new TileCoordinate(2,0),new TileCoordinate(6,1)});
             SetRotated(data.GeometryRecords[0].Layouts[1],new[]{new TileCoordinate(0,1),new TileCoordinate(2,0),new TileCoordinate(6,0),new TileCoordinate(10,1)});
@@ -375,10 +375,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             data.GeometryRecords[0].Layouts[0].Placements[1].Anchor=new TileCoordinate(1,0);
             data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
-            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(CanonicalAsset(data),rotatedSpatial,limits).Success,Is.False);
+            AssertGeometryDiagnostic(SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                CanonicalAsset(data),rotatedSpatial,limits));
             data.GeometryRecords[0].Layouts[0].Placements[1].Anchor=new TileCoordinate(3,0);
             data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
-            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(CanonicalAsset(data),rotatedSpatial,limits).Success,Is.False);
+            AssertGeometryDiagnostic(SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                CanonicalAsset(data),rotatedSpatial,limits));
 
             data.GeometryRecords[0].Layouts[0].Placements[1].Anchor=new TileCoordinate(2,0);
             SpatialContentCatalog sameFacingCatalog=rotatedSpatial.Catalog;
@@ -386,24 +388,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .Single(value=>value.ConnectionPointId=="south").Facing=CardinalOrientation.Zero;
             var sameFacingSpatial=new ProductionSpatialContentSnapshot(rotatedSpatial.Manifest,sameFacingCatalog,rotatedSpatial.Languages);
             data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
-            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(CanonicalAsset(data),sameFacingSpatial,limits).Success,Is.False);
+            AssertGeometryDiagnostic(SpatialLayoutCompatibilityProfiles.ParseAndValidate(
+                CanonicalAsset(data),sameFacingSpatial,limits));
         }
 
         [TestCase(".leading")][TestCase("trailing-")][TestCase("two..segments")]
         [TestCase("UPPER")][TestCase("white space")][TestCase("nönascii")]
         public void StableIdGrammarRejectsInvalidSegments(string id)
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             data.GeometryRecords[0].GeometryId=id;
             data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
             TextAsset asset=new TextAsset(System.Text.Encoding.UTF8.GetString(
                 SpatialLayoutCompatibilityProfiles.SerializeCanonical(data)));
-            Assert.That(SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,limits).Success,Is.False,id);
+            SpatialLayoutCompatibilityResult result=SpatialLayoutCompatibilityProfiles.ParseAndValidate(asset,spatial,limits);
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidStableId),Is.True,id);
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection),Is.False,id);
         }
 
         [Test] public void SemanticDiagnosticLimitFailsAsWorkloadWithoutPublication()
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             data.GeometryRecords[0].GeometryId="INVALID";
             data.GeometryRecords[0].GeometryVersion=0;
             data.GeometryRecords[0].CanonicalHash="bad";
@@ -418,7 +423,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void DifferentSemanticReasonsAreAcceptedAtExactIssueBoundary()
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             data.GeometryRecords[0].GeometryId="INVALID"; data.GeometryRecords[0].GeometryVersion=0;
             data.GeometryRecords[0].CanonicalHash="bad";
             var exact=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
@@ -585,7 +590,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         { return new CanonicalStarterLayoutProfile{ProfileId="test.starter",ProfileVersion=1,Lifecycle=lifecycle,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}; }
         private TextAsset RepeatedInvalidGeometryAsset(int count)
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
             CompatibilityLayoutGeometryRecord template=data.GeometryRecords[0];
             data.GeometryRecords=Enumerable.Range(0,count).Select(index=>
             {
@@ -604,9 +609,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private void AssertGeometryMutationFails(System.Action<SpatialLayoutCompatibilityProfilesData> mutation)
         {
-            SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
-            mutation(data); data.GeometryRecords[0].CanonicalHash=SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
-            Assert.That(ParseData(data).Success,Is.False);
+            SpatialLayoutCompatibilityProfilesData data=GeometryOnlyData();
+            mutation(data);
+            data.GeometryRecords[0].CanonicalHash=
+                SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(data.GeometryRecords[0]);
+            AssertGeometryDiagnostic(ParseData(data));
+        }
+        private SpatialLayoutCompatibilityProfilesData GeometryOnlyData()
+        {
+            SpatialLayoutCompatibilityProfilesData data=
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            data.MigrationProfiles=System.Array.Empty<SpatialMigrationCompatibilityProfile>();
+            data.StarterProfiles=System.Array.Empty<CanonicalStarterLayoutProfile>();
+            data.ContractSelections=System.Array.Empty<CanonicalLayoutContractSelection>();
+            return data;
+        }
+        private static void AssertGeometryDiagnostic(SpatialLayoutCompatibilityResult result)
+        {
+            Assert.That(result.Success,Is.False);
+            Assert.That(result.Diagnostics.Any(value=>value==SpatialLayoutCompatibilityDiagnostic.InvalidGeometry ||
+                value==SpatialLayoutCompatibilityDiagnostic.IncompleteGeometry ||
+                value==SpatialLayoutCompatibilityDiagnostic.DuplicateLayout),Is.True,
+                string.Join(",",result.Diagnostics.Select(value=>value.ToString()).ToArray()));
+            Assert.That(result.Diagnostics.Contains(SpatialLayoutCompatibilityDiagnostic.InvalidLifecycleSelection),
+                Is.False);
         }
         private static void AssertTransform(TileCoordinate offset,TileCoordinate anchor,
             CardinalOrientation orientation,RectangularFootprintDefinition footprint,int x,int y)
