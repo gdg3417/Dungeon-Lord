@@ -6,12 +6,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed class DetachedCompleteSaveValidationResult
     {
-        internal DetachedCompleteSaveValidationResult(byte[] bytes, DetachedCanonicalSpatialSaveState spatial,
-            string reason)
-        { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Spatial = spatial; Reason = reason; }
+        internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason)
+        { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
-        public DetachedCanonicalSpatialSaveState Spatial { get; }
         public string Reason { get; }
         private byte[] Bytes { get; }
     }
@@ -55,7 +53,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
-                return new DetachedCompleteSaveValidationResult(bytes, parsedSpatial.Value, null);
+                return new DetachedCompleteSaveValidationResult(bytes, null);
             }
             catch { return Failure(); }
         }
@@ -148,6 +146,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
         private static bool Same(byte[] left, byte[] right) => left != null && right != null && left.SequenceEqual(right);
         private static DetachedCompleteSaveValidationResult Failure() =>
-            new DetachedCompleteSaveValidationResult(null, null, "gd66.transaction.candidate_invalid");
+            new DetachedCompleteSaveValidationResult(null, "gd66.transaction.candidate_invalid");
     }
 }

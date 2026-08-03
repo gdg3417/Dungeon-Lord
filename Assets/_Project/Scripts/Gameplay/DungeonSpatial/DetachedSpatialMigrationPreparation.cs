@@ -14,8 +14,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private DetachedRequiredValidationInputSpecification(IEnumerable<string> values)
         { inputIds = (values ?? Array.Empty<string>()).OrderBy(value => value, StringComparer.Ordinal).ToArray(); }
 
-        // GD66 contract 1 currently has no external validation byte authorities beyond the
-        // descriptor's explicit profile, geometry, production, legacy-config, and serializer pins.
+        // Locked GD66 design §25: contract 1 has no extension validation-input IDs; profile,
+        // geometry, production, legacy-config, serializer, marker, and contract pins are named fields.
         public static DetachedRequiredValidationInputSpecification Current { get; } =
             new DetachedRequiredValidationInputSpecification(Array.Empty<string>());
         public string[] InputIds => (string[])inputIds.Clone();
