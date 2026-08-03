@@ -380,8 +380,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 bool dependencyChanged = false;
             DiscoverAttempt:
-                SpatialContractResult<SpatialMigrationJournal> existing = FindLiveJournal(
-                    directory, Path.GetFileNameWithoutExtension(activePath), out int liveCount);
+                EvidenceSnapshot executeEvidence = DiscoverEvidence(directory,
+                    Path.GetFileNameWithoutExtension(activePath));
+                SpatialContractResult<SpatialMigrationJournal> existing = executeEvidence.SingleLive;
+                int liveCount = executeEvidence.LiveCount;
                 if (liveCount > 1) return Failure(MultipleAttemptsReason, null, SpatialTrustedPayload.None);
                 SpatialMigrationJournal journal;
                 if (liveCount == 1)
@@ -444,10 +446,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     candidate, descriptor, fingerprint, identity, transactionId, names.Value, journal);
                 return dependencyChanged ? WithDiagnostic(resumed, DependencyChangedReason) : resumed;
             }
-            catch (IOException) { return Failure(RecoveryFailedReason, null, SpatialTrustedPayload.None); }
-            catch (UnauthorizedAccessException) { return Failure(PathInvalidReason, null, SpatialTrustedPayload.None); }
-            catch (ArgumentException) { return Failure(PathInvalidReason, null, SpatialTrustedPayload.None); }
-            catch (NotSupportedException) { return Failure(PathInvalidReason, null, SpatialTrustedPayload.None); }
+            catch (IOException) { return Failure(RecoveryFailedReason, null,
+                TrustedActiveSafe(activePath, exactOriginalBytes, candidate.GetBytes())); }
+            catch (UnauthorizedAccessException) { return Failure(PathInvalidReason, null,
+                TrustedActiveSafe(activePath, exactOriginalBytes, candidate.GetBytes())); }
+            catch (ArgumentException) { return Failure(PathInvalidReason, null,
+                TrustedActiveSafe(activePath, exactOriginalBytes, candidate.GetBytes())); }
+            catch (NotSupportedException) { return Failure(PathInvalidReason, null,
+                TrustedActiveSafe(activePath, exactOriginalBytes, candidate.GetBytes())); }
         }
 
         private bool QuarantineLiveAttemptJournal(string directory, SpatialMigrationJournal journal)
@@ -470,34 +476,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!string.Equals(normalizedActive, activePath, StringComparison.Ordinal) ||
                     !fileSystem.IsPathContainedWithoutRedirection(directory, activePath))
                     return Failure(PathInvalidReason, null, SpatialTrustedPayload.None);
-                SpatialContractResult<SpatialMigrationJournal> found = FindLiveJournal(
-                    directory, Path.GetFileNameWithoutExtension(activePath), out int count);
+                EvidenceSnapshot evidence = DiscoverEvidence(directory,
+                    Path.GetFileNameWithoutExtension(activePath));
+                SpatialContractResult<SpatialMigrationJournal> found = evidence.SingleLive;
+                int count = evidence.LiveCount;
                 if (count > 1) return Failure(MultipleAttemptsReason, null, SpatialTrustedPayload.None);
                 if (count == 0)
                 {
                     byte[] active = fileSystem.ReadAllBytes(activePath);
                     // Terminal journals and receipts are audit evidence only.  Current-target C is
                     // self-authoritative after complete validation and may have changed normally.
-                    if (IsCanonicalSchemaSeven(active))
-                        return new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null,
-                            SpatialTrustedPayload.Candidate);
-                    DetachedLegacyValidationResult legacy = recoveryContext.ValidateLegacy(active);
-                    bool activeLegacy = legacy.IsValid;
-                    if (TryQuarantineMalformedJournal(directory,
-                        Path.GetFileNameWithoutExtension(activePath), out bool malformed))
+                    bool activeCandidate = IsCanonicalSchemaSeven(active);
+                    DetachedLegacyValidationResult legacy = activeCandidate ? null :
+                        recoveryContext.ValidateLegacy(active);
+                    bool activeLegacy = legacy != null && legacy.IsValid;
+                    bool malformed = evidence.Malformed.Count != 0;
+                    if (malformed && QuarantineMalformedEvidence(directory, evidence.Malformed))
                     {
+                        if (activeCandidate) return new DetachedSpatialMigrationOutcome(true,
+                            AlreadyCommittedReason, null, SpatialTrustedPayload.Candidate);
                         if (activeLegacy) return Failure(
                             "gd66.transaction.journal_malformed_with_verified_original", null,
                             SpatialTrustedPayload.Original);
                     }
-                    else if (malformed) return Failure(PathInvalidReason, null, SpatialTrustedPayload.None);
+                    else if (malformed) return Failure(PathInvalidReason, null, activeCandidate ?
+                        SpatialTrustedPayload.Candidate : activeLegacy ? SpatialTrustedPayload.Original :
+                        SpatialTrustedPayload.None);
+                    if (activeCandidate) return new DetachedSpatialMigrationOutcome(true,
+                        AlreadyCommittedReason, null, SpatialTrustedPayload.Candidate);
                     if (activeLegacy)
                         return new DetachedSpatialMigrationOutcome(true, NoJournalLegacyDiagnostic, null,
                             SpatialTrustedPayload.Original, new[] { NoJournalLegacyDiagnostic });
-                    if (!string.IsNullOrEmpty(legacy.Reason))
+                    if (legacy != null && !string.IsNullOrEmpty(legacy.Reason))
                         return Failure(legacy.Reason, null, SpatialTrustedPayload.None);
-                    SpatialMigrationJournal terminal = FindTerminalJournal(directory,
-                        Path.GetFileNameWithoutExtension(activePath), out int terminalCount);
+                    SpatialMigrationJournal terminal = evidence.Terminal.Count == 1
+                        ? evidence.Terminal[0].Journal : null;
+                    int terminalCount = evidence.Terminal.Count;
                     if (terminal != null)
                     {
                         if (terminal.Stage == SpatialMigrationJournalStage.OriginalRestored &&
@@ -901,75 +915,119 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage, SpatialTrustedPayload.Candidate);
         }
 
-        private SpatialContractResult<SpatialMigrationJournal> FindLiveJournal(string directory, string stem, out int count)
+        private enum EvidenceKind
+        { LiveJournal, FinalizedJournal, OriginalRestoredJournal, MalformedJournal,
+          RedirectedJournal, FilenameInvalidJournal, BindingInvalidJournal, OriginalBackup,
+          CandidateStaging, JournalNext, RestoreStaging, RestorationIntent,
+          FinalizationReceipt, ExistingQuarantine, Unknown }
+
+        private sealed class EvidenceRecord
         {
-            count = 0; SpatialContractResult<SpatialMigrationJournal> found = default(SpatialContractResult<SpatialMigrationJournal>);
-            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, stem + ".gd66-*.journal.json",
-                limits.MaximumCollectionRecords);
-            for (int i = 0; i < paths.Count; i++)
-            {
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, paths[i])) continue;
-                SpatialContractResult<SpatialMigrationJournal> parsed = SpatialMigrationJournalContracts.Parse(
-                    fileSystem.ReadAllBytes(paths[i]), limits);
-                if (!parsed.IsValid || parsed.Value.Stage == SpatialMigrationJournalStage.Finalized ||
-                    parsed.Value.Stage == SpatialMigrationJournalStage.OriginalRestored ||
-                    !string.Equals(Path.GetFileName(paths[i]), parsed.Value.RelativeJournalFilename,
-                        StringComparison.Ordinal)) continue;
-                if (!ResolveEvidencePaths(directory, parsed.Value, out string resolvedJournal,
-                    out string ignoredBackup, out string ignoredStaging) ||
-                    !string.Equals(resolvedJournal, paths[i], StringComparison.Ordinal)) continue;
-                count++; found = parsed;
-            }
-            return found;
+            internal EvidenceRecord(string path, bool contained, byte[] bytes, EvidenceKind kind,
+                SpatialMigrationJournal journal)
+            { Path = path; Contained = contained; Bytes = bytes == null ? null : (byte[])bytes.Clone();
+              Sha256 = bytes == null ? null : SpatialContractSha256.Compute(bytes); Kind = kind;
+              Journal = journal; }
+            internal string Path { get; }
+            internal bool Contained { get; }
+            internal byte[] Bytes { get; }
+            internal string Sha256 { get; }
+            internal EvidenceKind Kind { get; }
+            internal SpatialMigrationJournal Journal { get; }
         }
 
-        private SpatialMigrationJournal FindTerminalJournal(string directory, string stem, out int count)
+        private sealed class EvidenceSnapshot
         {
-            count = 0; SpatialMigrationJournal found = null;
-            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory,
-                stem + ".gd66-*.journal.json", limits.MaximumCollectionRecords);
-            for (int index = 0; index < paths.Count; index++)
-            {
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, paths[index])) continue;
-                SpatialContractResult<SpatialMigrationJournal> parsed = SpatialMigrationJournalContracts.Parse(
-                    fileSystem.ReadAllBytes(paths[index]), limits);
-                if (!parsed.IsValid || (parsed.Value.Stage != SpatialMigrationJournalStage.Finalized &&
-                    parsed.Value.Stage != SpatialMigrationJournalStage.OriginalRestored) ||
-                    Path.GetFileName(paths[index]) != parsed.Value.RelativeJournalFilename) continue;
-                count++; found = parsed.Value;
-            }
-            return found;
+            internal EvidenceSnapshot(List<EvidenceRecord> records)
+            { Records = records.AsReadOnly(); Live = records.Where(value => value.Kind ==
+                EvidenceKind.LiveJournal).ToList().AsReadOnly(); Terminal = records.Where(value =>
+                value.Kind == EvidenceKind.FinalizedJournal || value.Kind ==
+                EvidenceKind.OriginalRestoredJournal).ToList().AsReadOnly(); Malformed = records.Where(
+                value => value.Kind == EvidenceKind.MalformedJournal || value.Kind ==
+                EvidenceKind.RedirectedJournal || value.Kind == EvidenceKind.FilenameInvalidJournal ||
+                value.Kind == EvidenceKind.BindingInvalidJournal).ToList().AsReadOnly(); }
+            internal IReadOnlyList<EvidenceRecord> Records { get; }
+            internal IReadOnlyList<EvidenceRecord> Live { get; }
+            internal IReadOnlyList<EvidenceRecord> Terminal { get; }
+            internal IReadOnlyList<EvidenceRecord> Malformed { get; }
+            internal int LiveCount => Live.Count;
+            internal SpatialContractResult<SpatialMigrationJournal> SingleLive => Live.Count == 1
+                ? new SpatialContractResult<SpatialMigrationJournal>(Live[0].Journal,
+                    Array.Empty<SpatialContractIssue>())
+                : default(SpatialContractResult<SpatialMigrationJournal>);
         }
 
-        private bool TryQuarantineMalformedJournal(string directory, string stem, out bool malformed)
+        private EvidenceSnapshot DiscoverEvidence(string directory, string stem)
         {
-            malformed = false;
-            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory,
-                stem + ".gd66-*.journal.json", limits.MaximumCollectionRecords);
-            string malformedPath = null; byte[] malformedBytes = null;
-            for (int index = 0; index < paths.Count; index++)
+            int maximum = limits.MaximumCollectionRecords;
+            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, stem + ".gd66-*", maximum + 1);
+            if (paths.Count > maximum) throw new IOException("GD66 evidence limit exceeded.");
+            var records = new List<EvidenceRecord>(paths.Count);
+            foreach (string enumerated in paths.OrderBy(value => value, StringComparer.Ordinal))
             {
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, paths[index]))
-                { malformed = true; return false; }
-                byte[] bytes = fileSystem.ReadAllBytes(paths[index]);
-                if (!SpatialMigrationJournalContracts.Parse(bytes, limits).IsValid)
-                {
-                    if (malformedPath != null) { malformed = true; return false; }
-                    malformedPath = paths[index]; malformedBytes = bytes;
-                }
+                string path = Path.GetFullPath(enumerated);
+                bool contained = fileSystem.IsPathContainedWithoutRedirection(directory, path);
+                if (!contained) { records.Add(new EvidenceRecord(path, false, null,
+                    EvidenceKind.RedirectedJournal, null)); continue; }
+                byte[] bytes = fileSystem.ReadAllBytes(path);
+                string name = Path.GetFileName(path);
+                EvidenceKind sidecar = ClassifySidecar(name);
+                if (!name.EndsWith(".journal.json", StringComparison.Ordinal))
+                { records.Add(new EvidenceRecord(path, true, bytes, sidecar, null)); continue; }
+                SpatialContractResult<SpatialMigrationJournal> parsed =
+                    SpatialMigrationJournalContracts.Parse(bytes, limits);
+                if (!parsed.IsValid) { records.Add(new EvidenceRecord(path, true, bytes,
+                    EvidenceKind.MalformedJournal, null)); continue; }
+                SpatialMigrationJournal journal = parsed.Value;
+                if (!string.Equals(name, journal.RelativeJournalFilename, StringComparison.Ordinal))
+                { records.Add(new EvidenceRecord(path, true, bytes,
+                    EvidenceKind.FilenameInvalidJournal, journal)); continue; }
+                if (!ResolveEvidencePaths(directory, journal, out string resolved, out string ignoredBackup,
+                    out string ignoredStaging) || !string.Equals(path, resolved, StringComparison.Ordinal))
+                { records.Add(new EvidenceRecord(path, true, bytes,
+                    EvidenceKind.BindingInvalidJournal, journal)); continue; }
+                EvidenceKind kind = journal.Stage == SpatialMigrationJournalStage.Finalized
+                    ? EvidenceKind.FinalizedJournal : journal.Stage ==
+                    SpatialMigrationJournalStage.OriginalRestored ? EvidenceKind.OriginalRestoredJournal
+                    : EvidenceKind.LiveJournal;
+                records.Add(new EvidenceRecord(path, true, bytes, kind, journal));
             }
-            if (malformedPath == null) return false;
-            malformed = true;
-            try { return QuarantineEvidence(directory, malformedPath, malformedBytes); }
+            return new EvidenceSnapshot(records);
+        }
+
+        private static EvidenceKind ClassifySidecar(string name)
+        {
+            if (name.EndsWith(".journal.json.next", StringComparison.Ordinal)) return EvidenceKind.JournalNext;
+            if (name.EndsWith(".original.bak.restore.intent", StringComparison.Ordinal)) return EvidenceKind.RestorationIntent;
+            if (name.EndsWith(".original.bak.restore", StringComparison.Ordinal)) return EvidenceKind.RestoreStaging;
+            if (name.EndsWith(".original.bak", StringComparison.Ordinal)) return EvidenceKind.OriginalBackup;
+            if (name.EndsWith(".candidate.tmp", StringComparison.Ordinal)) return EvidenceKind.CandidateStaging;
+            if (name.EndsWith(".finalized", StringComparison.Ordinal)) return EvidenceKind.FinalizationReceipt;
+            if (name.EndsWith(".evidence", StringComparison.Ordinal)) return EvidenceKind.ExistingQuarantine;
+            return EvidenceKind.Unknown;
+        }
+
+        private bool QuarantineMalformedEvidence(string directory, IReadOnlyList<EvidenceRecord> malformed)
+        {
+            try
+            {
+                foreach (EvidenceRecord record in malformed)
+                    if (!record.Contained || record.Bytes == null ||
+                        !QuarantineEvidence(directory, record.Path, record.Bytes)) return false;
+                return true;
+            }
             catch { return false; }
         }
 
         private bool QuarantineEvidence(string directory, string path, byte[] bytes)
         {
             string evidenceHash = SpatialContractSha256.Compute(bytes);
+            string evidenceName = Path.GetFileName(path);
             string pathHash = SpatialContractSha256.Compute(System.Text.Encoding.UTF8.GetBytes(
-                Path.GetFileName(path))).Substring(0, 16);
-            string quarantine = Path.Combine(directory, "gd66-quarantine-" + evidenceHash + "-" +
+                evidenceName)).Substring(0, 16);
+            int marker = evidenceName.IndexOf(".gd66-", StringComparison.Ordinal);
+            string stem = marker > 0 ? evidenceName.Substring(0, marker) : "gd66";
+            string quarantine = Path.Combine(directory, stem + ".gd66-quarantine-" + evidenceHash + "-" +
                 pathHash + ".evidence");
             if (quarantine.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters ||
                 !fileSystem.IsPathContainedWithoutRedirection(directory, quarantine)) return false;
@@ -1058,6 +1116,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (Same(active, candidate)) return SpatialTrustedPayload.Candidate;
             return SpatialTrustedPayload.None;
         }
+        private SpatialTrustedPayload TrustedActiveSafe(string activePath, byte[] original, byte[] candidate)
+        { try { return TrustedActive(activePath, original, candidate); }
+          catch { return SpatialTrustedPayload.None; } }
         private bool Resolve(string directory, string relative, out string path) =>
             SpatialMigrationSidecarPaths.TryResolveContained(directory, relative,
                 SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters, out path);

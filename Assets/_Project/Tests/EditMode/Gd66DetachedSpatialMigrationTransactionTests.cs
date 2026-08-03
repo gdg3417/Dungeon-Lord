@@ -308,8 +308,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo("gd66.transaction.journal_malformed_with_verified_original"));
             Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(fileSystem.Exists(malformedPath), Is.False);
-            Assert.That(fileSystem.Paths.Any(path => Path.GetFileName(path).StartsWith(
-                "gd66-quarantine-", StringComparison.Ordinal)), Is.True);
+            Assert.That(fileSystem.Paths.Any(path => Path.GetFileName(path).Contains(
+                ".gd66-quarantine-")), Is.True);
+            Assert.That(fileSystem.Operations.Count(operation =>
+                operation.Type == OperationType.Enumerate), Is.EqualTo(1));
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
         }
 
@@ -457,6 +459,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
+        internal static void RunClosureEngineSmoke(string identity)
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath("closure-" + identity);
+            fileSystem.Seed(activePath, fixture.Original);
+            var transaction = new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture));
+            DetachedSpatialMigrationOutcome executed = transaction.Execute(activePath, fixture.Result.Attempt);
+            Assert.That(executed.IsSuccess, Is.True, executed.Reason);
+            DetachedSpatialMigrationOutcome recovered = transaction.Recover(activePath);
+            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
+            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+        }
         private static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
             ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         private static void AssertPendingDurability(DetachedSpatialMigrationOutcome outcome,
