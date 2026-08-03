@@ -414,6 +414,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Recovery_RedirectedEvidenceContainmentFailure_PreservesOriginal()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Containment, 2);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            string evidencePath = Path.Combine(Path.GetDirectoryName(activePath),
+                "save.gd66-redirected.original.bak");
+            fileSystem.Seed(activePath, fixture.Original);
+            fileSystem.Seed(evidencePath, fixture.Original);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.PathInvalidReason));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Exists(evidencePath), Is.True);
+        }
+
+        [Test]
         public void Recovery_EnumerationFailureWithCandidate_IsNonterminal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
@@ -459,21 +481,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
-        internal static void RunClosureEngineSmoke(string identity)
-        {
-            PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem();
-            string activePath = ActivePath("closure-" + identity);
-            fileSystem.Seed(activePath, fixture.Original);
-            var transaction = new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture));
-            DetachedSpatialMigrationOutcome executed = transaction.Execute(activePath, fixture.Result.Attempt);
-            Assert.That(executed.IsSuccess, Is.True, executed.Reason);
-            DetachedSpatialMigrationOutcome recovered = transaction.Recover(activePath);
-            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
-            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
-            Assert.That(fileSystem.ReadAllBytes(activePath),
-                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
-        }
         private static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
             ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         private static void AssertPendingDurability(DetachedSpatialMigrationOutcome outcome,

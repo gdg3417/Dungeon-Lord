@@ -917,7 +917,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private enum EvidenceKind
         { LiveJournal, FinalizedJournal, OriginalRestoredJournal, MalformedJournal,
-          RedirectedJournal, FilenameInvalidJournal, BindingInvalidJournal, OriginalBackup,
+          RedirectedEvidence, FilenameInvalidJournal, BindingInvalidJournal, OriginalBackup,
           CandidateStaging, JournalNext, RestoreStaging, RestorationIntent,
           FinalizationReceipt, ExistingQuarantine, Unknown }
 
@@ -927,12 +927,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialMigrationJournal journal)
             { Path = path; Contained = contained; Bytes = bytes == null ? null : (byte[])bytes.Clone();
               Sha256 = bytes == null ? null : SpatialContractSha256.Compute(bytes); Kind = kind;
-              Journal = journal; }
+              Journal = journal; FilenameKind = ClassifyFilename(Path.GetFileName(path)); }
             internal string Path { get; }
             internal bool Contained { get; }
             internal byte[] Bytes { get; }
             internal string Sha256 { get; }
             internal EvidenceKind Kind { get; }
+            internal EvidenceKind FilenameKind { get; }
             internal SpatialMigrationJournal Journal { get; }
         }
 
@@ -944,7 +945,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value.Kind == EvidenceKind.FinalizedJournal || value.Kind ==
                 EvidenceKind.OriginalRestoredJournal).ToList().AsReadOnly(); Malformed = records.Where(
                 value => value.Kind == EvidenceKind.MalformedJournal || value.Kind ==
-                EvidenceKind.RedirectedJournal || value.Kind == EvidenceKind.FilenameInvalidJournal ||
+                EvidenceKind.RedirectedEvidence || value.Kind == EvidenceKind.FilenameInvalidJournal ||
                 value.Kind == EvidenceKind.BindingInvalidJournal).ToList().AsReadOnly(); }
             internal IReadOnlyList<EvidenceRecord> Records { get; }
             internal IReadOnlyList<EvidenceRecord> Live { get; }
@@ -968,10 +969,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string path = Path.GetFullPath(enumerated);
                 bool contained = fileSystem.IsPathContainedWithoutRedirection(directory, path);
                 if (!contained) { records.Add(new EvidenceRecord(path, false, null,
-                    EvidenceKind.RedirectedJournal, null)); continue; }
+                    EvidenceKind.RedirectedEvidence, null)); continue; }
                 byte[] bytes = fileSystem.ReadAllBytes(path);
                 string name = Path.GetFileName(path);
-                EvidenceKind sidecar = ClassifySidecar(name);
+                EvidenceKind sidecar = ClassifyFilename(name);
                 if (!name.EndsWith(".journal.json", StringComparison.Ordinal))
                 { records.Add(new EvidenceRecord(path, true, bytes, sidecar, null)); continue; }
                 SpatialContractResult<SpatialMigrationJournal> parsed =
@@ -995,8 +996,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new EvidenceSnapshot(records);
         }
 
-        private static EvidenceKind ClassifySidecar(string name)
+        private static EvidenceKind ClassifyFilename(string name)
         {
+            if (name.EndsWith(".journal.json", StringComparison.Ordinal)) return EvidenceKind.LiveJournal;
             if (name.EndsWith(".journal.json.next", StringComparison.Ordinal)) return EvidenceKind.JournalNext;
             if (name.EndsWith(".original.bak.restore.intent", StringComparison.Ordinal)) return EvidenceKind.RestorationIntent;
             if (name.EndsWith(".original.bak.restore", StringComparison.Ordinal)) return EvidenceKind.RestoreStaging;
