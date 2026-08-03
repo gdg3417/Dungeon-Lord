@@ -190,6 +190,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string RollbackSourceMissingReason = "gd66.transaction.rollback_source_missing";
         public const string ContradictoryAuthorityReason = "gd66.authority.contradictory_state";
         public const string DependencyChangedReason = "gd66.transaction.dependency_changed";
+        public const string ReceiptInvalidReason = "gd66.transaction.finalization_receipt_invalid";
+        public const string ReceiptWriteDiagnostic = "gd66.diagnostic.finalization_receipt_write_failed";
 
         private readonly ISpatialMigrationFileSystem fileSystem;
         private readonly SpatialSerializedInputLimits limits;
@@ -255,11 +257,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     if (!existing.IsValid || !string.Equals(existing.Value.TransactionId, transactionId, StringComparison.Ordinal))
                     {
-                        if (existing.IsValid && Same(fileSystem.ReadAllBytes(activePath), exactOriginalBytes) &&
-                            existing.Value.OriginalPayloadSha256 == descriptor.OriginalPayloadSha256 &&
-                            TerminalizeChangedAttempt(directory, existing.Value, out SpatialMigrationJournalStage terminalStage))
-                            return Failure(DependencyChangedReason, terminalStage,
-                                SpatialTrustedPayload.Original);
+                        if (existing.IsValid && existing.Value.OriginalPayloadSha256 ==
+                            descriptor.OriginalPayloadSha256)
+                        {
+                            DetachedSpatialMigrationOutcome oldOutcome;
+                            if (existing.Value.Stage == SpatialMigrationJournalStage.DescriptorPinned &&
+                                Same(fileSystem.ReadAllBytes(activePath), exactOriginalBytes) &&
+                                TerminalizeChangedAttempt(directory, existing.Value,
+                                    out SpatialMigrationJournalStage terminalStage))
+                                oldOutcome = new DetachedSpatialMigrationOutcome(true,
+                                    RecoveredOriginalReason, terminalStage, SpatialTrustedPayload.Original);
+                            else
+                                oldOutcome = RecoverLive(activePath, directory, existing.Value);
+                            return WithDiagnostic(oldOutcome, DependencyChangedReason);
+                        }
                         return Failure(FingerprintMismatchReason, existing.IsValid ? existing.Value.Stage : (SpatialMigrationJournalStage?)null,
                             TrustedActive(activePath, exactOriginalBytes, candidate.GetBytes()));
                     }
@@ -300,10 +311,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 try { fileSystem.MoveSameDirectoryAtomic(journalPath, quarantine); return true; }
                 catch { return false; }
             }
-            SpatialMigrationJournal restored = CopyStage(journal,
-                SpatialMigrationJournalStage.OriginalRestored);
-            if (!RewriteJournal(journalPath, restored)) return false;
-            terminalStage = restored.Stage; return true;
+            return false;
         }
 
         // Restart recovery deliberately consumes persisted evidence only. It never reconstructs C.
@@ -322,30 +330,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (count > 1) return Failure(MultipleAttemptsReason, null, SpatialTrustedPayload.None);
                 if (count == 0)
                 {
+                    byte[] active = fileSystem.ReadAllBytes(activePath);
+                    // Terminal journals and receipts are audit evidence only.  Current-target C is
+                    // self-authoritative after complete validation and may have changed normally.
+                    if (IsCanonicalSchemaSeven(active))
+                        return new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null,
+                            SpatialTrustedPayload.Candidate);
                     if (HasMalformedJournal(directory, Path.GetFileNameWithoutExtension(activePath)))
                         return Failure(NoTrustedPayloadReason, null, SpatialTrustedPayload.None);
                     SpatialMigrationJournal terminal = FindTerminalJournal(directory,
                         Path.GetFileNameWithoutExtension(activePath), out int terminalCount);
-                    if (terminalCount > 1)
-                        return Failure(ContradictoryAuthorityReason, null, SpatialTrustedPayload.None);
-                    byte[] active = fileSystem.ReadAllBytes(activePath);
                     if (terminal != null)
                     {
-                        if (terminal.Stage == SpatialMigrationJournalStage.Finalized &&
-                            HashIs(active, terminal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                                terminal.TransactionId, terminal.DescriptorFingerprintSha256))
-                            return new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason,
-                                terminal.Stage, SpatialTrustedPayload.Candidate);
                         if (terminal.Stage == SpatialMigrationJournalStage.OriginalRestored &&
                             HashIs(active, terminal.OriginalPayloadSha256))
                             return new DetachedSpatialMigrationOutcome(true, RecoveredOriginalReason,
                                 terminal.Stage, SpatialTrustedPayload.Original);
-                        return Failure(ContradictoryAuthorityReason, terminal.Stage,
-                            SpatialTrustedPayload.None);
                     }
-                    return IsCanonicalSchemaSeven(active)
-                        ? new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null, SpatialTrustedPayload.Candidate)
-                        : Failure(NoTrustedPayloadReason, null, SpatialTrustedPayload.None);
+                    return Failure(NoTrustedPayloadReason, terminalCount == 1 ? terminal?.Stage : null,
+                        SpatialTrustedPayload.None);
                 }
                 string pinFailure = recoveryContext.ValidatePins(found.Value.Descriptor);
                 if (pinFailure != null)
@@ -385,7 +388,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             bool backupValid = HashIs(backup, journal.OriginalPayloadSha256);
             if (activeOriginal && journal.Stage != SpatialMigrationJournalStage.DescriptorPinned &&
-                HasRestorationMarker(backupPath, journal.OriginalPayloadSha256))
+                HasRestorationIntent(backupPath, journal))
             {
                 SpatialMigrationJournal restored = CopyStage(journal,
                     SpatialMigrationJournalStage.OriginalRestored);
@@ -452,44 +455,52 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!HashIs(durableActive, journal.ExpectedCandidateSha256) ||
                     !IsCanonicalSchemaSeven(durableActive, journal.TransactionId, journal.DescriptorFingerprintSha256))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup);
-                bool receiptValid = TryWriteReceipt(directory, journal);
+                string receiptDiagnostic = TryWriteReceipt(directory, journal);
                 SpatialMigrationJournal finalized = CopyStage(journal, SpatialMigrationJournalStage.Finalized);
                 if (!RewriteJournal(journalPath, finalized))
                     return Failure(FinalizationFailedReason, journal.Stage, SpatialTrustedPayload.Candidate);
                 journal = finalized;
                 return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
-                    SpatialTrustedPayload.Candidate, receiptValid ? null : new[]
-                    { "gd66.diagnostic.finalization_receipt_write_failed" });
+                    SpatialTrustedPayload.Candidate, receiptDiagnostic == null ? null : new[]
+                    { receiptDiagnostic });
             }
             return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage, SpatialTrustedPayload.Candidate);
         }
 
-        private bool TryWriteReceipt(string directory, SpatialMigrationJournal journal)
+        private string TryWriteReceipt(string directory, SpatialMigrationJournal journal)
         {
             string relative = ReceiptName(journal.RelativeJournalFilename, journal.TransactionId);
             if (!Resolve(directory, relative, out string path) ||
-                !fileSystem.IsPathContainedWithoutRedirection(directory, path)) return false;
-            byte[] expected = System.Text.Encoding.UTF8.GetBytes(
-                "{\"TransactionId\":\"" + journal.TransactionId +
-                "\",\"DescriptorFingerprintSha256\":\"" + journal.DescriptorFingerprintSha256 +
-                "\",\"CandidateSha256\":\"" + journal.ExpectedCandidateSha256 +
-                "\",\"FinalStage\":6}");
+                !fileSystem.IsPathContainedWithoutRedirection(directory, path)) return ReceiptWriteDiagnostic;
+            var receipt = new DetachedFinalizationReceipt(journal.TransactionId,
+                journal.DescriptorFingerprintSha256, journal.ExpectedCandidateSha256);
+            byte[] expected = DetachedFinalizationReceiptContract.Serialize(receipt, limits);
+            if (expected == null) return ReceiptWriteDiagnostic;
             try
             {
                 if (fileSystem.Exists(path))
                 {
                     byte[] existing = fileSystem.ReadAllBytes(path);
-                    if (Same(existing, expected)) return true;
+                    DetachedFinalizationReceipt parsed = DetachedFinalizationReceiptContract.Parse(existing, limits);
+                    if (parsed != null && Same(existing, expected)) return null;
                     string quarantineRelative = relative + ".quarantine." +
-                        SpatialContractSha256.Compute(existing).Substring(0, 12);
+                        SpatialContractSha256.Compute(existing);
                     if (!Resolve(directory, quarantineRelative, out string quarantine) ||
-                        fileSystem.Exists(quarantine)) return false;
+                        fileSystem.Exists(quarantine)) return ReceiptInvalidReason;
                     fileSystem.MoveSameDirectoryAtomic(path, quarantine);
+                    fileSystem.WriteAllBytesDurable(path, expected);
+                    fileSystem.FlushDirectory(directory);
+                    byte[] replaced = fileSystem.ReadAllBytes(path);
+                    return DetachedFinalizationReceiptContract.Parse(replaced, limits) != null &&
+                        Same(replaced, expected) ? ReceiptInvalidReason : ReceiptWriteDiagnostic;
                 }
                 fileSystem.WriteAllBytesDurable(path, expected);
-                return Same(fileSystem.ReadAllBytes(path), expected);
+                fileSystem.FlushDirectory(directory);
+                byte[] actual = fileSystem.ReadAllBytes(path);
+                return DetachedFinalizationReceiptContract.Parse(actual, limits) != null &&
+                    Same(actual, expected) ? null : ReceiptWriteDiagnostic;
             }
-            catch { return false; }
+            catch { return ReceiptWriteDiagnostic; }
         }
 
         private DetachedSpatialMigrationOutcome Restore(string journalPath, string backupPath, string activePath,
@@ -511,17 +522,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     fileSystem.WriteAllBytesDurable(restoreStaging, verifiedBackup);
                 if (!Same(fileSystem.ReadAllBytes(restoreStaging), verifiedBackup))
                     return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                string intentRelative = Path.GetFileName(backupPath) + ".restore.intent";
+                if (!Resolve(directory, intentRelative, out string intentPath) ||
+                    !fileSystem.IsPathContainedWithoutRedirection(directory, intentPath))
+                    return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
+                var intent = new DetachedRestorationIntent(journal.TransactionId,
+                    journal.DescriptorFingerprintSha256, journal.OriginalPayloadSha256,
+                    SpatialContractSha256.Compute(verifiedBackup), journal.RelativeJournalFilename,
+                    (int)journal.Stage);
+                byte[] intentBytes = DetachedRestorationIntentContract.Serialize(intent, limits);
+                if (!fileSystem.Exists(intentPath)) fileSystem.WriteAllBytesDurable(intentPath, intentBytes);
+                fileSystem.FlushDirectory(directory);
+                byte[] persistedIntent = fileSystem.ReadAllBytes(intentPath);
+                if (!Same(persistedIntent, intentBytes) ||
+                    DetachedRestorationIntentContract.Parse(persistedIntent, limits) == null)
+                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
                 fileSystem.ReplaceSameDirectoryAtomic(restoreStaging, activePath);
                 fileSystem.FlushDirectory(directory);
                 if (!HashIs(fileSystem.ReadAllBytes(activePath), journal.OriginalPayloadSha256))
                     return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
                 restoredActive = true;
-                string markerPath = backupPath + ".restored";
-                byte[] markerBytes = System.Text.Encoding.UTF8.GetBytes(journal.OriginalPayloadSha256);
-                if (!fileSystem.Exists(markerPath)) fileSystem.WriteAllBytesDurable(markerPath, markerBytes);
-                if (!Same(fileSystem.ReadAllBytes(markerPath), markerBytes))
-                    return Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
-                        SpatialTrustedPayload.Original);
                 SpatialMigrationJournal restored = CopyStage(journal, SpatialMigrationJournalStage.OriginalRestored);
                 if (!RewriteJournal(journalPath, restored))
                     return Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
@@ -540,12 +560,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private bool HasRestorationMarker(string backupPath, string originalHash)
+        private bool HasRestorationIntent(string backupPath, SpatialMigrationJournal journal)
         {
-            string markerPath = backupPath + ".restored";
-            if (!fileSystem.Exists(markerPath)) return false;
-            byte[] expected = System.Text.Encoding.UTF8.GetBytes(originalHash);
-            return Same(fileSystem.ReadAllBytes(markerPath), expected);
+            string intentPath = backupPath + ".restore.intent";
+            if (!fileSystem.Exists(intentPath)) return false;
+            DetachedRestorationIntent intent = DetachedRestorationIntentContract.Parse(
+                fileSystem.ReadAllBytes(intentPath), limits);
+            return intent != null && intent.TransactionId == journal.TransactionId &&
+                intent.DescriptorFingerprint == journal.DescriptorFingerprintSha256 &&
+                intent.OriginalSha256 == journal.OriginalPayloadSha256 &&
+                intent.BackupSha256 == journal.OriginalPayloadSha256 &&
+                intent.JournalFilename == journal.RelativeJournalFilename &&
+                intent.JournalStage == (int)journal.Stage;
         }
 
         private DetachedSpatialMigrationOutcome Resume(string activePath, string directory, string journalPath,
@@ -647,14 +673,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!Same(fileSystem.ReadAllBytes(activePath), candidateBytes))
                     return Failure(ActivePayloadUnknownReason, persisted, SpatialTrustedPayload.None);
-                bool receiptValid = TryWriteReceipt(directory, journal);
+                string receiptDiagnostic = TryWriteReceipt(directory, journal);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.Finalized);
                 if (!RewriteJournal(journalPath, next)) return Failure(FinalizationFailedReason, persisted, SpatialTrustedPayload.Candidate);
                 journal = next;
                 return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
-                    SpatialTrustedPayload.Candidate, receiptValid ? null : new[]
-                    { "gd66.diagnostic.finalization_receipt_write_failed" });
+                    SpatialTrustedPayload.Candidate, receiptDiagnostic == null ? null : new[]
+                    { receiptDiagnostic });
             }
             return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage, SpatialTrustedPayload.Candidate);
         }
@@ -721,7 +747,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !Resolve(directory, journal.RelativeCandidateStagingFilename, out stagingPath)) return false;
             string nextRelative = journal.RelativeJournalFilename + ".next";
             string restoreRelative = journal.RelativeOriginalBackupFilename + ".restore";
-            string restoredRelative = journal.RelativeOriginalBackupFilename + ".restored";
+            string restoredRelative = journal.RelativeOriginalBackupFilename + ".restore.intent";
             if (!SpatialMigrationSidecarPaths.IsValidRelativeFilename(nextRelative,
                 SpatialMigrationSidecarPaths.MaximumGeneratedFilenameCharacters) ||
                 !SpatialMigrationSidecarPaths.IsValidRelativeFilename(restoreRelative,
@@ -822,5 +848,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static DetachedSpatialMigrationOutcome Failure(string reason,
             SpatialMigrationJournalStage? stage, SpatialTrustedPayload trusted) =>
             new DetachedSpatialMigrationOutcome(false, reason, stage, trusted);
+        private static DetachedSpatialMigrationOutcome WithDiagnostic(
+            DetachedSpatialMigrationOutcome outcome, string diagnostic)
+        {
+            string[] diagnostics = outcome.Diagnostics.Concat(new[] { diagnostic }).Distinct().ToArray();
+            return new DetachedSpatialMigrationOutcome(outcome.IsSuccess, outcome.Reason, outcome.Stage,
+                outcome.TrustedPayload, diagnostics);
+        }
     }
 }
