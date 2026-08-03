@@ -83,8 +83,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RunSimulationConfig legacyGameplayConfiguration, CanonicalSpatialSerializationLimits spatialLimits,
             DetachedWholeSaveLimits wholeSaveLimits)
             : this(exactOriginalBytes, classification, descriptorInputs, null, null, productionContent,
-                legacyGameplayConfiguration, null, spatialLimits, wholeSaveLimits)
-        { compatibilitySnapshot = compatibility; }
+                legacyGameplayConfiguration, null, spatialLimits, wholeSaveLimits, compatibility)
+        { }
 
         public DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
             RawSavePayloadClassification classification, SpatialMigrationInputDescriptor descriptorInputs,
@@ -92,15 +92,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RunSimulationConfig legacyGameplayConfiguration, IReadOnlyDictionary<string, byte[]> validationInputs,
             CanonicalSpatialSerializationLimits spatialLimits, DetachedWholeSaveLimits wholeSaveLimits)
             : this(exactOriginalBytes, classification, descriptorInputs, null, null, productionContent,
-                legacyGameplayConfiguration, validationInputs, spatialLimits, wholeSaveLimits)
-        { compatibilitySnapshot = compatibility; }
+                legacyGameplayConfiguration, validationInputs, spatialLimits, wholeSaveLimits, compatibility)
+        { }
 
         private DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
             RawSavePayloadClassification classification, SpatialMigrationInputDescriptor descriptorInputs,
             SpatialMigrationCompatibilityProfile profile, CompatibilityLayoutGeometryRecord geometry,
             ProductionSpatialContentSnapshot productionContent, RunSimulationConfig legacyGameplayConfiguration,
             IReadOnlyDictionary<string, byte[]> validationInputs,
-            CanonicalSpatialSerializationLimits spatialLimits, DetachedWholeSaveLimits wholeSaveLimits)
+            CanonicalSpatialSerializationLimits spatialLimits, DetachedWholeSaveLimits wholeSaveLimits,
+            SpatialLayoutCompatibilitySnapshot compatibility = null)
         {
             this.exactOriginalBytes = exactOriginalBytes == null ? null : (byte[])exactOriginalBytes.Clone();
             profileBytes = profile == null ? null : Encoding.UTF8.GetBytes(JsonUtility.ToJson(profile));
@@ -111,6 +112,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.validationInputs = validationInputs == null ? null : validationInputs.ToDictionary(
                 pair => pair.Key, pair => pair.Value == null ? null : (byte[])pair.Value.Clone(), StringComparer.Ordinal);
             SpatialLimits = spatialLimits; WholeSaveLimits = wholeSaveLimits;
+            compatibilitySnapshot = compatibility;
         }
         public byte[] GetExactOriginalBytes() => exactOriginalBytes == null ? null : (byte[])exactOriginalBytes.Clone();
         internal byte[] OwnedOriginalBytes => exactOriginalBytes;
@@ -135,7 +137,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             new DetachedSpatialMigrationPreparationInputs(source.OwnedOriginalBytes, source.Classification,
                 source.DescriptorInputs, profile, geometry, source.ProductionContent,
                 source.LegacyGameplayConfiguration, source.ValidationInputs, source.SpatialLimits,
-                source.WholeSaveLimits);
+                source.WholeSaveLimits, source.CompatibilitySnapshot);
     }
 
     public sealed class DetachedPreparedSpatialMigrationAttempt
@@ -226,8 +228,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedWholeSaveResult candidate = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                     inputs.Classification, spatial, inputs.SpatialLimits, inputs.WholeSaveLimits);
                 if (!candidate.IsSuccess) return Failure(candidate.Reason, projection.Diagnostics);
+                CompatibilitySelectionResult<CanonicalLayoutContractSelection> selectedContract =
+                    inputs.CompatibilitySnapshot.SelectContract(descriptor.SelectedTargetSchemaVersion);
+                if (!selectedContract.Success) return Failure(selectedContract.Code, projection.Diagnostics);
                 var validationContext = new DetachedUnfinishedAttemptValidationContext(descriptor,
-                    transactionId, fingerprint, inputs.Profile, inputs.Geometry, inputs.ProductionContent,
+                    transactionId, fingerprint, selectedContract.Value, inputs.Profile, inputs.Geometry, inputs.ProductionContent,
                     inputs.LegacyConfigurationBytes, inputs.ValidationInputs, inputs.SpatialLimits);
                 if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                     candidate.Candidate.GetBytes(), validationContext).IsValid)

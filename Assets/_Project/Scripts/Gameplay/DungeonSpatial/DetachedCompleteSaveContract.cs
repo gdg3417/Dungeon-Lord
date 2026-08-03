@@ -6,10 +6,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed class DetachedCurrentTargetValidationContext
     {
-        public DetachedCurrentTargetValidationContext(ProductionSpatialContentSnapshot production,
+        public DetachedCurrentTargetValidationContext(SpatialLayoutCompatibilitySnapshot compatibility,
+            ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
-        { Production = production ?? throw new ArgumentNullException(nameof(production));
+        { Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
+          Production = production ?? throw new ArgumentNullException(nameof(production));
           if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits; }
+        internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
     }
@@ -20,6 +23,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly Dictionary<string, byte[]> validationInputs;
         public DetachedUnfinishedAttemptValidationContext(SpatialMigrationInputDescriptor descriptor,
             string transactionId, string descriptorFingerprint,
+            CanonicalLayoutContractSelection selectedContract,
             SpatialMigrationCompatibilityProfile profile, CompatibilityLayoutGeometryRecord geometry,
             ProductionSpatialContentSnapshot production, byte[] legacyConfiguration,
             IReadOnlyDictionary<string, byte[]> validationInputs,
@@ -27,6 +31,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
             TransactionId = transactionId; DescriptorFingerprint = descriptorFingerprint;
+            SelectedContract = selectedContract ?? throw new ArgumentNullException(nameof(selectedContract));
             Profile = profile ?? throw new ArgumentNullException(nameof(profile));
             Geometry = geometry ?? throw new ArgumentNullException(nameof(geometry));
             Production = production ?? throw new ArgumentNullException(nameof(production));
@@ -40,6 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string TransactionId { get; }
         public string DescriptorFingerprint { get; }
         internal SpatialMigrationCompatibilityProfile Profile { get; }
+        internal CanonicalLayoutContractSelection SelectedContract { get; }
         internal CompatibilityLayoutGeometryRecord Geometry { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
@@ -60,13 +66,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Descriptor.MigrationContractVersion != SpatialMigrationContractIdentity.MigrationContractVersion ||
                 Profile.ProfileId != Descriptor.MigrationProfileId ||
                 Profile.ProfileVersion != Descriptor.MigrationProfileVersion ||
+                (Profile.Lifecycle != CompatibilityProfileLifecycle.Active &&
+                    Profile.Lifecycle != CompatibilityProfileLifecycle.Retired) ||
                 Profile.CanonicalHash != Descriptor.MigrationProfileCanonicalHash ||
                 SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(Profile) !=
                     Descriptor.MigrationProfileCanonicalHash ||
                 Descriptor.RawSourceSchemaVersion < Profile.MinimumSourceSchemaVersion ||
                 Descriptor.RawSourceSchemaVersion > Profile.MaximumSourceSchemaVersion ||
                 Profile.TargetSchemaVersion != Descriptor.SelectedTargetSchemaVersion ||
-                Profile.TargetCanonicalLayoutContractVersion <= 0 ||
+                SelectedContract.Lifecycle != CompatibilityProfileLifecycle.Active ||
+                SelectedContract.TargetSchemaVersion != Descriptor.SelectedTargetSchemaVersion ||
+                Profile.TargetCanonicalLayoutContractVersion !=
+                    SelectedContract.CanonicalLayoutContractVersion ||
                 Geometry.GeometryId != Descriptor.SharedGeometryId ||
                 Geometry.GeometryVersion != Descriptor.SharedGeometryVersion ||
                 Geometry.CanonicalHash != Descriptor.SharedGeometryCanonicalHash ||
@@ -85,24 +96,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public sealed class DetachedCompleteSaveValidationResult
     {
-        internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason)
-        { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason; }
+        internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason,
+            int? layoutContractVersion = null)
+        { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason;
+          LayoutContractVersion = layoutContractVersion; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
         public string Reason { get; }
         private byte[] Bytes { get; }
+        internal int? LayoutContractVersion { get; }
     }
 
     public static class DetachedCompleteSaveContract
     {
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
-            DetachedCurrentTargetValidationContext context) => context == null ? Failure() :
-            ParseValidateAndRoundTrip(bytes, context.Limits, context.Production);
+            DetachedCurrentTargetValidationContext context)
+        {
+            if (context == null) return Failure();
+            DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes,
+                context.Limits, context.Production);
+            if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
+                context.Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
+            return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
+                result.LayoutContractVersion.Value ? result : Failure();
+        }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
-            DetachedUnfinishedAttemptValidationContext context) => context == null || !context.PinsAreValid()
-            ? Failure() : ParseValidateAndRoundTrip(bytes, context.Limits, context.Production,
-                context.TransactionId, context.DescriptorFingerprint);
+            DetachedUnfinishedAttemptValidationContext context)
+        {
+            if (context == null || !context.PinsAreValid()) return Failure();
+            DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes, context.Limits,
+                context.Production, context.TransactionId, context.DescriptorFingerprint);
+            return result.IsValid && result.LayoutContractVersion ==
+                context.SelectedContract.CanonicalLayoutContractVersion ? result : Failure();
+        }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, ProductionSpatialContentSnapshot production = null,
@@ -141,7 +169,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
-                return new DetachedCompleteSaveValidationResult(bytes, null);
+                return new DetachedCompleteSaveValidationResult(bytes, null,
+                    parsedSpatial.Value.Authority.CanonicalLayoutContractVersion);
             }
             catch { return Failure(); }
         }

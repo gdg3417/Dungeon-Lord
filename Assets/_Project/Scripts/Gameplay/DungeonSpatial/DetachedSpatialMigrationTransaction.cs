@@ -175,9 +175,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value.GeometryVersion == descriptor.SharedGeometryVersion &&
                 value.CanonicalHash == descriptor.SharedGeometryCanonicalHash);
             if (geometry == null) return false;
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> selectedContract =
+                Compatibility.SelectContract(descriptor.SelectedTargetSchemaVersion);
+            if (!selectedContract.Success) return false;
             context = new DetachedUnfinishedAttemptValidationContext(descriptor, transactionId, fingerprint,
-                profile, geometry, ProductionContent, legacyConfigurationBytes, validationInputs, Limits);
+                selectedContract.Value, profile, geometry, ProductionContent, legacyConfigurationBytes,
+                validationInputs, Limits);
             return true;
+        }
+
+        internal bool IsJournalBoundCandidateValid(byte[] bytes, SpatialMigrationJournal journal)
+        {
+            if (bytes == null || journal == null || !HashEquals(bytes, journal.ExpectedCandidateSha256))
+                return false;
+            string fingerprint;
+            try { fingerprint = SpatialMigrationDescriptorContracts.ComputeInputFingerprint(
+                journal.Descriptor, Limits.Serialized); }
+            catch (ArgumentException) { return false; }
+            if (fingerprint != journal.DescriptorFingerprintSha256) return false;
+            string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(
+                journal.Descriptor.OriginalPayloadSha256, fingerprint);
+            if (identity != journal.TransactionIdentitySha256 ||
+                SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
+                return false;
+            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, Limits, ProductionContent,
+                journal.TransactionId, journal.DescriptorFingerprintSha256).IsValid;
         }
 
         private static bool HashEquals(byte[] bytes, string expected) => bytes != null &&
@@ -492,8 +514,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return RecoverLive(activePath, directory, found.Value);
             }
             catch (InvalidOperationException) { return Failure(MultipleAttemptsReason, null, SpatialTrustedPayload.None); }
-            catch (IOException) { return Failure(PathInvalidReason, null, SpatialTrustedPayload.None); }
-            catch (UnauthorizedAccessException) { return Failure(PathInvalidReason, null, SpatialTrustedPayload.None); }
+            catch (IOException) { return RecoverExceptionOutcome(activePath, PathInvalidReason); }
+            catch (UnauthorizedAccessException) { return RecoverExceptionOutcome(activePath, PathInvalidReason); }
+        }
+
+        private DetachedSpatialMigrationOutcome RecoverExceptionOutcome(string activePath, string reason)
+        {
+            try
+            {
+                byte[] active = fileSystem.ReadAllBytes(activePath);
+                if (IsCanonicalSchemaSeven(active))
+                    return new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null,
+                        SpatialTrustedPayload.Candidate);
+                DetachedLegacyValidationResult legacy = recoveryContext.ValidateLegacy(active);
+                if (legacy.IsValid) return Failure(reason, null, SpatialTrustedPayload.Original);
+                return Failure(string.IsNullOrEmpty(legacy.Reason) ? reason : legacy.Reason,
+                    null, SpatialTrustedPayload.None);
+            }
+            catch { return Failure(reason, null, SpatialTrustedPayload.None); }
         }
 
         private DetachedSpatialMigrationOutcome ResolvePinFailure(string activePath, string directory,
@@ -507,9 +545,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             if (HashIs(backup, journal.OriginalPayloadSha256))
                 return Restore(journalPath, backupPath, activePath, directory, journal, backup, pinFailure);
-            if (SpatialContractSha256.IsCanonical(journal.ExpectedCandidateSha256) &&
-                HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                    journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256))
+            if (recoveryContext.IsJournalBoundCandidateValid(active, journal))
                 return Failure(RollbackSourceMissingReason, journal.Stage, SpatialTrustedPayload.Candidate);
             return Failure(NoTrustedPayloadReason, journal.Stage, SpatialTrustedPayload.None);
         }
@@ -582,6 +618,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!HashIs(active, journal.ExpectedCandidateSha256) || !IsCanonicalSchemaSeven(active,
                     journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup);
+                CleanupInterruptedRestoration(directory, backupPath);
                 SpatialMigrationJournal durable = CopyStage(journal, SpatialMigrationJournalStage.DurableVerified);
                 if (!RewriteJournal(journalPath, durable))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup,
@@ -734,6 +771,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 intent.BackupSha256 == journal.OriginalPayloadSha256 &&
                 intent.JournalFilename == journal.RelativeJournalFilename &&
                 intent.JournalStage == (int)journal.Stage;
+        }
+
+        private void CleanupInterruptedRestoration(string directory, string backupPath)
+        {
+            string[] paths = { backupPath + ".restore", backupPath + ".restore.intent" };
+            for (int index = 0; index < paths.Length; index++)
+            {
+                try
+                {
+                    if (!fileSystem.Exists(paths[index])) continue;
+                    byte[] bytes = fileSystem.ReadAllBytes(paths[index]);
+                    QuarantineEvidence(directory, paths[index], bytes);
+                }
+                catch { /* Audit cleanup never revokes already verified C. */ }
+            }
         }
 
         private DetachedSpatialMigrationOutcome Resume(string activePath, string directory, string journalPath,
@@ -993,7 +1045,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, unfinished).IsValid;
             }
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
-                new DetachedCurrentTargetValidationContext(productionContent, completeLimits)).IsValid;
+                new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
+                    productionContent, completeLimits)).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)

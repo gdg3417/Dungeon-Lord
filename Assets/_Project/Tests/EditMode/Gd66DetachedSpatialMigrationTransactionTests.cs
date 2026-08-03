@@ -128,6 +128,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
                     .Execute(activePath, fixture.Result.Attempt);
             AssertPendingDurability(pending, fixture, fileSystem, activePath);
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".restore",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".restore.intent",
+                StringComparison.Ordinal)), Is.EqualTo(1));
             fileSystem.DisableFailure();
 
             DetachedSpatialMigrationOutcome recovered =
@@ -136,6 +140,62 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
             Assert.That(recovered.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
             Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Paths.Any(path => path.EndsWith(".restore",
+                StringComparison.Ordinal) || path.EndsWith(".restore.intent", StringComparison.Ordinal)),
+                Is.False);
+            Assert.That(fileSystem.Paths.Count(path => Path.GetFileName(path).StartsWith(
+                "gd66-quarantine-", StringComparison.Ordinal)), Is.GreaterThanOrEqualTo(2));
+        }
+
+        [Test]
+        public void PinFailure_ConfigChangedWithCandidateAndBackupRestoresOriginal()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+            DetachedSpatialMigrationOutcome pending =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+            AssertPendingDurability(pending, fixture, fileSystem, activePath);
+            fileSystem.DisableFailure();
+
+            DetachedSpatialMigrationOutcome outcome = new DetachedSpatialMigrationTransaction(fileSystem,
+                Recovery(fixture, new byte[] { 1 })).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+        }
+
+        [Test]
+        public void PinFailure_ConfigChangedWithCandidateAndMissingBackupTrustsJournalBoundCandidate()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+            DetachedSpatialMigrationOutcome pending =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+            AssertPendingDurability(pending, fixture, fileSystem, activePath);
+            fileSystem.DisableFailure();
+            string backup = fileSystem.Paths.Single(path => path.EndsWith(".original.bak",
+                StringComparison.Ordinal));
+            fileSystem.DeleteFile(backup);
+
+            DetachedSpatialMigrationOutcome outcome = new DetachedSpatialMigrationTransaction(fileSystem,
+                Recovery(fixture, new byte[] { 1 })).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason,
+                Is.EqualTo(DetachedSpatialMigrationTransaction.RollbackSourceMissingReason));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
         }
@@ -333,6 +393,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.Index == 1), Is.True);
         }
 
+        [Test]
+        public void Recovery_EnumerationFailurePreservesVerifiedOriginal()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Enumerate, -1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+        }
+
+        [Test]
+        public void Recovery_EnumerationFailurePreservesSelfValidCandidate()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+            DetachedSpatialMigrationOutcome executed =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+            Assert.That(executed.IsSuccess, Is.True);
+            fileSystem.EnableFailure(OperationType.Enumerate, -1);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.True);
+            Assert.That(outcome.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+        }
+
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
         private static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
@@ -412,9 +512,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedSpatialMigrationPreparer.Prepare(inputs));
         }
 
-        private static DetachedSpatialMigrationRecoveryContext Recovery(PreparedFixture fixture) =>
+        private static DetachedSpatialMigrationRecoveryContext Recovery(PreparedFixture fixture,
+            byte[] legacyBytes = null) =>
             new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility, fixture.Production,
-                new Dictionary<string, byte[]>(), fixture.LegacyBytes, fixture.Limits, RawLimits(),
+                new Dictionary<string, byte[]>(), legacyBytes ?? fixture.LegacyBytes, fixture.Limits, RawLimits(),
                 new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), WholeLimits());
 
         private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
@@ -470,6 +571,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DeterministicFileSystem(OperationType? failureType = null, int failureIndex = 0)
             { this.failureType = failureType; this.failureIndex = failureIndex; }
             internal void DisableFailure() { failureType = null; failureIndex = 0; }
+            internal void EnableFailure(OperationType type, int index)
+            { failureType = type; failureIndex = index; }
             internal void Seed(string path, byte[] bytes) { files[Normalize(path)] = (byte[])bytes.Clone(); }
             internal IEnumerable<string> Paths => files.Keys.OrderBy(value => value, PathComparer).ToArray();
             internal IEnumerable<FileOperation> Operations => operations.ToArray();
