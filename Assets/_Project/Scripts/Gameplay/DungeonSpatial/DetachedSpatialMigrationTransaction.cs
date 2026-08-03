@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -15,6 +16,85 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string Reason { get; }
         public SpatialMigrationJournalStage? Stage { get; }
         public SpatialTrustedPayload TrustedPayload { get; }
+    }
+
+    public sealed class DetachedSpatialMigrationRecoveryContext
+    {
+        private readonly Dictionary<string, byte[]> validationInputs;
+        private readonly byte[] legacyConfigurationBytes;
+
+        public DetachedSpatialMigrationRecoveryContext(SpatialLayoutCompatibilitySnapshot compatibility,
+            ProductionSpatialContentSnapshot productionContent,
+            IReadOnlyDictionary<string, byte[]> validationInputs, byte[] legacyConfigurationBytes,
+            CanonicalSpatialSerializationLimits limits)
+        {
+            Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
+            ProductionContent = productionContent ?? throw new ArgumentNullException(nameof(productionContent));
+            if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits));
+            Limits = limits;
+            this.validationInputs = validationInputs == null ? null : validationInputs.ToDictionary(
+                pair => pair.Key, pair => pair.Value == null ? null : (byte[])pair.Value.Clone(),
+                StringComparer.Ordinal);
+            this.legacyConfigurationBytes = legacyConfigurationBytes == null ? null :
+                (byte[])legacyConfigurationBytes.Clone();
+        }
+
+        public SpatialLayoutCompatibilitySnapshot Compatibility { get; }
+        public ProductionSpatialContentSnapshot ProductionContent { get; }
+        public CanonicalSpatialSerializationLimits Limits { get; }
+
+        internal string ValidatePins(SpatialMigrationInputDescriptor descriptor)
+        {
+            if (descriptor == null) return "gd66.transaction.pinned_input_missing";
+            if (descriptor.CanonicalSerializerId != SpatialMigrationContractIdentity.CanonicalSerializerId ||
+                descriptor.CanonicalSerializerVersion != SpatialMigrationContractIdentity.CanonicalSerializerVersion ||
+                descriptor.AuthorityMarkerContractVersion != SpatialMigrationContractIdentity.AuthorityMarkerContractVersion ||
+                descriptor.MigrationContractVersion != SpatialMigrationContractIdentity.MigrationContractVersion)
+                return "gd66.transaction.pinned_input_hash_mismatch";
+            SpatialLayoutCompatibilityProfilesData compatibilityData = Compatibility.Value;
+            SpatialMigrationCompatibilityProfile[] profileIdentities =
+                (compatibilityData.MigrationProfiles ?? Array.Empty<SpatialMigrationCompatibilityProfile>())
+                .Where(value => value != null && value.ProfileId == descriptor.MigrationProfileId &&
+                    value.ProfileVersion == descriptor.MigrationProfileVersion).ToArray();
+            if (profileIdentities.Length == 0) return "gd66.transaction.pinned_profile_missing";
+            CompatibilityLayoutGeometryRecord[] geometryIdentities =
+                (compatibilityData.GeometryRecords ?? Array.Empty<CompatibilityLayoutGeometryRecord>())
+                .Where(value => value != null && value.GeometryId == descriptor.SharedGeometryId &&
+                    value.GeometryVersion == descriptor.SharedGeometryVersion).ToArray();
+            if (geometryIdentities.Length == 0) return "gd66.transaction.pinned_spatial_input_missing";
+            if (!Compatibility.TryRecoverMigration(descriptor.MigrationProfileId,
+                descriptor.MigrationProfileVersion, descriptor.MigrationProfileCanonicalHash,
+                descriptor.SharedGeometryId, descriptor.SharedGeometryVersion,
+                descriptor.SharedGeometryCanonicalHash, out SpatialMigrationCompatibilityProfile profile))
+                return profileIdentities.All(value => value.CanonicalHash != descriptor.MigrationProfileCanonicalHash)
+                    ? "gd66.transaction.pinned_profile_hash_mismatch" :
+                    "gd66.transaction.pinned_spatial_input_hash_mismatch";
+            if (profile.Lifecycle != CompatibilityProfileLifecycle.Active &&
+                profile.Lifecycle != CompatibilityProfileLifecycle.Retired)
+                return "gd66.profile.invalid";
+            byte[] manifest = ProductionSpatialGeneratedSetParser.SerializeCanonical(ProductionContent.Manifest);
+            byte[] catalog = ProductionSpatialGeneratedSetParser.SerializeCanonical(ProductionContent.Catalog);
+            if (!HashEquals(manifest, descriptor.ProductionManifestSha256) ||
+                !HashEquals(catalog, descriptor.ProductionCatalogSha256))
+                return "gd66.transaction.pinned_spatial_input_hash_mismatch";
+            if (!HashEquals(legacyConfigurationBytes, descriptor.LegacyGameplayConfigurationSha256))
+                return legacyConfigurationBytes == null ? "gd66.transaction.pinned_input_missing" :
+                    "gd66.transaction.pinned_input_hash_mismatch";
+            SpatialValidationInputHash[] pins = descriptor.ValidationInputHashes;
+            if (validationInputs == null && pins.Length != 0) return "gd66.transaction.pinned_input_missing";
+            if (validationInputs != null && validationInputs.Count != pins.Length)
+                return "gd66.transaction.pinned_input_hash_mismatch";
+            foreach (SpatialValidationInputHash pin in pins)
+            {
+                if (!validationInputs.TryGetValue(pin.InputId, out byte[] bytes) || bytes == null)
+                    return "gd66.transaction.pinned_input_missing";
+                if (!HashEquals(bytes, pin.Sha256)) return "gd66.transaction.pinned_input_hash_mismatch";
+            }
+            return null;
+        }
+
+        private static bool HashEquals(byte[] bytes, string expected) => bytes != null &&
+            string.Equals(SpatialContractSha256.Compute(bytes), expected, StringComparison.Ordinal);
     }
 
     public interface ISpatialMigrationFileSystem
@@ -94,21 +174,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string BackupIncompleteReason = "gd66.transaction.backup_incomplete";
         public const string AlreadyCommittedReason = "gd66.success.already_committed";
         public const string RecoveredOriginalReason = "gd66.success.recovered_original";
+        public const string OriginalRestoredStageWriteFailedReason =
+            "gd66.transaction.original_restored_stage_write_failed";
         public const string PathInvalidReason = "gd66.transaction.path_invalid";
 
         private readonly ISpatialMigrationFileSystem fileSystem;
         private readonly SpatialSerializedInputLimits limits;
         private readonly ProductionSpatialContentSnapshot productionContent;
+        private readonly DetachedSpatialMigrationRecoveryContext recoveryContext;
 
         public DetachedSpatialMigrationTransaction(ISpatialMigrationFileSystem fileSystem,
-            SpatialSerializedInputLimits limits)
-            : this(fileSystem, limits, null) { }
-
-        public DetachedSpatialMigrationTransaction(ISpatialMigrationFileSystem fileSystem,
-            SpatialSerializedInputLimits limits, ProductionSpatialContentSnapshot productionContent)
+            DetachedSpatialMigrationRecoveryContext recoveryContext)
         { this.fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-          if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); this.limits = limits;
-          this.productionContent = productionContent; }
+          this.recoveryContext = recoveryContext ?? throw new ArgumentNullException(nameof(recoveryContext));
+          limits = recoveryContext.Limits.Serialized; productionContent = recoveryContext.ProductionContent; }
 
         public DetachedSpatialMigrationOutcome Execute(string activePath,
             DetachedPreparedSpatialMigrationAttempt attempt)
@@ -206,6 +285,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return IsCanonicalSchemaSeven(fileSystem.ReadAllBytes(activePath))
                         ? new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null, SpatialTrustedPayload.Candidate)
                         : Failure(NoTrustedPayloadReason, null, SpatialTrustedPayload.None);
+                string pinFailure = recoveryContext.ValidatePins(found.Value.Descriptor);
+                if (pinFailure != null)
+                    return Failure(pinFailure, found.Value.Stage, SpatialTrustedPayload.None);
                 return RecoverLive(activePath, directory, found.Value);
             }
             catch (InvalidOperationException) { return Failure(MultipleAttemptsReason, null, SpatialTrustedPayload.None); }
@@ -311,7 +393,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
                 SpatialMigrationJournal restored = CopyStage(journal, SpatialMigrationJournalStage.OriginalRestored);
                 if (!RewriteJournal(journalPath, restored))
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                    return Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
+                        SpatialTrustedPayload.Original);
                 return restoredFailureReason == null
                     ? new DetachedSpatialMigrationOutcome(true, RecoveredOriginalReason,
                         restored.Stage, SpatialTrustedPayload.Original)

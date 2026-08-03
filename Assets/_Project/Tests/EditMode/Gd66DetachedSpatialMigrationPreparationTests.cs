@@ -24,6 +24,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void TransactionConstruction_RequiresRecoveryValidationContext()
+        {
+            ConstructorInfo constructor = typeof(DetachedSpatialMigrationTransaction).GetConstructors().Single();
+            Assert.That(constructor.GetParameters().Select(parameter => parameter.ParameterType).ToArray(),
+                Is.EqualTo(new[]
+                {
+                    typeof(ISpatialMigrationFileSystem), typeof(DetachedSpatialMigrationRecoveryContext)
+                }));
+        }
+
+        [Test]
         public void CandidateSerializer_DoesNotExposeCallerAuthoredBuild()
         {
             Assert.That(typeof(DetachedWholeSaveCandidateSerializer).GetMethod("Build",

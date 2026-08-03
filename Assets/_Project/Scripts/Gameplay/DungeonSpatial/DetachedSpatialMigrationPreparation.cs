@@ -272,6 +272,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 inputs.Profile.GeometryVersion == inputs.Geometry.GeometryVersion &&
                 inputs.Profile.GeometryCanonicalHash == inputs.Geometry.CanonicalHash;
             if (!fixedPins) { reason = "gd66.transaction.pinned_input_hash_mismatch"; return false; }
+            if ((inputs.ValidationInputs?.Count ?? 0) != descriptor.ValidationInputHashes.Length)
+            { reason = inputs.ValidationInputs == null ? "gd66.transaction.pinned_input_missing" :
+                "gd66.transaction.pinned_input_hash_mismatch"; return false; }
             foreach (SpatialValidationInputHash pin in descriptor.ValidationInputHashes)
             {
                 if (inputs.ValidationInputs == null || !inputs.ValidationInputs.TryGetValue(pin.InputId,
@@ -413,6 +416,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 bool roomCategory = string.Equals(group.Key, MvpDungeonPlacementIds.RoomCategoryId,
                     StringComparison.Ordinal);
+                if (ignoreRoomErrors && roomCategory) continue;
                 if (!MvpDungeonPlacementIds.IsAllowedCategory(group.Key) || group.Any(value => value.Revision < 0))
                 { reason = "gd66.route.record_out_of_range"; return false; }
                 int greatest = group.Max(value => value.Revision); MvpDungeonPlacementEntry[] tied = group.Where(value => value.Revision == greatest).ToArray();
@@ -420,10 +424,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!MvpDungeonPlacementIds.TryGetCategoryForOption(tied[0].OptionId, out string optionCategory) ||
                     optionCategory != group.Key)
                 {
-                    if (ignoreRoomErrors && roomCategory) continue;
                     reason = "gd66.content.category_mismatch"; return false;
                 }
-                if (ignoreRoomErrors && roomCategory) continue;
                 selected[group.Key] = tied[0].OptionId;
             }
             rooms = FromCategories(selected); return ValidateOptions(rooms, out reason);
