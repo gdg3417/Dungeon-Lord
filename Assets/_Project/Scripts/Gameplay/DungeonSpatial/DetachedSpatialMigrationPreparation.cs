@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly byte[] geometryBytes;
         private readonly byte[] legacyConfigurationBytes;
         private readonly SpatialLayoutCompatibilitySnapshot compatibilitySnapshot;
+        private readonly Dictionary<string, byte[]> validationInputs;
 
         public DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
             RawSavePayloadClassification classification, SpatialMigrationInputDescriptor descriptorInputs,
@@ -44,13 +45,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RunSimulationConfig legacyGameplayConfiguration, CanonicalSpatialSerializationLimits spatialLimits,
             DetachedWholeSaveLimits wholeSaveLimits)
             : this(exactOriginalBytes, classification, descriptorInputs, null, null, productionContent,
-                legacyGameplayConfiguration, spatialLimits, wholeSaveLimits)
+                legacyGameplayConfiguration, null, spatialLimits, wholeSaveLimits)
         { compatibilitySnapshot = compatibility; }
 
-        internal DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
+        public DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
+            RawSavePayloadClassification classification, SpatialMigrationInputDescriptor descriptorInputs,
+            SpatialLayoutCompatibilitySnapshot compatibility, ProductionSpatialContentSnapshot productionContent,
+            RunSimulationConfig legacyGameplayConfiguration, IReadOnlyDictionary<string, byte[]> validationInputs,
+            CanonicalSpatialSerializationLimits spatialLimits, DetachedWholeSaveLimits wholeSaveLimits)
+            : this(exactOriginalBytes, classification, descriptorInputs, null, null, productionContent,
+                legacyGameplayConfiguration, validationInputs, spatialLimits, wholeSaveLimits)
+        { compatibilitySnapshot = compatibility; }
+
+        private DetachedSpatialMigrationPreparationInputs(byte[] exactOriginalBytes,
             RawSavePayloadClassification classification, SpatialMigrationInputDescriptor descriptorInputs,
             SpatialMigrationCompatibilityProfile profile, CompatibilityLayoutGeometryRecord geometry,
             ProductionSpatialContentSnapshot productionContent, RunSimulationConfig legacyGameplayConfiguration,
+            IReadOnlyDictionary<string, byte[]> validationInputs,
             CanonicalSpatialSerializationLimits spatialLimits, DetachedWholeSaveLimits wholeSaveLimits)
         {
             this.exactOriginalBytes = exactOriginalBytes == null ? null : (byte[])exactOriginalBytes.Clone();
@@ -59,6 +70,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             legacyConfigurationBytes = legacyGameplayConfiguration == null ? null :
                 LegacyGameplayConfigurationContract.SerializeCanonical(legacyGameplayConfiguration);
             Classification = classification; DescriptorInputs = descriptorInputs; ProductionContent = productionContent;
+            this.validationInputs = validationInputs == null ? null : validationInputs.ToDictionary(
+                pair => pair.Key, pair => pair.Value == null ? null : (byte[])pair.Value.Clone(), StringComparer.Ordinal);
             SpatialLimits = spatialLimits; WholeSaveLimits = wholeSaveLimits;
         }
         public byte[] GetExactOriginalBytes() => exactOriginalBytes == null ? null : (byte[])exactOriginalBytes.Clone();
@@ -76,6 +89,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public CanonicalSpatialSerializationLimits SpatialLimits { get; }
         public DetachedWholeSaveLimits WholeSaveLimits { get; }
         internal SpatialLayoutCompatibilitySnapshot CompatibilitySnapshot => compatibilitySnapshot;
+        internal IReadOnlyDictionary<string, byte[]> ValidationInputs => validationInputs;
+
+        internal static DetachedSpatialMigrationPreparationInputs FromValidatedResolution(
+            DetachedSpatialMigrationPreparationInputs source, SpatialMigrationCompatibilityProfile profile,
+            CompatibilityLayoutGeometryRecord geometry) =>
+            new DetachedSpatialMigrationPreparationInputs(source.OwnedOriginalBytes, source.Classification,
+                source.DescriptorInputs, profile, geometry, source.ProductionContent,
+                source.LegacyGameplayConfiguration, source.ValidationInputs, source.SpatialLimits,
+                source.WholeSaveLimits);
     }
 
     public sealed class DetachedPreparedSpatialMigrationAttempt
@@ -148,7 +170,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialMigrationInputDescriptor descriptor = Descriptor(originalHash, inputs);
                 SpatialContractResult<byte[]> descriptorBytes = SpatialMigrationDescriptorContracts.Serialize(
                     descriptor, inputs.SpatialLimits.Serialized);
-                if (!descriptorBytes.IsValid || !PinsMatch(inputs, descriptor)) return Failure(InvalidInputReason);
+                if (!descriptorBytes.IsValid) return Failure(InvalidInputReason);
+                if (!PinsMatch(inputs, descriptor, out string pinReason)) return Failure(pinReason);
                 string fingerprint = SpatialContractSha256.Compute(descriptorBytes.Value);
                 string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(originalHash, fingerprint);
                 string transactionId = SpatialMigrationTransactionIdentity.CreateTransactionId(identity);
@@ -166,7 +189,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     inputs.Classification, spatial, inputs.SpatialLimits, inputs.WholeSaveLimits);
                 if (!candidate.IsSuccess) return Failure(candidate.Reason, projection.Diagnostics);
                 if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate.Candidate.GetBytes(),
-                    inputs.SpatialLimits, inputs.ProductionContent).IsValid)
+                    inputs.SpatialLimits, inputs.ProductionContent, transactionId, fingerprint).IsValid)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason, projection.Diagnostics);
                 return new DetachedSpatialMigrationPreparationResult(
                     new DetachedPreparedSpatialMigrationAttempt(inputs.OwnedOriginalBytes, descriptor, fingerprint,
@@ -187,11 +210,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { reason = "gd66.profile.missing"; return null; }
             int rawSchema = inputs.Classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
                 ? 1 : inputs.Classification.SchemaVersion ?? 0;
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> contract =
+                inputs.CompatibilitySnapshot.SelectContract(
+                    inputs.DescriptorInputs.SelectedTargetSchemaVersion);
+            if (!contract.Success) { reason = contract.Code; return null; }
             CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> selection =
                 inputs.CompatibilitySnapshot.SelectMigration(rawSchema,
                     inputs.DescriptorInputs.SelectedTargetSchemaVersion,
-                    inputs.DescriptorInputs.AuthorityMarkerContractVersion);
+                    contract.Value.CanonicalLayoutContractVersion);
             if (!selection.Success) { reason = selection.Code; return null; }
+            if (selection.Value.Lifecycle != CompatibilityProfileLifecycle.Active ||
+                selection.Value.CanonicalHash != SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(selection.Value))
+            { reason = "gd66.profile.invalid"; return null; }
             SpatialLayoutCompatibilityProfilesData data = inputs.CompatibilitySnapshot.Value;
             CompatibilityLayoutGeometryRecord[] matches = (data.GeometryRecords ??
                 Array.Empty<CompatibilityLayoutGeometryRecord>()).Where(value => value != null &&
@@ -199,10 +229,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value.GeometryVersion == selection.Value.GeometryVersion &&
                 value.CanonicalHash == selection.Value.GeometryCanonicalHash).ToArray();
             if (matches.Length != 1) { reason = "gd66.profile.invalid"; return null; }
-            return new DetachedSpatialMigrationPreparationInputs(inputs.OwnedOriginalBytes,
-                inputs.Classification, inputs.DescriptorInputs, selection.Value, matches[0],
-                inputs.ProductionContent, inputs.LegacyGameplayConfiguration, inputs.SpatialLimits,
-                inputs.WholeSaveLimits);
+            if (matches[0].CanonicalHash != SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(matches[0]))
+            { reason = "gd66.profile.invalid"; return null; }
+            return DetachedSpatialMigrationPreparationInputs.FromValidatedResolution(inputs,
+                selection.Value, matches[0]);
         }
 
         private static SpatialMigrationInputDescriptor Descriptor(string originalHash,
@@ -225,12 +255,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static bool PinsMatch(DetachedSpatialMigrationPreparationInputs inputs,
-            SpatialMigrationInputDescriptor descriptor)
+            SpatialMigrationInputDescriptor descriptor, out string reason)
         {
+            reason = null;
             byte[] manifest = ProductionSpatialGeneratedSetParser.SerializeCanonical(inputs.ProductionContent.Manifest);
             byte[] catalog = ProductionSpatialGeneratedSetParser.SerializeCanonical(inputs.ProductionContent.Catalog);
             byte[] gameplay = inputs.LegacyConfigurationBytes;
-            return descriptor.SelectedTargetSchemaVersion == DetachedWholeSaveCandidateSerializer.TargetSchemaVersion &&
+            bool fixedPins = descriptor.SelectedTargetSchemaVersion == DetachedWholeSaveCandidateSerializer.TargetSchemaVersion &&
                 descriptor.AuthorityMarkerContractVersion == SpatialMigrationContractIdentity.AuthorityMarkerContractVersion &&
                 descriptor.MigrationContractVersion == SpatialMigrationContractIdentity.MigrationContractVersion &&
                 string.Equals(descriptor.ProductionManifestSha256, SpatialContractSha256.Compute(manifest), StringComparison.Ordinal) &&
@@ -240,6 +271,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 inputs.Profile.GeometryId == inputs.Geometry.GeometryId &&
                 inputs.Profile.GeometryVersion == inputs.Geometry.GeometryVersion &&
                 inputs.Profile.GeometryCanonicalHash == inputs.Geometry.CanonicalHash;
+            if (!fixedPins) { reason = "gd66.transaction.pinned_input_hash_mismatch"; return false; }
+            foreach (SpatialValidationInputHash pin in descriptor.ValidationInputHashes)
+            {
+                if (inputs.ValidationInputs == null || !inputs.ValidationInputs.TryGetValue(pin.InputId,
+                    out byte[] bytes) || bytes == null)
+                { reason = "gd66.transaction.pinned_input_missing"; return false; }
+                if (!string.Equals(pin.Sha256, SpatialContractSha256.Compute(bytes), StringComparison.Ordinal))
+                { reason = "gd66.transaction.pinned_input_hash_mismatch"; return false; }
+            }
+            return true;
         }
 
         private static DetachedSpatialMigrationPreparationResult Failure(string reason,
@@ -275,12 +316,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (source.RoomSlotAssignmentsPresence == RawLegacyRoutePresence.Present)
             {
                 if (!TryAssignments(source, inputs.SpatialLimits.Serialized, out rooms, out string reason)) return Failure(reason);
-                CompareLower(source, rooms, diagnostics, false);
+                CompareLower(source, inputs.SpatialLimits.Serialized, rooms, diagnostics);
             }
             else if (source.FloorLayoutPresence == RawLegacyRoutePresence.Present)
             {
                 if (!TryFloor(source, inputs.SpatialLimits.Serialized, out rooms, out string reason)) return Failure(reason);
-                if (!MergeEffectivePlacements(source, inputs.SpatialLimits.Serialized, rooms, diagnostics, out reason)) return Failure(reason);
+                if (!MergeEffectivePlacements(source, inputs.SpatialLimits.Serialized, ref rooms, diagnostics, out reason)) return Failure(reason);
             }
             else if (source.DungeonPlacementsPresence == RawLegacyRoutePresence.Present)
             {
@@ -360,7 +401,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return ValidateOptions(rooms, out reason);
         }
 
-        private static bool TryPlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, out RouteRoom[] rooms, out string reason)
+        private static bool TryPlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, out RouteRoom[] rooms, out string reason, bool ignoreRoomErrors = false)
         {
             rooms = null; reason = null;
             MvpDungeonPlacementState data = RawLegacyRouteContracts.ParsePlacements(source, "mvpDungeonPlacements", limits, out string parseReason);
@@ -370,13 +411,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (IGrouping<string, MvpDungeonPlacementEntry> group in data.Entries.Where(value => value != null)
                 .GroupBy(value => value.CategoryId, StringComparer.Ordinal))
             {
+                bool roomCategory = string.Equals(group.Key, MvpDungeonPlacementIds.RoomCategoryId,
+                    StringComparison.Ordinal);
                 if (!MvpDungeonPlacementIds.IsAllowedCategory(group.Key) || group.Any(value => value.Revision < 0))
                 { reason = "gd66.route.record_out_of_range"; return false; }
                 int greatest = group.Max(value => value.Revision); MvpDungeonPlacementEntry[] tied = group.Where(value => value.Revision == greatest).ToArray();
                 if (tied.Length != 1) { reason = DetachedSpatialMigrationPreparer.DuplicatePlacementRevisionReason; return false; }
                 if (!MvpDungeonPlacementIds.TryGetCategoryForOption(tied[0].OptionId, out string optionCategory) ||
                     optionCategory != group.Key)
-                { reason = "gd66.content.category_mismatch"; return false; }
+                {
+                    if (ignoreRoomErrors && roomCategory) continue;
+                    reason = "gd66.content.category_mismatch"; return false;
+                }
+                if (ignoreRoomErrors && roomCategory) continue;
                 selected[group.Key] = tied[0].OptionId;
             }
             rooms = FromCategories(selected); return ValidateOptions(rooms, out reason);
@@ -396,18 +443,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static string[] Value(IDictionary<string, string> values, string category) =>
             values.TryGetValue(category, out string value) ? new[] { value } : Array.Empty<string>();
 
-        private static bool MergeEffectivePlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, RouteRoom[] rooms,
+        private static bool MergeEffectivePlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, ref RouteRoom[] rooms,
             List<string> diagnostics, out string reason)
         {
             reason = null;
-            if (source.DungeonPlacementsPresence != RawLegacyRoutePresence.Present || rooms.Length == 0) return true;
-            if (!TryPlacements(source, limits, out RouteRoom[] lower, out reason)) return false;
+            if (source.DungeonPlacementsPresence != RawLegacyRoutePresence.Present) return true;
+            if (!TryPlacements(source, limits, out RouteRoom[] lower, out reason, true)) return false;
             if (lower.Length == 0) return true;
+            if (rooms.Length == 0)
+            { rooms = lower; diagnostics.Add(EffectiveContentDiagnostic); return true; }
             RouteRoom winner = rooms[0], contribution = lower[0];
+            bool contributed = (winner.Monsters.Length == 0 && contribution.Monsters.Length != 0) ||
+                (winner.Traps.Length == 0 && contribution.Traps.Length != 0) ||
+                (winner.Loot.Length == 0 && contribution.Loot.Length != 0);
             if (!Merge(ref winner.Monsters, contribution.Monsters) || !Merge(ref winner.Traps, contribution.Traps) ||
                 !Merge(ref winner.Loot, contribution.Loot))
             { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
-            rooms[0] = winner; diagnostics.Add(EffectiveContentDiagnostic); return true;
+            rooms[0] = winner;
+            diagnostics.Add(contributed ? EffectiveContentDiagnostic : AgreementDiagnostic); return true;
         }
 
         private static bool Merge(ref string[] winner, string[] lower)
@@ -417,12 +470,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return winner.SequenceEqual(lower, StringComparer.Ordinal);
         }
 
-        private static void CompareLower(RawSavePayloadClassification source, RouteRoom[] rooms,
-            List<string> diagnostics, bool effective)
+        private static void CompareLower(RawSavePayloadClassification source,
+            SpatialSerializedInputLimits limits, RouteRoom[] winner, List<string> diagnostics)
         {
             if (source.FloorLayoutPresence == RawLegacyRoutePresence.Absent &&
                 source.DungeonPlacementsPresence == RawLegacyRoutePresence.Absent) return;
-            diagnostics.Add(effective ? EffectiveContentDiagnostic : IneffectiveDiagnostic);
+            RouteRoom[] lower; string reason;
+            bool parsed = source.FloorLayoutPresence == RawLegacyRoutePresence.Present
+                ? TryFloor(source, limits, out lower, out reason)
+                : TryPlacements(source, limits, out lower, out reason);
+            if (parsed && source.FloorLayoutPresence == RawLegacyRoutePresence.Present)
+                parsed = MergeEffectivePlacements(source, limits, ref lower, new List<string>(), out reason);
+            diagnostics.Add(parsed && Equivalent(winner, lower) ? AgreementDiagnostic : IneffectiveDiagnostic);
+        }
+
+        private static bool Equivalent(RouteRoom[] left, RouteRoom[] right)
+        {
+            if (left == null || right == null || left.Length != right.Length) return false;
+            for (int index = 0; index < left.Length; index++)
+                if (left[index].Index != right[index].Index || left[index].Explicit != right[index].Explicit ||
+                    left[index].RoomOption != right[index].RoomOption ||
+                    !left[index].Monsters.SequenceEqual(right[index].Monsters, StringComparer.Ordinal) ||
+                    !left[index].Traps.SequenceEqual(right[index].Traps, StringComparer.Ordinal) ||
+                    !left[index].Loot.SequenceEqual(right[index].Loot, StringComparer.Ordinal)) return false;
+            return true;
         }
 
         private static bool ValidateOptions(RouteRoom[] rooms, out string reason)

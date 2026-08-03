@@ -30,6 +30,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Encoding.UTF8.GetBytes(text), Limits()).IsValid, Is.False);
         }
 
+        [Test]
+        public void CompleteSave_RejectsMarkerOwnershipMismatch()
+        {
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(CompleteSave(), Limits(),
+                null, "gd66-" + new string('3', 64), new string('2', 64)).IsValid, Is.False);
+        }
+
         private static CanonicalSpatialSerializationLimits Limits() =>
             new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(100000, 10000,
                 1000, 10000, 20), new CanonicalSpatialSaveWorkloadLimits(1000, 1000));

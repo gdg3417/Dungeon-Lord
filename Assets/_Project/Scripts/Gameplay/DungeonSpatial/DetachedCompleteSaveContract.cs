@@ -19,7 +19,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class DetachedCompleteSaveContract
     {
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
-            CanonicalSpatialSerializationLimits limits, ProductionSpatialContentSnapshot production = null)
+            CanonicalSpatialSerializationLimits limits, ProductionSpatialContentSnapshot production = null,
+            string expectedTransactionId = null, string expectedDescriptorFingerprint = null)
         {
             if (bytes == null || !limits.IsValid) return Failure();
             try
@@ -30,12 +31,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     !Field(root, 0, "schema", ContractJsonKind.String) || root.Fields[0].Value.Text != "save_root" ||
                     !Field(root, 1, "schemaVersion", ContractJsonKind.Number) || root.Fields[1].Value.Text != "7" ||
                     !Field(root, 2, "primary", ContractJsonKind.Object)) return Failure();
-                if (CaseAmbiguous(root, new[] { "schema", "schemaVersion", "primary" })) return Failure();
+                if (HasCaseAmbiguousSibling(root) || CaseAmbiguous(root,
+                    new[] { "schema", "schemaVersion", "primary" })) return Failure();
                 ContractJsonNode primary = root.Fields[2].Value;
                 if (primary.Fields.Count < 2 ||
                     primary.Fields[primary.Fields.Count - 2].Key != "canonicalSpatialAuthority" ||
                     primary.Fields[primary.Fields.Count - 1].Key != "spatialFloors" ||
                     CaseAmbiguous(primary, new[] { "canonicalSpatialAuthority", "spatialFloors" })) return Failure();
+                if (!PrimaryOrderIsCanonical(primary)) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
@@ -44,7 +47,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value); spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
-                if (!parsedSpatial.IsValid || !DefinitionsValid(parsedSpatial.Value, production)) return Failure();
+                if (!parsedSpatial.IsValid || !DefinitionsValid(parsedSpatial.Value, production) ||
+                    (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
+                    (expectedDescriptorFingerprint != null &&
+                        parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();
 
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
@@ -77,11 +83,50 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static bool Field(ContractJsonNode node, int index, string name, ContractJsonKind kind) =>
             node.Fields[index].Key == name && node.Fields[index].Value.Kind == kind;
+        private static bool PrimaryOrderIsCanonical(ContractJsonNode primary)
+        {
+            IReadOnlyList<string> recognized = RawSavePayloadClassifier.RecognizedSaveDataMemberNames;
+            int previous = -1; bool unknownSeen = false;
+            for (int index = 0; index < primary.Fields.Count - 2; index++)
+            {
+                string name = primary.Fields[index].Key;
+                int recognizedIndex = -1;
+                for (int candidate = 0; candidate < recognized.Count; candidate++)
+                    if (recognized[candidate] == name) { recognizedIndex = candidate; break; }
+                if (recognizedIndex >= 0)
+                {
+                    if (unknownSeen || recognizedIndex <= previous) return false;
+                    previous = recognizedIndex;
+                }
+                else
+                {
+                    foreach (string known in recognized)
+                        if (string.Equals(known, name, StringComparison.OrdinalIgnoreCase)) return false;
+                    unknownSeen = true;
+                }
+            }
+            return true;
+        }
         private static bool CaseAmbiguous(ContractJsonNode node, IEnumerable<string> reserved)
         {
             foreach (KeyValuePair<string, ContractJsonNode> field in node.Fields)
                 foreach (string name in reserved)
                     if (field.Key != name && string.Equals(field.Key, name, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+        private static bool HasCaseAmbiguousSibling(ContractJsonNode node)
+        {
+            if (node.Kind == ContractJsonKind.Object)
+            {
+                var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, ContractJsonNode> field in node.Fields)
+                {
+                    if (!names.Add(field.Key) || HasCaseAmbiguousSibling(field.Value)) return true;
+                }
+            }
+            else if (node.Kind == ContractJsonKind.Array)
+                foreach (ContractJsonNode item in node.Items)
+                    if (HasCaseAmbiguousSibling(item)) return true;
             return false;
         }
         private static void WriteNode(ContractJsonWriter writer, ContractJsonNode node)
