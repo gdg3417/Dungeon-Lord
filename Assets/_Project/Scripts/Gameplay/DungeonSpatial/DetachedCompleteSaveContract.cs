@@ -4,6 +4,85 @@ using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public sealed class DetachedCurrentTargetValidationContext
+    {
+        public DetachedCurrentTargetValidationContext(ProductionSpatialContentSnapshot production,
+            CanonicalSpatialSerializationLimits limits)
+        { Production = production ?? throw new ArgumentNullException(nameof(production));
+          if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits; }
+        internal ProductionSpatialContentSnapshot Production { get; }
+        public CanonicalSpatialSerializationLimits Limits { get; }
+    }
+
+    public sealed class DetachedUnfinishedAttemptValidationContext
+    {
+        private readonly byte[] legacyConfiguration;
+        private readonly Dictionary<string, byte[]> validationInputs;
+        public DetachedUnfinishedAttemptValidationContext(SpatialMigrationInputDescriptor descriptor,
+            string transactionId, string descriptorFingerprint,
+            SpatialMigrationCompatibilityProfile profile, CompatibilityLayoutGeometryRecord geometry,
+            ProductionSpatialContentSnapshot production, byte[] legacyConfiguration,
+            IReadOnlyDictionary<string, byte[]> validationInputs,
+            CanonicalSpatialSerializationLimits limits)
+        {
+            Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
+            TransactionId = transactionId; DescriptorFingerprint = descriptorFingerprint;
+            Profile = profile ?? throw new ArgumentNullException(nameof(profile));
+            Geometry = geometry ?? throw new ArgumentNullException(nameof(geometry));
+            Production = production ?? throw new ArgumentNullException(nameof(production));
+            this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
+            this.validationInputs = validationInputs == null ? null : validationInputs.ToDictionary(
+                pair => pair.Key, pair => pair.Value == null ? null : (byte[])pair.Value.Clone(),
+                StringComparer.Ordinal);
+            if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits;
+        }
+        public SpatialMigrationInputDescriptor Descriptor { get; }
+        public string TransactionId { get; }
+        public string DescriptorFingerprint { get; }
+        internal SpatialMigrationCompatibilityProfile Profile { get; }
+        internal CompatibilityLayoutGeometryRecord Geometry { get; }
+        internal ProductionSpatialContentSnapshot Production { get; }
+        public CanonicalSpatialSerializationLimits Limits { get; }
+
+        internal bool PinsAreValid()
+        {
+            if (!SpatialMigrationTransactionIdentity.IsCanonicalTransactionId(TransactionId) ||
+                !SpatialContractSha256.IsCanonical(DescriptorFingerprint) ||
+                SpatialMigrationDescriptorContracts.ComputeInputFingerprint(Descriptor,
+                    Limits.Serialized) != DescriptorFingerprint ||
+                SpatialMigrationTransactionIdentity.CreateTransactionId(
+                    SpatialMigrationTransactionIdentity.ComputeIdentity(
+                        Descriptor.OriginalPayloadSha256, DescriptorFingerprint)) != TransactionId ||
+                Descriptor.SelectedTargetSchemaVersion != DetachedWholeSaveCandidateSerializer.TargetSchemaVersion ||
+                Descriptor.CanonicalSerializerId != SpatialMigrationContractIdentity.CanonicalSerializerId ||
+                Descriptor.CanonicalSerializerVersion != SpatialMigrationContractIdentity.CanonicalSerializerVersion ||
+                Descriptor.AuthorityMarkerContractVersion != SpatialMigrationContractIdentity.AuthorityMarkerContractVersion ||
+                Descriptor.MigrationContractVersion != SpatialMigrationContractIdentity.MigrationContractVersion ||
+                Profile.ProfileId != Descriptor.MigrationProfileId ||
+                Profile.ProfileVersion != Descriptor.MigrationProfileVersion ||
+                Profile.CanonicalHash != Descriptor.MigrationProfileCanonicalHash ||
+                SpatialLayoutCompatibilityProfiles.ComputeMigrationProfileHash(Profile) !=
+                    Descriptor.MigrationProfileCanonicalHash ||
+                Descriptor.RawSourceSchemaVersion < Profile.MinimumSourceSchemaVersion ||
+                Descriptor.RawSourceSchemaVersion > Profile.MaximumSourceSchemaVersion ||
+                Profile.TargetSchemaVersion != Descriptor.SelectedTargetSchemaVersion ||
+                Profile.TargetCanonicalLayoutContractVersion <= 0 ||
+                Geometry.GeometryId != Descriptor.SharedGeometryId ||
+                Geometry.GeometryVersion != Descriptor.SharedGeometryVersion ||
+                Geometry.CanonicalHash != Descriptor.SharedGeometryCanonicalHash ||
+                SpatialLayoutCompatibilityProfiles.ComputeGeometryHash(Geometry) !=
+                    Descriptor.SharedGeometryCanonicalHash ||
+                SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
+                    Production.Manifest)) != Descriptor.ProductionManifestSha256 ||
+                SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
+                    Production.Catalog)) != Descriptor.ProductionCatalogSha256 ||
+                legacyConfiguration == null || SpatialContractSha256.Compute(legacyConfiguration) !=
+                    Descriptor.LegacyGameplayConfigurationSha256) return false;
+            return DetachedRequiredValidationInputSpecification.Current.Validate(validationInputs,
+                Descriptor.ValidationInputHashes) == null;
+        }
+    }
+
     public sealed class DetachedCompleteSaveValidationResult
     {
         internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason)
@@ -16,6 +95,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public static class DetachedCompleteSaveContract
     {
+        public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
+            DetachedCurrentTargetValidationContext context) => context == null ? Failure() :
+            ParseValidateAndRoundTrip(bytes, context.Limits, context.Production);
+
+        public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
+            DetachedUnfinishedAttemptValidationContext context) => context == null || !context.PinsAreValid()
+            ? Failure() : ParseValidateAndRoundTrip(bytes, context.Limits, context.Production,
+                context.TransactionId, context.DescriptorFingerprint);
+
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, ProductionSpatialContentSnapshot production = null,
             string expectedTransactionId = null, string expectedDescriptorFingerprint = null)

@@ -226,8 +226,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedWholeSaveResult candidate = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                     inputs.Classification, spatial, inputs.SpatialLimits, inputs.WholeSaveLimits);
                 if (!candidate.IsSuccess) return Failure(candidate.Reason, projection.Diagnostics);
-                if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate.Candidate.GetBytes(),
-                    inputs.SpatialLimits, inputs.ProductionContent, transactionId, fingerprint).IsValid)
+                var validationContext = new DetachedUnfinishedAttemptValidationContext(descriptor,
+                    transactionId, fingerprint, inputs.Profile, inputs.Geometry, inputs.ProductionContent,
+                    inputs.LegacyConfigurationBytes, inputs.ValidationInputs, inputs.SpatialLimits);
+                if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    candidate.Candidate.GetBytes(), validationContext).IsValid)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason, projection.Diagnostics);
                 return new DetachedSpatialMigrationPreparationResult(
                     new DetachedPreparedSpatialMigrationAttempt(inputs.OwnedOriginalBytes, descriptor, fingerprint,
