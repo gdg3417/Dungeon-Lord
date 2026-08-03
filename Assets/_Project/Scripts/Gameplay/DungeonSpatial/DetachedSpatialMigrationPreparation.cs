@@ -8,6 +8,44 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public sealed class DetachedRequiredValidationInputSpecification
+    {
+        private readonly string[] inputIds;
+        private DetachedRequiredValidationInputSpecification(IEnumerable<string> values)
+        { inputIds = (values ?? Array.Empty<string>()).OrderBy(value => value, StringComparer.Ordinal).ToArray(); }
+
+        // GD66 contract 1 currently has no external validation byte authorities beyond the
+        // descriptor's explicit profile, geometry, production, legacy-config, and serializer pins.
+        public static DetachedRequiredValidationInputSpecification Current { get; } =
+            new DetachedRequiredValidationInputSpecification(Array.Empty<string>());
+        public string[] InputIds => (string[])inputIds.Clone();
+        public string SerializerId => SpatialMigrationContractIdentity.CanonicalSerializerId;
+        public int SerializerVersion => SpatialMigrationContractIdentity.CanonicalSerializerVersion;
+        public int MarkerContractVersion => SpatialMigrationContractIdentity.AuthorityMarkerContractVersion;
+        public int MigrationContractVersion => SpatialMigrationContractIdentity.MigrationContractVersion;
+        public int TargetSchemaVersion => DetachedWholeSaveCandidateSerializer.TargetSchemaVersion;
+
+        internal string Validate(IReadOnlyDictionary<string, byte[]> values,
+            IEnumerable<SpatialValidationInputHash> descriptorPins)
+        {
+            SpatialValidationInputHash[] pins = (descriptorPins ?? Array.Empty<SpatialValidationInputHash>()).ToArray();
+            if (pins.Any(pin => pin == null) || pins.Select(pin => pin.InputId).Distinct(StringComparer.Ordinal).Count() != pins.Length)
+                return "gd66.transaction.pinned_input_hash_mismatch";
+            if (pins.Length != inputIds.Length || (values?.Count ?? 0) != inputIds.Length)
+                return values == null || pins.Length < inputIds.Length
+                    ? "gd66.transaction.pinned_input_missing" : "gd66.transaction.pinned_input_hash_mismatch";
+            for (int index = 0; index < inputIds.Length; index++)
+            {
+                SpatialValidationInputHash pin = pins.SingleOrDefault(value => value.InputId == inputIds[index]);
+                if (pin == null || values == null || !values.TryGetValue(inputIds[index], out byte[] bytes) || bytes == null)
+                    return "gd66.transaction.pinned_input_missing";
+                if (SpatialContractSha256.Compute(bytes) != pin.Sha256)
+                    return "gd66.transaction.pinned_input_hash_mismatch";
+            }
+            return null;
+        }
+    }
+
     public static class LegacyGameplayConfigurationContract
     {
         public static byte[] SerializeCanonical(RunSimulationConfig value)
@@ -272,6 +310,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 inputs.Profile.GeometryVersion == inputs.Geometry.GeometryVersion &&
                 inputs.Profile.GeometryCanonicalHash == inputs.Geometry.CanonicalHash;
             if (!fixedPins) { reason = "gd66.transaction.pinned_input_hash_mismatch"; return false; }
+            string registryReason = DetachedRequiredValidationInputSpecification.Current.Validate(
+                inputs.ValidationInputs, descriptor.ValidationInputHashes);
+            if (registryReason != null) { reason = registryReason; return false; }
             if ((inputs.ValidationInputs?.Count ?? 0) != descriptor.ValidationInputHashes.Length)
             { reason = inputs.ValidationInputs == null ? "gd66.transaction.pinned_input_missing" :
                 "gd66.transaction.pinned_input_hash_mismatch"; return false; }

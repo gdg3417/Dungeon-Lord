@@ -70,6 +70,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reason, Does.StartWith("gd66."));
         }
 
+        [Test]
+        public void RequiredValidationInputRegistry_RejectsUnexpectedCallerAuthoredInput()
+        {
+            var values = new System.Collections.Generic.Dictionary<string, byte[]>
+            { { "unexpected", new byte[] { 1 } } };
+            var pins = new[]
+            {
+                new SpatialValidationInputHash("unexpected", SpatialContractSha256.Compute(new byte[] { 1 }))
+            };
+
+            string reason = DetachedRequiredValidationInputSpecification.Current.Validate(values, pins);
+
+            Assert.That(reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(DetachedRequiredValidationInputSpecification.Current.TargetSchemaVersion, Is.EqualTo(7));
+        }
+
         private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
             new[]
             {
