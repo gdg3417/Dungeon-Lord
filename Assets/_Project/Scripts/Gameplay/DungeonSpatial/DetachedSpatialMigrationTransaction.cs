@@ -524,8 +524,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 byte[] active = fileSystem.ReadAllBytes(activePath);
                 if (IsCanonicalSchemaSeven(active))
-                    return new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason, null,
-                        SpatialTrustedPayload.Candidate);
+                    // Failure to discover evidence cannot establish the no-live-journal precondition
+                    // for AlreadyCommitted.  C remains independently trusted, but gameplay stays
+                    // blocked until discovery succeeds and any live attempt can be ruled out.
+                    return Failure(reason, null, SpatialTrustedPayload.Candidate);
                 DetachedLegacyValidationResult legacy = recoveryContext.ValidateLegacy(active);
                 if (legacy.IsValid) return Failure(reason, null, SpatialTrustedPayload.Original);
                 return Failure(string.IsNullOrEmpty(legacy.Reason) ? reason : legacy.Reason,

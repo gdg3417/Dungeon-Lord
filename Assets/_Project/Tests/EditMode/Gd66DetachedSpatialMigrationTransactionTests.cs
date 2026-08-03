@@ -394,7 +394,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Recovery_EnumerationFailurePreservesVerifiedOriginal()
+        public void Recovery_EnumerationFailureWithOriginal_PreservesOriginal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             var fileSystem = new DeterministicFileSystem(OperationType.Enumerate, -1);
@@ -405,12 +405,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
 
             Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.PathInvalidReason));
             Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
         }
 
         [Test]
-        public void Recovery_EnumerationFailurePreservesSelfValidCandidate()
+        public void Recovery_EnumerationFailureWithCandidate_IsNonterminal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             var fileSystem = new DeterministicFileSystem();
@@ -425,9 +427,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
 
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.PathInvalidReason));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+        }
+
+        [Test]
+        public void Recovery_NoLiveJournalWithCandidate_IsAlreadyCommitted()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Result.Attempt.Candidate.GetBytes());
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
             Assert.That(outcome.IsSuccess, Is.True);
             Assert.That(outcome.Reason, Is.EqualTo(
                 DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
+            Assert.That(outcome.Stage, Is.Null);
             Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
