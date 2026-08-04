@@ -573,6 +573,176 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(invalidTarget));
         }
 
+
+
+
+
+        [Test]
+        public void Execute_RepairedOriginalQuarantinesStaleLiveJournalBeforeRetryCreatesNewAttempt()
+        {
+            PreparedFixture stale = PrepareEmptyFixture(6);
+            PreparedFixture repaired = PrepareEmptyFixture(5);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, stale, activePath, SpatialMigrationJournalStage.BackupVerified,
+                includeBackup: true, includeStaging: false, activeCandidate: false);
+            fileSystem.Seed(activePath, repaired.Original);
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(repaired))
+                    .Execute(activePath, repaired.Result.Attempt);
+
+            Assert.That(first.IsSuccess, Is.False);
+            Assert.That(first.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.StaleJournalOriginalMismatchReason));
+            Assert.That(first.Stage, Is.EqualTo(SpatialMigrationJournalStage.BackupVerified));
+            Assert.That(first.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(repaired.Original));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json", StringComparison.Ordinal)),
+                Is.EqualTo(0));
+            Assert.That(fileSystem.Paths.Any(path => Path.GetFileName(path).Contains(
+                ".gd66-quarantine-")), Is.True);
+
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(repaired))
+                    .Execute(activePath, repaired.Result.Attempt);
+
+            Assert.That(retry.IsSuccess, Is.True, retry.Reason);
+            Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(repaired.Result.Attempt.Candidate.GetBytes()));
+        }
+
+        [Test]
+        public void Execute_CandidateVerifiedWithValidStagedCandidateAndMissingBackupUsesRecoveryPolicy()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.CandidateVerified,
+                includeBackup: false, includeStaging: true, activeCandidate: false);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.BackupFailedReason));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.CandidateVerified));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json", StringComparison.Ordinal)),
+                Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Execute_ReplacedExactCandidateMissingBackupFlushFailureUsesRecoveryPolicy()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Flush, 1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.Replaced,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Diagnostics, Does.Contain(
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Execute_DurableVerifiedExactCandidateMissingBackupFinalizesWithoutReplacement()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.DurableVerified,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+
+            Assert.That(outcome.IsSuccess, Is.True, outcome.Reason);
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Diagnostics, Does.Contain(
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+        }
+
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"unknown\":\"spatialFloors\"}}")]
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"unknown\":\"\\\"schemaVersion\\\":7\"}}")]
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"unknown\":{\"spatialFloors\":[]}}}")]
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"spatialFloors\":[],\"primary\":{}}")]
+        public void Recovery_StructuralClassifierIgnoresLegacyFalsePositiveCanonicalNames(string json)
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            fileSystem.Seed(activePath, bytes);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.True, outcome.Reason);
+            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.NoJournalLegacyDiagnostic));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(bytes));
+        }
+
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"spatialFloors\":[]}", "gd66.payload.missing_primary")]
+        [TestCase("{\"schema\":\"save_root\",\"schemaVersion\":6,\"spatialFloors\":[],\"primary\":1}", RawSavePayloadClassifier.InvalidPrimaryReason)]
+        public void Recovery_StructuralClassifierPreservesWrappedPrimaryReasons(string json, string expectedReason)
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            fileSystem.Seed(activePath, bytes);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(expectedReason));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(bytes));
+        }
+
+        [Test]
+        public void Recovery_MalformedUtf8PreservesUnreadableReason()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            byte[] bytes = { 0xff, 0xfe, 0xfd };
+            fileSystem.Seed(activePath, bytes);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(RawSavePayloadClassifier.UnreadableReason));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(bytes));
+        }
+
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
         private static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
