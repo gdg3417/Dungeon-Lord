@@ -34,6 +34,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
+        public static IEnumerable<TestCaseData> ExactContextMutations
+        {
+            get
+            {
+                yield return ContextCase("FloorIdentity", RenameFloor);
+                yield return ContextCase("FixedIdentity", state => state.Floors[0].FixedStructures[0]
+                    .FixedStructureInstanceId = "compat.floor.00.fixed.alternate");
+                yield return ContextCase("NodeIdentity", RenameRoomNode);
+                yield return ContextCase("EdgeIdentity", state => state.Floors[0].Layout.Edges[0].EdgeId =
+                    "compat.floor.00.edge.direct.alternate");
+                yield return ContextCase("AlternateRoute", AlternateRoute);
+            }
+        }
+
         [TestCaseSource(nameof(SharedMutations))]
         public void SharedProductionMutation_IsRejectedByBothModes(Mutation mutation)
         {
@@ -67,6 +81,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TileCoordinate anchor = first.Anchor; CardinalOrientation orientation = first.Orientation;
             first.Anchor = second.Anchor; first.Orientation = second.Orientation;
             second.Anchor = anchor; second.Orientation = orientation;
+            Assert.That(Validate(fixture, changed, false), Is.True);
+            Assert.That(Validate(fixture, changed, true), Is.False);
+        }
+
+        [TestCaseSource(nameof(ExactContextMutations))]
+        public void ExactPinnedIdentity_CurrentTargetAccepts_UnfinishedRejects(Mutation mutation)
+        {
+            var fixture = Baseline("context-" + mutation.Name, true);
+            Assert.That(Validate(fixture, fixture.State, false), Is.True);
+            Assert.That(Validate(fixture, fixture.State, true), Is.True);
+            DetachedCanonicalSpatialSaveState changed = Clone(fixture.State, fixture.Limits);
+            mutation.Apply(changed);
             Assert.That(Validate(fixture, changed, false), Is.True);
             Assert.That(Validate(fixture, changed, true), Is.False);
         }
@@ -107,8 +133,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     OptionId = "placement.option.monster.skeleton", Sequence = index }).ToArray();
             state.Floors[0].RoomContents.NextSequence = 100;
         }
+        private static void RenameFloor(DetachedCanonicalSpatialSaveState state)
+        {
+            SavedSpatialFloor floor = state.Floors[0]; const string renamed = "compat.floor.renamed";
+            floor.FloorInstanceId = renamed; floor.Layout.FloorId = renamed;
+            foreach (RoomSpatialInstance value in floor.Layout.Rooms) value.FloorId = renamed;
+            foreach (SavedFixedSpatialStructure value in floor.FixedStructures) value.FloorInstanceId = renamed;
+            foreach (FloorRouteNode value in floor.Layout.Nodes) value.FloorId = renamed;
+            foreach (FloorRouteEdge value in floor.Layout.Edges) value.FloorId = renamed;
+        }
+        private static void RenameRoomNode(DetachedCanonicalSpatialSaveState state)
+        {
+            FloorRouteNode node = state.Floors[0].Layout.Nodes.First(value => value.Kind == FloorRouteNodeKind.Room);
+            string previous = node.NodeId; node.NodeId = previous + ".renamed";
+            foreach (FloorRouteEdge edge in state.Floors[0].Layout.Edges)
+            { if (edge.SourceNodeId == previous) edge.SourceNodeId = node.NodeId;
+              if (edge.DestinationNodeId == previous) edge.DestinationNodeId = node.NodeId; }
+        }
+        private static void AlternateRoute(DetachedCanonicalSpatialSaveState state)
+        {
+            FloorRouteEdge[] edges = state.Floors[0].Layout.Edges;
+            string entrance = state.Floors[0].Layout.Nodes.First(value => value.Kind == FloorRouteNodeKind.Entrance).NodeId;
+            string completion = state.Floors[0].Layout.Nodes.First(value => value.Kind == FloorRouteNodeKind.Completion).NodeId;
+            string[] rooms = state.Floors[0].Layout.Nodes.Where(value => value.Kind == FloorRouteNodeKind.Room)
+                .Select(value => value.NodeId).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            edges[0].SourceNodeId = entrance; edges[0].DestinationNodeId = rooms[1];
+            edges[1].SourceNodeId = rooms[1]; edges[1].DestinationNodeId = rooms[0];
+            edges[2].SourceNodeId = rooms[0]; edges[2].DestinationNodeId = completion;
+        }
         private static TestCaseData Case(string name, Action<DetachedCanonicalSpatialSaveState> apply) =>
             new TestCaseData(new Mutation { Name = name, Apply = apply }).SetName("ProductionSemantic_" + name);
+        private static TestCaseData ContextCase(string name, Action<DetachedCanonicalSpatialSaveState> apply) =>
+            new TestCaseData(new Mutation { Name = name, Apply = apply }).SetName("PinnedContext_" + name);
         private static string Room(int index, string monster = null) => "{\"FloorIndex\":0,\"RoomIndex\":" + index +
             ",\"RoomOptionId\":\"placement.option.room.basic\",\"MonsterOptionIds\":" +
             (monster == null ? "[]" : "[\"" + monster + "\"]") +

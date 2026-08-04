@@ -186,23 +186,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal bool IsJournalBoundCandidateValid(byte[] bytes, SpatialMigrationJournal journal)
         {
-            if (bytes == null || journal == null || !HashEquals(bytes, journal.ExpectedCandidateSha256))
-                return false;
-            string fingerprint;
-            try { fingerprint = SpatialMigrationDescriptorContracts.ComputeInputFingerprint(
-                journal.Descriptor, Limits.Serialized); }
+            try
+            {
+                if (bytes == null || journal == null || journal.Descriptor == null ||
+                    !HashEquals(bytes, journal.ExpectedCandidateSha256)) return false;
+                string fingerprint = SpatialMigrationDescriptorContracts.ComputeInputFingerprint(
+                    journal.Descriptor, Limits.Serialized);
+                if (fingerprint != journal.DescriptorFingerprintSha256) return false;
+                string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(
+                    journal.Descriptor.OriginalPayloadSha256, fingerprint);
+                if (identity != journal.TransactionIdentitySha256 ||
+                    SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
+                    return false;
+                return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, Limits, null,
+                    journal.TransactionId, journal.DescriptorFingerprintSha256).IsValid;
+            }
             catch (ArgumentException) { return false; }
-            if (fingerprint != journal.DescriptorFingerprintSha256) return false;
-            string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(
-                journal.Descriptor.OriginalPayloadSha256, fingerprint);
-            if (identity != journal.TransactionIdentitySha256 ||
-                SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
-                return false;
-            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                bytes, Limits, null, journal.TransactionId, journal.DescriptorFingerprintSha256);
-            return parsed.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(parsed.State,
-                ProductionContent, LegacyGameplayConfigurationContract.Parse(legacyConfigurationBytes),
-                Limits.Spatial).IsValid;
+            catch (FormatException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
         internal byte[] LegacyConfigurationBytes => legacyConfigurationBytes == null ? null :

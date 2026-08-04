@@ -196,26 +196,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (state?.Floors == null || state.Floors.Length == 0) return state?.Floors?.Length == 0;
             if (state.Floors.Length != 1) return false;
+            const string floorId = "compat.floor.00";
             SavedSpatialFloor floor = state.Floors[0];
-            if (floor == null || floor.Layout == null || floor.FloorDefinitionId != context.Geometry.FloorDefinitionId ||
+            if (floor == null || floor.Layout == null || floor.FloorInstanceId != floorId ||
+                floor.Layout.FloorId != floorId || floor.FloorDefinitionId != context.Geometry.FloorDefinitionId ||
                 floor.FloorIndex != context.Geometry.FloorIndex) return false;
             RoomSpatialInstance[] rooms = floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>();
-            CompatibilityLayoutVariant variant = (context.Geometry.Layouts ?? Array.Empty<CompatibilityLayoutVariant>())
-                .SingleOrDefault(value => value != null && value.Placements.Count(placement => placement != null &&
+            CompatibilityLayoutVariant[] variants = (context.Geometry.Layouts ?? Array.Empty<CompatibilityLayoutVariant>())
+                .Where(value => value != null && (value.Placements ?? Array.Empty<CompatibilityLayoutPlacement>())
+                    .Count(placement => placement != null &&
                     (placement.Role == CompatibilityRouteRole.BasicRoom0 ||
-                     placement.Role == CompatibilityRouteRole.BasicRoom1)) == rooms.Length);
-            if (variant == null || (floor.Layout.Edges?.Length ?? 0) != variant.Connections.Length) return false;
-            foreach (CompatibilityLayoutPlacement placement in variant.Placements ??
-                Array.Empty<CompatibilityLayoutPlacement>())
+                     placement.Role == CompatibilityRouteRole.BasicRoom1)) == rooms.Length).ToArray();
+            if (variants.Length != 1) return false;
+            CompatibilityLayoutVariant variant = variants[0];
+            CompatibilityLayoutPlacement[] placements = variant.Placements ?? Array.Empty<CompatibilityLayoutPlacement>();
+            SavedFixedSpatialStructure[] fixedValues = floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>();
+            FloorRouteNode[] nodes = floor.Layout.Nodes ?? Array.Empty<FloorRouteNode>();
+            FloorRouteEdge[] edges = floor.Layout.Edges ?? Array.Empty<FloorRouteEdge>();
+            if (rooms.Length != placements.Count(IsRoom) || fixedValues.Length != 2 ||
+                nodes.Length != placements.Length || edges.Length != (variant.Connections?.Length ?? 0)) return false;
+            foreach (CompatibilityLayoutPlacement placement in placements)
             {
-                if (placement.Role == CompatibilityRouteRole.BasicRoom0 ||
-                    placement.Role == CompatibilityRouteRole.BasicRoom1)
+                string role = Role(placement.Role);
+                string nodeId = floorId + ".node." + role;
+                bool roomRole = IsRoom(placement);
+                if (roomRole)
                 {
                     int index = placement.Role == CompatibilityRouteRole.BasicRoom0 ? 0 : 1;
-                    RoomSpatialInstance room = rooms.SingleOrDefault(value => value != null &&
-                        value.RoomInstanceId == "compat.floor.00.legacy-room." + index.ToString("D2"));
-                    if (room == null || room.RoomDefinitionId != context.Geometry.BasicRoomDefinitionId ||
+                    string roomId = floorId + ".legacy-room." + index.ToString("D2");
+                    if (!ExactlyOne(rooms, value => value != null && value.RoomInstanceId == roomId,
+                        out RoomSpatialInstance room) || room.FloorId != floorId ||
+                        room.RoomDefinitionId != context.Geometry.BasicRoomDefinitionId ||
                         !room.Anchor.Equals(placement.Anchor) || room.Orientation != placement.Orientation) return false;
+                    if (!ExactlyOne(nodes, value => value != null && value.NodeId == nodeId,
+                        out FloorRouteNode node) || node.FloorId != floorId || node.Kind != FloorRouteNodeKind.Room ||
+                        node.RoomInstanceId != roomId) return false;
                 }
                 else
                 {
@@ -223,13 +238,46 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
                     string definition = placement.Role == CompatibilityRouteRole.Entrance ?
                         context.Geometry.EntranceStructureDefinitionId : context.Geometry.CompletionStructureDefinitionId;
-                    SavedFixedSpatialStructure fixedValue = (floor.FixedStructures ??
-                        Array.Empty<SavedFixedSpatialStructure>()).SingleOrDefault(value => value != null && value.Kind == kind);
-                    if (fixedValue == null || fixedValue.FixedStructureDefinitionId != definition ||
+                    string fixedId = floorId + ".fixed." + role;
+                    if (!ExactlyOne(fixedValues, value => value != null && value.FixedStructureInstanceId == fixedId,
+                        out SavedFixedSpatialStructure fixedValue) || fixedValue.Kind != kind ||
+                        fixedValue.FloorInstanceId != floorId || fixedValue.FixedStructureDefinitionId != definition ||
                         !fixedValue.Anchor.Equals(placement.Anchor) || fixedValue.Orientation != placement.Orientation) return false;
+                    FloorRouteNodeKind nodeKind = placement.Role == CompatibilityRouteRole.Entrance ?
+                        FloorRouteNodeKind.Entrance : FloorRouteNodeKind.Completion;
+                    if (!ExactlyOne(nodes, value => value != null && value.NodeId == nodeId,
+                        out FloorRouteNode node) || node.FloorId != floorId || node.Kind != nodeKind ||
+                        !string.IsNullOrEmpty(node.RoomInstanceId)) return false;
                 }
             }
+            foreach (CompatibilityLayoutConnection connection in variant.Connections ??
+                Array.Empty<CompatibilityLayoutConnection>())
+            {
+                string source = Role(connection.SourceRole), destination = Role(connection.DestinationRole);
+                string edgeId = floorId + ".edge.direct." + source + "." + destination;
+                if (!ExactlyOne(edges, value => value != null && value.EdgeId == edgeId,
+                    out FloorRouteEdge edge) || edge.FloorId != floorId ||
+                    edge.SourceNodeId != floorId + ".node." + source ||
+                    edge.DestinationNodeId != floorId + ".node." + destination ||
+                    edge.Classification != RouteClassification.Required ||
+                    edge.ConnectionKind != FloorRouteConnectionKind.DirectDoorway ||
+                    !string.IsNullOrEmpty(edge.CorridorDefinitionId) || edge.Footprint != null ||
+                    !string.IsNullOrEmpty(edge.OptionalBranchId)) return false;
+            }
             return true;
+        }
+
+        private static bool IsRoom(CompatibilityLayoutPlacement value) => value != null &&
+            (value.Role == CompatibilityRouteRole.BasicRoom0 || value.Role == CompatibilityRouteRole.BasicRoom1);
+        private static string Role(CompatibilityRouteRole role) => role == CompatibilityRouteRole.Entrance ? "entrance" :
+            role == CompatibilityRouteRole.Completion ? "completion" : role == CompatibilityRouteRole.BasicRoom0 ?
+            "legacy-room.00" : "legacy-room.01";
+        private static bool ExactlyOne<T>(IEnumerable<T> values, Func<T, bool> predicate, out T result)
+        {
+            result = default(T); int count = 0;
+            foreach (T value in values ?? Enumerable.Empty<T>())
+                if (predicate(value)) { result = value; if (++count > 1) return false; }
+            return count == 1;
         }
 
         private static bool Field(ContractJsonNode node, int index, string name, ContractJsonKind kind) =>
