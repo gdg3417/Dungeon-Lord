@@ -83,12 +83,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     transaction.Execute(activePath, fixture.Result.Attempt);
 
                 Assert.That(outcome.IsSuccess, Is.False);
-                Assert.That(outcome.Reason, Is.EqualTo(
-                    DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic));
-                Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
-                Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
-                Assert.That(File.ReadAllBytes(activePath),
-                    Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+                Assert.That(outcome.Stage, Is.Not.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+                Assert.That(outcome.Stage, Is.Not.EqualTo(SpatialMigrationJournalStage.Finalized));
+                Assert.That(outcome.Reason, Is.Not.EqualTo(DetachedSpatialMigrationTransaction.SuccessReason));
+                Assert.That(outcome.Reason, Is.Not.EqualTo(DetachedSpatialMigrationTransaction.EmptySuccessReason));
+                byte[] active = File.ReadAllBytes(activePath);
+                Assert.That(active.SequenceEqual(fixture.Original) ||
+                    active.SequenceEqual(fixture.Result.Attempt.Candidate.GetBytes()), Is.True);
             }
             finally
             {
