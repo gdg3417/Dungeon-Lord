@@ -232,7 +232,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     inputs.CompatibilitySnapshot.SelectContract(descriptor.SelectedTargetSchemaVersion);
                 if (!selectedContract.Success) return Failure(selectedContract.Code, projection.Diagnostics);
                 var validationContext = new DetachedUnfinishedAttemptValidationContext(descriptor,
-                    transactionId, fingerprint, selectedContract.Value, inputs.Profile, inputs.Geometry, inputs.ProductionContent,
+                    transactionId, fingerprint, candidate.Candidate.Sha256, selectedContract.Value, inputs.Profile, inputs.Geometry, inputs.ProductionContent,
                     inputs.LegacyConfigurationBytes, inputs.ValidationInputs, inputs.SpatialLimits);
                 if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                     candidate.Candidate.GetBytes(), validationContext).IsValid)

@@ -10,7 +10,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class Gd66DetachedCompleteSaveSemanticValidationTests
     {
         public sealed class Mutation
-        { internal string Name; internal Action<DetachedCanonicalSpatialSaveState> Apply; }
+        { internal string Name; internal bool UseR2; internal Action<DetachedCanonicalSpatialSaveState> Apply; }
 
         public static IEnumerable<TestCaseData> SharedMutations
         {
@@ -45,6 +45,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 yield return ContextCase("EdgeIdentity", state => state.Floors[0].Layout.Edges[0].EdgeId =
                     "compat.floor.00.edge.direct.alternate");
                 yield return ContextCase("AlternateRoute", AlternateRoute);
+            }
+        }
+
+
+
+        public static IEnumerable<TestCaseData> ExactCandidateMutations
+        {
+            get
+            {
+                yield return CandidateCase("PopulatedR1ToEmpty", false,
+                    state => state.Floors = Array.Empty<SavedSpatialFloor>());
+                yield return CandidateCase("R2ToValidR1", true, ReplaceWithR1Floor);
+                yield return CandidateCase("RemoveAssignment", false, state =>
+                {
+                    state.Floors[0].RoomContents.Assignments = Array.Empty<RoomContentAssignment>();
+                    state.Floors[0].RoomContents.NextSequence = 0;
+                });
+                yield return CandidateCase("ChangeRoomSemantics", false, state =>
+                    state.Floors[0].RoomContents.RoomSemantics[0].LegacyRoomOriginKind =
+                        LegacyRoomOriginKind.CanonicalPlayerPlaced);
+            }
+        }
+
+        public static IEnumerable<TestCaseData> ExpectedHashFailures
+        {
+            get
+            {
+                yield return new TestCaseData(new object[] { null }).SetName("ExpectedCandidateHash_Null");
+                yield return new TestCaseData("not-a-sha").SetName("ExpectedCandidateHash_Malformed");
+                yield return new TestCaseData(new string('0', 64)).SetName("ExpectedCandidateHash_Incorrect");
             }
         }
 
@@ -97,6 +127,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Validate(fixture, changed, true), Is.False);
         }
 
+
+
+        [TestCaseSource(nameof(ExactCandidateMutations))]
+        public void ExactPreparedCandidate_CurrentTargetAccepts_UnfinishedRejects(Mutation mutation)
+        {
+            var fixture = Baseline("exact-candidate-" + mutation.Name, mutation.UseR2);
+            Assert.That(Validate(fixture, fixture.State, false), Is.True);
+            Assert.That(Validate(fixture, fixture.State, true), Is.True);
+            DetachedCanonicalSpatialSaveState changed = Clone(fixture.State, fixture.Limits);
+            mutation.Apply(changed);
+            DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
+            Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
+            Assert.That(changedCandidate.Candidate.Sha256, Is.Not.EqualTo(fixture.Attempt.CandidateSha256));
+            Assert.That(Validate(fixture, changed, false), Is.True);
+            Assert.That(Validate(fixture, changed, true), Is.False);
+            Assert.That(Validate(fixture, fixture.State, false), Is.True);
+            Assert.That(Validate(fixture, fixture.State, true), Is.True);
+        }
+
+        [TestCaseSource(nameof(ExpectedHashFailures))]
+        public void ExpectedCandidateHash_InvalidOrWrong_FailsClosed(string expectedHash)
+        {
+            var fixture = Baseline("expected-hash", false);
+            var context = new DetachedUnfinishedAttemptValidationContext(fixture.Attempt.Descriptor,
+                fixture.Attempt.TransactionId, fixture.Attempt.DescriptorFingerprint, expectedHash,
+                fixture.UnfinishedContext.SelectedContract, fixture.UnfinishedContext.Profile,
+                fixture.UnfinishedContext.Geometry, fixture.UnfinishedContext.Production,
+                fixture.LegacyBytes, fixture.ValidationInputs, fixture.Limits);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Attempt.Candidate.GetBytes(), context).IsValid, Is.False);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Attempt.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.True);
+        }
+
         private static Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution Baseline(
             string identity, bool r2)
         {
@@ -105,11 +169,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"mvpRoomSlotAssignments\":{\"Rooms\":[" + rooms + "],\"NextRevision\":3}");
         }
 
+
+        private static DetachedWholeSaveResult Build(
+            Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution fixture,
+            DetachedCanonicalSpatialSaveState state) =>
+            DetachedWholeSaveCandidateSerializer.BuildPrepared(fixture.Classification, state,
+                fixture.Limits, fixture.WholeLimits);
+
+        private static void ReplaceWithR1Floor(DetachedCanonicalSpatialSaveState state)
+        {
+            var r1 = Baseline("r2-to-r1-source", false);
+            state.Floors = Clone(r1.State, r1.Limits).Floors;
+        }
+
         private static bool Validate(Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution fixture,
             DetachedCanonicalSpatialSaveState state, bool unfinished)
         {
-            DetachedWholeSaveResult built = DetachedWholeSaveCandidateSerializer.BuildPrepared(fixture.Classification,
-                state, fixture.Limits, fixture.WholeLimits);
+            DetachedWholeSaveResult built = Build(fixture, state);
             if (!built.IsSuccess) return false;
             return unfinished ? DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 built.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid :
@@ -165,6 +241,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             new TestCaseData(new Mutation { Name = name, Apply = apply }).SetName("ProductionSemantic_" + name);
         private static TestCaseData ContextCase(string name, Action<DetachedCanonicalSpatialSaveState> apply) =>
             new TestCaseData(new Mutation { Name = name, Apply = apply }).SetName("PinnedContext_" + name);
+        private static TestCaseData CandidateCase(string name, bool r2, Action<DetachedCanonicalSpatialSaveState> apply) =>
+            new TestCaseData(new Mutation { Name = name, UseR2 = r2, Apply = apply }).SetName("ExactCandidate_" + name);
         private static string Room(int index, string monster = null) => "{\"FloorIndex\":0,\"RoomIndex\":" + index +
             ",\"RoomOptionId\":\"placement.option.room.basic\",\"MonsterOptionIds\":" +
             (monster == null ? "[]" : "[\"" + monster + "\"]") +

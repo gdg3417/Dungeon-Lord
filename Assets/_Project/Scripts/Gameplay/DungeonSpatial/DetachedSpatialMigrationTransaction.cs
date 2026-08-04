@@ -160,11 +160,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         internal bool TryCreateUnfinishedValidationContext(SpatialMigrationInputDescriptor descriptor,
-            string transactionId, string fingerprint,
+            string transactionId, string fingerprint, string expectedCandidateSha256,
             out DetachedUnfinishedAttemptValidationContext context)
         {
             context = null;
-            if (ValidatePins(descriptor) != null || !Compatibility.TryRecoverMigration(
+            if (descriptor == null || !SpatialContractSha256.IsCanonical(expectedCandidateSha256) ||
+                ValidatePins(descriptor) != null || !Compatibility.TryRecoverMigration(
                 descriptor.MigrationProfileId, descriptor.MigrationProfileVersion,
                 descriptor.MigrationProfileCanonicalHash, descriptor.SharedGeometryId,
                 descriptor.SharedGeometryVersion, descriptor.SharedGeometryCanonicalHash,
@@ -179,7 +180,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Compatibility.SelectContract(descriptor.SelectedTargetSchemaVersion);
             if (!selectedContract.Success) return false;
             context = new DetachedUnfinishedAttemptValidationContext(descriptor, transactionId, fingerprint,
-                selectedContract.Value, profile, geometry, ProductionContent, legacyConfigurationBytes,
+                expectedCandidateSha256, selectedContract.Value, profile, geometry, ProductionContent, legacyConfigurationBytes,
                 validationInputs, Limits);
             return true;
         }
@@ -436,7 +437,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 else
                 {
                     if (Same(fileSystem.ReadAllBytes(activePath), candidate.GetBytes()) &&
-                        IsCanonicalSchemaSeven(candidate.GetBytes(), descriptor, transactionId, fingerprint))
+                        IsCanonicalSchemaSeven(candidate.GetBytes(), descriptor, transactionId, fingerprint, candidate.Sha256))
                     {
                         var committed = new DetachedSpatialMigrationOutcome(true, AlreadyCommittedReason,
                             null, SpatialTrustedPayload.Candidate);
@@ -604,11 +605,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     : Restore(journalPath, backupPath, activePath, directory, journal, backup);
 
             bool activeCandidate = HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256);
+                journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
+                journal.ExpectedCandidateSha256);
             byte[] staged = fileSystem.Exists(stagingPath) ? fileSystem.ReadAllBytes(stagingPath) : null;
             bool stagedCandidate = HashIs(staged, journal.ExpectedCandidateSha256) &&
                 IsCanonicalSchemaSeven(staged, journal.Descriptor, journal.TransactionId,
-                    journal.DescriptorFingerprintSha256);
+                    journal.DescriptorFingerprintSha256, journal.ExpectedCandidateSha256);
             if (journal.Stage == SpatialMigrationJournalStage.CandidateVerified)
             {
                 if (!activeCandidate && !stagedCandidate)
@@ -639,7 +641,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DurabilityFailedReason); }
                 active = fileSystem.ReadAllBytes(activePath);
                 if (!HashIs(active, journal.ExpectedCandidateSha256) || !IsCanonicalSchemaSeven(active,
-                    journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256))
+                    journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
+                    journal.ExpectedCandidateSha256))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup);
                 CleanupInterruptedRestoration(directory, backupPath);
                 SpatialMigrationJournal durable = CopyStage(journal, SpatialMigrationJournalStage.DurableVerified);
@@ -653,7 +656,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 byte[] durableActive = fileSystem.ReadAllBytes(activePath);
                 if (!HashIs(durableActive, journal.ExpectedCandidateSha256) ||
                     !IsCanonicalSchemaSeven(durableActive, journal.Descriptor, journal.TransactionId,
-                        journal.DescriptorFingerprintSha256))
+                        journal.DescriptorFingerprintSha256, journal.ExpectedCandidateSha256))
                     return Restore(journalPath, backupPath, activePath, directory, journal, backup);
                 string receiptDiagnostic = TryWriteReceipt(directory, journal);
                 SpatialMigrationJournal finalized = CopyStage(journal, SpatialMigrationJournalStage.Finalized);
@@ -767,7 +770,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     {
                         byte[] active = fileSystem.ReadAllBytes(activePath);
                         if (HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                            journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256))
+                            journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
+                            journal.ExpectedCandidateSha256))
                             return new DetachedSpatialMigrationOutcome(false,
                                 ReplacedPendingDurabilityDiagnostic, journal.Stage,
                                 SpatialTrustedPayload.Candidate,
@@ -1100,7 +1104,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string.Equals(SpatialContractSha256.Compute(bytes), expected, StringComparison.Ordinal);
 
         private bool IsCanonicalSchemaSeven(byte[] bytes, SpatialMigrationInputDescriptor descriptor = null,
-            string expectedTransactionId = null, string expectedDescriptorFingerprint = null)
+            string expectedTransactionId = null, string expectedDescriptorFingerprint = null,
+            string expectedCandidateSha256 = null)
         {
             if (productionContent == null) return false;
             var completeLimits = new CanonicalSpatialSerializationLimits(limits,
@@ -1109,7 +1114,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (descriptor != null)
             {
                 return recoveryContext.TryCreateUnfinishedValidationContext(descriptor,
-                    expectedTransactionId, expectedDescriptorFingerprint,
+                    expectedTransactionId, expectedDescriptorFingerprint, expectedCandidateSha256,
                     out DetachedUnfinishedAttemptValidationContext unfinished) &&
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, unfinished).IsValid;
             }

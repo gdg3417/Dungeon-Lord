@@ -523,6 +523,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedUnfinishedAttemptValidationContext UnfinishedContext;
             internal CanonicalSpatialSerializationLimits Limits;
             internal DetachedWholeSaveLimits WholeLimits;
+            internal byte[] LegacyBytes;
+            internal IReadOnlyDictionary<string, byte[]> ValidationInputs;
         }
 
         internal static SemanticFixtureExecution RunPopulatedSemanticFixture(string identity, int schema,
@@ -577,12 +579,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedSpatialMigrationRecoveryContext recoveryContext = Recovery(fixture);
             Assert.That(recoveryContext.TryCreateUnfinishedValidationContext(fixture.Result.Attempt.Descriptor,
                 fixture.Result.Attempt.TransactionId, fixture.Result.Attempt.DescriptorFingerprint,
-                out DetachedUnfinishedAttemptValidationContext unfinished), Is.True);
+                fixture.Result.Attempt.CandidateSha256, out DetachedUnfinishedAttemptValidationContext unfinished), Is.True);
             return new SemanticFixtureExecution { Classification = fixture.Classification,
                 Attempt = fixture.Result.Attempt, State = parsed.State, Execute = executed,
                 FirstRecovery = recovered, SecondRecovery = recoveredAgain,
                 BasicRoomDefinitionId = geometry.BasicRoomDefinitionId, CurrentContext = currentContext,
-                UnfinishedContext = unfinished, Limits = fixture.Limits, WholeLimits = WholeLimits() };
+                UnfinishedContext = unfinished, Limits = fixture.Limits, WholeLimits = WholeLimits(),
+                LegacyBytes = fixture.LegacyBytes, ValidationInputs = new Dictionary<string, byte[]>() };
         }
 
         private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,

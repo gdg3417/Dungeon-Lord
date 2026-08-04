@@ -28,7 +28,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly byte[] legacyConfiguration;
         private readonly Dictionary<string, byte[]> validationInputs;
         public DetachedUnfinishedAttemptValidationContext(SpatialMigrationInputDescriptor descriptor,
-            string transactionId, string descriptorFingerprint,
+            string transactionId, string descriptorFingerprint, string expectedCandidateSha256,
             CanonicalLayoutContractSelection selectedContract,
             SpatialMigrationCompatibilityProfile profile, CompatibilityLayoutGeometryRecord geometry,
             ProductionSpatialContentSnapshot production, byte[] legacyConfiguration,
@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
             TransactionId = transactionId; DescriptorFingerprint = descriptorFingerprint;
+            ExpectedCandidateSha256 = expectedCandidateSha256;
             SelectedContract = selectedContract ?? throw new ArgumentNullException(nameof(selectedContract));
             Profile = profile ?? throw new ArgumentNullException(nameof(profile));
             Geometry = geometry ?? throw new ArgumentNullException(nameof(geometry));
@@ -50,6 +51,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public SpatialMigrationInputDescriptor Descriptor { get; }
         public string TransactionId { get; }
         public string DescriptorFingerprint { get; }
+        public string ExpectedCandidateSha256 { get; }
         internal SpatialMigrationCompatibilityProfile Profile { get; }
         internal CanonicalLayoutContractSelection SelectedContract { get; }
         internal CompatibilityLayoutGeometryRecord Geometry { get; }
@@ -63,6 +65,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (!SpatialMigrationTransactionIdentity.IsCanonicalTransactionId(TransactionId) ||
                 !SpatialContractSha256.IsCanonical(DescriptorFingerprint) ||
+                !SpatialContractSha256.IsCanonical(ExpectedCandidateSha256) ||
                 SpatialMigrationDescriptorContracts.ComputeInputFingerprint(Descriptor,
                     Limits.Serialized) != DescriptorFingerprint ||
                 SpatialMigrationTransactionIdentity.CreateTransactionId(
@@ -137,7 +140,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
             DetachedUnfinishedAttemptValidationContext context)
         {
-            if (context == null || !context.PinsAreValid()) return Failure();
+            if (context == null || !context.PinsAreValid() || bytes == null ||
+                !string.Equals(SpatialContractSha256.Compute(bytes), context.ExpectedCandidateSha256,
+                    StringComparison.Ordinal)) return Failure();
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes, context.Limits,
                 null, context.TransactionId, context.DescriptorFingerprint);
             if (result.IsValid && !DetachedCanonicalProductionSemanticValidation.Validate(result.State,
