@@ -502,44 +502,77 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "save.json"));
         }
 
-        internal static DetachedSpatialMigrationPreparationResult PrepareSemanticResult(string primaryMembers)
+        internal static DetachedSpatialMigrationPreparationResult PrepareSemanticResult(int schema,
+            string primaryMembers)
         {
-            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":" + schema + "," +
                 "\"primary\":{" + primaryMembers + "}}");
-            return PrepareEmptyFixture(6, false, original).Result;
+            return PrepareEmptyFixture(schema, false, original).Result;
         }
 
-        internal static byte[] RunPopulatedSemanticFixture(string identity, string primaryMembers,
-            int expectedRooms, params string[] expectedOptions)
+        internal sealed class SemanticFixtureExecution
         {
-            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+            internal RawSavePayloadClassification Classification;
+            internal DetachedPreparedSpatialMigrationAttempt Attempt;
+            internal DetachedCanonicalSpatialSaveState State;
+            internal string BasicRoomDefinitionId;
+            internal DetachedSpatialMigrationOutcome Execute;
+            internal DetachedSpatialMigrationOutcome FirstRecovery;
+            internal DetachedSpatialMigrationOutcome SecondRecovery;
+        }
+
+        internal static SemanticFixtureExecution RunPopulatedSemanticFixture(string identity, int schema,
+            string primaryMembers)
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":" + schema + "," +
                 "\"primary\":{" + primaryMembers + "}}");
-            PreparedFixture fixture = PrepareEmptyFixture(6, false, original);
+            PreparedFixture fixture = PrepareEmptyFixture(schema, false, original);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
             Assert.That(fixture.Result.Attempt.IsEmptyMigration, Is.False);
-            string candidateText = Encoding.UTF8.GetString(fixture.Result.Attempt.Candidate.GetBytes());
-            for (int room = 0; room < expectedRooms; room++)
-                Assert.That(candidateText, Does.Contain("compat.floor.00.legacy-room." + room.ToString("D2")));
-            foreach (string option in expectedOptions) Assert.That(candidateText, Does.Contain(option));
-            PreparedFixture equivalent = PrepareEmptyFixture(6, false, original);
+            byte[] separatelyAllocatedOriginal = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(original));
+            PreparedFixture equivalent = PrepareEmptyFixture(schema, false, separatelyAllocatedOriginal);
             Assert.That(equivalent.Result.Attempt.Candidate.GetBytes(),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
             Assert.That(equivalent.Result.Attempt.CandidateSha256,
                 Is.EqualTo(fixture.Result.Attempt.CandidateSha256));
+            Assert.That(equivalent.Result.Attempt.Descriptor.RawSourceSchemaVersion,
+                Is.EqualTo(fixture.Result.Attempt.Descriptor.RawSourceSchemaVersion));
+            Assert.That(equivalent.Result.Attempt.Descriptor.MigrationProfileId,
+                Is.EqualTo(fixture.Result.Attempt.Descriptor.MigrationProfileId));
+            Assert.That(equivalent.Result.Attempt.Descriptor.MigrationProfileVersion,
+                Is.EqualTo(fixture.Result.Attempt.Descriptor.MigrationProfileVersion));
+            Assert.That(equivalent.Result.Attempt.Diagnostics, Is.EqualTo(fixture.Result.Attempt.Diagnostics));
+            Assert.That(equivalent.Result.Attempt.DescriptorFingerprint,
+                Is.EqualTo(fixture.Result.Attempt.DescriptorFingerprint));
+            Assert.That(equivalent.Result.Attempt.TransactionId,
+                Is.EqualTo(fixture.Result.Attempt.TransactionId));
             var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath("semantic-" + identity);
             fileSystem.Seed(activePath, original);
+            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                    fixture.Compatibility, fixture.Production, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             DetachedSpatialMigrationOutcome executed =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
                     .Execute(activePath, fixture.Result.Attempt);
             Assert.That(executed.IsSuccess, Is.True, executed.Reason);
+            Assert.That(executed.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
             DetachedSpatialMigrationOutcome recovered =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
             Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
-            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            DetachedSpatialMigrationOutcome recoveredAgain =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+            Assert.That(recoveredAgain.IsSuccess, Is.True, recoveredAgain.Reason);
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
-            return fixture.Result.Attempt.Candidate.GetBytes();
+            CompatibilityLayoutGeometryRecord geometry = fixture.Compatibility.Value.GeometryRecords.Single(value =>
+                value.GeometryId == fixture.Result.Attempt.Descriptor.SharedGeometryId &&
+                value.GeometryVersion == fixture.Result.Attempt.Descriptor.SharedGeometryVersion);
+            return new SemanticFixtureExecution { Classification = fixture.Classification,
+                Attempt = fixture.Result.Attempt, State = parsed.State, Execute = executed,
+                FirstRecovery = recovered, SecondRecovery = recoveredAgain,
+                BasicRoomDefinitionId = geometry.BasicRoomDefinitionId };
         }
 
         private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
@@ -595,7 +628,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var inputs = new DetachedSpatialMigrationPreparationInputs(original, classification, descriptor,
                 compatibility, production, legacy, new Dictionary<string, byte[]>(), limits,
                 WholeLimits());
-            return new PreparedFixture(original, production, compatibility, legacyBytes, limits,
+            return new PreparedFixture(original, classification, production, compatibility, legacyBytes, limits,
                 DetachedSpatialMigrationPreparer.Prepare(inputs));
         }
 
@@ -621,12 +654,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private sealed class PreparedFixture
         {
-            internal PreparedFixture(byte[] original, ProductionSpatialContentSnapshot production,
+            internal PreparedFixture(byte[] original, RawSavePayloadClassification classification,
+                ProductionSpatialContentSnapshot production,
                 SpatialLayoutCompatibilitySnapshot compatibility, byte[] legacyBytes,
                 CanonicalSpatialSerializationLimits limits, DetachedSpatialMigrationPreparationResult result)
-            { Original = original; Production = production; Compatibility = compatibility;
+            { Original = original; Classification = classification; Production = production; Compatibility = compatibility;
               LegacyBytes = legacyBytes; Limits = limits; Result = result; }
             internal byte[] Original { get; }
+            internal RawSavePayloadClassification Classification { get; }
             internal ProductionSpatialContentSnapshot Production { get; }
             internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
             internal byte[] LegacyBytes { get; }
