@@ -6,15 +6,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed class DetachedCurrentTargetValidationContext
     {
+        private readonly byte[] legacyConfiguration;
         public DetachedCurrentTargetValidationContext(SpatialLayoutCompatibilitySnapshot compatibility,
             ProductionSpatialContentSnapshot production,
+            byte[] legacyConfiguration,
             CanonicalSpatialSerializationLimits limits)
         { Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
           Production = production ?? throw new ArgumentNullException(nameof(production));
+          this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
           if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits; }
         internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
+        internal RunSimulationConfig Configuration
+        { get { try { return LegacyGameplayConfigurationContract.Parse(legacyConfiguration); }
+                catch { return null; } } }
     }
 
     public sealed class DetachedUnfinishedAttemptValidationContext
@@ -49,6 +55,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal CompatibilityLayoutGeometryRecord Geometry { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
+        internal RunSimulationConfig Configuration
+        { get { try { return LegacyGameplayConfigurationContract.Parse(legacyConfiguration); }
+                catch { return null; } } }
 
         internal bool PinsAreValid()
         {
@@ -115,8 +124,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (context == null) return Failure();
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes,
-                context.Limits, context.Production);
+                context.Limits);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
+            if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
+                context.Configuration, context.Limits.Spatial).IsValid) return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 context.Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
@@ -128,7 +139,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (context == null || !context.PinsAreValid()) return Failure();
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes, context.Limits,
-                context.Production, context.TransactionId, context.DescriptorFingerprint);
+                null, context.TransactionId, context.DescriptorFingerprint);
+            if (result.IsValid && !DetachedCanonicalProductionSemanticValidation.Validate(result.State,
+                context.Production, context.Configuration, context.Limits.Spatial).IsValid) return Failure();
             return result.IsValid && result.LayoutContractVersion ==
                 context.SelectedContract.CanonicalLayoutContractVersion &&
                 ContextSemanticsValid(result.State, context) ? result : Failure();
@@ -164,7 +177,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
                 if (!parsedSpatial.IsValid || !CanonicalSpatialSaveValidator.Validate(parsedSpatial.Value,
-                        limits.Spatial, true).IsValid || !DefinitionsValid(parsedSpatial.Value, production) ||
+                        limits.Spatial, true).IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&
                         parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();
@@ -176,27 +189,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value);
             }
             catch { return Failure(); }
-        }
-
-        private static bool DefinitionsValid(DetachedCanonicalSpatialSaveState state,
-            ProductionSpatialContentSnapshot production)
-        {
-            if (production == null) return true;
-            SpatialContentCatalog catalog = production.Catalog;
-            var floors = new HashSet<string>((catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
-                .Where(value => value != null).Select(value => value.FloorDefinitionId), StringComparer.Ordinal);
-            var rooms = new HashSet<string>((catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
-                .Where(value => value != null).Select(value => value.RoomDefinitionId), StringComparer.Ordinal);
-            var fixedDefinitions = new HashSet<string>((catalog.FixedStructures ?? Array.Empty<FixedSpatialStructureDefinition>())
-                .Where(value => value != null).Select(value => value.StructureDefinitionId), StringComparer.Ordinal);
-            foreach (SavedSpatialFloor floor in state.Floors ?? Array.Empty<SavedSpatialFloor>())
-            {
-                if (!floors.Contains(floor.FloorDefinitionId)) return false;
-                if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Any(value => !rooms.Contains(value.RoomDefinitionId))) return false;
-                if ((floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>()).Any(value =>
-                    !fixedDefinitions.Contains(value.FixedStructureDefinitionId))) return false;
-            }
-            return true;
         }
 
         private static bool ContextSemanticsValid(DetachedCanonicalSpatialSaveState state,

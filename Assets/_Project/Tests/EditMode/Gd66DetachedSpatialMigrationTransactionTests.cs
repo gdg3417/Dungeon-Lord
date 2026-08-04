@@ -519,6 +519,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedSpatialMigrationOutcome Execute;
             internal DetachedSpatialMigrationOutcome FirstRecovery;
             internal DetachedSpatialMigrationOutcome SecondRecovery;
+            internal DetachedCurrentTargetValidationContext CurrentContext;
+            internal DetachedUnfinishedAttemptValidationContext UnfinishedContext;
+            internal CanonicalSpatialSerializationLimits Limits;
+            internal DetachedWholeSaveLimits WholeLimits;
         }
 
         internal static SemanticFixtureExecution RunPopulatedSemanticFixture(string identity, int schema,
@@ -549,9 +553,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath("semantic-" + identity);
             fileSystem.Seed(activePath, original);
+            var currentContext = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
+                fixture.Production, fixture.LegacyBytes, fixture.Limits);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
-                    fixture.Compatibility, fixture.Production, fixture.Limits));
+                fixture.Result.Attempt.Candidate.GetBytes(), currentContext);
             Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             DetachedSpatialMigrationOutcome executed =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
@@ -569,10 +574,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CompatibilityLayoutGeometryRecord geometry = fixture.Compatibility.Value.GeometryRecords.Single(value =>
                 value.GeometryId == fixture.Result.Attempt.Descriptor.SharedGeometryId &&
                 value.GeometryVersion == fixture.Result.Attempt.Descriptor.SharedGeometryVersion);
+            DetachedSpatialMigrationRecoveryContext recoveryContext = Recovery(fixture);
+            Assert.That(recoveryContext.TryCreateUnfinishedValidationContext(fixture.Result.Attempt.Descriptor,
+                fixture.Result.Attempt.TransactionId, fixture.Result.Attempt.DescriptorFingerprint,
+                out DetachedUnfinishedAttemptValidationContext unfinished), Is.True);
             return new SemanticFixtureExecution { Classification = fixture.Classification,
                 Attempt = fixture.Result.Attempt, State = parsed.State, Execute = executed,
                 FirstRecovery = recovered, SecondRecovery = recoveredAgain,
-                BasicRoomDefinitionId = geometry.BasicRoomDefinitionId };
+                BasicRoomDefinitionId = geometry.BasicRoomDefinitionId, CurrentContext = currentContext,
+                UnfinishedContext = unfinished, Limits = fixture.Limits, WholeLimits = WholeLimits() };
         }
 
         private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,

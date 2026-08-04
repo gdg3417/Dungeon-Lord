@@ -198,9 +198,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (identity != journal.TransactionIdentitySha256 ||
                 SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
                 return false;
-            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, Limits, ProductionContent,
-                journal.TransactionId, journal.DescriptorFingerprintSha256).IsValid;
+            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                bytes, Limits, null, journal.TransactionId, journal.DescriptorFingerprintSha256);
+            return parsed.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(parsed.State,
+                ProductionContent, LegacyGameplayConfigurationContract.Parse(legacyConfigurationBytes),
+                Limits.Spatial).IsValid;
         }
+
+        internal byte[] LegacyConfigurationBytes => legacyConfigurationBytes == null ? null :
+            (byte[])legacyConfigurationBytes.Clone();
 
         private static bool HashEquals(byte[] bytes, string expected) => bytes != null &&
             string.Equals(SpatialContractSha256.Compute(bytes), expected, StringComparison.Ordinal);
@@ -1108,7 +1114,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
-                    productionContent, completeLimits)).IsValid;
+                    productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits)).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)
