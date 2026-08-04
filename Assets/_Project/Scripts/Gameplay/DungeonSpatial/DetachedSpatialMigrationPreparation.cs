@@ -499,15 +499,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             reason = null;
             if (source.DungeonPlacementsPresence != RawLegacyRoutePresence.Present) return true;
-            MvpDungeonPlacementState rawLower = RawLegacyRouteContracts.ParsePlacements(source,
-                "mvpDungeonPlacements", limits, out string rawReason);
-            if (rawLower == null) { reason = rawReason; return false; }
-            MvpDungeonPlacementEntry lowerRoom = (rawLower.Entries ?? new List<MvpDungeonPlacementEntry>())
-                .Where(value => value != null && value.CategoryId == MvpDungeonPlacementIds.RoomCategoryId)
-                .OrderByDescending(value => value.Revision).FirstOrDefault();
-            if (lowerRoom != null)
-                diagnostics.Add(rooms.Length != 0 && rooms[0].RoomOption == lowerRoom.OptionId ?
-                    AgreementDiagnostic : IneffectiveDiagnostic);
             if (!TryPlacements(source, limits, out RouteRoom[] lower, out reason, true)) return false;
             if (lower.Length == 0) return true;
             if (rooms.Length == 0)

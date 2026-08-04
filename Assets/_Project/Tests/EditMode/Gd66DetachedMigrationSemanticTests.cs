@@ -9,8 +9,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class Gd66DetachedMigrationSemanticTests
     {
-        private enum Winner { Placements, Floor, Assignments }
-        private sealed class Expected
+        public enum Winner { Placements, Floor, Assignments }
+        public sealed class Expected
         {
             internal string Id; internal int Schema; internal Winner Winner; internal string Members;
             internal int Rooms; internal string[] Diagnostics; internal string[] Categories;
@@ -35,12 +35,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     "," + Entry(Trap, Spike, 3) + "," + Entry(Loot, BasicLoot, 4)), 1, null,
                     new[] { Monster, Trap, Loot }, new[] { Skeleton, Spike, BasicLoot });
                 yield return Data("FloorR1", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)), 1);
-                yield return Data("FloorPlacementAgreement", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)) + "," +
-                    Placement(RoomPlacement(1)), 1, new[] { Agreement });
+                yield return Data("FloorPlacementAgreement", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom) + "," +
+                    Node(1, Monster, Skeleton)) + "," + Placement(RoomPlacement(1) + "," +
+                    Entry(Monster, Skeleton, 2)), 1, new[] { Agreement }, new[] { Monster }, new[] { Skeleton });
                 yield return Data("LowerEffectiveContribution", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)) + "," +
                     Placement(Entry(Monster, Skeleton, 1)), 1, new[] { Contribution }, new[] { Monster }, new[] { Skeleton });
-                yield return Data("LowerIneffectiveConflict", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)) + "," +
-                    Placement(Entry(RoomCategory, NarrowHall, 1)), 1, new[] { Ineffective });
+                yield return Data("LowerIneffectiveConflict", 5, Winner.Assignments, Assign(Room(0, Skeleton)) + "," +
+                    Placement(RoomPlacement(1) + "," + Entry(Monster, Goblin, 2)), 1,
+                    new[] { Ineffective }, new[] { Monster }, new[] { Skeleton });
                 yield return Data("AssignmentR1", 5, Winner.Assignments, Assign(Room(0)), 1);
                 yield return Data("AssignmentR2", 5, Winner.Assignments, Assign(Room(0) + "," + Room(1)), 2);
                 yield return Data("LowerExactAgreement", 5, Winner.Assignments, Assign(Room(0, Skeleton)) + "," +
