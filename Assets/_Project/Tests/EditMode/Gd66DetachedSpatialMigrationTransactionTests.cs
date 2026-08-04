@@ -502,7 +502,48 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "save.json"));
         }
 
-        private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false)
+        internal static DetachedSpatialMigrationPreparationResult PrepareSemanticResult(string primaryMembers)
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{" + primaryMembers + "}}");
+            return PrepareEmptyFixture(6, false, original).Result;
+        }
+
+        internal static byte[] RunPopulatedSemanticFixture(string identity, string primaryMembers,
+            int expectedRooms, params string[] expectedOptions)
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{" + primaryMembers + "}}");
+            PreparedFixture fixture = PrepareEmptyFixture(6, false, original);
+            Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
+            Assert.That(fixture.Result.Attempt.IsEmptyMigration, Is.False);
+            string candidateText = Encoding.UTF8.GetString(fixture.Result.Attempt.Candidate.GetBytes());
+            for (int room = 0; room < expectedRooms; room++)
+                Assert.That(candidateText, Does.Contain("compat.floor.00.legacy-room." + room.ToString("D2")));
+            foreach (string option in expectedOptions) Assert.That(candidateText, Does.Contain(option));
+            PreparedFixture equivalent = PrepareEmptyFixture(6, false, original);
+            Assert.That(equivalent.Result.Attempt.Candidate.GetBytes(),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(equivalent.Result.Attempt.CandidateSha256,
+                Is.EqualTo(fixture.Result.Attempt.CandidateSha256));
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath("semantic-" + identity);
+            fileSystem.Seed(activePath, original);
+            DetachedSpatialMigrationOutcome executed =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+            Assert.That(executed.IsSuccess, Is.True, executed.Reason);
+            DetachedSpatialMigrationOutcome recovered =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
+            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            return fixture.Result.Attempt.Candidate.GetBytes();
+        }
+
+        private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
+            byte[] originalOverride = null)
         {
             const string root = "Assets/_Project/Data/Production/DungeonSpatial/";
             TextAsset limitAsset = Asset(root + "validation_limits.json");
@@ -531,7 +572,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RunSimulationConfig legacy = JsonUtility.FromJson<RunSimulationConfig>(
                 Asset("Assets/_Project/Data/Bootstrap/run_simulation_config.json").text);
             byte[] legacyBytes = LegacyGameplayConfigurationContract.SerializeCanonical(legacy);
-            byte[] original = Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1}" :
+            byte[] original = originalOverride ?? Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1}" :
                 "{\"schema\":\"save_root\",\"schemaVersion\":" + schema + ",\"primary\":{}}");
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(original,
                 RawLimits(),

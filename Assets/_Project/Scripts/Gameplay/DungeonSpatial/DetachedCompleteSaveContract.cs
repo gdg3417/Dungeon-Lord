@@ -97,14 +97,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCompleteSaveValidationResult
     {
         internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason,
-            int? layoutContractVersion = null)
+            int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null)
         { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason;
-          LayoutContractVersion = layoutContractVersion; }
+          LayoutContractVersion = layoutContractVersion; State = state; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
         public string Reason { get; }
         private byte[] Bytes { get; }
         internal int? LayoutContractVersion { get; }
+        internal DetachedCanonicalSpatialSaveState State { get; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -129,7 +130,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes, context.Limits,
                 context.Production, context.TransactionId, context.DescriptorFingerprint);
             return result.IsValid && result.LayoutContractVersion ==
-                context.SelectedContract.CanonicalLayoutContractVersion ? result : Failure();
+                context.SelectedContract.CanonicalLayoutContractVersion &&
+                ContextSemanticsValid(result.State, context) ? result : Failure();
         }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
@@ -171,7 +173,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
                 return new DetachedCompleteSaveValidationResult(bytes, null,
-                    parsedSpatial.Value.Authority.CanonicalLayoutContractVersion);
+                    parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value);
             }
             catch { return Failure(); }
         }
@@ -193,6 +195,47 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Any(value => !rooms.Contains(value.RoomDefinitionId))) return false;
                 if ((floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>()).Any(value =>
                     !fixedDefinitions.Contains(value.FixedStructureDefinitionId))) return false;
+            }
+            return true;
+        }
+
+        private static bool ContextSemanticsValid(DetachedCanonicalSpatialSaveState state,
+            DetachedUnfinishedAttemptValidationContext context)
+        {
+            if (state?.Floors == null || state.Floors.Length == 0) return state?.Floors?.Length == 0;
+            if (state.Floors.Length != 1) return false;
+            SavedSpatialFloor floor = state.Floors[0];
+            if (floor == null || floor.Layout == null || floor.FloorDefinitionId != context.Geometry.FloorDefinitionId ||
+                floor.FloorIndex != context.Geometry.FloorIndex) return false;
+            RoomSpatialInstance[] rooms = floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>();
+            CompatibilityLayoutVariant variant = (context.Geometry.Layouts ?? Array.Empty<CompatibilityLayoutVariant>())
+                .SingleOrDefault(value => value != null && value.Placements.Count(placement => placement != null &&
+                    (placement.Role == CompatibilityRouteRole.BasicRoom0 ||
+                     placement.Role == CompatibilityRouteRole.BasicRoom1)) == rooms.Length);
+            if (variant == null || (floor.Layout.Edges?.Length ?? 0) != variant.Connections.Length) return false;
+            foreach (CompatibilityLayoutPlacement placement in variant.Placements ??
+                Array.Empty<CompatibilityLayoutPlacement>())
+            {
+                if (placement.Role == CompatibilityRouteRole.BasicRoom0 ||
+                    placement.Role == CompatibilityRouteRole.BasicRoom1)
+                {
+                    int index = placement.Role == CompatibilityRouteRole.BasicRoom0 ? 0 : 1;
+                    RoomSpatialInstance room = rooms.SingleOrDefault(value => value != null &&
+                        value.RoomInstanceId == "compat.floor.00.legacy-room." + index.ToString("D2"));
+                    if (room == null || room.RoomDefinitionId != context.Geometry.BasicRoomDefinitionId ||
+                        !room.Anchor.Equals(placement.Anchor) || room.Orientation != placement.Orientation) return false;
+                }
+                else
+                {
+                    FixedSpatialStructureKind kind = placement.Role == CompatibilityRouteRole.Entrance ?
+                        FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
+                    string definition = placement.Role == CompatibilityRouteRole.Entrance ?
+                        context.Geometry.EntranceStructureDefinitionId : context.Geometry.CompletionStructureDefinitionId;
+                    SavedFixedSpatialStructure fixedValue = (floor.FixedStructures ??
+                        Array.Empty<SavedFixedSpatialStructure>()).SingleOrDefault(value => value != null && value.Kind == kind);
+                    if (fixedValue == null || fixedValue.FixedStructureDefinitionId != definition ||
+                        !fixedValue.Anchor.Equals(placement.Anchor) || fixedValue.Orientation != placement.Orientation) return false;
+                }
             }
             return true;
         }
