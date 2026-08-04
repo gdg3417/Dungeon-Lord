@@ -60,6 +60,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
+
+
+        public static IEnumerable<TestCaseData> ExtraFixedStructureMutations
+        {
+            get
+            {
+                yield return new TestCaseData(FixedSpatialStructureKind.Entrance,
+                    "spatial.fixed.test_extra_entrance", "compat.floor.00.fixed.test-extra-entrance")
+                    .SetName("ExtraFixed_Entrance");
+                yield return new TestCaseData(FixedSpatialStructureKind.CompletionTerminal,
+                    "spatial.fixed.test_extra_completion", "compat.floor.00.fixed.test-extra-completion")
+                    .SetName("ExtraFixed_Completion");
+            }
+        }
+
         public static IEnumerable<TestCaseData> ExactCandidateMutations
         {
             get
@@ -234,6 +249,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
 
 
+
+
+        [TestCaseSource(nameof(ExtraFixedStructureMutations))]
+        public void ExtraFixedStructure_IndividuallyValid_IsFixedStructureCardinalityIssue(
+            FixedSpatialStructureKind kind, string definitionId, string instanceId)
+        {
+            var fixture = Baseline("extra-fixed-" + kind, false);
+            ProductionSpatialContentSnapshot testProduction = CloneProductionWithExtraFixed(
+                fixture.Production, kind, definitionId, out SpatialContentCatalog catalog);
+            AssertSemanticIssues(fixture.State, fixture.Production, fixture.LegacyBytes, fixture.Limits);
+            AssertSemanticIssues(fixture.State, testProduction, fixture.LegacyBytes, fixture.Limits);
+            DetachedCanonicalSpatialSaveState changed = Clone(fixture.State, fixture.Limits);
+            SavedSpatialFloor floor = changed.Floors[0];
+            SavedFixedSpatialStructure exemplar = floor.FixedStructures.Single(value => value.Kind == kind);
+            FixedSpatialStructureDefinition definition = ResolveFixed(catalog, definitionId);
+            var extra = new SavedFixedSpatialStructure
+            {
+                FixedStructureInstanceId = instanceId,
+                FixedStructureDefinitionId = definitionId,
+                Kind = kind,
+                FloorInstanceId = floor.FloorInstanceId,
+                Anchor = exemplar.Anchor,
+                Orientation = (definition.AllowedOrientations ?? Array.Empty<CardinalOrientation>())[0]
+            };
+            floor.FixedStructures = floor.FixedStructures.Concat(new[] { extra })
+                .OrderBy(value => value.FixedStructureInstanceId, StringComparer.Ordinal).ToArray();
+            Assert.That(AllFixedStructuresIndividuallyValid(floor, catalog, fixture.Limits), Is.True);
+            DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
+            Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
+            Assert.That(CanonicalSpatialSaveValidator.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, testProduction,
+                fixture.LegacyBytes, fixture.Limits);
+            Assert.That(issues, Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FixedStructure }));
+            var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
+                testProduction, fixture.LegacyBytes, fixture.Limits);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                changedCandidate.Candidate.GetBytes(), context).IsValid, Is.False);
+        }
+
+
         [TestCaseSource(nameof(ExactCandidateMutations))]
         public void ExactPreparedCandidate_CurrentTargetAccepts_UnfinishedRejects(Mutation mutation)
         {
@@ -396,6 +451,60 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static SpatialContentCatalog CloneCatalog(SpatialContentCatalog catalog) =>
             JsonUtility.FromJson<SpatialContentCatalog>(Encoding.UTF8.GetString(
                 ProductionSpatialGeneratedSetParser.SerializeCanonical(catalog)));
+
+
+
+        private static ProductionSpatialContentSnapshot CloneProductionWithExtraFixed(
+            ProductionSpatialContentSnapshot production, FixedSpatialStructureKind kind, string definitionId,
+            out SpatialContentCatalog catalog)
+        {
+            catalog = CloneCatalog(production.Catalog);
+            FixedSpatialStructureDefinition source = (catalog.FixedStructures ?? Array.Empty<FixedSpatialStructureDefinition>())
+                .First(value => value != null && value.Kind == kind);
+            var copy = new FixedSpatialStructureDefinition
+            {
+                StructureDefinitionId = definitionId,
+                LocalizationKey = source.LocalizationKey,
+                Kind = source.Kind,
+                GrossFootprint = source.GrossFootprint == null ? null :
+                    new RectangularFootprintDefinition(source.GrossFootprint.Width, source.GrossFootprint.Height),
+                ReservedTileOffsets = (TileCoordinate[])(source.ReservedTileOffsets ?? Array.Empty<TileCoordinate>()).Clone(),
+                AllowedOrientations = (CardinalOrientation[])(source.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Clone(),
+                ConnectionPoints = (source.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+                    .Select(value => value == null ? null : new SpatialConnectionPointDefinition
+                    {
+                        ConnectionPointId = value.ConnectionPointId,
+                        Offset = value.Offset,
+                        Facing = value.Facing,
+                        SocketTypeId = value.SocketTypeId
+                    }).ToArray(),
+                MaximumConnectionCount = source.MaximumConnectionCount
+            };
+            catalog.FixedStructures = (catalog.FixedStructures ?? Array.Empty<FixedSpatialStructureDefinition>())
+                .Concat(new[] { copy }).OrderBy(value => value.StructureDefinitionId, StringComparer.Ordinal).ToArray();
+            return new ProductionSpatialContentSnapshot(production.Manifest, catalog, production.Languages);
+        }
+
+        private static bool AllFixedStructuresIndividuallyValid(SavedSpatialFloor floor,
+            SpatialContentCatalog catalog, CanonicalSpatialSerializationLimits limits)
+        {
+            FloorSpatialConfiguration floorDefinition = ResolveFloor(catalog, floor);
+            if (floorDefinition.Bounds == null || !floorDefinition.Bounds.IsValid) return false;
+            foreach (SavedFixedSpatialStructure value in floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>())
+            {
+                FixedSpatialStructureDefinition[] matches = (catalog.FixedStructures ??
+                    Array.Empty<FixedSpatialStructureDefinition>()).Where(definition => definition != null &&
+                    definition.StructureDefinitionId == value?.FixedStructureDefinitionId).ToArray();
+                if (value == null || matches.Length != 1 || matches[0].Kind != value.Kind ||
+                    value.FloorInstanceId != floor.FloorInstanceId ||
+                    !(matches[0].AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(value.Orientation) ||
+                    !TileFootprintResolver.TryResolveRectangle(matches[0].GrossFootprint, value.Anchor,
+                        value.Orientation, new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
+                        out ResolvedTileFootprint footprint) || footprint?.OccupiedTiles == null ||
+                    footprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile))) return false;
+            }
+            return true;
+        }
 
         private static TileCoordinate FreeTile(SavedSpatialFloor floor, SpatialContentCatalog catalog,
             CanonicalSpatialSerializationLimits limits)

@@ -88,10 +88,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     footprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile)))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FixedStructure);
             }
-            if (values.Count(value => value != null && value.Kind == FixedSpatialStructureKind.Entrance &&
-                    value.FixedStructureDefinitionId == floorDefinition.EntranceStructureDefinitionId) != 1 ||
-                values.Count(value => value != null && value.Kind == FixedSpatialStructureKind.CompletionTerminal &&
-                    value.FixedStructureDefinitionId == floorDefinition.CompletionStructureDefinitionId) != 1)
+            SavedFixedSpatialStructure[] entrances = values.Where(value => value != null &&
+                value.Kind == FixedSpatialStructureKind.Entrance).ToArray();
+            SavedFixedSpatialStructure[] completions = values.Where(value => value != null &&
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).ToArray();
+            if (values.Length != 2 || entrances.Length != 1 || completions.Length != 1 ||
+                entrances[0].FixedStructureDefinitionId != floorDefinition.EntranceStructureDefinitionId ||
+                completions[0].FixedStructureDefinitionId != floorDefinition.CompletionStructureDefinitionId)
                 issues.Add(DetachedCanonicalProductionSemanticIssue.FixedStructure);
         }
 
