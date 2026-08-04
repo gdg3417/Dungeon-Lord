@@ -521,6 +521,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedSpatialMigrationOutcome SecondRecovery;
             internal DetachedCurrentTargetValidationContext CurrentContext;
             internal DetachedUnfinishedAttemptValidationContext UnfinishedContext;
+            internal ProductionSpatialContentSnapshot Production;
+            internal SpatialLayoutCompatibilitySnapshot Compatibility;
             internal CanonicalSpatialSerializationLimits Limits;
             internal DetachedWholeSaveLimits WholeLimits;
             internal byte[] LegacyBytes;
@@ -584,7 +586,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Attempt = fixture.Result.Attempt, State = parsed.State, Execute = executed,
                 FirstRecovery = recovered, SecondRecovery = recoveredAgain,
                 BasicRoomDefinitionId = geometry.BasicRoomDefinitionId, CurrentContext = currentContext,
-                UnfinishedContext = unfinished, Limits = fixture.Limits, WholeLimits = WholeLimits(),
+                UnfinishedContext = unfinished, Production = fixture.Production, Compatibility = fixture.Compatibility,
+                Limits = fixture.Limits, WholeLimits = WholeLimits(),
                 LegacyBytes = fixture.LegacyBytes, ValidationInputs = new Dictionary<string, byte[]>() };
         }
 

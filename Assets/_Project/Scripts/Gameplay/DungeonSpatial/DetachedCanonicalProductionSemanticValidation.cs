@@ -60,16 +60,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (edge != null && edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
                         !allowedCorridors.Contains(edge.CorridorDefinitionId))
                         issues.Add(DetachedCanonicalProductionSemanticIssue.CorridorDefinition);
-                ValidateFixed(floor, floorDefinition, catalog, issues);
+                ValidateFixed(floor, floorDefinition, catalog, limits, issues);
                 ValidateAssignments(floor, roomByInstance, configured, issues);
             }
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
         }
 
         private static void ValidateFixed(SavedSpatialFloor floor, FloorSpatialConfiguration floorDefinition,
-            SpatialContentCatalog catalog, ICollection<DetachedCanonicalProductionSemanticIssue> issues)
+            SpatialContentCatalog catalog, CanonicalSpatialSaveWorkloadLimits limits,
+            ICollection<DetachedCanonicalProductionSemanticIssue> issues)
         {
             SavedFixedSpatialStructure[] values = floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>();
+            bool boundsValid = floorDefinition.Bounds != null && floorDefinition.Bounds.IsValid;
             foreach (SavedFixedSpatialStructure value in values)
             {
                 FixedSpatialStructureDefinition[] matches = (catalog.FixedStructures ??
@@ -78,6 +80,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (value == null || matches.Length != 1 || matches[0].Kind != value.Kind ||
                     value.FloorInstanceId != floor.FloorInstanceId ||
                     !(matches[0].AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(value.Orientation))
+                { issues.Add(DetachedCanonicalProductionSemanticIssue.FixedStructure); continue; }
+                if (!boundsValid || !TileFootprintResolver.TryResolveRectangle(matches[0].GrossFootprint,
+                        value.Anchor, value.Orientation,
+                        new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles),
+                        out ResolvedTileFootprint footprint) || footprint?.OccupiedTiles == null ||
+                    footprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile)))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FixedStructure);
             }
             if (values.Count(value => value != null && value.Kind == FixedSpatialStructureKind.Entrance &&
