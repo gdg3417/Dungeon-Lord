@@ -1424,7 +1424,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
-        private static string QuarantinePath(string directory, string path, byte[] bytes)
+        internal static string QuarantinePath(string directory, string path, byte[] bytes)
         {
             string evidenceHash = SpatialContractSha256.Compute(bytes);
             string evidenceName = Path.GetFileName(path);
@@ -1678,6 +1678,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal OperationType Type { get; }
             internal int Index { get; }
             internal string[] Paths { get; }
+            internal bool MutationCompleted { get; private set; }
+            internal bool FailedAfterMutation { get; private set; }
+            internal void MarkMutationCompleted() { MutationCompleted = true; }
+            internal void MarkFailedAfterMutation() { FailedAfterMutation = true; }
         }
 
         internal sealed class DeterministicFileSystem : ISpatialMigrationFileSystem
@@ -1688,30 +1692,42 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new Dictionary<string, byte[]>(PathComparer);
             private readonly Dictionary<OperationType, int> counts = new Dictionary<OperationType, int>();
             private readonly List<FileOperation> operations = new List<FileOperation>();
+            private readonly Dictionary<OperationType, int> targetedCounts = new Dictionary<OperationType, int>();
             private OperationType? failureType;
             private int failureIndex;
             private OperationType? secondFailureType;
             private int secondFailureIndex;
             private bool failureAfterMutation;
+            private Predicate<string[]> failurePathPredicate;
+            private FileOperation failedOperation;
+            private int failedTargetOccurrence;
             private readonly Dictionary<string, Queue<byte[]>> readSubstitutions =
                 new Dictionary<string, Queue<byte[]>>(PathComparer);
             internal DeterministicFileSystem(OperationType? failureType = null, int failureIndex = 0)
             { this.failureType = failureType; this.failureIndex = failureIndex; }
             internal void DisableFailure()
             {
-                failureType = null; failureIndex = 0; failureAfterMutation = false;
+                failureType = null; failureIndex = 0; failureAfterMutation = false; failurePathPredicate = null; failedOperation = null; failedTargetOccurrence = 0; targetedCounts.Clear();
                 secondFailureType = null; secondFailureIndex = 0;
             }
             internal void EnableFailure(OperationType type, int index)
             {
                 failureType = type; failureIndex = index; failureAfterMutation = false;
-                secondFailureType = null; secondFailureIndex = 0;
+                secondFailureType = null; secondFailureIndex = 0; failurePathPredicate = null; targetedCounts.Clear();
             }
             internal void EnableFailureAfterMutation(OperationType type, int index)
             {
                 failureType = type; failureIndex = index; failureAfterMutation = true;
+                secondFailureType = null; secondFailureIndex = 0; failurePathPredicate = null; targetedCounts.Clear();
+            }
+            internal void EnableTargetedFailure(OperationType type, Predicate<string[]> pathPredicate, int occurrence, bool afterMutation)
+            {
+                failureType = type; failureIndex = occurrence; failureAfterMutation = afterMutation;
+                failurePathPredicate = pathPredicate; failedOperation = null; failedTargetOccurrence = 0; targetedCounts.Clear();
                 secondFailureType = null; secondFailureIndex = 0;
             }
+            internal FileOperation FailedOperation => failedOperation;
+            internal int FailedTargetOccurrence => failedTargetOccurrence;
             internal void SubstituteNextRead(string path, byte[] bytes)
             {
                 path = Normalize(path);
@@ -1740,24 +1756,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public void WriteAllBytesDurable(string path, byte[] bytes)
             {
                 path = Normalize(path); Record(OperationType.Write, path);
-                files.Add(path, (byte[])bytes.Clone()); FailAfter(OperationType.Write);
+                files.Add(path, (byte[])bytes.Clone()); MarkMutation(OperationType.Write); FailAfter(OperationType.Write);
             }
             public void ReplaceSameDirectoryAtomic(string stagingPath, string activePath)
             {
                 stagingPath = Normalize(stagingPath); activePath = Normalize(activePath);
                 Record(OperationType.Replace, stagingPath, activePath); SameDirectory(stagingPath, activePath);
                 files[activePath] = (byte[])files[stagingPath].Clone(); files.Remove(stagingPath);
-                FailAfter(OperationType.Replace);
+                MarkMutation(OperationType.Replace); FailAfter(OperationType.Replace);
             }
             public void MoveSameDirectoryAtomic(string sourcePath, string destinationPath)
             {
                 sourcePath = Normalize(sourcePath); destinationPath = Normalize(destinationPath);
                 Record(OperationType.Move, sourcePath, destinationPath); SameDirectory(sourcePath, destinationPath);
                 files.Add(destinationPath, (byte[])files[sourcePath].Clone()); files.Remove(sourcePath);
-                FailAfter(OperationType.Move);
+                MarkMutation(OperationType.Move); FailAfter(OperationType.Move);
             }
             public void DeleteFile(string path)
-            { path = Normalize(path); Record(OperationType.Delete, path); files.Remove(path); FailAfter(OperationType.Delete); }
+            { path = Normalize(path); Record(OperationType.Delete, path); files.Remove(path); MarkMutation(OperationType.Delete); FailAfter(OperationType.Delete); }
             public void FlushDirectory(string directoryPath)
             { directoryPath = Normalize(directoryPath); Record(OperationType.Flush, directoryPath); }
             public IReadOnlyList<string> EnumerateFiles(string directoryPath, string searchPattern,
@@ -1789,17 +1805,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             private void Record(OperationType type, params string[] paths)
             {
                 int index = counts.TryGetValue(type, out int previous) ? previous + 1 : 1;
-                counts[type] = index; operations.Add(new FileOperation(type, index, paths));
-                if (!failureAfterMutation && failureType == type && (failureIndex < 0 || failureIndex == index))
-                    throw new IOException(type + "#" + index);
+                counts[type] = index;
+                var operation = new FileOperation(type, index, paths);
+                operations.Add(operation);
+                bool pathMatches = failurePathPredicate == null || failurePathPredicate(paths);
+                int targetedIndex = 0;
+                if (pathMatches)
+                {
+                    targetedIndex = targetedCounts.TryGetValue(type, out int targetedPrevious) ? targetedPrevious + 1 : 1;
+                    targetedCounts[type] = targetedIndex;
+                }
+                if (!failureAfterMutation && failureType == type && pathMatches &&
+                    (failureIndex < 0 || failureIndex == targetedIndex))
+                { failedOperation = operation; failedTargetOccurrence = targetedIndex; throw new IOException(type + "#" + targetedIndex); }
                 if (secondFailureType == type && (secondFailureIndex < 0 || secondFailureIndex == index))
-                    throw new IOException(type + "#" + index);
+                { failedOperation = operation; failedTargetOccurrence = index; throw new IOException(type + "#" + index); }
+            }
+            private void MarkMutation(OperationType type)
+            {
+                for (int index = operations.Count - 1; index >= 0; index--)
+                    if (operations[index].Type == type) { operations[index].MarkMutationCompleted(); return; }
             }
             private void FailAfter(OperationType type)
             {
-                if (failureAfterMutation && failureType == type &&
-                    counts.TryGetValue(type, out int index) && (failureIndex < 0 || failureIndex == index))
-                    throw new IOException(type + "#" + index + " after");
+                if (!failureAfterMutation || failureType != type) return;
+                FileOperation operation = operations.LastOrDefault(value => value.Type == type);
+                if (operation == null) return;
+                bool pathMatches = failurePathPredicate == null || failurePathPredicate(operation.Paths);
+                int targetedIndex = targetedCounts.TryGetValue(type, out int value) ? value : operation.Index;
+                if (pathMatches && (failureIndex < 0 || failureIndex == targetedIndex))
+                { operation.MarkFailedAfterMutation(); failedOperation = operation; failedTargetOccurrence = targetedIndex; throw new IOException(type + "#" + targetedIndex + " after"); }
             }
         }
     }
