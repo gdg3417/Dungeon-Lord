@@ -222,6 +222,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(executed.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.EmptySuccessReason));
             Assert.That(executed.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
             Assert.That(executed.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(executed.Diagnostics, Is.EqualTo(new[]
+            {
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic,
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic,
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic
+            }));
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json")), Is.EqualTo(1));
@@ -595,6 +601,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
                 PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Recovery_ChangedPinsRollbackStagingMismatchTrustsJournalBoundCandidate()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.Replaced, includeBackup: true, includeStaging: false,
+                activeCandidate: true);
+            string directory = Path.GetDirectoryName(activePath);
+            string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
+            fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Diagnostics, Is.EqualTo(new[]
+            { DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic }));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
         }
 
         [Test]

@@ -598,7 +598,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(pinFailure, journal.Stage, SpatialTrustedPayload.Original);
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             if (HashIs(backup, journal.OriginalPayloadSha256))
-                return Restore(journalPath, backupPath, activePath, directory, journal, backup, pinFailure);
+            {
+                var diagnostics = new List<string>();
+                if (journal.Stage == SpatialMigrationJournalStage.CandidateVerified)
+                    AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
+                if (journal.Stage == SpatialMigrationJournalStage.Replaced ||
+                    journal.Stage == SpatialMigrationJournalStage.DurableVerified)
+                    AddDiagnostic(diagnostics, ReplacedPendingDurabilityDiagnostic);
+                if (journal.Stage == SpatialMigrationJournalStage.DurableVerified)
+                    AddDiagnostic(diagnostics, DurableCandidatePendingFinalizationDiagnostic);
+                return Restore(journalPath, backupPath, activePath, directory, journal, backup,
+                    pinFailure, diagnostics);
+            }
             if (recoveryContext.IsJournalBoundCandidateValid(active, journal))
                 return Failure(RollbackSourceMissingReason, journal.Stage, SpatialTrustedPayload.Candidate);
             return Failure(NoTrustedPayloadReason, journal.Stage, SpatialTrustedPayload.None);
@@ -723,7 +734,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
                     SpatialTrustedPayload.Candidate, diagnostics);
             }
-            return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage, SpatialTrustedPayload.Candidate);
+            return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
+                SpatialTrustedPayload.Candidate, diagnostics);
         }
 
         private string TryWriteReceipt(string directory, SpatialMigrationJournal journal)
@@ -844,13 +856,35 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return FailureWithDiagnostics(failure, journal.Stage, SpatialTrustedPayload.Original, diagnostics);
                 if ((journal.Stage == SpatialMigrationJournalStage.CandidateVerified ||
                     journal.Stage == SpatialMigrationJournalStage.Replaced) &&
-                    HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                        journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
-                        journal.ExpectedCandidateSha256))
+                    IsTrustedJournalBoundCandidateForRecovery(active, journal))
                     return FailureWithDiagnostics(failure, journal.Stage, SpatialTrustedPayload.Candidate, diagnostics);
             }
             catch { }
             return FailureWithDiagnostics(failure, journal.Stage, SpatialTrustedPayload.None, diagnostics);
+        }
+
+
+        private bool IsTrustedJournalBoundCandidateForRecovery(byte[] active, SpatialMigrationJournal journal)
+        {
+            if (active == null || journal == null || journal.Descriptor == null ||
+                !HashIs(active, journal.ExpectedCandidateSha256)) return false;
+            try
+            {
+                string fingerprint = SpatialMigrationDescriptorContracts.ComputeInputFingerprint(
+                    journal.Descriptor, limits);
+                if (fingerprint != journal.DescriptorFingerprintSha256) return false;
+                string identity = SpatialMigrationTransactionIdentity.ComputeIdentity(
+                    journal.Descriptor.OriginalPayloadSha256, fingerprint);
+                if (identity != journal.TransactionIdentitySha256 ||
+                    SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
+                    return false;
+                return recoveryContext.ValidatePins(journal.Descriptor) == null
+                    ? IsCanonicalSchemaSeven(active, journal.Descriptor, journal.TransactionId,
+                        journal.DescriptorFingerprintSha256, journal.ExpectedCandidateSha256)
+                    : recoveryContext.IsJournalBoundCandidateValid(active, journal);
+            }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
         private bool HasRestorationIntent(string backupPath, SpatialMigrationJournal journal)
@@ -888,6 +922,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialMigrationSidecarNames names, SpatialMigrationJournal journal)
         {
             byte[] candidateBytes = candidate.GetBytes();
+            var diagnostics = new List<string>();
             SpatialMigrationJournalStage persisted = journal.Stage;
             if (persisted == SpatialMigrationJournalStage.Finalized)
                 return Same(fileSystem.ReadAllBytes(activePath), candidateBytes)
@@ -940,6 +975,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!Same(fileSystem.ReadAllBytes(stagingPath), candidateBytes) ||
                     candidate.Sha256 != SpatialContractSha256.Compute(candidateBytes))
                     return Failure(CandidateFailedReason, persisted, SpatialTrustedPayload.Original);
+                AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.CandidateVerified);
                 if (!RewriteJournal(journalPath, next)) return Failure(CandidateFailedReason, persisted, SpatialTrustedPayload.Original);
@@ -951,6 +987,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             if (persisted == SpatialMigrationJournalStage.CandidateVerified)
             {
+                if (fileSystem.Exists(stagingPath) && Same(fileSystem.ReadAllBytes(stagingPath), candidateBytes))
+                    AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
                 bool alreadyReplaced = Same(fileSystem.ReadAllBytes(activePath), candidateBytes);
                 if (!alreadyReplaced)
                 {
@@ -962,16 +1000,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (Same(fileSystem.ReadAllBytes(activePath), original))
                             return Failure(ReplacementFailedReason, persisted, SpatialTrustedPayload.Original);
                         return Restore(journalPath, backupPath, activePath, directory, journal,
-                            fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason,
-                            new[] { StagedCandidateVerifiedDiagnostic });
+                            fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason, diagnostics);
                     }
                 }
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.Replaced);
                 if (!RewriteJournal(journalPath, next))
                     return Restore(journalPath, backupPath, activePath, directory, journal,
-                        fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason,
-                        new[] { StagedCandidateVerifiedDiagnostic });
+                        fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason, diagnostics);
                 journal = next; persisted = journal.Stage;
             }
             if (persisted == SpatialMigrationJournalStage.Replaced)
@@ -981,43 +1017,44 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (Same(fileSystem.ReadAllBytes(activePath), original))
                         return Failure(DurabilityFailedReason, persisted, SpatialTrustedPayload.Original);
                     return Restore(journalPath, backupPath, activePath, directory, journal,
-                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason,
-                        new[] { StagedCandidateVerifiedDiagnostic, ReplacedPendingDurabilityDiagnostic });
+                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason, diagnostics);
                 }
+                AddDiagnostic(diagnostics, ReplacedPendingDurabilityDiagnostic);
                 try { fileSystem.FlushDirectory(directory); }
                 catch
                 {
                     byte[] backupSnapshot = fileSystem.ReadAllBytes(backupPath);
                     return Restore(journalPath, backupPath, activePath, directory, journal,
-                        backupSnapshot, DurabilityFailedReason,
-                        new[] { StagedCandidateVerifiedDiagnostic, ReplacedPendingDurabilityDiagnostic });
+                        backupSnapshot, DurabilityFailedReason, diagnostics);
                 }
                 if (!Same(fileSystem.ReadAllBytes(activePath), candidateBytes))
                     return Restore(journalPath, backupPath, activePath, directory, journal,
-                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason,
-                        new[] { StagedCandidateVerifiedDiagnostic, ReplacedPendingDurabilityDiagnostic });
+                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason, diagnostics);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.DurableVerified);
                 if (!RewriteJournal(journalPath, next))
                     return Restore(journalPath, backupPath, activePath, directory, journal,
-                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason,
-                        new[] { StagedCandidateVerifiedDiagnostic, ReplacedPendingDurabilityDiagnostic });
+                        fileSystem.ReadAllBytes(backupPath), DurabilityFailedReason, diagnostics);
                 journal = next; persisted = journal.Stage;
             }
             if (persisted == SpatialMigrationJournalStage.DurableVerified)
             {
                 if (!Same(fileSystem.ReadAllBytes(activePath), candidateBytes))
                     return Failure(ActivePayloadUnknownReason, persisted, SpatialTrustedPayload.None);
+                AddDiagnostic(diagnostics, DurableCandidatePendingFinalizationDiagnostic);
                 string receiptDiagnostic = TryWriteReceipt(directory, journal);
+                if (receiptDiagnostic != null) AddDiagnostic(diagnostics, receiptDiagnostic);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.Finalized);
-                if (!RewriteJournal(journalPath, next)) return Failure(FinalizationFailedReason, persisted, SpatialTrustedPayload.Candidate);
+                if (!RewriteJournal(journalPath, next))
+                    return FailureWithDiagnostics(FinalizationFailedReason, persisted,
+                        SpatialTrustedPayload.Candidate, diagnostics);
                 journal = next;
                 return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
-                    SpatialTrustedPayload.Candidate, receiptDiagnostic == null ? null : new[]
-                    { receiptDiagnostic });
+                    SpatialTrustedPayload.Candidate, diagnostics);
             }
-            return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage, SpatialTrustedPayload.Candidate);
+            return new DetachedSpatialMigrationOutcome(true, SuccessReason, journal.Stage,
+                SpatialTrustedPayload.Candidate, diagnostics);
         }
 
         private enum EvidenceKind
