@@ -13,6 +13,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class Gd66DetachedSpatialMigrationTransactionTests
     {
+        public enum RestorationIntentMismatch
+        {
+            Malformed,
+            TransactionId,
+            DescriptorFingerprint,
+            OriginalSha,
+            BackupSha,
+            JournalFilename,
+            JournalStage
+        }
+
         private static readonly SpatialSerializedInputLimits Limits =
             new SpatialSerializedInputLimits(32768, 256, 32, 4096, 16);
 
@@ -753,6 +764,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
                 operation.MutationCompleted && comparer.Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                comparer.Equals(operation.Paths[0], candidatePath)), Is.EqualTo(0));
+        }
+
+        [TestCase(RestorationIntentMismatch.Malformed)]
+        [TestCase(RestorationIntentMismatch.TransactionId)]
+        [TestCase(RestorationIntentMismatch.DescriptorFingerprint)]
+        [TestCase(RestorationIntentMismatch.OriginalSha)]
+        [TestCase(RestorationIntentMismatch.BackupSha)]
+        [TestCase(RestorationIntentMismatch.JournalFilename)]
+        [TestCase(RestorationIntentMismatch.JournalStage)]
+        public void Recovery_OriginalActiveRequiresFullyBoundRestorationIntentForStageAdvance(
+            RestorationIntentMismatch mismatch)
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name + "-" + mismatch);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.DurableVerified, includeBackup: true, includeStaging: false,
+                activeCandidate: false);
+            string directory = Path.GetDirectoryName(activePath);
+            string journalPath = Path.Combine(directory, names.Journal);
+            string journalNextPath = journalPath + ".next";
+            string backupPath = Path.Combine(directory, names.OriginalBackup);
+            string candidatePath = Path.Combine(directory, names.CandidateStaging);
+            string restoreStaging = backupPath + ".restore";
+            string intentPath = backupPath + ".restore.intent";
+            string receiptPath = Path.Combine(directory, names.FinalizedReceipt);
+            StringComparer comparer = PathComparer();
+            SpatialMigrationJournal initialJournal =
+                SpatialMigrationJournalContracts.Parse(fileSystem.ReadAllBytes(journalPath), Limits).Value;
+            byte[] intentBytes = RestorationIntentBytes(mismatch, initialJournal, fixture.Original);
+            fileSystem.Seed(intentPath, intentBytes);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            SpatialMigrationJournal liveJournal =
+                SpatialMigrationJournalContracts.Parse(fileSystem.ReadAllBytes(journalPath), Limits).Value;
+            Assert.That(liveJournal.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(liveJournal.TransactionId, Is.EqualTo(initialJournal.TransactionId));
+            Assert.That(liveJournal.DescriptorFingerprintSha256,
+                Is.EqualTo(initialJournal.DescriptorFingerprintSha256));
+            Assert.That(fileSystem.ReadAllBytes(backupPath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.ReadAllBytes(intentPath), Is.EqualTo(intentBytes));
+            Assert.That(fileSystem.Exists(journalNextPath), Is.False);
+            Assert.That(fileSystem.Exists(restoreStaging), Is.False);
+            Assert.That(fileSystem.Exists(candidatePath), Is.False);
+            Assert.That(fileSystem.Exists(receiptPath), Is.False);
+            Assert.That(fileSystem.Paths.Any(path => path.IndexOf(".gd66-quarantine-",
+                StringComparison.Ordinal) >= 0), Is.False);
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Any(operation =>
+                operation.Type == OperationType.Write ||
+                operation.Type == OperationType.Replace ||
+                operation.Type == OperationType.Move ||
+                operation.Type == OperationType.Delete), Is.False);
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && comparer.Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
                 comparer.Equals(operation.Paths[0], candidatePath)), Is.EqualTo(0));
         }
@@ -1728,6 +1805,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static string Hash(char value) => new string(value, 64);
         private static string TransactionId(char value) => "gd66-" + Hash(value);
+        private static byte[] RestorationIntentBytes(RestorationIntentMismatch mismatch,
+            SpatialMigrationJournal journal, byte[] backup)
+        {
+            if (mismatch == RestorationIntentMismatch.Malformed)
+                return Encoding.UTF8.GetBytes("{\"TransactionId\":");
+            string transactionId = journal.TransactionId;
+            string descriptor = journal.DescriptorFingerprintSha256;
+            string original = journal.OriginalPayloadSha256;
+            string backupHash = SpatialContractSha256.Compute(backup);
+            string filename = journal.RelativeJournalFilename;
+            int stage = (int)journal.Stage;
+            switch (mismatch)
+            {
+                case RestorationIntentMismatch.TransactionId:
+                    transactionId = TransactionId('2'); break;
+                case RestorationIntentMismatch.DescriptorFingerprint:
+                    descriptor = Hash('2'); break;
+                case RestorationIntentMismatch.OriginalSha:
+                    original = Hash('2'); break;
+                case RestorationIntentMismatch.BackupSha:
+                    backupHash = Hash('2'); break;
+                case RestorationIntentMismatch.JournalFilename:
+                    filename = "save." + TransactionId('2') + ".journal.json"; break;
+                case RestorationIntentMismatch.JournalStage:
+                    stage = (int)SpatialMigrationJournalStage.Replaced; break;
+            }
+            return DetachedRestorationIntentContract.Serialize(new DetachedRestorationIntent(
+                transactionId, descriptor, original, backupHash, filename, stage), Limits);
+        }
         internal static string QuarantinePath(string directory, string path, byte[] bytes)
         {
             string evidenceHash = SpatialContractSha256.Compute(bytes);
