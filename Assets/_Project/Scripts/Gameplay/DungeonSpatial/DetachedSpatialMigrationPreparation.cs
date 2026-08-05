@@ -150,7 +150,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             original = (byte[])source.Clone(); Descriptor = descriptor; DescriptorFingerprint = fingerprint;
             TransactionIdentity = identity; TransactionId = transactionId; Candidate = candidate; Marker = marker;
             IsEmptyMigration = isEmptyMigration;
-            Diagnostics = (diagnostics ?? Array.Empty<string>()).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            Diagnostics = (diagnostics ?? Array.Empty<string>()).ToArray();
         }
         public byte[] GetOriginalBytes() => (byte[])original.Clone();
         public SpatialMigrationInputDescriptor Descriptor { get; }

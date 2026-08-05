@@ -167,6 +167,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(rows.All(row => !string.IsNullOrEmpty(row.FinalReason)), Is.True);
         }
 
+        [Test]
+        public void PacketC_DiagnosticChronologyGuardRejectsReorderedAndDuplicateEvents()
+        {
+            Assert.That(AreChronologicalAndDuplicateFree(new[]
+            {
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic,
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic,
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic
+            }), Is.True);
+            Assert.That(AreChronologicalAndDuplicateFree(new[]
+            {
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic,
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic,
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic
+            }), Is.False);
+            Assert.That(AreChronologicalAndDuplicateFree(new[]
+            {
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic,
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic
+            }), Is.False);
+            Assert.That(AreChronologicalAndDuplicateFree(new[]
+            {
+                DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic,
+                "gd66.diagnostic.unranked",
+                DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic,
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic
+            }), Is.True);
+        }
+
         private static MatrixCase C(string name, EntryPoint entry, MatrixCheckpoint checkpoint,
             MatrixOperation operation, PathRole role, string reason, SpatialMigrationJournalStage? stage,
             MatrixAuthority authority, ActiveExpectation active, RetainedEvidence evidence, int transitions,
@@ -239,7 +268,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static void AssertChronologicalDuplicateFree(DetachedSpatialMigrationOutcome outcome)
         {
             string[] diagnostics = outcome.Diagnostics == null ? Array.Empty<string>() : outcome.Diagnostics.ToArray();
-            Assert.That(diagnostics.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(diagnostics.Length));
+            Assert.That(AreChronologicalAndDuplicateFree(diagnostics), Is.True);
+        }
+
+        private static bool AreChronologicalAndDuplicateFree(IEnumerable<string> diagnostics)
+        {
+            string[] values = diagnostics == null ? Array.Empty<string>() : diagnostics.ToArray();
+            if (values.Distinct(StringComparer.Ordinal).Count() != values.Length) return false;
+            int previousRank = -1;
+            foreach (string diagnostic in values)
+            {
+                if (!TryDiagnosticRank(diagnostic, out int rank)) continue;
+                if (rank <= previousRank) return false;
+                previousRank = rank;
+            }
+            return true;
+        }
+
+        private static bool TryDiagnosticRank(string diagnostic, out int rank)
+        {
+            if (diagnostic == DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic)
+            { rank = 0; return true; }
+            if (diagnostic == DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic)
+            { rank = 1; return true; }
+            if (diagnostic == DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic)
+            { rank = 2; return true; }
+            if (diagnostic == DetachedSpatialMigrationTransaction.ReceiptInvalidReason ||
+                diagnostic == DetachedSpatialMigrationTransaction.ReceiptWriteDiagnostic)
+            { rank = 3; return true; }
+            rank = -1; return false;
         }
 
         private static int AuthorityTransitions(Scenario scenario) => scenario.FileSystem.Operations.Count(operation =>

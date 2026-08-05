@@ -73,6 +73,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertWinner(run.Classification, expected.Winner);
             Assert.That(run.Attempt.Descriptor.RawSourceSchemaVersion, Is.EqualTo(expected.Schema));
             Assert.That(run.Attempt.Diagnostics, Is.EqualTo(expected.Diagnostics));
+            Assert.That(run.Attempt.Diagnostics.Distinct(StringComparer.Ordinal).Count(),
+                Is.EqualTo(run.Attempt.Diagnostics.Length));
             Assert.That(run.State.Floors, Has.Length.EqualTo(1));
             SavedSpatialFloor floor = run.State.Floors[0];
             RoomSpatialInstance[] rooms = floor.Layout.Rooms;
@@ -170,8 +172,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string[] diagnostics = null, string[] categories = null, string[] options = null,
             LegacyRoomOriginKind semantics = LegacyRoomOriginKind.MigratedExplicitLegacyRoom) =>
             new TestCaseData(new Expected { Id = id, Schema = schema, Winner = winner, Members = members,
-                Rooms = rooms, Diagnostics = (diagnostics ?? Array.Empty<string>()).OrderBy(value => value,
-                    StringComparer.Ordinal).ToArray(), Categories = categories ??
+                Rooms = rooms, Diagnostics = (diagnostics ?? Array.Empty<string>()).ToArray(), Categories = categories ??
                 Array.Empty<string>(), Options = options ?? Array.Empty<string>(), Semantics = semantics }).SetName("Semantic_" + id);
 
         private const string RoomCategory = "placement.category.room", Monster = "placement.category.monster",
