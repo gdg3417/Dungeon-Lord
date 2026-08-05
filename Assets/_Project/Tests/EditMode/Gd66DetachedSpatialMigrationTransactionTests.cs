@@ -1252,12 +1252,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
 
-        [TestCase(OperationType.Write, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate, false)]
-        [TestCase(OperationType.Flush, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate, false)]
-        [TestCase(OperationType.Read, 3, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate, false)]
+        [TestCase(OperationType.Write, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
+        [TestCase(OperationType.Flush, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
+        [TestCase(OperationType.Read, 3, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
         public void Recovery_ChangedPinsDurableVerifiedCorruptRestoreStagingRecreationFailuresRetry(
             OperationType failureType, int failureIndex, SpatialMigrationJournalStage expectedStage,
-            SpatialTrustedPayload expectedTrust, bool unused)
+            SpatialTrustedPayload expectedTrust)
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             var fileSystem = new DeterministicFileSystem(failureType, failureIndex);
