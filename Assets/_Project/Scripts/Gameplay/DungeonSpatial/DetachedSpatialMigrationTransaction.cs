@@ -421,11 +421,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             if (repaired != null && repaired.IsValid)
                             {
                                 StaleJournalCleanupResult cleanup = QuarantineBoundNonterminalEvidence(directory, existing.Value);
-                                if (!cleanup.JournalQuarantined || cleanup.CleanupFailed || !cleanup.SidecarsComplete)
-                                {
-                                    return Failure(StaleJournalOriginalMismatchReason, existing.Value.Stage,
-                                        SpatialTrustedPayload.Original);
-                                }
                                 return Failure(StaleJournalOriginalMismatchReason, existing.Value.Stage,
                                     SpatialTrustedPayload.Original);
                             }
@@ -650,13 +645,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     journal.DescriptorFingerprintSha256, journal.ExpectedCandidateSha256);
             if (journal.Stage == SpatialMigrationJournalStage.CandidateVerified)
             {
+                if (stagedCandidate) AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
                 if (!backupValid)
-                    return activeOriginal ? Failure(BackupFailedReason, journal.Stage, SpatialTrustedPayload.Original)
-                        : Failure(NoTrustedPayloadReason, journal.Stage, SpatialTrustedPayload.None);
+                    return activeOriginal ? FailureWithDiagnostics(BackupFailedReason, journal.Stage,
+                        SpatialTrustedPayload.Original, diagnostics)
+                        : FailureWithDiagnostics(NoTrustedPayloadReason, journal.Stage,
+                            SpatialTrustedPayload.None, diagnostics);
                 if (!activeCandidate && !stagedCandidate)
                     return activeOriginal ? Failure(CandidateAbsentReason, journal.Stage, SpatialTrustedPayload.Original)
                         : Restore(journalPath, backupPath, activePath, directory, journal, backup);
-                if (stagedCandidate) AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
                 if (!activeCandidate)
                 {
                     try { fileSystem.ReplaceSameDirectoryAtomic(stagingPath, activePath); }
@@ -664,7 +661,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     {
                         byte[] afterFailure = fileSystem.ReadAllBytes(activePath);
                         if (HashIs(afterFailure, journal.OriginalPayloadSha256))
-                            return Failure(ReplacementFailedReason, journal.Stage, SpatialTrustedPayload.Original);
+                            return FailureWithDiagnostics(ReplacementFailedReason, journal.Stage,
+                                SpatialTrustedPayload.Original, diagnostics);
                         return WithDiagnostics(Restore(journalPath, backupPath, activePath, directory, journal, backup),
                             diagnostics);
                     }
@@ -1191,35 +1189,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private sealed class StaleJournalCleanupResult
         {
             internal bool JournalQuarantined;
-            internal bool SidecarsComplete = true;
-            internal bool CleanupFailed;
+            internal bool SidecarCleanupComplete = true;
         }
 
         private StaleJournalCleanupResult QuarantineBoundNonterminalEvidence(string directory, SpatialMigrationJournal journal)
         {
             var result = new StaleJournalCleanupResult();
             if (!ResolveEvidencePaths(directory, journal, out string journalPath, out string backupPath,
-                out string stagingPath)) { result.CleanupFailed = true; return result; }
-            string[] paths =
+                out string stagingPath)) return result;
+            try
             {
-                journalPath, backupPath, stagingPath, journalPath + ".next", backupPath + ".restore",
+                if (!fileSystem.Exists(journalPath)) return result;
+                result.JournalQuarantined = QuarantineEvidence(directory, journalPath,
+                    fileSystem.ReadAllBytes(journalPath));
+                if (!result.JournalQuarantined || fileSystem.Exists(journalPath)) return result;
+            }
+            catch { return result; }
+
+            string[] sidecars =
+            {
+                backupPath, stagingPath, journalPath + ".next", backupPath + ".restore",
                 backupPath + ".restore.intent", ReceiptName(journal.RelativeJournalFilename, journal.TransactionId)
             };
-            foreach (string path in paths.OrderBy(value => value, StringComparer.Ordinal))
+            foreach (string path in sidecars.OrderBy(value => value, StringComparer.Ordinal))
             {
                 try
                 {
                     if (!fileSystem.Exists(path)) continue;
-                    bool quarantined = QuarantineEvidence(directory, path, fileSystem.ReadAllBytes(path));
-                    if (path == journalPath) result.JournalQuarantined = quarantined;
-                    else result.SidecarsComplete = result.SidecarsComplete && quarantined;
-                    if (!quarantined) result.CleanupFailed = true;
+                    result.SidecarCleanupComplete = QuarantineEvidence(directory, path,
+                        fileSystem.ReadAllBytes(path)) && result.SidecarCleanupComplete;
                 }
-                catch
-                {
-                    result.CleanupFailed = true;
-                    if (path != journalPath) result.SidecarsComplete = false;
-                }
+                catch { result.SidecarCleanupComplete = false; }
             }
             return result;
         }
@@ -1374,9 +1374,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static DetachedSpatialMigrationOutcome WithDiagnostics(
             DetachedSpatialMigrationOutcome outcome, IEnumerable<string> diagnostics)
         {
-            if (diagnostics == null) return outcome;
-            var merged = new List<string>(outcome.Diagnostics);
-            foreach (string diagnostic in diagnostics)
+            var merged = new List<string>();
+            if (diagnostics != null)
+                foreach (string diagnostic in diagnostics)
+                    if (!merged.Contains(diagnostic)) merged.Add(diagnostic);
+            foreach (string diagnostic in outcome.Diagnostics)
                 if (!merged.Contains(diagnostic)) merged.Add(diagnostic);
             return new DetachedSpatialMigrationOutcome(outcome.IsSuccess, outcome.Reason, outcome.Stage,
                 outcome.TrustedPayload, merged);
