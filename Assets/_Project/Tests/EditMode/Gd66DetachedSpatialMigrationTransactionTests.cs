@@ -1434,9 +1434,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return Path.Combine(directory, stem + ".gd66-quarantine-" + evidenceHash + "-" + pathHash + ".evidence");
         }
 
-        private static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
+        internal static StringComparer PathComparer() => Path.DirectorySeparatorChar == '\\'
             ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-        private static SpatialMigrationSidecarNames MaterializeJournal(DeterministicFileSystem fileSystem,
+        internal static SpatialMigrationSidecarNames MaterializeJournal(DeterministicFileSystem fileSystem,
             PreparedFixture fixture, string activePath, SpatialMigrationJournalStage stage, bool includeBackup,
             bool includeStaging, bool activeCandidate)
         {
@@ -1478,7 +1478,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
         }
-        private static string ActivePath(string identity)
+        internal static string ActivePath(string identity)
         {
             string safe = new string(identity.Select(character => char.IsLetterOrDigit(character) ?
                 character : '-').ToArray());
@@ -1575,7 +1575,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyBytes = fixture.LegacyBytes, ValidationInputs = new Dictionary<string, byte[]>() };
         }
 
-        private static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
+        internal static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
             byte[] originalOverride = null)
         {
             const string root = "Assets/_Project/Data/Production/DungeonSpatial/";
@@ -1632,7 +1632,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedSpatialMigrationPreparer.Prepare(inputs));
         }
 
-        private static DetachedSpatialMigrationRecoveryContext Recovery(PreparedFixture fixture,
+        internal static DetachedSpatialMigrationRecoveryContext Recovery(PreparedFixture fixture,
             byte[] legacyBytes = null) =>
             new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility, fixture.Production,
                 new Dictionary<string, byte[]>(), legacyBytes ?? fixture.LegacyBytes, fixture.Limits, RawLimits(),
@@ -1652,7 +1652,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static TextAsset Asset(string path)
         { TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path); Assert.That(asset, Is.Not.Null, path); return asset; }
 
-        private sealed class PreparedFixture
+        internal sealed class PreparedFixture
         {
             internal PreparedFixture(byte[] original, RawSavePayloadClassification classification,
                 ProductionSpatialContentSnapshot production,
@@ -1669,9 +1669,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedSpatialMigrationPreparationResult Result { get; }
         }
 
-        private enum OperationType { Exists, Read, Write, Replace, Move, Delete, Flush, Enumerate, Containment }
+        internal enum OperationType { Exists, Read, Write, Replace, Move, Delete, Flush, Enumerate, Containment }
 
-        private sealed class FileOperation
+        internal sealed class FileOperation
         {
             internal FileOperation(OperationType type, int index, params string[] paths)
             { Type = type; Index = index; Paths = paths; }
@@ -1680,7 +1680,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal string[] Paths { get; }
         }
 
-        private sealed class DeterministicFileSystem : ISpatialMigrationFileSystem
+        internal sealed class DeterministicFileSystem : ISpatialMigrationFileSystem
         {
             private static readonly StringComparer PathComparer = Path.DirectorySeparatorChar == '\\'
                 ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
