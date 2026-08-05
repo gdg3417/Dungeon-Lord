@@ -596,8 +596,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] active = fileSystem.ReadAllBytes(activePath);
             if (HashIs(active, journal.OriginalPayloadSha256))
             {
-                if (journal.Stage > SpatialMigrationJournalStage.DescriptorPinned &&
-                    journal.Stage < SpatialMigrationJournalStage.OriginalRestored &&
+                if ((int)journal.Stage > (int)SpatialMigrationJournalStage.DescriptorPinned &&
+                    (int)journal.Stage < (int)SpatialMigrationJournalStage.OriginalRestored &&
                     HasRestorationIntent(backupPath, journal))
                 {
                     SpatialMigrationJournal restored = CopyStage(journal,
