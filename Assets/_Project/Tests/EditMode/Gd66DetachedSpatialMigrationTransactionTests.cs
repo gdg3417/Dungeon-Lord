@@ -530,6 +530,44 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Recovery_CandidateVerifiedRollbackRestoreWriteFailureTrustsExactCandidate()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            fileSystem.EnableFailureSequence(OperationType.Replace, 2, OperationType.Write, 2);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.CandidateVerified,
+                includeBackup: true, includeStaging: true, activeCandidate: false);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.ReplacementFailedReason));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.CandidateVerified));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Diagnostics, Is.EqualTo(new[]
+            { DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic }));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+
+            fileSystem.DisableFailure();
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(retry.IsSuccess, Is.True, retry.Reason);
+            Assert.That(retry.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+        }
+
+        [Test]
         public void Recovery_CandidateVerifiedWithValidStagedCandidateAndMissingBackupDoesNotReplaceOriginal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
@@ -1273,11 +1311,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             private readonly List<FileOperation> operations = new List<FileOperation>();
             private OperationType? failureType;
             private int failureIndex;
+            private OperationType? secondFailureType;
+            private int secondFailureIndex;
             internal DeterministicFileSystem(OperationType? failureType = null, int failureIndex = 0)
             { this.failureType = failureType; this.failureIndex = failureIndex; }
-            internal void DisableFailure() { failureType = null; failureIndex = 0; }
+            internal void DisableFailure()
+            {
+                failureType = null; failureIndex = 0;
+                secondFailureType = null; secondFailureIndex = 0;
+            }
             internal void EnableFailure(OperationType type, int index)
-            { failureType = type; failureIndex = index; }
+            {
+                failureType = type; failureIndex = index;
+                secondFailureType = null; secondFailureIndex = 0;
+            }
+            internal void EnableFailureSequence(OperationType firstType, int firstIndex,
+                OperationType secondType, int secondIndex)
+            {
+                failureType = firstType; failureIndex = firstIndex;
+                secondFailureType = secondType; secondFailureIndex = secondIndex;
+            }
             internal void Seed(string path, byte[] bytes) { files[Normalize(path)] = (byte[])bytes.Clone(); }
             internal IEnumerable<string> Paths => files.Keys.OrderBy(value => value, PathComparer).ToArray();
             internal IEnumerable<FileOperation> Operations => operations.ToArray();
@@ -1334,6 +1387,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 int index = counts.TryGetValue(type, out int previous) ? previous + 1 : 1;
                 counts[type] = index; operations.Add(new FileOperation(type, index, paths));
                 if (failureType == type && (failureIndex < 0 || failureIndex == index))
+                    throw new IOException(type + "#" + index);
+                if (secondFailureType == type && (secondFailureIndex < 0 || secondFailureIndex == index))
                     throw new IOException(type + "#" + index);
             }
         }

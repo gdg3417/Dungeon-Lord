@@ -768,27 +768,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try
             {
                 if (!Same(fileSystem.ReadAllBytes(backupPath), verifiedBackup))
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                 string restoreRelative = Path.GetFileName(backupPath) + ".restore";
                 if (!Resolve(directory, restoreRelative, out string restoreStaging) ||
                     !fileSystem.IsPathContainedWithoutRedirection(directory, restoreStaging))
-                    return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, PathInvalidReason);
                 if (!fileSystem.Exists(restoreStaging))
                 {
                     fileSystem.WriteAllBytesDurable(restoreStaging, verifiedBackup);
                     fileSystem.FlushDirectory(directory);
                 }
                 if (!Same(fileSystem.ReadAllBytes(restoreStaging), verifiedBackup))
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                 string intentRelative = Path.GetFileName(backupPath) + ".restore.intent";
                 if (!Resolve(directory, intentRelative, out string intentPath) ||
                     !fileSystem.IsPathContainedWithoutRedirection(directory, intentPath))
-                    return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, PathInvalidReason);
                 var intent = new DetachedRestorationIntent(journal.TransactionId,
                     journal.DescriptorFingerprintSha256, journal.OriginalPayloadSha256,
                     SpatialContractSha256.Compute(verifiedBackup), journal.RelativeJournalFilename,
                     (int)journal.Stage);
                 byte[] intentBytes = DetachedRestorationIntentContract.Serialize(intent, limits);
+                if (intentBytes == null) return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                 if (fileSystem.Exists(intentPath))
                 {
                     byte[] existingIntent = fileSystem.ReadAllBytes(intentPath);
@@ -796,7 +797,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         DetachedRestorationIntentContract.Parse(existingIntent, limits) == null)
                     {
                         if (!QuarantineEvidence(directory, intentPath, existingIntent))
-                            return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                            return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                     }
                 }
                 if (!fileSystem.Exists(intentPath)) fileSystem.WriteAllBytesDurable(intentPath, intentBytes);
@@ -804,11 +805,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 byte[] persistedIntent = fileSystem.ReadAllBytes(intentPath);
                 if (!Same(persistedIntent, intentBytes) ||
                     DetachedRestorationIntentContract.Parse(persistedIntent, limits) == null)
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                 fileSystem.ReplaceSameDirectoryAtomic(restoreStaging, activePath);
                 fileSystem.FlushDirectory(directory);
                 if (!HashIs(fileSystem.ReadAllBytes(activePath), journal.OriginalPayloadSha256))
-                    return Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                    return ClassifyRestoreFailure(activePath, journal, RecoveryFailedReason);
                 restoredActive = true;
                 SpatialMigrationJournal restored = CopyStage(journal, SpatialMigrationJournalStage.OriginalRestored);
                 if (!RewriteJournal(journalPath, restored))
@@ -823,30 +824,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch
             {
-                if (!restoredActive && (journal.Stage == SpatialMigrationJournalStage.CandidateVerified ||
-                    journal.Stage == SpatialMigrationJournalStage.Replaced))
-                {
-                    try
-                    {
-                        byte[] active = fileSystem.ReadAllBytes(activePath);
-                        if (HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
-                            journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
-                            journal.ExpectedCandidateSha256))
-                        {
-                            string reason = restoredFailureReason ?? (journal.Stage == SpatialMigrationJournalStage.Replaced
-                                ? ReplacedPendingDurabilityDiagnostic : RecoveryFailedReason);
-                            return new DetachedSpatialMigrationOutcome(false, reason, journal.Stage,
-                                SpatialTrustedPayload.Candidate, journal.Stage == SpatialMigrationJournalStage.Replaced
-                                    ? new[] { ReplacedPendingDurabilityDiagnostic } : null);
-                        }
-                    }
-                    catch { }
-                }
-                return restoredActive
-                    ? Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
-                        SpatialTrustedPayload.Original)
-                    : Failure(RecoveryFailedReason, journal.Stage, SpatialTrustedPayload.None);
+                if (!restoredActive)
+                    return ClassifyRestoreFailure(activePath, journal, restoredFailureReason ?? RecoveryFailedReason);
+                return Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
+                    SpatialTrustedPayload.Original);
             }
+        }
+
+
+        private DetachedSpatialMigrationOutcome ClassifyRestoreFailure(string activePath,
+            SpatialMigrationJournal journal, string reason)
+        {
+            string failure = string.IsNullOrEmpty(reason) ? RecoveryFailedReason : reason;
+            try
+            {
+                byte[] active = fileSystem.ReadAllBytes(activePath);
+                if (HashIs(active, journal.OriginalPayloadSha256))
+                    return Failure(failure, journal.Stage, SpatialTrustedPayload.Original);
+                if ((journal.Stage == SpatialMigrationJournalStage.CandidateVerified ||
+                    journal.Stage == SpatialMigrationJournalStage.Replaced) &&
+                    HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
+                        journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
+                        journal.ExpectedCandidateSha256))
+                    return Failure(failure, journal.Stage, SpatialTrustedPayload.Candidate);
+            }
+            catch { }
+            return Failure(failure, journal.Stage, SpatialTrustedPayload.None);
         }
 
         private bool HasRestorationIntent(string backupPath, SpatialMigrationJournal journal)
