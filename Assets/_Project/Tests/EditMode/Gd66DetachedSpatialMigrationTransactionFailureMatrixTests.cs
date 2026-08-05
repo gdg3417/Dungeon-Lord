@@ -48,14 +48,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MatrixOperation operation, int occurrence, PathRole role, bool afterMutation,
                 string firstReason, SpatialMigrationJournalStage? firstStage, MatrixAuthority firstAuthority,
                 ActiveExpectation firstActive, RetainedEvidence firstEvidence, int firstTransitions,
-                EntryPoint retryEntryPoint, bool finalSuccess, string finalReason,
+                EntryPoint retryEntryPoint, bool firstSuccess, bool injectFailure, int firstCandidateWrites, int finalCandidateWrites,
+                bool finalSuccess, string finalReason,
                 SpatialMigrationJournalStage? finalStage, MatrixAuthority finalAuthority,
                 ActiveExpectation finalActive, int finalTransitions, ReadSubstitution substitution = null)
             { Name = name; EntryPoint = entryPoint; Checkpoint = checkpoint; Operation = operation;
               Occurrence = occurrence; Role = role; AfterMutation = afterMutation; FirstReason = firstReason;
               FirstStage = firstStage; FirstAuthority = firstAuthority; FirstActive = firstActive;
               FirstEvidence = firstEvidence; FirstTransitions = firstTransitions; RetryEntryPoint = retryEntryPoint;
-              FinalSuccess = finalSuccess; FinalReason = finalReason; FinalStage = finalStage;
+              FirstSuccess = firstSuccess; InjectFailure = injectFailure; FirstCandidateWrites = firstCandidateWrites;
+              FinalCandidateWrites = finalCandidateWrites; FinalSuccess = finalSuccess; FinalReason = finalReason; FinalStage = finalStage;
               FinalAuthority = finalAuthority; FinalActive = finalActive; FinalTransitions = finalTransitions;
               Substitution = substitution; }
             internal string Name { get; }
@@ -72,6 +74,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal RetainedEvidence FirstEvidence { get; }
             internal int FirstTransitions { get; }
             internal EntryPoint RetryEntryPoint { get; }
+            internal bool FirstSuccess { get; }
+            internal bool InjectFailure { get; }
+            internal int FirstCandidateWrites { get; }
+            internal int FinalCandidateWrites { get; }
             internal bool FinalSuccess { get; }
             internal string FinalReason { get; }
             internal SpatialMigrationJournalStage? FinalStage { get; }
@@ -86,29 +92,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             get
             {
-                yield return C("fresh-exists-discovery", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Exists, PathRole.Journal, DetachedSpatialMigrationTransaction.RecoveryFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("fresh-containment", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Containment, PathRole.Active, DetachedSpatialMigrationTransaction.PathInvalidReason, null, MatrixAuthority.None, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("fresh-journal-write", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.DurableWrite, PathRole.Journal, DetachedSpatialMigrationTransaction.BackupFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("fresh-enumeration", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Enumeration, PathRole.Directory, DetachedSpatialMigrationTransaction.RecoveryFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("descriptor-backup-write", EntryPoint.ResumedExecute, MatrixCheckpoint.DescriptorPinned, MatrixOperation.DurableWrite, PathRole.Backup, DetachedSpatialMigrationTransaction.BackupFailedReason, SpatialMigrationJournalStage.DescriptorPinned, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("descriptor-backup-reread", EntryPoint.ResumedExecute, MatrixCheckpoint.DescriptorPinned, MatrixOperation.Read, PathRole.Backup, DetachedSpatialMigrationTransaction.BackupFailedReason, SpatialMigrationJournalStage.DescriptorPinned, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, new ReadSubstitution(PathRole.Backup, new byte[] { 9, 9, 9 }));
-                yield return C("backup-candidate-write", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.DurableWrite, PathRole.CandidateStaging, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("backup-candidate-flush", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.DirectoryFlush, PathRole.Directory, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("backup-candidate-reread", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.Read, PathRole.CandidateStaging, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, new ReadSubstitution(PathRole.CandidateStaging, new byte[] { 1, 2, 3 }));
-                yield return C("candidate-active-replace-before", EntryPoint.Recover, MatrixCheckpoint.CandidateVerified, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.ReplacementFailedReason, SpatialMigrationJournalStage.CandidateVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("candidate-active-replace-after", EntryPoint.Recover, MatrixCheckpoint.CandidateVerified, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.DurabilityFailedReason, SpatialMigrationJournalStage.CandidateVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, null, true);
+                yield return C("fresh-exists-discovery", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Exists, PathRole.Journal, DetachedSpatialMigrationTransaction.RecoveryFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("fresh-containment", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Containment, PathRole.Journal, DetachedSpatialMigrationTransaction.PathInvalidReason, null, MatrixAuthority.None, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("fresh-journal-write", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.DurableWrite, PathRole.Journal, DetachedSpatialMigrationTransaction.BackupFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("fresh-enumeration", EntryPoint.FreshExecute, MatrixCheckpoint.NoJournal, MatrixOperation.Enumeration, PathRole.Directory, DetachedSpatialMigrationTransaction.RecoveryFailedReason, null, MatrixAuthority.Original, ActiveExpectation.Original, E(), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("descriptor-backup-write", EntryPoint.ResumedExecute, MatrixCheckpoint.DescriptorPinned, MatrixOperation.DurableWrite, PathRole.Backup, DetachedSpatialMigrationTransaction.BackupFailedReason, SpatialMigrationJournalStage.DescriptorPinned, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("descriptor-backup-mismatch", EntryPoint.ResumedExecute, MatrixCheckpoint.DescriptorPinned, MatrixOperation.Read, PathRole.Backup, DetachedSpatialMigrationTransaction.BackupFailedReason, SpatialMigrationJournalStage.DescriptorPinned, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, new ReadSubstitution(PathRole.Backup, new byte[] { 9, 9, 9 }), injectFailure:false, finalCandidateWrites:1);
+                yield return C("backup-candidate-write", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.DurableWrite, PathRole.CandidateStaging, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:1);
+                yield return C("backup-candidate-flush", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.DirectoryFlush, PathRole.Directory, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, firstCandidateWrites:1, finalCandidateWrites:1);
+                yield return C("backup-candidate-mismatch", EntryPoint.ResumedExecute, MatrixCheckpoint.BackupVerified, MatrixOperation.Read, PathRole.CandidateStaging, DetachedSpatialMigrationTransaction.CandidateFailedReason, SpatialMigrationJournalStage.BackupVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, new ReadSubstitution(PathRole.CandidateStaging, new byte[] { 1, 2, 3 }), injectFailure:false, firstCandidateWrites:1, finalCandidateWrites:1);
+                yield return C("candidate-active-replace-before", EntryPoint.Recover, MatrixCheckpoint.CandidateVerified, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.ReplacementFailedReason, SpatialMigrationJournalStage.CandidateVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, candidate:true), 0, EntryPoint.ResumedExecute, true, DetachedSpatialMigrationTransaction.EmptySuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, finalCandidateWrites:0);
+                yield return C("candidate-active-replace-after", EntryPoint.Recover, MatrixCheckpoint.CandidateVerified, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.DurabilityFailedReason, SpatialMigrationJournalStage.CandidateVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, null, true, finalCandidateWrites:0);
                 yield return C("replaced-directory-flush", EntryPoint.Recover, MatrixCheckpoint.Replaced, MatrixOperation.DirectoryFlush, PathRole.Directory, DetachedSpatialMigrationTransaction.DurabilityFailedReason, SpatialMigrationJournalStage.Replaced, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("replaced-active-reread", EntryPoint.Recover, MatrixCheckpoint.Replaced, MatrixOperation.Read, PathRole.Active, DetachedSpatialMigrationTransaction.RecoveryFailedReason, SpatialMigrationJournalStage.Replaced, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, new ReadSubstitution(PathRole.Active, new byte[] { 7, 7, 7 }));
-                yield return C("durable-final-receipt-write", EntryPoint.Recover, MatrixCheckpoint.DurableVerified, MatrixOperation.DurableWrite, PathRole.Receipt, DetachedSpatialMigrationTransaction.FinalizationFailedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
+                yield return C("replaced-active-read-exception", EntryPoint.Recover, MatrixCheckpoint.Replaced, MatrixOperation.Read, PathRole.Active, DetachedSpatialMigrationTransaction.RecoveryFailedReason, SpatialMigrationJournalStage.Replaced, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
+                yield return C("durable-final-receipt-write", EntryPoint.Recover, MatrixCheckpoint.DurableVerified, MatrixOperation.DurableWrite, PathRole.Receipt, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1, firstSuccess:true);
                 yield return C("durable-final-journal-advance", EntryPoint.Recover, MatrixCheckpoint.DurableVerified, MatrixOperation.AtomicReplace, PathRole.Journal, DetachedSpatialMigrationTransaction.FinalizationFailedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, receipt:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("restoration-intent-write", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.DurableWrite, PathRole.RestorationIntent, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
-                yield return C("restoration-intent-reread", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Read, PathRole.RestorationIntent, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, new ReadSubstitution(PathRole.RestorationIntent, new byte[] { 4, 5, 6 }));
-                yield return C("restore-staging-quarantine-move", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicMove, PathRole.Quarantine, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
-                yield return C("restore-staging-reread", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Read, PathRole.RestoreStaging, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, new ReadSubstitution(PathRole.RestoreStaging, new byte[] { 6, 5, 4 }));
-                yield return C("restore-active-replace-before", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
-                yield return C("restore-active-replace-after", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Active, DetachedSpatialMigrationTransaction.DependencyChangedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, intent:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, null, true);
-                yield return C("finalization-cleanup-delete", EntryPoint.Recover, MatrixCheckpoint.FinalizationAttempt, MatrixOperation.Delete, PathRole.Backup, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, receipt:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.SuccessReason, SpatialMigrationJournalStage.Finalized, MatrixAuthority.Candidate, ActiveExpectation.Candidate, 1);
-                yield return C("restore-originalrestored-advance", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Journal, DetachedSpatialMigrationTransaction.OriginalRestoredStageWriteFailedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, intent:true), 1, EntryPoint.Recover, true, DetachedSpatialMigrationTransaction.RecoveredOriginalReason, SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restoration-intent-write", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.DurableWrite, PathRole.RestorationIntent, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restoration-intent-mismatch", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Read, PathRole.RestorationIntent, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, new ReadSubstitution(PathRole.RestorationIntent, new byte[] { 4, 5, 6 }), injectFailure:false);
+                yield return C("restore-staging-quarantine-move", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicMove, PathRole.Quarantine, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restore-staging-mismatch", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Read, PathRole.RestoreStaging, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, new ReadSubstitution(PathRole.RestoreStaging, new byte[] { 6, 5, 4 }), injectFailure:false);
+                yield return C("restore-active-replace-before", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Active, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restore-active-replace-after", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Active, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, intent:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, null, true);
+                yield return C("restore-exact-quarantine-delete", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Delete, PathRole.RestoreStaging, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, quarantine:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restore-originalrestored-advance", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Journal, DetachedSpatialMigrationTransaction.OriginalRestoredStageWriteFailedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, backup:true, intent:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
             }
         }
 
@@ -120,23 +126,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             DetachedSpatialMigrationOutcome first = Invoke(row.EntryPoint, scenario);
 
-            scenario.FileSystem.DisableFailure();
-            AssertOutcome(first, false, row.FirstReason, row.FirstStage, row.FirstAuthority);
+            Gd66DetachedSpatialMigrationTransactionTests.FileOperation failedOperation = scenario.FileSystem.FailedOperation;
+            int failedOccurrence = scenario.FileSystem.FailedTargetOccurrence;
+            AssertOutcome(first, row.FirstSuccess, row.FirstReason, row.FirstStage, row.FirstAuthority);
             AssertActiveBytes(scenario, row.FirstActive);
             AssertEvidence(scenario, row.FirstEvidence);
             Assert.That(AuthorityTransitions(scenario), Is.EqualTo(row.FirstTransitions), row.Name);
+            Assert.That(scenario.CandidateStagingWriteCount(), Is.EqualTo(row.FirstCandidateWrites), row.Name);
             Assert.That(scenario.LiveJournalCount(), Is.LessThanOrEqualTo(1), row.Name);
-            AssertThrownOperation(scenario, row);
+            AssertThrownOperation(scenario, row, failedOperation, failedOccurrence);
+            scenario.AssertSubstitutionConsumed(row);
             AssertChronologicalDuplicateFree(first);
+            scenario.FileSystem.DisableFailure();
 
-            int candidateWritesBeforeRetry = scenario.CandidateStagingWriteCount();
             DetachedSpatialMigrationOutcome retry = Invoke(row.RetryEntryPoint, scenario);
 
             AssertOutcome(retry, row.FinalSuccess, row.FinalReason, row.FinalStage, row.FinalAuthority);
             AssertActiveBytes(scenario, row.FinalActive);
             Assert.That(AuthorityTransitions(scenario), Is.EqualTo(row.FinalTransitions), row.Name);
             Assert.That(scenario.LiveJournalCount(), Is.LessThanOrEqualTo(1), row.Name);
-            Assert.That(scenario.CandidateStagingWriteCount(), Is.EqualTo(candidateWritesBeforeRetry), row.Name);
+            Assert.That(scenario.CandidateStagingWriteCount(), Is.EqualTo(row.FinalCandidateWrites), row.Name);
             AssertChronologicalDuplicateFree(retry);
         }
 
@@ -145,7 +154,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             MatrixCase[] rows = Cases.ToArray();
             Assert.That(rows.Length, Is.InRange(18, 30));
-            Assert.That(rows.All(row => row.Occurrence > 0), Is.True);
+            Assert.That(rows.Where(row => row.InjectFailure).All(row => row.Occurrence > 0), Is.True);
             foreach (MatrixOperation operation in (MatrixOperation[])Enum.GetValues(typeof(MatrixOperation)))
                 Assert.That(rows.Any(row => row.Operation == operation), Is.True, operation.ToString());
             foreach (MatrixCheckpoint checkpoint in (MatrixCheckpoint[])Enum.GetValues(typeof(MatrixCheckpoint)))
@@ -159,9 +168,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             MatrixAuthority authority, ActiveExpectation active, RetainedEvidence evidence, int transitions,
             EntryPoint retry, bool finalSuccess, string finalReason, SpatialMigrationJournalStage? finalStage,
             MatrixAuthority finalAuthority, ActiveExpectation finalActive, int finalTransitions,
-            ReadSubstitution substitution = null, bool after = false) => new MatrixCase(name, entry, checkpoint,
-                operation, 1, role, after, reason, stage, authority, active, evidence, transitions, retry,
-                finalSuccess, finalReason, finalStage, finalAuthority, finalActive, finalTransitions, substitution);
+            ReadSubstitution substitution = null, bool after = false, bool firstSuccess = false,
+            bool injectFailure = true, int firstCandidateWrites = 0, int finalCandidateWrites = 0) =>
+            new MatrixCase(name, entry, checkpoint, operation, injectFailure ? 1 : 0, role, after, reason, stage,
+                authority, active, evidence, transitions, retry, firstSuccess, injectFailure, firstCandidateWrites,
+                finalCandidateWrites, finalSuccess, finalReason, finalStage, finalAuthority, finalActive,
+                finalTransitions, substitution);
         private static RetainedEvidence E(bool journal = false, bool journalNext = false, bool backup = false,
             bool candidate = false, bool restore = false, bool intent = false, bool quarantine = false,
             bool receipt = false) => new RetainedEvidence(journal, journalNext, backup, candidate, restore,
@@ -206,13 +218,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(expected.Quarantine));
         }
 
-        private static void AssertThrownOperation(Scenario scenario, MatrixCase row)
+        private static void AssertThrownOperation(Scenario scenario, MatrixCase row,
+            Gd66DetachedSpatialMigrationTransactionTests.FileOperation failed, int failedOccurrence)
         {
-            Gd66DetachedSpatialMigrationTransactionTests.FileOperation failed = scenario.FileSystem.FailedOperation;
+            if (!row.InjectFailure)
+            { Assert.That(failed, Is.Null, row.Name); return; }
             Assert.That(failed, Is.Not.Null, row.Name);
             Assert.That(failed.Type, Is.EqualTo(ToOperationType(row.Operation)), row.Name);
             Assert.That(scenario.RoleMatches(failed.Paths, row.Role), Is.True, row.Name);
-            Assert.That(scenario.FileSystem.FailedTargetOccurrence, Is.EqualTo(row.Occurrence), row.Name);
+            Assert.That(failedOccurrence, Is.EqualTo(row.Occurrence), row.Name);
             Assert.That(failed.FailedAfterMutation, Is.EqualTo(row.AfterMutation), row.Name);
             Assert.That(failed.MutationCompleted, Is.EqualTo(row.AfterMutation), row.Name);
         }
@@ -258,6 +272,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 scenario.Materialize(row.Checkpoint);
                 if (row.Operation == MatrixOperation.AtomicMove)
                     scenario.FileSystem.Seed(scenario.RestoreStagingPath, scenario.UntrustedBytes);
+                if (row.Name.Contains("exact-quarantine"))
+                {
+                    scenario.FileSystem.Seed(scenario.RestoreStagingPath, scenario.UntrustedBytes);
+                    scenario.FileSystem.Seed(Gd66DetachedSpatialMigrationTransactionTests.QuarantinePath(
+                        scenario.DirectoryPath, scenario.RestoreStagingPath, scenario.UntrustedBytes),
+                        scenario.UntrustedBytes);
+                }
                 return scenario;
             }
 
@@ -304,9 +325,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 if (row.Substitution != null)
                     FileSystem.SubstituteNextRead(PathForRole(row.Substitution.Role), row.Substitution.Bytes);
+                if (!row.InjectFailure) return;
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType type = ToOperationType(row.Operation);
                 FileSystem.EnableTargetedFailure(type, paths => RoleMatches(paths, row.Role), row.Occurrence,
                     row.AfterMutation);
+            }
+
+            internal void AssertSubstitutionConsumed(MatrixCase row)
+            {
+                if (row.Substitution == null) return;
+                Assert.That(FileSystem.PendingReadSubstitutions(PathForRole(row.Substitution.Role)),
+                    Is.EqualTo(0), row.Name);
             }
 
             internal bool RoleMatches(string[] paths, PathRole role)

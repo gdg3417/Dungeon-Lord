@@ -1735,6 +1735,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 { queue = new Queue<byte[]>(); readSubstitutions[path] = queue; }
                 queue.Enqueue((byte[])bytes.Clone());
             }
+            internal int PendingReadSubstitutions(string path)
+            {
+                path = Normalize(path);
+                return readSubstitutions.TryGetValue(path, out Queue<byte[]> queue) ? queue.Count : 0;
+            }
             internal void EnableFailureSequence(OperationType firstType, int firstIndex,
                 OperationType secondType, int secondIndex)
             {
