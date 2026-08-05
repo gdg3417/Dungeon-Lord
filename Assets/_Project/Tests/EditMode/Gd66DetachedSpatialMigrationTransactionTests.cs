@@ -665,6 +665,100 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(1));
         }
 
+
+
+        [Test]
+        public void Execute_StaleReceiptCleanupUsesContainedReceiptPath()
+        {
+            PreparedFixture stale = PrepareEmptyFixture(6);
+            PreparedFixture repaired = PrepareEmptyFixture(5);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, stale, activePath,
+                SpatialMigrationJournalStage.DurableVerified, includeBackup: false, includeStaging: false,
+                activeCandidate: false);
+            string directory = Path.GetDirectoryName(activePath);
+            string receiptPath = Path.Combine(directory, names.FinalizedReceipt);
+            fileSystem.Seed(receiptPath, Encoding.UTF8.GetBytes("{malformed"));
+            fileSystem.Seed(activePath, repaired.Original);
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(repaired))
+                    .Execute(activePath, repaired.Result.Attempt);
+
+            Assert.That(first.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.StaleJournalOriginalMismatchReason));
+            Assert.That(fileSystem.Exists(Path.Combine(directory, names.Journal)), Is.False);
+            Assert.That(fileSystem.Exists(receiptPath), Is.False);
+            Assert.That(fileSystem.Operations.SelectMany(operation => operation.Paths),
+                Has.None.EqualTo(names.FinalizedReceipt));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(repaired.Original));
+        }
+
+        [Test]
+        public void Execute_StaleReceiptMoveFailureLeavesContainedReceiptButRemovesJournal()
+        {
+            PreparedFixture stale = PrepareEmptyFixture(6);
+            PreparedFixture repaired = PrepareEmptyFixture(5);
+            var fileSystem = new DeterministicFileSystem(OperationType.Move, 2);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, stale, activePath,
+                SpatialMigrationJournalStage.DurableVerified, includeBackup: false, includeStaging: false,
+                activeCandidate: false);
+            string directory = Path.GetDirectoryName(activePath);
+            string receiptPath = Path.Combine(directory, names.FinalizedReceipt);
+            fileSystem.Seed(receiptPath, Encoding.UTF8.GetBytes("{malformed"));
+            fileSystem.Seed(activePath, repaired.Original);
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(repaired))
+                    .Execute(activePath, repaired.Result.Attempt);
+
+            Assert.That(first.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.StaleJournalOriginalMismatchReason));
+            Assert.That(fileSystem.Exists(Path.Combine(directory, names.Journal)), Is.False);
+            Assert.That(fileSystem.Exists(receiptPath), Is.True);
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(repaired.Original));
+            fileSystem.DisableFailure();
+
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(repaired))
+                    .Execute(activePath, repaired.Result.Attempt);
+
+            Assert.That(retry.IsSuccess, Is.True, retry.Reason);
+        }
+
+        [Test]
+        public void Execute_DurableVerifiedFinalizedWriteFailureRetriesWithoutReplacingCandidate()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Replace, 1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.DurableVerified,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+            int replacementsAfterFailure = fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath));
+            fileSystem.DisableFailure();
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
+                    .Execute(activePath, fixture.Result.Attempt);
+
+            Assert.That(first.IsSuccess, Is.False);
+            Assert.That(first.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.FinalizationFailedReason));
+            Assert.That(first.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(first.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(first.Diagnostics, Does.Contain(
+                DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic));
+            Assert.That(retry.IsSuccess, Is.True, retry.Reason);
+            Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(replacementsAfterFailure));
+        }
+
         [Test]
         public void Execute_StaleJournalMoveFailureLeavesSidecarsAndRetriesSameStaleJournal()
         {

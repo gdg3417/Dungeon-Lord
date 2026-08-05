@@ -420,7 +420,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 ? recoveryContext.ValidateLegacy(activeBytes) : null;
                             if (repaired != null && repaired.IsValid)
                             {
-                                StaleJournalCleanupResult cleanup = QuarantineBoundNonterminalEvidence(directory, existing.Value);
+                                QuarantineBoundNonterminalEvidence(directory, existing.Value);
                                 return Failure(StaleJournalOriginalMismatchReason, existing.Value.Stage,
                                     SpatialTrustedPayload.Original);
                             }
@@ -823,7 +823,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch
             {
-                if (!restoredActive && journal.Stage == SpatialMigrationJournalStage.Replaced)
+                if (!restoredActive && (journal.Stage == SpatialMigrationJournalStage.CandidateVerified ||
+                    journal.Stage == SpatialMigrationJournalStage.Replaced))
                 {
                     try
                     {
@@ -831,10 +832,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (HashIs(active, journal.ExpectedCandidateSha256) && IsCanonicalSchemaSeven(active,
                             journal.Descriptor, journal.TransactionId, journal.DescriptorFingerprintSha256,
                             journal.ExpectedCandidateSha256))
-                            return new DetachedSpatialMigrationOutcome(false,
-                                ReplacedPendingDurabilityDiagnostic, journal.Stage,
-                                SpatialTrustedPayload.Candidate,
-                                new[] { ReplacedPendingDurabilityDiagnostic });
+                        {
+                            string reason = restoredFailureReason ?? (journal.Stage == SpatialMigrationJournalStage.Replaced
+                                ? ReplacedPendingDurabilityDiagnostic : RecoveryFailedReason);
+                            return new DetachedSpatialMigrationOutcome(false, reason, journal.Stage,
+                                SpatialTrustedPayload.Candidate, journal.Stage == SpatialMigrationJournalStage.Replaced
+                                    ? new[] { ReplacedPendingDurabilityDiagnostic } : null);
+                        }
                     }
                     catch { }
                 }
@@ -1206,11 +1210,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch { return result; }
 
-            string[] sidecars =
+            string receiptRelative = ReceiptName(journal.RelativeJournalFilename, journal.TransactionId);
+            var sidecars = new List<string>
             {
                 backupPath, stagingPath, journalPath + ".next", backupPath + ".restore",
-                backupPath + ".restore.intent", ReceiptName(journal.RelativeJournalFilename, journal.TransactionId)
+                backupPath + ".restore.intent"
             };
+            if (SpatialMigrationSidecarPaths.IsValidRelativeFilename(receiptRelative,
+                SpatialMigrationSidecarPaths.MaximumGeneratedFilenameCharacters) &&
+                Resolve(directory, receiptRelative, out string receiptPath) &&
+                fileSystem.IsPathContainedWithoutRedirection(directory, receiptPath))
+                sidecars.Add(receiptPath);
+            else result.SidecarCleanupComplete = false;
+
             foreach (string path in sidecars.OrderBy(value => value, StringComparer.Ordinal))
             {
                 try
