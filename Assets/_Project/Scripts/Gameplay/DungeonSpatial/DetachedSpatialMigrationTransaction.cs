@@ -790,6 +790,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     fileSystem.WriteAllBytesDurable(restoreStaging, verifiedBackup);
                     fileSystem.FlushDirectory(directory);
                 }
+                else
+                {
+                    byte[] existingRestore = fileSystem.ReadAllBytes(restoreStaging);
+                    if (!Same(existingRestore, verifiedBackup))
+                    {
+                        if (!QuarantineEvidence(directory, restoreStaging, existingRestore))
+                            return ClassifyRestoreFailure(activePath, journal,
+                                restoredFailureReason ?? RecoveryFailedReason, diagnostics);
+                        fileSystem.WriteAllBytesDurable(restoreStaging, verifiedBackup);
+                        fileSystem.FlushDirectory(directory);
+                    }
+                }
                 if (!Same(fileSystem.ReadAllBytes(restoreStaging), verifiedBackup))
                     return ClassifyRestoreFailure(activePath, journal, restoredFailureReason ?? RecoveryFailedReason, diagnostics);
                 string intentRelative = Path.GetFileName(backupPath) + ".restore.intent";

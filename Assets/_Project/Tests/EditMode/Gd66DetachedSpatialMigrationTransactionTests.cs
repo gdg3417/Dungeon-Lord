@@ -635,7 +635,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Recovery_ChangedPinsDurableVerifiedRollbackStagingMismatchTrustsJournalBoundCandidate()
+        public void Recovery_ChangedPinsDurableVerifiedCorruptRestoreStagingQuarantinesAndRestoresOriginal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             var fileSystem = new DeterministicFileSystem();
@@ -653,16 +653,66 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(outcome.IsSuccess, Is.False);
             Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
-            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
-            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(outcome.Diagnostics, Does.Contain(
                 DetachedSpatialMigrationTransaction.DurableCandidatePendingFinalizationDiagnostic));
             Assert.That(fileSystem.ReadAllBytes(activePath),
-                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+                Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Paths.Any(path => path.IndexOf(".gd66-quarantine-", StringComparison.Ordinal) >= 0 &&
+                path.EndsWith(".evidence", StringComparison.Ordinal)), Is.True);
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
-                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                operation.Paths[0].EndsWith(".candidate.tmp", StringComparison.Ordinal)), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Recovery_ChangedPinsDurableVerifiedCorruptRestoreStagingQuarantineFailureRetries()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Move, 1);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.DurableVerified, includeBackup: true, includeStaging: false,
+                activeCandidate: true);
+            string directory = Path.GetDirectoryName(activePath);
+            string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
+            fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(first.IsSuccess, Is.False);
+            Assert.That(first.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(first.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(first.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.ReadAllBytes(restoreStaging),
+                Is.EqualTo(Encoding.UTF8.GetBytes("{\"not\":\"original\"}")));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".candidate.tmp",
+                StringComparison.Ordinal)), Is.EqualTo(0));
+
+            fileSystem.DisableFailure();
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(retry.IsSuccess, Is.False);
+            Assert.That(retry.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(retry.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                operation.Paths[0].EndsWith(".candidate.tmp", StringComparison.Ordinal)), Is.EqualTo(0));
         }
 
         [Test]
