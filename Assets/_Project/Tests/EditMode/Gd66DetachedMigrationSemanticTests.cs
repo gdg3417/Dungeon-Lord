@@ -43,6 +43,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Entry(Monster, Skeleton, 2)), 1, new[] { Agreement }, new[] { Monster }, new[] { Skeleton });
                 yield return Data("LowerEffectiveContribution", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)) + "," +
                     Placement(Entry(Monster, Skeleton, 1)), 1, new[] { Contribution }, new[] { Monster }, new[] { Skeleton });
+                yield return Data("FloorBlankLowerContentImplicit", 4, Winner.Floor, Floor(Node(1, "", "")) + "," +
+                    Placement(Entry(Monster, Skeleton, 1)), 1,
+                    new[] { Contribution, MissingRoom, ImplicitRoom }, new[] { Monster }, new[] { Skeleton },
+                    LegacyRoomOriginKind.ImplicitCompatibilityContainer);
                 yield return Data("LowerIneffectiveConflict", 5, Winner.Assignments, Assign(Room(0, Skeleton)) + "," +
                     Placement(RoomPlacement(1) + "," + Entry(Monster, Goblin, 2)), 1,
                     new[] { Ineffective }, new[] { Monster }, new[] { Skeleton });

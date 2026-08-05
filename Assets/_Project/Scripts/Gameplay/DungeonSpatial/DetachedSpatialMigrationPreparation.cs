@@ -540,7 +540,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (lower.HasRoom && !LowerRoomAgreesWithWinner(lower, rooms))
             { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
             if (rooms.Length == 0)
-            { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
+            {
+                rooms = new[] { lower.ToContribution() };
+                diagnostics.Add(EffectiveContentDiagnostic);
+                return true;
+            }
             RouteRoom winner = rooms[0], contribution = lower.ToContribution();
             bool contributed = (winner.Monsters.Length == 0 && contribution.Monsters.Length != 0) ||
                 (winner.Traps.Length == 0 && contribution.Traps.Length != 0) ||
