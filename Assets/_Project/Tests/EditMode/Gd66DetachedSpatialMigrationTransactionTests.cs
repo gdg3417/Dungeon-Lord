@@ -282,6 +282,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Recovery_NoJournalLegacyMissingConfigurationReturnsPinnedInputMissing()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+            var recoveryContext = new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility,
+                fixture.Production, new Dictionary<string, byte[]>(), null, fixture.Limits, RawLimits(),
+                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), WholeLimits());
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, recoveryContext).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_missing"));
+            Assert.That(outcome.Stage, Is.Null);
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Paths, Is.EqualTo(new[] { activePath }));
+            Assert.That(fileSystem.Operations.Any(operation =>
+                operation.Type == OperationType.Write ||
+                operation.Type == OperationType.Replace ||
+                operation.Type == OperationType.Move ||
+                operation.Type == OperationType.Delete), Is.False);
+        }
+
+        [Test]
         public void PreparationAndRecovery_UnwrappedSchemaOneRemainExecutable()
         {
             PreparedFixture fixture = PrepareEmptyFixture(1, true);

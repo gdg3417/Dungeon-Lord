@@ -74,6 +74,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Compatibility.SelectMigration(schema, DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
                     contract.Value.CanonicalLayoutContractVersion);
             if (!profile.Success) return new DetachedLegacyValidationResult(false, profile.Code);
+            if (legacyConfigurationBytes == null) return new DetachedLegacyValidationResult(false,
+                "gd66.transaction.pinned_input_missing");
             try
             {
                 var descriptor = new SpatialMigrationInputDescriptor(SpatialContractSha256.Compute(bytes), schema,
