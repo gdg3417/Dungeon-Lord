@@ -595,7 +595,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 out string ignoredStaging)) return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
             byte[] active = fileSystem.ReadAllBytes(activePath);
             if (HashIs(active, journal.OriginalPayloadSha256))
+            {
+                if (journal.Stage > SpatialMigrationJournalStage.DescriptorPinned &&
+                    journal.Stage < SpatialMigrationJournalStage.OriginalRestored &&
+                    HasRestorationIntent(backupPath, journal))
+                {
+                    SpatialMigrationJournal restored = CopyStage(journal,
+                        SpatialMigrationJournalStage.OriginalRestored);
+                    if (!RewriteJournal(journalPath, restored))
+                        return Failure(OriginalRestoredStageWriteFailedReason, journal.Stage,
+                            SpatialTrustedPayload.Original);
+                    return Failure(pinFailure, restored.Stage, SpatialTrustedPayload.Original);
+                }
                 return Failure(pinFailure, journal.Stage, SpatialTrustedPayload.Original);
+            }
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             if (HashIs(backup, journal.OriginalPayloadSha256))
             {

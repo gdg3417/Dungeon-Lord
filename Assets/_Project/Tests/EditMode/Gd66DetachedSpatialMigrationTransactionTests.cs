@@ -716,6 +716,88 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Recovery_OriginalRestoredJournalAdvanceFailureRetriesUsingPersistedIntent()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.DurableVerified, includeBackup: true, includeStaging: false,
+                activeCandidate: true);
+            string directory = Path.GetDirectoryName(activePath);
+            string journalPath = Path.Combine(directory, names.Journal);
+            string journalNextPath = journalPath + ".next";
+            string backupPath = Path.Combine(directory, names.OriginalBackup);
+            string candidatePath = Path.Combine(directory, names.CandidateStaging);
+            string restoreStaging = backupPath + ".restore";
+            string intentPath = backupPath + ".restore.intent";
+            StringComparer comparer = PathComparer();
+            fileSystem.EnableTargetedFailure(OperationType.Replace,
+                paths => comparer.Equals(paths[0], journalNextPath) &&
+                    comparer.Equals(paths[1], journalPath), 1, afterMutation: false);
+
+            DetachedSpatialMigrationOutcome first =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(first.IsSuccess, Is.False);
+            Assert.That(first.Reason, Is.EqualTo(
+                DetachedSpatialMigrationTransaction.OriginalRestoredStageWriteFailedReason));
+            Assert.That(first.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(first.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            SpatialContractResult<SpatialMigrationJournal> liveBefore =
+                SpatialMigrationJournalContracts.Parse(fileSystem.ReadAllBytes(journalPath), Limits);
+            Assert.That(liveBefore.IsValid, Is.True);
+            Assert.That(liveBefore.Value.Stage, Is.EqualTo(SpatialMigrationJournalStage.DurableVerified));
+            Assert.That(fileSystem.Exists(journalNextPath), Is.True);
+            SpatialContractResult<SpatialMigrationJournal> nextBefore =
+                SpatialMigrationJournalContracts.Parse(fileSystem.ReadAllBytes(journalNextPath), Limits);
+            Assert.That(nextBefore.IsValid, Is.True);
+            Assert.That(nextBefore.Value.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(fileSystem.ReadAllBytes(backupPath), Is.EqualTo(fixture.Original));
+            DetachedRestorationIntent intentBefore =
+                DetachedRestorationIntentContract.Parse(fileSystem.ReadAllBytes(intentPath), Limits);
+            Assert.That(intentBefore, Is.Not.Null);
+            Assert.That(intentBefore.TransactionId, Is.EqualTo(liveBefore.Value.TransactionId));
+            Assert.That(intentBefore.DescriptorFingerprint,
+                Is.EqualTo(liveBefore.Value.DescriptorFingerprintSha256));
+            Assert.That(intentBefore.JournalStage, Is.EqualTo((int)liveBefore.Value.Stage));
+            Assert.That(fileSystem.Exists(restoreStaging), Is.False);
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && comparer.Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                comparer.Equals(operation.Paths[0], candidatePath)), Is.EqualTo(0));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+
+            fileSystem.DisableFailure();
+            DetachedSpatialMigrationOutcome retry =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
+                    .Recover(activePath);
+
+            Assert.That(retry.IsSuccess, Is.False);
+            Assert.That(retry.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
+            Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(retry.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && comparer.Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                comparer.Equals(operation.Paths[0], candidatePath)), Is.EqualTo(0));
+            SpatialContractResult<SpatialMigrationJournal> liveAfter =
+                SpatialMigrationJournalContracts.Parse(fileSystem.ReadAllBytes(journalPath), Limits);
+            Assert.That(liveAfter.IsValid, Is.True);
+            Assert.That(liveAfter.Value.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(fileSystem.Exists(journalNextPath), Is.False);
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(liveAfter.Value.TransactionId, Is.EqualTo(nextBefore.Value.TransactionId));
+            Assert.That(liveAfter.Value.DescriptorFingerprintSha256,
+                Is.EqualTo(nextBefore.Value.DescriptorFingerprintSha256));
+        }
+
+        [Test]
         public void Execute_FreshCandidateVerifiedJournalFailurePreservesStagedDiagnostic()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
