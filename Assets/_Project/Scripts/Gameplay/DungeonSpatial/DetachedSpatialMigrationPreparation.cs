@@ -453,7 +453,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return ValidateOptions(rooms, out reason);
         }
 
-        private static bool TryPlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, out RouteRoom[] rooms, out string reason, bool ignoreRoomErrors = false)
+        private static bool TryPlacements(RawSavePayloadClassification source, SpatialSerializedInputLimits limits, out RouteRoom[] rooms, out string reason)
         {
             rooms = null; reason = null;
             MvpDungeonPlacementState data = RawLegacyRouteContracts.ParsePlacements(source, "mvpDungeonPlacements", limits, out string parseReason);
@@ -463,9 +463,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (IGrouping<string, MvpDungeonPlacementEntry> group in data.Entries.Where(value => value != null)
                 .GroupBy(value => value.CategoryId, StringComparer.Ordinal))
             {
-                bool roomCategory = string.Equals(group.Key, MvpDungeonPlacementIds.RoomCategoryId,
-                    StringComparison.Ordinal);
-                if (ignoreRoomErrors && roomCategory) continue;
                 if (!MvpDungeonPlacementIds.IsAllowedCategory(group.Key) || group.Any(value => value.Revision < 0))
                 { reason = "gd66.route.record_out_of_range"; return false; }
                 int greatest = group.Max(value => value.Revision); MvpDungeonPlacementEntry[] tied = group.Where(value => value.Revision == greatest).ToArray();
@@ -478,6 +475,45 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 selected[group.Key] = tied[0].OptionId;
             }
             rooms = FromCategories(selected); return ValidateOptions(rooms, out reason);
+        }
+
+        private static bool TryLowerPlacementEvidence(RawSavePayloadClassification source,
+            SpatialSerializedInputLimits limits, out LowerPlacementEvidence evidence, out string reason)
+        {
+            evidence = null; reason = null;
+            MvpDungeonPlacementState data = RawLegacyRouteContracts.ParsePlacements(source,
+                "mvpDungeonPlacements", limits, out string parseReason);
+            if (data == null) { reason = parseReason; return false; }
+            if (data?.Entries == null) { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
+            var selected = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (IGrouping<string, MvpDungeonPlacementEntry> group in data.Entries.Where(value => value != null)
+                .GroupBy(value => value.CategoryId, StringComparer.Ordinal))
+            {
+                bool roomCategory = string.Equals(group.Key, MvpDungeonPlacementIds.RoomCategoryId,
+                    StringComparison.Ordinal);
+                if (!MvpDungeonPlacementIds.IsAllowedCategory(group.Key) || group.Any(value => value.Revision < 0))
+                { reason = "gd66.route.record_out_of_range"; return false; }
+                int greatest = group.Max(value => value.Revision);
+                MvpDungeonPlacementEntry[] tied = group.Where(value => value.Revision == greatest).ToArray();
+                if (tied.Length != 1) { reason = DetachedSpatialMigrationPreparer.DuplicatePlacementRevisionReason; return false; }
+                if (!MvpDungeonPlacementIds.TryGetCategoryForOption(tied[0].OptionId, out string optionCategory) ||
+                    optionCategory != group.Key)
+                {
+                    reason = roomCategory ? DetachedSpatialMigrationPreparer.OutcomeMismatchReason :
+                        "gd66.content.category_mismatch";
+                    return false;
+                }
+                if (roomCategory && tied[0].OptionId != MvpDungeonPlacementIds.BasicRoomOptionId)
+                { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
+                selected[group.Key] = tied[0].OptionId;
+            }
+            evidence = new LowerPlacementEvidence(
+                selected.TryGetValue(MvpDungeonPlacementIds.RoomCategoryId, out string room),
+                room,
+                Value(selected, MvpDungeonPlacementIds.MonsterCategoryId),
+                Value(selected, MvpDungeonPlacementIds.TrapCategoryId),
+                Value(selected, MvpDungeonPlacementIds.LootNodeCategoryId));
+            return true;
         }
 
         private static RouteRoom[] FromCategories(IDictionary<string, string> values)
@@ -499,11 +535,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             reason = null;
             if (source.DungeonPlacementsPresence != RawLegacyRoutePresence.Present) return true;
-            if (!TryPlacements(source, limits, out RouteRoom[] lower, out reason, true)) return false;
-            if (lower.Length == 0) return true;
+            if (!TryLowerPlacementEvidence(source, limits, out LowerPlacementEvidence lower, out reason)) return false;
+            if (!lower.HasRoom && !lower.HasContent) return true;
+            if (lower.HasRoom && !LowerRoomAgreesWithWinner(lower, rooms))
+            { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
             if (rooms.Length == 0)
-            { rooms = lower; diagnostics.Add(EffectiveContentDiagnostic); return true; }
-            RouteRoom winner = rooms[0], contribution = lower[0];
+            { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
+            RouteRoom winner = rooms[0], contribution = lower.ToContribution();
             bool contributed = (winner.Monsters.Length == 0 && contribution.Monsters.Length != 0) ||
                 (winner.Traps.Length == 0 && contribution.Traps.Length != 0) ||
                 (winner.Loot.Length == 0 && contribution.Loot.Length != 0);
@@ -512,6 +550,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return false; }
             rooms[0] = winner;
             diagnostics.Add(contributed ? EffectiveContentDiagnostic : AgreementDiagnostic); return true;
+        }
+
+        private static bool LowerRoomAgreesWithWinner(LowerPlacementEvidence lower, RouteRoom[] rooms)
+        {
+            return lower.HasRoom && rooms != null && rooms.Length == 1 && rooms[0].Explicit &&
+                rooms[0].RoomOption == MvpDungeonPlacementIds.BasicRoomOptionId &&
+                lower.RoomOption == MvpDungeonPlacementIds.BasicRoomOptionId;
         }
 
         private static bool Merge(ref string[] winner, string[] lower)
@@ -673,6 +718,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
               Traps = traps ?? Array.Empty<string>(); Loot = loot ?? Array.Empty<string>(); }
             internal int Index; internal string RoomOption; internal bool Explicit;
             internal string[] Monsters; internal string[] Traps; internal string[] Loot;
+        }
+
+        private sealed class LowerPlacementEvidence
+        {
+            internal LowerPlacementEvidence(bool hasRoom, string roomOption, string[] monsters,
+                string[] traps, string[] loot)
+            { HasRoom = hasRoom; RoomOption = roomOption; Monsters = monsters ?? Array.Empty<string>();
+              Traps = traps ?? Array.Empty<string>(); Loot = loot ?? Array.Empty<string>(); }
+            internal bool HasRoom { get; }
+            internal string RoomOption { get; }
+            internal string[] Monsters { get; }
+            internal string[] Traps { get; }
+            internal string[] Loot { get; }
+            internal bool HasContent => Monsters.Length + Traps.Length + Loot.Length != 0;
+            internal RouteRoom ToContribution() =>
+                new RouteRoom(0, MvpDungeonPlacementIds.BasicRoomOptionId, false, Monsters, Traps, Loot);
         }
     }
 

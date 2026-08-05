@@ -35,6 +35,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     "," + Entry(Trap, Spike, 3) + "," + Entry(Loot, BasicLoot, 4)), 1, null,
                     new[] { Monster, Trap, Loot }, new[] { Skeleton, Spike, BasicLoot });
                 yield return Data("FloorR1", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom)), 1);
+                yield return Data("FloorLowerBasicRoomAgreement", 4, Winner.Floor,
+                    Floor(Node(0, RoomCategory, BasicRoom)) + "," + Placement(RoomPlacement(1)), 1,
+                    new[] { Agreement });
                 yield return Data("FloorPlacementAgreement", 4, Winner.Floor, Floor(Node(0, RoomCategory, BasicRoom) + "," +
                     Node(1, Monster, Skeleton)) + "," + Placement(RoomPlacement(1) + "," +
                     Entry(Monster, Skeleton, 2)), 1, new[] { Agreement }, new[] { Monster }, new[] { Skeleton });
@@ -42,6 +45,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Placement(Entry(Monster, Skeleton, 1)), 1, new[] { Contribution }, new[] { Monster }, new[] { Skeleton });
                 yield return Data("LowerIneffectiveConflict", 5, Winner.Assignments, Assign(Room(0, Skeleton)) + "," +
                     Placement(RoomPlacement(1) + "," + Entry(Monster, Goblin, 2)), 1,
+                    new[] { Ineffective }, new[] { Monster }, new[] { Skeleton });
+                yield return Data("AssignmentCombinedLowerConflict", 5, Winner.Assignments, Assign(Room(0, Skeleton)) +
+                    "," + Floor(Node(0, RoomCategory, BasicRoom) + "," + Node(1, Monster, Goblin)) +
+                    "," + Placement(RoomPlacement(1) + "," + Entry(Monster, Goblin, 2)), 1,
                     new[] { Ineffective }, new[] { Monster }, new[] { Skeleton });
                 yield return Data("AssignmentR1", 5, Winner.Assignments, Assign(Room(0)), 1);
                 yield return Data("AssignmentR2", 5, Winner.Assignments, Assign(Room(0) + "," + Room(1)), 2);
@@ -102,6 +109,44 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareSemanticResult(4, members);
             Assert.That(result.Attempt, Is.Null);
             Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+        }
+
+        [TestCase("LowerNarrowHall", "placement.option.room.narrow_hall",
+            DetachedSpatialMigrationPreparer.OutcomeMismatchReason)]
+        [TestCase("LowerCategoryMismatch", "placement.option.monster.skeleton",
+            DetachedSpatialMigrationPreparer.OutcomeMismatchReason)]
+        [TestCase("LowerBlankRoom", "", DetachedSpatialMigrationPreparer.OutcomeMismatchReason)]
+        public void LowerEffectiveRoomConflict_ReturnsExactReasonAndNoAttempt(string name,
+            string lowerRoomOption, string expectedReason)
+        {
+            string members = Floor(Node(0, RoomCategory, BasicRoom)) + "," +
+                Placement(Entry(RoomCategory, lowerRoomOption, 1));
+            DetachedSpatialMigrationPreparationResult result =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareSemanticResult(4, members);
+            Assert.That(result.Attempt, Is.Null, name);
+            Assert.That(result.Reason, Is.EqualTo(expectedReason), name);
+        }
+
+        [Test]
+        public void LowerExplicitRoomCannotAgreeWithImplicitWinner()
+        {
+            string members = Floor(Node(1, Monster, Skeleton)) + "," + Placement(RoomPlacement(1));
+            DetachedSpatialMigrationPreparationResult result =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareSemanticResult(4, members);
+            Assert.That(result.Attempt, Is.Null);
+            Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+        }
+
+        [Test]
+        public void LowerTiedRoomRevision_ReturnsDuplicatePlacementRevisionAndNoAttempt()
+        {
+            string members = Floor(Node(0, RoomCategory, BasicRoom)) + "," +
+                Placement(RoomPlacement(2) + "," + RoomPlacement(2));
+            DetachedSpatialMigrationPreparationResult result =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareSemanticResult(4, members);
+            Assert.That(result.Attempt, Is.Null);
+            Assert.That(result.Reason, Is.EqualTo(
+                DetachedSpatialMigrationPreparer.DuplicatePlacementRevisionReason));
         }
 
         private static void AssertWinner(RawSavePayloadClassification value, Winner winner)
