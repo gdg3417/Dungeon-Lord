@@ -568,6 +568,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Recovery_CandidateVerifiedRollbackRestoreStagingMismatchPreservesCommitReason()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem(OperationType.Replace, 2);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.CandidateVerified, includeBackup: true, includeStaging: true,
+                activeCandidate: false);
+            string directory = Path.GetDirectoryName(activePath);
+            string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
+            fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.ReplacementFailedReason));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.CandidateVerified));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Diagnostics, Is.EqualTo(new[]
+            { DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic }));
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+        }
+
+        [Test]
         public void Recovery_CandidateVerifiedWithValidStagedCandidateAndMissingBackupDoesNotReplaceOriginal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
