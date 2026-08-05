@@ -855,7 +855,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (HashIs(active, journal.OriginalPayloadSha256))
                     return FailureWithDiagnostics(failure, journal.Stage, SpatialTrustedPayload.Original, diagnostics);
                 if ((journal.Stage == SpatialMigrationJournalStage.CandidateVerified ||
-                    journal.Stage == SpatialMigrationJournalStage.Replaced) &&
+                    journal.Stage == SpatialMigrationJournalStage.Replaced ||
+                    journal.Stage == SpatialMigrationJournalStage.DurableVerified) &&
                     IsTrustedJournalBoundCandidateForRecovery(active, journal))
                     return FailureWithDiagnostics(failure, journal.Stage, SpatialTrustedPayload.Candidate, diagnostics);
             }
@@ -978,7 +979,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 AddDiagnostic(diagnostics, StagedCandidateVerifiedDiagnostic);
                 SpatialMigrationJournal next = CreateJournal(descriptor, fingerprint, identity, transactionId, names,
                     descriptor.OriginalPayloadSha256, candidate.Sha256, SpatialMigrationJournalStage.CandidateVerified);
-                if (!RewriteJournal(journalPath, next)) return Failure(CandidateFailedReason, persisted, SpatialTrustedPayload.Original);
+                if (!RewriteJournal(journalPath, next))
+                    return FailureWithDiagnostics(CandidateFailedReason, persisted,
+                        SpatialTrustedPayload.Original, diagnostics);
                 journal = next; persisted = journal.Stage;
             }
             if (!string.Equals(journal.ExpectedCandidateSha256, candidate.Sha256, StringComparison.Ordinal))
@@ -998,7 +1001,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     catch
                     {
                         if (Same(fileSystem.ReadAllBytes(activePath), original))
-                            return Failure(ReplacementFailedReason, persisted, SpatialTrustedPayload.Original);
+                            return FailureWithDiagnostics(ReplacementFailedReason, persisted,
+                                SpatialTrustedPayload.Original, diagnostics);
                         return Restore(journalPath, backupPath, activePath, directory, journal,
                             fileSystem.ReadAllBytes(backupPath), ReplacementFailedReason, diagnostics);
                     }
