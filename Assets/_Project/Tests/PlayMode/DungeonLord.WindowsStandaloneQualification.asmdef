@@ -2,6 +2,7 @@
     "name": "DungeonLord.WindowsStandaloneQualification",
     "references": [],
     "includePlatforms": [
+        "Editor",
         "WindowsStandalone64"
     ],
     "optionalUnityReferences": [
