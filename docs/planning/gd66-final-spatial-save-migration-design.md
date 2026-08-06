@@ -364,6 +364,12 @@ This table is the sole append-only ordinal registry. Phase 2 must provide at lea
 
 | Exact code | Classification | Continue C? | Trusted active state after emission | Gameplay | Player key? | Exact condition |
 |---|---|---:|---|---|---:|---|
+| `gd66.preflight.ready` | nonfatal diagnostic | Yes | Unchanged verified O | Allowed | No | Windows Editor or Windows Standalone targets a normalized, contained path on the lexical root's actual fixed NTFS volume, with no reparse component from that volume root through the save path; qualification may begin. |
+| `gd66.preflight.platform_unsupported` | recoverable failure | No | Unchanged verified O | Allowed | Yes | Runtime is neither Windows Editor nor Windows Standalone; retain schema 6 and retry only on a supported target. |
+| `gd66.preflight.path_invalid` | recoverable failure | No | Unchanged verified O | Allowed | Yes | Active-save path is null/empty, non-normalized, malformed, unsupported by `Path`, or exceeds the approved absolute path bound; correct the path before retry. |
+| `gd66.preflight.path_redirected` | recoverable failure | No | Unchanged verified O | Allowed | Yes | Save containment fails, any existing component from the actual volume root through the save path is a reparse point, or `GetVolumePathNameW` resolves a mounted volume root different from the lexical drive root; select a local nonredirected directory before retry. |
+| `gd66.preflight.volume_unsupported` | recoverable failure | No | Unchanged verified O | Allowed | Yes | The actual destination volume is not a fixed drive or its filesystem name is not ordinal-ignore-case `NTFS`; move the save to a qualified local NTFS volume before retry. |
+| `gd66.preflight.native_probe_failed` | recoverable failure | No | Unchanged verified O | Allowed | Yes | A required Windows volume/path native probe fails or capability evaluation throws after path parsing; retain schema 6 and retry only after the OS/filesystem error is resolved. |
 | `gd66.diagnostic.payload_wrapped_v1` | nonfatal diagnostic | Yes | Unchanged verified O | Allowed | No | Valid wrapped schema-1 root classified. |
 | `gd66.diagnostic.payload_unwrapped_v1` | nonfatal diagnostic | Yes | Unchanged verified O | Allowed | No | Recognized unwrapped schema-1 `SaveData` classified. |
 | `gd66.payload.unreadable` | fatal failure | No | No trusted active payload | Blocked | Yes | JSON bytes cannot be parsed. |

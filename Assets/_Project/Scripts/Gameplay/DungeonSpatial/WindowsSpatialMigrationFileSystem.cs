@@ -46,20 +46,27 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static SpatialMigrationActivationPreflight Evaluate(SpatialMigrationPlatform platform,
             string activeSavePath)
         {
+            var fileSystem = new WindowsSpatialMigrationFileSystem();
+            return Evaluate(platform, activeSavePath, fileSystem, fileSystem);
+        }
+
+        internal static SpatialMigrationActivationPreflight Evaluate(SpatialMigrationPlatform platform,
+            string activeSavePath, IWindowsSpatialMigrationCapabilityProbe probe,
+            ISpatialMigrationFileSystem fileSystem)
+        {
             if (platform != SpatialMigrationPlatform.WindowsEditor &&
                 platform != SpatialMigrationPlatform.WindowsStandalone)
                 return Unsupported(SpatialMigrationCapabilityReason.PlatformUnsupported, platform);
             try
             {
-                var fileSystem = new WindowsSpatialMigrationFileSystem();
                 string path = Path.GetFullPath(activeSavePath);
                 string directory = Path.GetDirectoryName(path);
                 if (string.IsNullOrEmpty(activeSavePath) || !string.Equals(path, activeSavePath,
                     StringComparison.Ordinal) || path.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters)
                     return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
+                if (!probe.IsPathContainedWithoutRedirection(directory, path))
                     return Unsupported(SpatialMigrationCapabilityReason.PathRedirected, platform);
-                string reason = fileSystem.ProbeSupportedVolume(directory);
+                string reason = probe.ProbeSupportedVolume(directory);
                 return reason == null
                     ? new SpatialMigrationActivationPreflight(true, SpatialMigrationCapabilityReason.Ready,
                         platform, fileSystem)
@@ -76,7 +83,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 platform, null);
     }
 
-    public sealed class WindowsSpatialMigrationFileSystem : ISpatialMigrationFileSystem
+    public interface IWindowsSpatialMigrationCapabilityProbe
+    {
+        bool IsPathContainedWithoutRedirection(string directoryPath, string path);
+        string ProbeSupportedVolume(string directoryPath);
+    }
+
+    public sealed class WindowsSpatialMigrationFileSystem : ISpatialMigrationFileSystem,
+        IWindowsSpatialMigrationCapabilityProbe
     {
         private const uint GenericWrite = 0x40000000;
         private const uint CreateNew = 1;
@@ -154,7 +168,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public void DeleteFile(string path)
         {
             path = NormalizePath(path);
-            if (!MoveFileExW(path, null, MoveWriteThrough)) ThrowLastWin32();
+            byte[] bytes = File.ReadAllBytes(path);
+            string nameHash = SpatialContractSha256.Compute(System.Text.Encoding.UTF8.GetBytes(
+                Path.GetFileName(path))).Substring(0, 16);
+            string retiredPath = NormalizePath(Path.Combine(Path.GetDirectoryName(path),
+                "gd66.retired-" + nameHash + "-" + SpatialContractSha256.Compute(bytes) + ".evidence"));
+            if (File.Exists(retiredPath))
+            {
+                if (!BytesEqual(File.ReadAllBytes(retiredPath), bytes)) throw new IOException();
+                Move(path, retiredPath, true);
+            }
+            else Move(path, retiredPath, false);
+            if (File.Exists(path) || !File.Exists(retiredPath) ||
+                !BytesEqual(File.ReadAllBytes(retiredPath), bytes)) throw new IOException();
         }
 
         internal string ProbeSupportedVolume(string directoryPath)
@@ -163,14 +189,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!Directory.Exists(directory) ||
                 (File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
                 return SpatialMigrationCapabilityReason.PathRedirected;
-            string root = Path.GetPathRoot(directory);
-            if (string.IsNullOrEmpty(root) || GetDriveTypeW(root) != DriveFixed)
+            var volumePath = new System.Text.StringBuilder(SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters + 1);
+            if (!GetVolumePathNameW(directory, volumePath, volumePath.Capacity))
+                return SpatialMigrationCapabilityReason.NativeProbeFailed;
+            string actualRoot = Path.GetFullPath(volumePath.ToString());
+            string lexicalRoot = Path.GetFullPath(Path.GetPathRoot(directory));
+            if (!string.Equals(actualRoot, lexicalRoot, StringComparison.OrdinalIgnoreCase))
+                return SpatialMigrationCapabilityReason.PathRedirected;
+            if (!HasNoReparsePoint(directory, actualRoot))
+                return SpatialMigrationCapabilityReason.PathRedirected;
+            if (GetDriveTypeW(actualRoot) != DriveFixed)
                 return SpatialMigrationCapabilityReason.VolumeUnsupported;
             var fileSystemName = new System.Text.StringBuilder(32);
-            if (!GetVolumeInformationW(root, null, 0, out _, out _, out _, fileSystemName,
+            if (!GetVolumeInformationW(actualRoot, null, 0, out _, out _, out _, fileSystemName,
                 fileSystemName.Capacity)) return SpatialMigrationCapabilityReason.NativeProbeFailed;
             return string.Equals(fileSystemName.ToString(), "NTFS", StringComparison.OrdinalIgnoreCase)
                 ? null : SpatialMigrationCapabilityReason.VolumeUnsupported;
+        }
+
+        private static bool HasNoReparsePoint(string directory, string volumeRoot)
+        {
+            for (string current = directory;; current = Path.GetDirectoryName(current))
+            {
+                if (string.IsNullOrEmpty(current) || !Directory.Exists(current) ||
+                    (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0) return false;
+                if (string.Equals(current.TrimEnd('\\'), volumeRoot.TrimEnd('\\'),
+                    StringComparison.OrdinalIgnoreCase)) return true;
+            }
+        }
+
+        private static bool BytesEqual(byte[] left, byte[] right)
+        {
+            if (left == null || right == null || left.Length != right.Length) return false;
+            for (int index = 0; index < left.Length; index++) if (left[index] != right[index]) return false;
+            return true;
         }
 
         private static void Move(string sourcePath, string destinationPath, bool replace)
@@ -206,6 +258,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static extern bool MoveFileExW(string existing, string destination, uint flags);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern uint GetDriveTypeW(string root);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool GetVolumePathNameW(string fileName,
+            System.Text.StringBuilder volumePathName, int bufferLength);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern bool GetVolumeInformationW(string root, System.Text.StringBuilder volume,
             int volumeLength, out uint serial, out uint maximumComponentLength, out uint flags,
