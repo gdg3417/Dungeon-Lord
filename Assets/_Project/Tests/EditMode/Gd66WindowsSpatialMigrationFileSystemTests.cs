@@ -5,6 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEngine;
@@ -240,6 +241,143 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         .Length != 0).Select(method => method.Name).ToArray();
             Assert.That(nativeMethods, Does.Contain("SetFileInformationByHandle"));
             Assert.That(nativeMethods, Does.Not.Contain("MoveFileExW"));
+        }
+
+        [Test]
+        public void RenameInfoBufferUsesRuntimeLayoutExactUtf16LengthAndTrailingNull()
+        {
+            Type fileSystemType = typeof(WindowsSpatialMigrationFileSystem);
+            Type layoutType = fileSystemType.GetNestedType("FileRenameInfoLayout", BindingFlags.NonPublic);
+            Assert.That(layoutType, Is.Not.Null);
+            int replaceOffset = Marshal.OffsetOf(layoutType, "ReplaceIfExists").ToInt32();
+            int rootOffset = Marshal.OffsetOf(layoutType, "RootDirectory").ToInt32();
+            int lengthOffset = Marshal.OffsetOf(layoutType, "FileNameLength").ToInt32();
+            int fileNameOffset = Marshal.OffsetOf(layoutType, "FileName").ToInt32();
+            int nativeSize = Marshal.SizeOf(layoutType);
+            Assert.That(replaceOffset, Is.Zero);
+            Assert.That(lengthOffset, Is.EqualTo(rootOffset + IntPtr.Size));
+            Assert.That(fileNameOffset, Is.EqualTo(lengthOffset + sizeof(uint)));
+            Assert.That(nativeSize, Is.GreaterThanOrEqualTo(fileNameOffset + sizeof(ushort)));
+            if (IntPtr.Size == 8)
+            {
+                Assert.That(rootOffset, Is.EqualTo(8));
+                Assert.That(lengthOffset, Is.EqualTo(16));
+                Assert.That(fileNameOffset, Is.EqualTo(20));
+                Assert.That(nativeSize, Is.EqualTo(24));
+            }
+
+            string destination = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-layout-Ω.json"));
+            byte[] expected = Encoding.Unicode.GetBytes(destination);
+            MethodInfo allocate = fileSystemType.GetMethod("AllocateRenameInfo",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            object[] arguments = { destination, true, 0 };
+            IntPtr buffer = (IntPtr)allocate.Invoke(null, arguments);
+            try
+            {
+                int allocationSize = (int)arguments[2];
+                Assert.That(allocationSize, Is.EqualTo(Math.Max(nativeSize,
+                    fileNameOffset + expected.Length + sizeof(ushort))));
+                Assert.That(Marshal.ReadByte(buffer, replaceOffset), Is.EqualTo(1));
+                Assert.That(Marshal.ReadIntPtr(buffer, rootOffset), Is.EqualTo(IntPtr.Zero));
+                Assert.That(Marshal.ReadInt32(buffer, lengthOffset), Is.EqualTo(expected.Length));
+                byte[] actual = new byte[expected.Length];
+                Marshal.Copy(IntPtr.Add(buffer, fileNameOffset), actual, 0, actual.Length);
+                CollectionAssert.AreEqual(expected, actual);
+                Assert.That(Marshal.ReadInt16(buffer, fileNameOffset + expected.Length), Is.Zero);
+            }
+            finally { Marshal.FreeHGlobal(buffer); }
+        }
+
+        [Test]
+        public void WindowsLongBoundedJournalReplacementUsesExactDestination()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-long-journal");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var fileSystem = new WindowsSpatialMigrationFileSystem();
+                string stem = "save." + new string('a', 64) + ".journal.json";
+                string journal = Path.Combine(directory, stem);
+                string next = journal + ".next";
+                byte[] oldBytes = { 21 };
+                byte[] nextBytes = { 22, 23 };
+                fileSystem.WriteAllBytesDurable(journal, oldBytes);
+                fileSystem.WriteAllBytesDurable(next, nextBytes);
+                fileSystem.ReplaceSameDirectoryAtomic(next, journal);
+                fileSystem.FlushDirectory(directory);
+                Assert.That(File.Exists(next), Is.False);
+                CollectionAssert.AreEqual(nextBytes, File.ReadAllBytes(journal));
+                Assert.That(Directory.GetFiles(directory), Is.EqualTo(new[] { journal }));
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void WindowsSuccessfulReplacementPreservesExactSourceFileIdentity()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-file-identity");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var fileSystem = new WindowsSpatialMigrationFileSystem();
+                string source = Path.Combine(directory, "source.tmp");
+                string destination = Path.Combine(directory, "destination.tmp");
+                byte[] sourceBytes = { 25, 26 };
+                fileSystem.WriteAllBytesDurable(source, sourceBytes);
+                fileSystem.WriteAllBytesDurable(destination, new byte[] { 27 });
+                MethodInfo readIdentity = typeof(WindowsSpatialMigrationFileSystem).GetMethod("ReadIdentity",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                object before;
+                using (var stream = new FileStream(source, FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete))
+                    before = readIdentity.Invoke(null, new object[] { stream.SafeFileHandle });
+                fileSystem.ReplaceSameDirectoryAtomic(source, destination);
+                object after;
+                using (var stream = new FileStream(destination, FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete))
+                    after = readIdentity.Invoke(null, new object[] { stream.SafeFileHandle });
+                Type identityType = before.GetType();
+                Assert.That(identityType.GetField("VolumeSerialNumber").GetValue(after),
+                    Is.EqualTo(identityType.GetField("VolumeSerialNumber").GetValue(before)));
+                Assert.That(identityType.GetField("FileIndexHigh").GetValue(after),
+                    Is.EqualTo(identityType.GetField("FileIndexHigh").GetValue(before)));
+                Assert.That(identityType.GetField("FileIndexLow").GetValue(after),
+                    Is.EqualTo(identityType.GetField("FileIndexLow").GetValue(before)));
+                Assert.That(File.Exists(source), Is.False);
+                CollectionAssert.AreEqual(sourceBytes, File.ReadAllBytes(destination));
+                Assert.That(Directory.GetFiles(directory), Is.EqualTo(new[] { destination }));
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void WindowsPathBoundFailurePreservesSourceBeforeNativeMutation()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-path-bound");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var fileSystem = new WindowsSpatialMigrationFileSystem();
+                string source = Path.Combine(directory, "source.tmp");
+                byte[] bytes = { 24 };
+                fileSystem.WriteAllBytesDurable(source, bytes);
+                string destination = Path.Combine(directory, new string('b',
+                    SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters));
+                Assert.Throws<PathTooLongException>(() =>
+                    fileSystem.MoveSameDirectoryAtomic(source, destination));
+                CollectionAssert.AreEqual(bytes, File.ReadAllBytes(source));
+                Assert.That(File.Exists(destination), Is.False);
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
         }
 
         [Test]

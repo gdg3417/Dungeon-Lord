@@ -103,12 +103,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private const uint FileFlagWriteThrough = 0x80000000;
         private const uint DriveFixed = 3;
         private const int FileRenameInfo = 3;
-        private const int RenameRootDirectoryOffset32 = 4;
-        private const int RenameRootDirectoryOffset64 = 8;
-        private const int RenameFileNameLengthOffset32 = 8;
-        private const int RenameFileNameLengthOffset64 = 16;
-        private const int RenameFileNameOffset32 = 12;
-        private const int RenameFileNameOffset64 = 20;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct FileRenameInfoLayout
+        {
+            public byte ReplaceIfExists;
+            public IntPtr RootDirectory;
+            public uint FileNameLength;
+            public ushort FileName;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ByHandleFileInformation
+        {
+            public uint FileAttributes;
+            public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME LastAccessTime;
+            public System.Runtime.InteropServices.ComTypes.FILETIME LastWriteTime;
+            public uint VolumeSerialNumber;
+            public uint FileSizeHigh;
+            public uint FileSizeLow;
+            public uint NumberOfLinks;
+            public uint FileIndexHigh;
+            public uint FileIndexLow;
+        }
 
         public bool Exists(string path) => File.Exists(path);
         public byte[] ReadAllBytes(string path) => File.ReadAllBytes(path);
@@ -215,9 +233,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             sourcePath = NormalizePath(sourcePath); destinationPath = NormalizePath(destinationPath);
             if (!string.Equals(Path.GetDirectoryName(sourcePath), Path.GetDirectoryName(destinationPath),
                 StringComparison.OrdinalIgnoreCase)) throw new IOException();
-            byte[] destinationBytes = System.Text.Encoding.Unicode.GetBytes(destinationPath);
-            int fileNameOffset = IntPtr.Size == 8 ? RenameFileNameOffset64 : RenameFileNameOffset32;
-            int allocationSize = checked(fileNameOffset + destinationBytes.Length);
             IntPtr renameInfo = IntPtr.Zero;
             using (SafeFileHandle handle = CreateFileW(sourcePath, DeleteAccess | GenericWrite,
                 FileShareRead | FileShareWrite | FileShareDelete, IntPtr.Zero, OpenExisting,
@@ -226,20 +241,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 EnsureHandle(handle);
                 try
                 {
-                    renameInfo = Marshal.AllocHGlobal(allocationSize);
-                    for (int index = 0; index < allocationSize; index++) Marshal.WriteByte(renameInfo, index, 0);
-                    Marshal.WriteByte(renameInfo, replace ? (byte)1 : (byte)0);
-                    int rootDirectoryOffset = IntPtr.Size == 8
-                        ? RenameRootDirectoryOffset64 : RenameRootDirectoryOffset32;
-                    int fileNameLengthOffset = IntPtr.Size == 8
-                        ? RenameFileNameLengthOffset64 : RenameFileNameLengthOffset32;
-                    Marshal.WriteIntPtr(renameInfo, rootDirectoryOffset, IntPtr.Zero);
-                    Marshal.WriteInt32(renameInfo, fileNameLengthOffset, destinationBytes.Length);
-                    Marshal.Copy(destinationBytes, 0, IntPtr.Add(renameInfo, fileNameOffset),
-                        destinationBytes.Length);
+                    ByHandleFileInformation sourceIdentity = ReadIdentity(handle);
+                    renameInfo = AllocateRenameInfo(destinationPath, replace, out int allocationSize);
                     if (!SetFileInformationByHandle(handle, FileRenameInfo, renameInfo,
                         (uint)allocationSize)) ThrowLastWin32();
                     if (!FlushFileBuffers(handle)) ThrowLastWin32();
+                    using (SafeFileHandle destinationHandle = CreateFileW(destinationPath, 0,
+                        FileShareRead | FileShareWrite | FileShareDelete, IntPtr.Zero, OpenExisting,
+                        FileAttributeNormal, IntPtr.Zero))
+                    {
+                        EnsureHandle(destinationHandle);
+                        ByHandleFileInformation destinationIdentity = ReadIdentity(destinationHandle);
+                        if (!SameIdentity(sourceIdentity, destinationIdentity)) throw new IOException();
+                    }
                 }
                 finally
                 {
@@ -248,6 +262,45 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (File.Exists(sourcePath) || !File.Exists(destinationPath)) throw new IOException();
         }
+
+        private static IntPtr AllocateRenameInfo(string destinationPath, bool replace, out int allocationSize)
+        {
+            byte[] destinationBytes = System.Text.Encoding.Unicode.GetBytes(destinationPath);
+            int fileNameOffset = Marshal.OffsetOf<FileRenameInfoLayout>(nameof(FileRenameInfoLayout.FileName)).ToInt32();
+            int requiredCharactersEnd = checked(fileNameOffset + destinationBytes.Length + sizeof(ushort));
+            allocationSize = Math.Max(Marshal.SizeOf<FileRenameInfoLayout>(), requiredCharactersEnd);
+            IntPtr renameInfo = Marshal.AllocHGlobal(allocationSize);
+            try
+            {
+                for (int index = 0; index < allocationSize; index++) Marshal.WriteByte(renameInfo, index, 0);
+                Marshal.WriteByte(renameInfo,
+                    Marshal.OffsetOf<FileRenameInfoLayout>(nameof(FileRenameInfoLayout.ReplaceIfExists)).ToInt32(),
+                    replace ? (byte)1 : (byte)0);
+                Marshal.WriteIntPtr(renameInfo,
+                    Marshal.OffsetOf<FileRenameInfoLayout>(nameof(FileRenameInfoLayout.RootDirectory)).ToInt32(),
+                    IntPtr.Zero);
+                Marshal.WriteInt32(renameInfo,
+                    Marshal.OffsetOf<FileRenameInfoLayout>(nameof(FileRenameInfoLayout.FileNameLength)).ToInt32(),
+                    destinationBytes.Length);
+                Marshal.Copy(destinationBytes, 0, IntPtr.Add(renameInfo, fileNameOffset), destinationBytes.Length);
+                return renameInfo;
+            }
+            catch
+            {
+                Marshal.FreeHGlobal(renameInfo);
+                throw;
+            }
+        }
+
+        private static ByHandleFileInformation ReadIdentity(SafeFileHandle handle)
+        {
+            if (!GetFileInformationByHandle(handle, out ByHandleFileInformation information)) ThrowLastWin32();
+            return information;
+        }
+
+        private static bool SameIdentity(ByHandleFileInformation left, ByHandleFileInformation right) =>
+            left.VolumeSerialNumber == right.VolumeSerialNumber &&
+            left.FileIndexHigh == right.FileIndexHigh && left.FileIndexLow == right.FileIndexLow;
 
         private static string NormalizePath(string path)
         {
@@ -272,6 +325,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetFileInformationByHandle(SafeFileHandle file, int informationClass,
             IntPtr fileInformation, uint bufferSize);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetFileInformationByHandle(SafeFileHandle file,
+            out ByHandleFileInformation fileInformation);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern uint GetDriveTypeW(string root);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
