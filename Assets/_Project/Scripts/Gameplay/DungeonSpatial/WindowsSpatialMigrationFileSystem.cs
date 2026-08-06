@@ -165,24 +165,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 (File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0;
         }
 
-        public void DeleteFile(string path)
-        {
-            path = NormalizePath(path);
-            byte[] bytes = File.ReadAllBytes(path);
-            string nameHash = SpatialContractSha256.Compute(System.Text.Encoding.UTF8.GetBytes(
-                Path.GetFileName(path))).Substring(0, 16);
-            string retiredPath = NormalizePath(Path.Combine(Path.GetDirectoryName(path),
-                "gd66.retired-" + nameHash + "-" + SpatialContractSha256.Compute(bytes) + ".evidence"));
-            if (File.Exists(retiredPath))
-            {
-                if (!BytesEqual(File.ReadAllBytes(retiredPath), bytes)) throw new IOException();
-                Move(path, retiredPath, true);
-            }
-            else Move(path, retiredPath, false);
-            if (File.Exists(path) || !File.Exists(retiredPath) ||
-                !BytesEqual(File.ReadAllBytes(retiredPath), bytes)) throw new IOException();
-        }
-
         internal string ProbeSupportedVolume(string directoryPath)
         {
             string directory = NormalizePath(directoryPath);
@@ -216,13 +198,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (string.Equals(current.TrimEnd('\\'), volumeRoot.TrimEnd('\\'),
                     StringComparison.OrdinalIgnoreCase)) return true;
             }
-        }
-
-        private static bool BytesEqual(byte[] left, byte[] right)
-        {
-            if (left == null || right == null || left.Length != right.Length) return false;
-            for (int index = 0; index < left.Length; index++) if (left[index] != right[index]) return false;
-            return true;
         }
 
         private static void Move(string sourcePath, string destinationPath, bool replace)

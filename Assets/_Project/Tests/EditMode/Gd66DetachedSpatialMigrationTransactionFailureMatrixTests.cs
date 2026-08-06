@@ -11,7 +11,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class Gd66DetachedSpatialMigrationTransactionFailureMatrixTests
     {
         private enum EntryPoint { FreshExecute, ResumedExecute, Recover }
-        private enum MatrixOperation { Exists, Read, DurableWrite, AtomicReplace, DirectoryFlush, Enumeration, Containment, AtomicMove, Delete }
+        private enum MatrixOperation { Exists, Read, DurableWrite, AtomicReplace, DirectoryFlush, Enumeration, Containment, AtomicMove }
         private enum MatrixCheckpoint { NoJournal, DescriptorPinned, BackupVerified, CandidateVerified, Replaced, DurableVerified, FinalizationAttempt, RestorationAttempt }
         private enum MatrixAuthority { Original, Candidate, None }
         private enum ActiveExpectation { Original, Candidate, Untrusted }
@@ -116,7 +116,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 yield return C("restore-staging-quarantine-move", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicMove, PathRole.Quarantine, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 0, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
                 yield return C("restore-staging-mismatch", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Read, PathRole.RestoreStaging, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true), 0, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1, new ReadSubstitution(PathRole.RestoreStaging, new byte[] { 6, 5, 4 }), injectFailure:false);
                 yield return C("restore-active-replace-before", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Active, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, intent:true), 0, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
-                yield return C("restore-exact-quarantine-delete", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.Delete, PathRole.RestoreStaging, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, quarantine:true), 0, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
+                yield return C("restore-exact-quarantine-replace", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.RestoreStaging, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Candidate, ActiveExpectation.Candidate, E(journal:true, backup:true, restore:true, quarantine:true), 0, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
                 yield return C("restore-originalrestored-advance", EntryPoint.Recover, MatrixCheckpoint.RestorationAttempt, MatrixOperation.AtomicReplace, PathRole.Journal, DetachedSpatialMigrationTransaction.OriginalRestoredStageWriteFailedReason, SpatialMigrationJournalStage.DurableVerified, MatrixAuthority.Original, ActiveExpectation.Original, E(journal:true, journalNext:true, backup:true, intent:true), 1, EntryPoint.Recover, false, "gd66.transaction.pinned_input_hash_mismatch", SpatialMigrationJournalStage.OriginalRestored, MatrixAuthority.Original, ActiveExpectation.Original, 1);
             }
         }
@@ -452,7 +452,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 case MatrixOperation.Enumeration: return Gd66DetachedSpatialMigrationTransactionTests.OperationType.Enumerate;
                 case MatrixOperation.Containment: return Gd66DetachedSpatialMigrationTransactionTests.OperationType.Containment;
                 case MatrixOperation.AtomicMove: return Gd66DetachedSpatialMigrationTransactionTests.OperationType.Move;
-                case MatrixOperation.Delete: return Gd66DetachedSpatialMigrationTransactionTests.OperationType.Delete;
                 default: throw new ArgumentOutOfRangeException(nameof(operation));
             }
         }
