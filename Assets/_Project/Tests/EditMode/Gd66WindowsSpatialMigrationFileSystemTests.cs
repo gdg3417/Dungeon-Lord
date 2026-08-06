@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.IO;
 using System.Text;
@@ -295,15 +296,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(active);
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 File.WriteAllBytes(active, original);
-                var transaction = new DetachedSpatialMigrationTransaction(preflight.FileSystem,
+                var diagnostic = new DiagnosticFileSystem(preflight.FileSystem);
+                var transaction = new DetachedSpatialMigrationTransaction(diagnostic,
                     Gd66DetachedSpatialMigrationTransactionTests.Recovery(fixture));
                 DetachedSpatialMigrationOutcome executed = transaction.Execute(active, fixture.Result.Attempt);
-                Assert.That(executed.IsSuccess, Is.True, executed.Reason);
+                Assert.That(executed.IsSuccess, Is.True, executed.Reason + "\n" + diagnostic.Trace);
                 Assert.That(executed.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
                 CollectionAssert.AreEqual(fixture.Result.Attempt.Candidate.GetBytes(), File.ReadAllBytes(active));
                 DetachedSpatialMigrationOutcome reopened = new DetachedSpatialMigrationTransaction(
-                    preflight.FileSystem, Gd66DetachedSpatialMigrationTransactionTests.Recovery(fixture)).Recover(active);
-                Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
+                    diagnostic, Gd66DetachedSpatialMigrationTransactionTests.Recovery(fixture)).Recover(active);
+                Assert.That(reopened.IsSuccess, Is.True, reopened.Reason + "\n" + diagnostic.Trace);
                 Assert.That(reopened.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
                 CollectionAssert.AreEqual(fixture.Result.Attempt.Candidate.GetBytes(), File.ReadAllBytes(active));
             }
@@ -340,10 +342,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (includeBackup) preflight.FileSystem.WriteAllBytesDurable(
                     Path.Combine(directory, persisted.Names.OriginalBackup), fixture.Original);
                 preflight.FileSystem.FlushDirectory(directory);
-                var counting = new CountingFileSystem(preflight.FileSystem, active);
+                var diagnostic = new DiagnosticFileSystem(preflight.FileSystem);
+                var counting = new CountingFileSystem(diagnostic, active);
                 DetachedSpatialMigrationOutcome recovered = new DetachedSpatialMigrationTransaction(counting,
                     Gd66DetachedSpatialMigrationTransactionTests.Recovery(fixture)).Recover(active);
-                Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
+                Assert.That(recovered.IsSuccess, Is.True, recovered.Reason + "\n" + diagnostic.Trace);
                 Assert.That(recovered.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
                 Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
                 Assert.That(counting.ActiveReplacementCount, Is.Zero);
@@ -445,5 +448,73 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public void MoveSameDirectoryAtomic(string sourcePath, string destinationPath) =>
                 inner.MoveSameDirectoryAtomic(sourcePath, destinationPath);
         }
+
+        private sealed class DiagnosticFileSystem : ISpatialMigrationFileSystem
+        {
+            private readonly ISpatialMigrationFileSystem inner;
+            private readonly StringBuilder trace = new StringBuilder();
+            internal DiagnosticFileSystem(ISpatialMigrationFileSystem inner) { this.inner = inner; }
+            internal string Trace => trace.ToString();
+            public bool Exists(string path) => inner.Exists(path);
+            public byte[] ReadAllBytes(string path) => inner.ReadAllBytes(path);
+            public void WriteAllBytesDurable(string path, byte[] bytes) => Record("Write", path, null,
+                () => inner.WriteAllBytesDurable(path, bytes));
+            public void ReplaceSameDirectoryAtomic(string source, string destination) => Record("Replace",
+                source, destination, () => inner.ReplaceSameDirectoryAtomic(source, destination));
+            public void FlushDirectory(string directoryPath) => Record("Flush", directoryPath, null,
+                () => inner.FlushDirectory(directoryPath));
+            public System.Collections.Generic.IReadOnlyList<string> EnumerateFiles(string directoryPath,
+                string searchPattern, int maximumResults) => inner.EnumerateFiles(directoryPath,
+                    searchPattern, maximumResults);
+            public bool IsPathContainedWithoutRedirection(string directoryPath, string path) =>
+                inner.IsPathContainedWithoutRedirection(directoryPath, path);
+            public void MoveSameDirectoryAtomic(string source, string destination) => Record("Move", source,
+                destination, () => inner.MoveSameDirectoryAtomic(source, destination));
+
+            private void Record(string operation, string source, string destination, Action action)
+            {
+                bool destinationExisted = destination != null && SafeExists(destination);
+                try
+                {
+                    action();
+                    Append(operation, source, destination, destinationExisted, true, null);
+                }
+                catch (Exception exception)
+                {
+                    Append(operation, source, destination, destinationExisted, false, exception);
+                    throw;
+                }
+            }
+
+            private void Append(string operation, string source, string destination,
+                bool destinationExisted, bool completed, Exception exception)
+            {
+                var native = exception as System.ComponentModel.Win32Exception;
+                string line = operation + " source=" + source + " destination=" + (destination ?? "<none>") +
+                    " destinationExisted=" + destinationExisted + " completed=" + completed +
+                    " exception=" + (exception == null ? "<none>" : exception.GetType().FullName) +
+                    " nativeError=" + (native == null ? "<none>" : native.NativeErrorCode.ToString()) +
+                    " message=" + (exception == null ? "<none>" : exception.Message) +
+                    " sourceAfter=" + Snapshot(source) + " destinationAfter=" + Snapshot(destination);
+                trace.AppendLine(line);
+                TestContext.Progress.WriteLine(line);
+            }
+
+            private bool SafeExists(string path)
+            { try { return path != null && inner.Exists(path); } catch { return false; } }
+
+            private string Snapshot(string path)
+            {
+                if (string.IsNullOrEmpty(path)) return "<none>";
+                try
+                {
+                    if (!inner.Exists(path)) return "absent";
+                    byte[] bytes = inner.ReadAllBytes(path);
+                    return "present:" + bytes.Length + ":" + SpatialContractSha256.Compute(bytes);
+                }
+                catch (Exception exception) { return "unreadable:" + exception.GetType().Name; }
+            }
+        }
     }
 }
+#endif

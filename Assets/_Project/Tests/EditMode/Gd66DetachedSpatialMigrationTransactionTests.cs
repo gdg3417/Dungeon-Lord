@@ -1947,6 +1947,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
             fileSystem.Seed(restoreStaging, corrupt);
             fileSystem.Seed(QuarantinePath(directory, restoreStaging, corrupt), corrupt);
+            string journalPath = Path.Combine(directory, names.Journal);
+            SpatialMigrationJournal journal = SpatialMigrationJournalContracts.Parse(
+                fileSystem.ReadAllBytes(journalPath), Limits).Value;
+            string intentPath = Path.Combine(directory, names.OriginalBackup + ".restore.intent");
+            byte[] intentBytes = DetachedRestorationIntentContract.Serialize(new DetachedRestorationIntent(
+                journal.TransactionId, journal.DescriptorFingerprintSha256, journal.OriginalPayloadSha256,
+                SpatialContractSha256.Compute(fixture.Original), journal.RelativeJournalFilename,
+                (int)journal.Stage), Limits);
+            string restoreQuarantine = QuarantinePath(directory, restoreStaging, corrupt);
+            string intentQuarantine = QuarantinePath(directory, intentPath, intentBytes);
             fileSystem.EnableFailure(OperationType.Replace, 1);
 
             DetachedSpatialMigrationOutcome first =
@@ -1965,14 +1975,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     .Recover(activePath);
             Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
             Assert.That(retry.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
-            string quarantine = QuarantinePath(directory, restoreStaging, corrupt);
             Assert.That(fileSystem.Exists(restoreStaging), Is.False);
-            Assert.That(fileSystem.ReadAllBytes(quarantine), Is.EqualTo(corrupt));
-            Assert.That(fileSystem.Paths.Count(path => path.IndexOf(".gd66-quarantine-",
-                StringComparison.Ordinal) >= 0), Is.EqualTo(1));
+            Assert.That(fileSystem.Exists(restoreQuarantine), Is.True);
+            Assert.That(fileSystem.ReadAllBytes(restoreQuarantine), Is.EqualTo(corrupt));
+            Assert.That(fileSystem.Exists(intentPath), Is.False);
+            Assert.That(fileSystem.Exists(intentQuarantine), Is.True);
+            Assert.That(fileSystem.ReadAllBytes(intentQuarantine), Is.EqualTo(intentBytes));
+            Assert.That(fileSystem.Paths.Count(path => PathComparer().Equals(path, restoreQuarantine)),
+                Is.EqualTo(1));
+            Assert.That(fileSystem.Paths.Count(path => PathComparer().Equals(path, intentQuarantine)),
+                Is.EqualTo(1));
+            Assert.That(fileSystem.Paths.Where(path => path.IndexOf(".gd66-quarantine-",
+                    StringComparison.Ordinal) >= 0).OrderBy(path => path, PathComparer()),
+                Is.EqualTo(new[] { restoreQuarantine, intentQuarantine }.OrderBy(path => path, PathComparer())));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
             Assert.That(fileSystem.Operations.Any(operation => operation.Type == OperationType.Replace &&
                 PathComparer().Equals(operation.Paths[0], restoreStaging) &&
-                PathComparer().Equals(operation.Paths[1], quarantine) && operation.MutationCompleted), Is.True);
+                PathComparer().Equals(operation.Paths[1], restoreQuarantine) && operation.MutationCompleted), Is.True);
         }
 
         [Test]
