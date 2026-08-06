@@ -183,7 +183,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             target.Anchor = OutsideAnchor(floorDefinition.Bounds, definition.GrossFootprint, target.Orientation);
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveValidator.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, fixture.Production,
                 fixture.LegacyBytes, fixture.Limits);
@@ -204,7 +204,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(category, Is.EqualTo(MvpDungeonPlacementIds.MonsterCategoryId));
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveValidator.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(SemanticIssues(changed, fixture.Production, fixture.LegacyBytes, fixture.Limits), Is.Empty);
             byte[] reducedConfig = WithoutOption(fixture.LegacyBytes, MvpDungeonPlacementIds.GoblinOptionId);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, fixture.Production,
@@ -232,7 +232,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             edge.Footprint = new ResolvedTileFootprint(new[] { FreeTile(changed.Floors[0], catalog, fixture.Limits) });
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveValidator.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, withCorridor,
                 fixture.LegacyBytes, fixture.Limits);
@@ -278,7 +278,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(AllFixedStructuresIndividuallyValid(floor, catalog, fixture.Limits), Is.True);
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveValidator.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, testProduction,
                 fixture.LegacyBytes, fixture.Limits);
             Assert.That(issues, Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FixedStructure }));

@@ -1100,7 +1100,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialMigrationJournal journal)
             { Path = path; Contained = contained; Bytes = bytes == null ? null : (byte[])bytes.Clone();
               Sha256 = bytes == null ? null : SpatialContractSha256.Compute(bytes); Kind = kind;
-              Journal = journal; FilenameKind = ClassifyFilename(Path.GetFileName(path)); }
+              Journal = journal; FilenameKind = ClassifyFilename(System.IO.Path.GetFileName(path)); }
             internal string Path { get; }
             internal bool Contained { get; }
             internal byte[] Bytes { get; }

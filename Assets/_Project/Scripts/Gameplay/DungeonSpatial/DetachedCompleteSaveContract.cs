@@ -181,7 +181,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value); spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
-                if (!parsedSpatial.IsValid || !CanonicalSpatialSaveValidator.Validate(parsedSpatial.Value,
+                if (!parsedSpatial.IsValid || !CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
                         limits.Spatial, true).IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&
