@@ -122,8 +122,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [TestCaseSource(nameof(Cases))]
-        public void PacketC_BoundedFailureMatrix_ExecutesDeclaredFaultAndRestartScenario(MatrixCase row)
+        public void PacketC_BoundedFailureMatrix_ExecutesDeclaredFaultAndRestartScenario(object caseValue)
         {
+            MatrixCase row = caseValue as MatrixCase;
+            Assert.That(row, Is.Not.Null);
+
             Scenario scenario = Scenario.Create(TestContext.CurrentContext.Test.Name, row);
             scenario.Inject(row);
 

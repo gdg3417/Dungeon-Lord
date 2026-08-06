@@ -2262,7 +2262,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedSpatialMigrationPreparationResult Result { get; }
         }
 
-        internal enum OperationType { Exists, Read, Write, Replace, Move, Delete, Flush, Enumerate, Containment }
+        public enum OperationType { Exists, Read, Write, Replace, Move, Delete, Flush, Enumerate, Containment }
 
         internal sealed class FileOperation
         {
