@@ -153,13 +153,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             int? schemaVersion, RawSaveMemberEvidence rootSchema, RawSaveMemberEvidence rootSchemaVersion,
             RawSaveMemberEvidence rootPrimary, IList<RawSaveMemberEvidence> members,
             IList<RawUnknownMemberEvidence> rootUnknown, IList<RawUnknownMemberEvidence> primaryUnknown,
-            RawLegacyRoutePresence assignments, RawLegacyRoutePresence floor, RawLegacyRoutePresence placements)
+            RawLegacyRoutePresence assignments, RawLegacyRoutePresence floor, RawLegacyRoutePresence placements,
+            string sourceSha256)
         { Envelope = envelope; FailureReason = reason; FailureByteOffset = reasonOffset; SchemaVersion = schemaVersion;
           RootSchemaEvidence = rootSchema; RootSchemaVersionEvidence = rootSchemaVersion; RootPrimaryEvidence = rootPrimary;
           Members = new ReadOnlyCollection<RawSaveMemberEvidence>(new List<RawSaveMemberEvidence>(members));
           UnknownRootMembers = new ReadOnlyCollection<RawUnknownMemberEvidence>(new List<RawUnknownMemberEvidence>(rootUnknown));
           UnknownPrimaryMembers = new ReadOnlyCollection<RawUnknownMemberEvidence>(new List<RawUnknownMemberEvidence>(primaryUnknown));
-          RoomSlotAssignmentsPresence = assignments; FloorLayoutPresence = floor; DungeonPlacementsPresence = placements; }
+          RoomSlotAssignmentsPresence = assignments; FloorLayoutPresence = floor; DungeonPlacementsPresence = placements;
+          SourcePayloadSha256 = sourceSha256; }
         public RawSaveEnvelopeKind Envelope { get; }
         public bool IsSuccess => Envelope != RawSaveEnvelopeKind.Invalid;
         public string FailureReason { get; }
@@ -174,6 +176,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RawLegacyRoutePresence RoomSlotAssignmentsPresence { get; }
         public RawLegacyRoutePresence FloorLayoutPresence { get; }
         public RawLegacyRoutePresence DungeonPlacementsPresence { get; }
+        public string SourcePayloadSha256 { get; }
     }
 
     public static class RawSavePayloadClassifier
@@ -255,14 +258,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
                 Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
                 ArrayAuthority(payload, "mvpRoomSlotAssignments", "Rooms"), FloorAuthority(payload, blankFloorContract),
-                ArrayAuthority(payload, "mvpDungeonPlacements", "Entries"));
+                ArrayAuthority(payload, "mvpDungeonPlacements", "Entries"), SpatialContractSha256.Compute(owned));
         }
 
         private static RawSavePayloadClassification Failed(string reason, int offset) =>
             new RawSavePayloadClassification(RawSaveEnvelopeKind.Invalid, reason, offset, null,
                 Absent("schema"), Absent("schemaVersion"), Absent("primary"), Array.Empty<RawSaveMemberEvidence>(), Array.Empty<RawUnknownMemberEvidence>(),
                 Array.Empty<RawUnknownMemberEvidence>(), RawLegacyRoutePresence.Absent,
-                RawLegacyRoutePresence.Absent, RawLegacyRoutePresence.Absent);
+                RawLegacyRoutePresence.Absent, RawLegacyRoutePresence.Absent, null);
 
         // Analyzes the JSON token as decimal digits plus a base-10 shift. No fixed-width
         // numeric type is used until the normalized value is proven to be in contract range.

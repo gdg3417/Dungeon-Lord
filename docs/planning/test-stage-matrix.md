@@ -1,6 +1,6 @@
 # Sprint 2 to Sprint 4 Test-Stage Matrix
 
-**Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
+**Current Phase 2B4B/2B5 implementation status (2026-08-02):** Phase 2B4A is merged. Detached whole-save candidate and explicit filesystem transaction tests are introduced by this PR; complete owner-run Unity EditMode and PlayMode evidence remains pending until supplied. The implementation remains inactive: live schema is **6**, schema 7 is selected but inactive, and `SaveService`, `GameRoot`, ordinary save behavior, runtime route readers/writers, and room-content authority are unchanged. Phase 2B6 remains the final live-activation gate, and GD66 is not complete.
 
 
 **GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.

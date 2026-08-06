@@ -219,7 +219,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal SpatialContractIssue Issue { get; }
     }
 
-    internal enum ContractJsonKind { Object, Array, String, Number, Null }
+    internal enum ContractJsonKind { Object, Array, String, Number, Boolean, Null }
 
     internal sealed class ContractJsonNode
     {
@@ -433,6 +433,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 { position++; return new ContractJsonNode { Kind = ContractJsonKind.Array,
                     Items = new List<ContractJsonNode>() }; }
                 if (current == '"') return new ContractJsonNode { Kind = ContractJsonKind.String, Text = ReadString() };
+                if (current == 't' && position + 4 <= source.Length && source.Substring(position, 4) == "true")
+                { position += 4; return new ContractJsonNode { Kind = ContractJsonKind.Boolean, Text = "true" }; }
+                if (current == 'f' && position + 5 <= source.Length && source.Substring(position, 5) == "false")
+                { position += 5; return new ContractJsonNode { Kind = ContractJsonKind.Boolean, Text = "false" }; }
                 if (current == 'n' && position + 4 <= source.Length && source.Substring(position, 4) == "null")
                 { position += 4; return new ContractJsonNode { Kind = ContractJsonKind.Null }; }
                 return ReadNumber();
@@ -445,8 +449,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (source[position] == '0' && position + 1 < source.Length && char.IsDigit(source[position + 1]))
                     Fail(SpatialContractIssue.UnsupportedNumber);
                 while (position < source.Length && char.IsDigit(source[position])) position++;
-                if (position < source.Length && (source[position] == '.' || source[position] == 'e' ||
-                    source[position] == 'E' || source[position] == '+')) Fail(SpatialContractIssue.UnsupportedNumber);
+                if (position < source.Length && source[position] == '.')
+                {
+                    position++;
+                    if (position >= source.Length || !char.IsDigit(source[position])) Fail(SpatialContractIssue.MalformedJson);
+                    while (position < source.Length && char.IsDigit(source[position])) position++;
+                }
+                if (position < source.Length && (source[position] == 'e' || source[position] == 'E'))
+                {
+                    position++; if (position < source.Length && (source[position] == '+' || source[position] == '-')) position++;
+                    if (position >= source.Length || !char.IsDigit(source[position])) Fail(SpatialContractIssue.MalformedJson);
+                    while (position < source.Length && char.IsDigit(source[position])) position++;
+                }
                 return new ContractJsonNode { Kind = ContractJsonKind.Number,
                     Text = source.Substring(start, position - start) };
             }
