@@ -1,0 +1,14 @@
+{
+    "name": "DungeonLord.WindowsStandaloneQualification",
+    "references": [],
+    "includePlatforms": [
+        "WindowsStandalone64"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "autoReferenced": true
+}
