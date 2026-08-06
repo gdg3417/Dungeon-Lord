@@ -50,15 +50,63 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Not.Contain("FinalStage"));
         }
 
-        [TestCase("{\"TransactionId\":\"{0}\",\"TransactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\"}")]
-        [TestCase("{\"transactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\"}")]
-        [TestCase("{\"TransactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\",\"FinalStage\":6}")]
+        [TestCase("{{\"TransactionId\":\"{0}\",\"TransactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\"}}")]
+        [TestCase("{{\"transactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\"}}")]
+        [TestCase("{{\"TransactionId\":\"{0}\",\"DescriptorFingerprintSha256\":\"{1}\",\"CandidateSha256\":\"{2}\",\"FinalStage\":6}}")]
         public void FinalizationReceipt_RejectsDuplicateCaseAmbiguousAndExtraFields(string format)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(string.Format(format,
                 TransactionId('1'), Hash('2'), Hash('3')));
 
             Assert.That(DetachedFinalizationReceiptContract.Parse(bytes, Limits), Is.Null);
+        }
+
+        [Test]
+        public void ActivePath_LongIdentityIsBoundedDeterministicAndDistinct()
+        {
+            string identity = new string('a', 1024);
+            string path = ActivePath(identity);
+            string differentPath = ActivePath(new string('b', 1024));
+            string quarantine = Path.Combine(Path.GetDirectoryName(path),
+                "save.gd66-quarantine-" + Hash('c') + "-" + new string('d', 16) + ".evidence");
+
+            Assert.That(ActivePath(identity), Is.EqualTo(path));
+            Assert.That(differentPath, Is.Not.EqualTo(path));
+            Assert.That(path, Is.EqualTo(Path.GetFullPath(path)));
+            Assert.That(quarantine.Length,
+                Is.LessThanOrEqualTo(SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters));
+        }
+
+        [Test]
+        public void TargetedReplacePredicate_IgnoresPrecedingSinglePathOperations()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            fileSystem.Seed(activePath, fixture.Original);
+            SpatialMigrationSidecarNames names = SpatialMigrationSidecarPaths.Derive(
+                Path.GetFileName(activePath), fixture.Result.Attempt.TransactionId).Value;
+            string candidatePath = Path.Combine(Path.GetDirectoryName(activePath), names.CandidateStaging);
+            int predicateInvocations = 0;
+            fileSystem.EnableTargetedFailure(OperationType.Replace, paths =>
+            {
+                predicateInvocations++;
+                return PathComparer().Equals(paths[0], candidatePath) &&
+                    PathComparer().Equals(paths[1], activePath);
+            }, 1, false);
+
+            DetachedSpatialMigrationOutcome outcome = new DetachedSpatialMigrationTransaction(
+                fileSystem, Recovery(fixture)).Execute(activePath, fixture.Result.Attempt);
+
+            Assert.That(outcome.IsSuccess, Is.False);
+            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.ReplacementFailedReason));
+            Assert.That(fileSystem.Operations.Any(operation => operation.Paths.Length == 1), Is.True);
+            Assert.That(predicateInvocations, Is.GreaterThan(0));
+            Assert.That(fileSystem.FailedOperation, Is.Not.Null);
+            Assert.That(fileSystem.FailedOperation.Type, Is.EqualTo(OperationType.Replace));
+            Assert.That(fileSystem.FailedOperation.Paths[0], Is.EqualTo(candidatePath).Using(PathComparer()));
+            Assert.That(fileSystem.FailedOperation.Paths[1], Is.EqualTo(activePath).Using(PathComparer()));
+            Assert.That(fileSystem.FailedTargetOccurrence, Is.EqualTo(1));
         }
 
         [Test]
@@ -386,7 +434,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
             Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(malformed));
-            Assert.That(fileSystem.Paths, Has.Count.EqualTo(1));
+            Assert.That(fileSystem.Paths.Count(), Is.EqualTo(1));
         }
 
         [TestCase("{malformed", RawSavePayloadClassifier.UnreadableReason)]
@@ -2073,10 +2121,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         internal static string ActivePath(string identity)
         {
-            string safe = new string(identity.Select(character => char.IsLetterOrDigit(character) ?
-                character : '-').ToArray());
-            return Path.GetFullPath(Path.Combine(Path.GetTempPath(), "DungeonLord-GD66-Tests", safe,
-                "save.json"));
+            string key = SpatialContractSha256.Compute(
+                Encoding.UTF8.GetBytes(identity ?? string.Empty)).Substring(0, 24);
+            return Path.GetFullPath(Path.Combine(Path.GetTempPath(), "DL-GD66", key, "save.json"));
         }
 
         internal static DetachedSpatialMigrationPreparationResult PrepareSemanticResult(int schema,
@@ -2406,7 +2453,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 counts[type] = index;
                 var operation = new FileOperation(type, index, paths);
                 operations.Add(operation);
-                bool pathMatches = failurePathPredicate == null || failurePathPredicate(paths);
+                bool pathMatches = failureType == type &&
+                    (failurePathPredicate == null || failurePathPredicate(paths));
                 int targetedIndex = 0;
                 if (pathMatches)
                 {
