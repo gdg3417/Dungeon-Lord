@@ -1827,7 +1827,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [TestCase(OperationType.Write, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
         [TestCase(OperationType.Flush, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
-        [TestCase(OperationType.Read, 2, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
+        [TestCase(OperationType.Read, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
         public void Recovery_ChangedPinsDurableVerifiedCorruptRestoreStagingRecreationFailuresRetry(
             OperationType failureType, int failureIndex, SpatialMigrationJournalStage expectedStage,
             SpatialTrustedPayload expectedTrust)
@@ -1848,6 +1848,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         fileSystem.Operations.Any(operation => operation.Type == OperationType.Write &&
                             operation.MutationCompleted &&
                             PathComparer().Equals(operation.Paths[0], restoreStaging));
+                if (failureType == OperationType.Read)
+                    return PathComparer().Equals(paths[0], restoreStaging) &&
+                        fileSystem.Operations.Any(operation => operation.Type == OperationType.Write &&
+                            operation.MutationCompleted &&
+                            PathComparer().Equals(operation.Paths[0], restoreStaging));
                 return PathComparer().Equals(paths[0], restoreStaging);
             }, failureIndex, false);
 
@@ -1861,6 +1866,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(first.TrustedPayload, Is.EqualTo(expectedTrust));
             Assert.That(fileSystem.FailedOperation, Is.Not.Null);
             Assert.That(fileSystem.FailedOperation.Type, Is.EqualTo(failureType));
+            Assert.That(fileSystem.FailedTargetOccurrence, Is.EqualTo(1));
             Assert.That(PathComparer().Equals(fileSystem.FailedOperation.Paths[0],
                 failureType == OperationType.Flush ? directory : restoreStaging), Is.True);
             Assert.That(fileSystem.Operations.Any(operation => operation.Type == OperationType.Move &&
