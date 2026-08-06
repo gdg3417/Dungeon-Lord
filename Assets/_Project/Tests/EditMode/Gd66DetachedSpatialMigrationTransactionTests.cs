@@ -104,8 +104,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(predicateInvocations, Is.GreaterThan(0));
             Assert.That(fileSystem.FailedOperation, Is.Not.Null);
             Assert.That(fileSystem.FailedOperation.Type, Is.EqualTo(OperationType.Replace));
-            Assert.That(fileSystem.FailedOperation.Paths[0], Is.EqualTo(candidatePath).Using(PathComparer()));
-            Assert.That(fileSystem.FailedOperation.Paths[1], Is.EqualTo(activePath).Using(PathComparer()));
+            Assert.That(PathComparer().Equals(
+                fileSystem.FailedOperation.Paths[0], candidatePath), Is.True);
+            Assert.That(PathComparer().Equals(
+                fileSystem.FailedOperation.Paths[1], activePath), Is.True);
             Assert.That(fileSystem.FailedTargetOccurrence, Is.EqualTo(1));
         }
 
