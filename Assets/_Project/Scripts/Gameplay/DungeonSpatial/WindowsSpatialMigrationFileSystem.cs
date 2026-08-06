@@ -93,12 +93,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         IWindowsSpatialMigrationCapabilityProbe
     {
         private const uint GenericWrite = 0x40000000;
+        private const uint DeleteAccess = 0x00010000;
+        private const uint FileShareRead = 0x1;
+        private const uint FileShareWrite = 0x2;
+        private const uint FileShareDelete = 0x4;
         private const uint CreateNew = 1;
+        private const uint OpenExisting = 3;
         private const uint FileAttributeNormal = 0x80;
         private const uint FileFlagWriteThrough = 0x80000000;
-        private const uint MoveReplaceExisting = 0x1;
-        private const uint MoveWriteThrough = 0x8;
         private const uint DriveFixed = 3;
+        private const int FileRenameInfo = 3;
+        private const int RenameRootDirectoryOffset32 = 4;
+        private const int RenameRootDirectoryOffset64 = 8;
+        private const int RenameFileNameLengthOffset32 = 8;
+        private const int RenameFileNameLengthOffset64 = 16;
+        private const int RenameFileNameOffset32 = 12;
+        private const int RenameFileNameOffset64 = 20;
 
         public bool Exists(string path) => File.Exists(path);
         public byte[] ReadAllBytes(string path) => File.ReadAllBytes(path);
@@ -205,8 +215,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             sourcePath = NormalizePath(sourcePath); destinationPath = NormalizePath(destinationPath);
             if (!string.Equals(Path.GetDirectoryName(sourcePath), Path.GetDirectoryName(destinationPath),
                 StringComparison.OrdinalIgnoreCase)) throw new IOException();
-            uint flags = MoveWriteThrough | (replace ? MoveReplaceExisting : 0);
-            if (!MoveFileExW(sourcePath, destinationPath, flags)) ThrowLastWin32();
+            byte[] destinationBytes = System.Text.Encoding.Unicode.GetBytes(destinationPath);
+            int fileNameOffset = IntPtr.Size == 8 ? RenameFileNameOffset64 : RenameFileNameOffset32;
+            int allocationSize = checked(fileNameOffset + destinationBytes.Length);
+            IntPtr renameInfo = IntPtr.Zero;
+            using (SafeFileHandle handle = CreateFileW(sourcePath, DeleteAccess | GenericWrite,
+                FileShareRead | FileShareWrite | FileShareDelete, IntPtr.Zero, OpenExisting,
+                FileAttributeNormal | FileFlagWriteThrough, IntPtr.Zero))
+            {
+                EnsureHandle(handle);
+                try
+                {
+                    renameInfo = Marshal.AllocHGlobal(allocationSize);
+                    for (int index = 0; index < allocationSize; index++) Marshal.WriteByte(renameInfo, index, 0);
+                    Marshal.WriteByte(renameInfo, replace ? (byte)1 : (byte)0);
+                    int rootDirectoryOffset = IntPtr.Size == 8
+                        ? RenameRootDirectoryOffset64 : RenameRootDirectoryOffset32;
+                    int fileNameLengthOffset = IntPtr.Size == 8
+                        ? RenameFileNameLengthOffset64 : RenameFileNameLengthOffset32;
+                    Marshal.WriteIntPtr(renameInfo, rootDirectoryOffset, IntPtr.Zero);
+                    Marshal.WriteInt32(renameInfo, fileNameLengthOffset, destinationBytes.Length);
+                    Marshal.Copy(destinationBytes, 0, IntPtr.Add(renameInfo, fileNameOffset),
+                        destinationBytes.Length);
+                    if (!SetFileInformationByHandle(handle, FileRenameInfo, renameInfo,
+                        (uint)allocationSize)) ThrowLastWin32();
+                    if (!FlushFileBuffers(handle)) ThrowLastWin32();
+                }
+                finally
+                {
+                    if (renameInfo != IntPtr.Zero) Marshal.FreeHGlobal(renameInfo);
+                }
+            }
+            if (File.Exists(sourcePath) || !File.Exists(destinationPath)) throw new IOException();
         }
 
         private static string NormalizePath(string path)
@@ -229,8 +269,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             out int written, IntPtr overlapped);
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool FlushFileBuffers(SafeFileHandle file);
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool MoveFileExW(string existing, string destination, uint flags);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetFileInformationByHandle(SafeFileHandle file, int informationClass,
+            IntPtr fileInformation, uint bufferSize);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern uint GetDriveTypeW(string root);
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

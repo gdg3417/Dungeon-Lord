@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEngine;
@@ -158,6 +160,85 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(new byte[] { 7 }, File.ReadAllBytes(destination));
             }
             finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void WindowsNonReplacingMoveRejectsExistingDestinationAndReleasesSourceHandle()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-existing-destination");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var fileSystem = new WindowsSpatialMigrationFileSystem();
+                string source = Path.Combine(directory, "source.tmp");
+                string destination = Path.Combine(directory, "destination.tmp");
+                fileSystem.WriteAllBytesDurable(source, new byte[] { 8 });
+                fileSystem.WriteAllBytesDurable(destination, new byte[] { 9 });
+                Assert.Throws<System.ComponentModel.Win32Exception>(() =>
+                    fileSystem.MoveSameDirectoryAtomic(source, destination));
+                fileSystem.ReplaceSameDirectoryAtomic(source, destination);
+                Assert.That(File.Exists(source), Is.False);
+                CollectionAssert.AreEqual(new byte[] { 8 }, File.ReadAllBytes(destination));
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void WindowsLockedDestinationReplacementFailsThenSucceedsAfterRelease()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-destination-lock");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var fileSystem = new WindowsSpatialMigrationFileSystem();
+                string source = Path.Combine(directory, "source.tmp");
+                string destination = Path.Combine(directory, "destination.tmp");
+                fileSystem.WriteAllBytesDurable(source, new byte[] { 10 });
+                fileSystem.WriteAllBytesDurable(destination, new byte[] { 11 });
+                using (new FileStream(destination, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    Assert.Throws<System.ComponentModel.Win32Exception>(() =>
+                        fileSystem.ReplaceSameDirectoryAtomic(source, destination));
+                fileSystem.ReplaceSameDirectoryAtomic(source, destination);
+                Assert.That(File.Exists(source), Is.False);
+                CollectionAssert.AreEqual(new byte[] { 10 }, File.ReadAllBytes(destination));
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void WindowsMissingSourceFailsWithoutCreatingDestination()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-missing-source");
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            Directory.CreateDirectory(directory);
+            try
+            {
+                string destination = Path.Combine(directory, "destination.tmp");
+                Assert.Throws<System.ComponentModel.Win32Exception>(() =>
+                    new WindowsSpatialMigrationFileSystem().MoveSameDirectoryAtomic(
+                        Path.Combine(directory, "missing.tmp"), destination));
+                Assert.That(File.Exists(destination), Is.False);
+            }
+            finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void ProductionRenameInteropUsesSetFileInformationByHandleNotMoveFileEx()
+        {
+            string[] nativeMethods = typeof(WindowsSpatialMigrationFileSystem).GetMethods(
+                BindingFlags.Static | BindingFlags.NonPublic).Where(method =>
+                    method.GetCustomAttributes(typeof(System.Runtime.InteropServices.DllImportAttribute), false)
+                        .Length != 0).Select(method => method.Name).ToArray();
+            Assert.That(nativeMethods, Does.Contain("SetFileInformationByHandle"));
+            Assert.That(nativeMethods, Does.Not.Contain("MoveFileExW"));
         }
 
         [Test]
