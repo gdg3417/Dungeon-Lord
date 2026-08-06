@@ -170,12 +170,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ReplacedPendingDurability_RetryDoesNotRewriteCandidate()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
-            fileSystem.Seed(activePath, fixture.Original);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.Replaced,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+            EnablePendingDurabilityFailure(fileSystem, activePath);
             var transaction = new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture));
 
-            DetachedSpatialMigrationOutcome first = transaction.Execute(activePath, fixture.Result.Attempt);
+            DetachedSpatialMigrationOutcome first = transaction.Recover(activePath);
+            AssertPendingDurabilityFailurePhase(fileSystem, fixture, activePath);
             int activeReplacements = fileSystem.Operations.Count(operation => operation.Type ==
                 OperationType.Replace && PathComparer().Equals(operation.Paths[1], activePath));
             DetachedSpatialMigrationOutcome retry =
@@ -191,17 +194,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ReplacedPendingDurability_DurableFilesystemResumesToFinalized()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
-            fileSystem.Seed(activePath, fixture.Original);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.Replaced,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+            EnablePendingDurabilityFailure(fileSystem, activePath);
             DetachedSpatialMigrationOutcome pending =
-                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
-                    .Execute(activePath, fixture.Result.Attempt);
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+            AssertPendingDurabilityFailurePhase(fileSystem, fixture, activePath);
             AssertPendingDurability(pending, fixture, fileSystem, activePath);
-            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".restore",
-                StringComparison.Ordinal)), Is.EqualTo(1));
-            Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".restore.intent",
-                StringComparison.Ordinal)), Is.EqualTo(1));
             fileSystem.DisableFailure();
 
             DetachedSpatialMigrationOutcome recovered =
@@ -213,23 +214,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
             Assert.That(fileSystem.Paths.Any(path => path.EndsWith(".restore",
-                StringComparison.Ordinal) || path.EndsWith(".restore.intent", StringComparison.Ordinal)),
-                Is.False);
-            Assert.That(fileSystem.Paths.Count(path => Path.GetFileName(path).StartsWith(
-                "gd66-quarantine-", StringComparison.Ordinal)), Is.GreaterThanOrEqualTo(2));
+                StringComparison.Ordinal) || path.EndsWith(".restore.intent", StringComparison.Ordinal)), Is.False);
         }
 
         [Test]
         public void PinFailure_ConfigChangedWithCandidateAndBackupRestoresOriginal()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
-            fileSystem.Seed(activePath, fixture.Original);
+            SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.Replaced, includeBackup: false, includeStaging: false,
+                activeCandidate: true);
+            EnablePendingDurabilityFailure(fileSystem, activePath);
             DetachedSpatialMigrationOutcome pending =
-                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
-                    .Execute(activePath, fixture.Result.Attempt);
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+            AssertPendingDurabilityFailurePhase(fileSystem, fixture, activePath);
             AssertPendingDurability(pending, fixture, fileSystem, activePath);
+            fileSystem.Seed(Path.Combine(Path.GetDirectoryName(activePath), names.OriginalBackup), fixture.Original);
             fileSystem.DisableFailure();
 
             DetachedSpatialMigrationOutcome outcome = new DetachedSpatialMigrationTransaction(fileSystem,
@@ -246,17 +248,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void PinFailure_ConfigChangedWithCandidateAndMissingBackupTrustsJournalBoundCandidate()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Flush, -1);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
-            fileSystem.Seed(activePath, fixture.Original);
+            MaterializeJournal(fileSystem, fixture, activePath, SpatialMigrationJournalStage.Replaced,
+                includeBackup: false, includeStaging: false, activeCandidate: true);
+            EnablePendingDurabilityFailure(fileSystem, activePath);
             DetachedSpatialMigrationOutcome pending =
-                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
-                    .Execute(activePath, fixture.Result.Attempt);
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+            AssertPendingDurabilityFailurePhase(fileSystem, fixture, activePath);
             AssertPendingDurability(pending, fixture, fileSystem, activePath);
             fileSystem.DisableFailure();
-            string backup = fileSystem.Paths.Single(path => path.EndsWith(".original.bak",
-                StringComparison.Ordinal));
-            fileSystem.DeleteFile(backup);
 
             DetachedSpatialMigrationOutcome outcome = new DetachedSpatialMigrationTransaction(fileSystem,
                 Recovery(fixture, new byte[] { 1 })).Recover(activePath);
@@ -1035,23 +1036,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 activeCandidate: false);
             string directory = Path.GetDirectoryName(activePath);
             string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
-            fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+            byte[] corruptRestore = Encoding.UTF8.GetBytes("{\"not\":\"original\"}");
+            fileSystem.Seed(restoreStaging, corruptRestore);
 
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
 
             Assert.That(outcome.IsSuccess, Is.False);
             Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.ReplacementFailedReason));
-            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.CandidateVerified));
-            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(outcome.Diagnostics, Is.EqualTo(new[]
             { DetachedSpatialMigrationTransaction.StagedCandidateVerifiedDiagnostic }));
-            Assert.That(fileSystem.ReadAllBytes(activePath),
-                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.ReadAllBytes(Path.Combine(directory, names.OriginalBackup)),
+                Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Exists(QuarantinePath(directory, restoreStaging, corruptRestore)), Is.True);
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(2));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[0], restoreStaging) &&
                 PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[0],
+                    Path.Combine(directory, names.CandidateStaging)) &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                operation.Paths[0].EndsWith(".candidate.tmp", StringComparison.Ordinal)), Is.EqualTo(0));
+            Assert.That(PathComparer().Equals(fileSystem.Operations.Last(operation =>
+                operation.Type == OperationType.Replace && operation.MutationCompleted &&
+                PathComparer().Equals(operation.Paths[1], activePath)).Paths[0], restoreStaging), Is.True);
         }
 
         [Test]
@@ -1065,7 +1081,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 activeCandidate: true);
             string directory = Path.GetDirectoryName(activePath);
             string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
-            fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+            byte[] corruptRestore = Encoding.UTF8.GetBytes("{\"not\":\"original\"}");
+            fileSystem.Seed(restoreStaging, corruptRestore);
 
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
@@ -1073,16 +1090,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(outcome.IsSuccess, Is.False);
             Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
-            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
-            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            Assert.That(outcome.Stage, Is.EqualTo(SpatialMigrationJournalStage.OriginalRestored));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(outcome.Diagnostics, Is.EqualTo(new[]
             { DetachedSpatialMigrationTransaction.ReplacedPendingDurabilityDiagnostic }));
-            Assert.That(fileSystem.ReadAllBytes(activePath),
-                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.ReadAllBytes(Path.Combine(directory, names.OriginalBackup)),
+                Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.Exists(QuarantinePath(directory, restoreStaging, corruptRestore)), Is.True);
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[0], restoreStaging) &&
+                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[0],
+                    Path.Combine(directory, names.CandidateStaging)) &&
                 PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                operation.Paths[0].EndsWith(".candidate.tmp", StringComparison.Ordinal)), Is.EqualTo(0));
+            Assert.That(PathComparer().Equals(fileSystem.Operations.Last(operation =>
+                operation.Type == OperationType.Replace && operation.MutationCompleted &&
+                PathComparer().Equals(operation.Paths[1], activePath)).Paths[0], restoreStaging), Is.True);
         }
 
         [Test]
@@ -1277,9 +1308,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Execute_FreshCandidateReplacementFailureWithOriginalIntactPreservesStagedDiagnostic()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Replace, 3);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
             fileSystem.Seed(activePath, fixture.Original);
+            SpatialMigrationSidecarNames names = SpatialMigrationSidecarPaths.Derive(
+                Path.GetFileName(activePath), fixture.Result.Attempt.TransactionId).Value;
+            string candidateStaging = Path.Combine(Path.GetDirectoryName(activePath), names.CandidateStaging);
+            fileSystem.EnableTargetedFailure(OperationType.Replace, paths =>
+                PathComparer().Equals(paths[0], candidateStaging) &&
+                PathComparer().Equals(paths[1], activePath), 1, false);
 
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture))
@@ -1294,6 +1331,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".candidate.tmp",
                 StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(fileSystem.FailedOperation, Is.Not.Null);
+            Assert.That(PathComparer().Equals(fileSystem.FailedOperation.Paths[0], candidateStaging), Is.True);
+            Assert.That(PathComparer().Equals(fileSystem.FailedOperation.Paths[1], activePath), Is.True);
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
                 PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
         }
@@ -1787,13 +1827,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [TestCase(OperationType.Write, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
         [TestCase(OperationType.Flush, 1, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
-        [TestCase(OperationType.Read, 3, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
+        [TestCase(OperationType.Read, 2, SpatialMigrationJournalStage.DurableVerified, SpatialTrustedPayload.Candidate)]
         public void Recovery_ChangedPinsDurableVerifiedCorruptRestoreStagingRecreationFailuresRetry(
             OperationType failureType, int failureIndex, SpatialMigrationJournalStage expectedStage,
             SpatialTrustedPayload expectedTrust)
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(failureType, failureIndex);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name + failureType + failureIndex);
             SpatialMigrationSidecarNames names = MaterializeJournal(fileSystem, fixture, activePath,
                 SpatialMigrationJournalStage.DurableVerified, includeBackup: true, includeStaging: false,
@@ -1801,6 +1841,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string directory = Path.GetDirectoryName(activePath);
             string restoreStaging = Path.Combine(directory, names.OriginalBackup + ".restore");
             fileSystem.Seed(restoreStaging, Encoding.UTF8.GetBytes("{\"not\":\"original\"}"));
+            fileSystem.EnableTargetedFailure(failureType, paths =>
+            {
+                if (failureType == OperationType.Flush)
+                    return PathComparer().Equals(paths[0], directory) &&
+                        fileSystem.Operations.Any(operation => operation.Type == OperationType.Write &&
+                            operation.MutationCompleted &&
+                            PathComparer().Equals(operation.Paths[0], restoreStaging));
+                return PathComparer().Equals(paths[0], restoreStaging);
+            }, failureIndex, false);
 
             DetachedSpatialMigrationOutcome first =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture, new byte[] { 1 }))
@@ -1810,6 +1859,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(first.Reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
             Assert.That(first.Stage, Is.EqualTo(expectedStage));
             Assert.That(first.TrustedPayload, Is.EqualTo(expectedTrust));
+            Assert.That(fileSystem.FailedOperation, Is.Not.Null);
+            Assert.That(fileSystem.FailedOperation.Type, Is.EqualTo(failureType));
+            Assert.That(PathComparer().Equals(fileSystem.FailedOperation.Paths[0],
+                failureType == OperationType.Flush ? directory : restoreStaging), Is.True);
+            Assert.That(fileSystem.Operations.Any(operation => operation.Type == OperationType.Move &&
+                PathComparer().Equals(operation.Paths[0], restoreStaging) && operation.MutationCompleted), Is.True);
+            Assert.That(fileSystem.Operations.Any(operation => operation.Type == OperationType.Write &&
+                PathComparer().Equals(operation.Paths[0], restoreStaging) && operation.MutationCompleted),
+                Is.EqualTo(failureType != OperationType.Write));
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
@@ -1934,17 +1992,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Execute_FreshCandidateReplacementFailureRetriesToFinalizedWithoutRepeatedTransition()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
-            var fileSystem = new DeterministicFileSystem(OperationType.Replace, 3);
+            var fileSystem = new DeterministicFileSystem();
             string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
             fileSystem.Seed(activePath, fixture.Original);
+            SpatialMigrationSidecarNames names = SpatialMigrationSidecarPaths.Derive(
+                Path.GetFileName(activePath), fixture.Result.Attempt.TransactionId).Value;
+            string candidateStaging = Path.Combine(Path.GetDirectoryName(activePath), names.CandidateStaging);
+            fileSystem.EnableTargetedFailure(OperationType.Replace, paths =>
+                PathComparer().Equals(paths[0], candidateStaging) &&
+                PathComparer().Equals(paths[1], activePath), 1, false);
             DetachedSpatialMigrationOutcome first = new DetachedSpatialMigrationTransaction(fileSystem,
                 Recovery(fixture)).Execute(activePath, fixture.Result.Attempt);
+            Gd66DetachedSpatialMigrationTransactionTests.FileOperation failedOperation = fileSystem.FailedOperation;
+            Assert.That(failedOperation, Is.Not.Null);
+            Assert.That(failedOperation.Type, Is.EqualTo(OperationType.Replace));
+            Assert.That(PathComparer().Equals(failedOperation.Paths[0], candidateStaging), Is.True);
+            Assert.That(PathComparer().Equals(failedOperation.Paths[1], activePath), Is.True);
+            Assert.That(failedOperation.MutationCompleted, Is.False);
+            Assert.That(failedOperation.FailedAfterMutation, Is.False);
+            Assert.That(fileSystem.FailedTargetOccurrence, Is.EqualTo(1));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            Assert.That(fileSystem.ReadAllBytes(candidateStaging),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            int candidateWrites = fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                PathComparer().Equals(operation.Paths[0], candidateStaging) && operation.MutationCompleted);
             fileSystem.DisableFailure();
 
             DetachedSpatialMigrationOutcome retry = new DetachedSpatialMigrationTransaction(fileSystem,
                 Recovery(fixture)).Execute(activePath, fixture.Result.Attempt);
 
+            Assert.That(first.IsSuccess, Is.False);
+            Assert.That(first.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.ReplacementFailedReason));
             Assert.That(first.Stage, Is.EqualTo(SpatialMigrationJournalStage.CandidateVerified));
+            Assert.That(first.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(retry.IsSuccess, Is.True, retry.Reason);
             Assert.That(retry.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
             Assert.That(fileSystem.ReadAllBytes(activePath),
@@ -1952,7 +2032,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fileSystem.Paths.Count(path => path.EndsWith(".journal.json",
                 StringComparison.Ordinal)), Is.EqualTo(1));
             Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
-                PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(1));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                PathComparer().Equals(operation.Paths[0], candidateStaging) && operation.MutationCompleted),
+                Is.EqualTo(candidateWrites));
         }
 
         private static string Hash(char value) => new string(value, 64);
@@ -2090,18 +2173,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string transactionId = SpatialMigrationTransactionIdentity.CreateTransactionId(identity);
             SpatialMigrationSidecarNames names = SpatialMigrationSidecarPaths.Derive(
                 Path.GetFileName(activePath), transactionId).Value;
+            bool candidateVerified = stage == SpatialMigrationJournalStage.CandidateVerified ||
+                stage == SpatialMigrationJournalStage.Replaced ||
+                stage == SpatialMigrationJournalStage.DurableVerified ||
+                stage == SpatialMigrationJournalStage.Finalized;
             var journal = new SpatialMigrationJournal(SpatialMigrationContractIdentity.JournalSchemaVersion,
                 fixture.Result.Attempt.Descriptor, fingerprint, identity, transactionId, names.Journal,
                 names.OriginalBackup, names.CandidateStaging,
                 stage == SpatialMigrationJournalStage.DurableVerified || stage == SpatialMigrationJournalStage.Finalized
                     ? names.FinalizedReceipt : null,
                 fixture.Result.Attempt.Descriptor.OriginalPayloadSha256,
-                includeBackup ? fixture.Result.Attempt.Descriptor.OriginalPayloadSha256 : null,
-                (int)stage >= (int)SpatialMigrationJournalStage.CandidateVerified
-                    ? fixture.Result.Attempt.CandidateSha256 : null,
+                stage == SpatialMigrationJournalStage.DescriptorPinned
+                    ? null : fixture.Result.Attempt.Descriptor.OriginalPayloadSha256,
+                candidateVerified ? fixture.Result.Attempt.CandidateSha256 : null,
                 stage);
-            byte[] journalBytes = SpatialMigrationJournalContracts.Serialize(journal, Limits).Value;
-            Assert.That(SpatialMigrationJournalContracts.Parse(journalBytes, Limits).IsValid, Is.True);
+            SpatialContractResult<byte[]> serialized = SpatialMigrationJournalContracts.Serialize(journal, Limits);
+            Assert.That(serialized.IsValid, Is.True,
+                "Journal serialization issues: " + string.Join(",", serialized.Issues));
+            byte[] journalBytes = serialized.Value;
+            SpatialContractResult<SpatialMigrationJournal> parsed =
+                SpatialMigrationJournalContracts.Parse(journalBytes, Limits);
+            Assert.That(parsed.IsValid, Is.True,
+                "Journal parse issues: " + string.Join(",", parsed.Issues));
             string directory = Path.GetDirectoryName(activePath);
             fileSystem.Seed(activePath, activeCandidate ? fixture.Result.Attempt.Candidate.GetBytes() : fixture.Original);
             fileSystem.Seed(Path.Combine(directory, names.Journal), journalBytes);
@@ -2120,6 +2213,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
             Assert.That(fileSystem.ReadAllBytes(activePath),
                 Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+        }
+        private static void EnablePendingDurabilityFailure(DeterministicFileSystem fileSystem,
+            string activePath)
+        {
+            string directory = Path.GetDirectoryName(activePath);
+            fileSystem.EnableTargetedFailure(OperationType.Flush, paths =>
+                PathComparer().Equals(paths[0], directory), -1, false);
+        }
+        private static void AssertPendingDurabilityFailurePhase(DeterministicFileSystem fileSystem,
+            PreparedFixture fixture, string activePath)
+        {
+            string directory = Path.GetDirectoryName(activePath);
+            FileOperation failed = fileSystem.FailedOperation;
+            Assert.That(failed, Is.Not.Null);
+            Assert.That(failed.Type, Is.EqualTo(OperationType.Flush));
+            Assert.That(PathComparer().Equals(failed.Paths[0], directory), Is.True);
+            Assert.That(fileSystem.ReadAllBytes(activePath),
+                Is.EqualTo(fixture.Result.Attempt.Candidate.GetBytes()));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Replace &&
+                operation.MutationCompleted && PathComparer().Equals(operation.Paths[1], activePath)), Is.EqualTo(0));
+            Assert.That(fileSystem.Operations.Count(operation => operation.Type == OperationType.Write &&
+                (operation.Paths[0].EndsWith(".original.bak", StringComparison.Ordinal) ||
+                 operation.Paths[0].EndsWith(".candidate.tmp", StringComparison.Ordinal))), Is.EqualTo(0));
+            string journalPath = fileSystem.Paths.Single(path => path.EndsWith(".journal.json",
+                StringComparison.Ordinal));
+            SpatialContractResult<SpatialMigrationJournal> parsed = SpatialMigrationJournalContracts.Parse(
+                fileSystem.ReadAllBytes(journalPath), Limits);
+            Assert.That(parsed.IsValid, Is.True, "Journal parse issues: " + string.Join(",", parsed.Issues));
+            Assert.That(parsed.Value.Stage, Is.EqualTo(SpatialMigrationJournalStage.Replaced));
         }
         internal static string ActivePath(string identity)
         {
