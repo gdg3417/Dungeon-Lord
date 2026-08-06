@@ -2,7 +2,7 @@
 
 **Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B4B/2B5 implementation status (2026-08-02):** Phase 2B4A is merged. This change adds the detached whole-save candidate boundary and explicit recoverable-transaction execution boundary on top of the merged classifier, canonical serializer, descriptor, identity, path, and journal contracts. Exact recognized and unknown JSON values are copied from raw evidence without constructing `SaveData`; schema 7 candidate ownership remains detached. Filesystem work begins only through the injected transaction API and its same-directory atomic-replacement operation. Owner-run Unity evidence remains pending. The engine remains inactive: live `SaveMigration.LatestSchemaVersion` is **6**, schema 7 remains selected but inactive, `SaveService` and `GameRoot` are unchanged, legacy route and room-content authority is unchanged, and final live activation remains Phase 2B6. GD66 is not complete.
+**Current Phase 2B6A implementation status (2026-08-06):** PR #193 is merged and is authoritative for the completed detached candidate, transaction, and recovery implementation. Phase 2B6A adds an explicit activation preflight and a Windows filesystem strategy using documented write-through file creation/flush and same-directory `MoveFileExW` write-through replacement/moves. Selection is limited to Windows Editor and Windows Standalone on a local, nonredirected NTFS path; every other platform, filesystem, redirected/reparse path, invalid path, and failed native probe fails closed. Windows qualification at the reviewed head remains required. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 remains detached and inactive; `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy writable authority are unchanged. Phase 2B6B remains the final live-activation packet. GD66 is not complete.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -10,7 +10,7 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 
 | Item | Reconciled state |
 |---|---|
-| Repository | `main` through merged PR #187 at `173d073a1d08b62eddca44a5798a211bb3f72570`; GD66 approved |
+| Repository | `main` through merged PR #193 at `d9d39871732f28f61c4958dc4a55fda922c66320`; detached candidate/transaction complete |
 | Save root | `SaveRoot.schemaVersion`; `SaveMigration.LatestSchemaVersion = 6` |
 | Route topology | ordered MVP representations; no spatial graph authority |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
