@@ -70,6 +70,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var run = Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                 expected.Id, expected.Schema, expected.Members);
             Assert.That(run.Classification.SchemaVersion, Is.EqualTo(expected.Schema));
+            Assert.That(run.Classification.RoomSlotAssignmentsPresence == RawLegacyRoutePresence.Present,
+                Is.EqualTo(ContainsMember(expected.Members, "mvpRoomSlotAssignments")));
+            Assert.That(run.Classification.FloorLayoutPresence == RawLegacyRoutePresence.Present,
+                Is.EqualTo(ContainsMember(expected.Members, "mvpDungeonFloorLayout")));
+            Assert.That(run.Classification.DungeonPlacementsPresence == RawLegacyRoutePresence.Present,
+                Is.EqualTo(ContainsMember(expected.Members, "mvpDungeonPlacements")));
             AssertWinner(run.Classification, expected.Winner);
             Assert.That(run.Attempt.Descriptor.RawSourceSchemaVersion, Is.EqualTo(expected.Schema));
             Assert.That(run.Attempt.Diagnostics, Is.EqualTo(expected.Diagnostics));
@@ -157,17 +163,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static void AssertWinner(RawSavePayloadClassification value, Winner winner)
         {
-            Assert.That(value.RoomSlotAssignmentsPresence == RawLegacyRoutePresence.Present,
-                Is.EqualTo(winner == Winner.Assignments));
-            Assert.That(value.FloorLayoutPresence == RawLegacyRoutePresence.Present,
-                Is.EqualTo(winner == Winner.Floor));
-            if (winner == Winner.Placements)
+            switch (winner)
             {
-                Assert.That(value.RoomSlotAssignmentsPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
-                Assert.That(value.FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
-                Assert.That(value.DungeonPlacementsPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+                case Winner.Assignments:
+                    Assert.That(value.RoomSlotAssignmentsPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+                    break;
+                case Winner.Floor:
+                    Assert.That(value.RoomSlotAssignmentsPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
+                    Assert.That(value.FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+                    break;
+                case Winner.Placements:
+                    Assert.That(value.RoomSlotAssignmentsPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
+                    Assert.That(value.FloorLayoutPresence, Is.EqualTo(RawLegacyRoutePresence.Absent));
+                    Assert.That(value.DungeonPlacementsPresence, Is.EqualTo(RawLegacyRoutePresence.Present));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(winner));
             }
         }
+        private static bool ContainsMember(string members, string memberName) =>
+            members.IndexOf("\"" + memberName + "\"", StringComparison.Ordinal) >= 0;
         private static TestCaseData Data(string id, int schema, Winner winner, string members, int rooms,
             string[] diagnostics = null, string[] categories = null, string[] options = null,
             LegacyRoomOriginKind semantics = LegacyRoomOriginKind.MigratedExplicitLegacyRoom) =>
