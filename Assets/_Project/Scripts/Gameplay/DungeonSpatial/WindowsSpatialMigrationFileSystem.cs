@@ -175,7 +175,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 (File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0;
         }
 
-        internal string ProbeSupportedVolume(string directoryPath)
+        public string ProbeSupportedVolume(string directoryPath)
         {
             string directory = NormalizePath(directoryPath);
             if (!Directory.Exists(directory) ||
