@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
     public sealed class ProductionSpatialContentBuildGateTests
     {
         private const string TestRoot = "Assets/_Project/Editor/DungeonSpatial/Tests/TempBuildGate";
+        private const string TestPlayerGuid = "01234567-89ab-cdef-0123-456789abcdef";
         private TextAsset manifest;
         private TextAsset catalog;
         private TextAsset english;
@@ -94,6 +95,56 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             Assert.That(observed, Is.SameAs(supplied));
             Assert.That(callback, Is.InstanceOf<BuildPlayerProcessor>());
             Assert.That(callback.callbackOrder, Is.EqualTo(-1000));
+        }
+
+        [Test]
+        public void BuildPreprocessorNormalBootstrapOnlyRemainsUnchangedAndPasses()
+        {
+            string[] supplied = BootstrapOnly();
+            string[] resolved = ProductionSpatialContentBuildPreprocessor.ResolveScenesForProductionValidation(
+                new BuildPlayerOptions { scenes = supplied, target = BuildTarget.StandaloneWindows64 });
+            Assert.That(resolved, Is.SameAs(supplied));
+            Assert.That(ProductionSpatialContentBuildGate.ValidateBuildScenes(resolved).Success, Is.True);
+        }
+
+        [Test]
+        public void BuildPreprocessorExactWindowsTestPlayerCompositionNormalizesWithoutMutatingInput()
+        {
+            string[] supplied = TestPlayerScenes();
+            string[] before = (string[])supplied.Clone();
+            string[] resolved = ProductionSpatialContentBuildPreprocessor.ResolveScenesForProductionValidation(
+                TestPlayerOptions(supplied));
+            CollectionAssert.AreEqual(before, supplied);
+            Assert.That(resolved, Is.Not.SameAs(supplied));
+            CollectionAssert.AreEqual(BootstrapOnly(), resolved);
+            Assert.That(ProductionSpatialContentBuildGate.ValidateBuildScenes(resolved).Success, Is.True);
+        }
+
+        [Test]
+        public void BuildPreprocessorTestPlayerStillRunsRecoveryInstalledAndBootstrapCompositionStages()
+        {
+            var calls = new List<string>();
+            string[] observed = null;
+            var gate = Gate(
+                () => Record(calls, "recovery"),
+                () => Record(calls, "installed"),
+                scenes => { observed = scenes; return Record(calls, "composition"); });
+            ProductionSpatialContentBuildPreprocessor.PrepareForBuild(gate, TestPlayerOptions(TestPlayerScenes()));
+            CollectionAssert.AreEqual(new[] { "recovery", "installed", "composition" }, calls);
+            CollectionAssert.AreEqual(BootstrapOnly(), observed);
+        }
+
+        [TestCaseSource(nameof(InvalidTestPlayerBuildOptions))]
+        public void BuildPreprocessorRejectsEveryInexactTestPlayerComposition(BuildPlayerOptions options,
+            string caseName)
+        {
+            string[] supplied = options.scenes;
+            string[] before = supplied == null ? null : (string[])supplied.Clone();
+            string[] resolved = ProductionSpatialContentBuildPreprocessor.ResolveScenesForProductionValidation(options);
+            Assert.That(resolved, Is.SameAs(supplied), caseName);
+            CollectionAssert.AreEqual(before, supplied, caseName);
+            Assert.That(ProductionSpatialContentBuildGate.ValidateBuildScenes(resolved).Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidBuildSceneComposition), caseName);
         }
 
         [Test]
@@ -607,6 +658,40 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
 
         private static TextAsset Load(string path) => AssetDatabase.LoadAssetAtPath<TextAsset>(path);
         private static string[] BootstrapOnly() => new[] { DevelopmentBuildUtility.BootstrapScenePath };
+        private static string TestInitializationScene() => "Assets/InitTestScene" + TestPlayerGuid + ".unity";
+        private static string[] TestPlayerScenes() => new[] {
+            TestInitializationScene(), DevelopmentBuildUtility.BootstrapScenePath };
+        private static BuildPlayerOptions TestPlayerOptions(string[] scenes) => new BuildPlayerOptions {
+            scenes = scenes, target = BuildTarget.StandaloneWindows64,
+            options = BuildOptions.IncludeTestAssemblies };
+
+        private static IEnumerable<TestCaseData> InvalidTestPlayerBuildOptions()
+        {
+            string init = TestInitializationScene();
+            string bootstrap = DevelopmentBuildUtility.BootstrapScenePath;
+            yield return Invalid(new BuildPlayerOptions { scenes = new[] { init, bootstrap },
+                target = BuildTarget.StandaloneWindows64 }, "missing-include-test-assemblies");
+            yield return Invalid(new BuildPlayerOptions { scenes = new[] { init, bootstrap },
+                target = BuildTarget.Android, options = BuildOptions.IncludeTestAssemblies }, "wrong-target");
+            yield return Invalid(TestPlayerOptions(new[] { "Assets/InitTestScenenot-a-guid.unity", bootstrap }),
+                "malformed-guid");
+            yield return Invalid(TestPlayerOptions(new[] { "Temp/InitTestScene" + TestPlayerGuid + ".unity", bootstrap }),
+                "outside-assets");
+            yield return Invalid(TestPlayerOptions(new[] { "Assets/InitTestSceneCopy" + TestPlayerGuid + ".unity", bootstrap }),
+                "similarly-named-arbitrary-scene");
+            yield return Invalid(TestPlayerOptions(new[] { init, DevelopmentBuildUtility.SampleScenePath }),
+                "bootstrap-missing");
+            yield return Invalid(TestPlayerOptions(new[] { bootstrap, init }), "reversed-order");
+            yield return Invalid(TestPlayerOptions(new[] { init, bootstrap, DevelopmentBuildUtility.SampleScenePath }),
+                "extra-third-scene");
+            yield return Invalid(TestPlayerOptions(new[] { bootstrap, bootstrap }), "duplicate-bootstrap");
+            yield return Invalid(TestPlayerOptions(new[] { init, init }), "duplicate-initialization");
+            yield return Invalid(TestPlayerOptions(new[] { DevelopmentBuildUtility.SampleScenePath, bootstrap }),
+                "ordinary-multi-scene");
+        }
+
+        private static TestCaseData Invalid(BuildPlayerOptions options, string name) =>
+            new TestCaseData(options, name).SetName("BuildPreprocessorRejects_" + name);
 
         private static ProductionSpatialContentBuildGate Gate(
             Func<ProductionSpatialBuildGateResult> recovery = null,

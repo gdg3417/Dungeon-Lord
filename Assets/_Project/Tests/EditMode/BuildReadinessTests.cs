@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DungeonBuilder.M0.EditorTools;
 using NUnit.Framework;
@@ -11,6 +12,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class BuildReadinessTests
     {
+        private const string WindowsQualificationDirectory = "Assets/_Project/Tests/PlayMode";
+        private const string WindowsQualificationAssemblyPath = WindowsQualificationDirectory +
+            "/DungeonLord.WindowsStandaloneQualification.asmdef";
+        private const string WindowsQualificationSourcePath = WindowsQualificationDirectory +
+            "/Gd66WindowsStandaloneQualificationTests.cs";
+
+        [Serializable]
+        private sealed class QualificationAssemblyDefinition
+        {
+            public string name;
+            public string[] references;
+            public string[] includePlatforms;
+            public string[] optionalUnityReferences;
+            public string[] defineConstraints;
+        }
+
+        [Test]
+        public void WindowsStandaloneQualificationAssembly_RemainsDiscoverableAndTestOnly()
+        {
+            Assert.That(File.Exists(WindowsQualificationAssemblyPath), Is.True);
+            Assert.That(File.Exists(WindowsQualificationSourcePath), Is.True);
+            QualificationAssemblyDefinition definition = JsonUtility.FromJson<QualificationAssemblyDefinition>(
+                File.ReadAllText(WindowsQualificationAssemblyPath));
+            Assert.That(definition, Is.Not.Null);
+            Assert.That(definition.name, Is.EqualTo("DungeonLord.WindowsStandaloneQualification"));
+            CollectionAssert.AreEqual(new[] { "Editor", "WindowsStandalone64" },
+                definition.includePlatforms);
+            CollectionAssert.AreEqual(new[] { "TestAssemblies" }, definition.optionalUnityReferences);
+            CollectionAssert.AreEqual(new[] { "UNITY_INCLUDE_TESTS" }, definition.defineConstraints);
+            Assert.That(definition.references ?? Array.Empty<string>(), Is.Empty,
+                "The isolated qualification assembly must not acquire compile-time production references.");
+            Assert.That(Directory.EnumerateFiles("Assets/_Project/Scripts", "*.cs",
+                SearchOption.AllDirectories).Any(path => File.ReadAllText(path).Contains(
+                    "DungeonLord.WindowsStandaloneQualification")), Is.False,
+                "Production runtime source must not reference the qualification test assembly.");
+            Assert.That(Path.GetDirectoryName(WindowsQualificationSourcePath).Replace('\\', '/'),
+                Is.EqualTo(Path.GetDirectoryName(WindowsQualificationAssemblyPath).Replace('\\', '/')));
+            string source = File.ReadAllText(WindowsQualificationSourcePath);
+            Assert.That(source, Does.Contain("Application.platform != RuntimePlatform.WindowsPlayer"));
+            Assert.That(source, Does.Contain("Assert.Ignore(\"gd66.test.windows_player_only\")"));
+            Assert.That(definition.optionalUnityReferences.Contains("TestAssemblies") &&
+                definition.defineConstraints.Contains("UNITY_INCLUDE_TESTS"), Is.True,
+                "Ordinary builds without IncludeTestAssemblies/UNITY_INCLUDE_TESTS must exclude qualification code.");
+        }
+
         [Test]
         public void PlayerSceneAllowlist_ContainsOnlyBootstrap()
         {

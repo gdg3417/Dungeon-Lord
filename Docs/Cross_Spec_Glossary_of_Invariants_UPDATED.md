@@ -1,6 +1,6 @@
 **Cross Spec Glossary of Invariants**
 
-**Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
+**Current Phase 2B6A status (2026-08-06):** PR #193 is merged; detached candidate construction and transaction/recovery are complete. Phase 2B6A adds a fail-closed Windows durability selector and activation preflight for Windows Editor/Standalone on local, nonredirected NTFS only. Live save schema remains **6** and schema 7 remains inactive. `SaveService`, `GameRoot`, native creation, canonical readers/writers, legacy writable authority, and ordinary gameplay remain unchanged; Phase 2B6B owns the final live activation.
 
 *Dungeon Builder, locked global invariants*
 

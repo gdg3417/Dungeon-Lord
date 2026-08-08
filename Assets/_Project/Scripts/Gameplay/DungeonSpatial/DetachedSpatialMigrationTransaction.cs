@@ -234,7 +234,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         IReadOnlyList<string> EnumerateFiles(string directoryPath, string searchPattern, int maximumResults);
         bool IsPathContainedWithoutRedirection(string directoryPath, string path);
         void MoveSameDirectoryAtomic(string sourcePath, string destinationPath);
-        void DeleteFile(string path);
     }
 
     public sealed class RuntimeSpatialMigrationFileSystem : ISpatialMigrationFileSystem
@@ -297,7 +296,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 throw new IOException();
             File.Move(sourcePath, destinationPath);
         }
-        public void DeleteFile(string path) => File.Delete(path);
         private static StringComparison PlatformPathComparison => Path.DirectorySeparatorChar == '\\'
             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     }
@@ -1209,7 +1207,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (fileSystem.Exists(quarantine))
             {
                 if (!Same(fileSystem.ReadAllBytes(quarantine), bytes)) return false;
-                fileSystem.DeleteFile(path);
+                fileSystem.ReplaceSameDirectoryAtomic(path, quarantine);
             }
             else fileSystem.MoveSameDirectoryAtomic(path, quarantine);
             fileSystem.FlushDirectory(directory);
