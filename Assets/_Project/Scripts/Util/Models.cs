@@ -2,6 +2,7 @@ using System;
 using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -1491,6 +1492,10 @@ namespace DungeonBuilder.M0
         public MvpDungeonPlacementState mvpDungeonPlacements = new MvpDungeonPlacementState();
         public MvpDungeonFloorLayoutState mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
         public MvpRoomSlotAssignmentCollection mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
+        // Schema 7 spatial authority. The legacy MVP route fields above remain serialized only as
+        // migration/rollback evidence once this marker is present.
+        public CanonicalSpatialAuthorityMarker canonicalSpatialAuthority;
+        public SavedSpatialFloor[] spatialFloors;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

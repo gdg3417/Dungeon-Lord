@@ -641,6 +641,16 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            // Until the production-owned save workload contract exists, schema-7 authority can
+            // only be loaded by focused fixtures. Never let that state fall through to a legacy
+            // writer and create dual authority.
+            if (CanonicalMvpRouteProjection.IsCanonical(Save))
+            {
+                bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                    "gd66.authority.contradictory_state");
+                return false;
+            }
+
             if (!MvpDungeonPlacementIds.TryGetCategoryForOption(optionId, out string optionCategoryId) ||
                 !string.Equals(optionCategoryId, categoryId, StringComparison.Ordinal))
             {
@@ -906,7 +916,7 @@ namespace DungeonBuilder.M0
 
         internal static void ApplyCleanMvpValidationBaseline(SaveData save)
         {
-            if (save == null)
+            if (save == null || CanonicalMvpRouteProjection.IsCanonical(save))
             {
                 return;
             }
