@@ -3,8 +3,10 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Reflection;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -29,6 +31,73 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(new[] { MvpDungeonPlacementIds.SkeletonOptionId }));
             Assert.That(route[1].AssignedTrapOptionIds,
                 Is.EqualTo(new[] { MvpDungeonPlacementIds.SpikeTrapOptionId }));
+        }
+
+        [Test]
+        public void ValidatedEmptyCanonicalAuthorityRejectsRunWithoutGameplayMutation()
+        {
+            SaveData save = PublishedEmptyProductionFixture(out RunSimulationConfig config);
+            save.totalTicks = 17;
+            save.structureRuntime.ManaReserve = 23d;
+            save.structureRuntime.Heat = 11d;
+            save.runHistory.NextRunSequence = 4;
+            string before = JsonUtility.ToJson(save);
+            var go = new GameObject("Gd66EmptyCanonicalRunGuard");
+            try
+            {
+                GameRoot root = go.AddComponent<GameRoot>();
+                SetRootField(root, "<Save>k__BackingField", save);
+                SetRootField(root, "_runSimulationService", new RunSimulationService(config));
+                SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
+
+                bool ran = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+
+                Assert.That(ran, Is.False);
+                Assert.That(root.LastRunRejectionReasonKey,
+                    Is.EqualTo(RunSimulationService.RouteNoEncounterKey));
+                Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+                Assert.That(save.runHistory.LatestOutcome, Is.Null);
+                Assert.That(save.runHistory.RecentOutcomes, Is.Empty);
+                Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(4));
+                Assert.That(save.totalTicks, Is.EqualTo(17));
+                Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(23d));
+                Assert.That(save.structureRuntime.Heat, Is.EqualTo(11d));
+                Assert.That(root.CurrentHeat, Is.EqualTo(11d));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void PopulatedValidatedCanonicalAuthorityContinuesThroughRunResolution()
+        {
+            SaveData save = PublishedProductionFixture(out RunSimulationConfig config);
+            var go = new GameObject("Gd66PopulatedCanonicalRun");
+            string savePath = null;
+            try
+            {
+                GameRoot root = go.AddComponent<GameRoot>();
+                var service = new SaveService(new SimpleLogger(false), new SaveConfig
+                { fileName = "gd66-populated-run-" + Guid.NewGuid().ToString("N") + ".json" });
+                savePath = service.SavePath;
+                SetRootField(root, "<Save>k__BackingField", save);
+                SetRootField(root, "<SaveService>k__BackingField", service);
+                SetRootField(root, "_runSimulationService", new RunSimulationService(config));
+                SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
+                LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(
+                    "[ERROR] Legacy save write rejected for canonical-looking authority.")));
+
+                bool ran = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+
+                Assert.That(ran, Is.True);
+                Assert.That(save.runHistory.LatestOutcome, Is.Not.Null);
+                Assert.That(save.runHistory.RecentOutcomes, Is.Not.Empty);
+                Assert.That(save.runHistory.NextRunSequence, Is.GreaterThan(1));
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(savePath) && File.Exists(savePath)) File.Delete(savePath);
+                UnityEngine.Object.DestroyImmediate(go);
+            }
         }
 
         [Test]
@@ -188,15 +257,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
-        private static SaveData PublishedProductionFixture()
+        internal static SaveData PublishedProductionFixture() =>
+            PublishedProductionFixture(out _);
+
+        internal static SaveData PublishedProductionFixture(out RunSimulationConfig config) =>
+            PublishedProductionFixture(DefaultPopulatedMembers, out config);
+
+        internal static SaveData PublishedProductionFixture(string members,
+            out RunSimulationConfig config)
         {
-            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
-                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
-                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"],\"TrapOptionIds\":[]," +
-                "\"LootNodeOptionIds\":[]}," +
-                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
-                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[\"placement.option.trap.spike\"]," +
-                "\"LootNodeOptionIds\":[]}],\"NextRevision\":3}";
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "runtime-projection", 6, members);
@@ -206,8 +275,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(validated.IsValid, Is.True);
             Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 out SaveData save, out string reason), Is.True, reason);
+            config = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             return save;
         }
+
+        internal static SaveData PublishedEmptyProductionFixture(out RunSimulationConfig config)
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
+            var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
+                fixture.Production, fixture.LegacyBytes, fixture.Limits);
+            DetachedCompleteSaveValidationResult validated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    fixture.Result.Attempt.Candidate.GetBytes(), context);
+            Assert.That(validated.IsValid, Is.True);
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated,
+                out SaveData save, out string reason), Is.True, reason);
+            config = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
+            return save;
+        }
+
+        private static void SetRootField(GameRoot root, string fieldName, object value) =>
+            typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(root, value);
+
+        private const string DefaultPopulatedMembers =
+            "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+            "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+            "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"],\"TrapOptionIds\":[]," +
+            "\"LootNodeOptionIds\":[]}," +
+            "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+            "\"MonsterOptionIds\":[],\"TrapOptionIds\":[\"placement.option.trap.spike\"]," +
+            "\"LootNodeOptionIds\":[]}],\"NextRevision\":3}";
 
         private static SaveData MalformedCanonicalLookingSave(MalformedKind kind)
         {

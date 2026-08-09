@@ -533,6 +533,8 @@ Before any changed-dependency or repaired-O attempt, the sole prior live attempt
 
 Phase 2B6B cannot activate until Save/Data, Performance, and QA approve one dedicated, explicitly injected production configuration contract for the save-specific validation workload. The existing spatial-content `validation_limits.json` is not this authority and cannot be copied, translated, inferred, or used as a fallback. No numeric values are approved by this working PR.
 
+`TryPublishValidated` is only a runtime projection seam; its `JsonUtility` materialization is not final persistence ownership. Before activation, the live canonical save session must retain the complete validated save bytes or equivalent lossless root/primary extension evidence and merge that evidence into every ordinary canonical save. Otherwise later canonical mutations could drop unknown members that migration preserved.
+
 The smallest proposed contract is one separately authored `save_spatial_migration_limits` versioned record with these semantically explicit positive fields:
 
 | Consumer | Required field | Unit / distinct meaning |

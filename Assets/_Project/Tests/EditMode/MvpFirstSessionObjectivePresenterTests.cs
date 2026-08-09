@@ -2,6 +2,7 @@
 using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Tests.EditMode;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -90,6 +91,66 @@ namespace DungeonBuilder.Tests.EditMode
                 MvpFirstSessionObjectivePresenter.Resolve(save, Config());
 
             Assert.That(summary.CurrentPathPlacementCount, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Resolve_CanonicalDuplicateRoomsAndMonstersCountDistinctRequiredCategories()
+        {
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.goblin\"],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}" +
+                "],\"NextRevision\":3}";
+            SaveData save = Gd66CanonicalRuntimeProjectionTests.PublishedProductionFixture(
+                members, out _);
+
+            MvpFirstSessionObjectiveSummary summary =
+                MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+
+            Assert.That(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, Config()).Length,
+                Is.EqualTo(4));
+            Assert.That(summary.CurrentPathPlacementCount, Is.EqualTo(2));
+            Assert.That(summary.PathComplete, Is.False);
+        }
+
+        [Test]
+        public void Resolve_CanonicalAllRequiredCategoriesRepresentedCompletesPathCoverage()
+        {
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
+                "\"TrapOptionIds\":[\"placement.option.trap.spike\"]," +
+                "\"LootNodeOptionIds\":[\"placement.option.loot_node.basic\"]}" +
+                "],\"NextRevision\":4}";
+            SaveData save = Gd66CanonicalRuntimeProjectionTests.PublishedProductionFixture(
+                members, out _);
+
+            MvpFirstSessionObjectiveSummary summary =
+                MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+
+            Assert.That(summary.CurrentPathPlacementCount,
+                Is.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
+            Assert.That(summary.PathComplete, Is.True);
+        }
+
+        [Test]
+        public void Resolve_CanonicalImplicitContainerDoesNotInventExplicitRoomCoverage()
+        {
+            const string members = "\"mvpDungeonPlacements\":{\"Entries\":[" +
+                "{\"CategoryId\":\"placement.category.monster\"," +
+                "\"OptionId\":\"placement.option.monster.skeleton\",\"Revision\":1}" +
+                "],\"NextRevision\":2}";
+            SaveData save = Gd66CanonicalRuntimeProjectionTests.PublishedProductionFixture(
+                members, out _);
+
+            MvpFirstSessionObjectiveSummary summary =
+                MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+
+            Assert.That(summary.CurrentPathPlacementCount, Is.EqualTo(1));
+            Assert.That(summary.PathComplete, Is.False);
+            Assert.That(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, Config())
+                .Any(value => value.CategoryId == MvpDungeonPlacementIds.RoomCategoryId), Is.False);
         }
 
         [Test]

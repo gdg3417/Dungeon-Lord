@@ -890,6 +890,11 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
+            {
+                return false;
+            }
+
             ApplyCleanMvpValidationBaseline(Save);
             _selectedFloorIndex = 0;
             _selectedSlotIndex = 0;
@@ -994,6 +999,12 @@ namespace DungeonBuilder.M0
                 return false;
             }
             route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+            if (authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
+                route.Length == 0)
+            {
+                rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
+                return false;
+            }
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
