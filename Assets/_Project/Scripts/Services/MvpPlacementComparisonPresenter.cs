@@ -52,7 +52,8 @@ namespace DungeonBuilder.M0
                 return preview;
             }
 
-            if (HasPersistedRoomSlotAssignments(save) || CanonicalMvpRouteProjection.IsCanonical(save))
+            if (HasPersistedRoomSlotAssignments(save) ||
+                CanonicalMvpRouteProjection.HasCanonicalLookingState(save))
             {
                 MvpDungeonFloorSlotLayout floor = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
                 int clampedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, floor);
@@ -75,7 +76,7 @@ namespace DungeonBuilder.M0
             }
 
             // Canonical authority never falls through to the legacy comparison overload.
-            if (CanonicalMvpRouteProjection.IsCanonical(save)) return preview;
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(save)) return preview;
             return Resolve(
                 save != null ? save.mvpDungeonFloorLayout : null,
                 save != null ? save.mvpDungeonPlacements : null,

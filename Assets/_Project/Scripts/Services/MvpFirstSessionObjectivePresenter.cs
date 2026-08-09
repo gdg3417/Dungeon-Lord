@@ -55,7 +55,11 @@ namespace DungeonBuilder.M0
             }
 
             summary.RuleResolved = true;
-            MvpDungeonPlacementEntry[] placements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);
+            MvpDungeonPlacementEntry[] placements =
+                CanonicalMvpRouteProjection.HasCanonicalLookingState(save)
+                    ? MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config)
+                    : MvpDungeonLayoutResolver.ResolveOrderedPlacements(
+                        save.mvpDungeonFloorLayout, save.mvpDungeonPlacements);
             summary.CurrentPathPlacementCount = placements.Length;
             summary.RequiredPathPlacementCount = MvpDungeonPlacementIds.OrderedCategoryIds.Length;
             summary.PathComplete = !summary.RequiredCompletePath || summary.CurrentPathPlacementCount >= summary.RequiredPathPlacementCount;

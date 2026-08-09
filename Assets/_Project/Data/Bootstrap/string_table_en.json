@@ -97,7 +97,7 @@
     },
     {
       "key": "ui.dev.structure_status",
-      "text": "Structure Sim — Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
+      "text": "Structure Sim \u2014 Slot F{0} S{1}, Structure: {2}, Heat Crisis: {3}"
     },
     {
       "key": "ui.banner.place_success",
@@ -193,11 +193,11 @@
     },
     {
       "key": "ui.dev.offline_summary_format",
-      "text": "Offline Summary — resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
+      "text": "Offline Summary \u2014 resolved={0} error={1} observedSeconds={2} clamped={3} wouldProcess={4} ruleSource={5}"
     },
     {
       "key": "ui.dev.research_pending_format",
-      "text": "Research Pending — pending={0} slot={1} project={2}"
+      "text": "Research Pending \u2014 pending={0} slot={1} project={2}"
     },
     {
       "key": "ui.dev.banner.heading",
@@ -377,7 +377,7 @@
     },
     {
       "key": "ui.dev.research_pending_validation_format",
-      "text": "Research Pending Validation — resolved={0} error={1} ruleSource={2}"
+      "text": "Research Pending Validation \u2014 resolved={0} error={1} ruleSource={2}"
     },
     {
       "key": "ui.dev.button.set_research_pending",
@@ -401,27 +401,27 @@
     },
     {
       "key": "ui.dev.research_progress_format",
-      "text": "Research Progress Preview — resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
+      "text": "Research Progress Preview \u2014 resolved={0} error={1} pending={2} slot={3} project={4} elapsedSeconds={5} delta={6:0.###} wouldComplete={7} ruleSource={8}"
     },
     {
       "key": "ui.dev.research_progress_state_format",
-      "text": "Research Progress State — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
+      "text": "Research Progress State \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} completionPending={7} matchesPending={8} ruleSource={9}"
     },
     {
       "key": "ui.dev.research_completion_eligibility_format",
-      "text": "Research Completion Eligibility — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Eligibility \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} remaining={8:0.###} eligible={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_pending_apply_format",
-      "text": "Research Completion Pending Apply — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
+      "text": "Research Completion Pending Apply \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} eligible={8} alreadyCompletionPending={9} wouldSetCompletionPending={10} wouldComplete={11} ruleSource={12}"
     },
     {
       "key": "ui.dev.research_completion_claim_readiness_format",
-      "text": "Research Completion Claim Readiness — resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
+      "text": "Research Completion Claim Readiness \u2014 resolved={0} error={1} pending={2} hasState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} readyForClaim={10} wouldComplete={11} wouldGrantRewards={12} wouldUnlockContent={13} wouldClearPending={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.completed_research_state_format",
-      "text": "Completed Research State — resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
+      "text": "Completed Research State \u2014 resolved={0} error={1} hasState={2} completedCount={3} lastCompletedProject={4} currentPendingProject={5} currentProgressProject={6} currentProjectAlreadyCompleted={7} wouldBlockClaimAsDuplicate={8} wouldGrantRewards={9} wouldUnlockContent={10} ruleSource={11}"
     },
     {
       "key": "ui.dev.button.claim_research_completion",
@@ -437,23 +437,23 @@
     },
     {
       "key": "ui.dev.research_completion_claim_apply_format",
-      "text": "Research Completion Claim Apply — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
+      "text": "Research Completion Claim Apply \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} readyForClaim={11} alreadyCompleted={12} wouldRecordCompletedResearch={13} wouldClearPending={14} wouldClearProgress={15} wouldGrantRewards={16} wouldUnlockContent={17} wouldChargeCosts={18} wouldProcessOfflineProgress={19} ruleSource={20}"
     },
     {
       "key": "ui.dev.research_status_presentation_format",
-      "text": "Research Status Presentation — state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
+      "text": "Research Status Presentation \u2014 state={0} pending={1} hasProgressState={2} hasCompletedState={3} slot={4} project={5} progress={6:0.###} required={7:0.###} completionPending={8} eligible={9} verificationRequired={10} readyToClaim={11} completed={12} blockedOrInvalid={13} statusKey={14} ruleSource={15}"
     },
     {
       "key": "ui.dev.research_status_safety_format",
-      "text": "Research Status Safety — canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Status Safety \u2014 canClaimProduction={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.dev.research_verification_boundary_format",
-      "text": "Research Verification Boundary — resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
+      "text": "Research Verification Boundary \u2014 resolved={0} error={1} pending={2} hasProgressState={3} hasCompletedState={4} slot={5} project={6} progress={7:0.###} required={8:0.###} completionPending={9} eligible={10} alreadyCompleted={11} verificationRequired={12} verificationAvailable={13} verificationSatisfied={14} canClaimProduction={15} verificationMode={16} ruleSource={17}"
     },
     {
       "key": "ui.dev.research_verification_safety_format",
-      "text": "Research Verification Safety — wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
+      "text": "Research Verification Safety \u2014 wouldCallServer={0} wouldGrantRewards={1} wouldUnlockContent={2} wouldChargeCosts={3} wouldProcessOfflineProgress={4}"
     },
     {
       "key": "ui.research.status.no_research",
@@ -501,7 +501,7 @@
     },
     {
       "key": "ui.mvp_loop.panel.heat_format",
-      "text": "Heat: {0:0.##} → {1:0.##} ({2}). {3}"
+      "text": "Heat: {0:0.##} \u2192 {1:0.##} ({2}). {3}"
     },
     {
       "key": "ui.mvp_loop.panel.research_format",
@@ -2381,7 +2381,7 @@
     },
     {
       "key": "ui.dev.player_research_authority_format",
-      "text": "Player Research Authority — state={0} canStart={1} canClaimLocalMvp={2} canClaimProduction={3} localAuthority={4} productionVerificationAvailable={5} wouldCallServer={6} feedbackKey={7}"
+      "text": "Player Research Authority \u2014 state={0} canStart={1} canClaimLocalMvp={2} canClaimProduction={3} localAuthority={4} productionVerificationAvailable={5} wouldCallServer={6} feedbackKey={7}"
     },
     {
       "key": "run.route.outcome.cleared",
@@ -2429,351 +2429,351 @@
     },
     {
       "key": "save.migration.spatial.gd66.preflight.platform_unsupported",
-      "text": "Runtime is neither Windows Editor nor Windows Standalone; retain schema 6 and retry only on a supported target."
+      "text": "This save can only be upgraded on a supported Windows installation. Your existing save was not changed."
     },
     {
       "key": "save.migration.spatial.gd66.preflight.path_invalid",
-      "text": "Active-save path is null/empty, non-normalized, malformed, unsupported by Path, or exceeds the approved absolute path bound; correct the path before retry."
+      "text": "The save location cannot be used safely. Choose a valid local save location and try again."
     },
     {
       "key": "save.migration.spatial.gd66.preflight.path_redirected",
-      "text": "Save containment fails, any existing component from the actual volume root through the save path is a reparse point, or GetVolumePathNameW resolves a mounted volume root different from the lexical drive root; select a local nonredirected directory before retry."
+      "text": "The save location is redirected or linked. Move the game to a supported local save location and try again."
     },
     {
       "key": "save.migration.spatial.gd66.preflight.volume_unsupported",
-      "text": "The actual destination volume is not a fixed drive or its filesystem name is not ordinal-ignore-case NTFS; move the save to a qualified local NTFS volume before retry."
+      "text": "The save must be on a supported local NTFS drive before it can be upgraded."
     },
     {
       "key": "save.migration.spatial.gd66.preflight.native_probe_failed",
-      "text": "A required Windows volume/path native probe fails or capability evaluation throws after path parsing; retain schema 6 and retry only after the OS/filesystem error is resolved."
+      "text": "The game could not verify that this save location supports a safe upgrade. Resolve the drive or folder problem and try again."
     },
     {
       "key": "save.migration.spatial.gd66.payload.unreadable",
-      "text": "JSON bytes cannot be parsed."
+      "text": "The save could not be read. It was not replaced or changed."
     },
     {
       "key": "save.migration.spatial.gd66.payload.ambiguous_envelope",
-      "text": "Payload cannot be safely classified wrapped/unwrapped."
+      "text": "The save format could not be identified safely. The save was not changed."
     },
     {
       "key": "save.migration.spatial.gd66.payload.missing_schema",
-      "text": "Root-shaped payload omits schema."
+      "text": "The save is missing required format information and cannot be upgraded safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.invalid_schema",
-      "text": "Root-shaped payload has wrong or malformed schema."
+      "text": "The save contains invalid format information and cannot be upgraded safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.null_primary",
-      "text": "Wrapped root primary is explicitly null."
+      "text": "The save is missing its primary game state and cannot be opened safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.unknown_member_unpreservable",
-      "text": "Unknown source member cannot be losslessly retained."
+      "text": "The save contains data that cannot be preserved safely during the upgrade."
     },
     {
       "key": "save.migration.spatial.gd66.success.recovered_original",
-      "text": "Verified O restored after interruption/failure."
+      "text": "The original save was recovered successfully. You can continue playing."
     },
     {
       "key": "save.migration.spatial.gd66.route.duplicate_room_slot",
-      "text": "Duplicate assignment floor/room key."
+      "text": "More than one room claims the same route position. Repair is required before the save can be upgraded."
     },
     {
       "key": "save.migration.spatial.gd66.route.duplicate_floor_node_revision",
-      "text": "Floor-node key/slot has tied greatest revision."
+      "text": "The dungeon route has conflicting floor changes. Repair is required before upgrade."
     },
     {
       "key": "save.migration.spatial.gd66.route.duplicate_placement_revision",
-      "text": "Placement category has tied greatest revision."
+      "text": "The dungeon contents have conflicting placement changes. Repair is required before upgrade."
     },
     {
       "key": "save.migration.spatial.gd66.route.record_out_of_range",
-      "text": "Floor, room, node, slot, revision, or sequence is out of range."
+      "text": "The dungeon route contains a position or sequence outside the supported range."
     },
     {
       "key": "save.migration.spatial.gd66.route.gap",
-      "text": "Room 1 exists without Room 0."
+      "text": "The dungeon route has a later room without the required earlier room."
     },
     {
       "key": "save.migration.spatial.gd66.content.outcome_mismatch",
-      "text": "Canonical projection cannot preserve effective run inputs/semantics exactly."
+      "text": "The upgraded dungeon would not preserve the current run behavior, so the upgrade was stopped."
     },
     {
       "key": "save.migration.spatial.gd66.content.invalid_legacy_room",
-      "text": "Explicit room ID is blank, malformed, or category-wrong."
+      "text": "The save contains an invalid room selection that must be repaired before upgrade."
     },
     {
       "key": "save.migration.spatial.gd66.content.missing_production_room",
-      "text": "Mapped production room definition is absent."
+      "text": "A room required by this save is missing from the installed game data."
     },
     {
       "key": "save.migration.spatial.gd66.content.invalid_production_room",
-      "text": "Mapped production room definition fails validation."
+      "text": "A room required by this save is invalid in the installed game data."
     },
     {
       "key": "save.migration.spatial.gd66.content.invalid_option",
-      "text": "Content option is blank, malformed, unknown, or lacks required config."
+      "text": "The save contains an unknown or invalid monster, trap, or loot selection."
     },
     {
       "key": "save.migration.spatial.gd66.content.category_mismatch",
-      "text": "Content option does not belong to recorded category."
+      "text": "A saved dungeon item is assigned to the wrong content category."
     },
     {
       "key": "save.migration.spatial.gd66.content.room_capacity_exceeded",
-      "text": "Per-room category count exceeds mapped room capacity."
+      "text": "A saved room contains more content than its supported capacity."
     },
     {
       "key": "save.migration.spatial.gd66.content.duplicate_assignment",
-      "text": "Assignment ID or room/category/sequence duplicates."
+      "text": "The save contains duplicate room-content assignments."
     },
     {
       "key": "save.migration.spatial.gd66.content.room_semantics_invalid",
-      "text": "Room semantics missing, duplicated, or inconsistent with frozen projection."
+      "text": "The saved room origin information is missing or contradictory."
     },
     {
       "key": "save.migration.spatial.gd66.floor.missing_definition",
-      "text": "Saved/profile floor definition is absent."
+      "text": "A dungeon floor required by this save is missing from the installed game data."
     },
     {
       "key": "save.migration.spatial.gd66.floor.invalid_definition",
-      "text": "Target floor definition fails production validation."
+      "text": "A dungeon floor required by this save is invalid in the installed game data."
     },
     {
       "key": "save.migration.spatial.gd66.floor.index_mismatch",
-      "text": "Saved/profile index differs from authored floor index."
+      "text": "A saved dungeon floor does not match its configured floor position."
     },
     {
       "key": "save.migration.spatial.gd66.floor.duplicate_binding",
-      "text": "Floor instance ID or index duplicates."
+      "text": "More than one saved floor claims the same dungeon position."
     },
     {
       "key": "save.migration.spatial.gd66.profile.missing",
-      "text": "No profile applies to raw source schema."
+      "text": "No supported layout upgrade profile matches this save."
     },
     {
       "key": "save.migration.spatial.gd66.profile.duplicate",
-      "text": "Profile identity/version duplicates or applicability overlaps."
+      "text": "Conflicting layout upgrade profiles match this save."
     },
     {
       "key": "save.migration.spatial.gd66.profile.invalid",
-      "text": "Profile structure, mapping, geometry, socket, total, or reference is invalid."
+      "text": "The selected layout upgrade profile is invalid."
     },
     {
       "key": "save.migration.spatial.gd66.profile.version_mismatch",
-      "text": "Journal/source requires unsupported profile version."
+      "text": "The exact layout upgrade profile version required by this save is unavailable."
     },
     {
       "key": "save.migration.spatial.gd66.id.malformed",
-      "text": "Persistent ID violates exact grammar."
+      "text": "The save contains an invalid persistent dungeon identifier."
     },
     {
       "key": "save.migration.spatial.gd66.id.collision",
-      "text": "Any canonical persistent ID collides."
+      "text": "The save contains duplicate persistent dungeon identifiers."
     },
     {
       "key": "save.migration.spatial.gd66.geometry.bounds",
-      "text": "Occupied tile lies outside profile target floor."
+      "text": "Part of the dungeon layout lies outside the supported floor area."
     },
     {
       "key": "save.migration.spatial.gd66.geometry.overlap",
-      "text": "Physical footprints overlap."
+      "text": "Dungeon structures overlap in the upgraded layout."
     },
     {
       "key": "save.migration.spatial.gd66.geometry.capacity",
-      "text": "Tile union exceeds capacity or expected total differs."
+      "text": "The upgraded dungeon layout exceeds the floor capacity."
     },
     {
       "key": "save.migration.spatial.gd66.geometry.socket",
-      "text": "Connection point/socket type/facing is incompatible."
+      "text": "Dungeon connections do not fit together correctly."
     },
     {
       "key": "save.migration.spatial.gd66.geometry.adjacency",
-      "text": "Direct-doorway endpoints are not adjacent."
+      "text": "Connected dungeon spaces are not positioned next to each other."
     },
     {
       "key": "save.migration.spatial.gd66.graph.endpoint",
-      "text": "Entrance/completion endpoint missing, duplicate, or wrong kind."
+      "text": "The dungeon route is missing a valid entrance or completion point."
     },
     {
       "key": "save.migration.spatial.gd66.graph.reachability",
-      "text": "Required semantic route is unreachable."
+      "text": "The required dungeon route cannot reach its completion point."
     },
     {
       "key": "save.migration.spatial.gd66.graph.terminal",
-      "text": "Completion-terminal semantics are invalid."
+      "text": "The dungeon completion point has invalid route connections."
     },
     {
       "key": "save.migration.spatial.gd66.graph.ordering",
-      "text": "Candidate is not canonical/round-trip stable."
+      "text": "The dungeon route cannot be saved in a stable order."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.backup_failed",
-      "text": "B creation, flush, readback, hash, or parse verification fails."
+      "text": "A verified safety backup could not be created. The original save was not changed."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.journal_malformed_with_verified_original",
-      "text": "Exactly one malformed live journal exists, O is independently verified, and no more precise stage/hash/path condition applies."
+      "text": "An interrupted upgrade record is damaged, but the original save is verified and remains protected."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.candidate_invalid",
-      "text": "Complete C serialization/deserialization or aggregate validation fails."
+      "text": "The upgraded save did not pass validation. The original save remains protected."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.commit_failed",
-      "text": "Single atomic replacement fails."
+      "text": "The upgraded save could not be installed safely. The original save remains protected."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.durability_failed",
-      "text": "Committed bytes fail durable reread/hash/semantic verification."
+      "text": "The upgraded save could not be verified after writing. Recovery is required before play can continue."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.recovery_failed",
-      "text": "Neither verified O nor complete verified C can be restored."
+      "text": "Neither the original nor upgraded save could be recovered safely. Gameplay is blocked to protect your data."
     },
     {
       "key": "save.migration.spatial.gd66.authority.contradictory_state",
-      "text": "Schema, marker, canonical fields, or writer evidence disagree."
+      "text": "Conflicting dungeon layout data was found. Gameplay is blocked to protect the save."
     },
     {
       "key": "save.migration.spatial.gd66.payload.missing_schema_version",
-      "text": "Wrapped/root-shaped payload omits schemaVersion."
+      "text": "The save is missing its version information and cannot be upgraded safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.nonintegral_schema_version",
-      "text": "schemaVersion is not an integral JSON number."
+      "text": "The save has invalid version information and cannot be upgraded safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.unsupported_legacy_version",
-      "text": "Source version is below/within legacy range but no migration contract supports it."
+      "text": "This save version is not supported by the available upgrade path."
     },
     {
       "key": "save.migration.spatial.gd66.payload.newer_than_application",
-      "text": "Source save version is greater than application latest supported version."
+      "text": "This save was created by a newer game version. Update the game before opening it."
     },
     {
       "key": "save.migration.spatial.gd66.payload.missing_primary",
-      "text": "Wrapped root omits primary."
+      "text": "The save is missing its primary game state and cannot be opened safely."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.input_fingerprint_mismatch",
-      "text": "Journal descriptor bytes do not hash to stored fingerprint or expected attempt."
+      "text": "The save changed during upgrade verification. The upgrade was stopped without replacing it."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_input_missing",
-      "text": "Any descriptor-pinned required input is unavailable."
+      "text": "Required game data for this save upgrade is unavailable. Install the complete game data and try again."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_input_hash_mismatch",
-      "text": "Pinned relevant config/string/serializer input exists but canonical hash or version differs."
+      "text": "Required game data no longer matches this upgrade attempt. Restore the matching game version and try again."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_profile_missing",
-      "text": "Exact pinned profile ID/version/hash is unavailable."
+      "text": "The exact layout upgrade profile required by this save is unavailable."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_profile_hash_mismatch",
-      "text": "Pinned profile identity exists but canonical hash differs."
+      "text": "The layout upgrade profile changed during an unfinished upgrade. Restore the matching game version and try again."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_spatial_input_missing",
-      "text": "Pinned production manifest or catalog bytes are unavailable."
+      "text": "Required dungeon layout data for this upgrade is unavailable."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.pinned_spatial_input_hash_mismatch",
-      "text": "Pinned manifest or catalog canonical hash differs."
+      "text": "Dungeon layout data changed during an unfinished upgrade. Restore the matching game version and try again."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.active_payload_unknown",
-      "text": "Active hash matches neither descriptor O nor expected C."
+      "text": "The active save does not match the verified original or upgraded save. Gameplay is blocked to prevent data loss."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.no_trusted_active_payload",
-      "text": "Neither O, B, staged C, nor active C can be trusted."
+      "text": "No verified playable save could be established. Gameplay is blocked to prevent data loss."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.rollback_source_missing",
-      "text": "Before finalization B is invalid and no separate verified O exists; provisional C may only finish with all exact live evidence."
+      "text": "The original save cannot be restored, and the upgrade cannot yet be finalized safely."
     },
     {
       "key": "save.migration.spatial.gd66.layout_contract.selection_missing",
-      "text": "Brand-new save release configuration has no Active canonical layout-contract selection for target schema."
+      "text": "The game is missing the configured starter layout for new saves."
     },
     {
       "key": "save.migration.spatial.gd66.layout_contract.selection_duplicate",
-      "text": "Brand-new save release configuration has multiple Active layout-contract selections for target schema."
+      "text": "The game has conflicting starter layout selections and cannot create a safe new save."
     },
     {
       "key": "save.migration.spatial.gd66.marker.layout_contract_missing",
-      "text": "Canonical marker omits/nonpositively encodes CanonicalLayoutContractVersion."
+      "text": "The save is missing its dungeon layout contract version and cannot be opened safely."
     },
     {
       "key": "save.migration.spatial.gd66.marker.layout_contract_unsupported",
-      "text": "Persisted positive layout-contract version is unsupported until explicit target/content migration."
+      "text": "This dungeon layout version is not supported by the installed game version."
     },
     {
       "key": "save.migration.spatial.gd66.starter_profile.marker_mismatch",
-      "text": "Selected starter profile target schema/layout-contract key differs from persisted marker."
+      "text": "The save\u2019s dungeon layout version does not match its starter layout profile."
     },
     {
       "key": "save.migration.spatial.gd66.starter_profile.missing",
-      "text": "No Active starter profile matches target schema/layout-contract key."
+      "text": "The required starter dungeon layout is unavailable."
     },
     {
       "key": "save.migration.spatial.gd66.starter_profile.duplicate",
-      "text": "Multiple Active starter profiles match one target key."
+      "text": "Conflicting starter dungeon layouts were found."
     },
     {
       "key": "save.migration.spatial.gd66.starter_profile.invalid",
-      "text": "Starter profile/shared-geometry reference or production validation fails."
+      "text": "The configured starter dungeon layout is invalid."
     },
     {
       "key": "save.migration.spatial.gd66.starter_profile.version_mismatch",
-      "text": "Required starter layout-contract/profile version is unsupported."
+      "text": "The required starter dungeon layout version is not supported."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.multiple_live_attempts",
-      "text": "More than one fully valid non-finalized journal binds to one normalized active save path."
+      "text": "More than one unfinished save upgrade was found. Gameplay is blocked until the save can be repaired safely."
     },
     {
       "key": "save.migration.spatial.gd66.transaction.path_invalid",
-      "text": "Generated relative filename/path violates grammar, normalization, containment, platform length, or same-directory rules."
+      "text": "A required save-upgrade file location is unsafe. The active save was not changed."
     },
     {
       "key": "save.migration.spatial.gd66.write.native_save_persist_failed",
-      "text": "No-file canonical first persistence fails; no active save exists."
+      "text": "The new save could not be created safely. No unsaved dungeon state was activated."
     },
     {
       "key": "save.migration.spatial.gd66.write.unsupported_room_selection",
-      "text": "Canonical writer/UI attempts unsupported Narrow Hall."
+      "text": "Narrow Hall is not supported in the new dungeon layout and was not placed."
     },
     {
       "key": "save.migration.spatial.gd66.write.first_write_validation_failed",
-      "text": "Detached canonical first-write candidate fails validation."
+      "text": "The dungeon change could not be validated and was not applied."
     },
     {
       "key": "save.migration.spatial.gd66.write.atomic_save_failed",
-      "text": "Canonical mutation durable atomic save fails; prior C retained."
+      "text": "The dungeon change could not be saved safely. Your previous dungeon remains unchanged."
     },
     {
       "key": "save.migration.spatial.gd66.write.room_removal_has_contents",
-      "text": "Room removal requested while assignments remain."
+      "text": "Remove this room\u2019s monsters, traps, and loot before removing the room."
     },
     {
       "key": "save.migration.spatial.gd66.write.capacity_reduction_invalid",
-      "text": "Replacement would make retained contents exceed capacity."
+      "text": "This change would leave the room over capacity. Remove some room contents first."
     },
     {
       "key": "save.migration.spatial.gd66.content.migration_blocked_narrow_hall",
-      "text": "Legacy O contains effective Narrow Hall with no production room mapping."
+      "text": "Replace the Narrow Hall with a Basic Room, save the repair, and try the upgrade again."
     },
     {
       "key": "save.migration.spatial.gd66.payload.invalid_primary",
-      "text": "Wrapped root has a present, non-null primary whose JSON value is not an object."
+      "text": "The save contains invalid primary game state and cannot be opened safely."
     },
     {
       "key": "save.migration.spatial.gd66.payload.workload_exceeded",
-      "text": "Detached raw classification exceeds a caller-supplied input, nesting, per-object member, per-array element, per-string byte, or total scan-work limit."
+      "text": "The save is too large or complex to verify safely. The save was not changed."
     }
   ]
 }

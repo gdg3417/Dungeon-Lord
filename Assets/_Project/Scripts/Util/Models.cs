@@ -1496,6 +1496,7 @@ namespace DungeonBuilder.M0
         // migration/rollback evidence once this marker is present.
         public CanonicalSpatialAuthorityMarker canonicalSpatialAuthority;
         public SavedSpatialFloor[] spatialFloors;
+        [NonSerialized] internal DetachedCanonicalSpatialSaveState validatedCanonicalSpatialState;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

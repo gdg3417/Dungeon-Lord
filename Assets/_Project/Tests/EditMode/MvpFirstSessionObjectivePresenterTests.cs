@@ -80,6 +80,19 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_LegacySchema6PathCountRemainsFrozenLegacyProjection()
+        {
+            SaveData save = SaveWithPlacements(3);
+            int expected = MvpDungeonLayoutResolver.ResolveOrderedPlacements(
+                save.mvpDungeonFloorLayout, save.mvpDungeonPlacements).Length;
+
+            MvpFirstSessionObjectiveSummary summary =
+                MvpFirstSessionObjectivePresenter.Resolve(save, Config());
+
+            Assert.That(summary.CurrentPathPlacementCount, Is.EqualTo(expected));
+        }
+
+        [Test]
         public void Resolve_RunObservedAndLootProgress_SumsRecoveredLootAcrossRuns()
         {
             SaveData save = SaveWithPlacements(MvpDungeonPlacementIds.OrderedCategoryIds.Length);

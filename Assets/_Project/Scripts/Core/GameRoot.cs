@@ -641,10 +641,9 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            // Until the production-owned save workload contract exists, schema-7 authority can
-            // only be loaded by focused fixtures. Never let that state fall through to a legacy
-            // writer and create dual authority.
-            if (CanonicalMvpRouteProjection.IsCanonical(Save))
+            // Until the production-owned save workload contract and canonical writer exist,
+            // canonical-looking state must never fall through to a legacy writer.
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
             {
                 bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
                     "gd66.authority.contradictory_state");
@@ -916,7 +915,7 @@ namespace DungeonBuilder.M0
 
         internal static void ApplyCleanMvpValidationBaseline(SaveData save)
         {
-            if (save == null || CanonicalMvpRouteProjection.IsCanonical(save))
+            if (save == null || CanonicalMvpRouteProjection.HasCanonicalLookingState(save))
             {
                 return;
             }
@@ -985,6 +984,15 @@ namespace DungeonBuilder.M0
             route = Array.Empty<MvpOrderedRouteRoom>();
             rejectionReasonKey = string.Empty;
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null) return false;
+            CanonicalMvpRouteProjectionResult authority =
+                CanonicalMvpRouteProjection.Inspect(Save, _runSimulationService.Config);
+            if (authority.AuthorityState ==
+                CanonicalMvpRuntimeAuthorityState.ContradictoryCanonical)
+            {
+                rejectionReasonKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                    authority.Reason);
+                return false;
+            }
             route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
             {

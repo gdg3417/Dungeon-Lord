@@ -30,7 +30,8 @@ namespace DungeonBuilder.M0
                 root.primary.dungeonLayout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
             }
 
-            bool canonicalSpatialAuthority = root.primary.canonicalSpatialAuthority != null;
+            bool canonicalSpatialAuthority =
+                CanonicalMvpRouteProjection.HasCanonicalLookingState(root.primary);
 
             // Canonical saves must never revive or normalize the three legacy writable models.
             // They remain untouched as migration/rollback evidence; normalization is

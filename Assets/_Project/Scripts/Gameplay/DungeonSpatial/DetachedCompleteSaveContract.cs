@@ -109,15 +109,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCompleteSaveValidationResult
     {
         internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason,
-            int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null)
+            int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null,
+            bool currentTargetValidated = false)
         { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason;
-          LayoutContractVersion = layoutContractVersion; State = state; }
+          LayoutContractVersion = layoutContractVersion; State = state;
+          CurrentTargetValidated = currentTargetValidated; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
         public string Reason { get; }
         private byte[] Bytes { get; }
         internal int? LayoutContractVersion { get; }
         internal DetachedCanonicalSpatialSaveState State { get; }
+        internal bool CurrentTargetValidated { get; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -134,7 +137,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 context.Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
-                result.LayoutContractVersion.Value ? result : Failure();
+                result.LayoutContractVersion.Value
+                ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
+                    result.LayoutContractVersion, result.State, true)
+                : Failure();
         }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,

@@ -1369,9 +1369,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string expectedCandidateSha256 = null)
         {
             if (productionContent == null) return false;
-            var completeLimits = new CanonicalSpatialSerializationLimits(limits,
-                new CanonicalSpatialSaveWorkloadLimits(limits.MaximumCollectionRecords,
-                    limits.MaximumCollectionRecords));
+            CanonicalSpatialSerializationLimits completeLimits = recoveryContext.Limits;
             if (descriptor != null)
             {
                 return recoveryContext.TryCreateUnfinishedValidationContext(descriptor,

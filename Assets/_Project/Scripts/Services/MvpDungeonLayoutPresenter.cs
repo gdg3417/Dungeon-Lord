@@ -36,7 +36,7 @@ namespace DungeonBuilder.M0
 
         public static string BuildLayoutText(SaveData save, RunSimulationConfig config, string selectedPlacementCategoryId, Func<string, string, string> localize)
         {
-            bool canonical = CanonicalMvpRouteProjection.IsCanonical(save);
+            bool canonical = CanonicalMvpRouteProjection.HasCanonicalLookingState(save);
             MvpDungeonFloorLayoutState layout = canonical ? null : save?.mvpDungeonFloorLayout;
             MvpDungeonPlacementState legacyPlacements = canonical ? null : save?.mvpDungeonPlacements;
             MvpDungeonPlacementEntry[] resolvedPlacements = canonical

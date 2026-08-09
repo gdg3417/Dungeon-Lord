@@ -33,5 +33,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Gd66MigrationReasonRegistry.PlayerLocalizationKey(
                 "gd66.diagnostic.canonical_write_noop"), Is.Empty);
         }
+
+        [Test]
+        public void PlayerMessagesDoNotExposeInternalMigrationNotation()
+        {
+            string path = Path.Combine(Application.dataPath,
+                "_Project/Data/Bootstrap/string_table_en.json");
+            StringEntry[] entries = JsonUtility.FromJson<StringTable>(File.ReadAllText(path)).entries
+                .Where(entry => entry != null && entry.key != null && entry.key.StartsWith(
+                    Gd66MigrationReasonRegistry.PlayerLocalizationPrefix,
+                    StringComparison.Ordinal)).ToArray();
+
+            foreach (StringEntry entry in entries)
+            {
+                Assert.That(entry.text, Does.Not.Contain("JSON"), entry.key);
+                Assert.That(entry.text, Does.Not.Contain("FileRename"), entry.key);
+                Assert.That(entry.text, Does.Not.Contain(" O "), entry.key);
+                Assert.That(entry.text, Does.Not.Contain(" B "), entry.key);
+                Assert.That(entry.text, Does.Not.Contain(" C "), entry.key);
+            }
+        }
     }
 }

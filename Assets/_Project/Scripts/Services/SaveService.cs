@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
@@ -90,6 +91,14 @@ namespace DungeonBuilder.M0
             if (data == null)
             {
                 _logger.Error("Save called with null data.");
+                return;
+            }
+
+            // The legacy serializer is not a schema-7 persistence boundary. Until activation,
+            // never rewrite canonical-looking bytes through JsonUtility.
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(data))
+            {
+                _logger.Error("Legacy save write rejected for canonical-looking authority.");
                 return;
             }
 
