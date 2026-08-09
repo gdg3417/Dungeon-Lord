@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -64,43 +66,64 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveData runHistorySave = RepresentativeSaveWithTenPersistedRuns();
             AddSerializedSave(rows, "representative-ten-run-history", runHistorySave);
 
+            ContentBootstrap bootstrap = ResearchBootstrap();
             SaveData pendingResearch = RepresentativeSave();
-            pendingResearch.researchPending = new ResearchPendingState
-            { SlotId = "research.slot.primary", ProjectId = "research.project.analysis" };
+            pendingResearch.researchPending = Pending(bootstrap);
+            Assert.That(ResearchPendingResolver.Resolve(pendingResearch.researchPending,
+                bootstrap.researchPendingScaffold).RuleResolved, Is.True);
             AddSerializedSave(rows, "research-pending", pendingResearch);
 
             SaveData activeResearch = RepresentativeSave();
-            activeResearch.researchProgress = new ResearchProgressState
-            {
-                SlotId = "research.slot.primary", ProjectId = "research.project.analysis",
-                ProgressUnits = 1d, CompletionPending = false,
-                RuleSourceIdUsed = "research.rule.active_progress"
-            };
+            activeResearch.researchPending = Pending(bootstrap);
+            activeResearch.researchProgress = Progress(bootstrap,
+                bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / 2d, false);
+            Assert.That(ResearchProgressStateResolver.Resolve(activeResearch.researchPending,
+                activeResearch.researchProgress).RuleResolved, Is.True);
+            ResearchCompletionEligibilitySummary activeEligibility =
+                ResearchCompletionEligibilityResolver.Resolve(activeResearch.researchPending,
+                    activeResearch.researchProgress, bootstrap.researchCompletionEligibilityScaffold);
+            Assert.That(activeEligibility.RuleResolved, Is.True);
+            Assert.That(activeEligibility.EligibleForCompletion, Is.False);
             AddSerializedSave(rows, "research-active-progress", activeResearch);
 
             SaveData completionPending = RepresentativeSave();
-            completionPending.researchProgress = new ResearchProgressState
-            {
-                SlotId = "research.slot.primary", ProjectId = "research.project.analysis",
-                ProgressUnits = 1d, CompletionPending = true,
-                RuleSourceIdUsed = "research.rule.completion_pending"
-            };
+            completionPending.researchPending = Pending(bootstrap);
+            completionPending.researchProgress = Progress(bootstrap,
+                bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits, true);
+            ResearchCompletionClaimReadinessSummary readiness =
+                ResearchCompletionClaimReadinessResolver.Resolve(completionPending.researchPending,
+                    completionPending.researchProgress, bootstrap.researchCompletionEligibilityScaffold);
+            Assert.That(readiness.RuleResolved, Is.True);
+            Assert.That(readiness.ReadyForClaim, Is.True);
             AddSerializedSave(rows, "research-completion-pending", completionPending);
 
             SaveData completed = RepresentativeSave();
             completed.completedResearch = new CompletedResearchState
             {
-                ProjectIds = new[] { "research.project.analysis" },
-                LastCompletedProjectId = "research.project.analysis",
-                LastCompletionRuleSourceId = "research.rule.claim"
+                ProjectIds = new[] { bootstrap.researchPendingScaffold.projectId },
+                LastCompletedProjectId = bootstrap.researchPendingScaffold.projectId,
+                LastCompletionRuleSourceId = bootstrap.researchCompletionClaimScaffold.ruleSourceId
             };
-            completed.completedObjectives = new CompletedObjectiveState
-            {
-                ObjectiveIds = new[] { "objective.mvp.first_session" },
-                LastCompletedObjectiveId = "objective.mvp.first_session",
-                LastCompletionRuleSourceId = "objective.rule.first_session"
-            };
+            completed.completedObjectives = CompletedObjective();
+            Assert.That(CompletedResearchStateResolver.Resolve(completed.completedResearch)
+                .RuleResolved, Is.True);
             AddSerializedSave(rows, "research-and-objective-completed", completed);
+
+            SaveData activeHighWater = RepresentativeSaveWithTenPersistedRuns();
+            activeHighWater.researchPending = Pending(bootstrap);
+            activeHighWater.researchProgress = Progress(bootstrap,
+                bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / 2d, false);
+            Assert.That(ResearchProgressStateResolver.Resolve(activeHighWater.researchPending,
+                activeHighWater.researchProgress).RuleResolved, Is.True);
+            AddSerializedSave(rows, "full-save-high-water-active-research", activeHighWater);
+
+            SaveData completedHighWater = RepresentativeSaveWithTenPersistedRuns();
+            completedHighWater.completedResearch = completed.completedResearch;
+            completedHighWater.completedObjectives = CompletedObjective();
+            Assert.That(CompletedResearchStateResolver.Resolve(completedHighWater.completedResearch)
+                .RuleResolved, Is.True);
+            AddSerializedSave(rows, "full-save-high-water-completed-research-objective",
+                completedHighWater);
 
             const string unknownJson = "{\"rootBefore\":[1,{\"x\":true}],\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"saveVersion\":6,\"unknownPrimary\":{\"note\":\"preserve\"}},\"rootAfter\":false}";
@@ -155,7 +178,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             rows.Add(MeasureArtifact("restoration-intent", restoration));
 
             foreach (string row in rows) TestContext.Progress.WriteLine("GD66_LIMIT_MEASUREMENT " + row);
-            Assert.That(rows.Count, Is.EqualTo(27));
+            Assert.That(rows.Count, Is.EqualTo(29));
         }
 
         [Test]
@@ -195,23 +218,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 saveVersion = 6, contentVersion = "gd66-measurement",
                 createdUtcUnix = 1, lastSavedUtcUnix = 2, lastPausedUtcUnix = 3,
                 lastResumedUtcUnix = 4, totalTicks = 5, lastKnownAppState = "Paused",
-                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 4),
+                dungeonLayout = PopulatedDungeonLayout(),
                 structureRuntime = new StructureRuntimeState { ManaReserve = 25d, Heat = 7d },
-                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
-                {
-                    NextRevision = 5,
-                    Rooms = new List<MvpRoomSlotAssignmentState>
-                    {
-                        new MvpRoomSlotAssignmentState
-                        {
-                            FloorIndex = 0, RoomIndex = 0,
-                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
-                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId },
-                            TrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
-                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
-                        }
-                    }
-                },
+                mvpRoomSlotAssignments = MaximumContentR2Assignments(),
                 lastOfflineSummary = new OfflineSummary
                 {
                     RuleResolved = true, OfflineSecondsObserved = 60,
@@ -232,8 +241,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(configAsset.text);
             LootConfig loot = JsonUtility.FromJson<LootConfig>(lootAsset.text);
             var simulation = new RunSimulationService(config, loot);
-            var route = new[] { ActiveRoom(0, MvpDungeonPlacementIds.SkeletonOptionId),
-                ActiveRoom(1, MvpDungeonPlacementIds.GoblinOptionId) };
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, config);
+            Assert.That(route.Length, Is.EqualTo(2));
+            foreach (MvpOrderedRouteRoom room in route)
+            {
+                Assert.That(room.Capacity.MonsterCapacity, Is.GreaterThanOrEqualTo(2));
+                Assert.That(room.Capacity.TrapCapacity, Is.GreaterThanOrEqualTo(2));
+                Assert.That(room.Capacity.LootCapacity, Is.GreaterThanOrEqualTo(2));
+                Assert.That(room.AssignedMonsterOptionIds.Length, Is.EqualTo(2));
+                Assert.That(room.AssignedTrapOptionIds.Length, Is.EqualTo(2));
+                Assert.That(room.AssignedLootNodeOptionIds.Length, Is.EqualTo(2));
+            }
             save.runHistory = new RunHistoryState();
             for (int sequence = 1; sequence <= config.MaxRunHistoryEntries; sequence++)
             {
@@ -246,17 +264,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return save;
         }
 
-        private static MvpOrderedRouteRoom ActiveRoom(int index, string monster) =>
-            new MvpOrderedRouteRoom
+        private static MvpRoomSlotAssignmentCollection MaximumContentR2Assignments()
+        {
+            string[] monsters = { MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId };
+            string[] traps = { MvpDungeonPlacementIds.SpikeTrapOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId };
+            string[] loot = { MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId };
+            return new MvpRoomSlotAssignmentCollection
             {
-                FloorIndex = 0, RoomIndex = index,
-                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
-                IncludeRoomPlacement = true, HasActiveContent = true,
-                AssignedMonsterOptionIds = new[] { monster },
-                AssignedTrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
-                AssignedLootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId },
-                Capacity = new MvpRoomSlotCapacity()
+                NextRevision = 13,
+                Rooms = Enumerable.Range(0, 2).Select(index => new MvpRoomSlotAssignmentState
+                {
+                    FloorIndex = 0, RoomIndex = index,
+                    RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    MonsterOptionIds = (string[])monsters.Clone(),
+                    TrapOptionIds = (string[])traps.Clone(),
+                    LootNodeOptionIds = (string[])loot.Clone()
+                }).ToList()
             };
+        }
+
+        private static DungeonLayoutState PopulatedDungeonLayout()
+        {
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 4);
+            layout.Slots[0] = new DungeonSlot(0, 0, StructureSimulationPass.ManaGeneratorBasicId);
+            layout.Slots[1] = new DungeonSlot(0, 1, StructureSimulationPass.HeatScrubberBasicId);
+            layout.Slots[2] = new DungeonSlot(0, 2, StructureSimulationPass.RiskLabBasicId);
+            return layout;
+        }
+
+        private static ContentBootstrap ResearchBootstrap()
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Bootstrap/content_bootstrap.json");
+            Assert.That(asset, Is.Not.Null);
+            ContentBootstrap bootstrap = JsonUtility.FromJson<ContentBootstrap>(asset.text);
+            Assert.That(bootstrap.researchPendingScaffold, Is.Not.Null);
+            Assert.That(bootstrap.researchProgressScaffold, Is.Not.Null);
+            Assert.That(bootstrap.researchCompletionEligibilityScaffold, Is.Not.Null);
+            return bootstrap;
+        }
+
+        private static ResearchPendingState Pending(ContentBootstrap bootstrap) =>
+            new ResearchPendingState
+            {
+                SlotId = bootstrap.researchPendingScaffold.slotId,
+                ProjectId = bootstrap.researchPendingScaffold.projectId
+            };
+
+        private static ResearchProgressState Progress(ContentBootstrap bootstrap,
+            double units, bool completionPending) => new ResearchProgressState
+        {
+            SlotId = bootstrap.researchPendingScaffold.slotId,
+            ProjectId = bootstrap.researchPendingScaffold.projectId,
+            ProgressUnits = units,
+            CompletionPending = completionPending,
+            RuleSourceIdUsed = bootstrap.researchProgressScaffold.ruleSourceId
+        };
+
+        private static CompletedObjectiveState CompletedObjective() => new CompletedObjectiveState
+        {
+            ObjectiveIds = new[] { "objective.first_dungeon_contract" },
+            LastCompletedObjectiveId = "objective.first_dungeon_contract",
+            LastCompletionRuleSourceId = CompletedObjectiveStateResolver.FirstSessionObjectiveCompletionRuleSourceId
+        };
 
         private static void AddSerializedSave(List<string> rows, string name, SaveData save)
         {
