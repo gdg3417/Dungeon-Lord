@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -57,19 +61,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "{\"CategoryId\":\"placement.category.loot_node\",\"OptionId\":\"placement.option.loot_node.basic\",\"Revision\":3}],\"NextRevision\":4}";
             AddSemantic(rows, "implicit-content-container", implicitContainer);
 
-            string outcomes = string.Join(",", Enumerable.Range(1, 10).Select(index =>
-                "{\"RunId\":\"run-" + index + "\",\"TickStarted\":" + index +
-                ",\"Success\":true,\"Score\":" + (index * 10) +
-                ",\"ReasonKey\":\"run.result.success\",\"FeedbackTagKeys\":[]," +
-                "\"LootBreakdown\":[],\"RoomResolutions\":[]}"));
-            string independent = "\"dungeonLayout\":{\"FloorCount\":1,\"SlotsPerFloor\":4,\"Slots\":[]}," +
-                "\"structureRuntime\":{\"ManaReserve\":123.5,\"Heat\":17.25}," +
-                "\"runHistory\":{\"NextRunSequence\":11,\"LatestOutcome\":null,\"RecentOutcomes\":[" + outcomes + "]}," +
-                "\"researchPending\":{\"SlotId\":\"research.slot.1\",\"ProjectId\":\"research.project.sample\"}," +
-                "\"researchProgress\":null,\"completedResearch\":{\"ProjectIds\":[]}," +
-                "\"completedObjectives\":{\"ObjectiveIds\":[\"objective.mvp.first_session\"]}," +
-                "\"lastOfflineSummary\":{\"RuleResolved\":true},\"lastPausedUtcUnix\":10,\"lastResumedUtcUnix\":20";
-            AddSemantic(rows, "independent-state-and-history", r1 + "," + independent);
+            SaveData runHistorySave = RepresentativeSaveWithTenPersistedRuns();
+            AddSerializedSave(rows, "representative-ten-run-history", runHistorySave);
+
+            SaveData pendingResearch = RepresentativeSave();
+            pendingResearch.researchPending = new ResearchPendingState
+            { SlotId = "research.slot.primary", ProjectId = "research.project.analysis" };
+            AddSerializedSave(rows, "research-pending", pendingResearch);
+
+            SaveData activeResearch = RepresentativeSave();
+            activeResearch.researchProgress = new ResearchProgressState
+            {
+                SlotId = "research.slot.primary", ProjectId = "research.project.analysis",
+                ProgressUnits = 1d, CompletionPending = false,
+                RuleSourceIdUsed = "research.rule.active_progress"
+            };
+            AddSerializedSave(rows, "research-active-progress", activeResearch);
+
+            SaveData completionPending = RepresentativeSave();
+            completionPending.researchProgress = new ResearchProgressState
+            {
+                SlotId = "research.slot.primary", ProjectId = "research.project.analysis",
+                ProgressUnits = 1d, CompletionPending = true,
+                RuleSourceIdUsed = "research.rule.completion_pending"
+            };
+            AddSerializedSave(rows, "research-completion-pending", completionPending);
+
+            SaveData completed = RepresentativeSave();
+            completed.completedResearch = new CompletedResearchState
+            {
+                ProjectIds = new[] { "research.project.analysis" },
+                LastCompletedProjectId = "research.project.analysis",
+                LastCompletionRuleSourceId = "research.rule.claim"
+            };
+            completed.completedObjectives = new CompletedObjectiveState
+            {
+                ObjectiveIds = new[] { "objective.mvp.first_session" },
+                LastCompletedObjectiveId = "objective.mvp.first_session",
+                LastCompletionRuleSourceId = "objective.rule.first_session"
+            };
+            AddSerializedSave(rows, "research-and-objective-completed", completed);
 
             const string unknownJson = "{\"rootBefore\":[1,{\"x\":true}],\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"saveVersion\":6,\"unknownPrimary\":{\"note\":\"preserve\"}},\"rootAfter\":false}";
@@ -80,6 +111,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             rows.Add(Measure("unknown-root-primary", unknown.Original, unknown.Classification,
                 unknown.Result.Attempt.Candidate.GetBytes(),
                 ParseState(unknown.Result.Attempt.Candidate.GetBytes(), unknown.Limits)));
+
+            AddNativeCanonical(rows, unknown);
 
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture sidecarFixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
@@ -122,7 +155,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             rows.Add(MeasureArtifact("restoration-intent", restoration));
 
             foreach (string row in rows) TestContext.Progress.WriteLine("GD66_LIMIT_MEASUREMENT " + row);
-            Assert.That(rows.Count, Is.EqualTo(22));
+            Assert.That(rows.Count, Is.EqualTo(27));
+        }
+
+        [Test]
+        public void RawMinimumSearch_StartsAtValidOneAndFindsKnownFixtureDimensions()
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(
+                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{}}");
+            Assert.That(MinimumRaw(bytes, 0), Is.EqualTo(2));
+            Assert.That(MinimumRaw(bytes, 1), Is.EqualTo(3));
+            Assert.That(MinimumRaw(bytes, 2), Is.EqualTo(1));
+            Assert.That(MinimumRaw(bytes, 3), Is.EqualTo(9));
+            Assert.That(MinimumRaw(bytes, 4), Is.GreaterThan(0));
         }
 
         [Test]
@@ -141,6 +186,124 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new CanonicalSpatialSerializationLimits(
                     new SpatialSerializedInputLimits(serializedInput, 8192, 2048, 131072, 64),
                     new CanonicalSpatialSaveWorkloadLimits(64, 64))).IsValid, Is.True);
+        }
+
+        private static SaveData RepresentativeSave()
+        {
+            return new SaveData
+            {
+                saveVersion = 6, contentVersion = "gd66-measurement",
+                createdUtcUnix = 1, lastSavedUtcUnix = 2, lastPausedUtcUnix = 3,
+                lastResumedUtcUnix = 4, totalTicks = 5, lastKnownAppState = "Paused",
+                dungeonLayout = DungeonLayoutState.CreateEmpty(1, 4),
+                structureRuntime = new StructureRuntimeState { ManaReserve = 25d, Heat = 7d },
+                mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    NextRevision = 5,
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0, RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            MonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId },
+                            TrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
+                            LootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }
+                        }
+                    }
+                },
+                lastOfflineSummary = new OfflineSummary
+                {
+                    RuleResolved = true, OfflineSecondsObserved = 60,
+                    RuleSourceIdUsed = "offline.rule.measurement"
+                }
+            };
+        }
+
+        private static SaveData RepresentativeSaveWithTenPersistedRuns()
+        {
+            SaveData save = RepresentativeSave();
+            TextAsset configAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Bootstrap/run_simulation_config.json");
+            TextAsset lootAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Bootstrap/loot_config.json");
+            Assert.That(configAsset, Is.Not.Null);
+            Assert.That(lootAsset, Is.Not.Null);
+            RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(configAsset.text);
+            LootConfig loot = JsonUtility.FromJson<LootConfig>(lootAsset.text);
+            var simulation = new RunSimulationService(config, loot);
+            var route = new[] { ActiveRoom(0, MvpDungeonPlacementIds.SkeletonOptionId),
+                ActiveRoom(1, MvpDungeonPlacementIds.GoblinOptionId) };
+            save.runHistory = new RunHistoryState();
+            for (int sequence = 1; sequence <= config.MaxRunHistoryEntries; sequence++)
+            {
+                RunOutcomeRecord outcome = simulation.SimulateRoute(save.structureRuntime,
+                    100L + sequence, sequence, RunPostureResolver.BalancedId, route);
+                save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
+                save.runHistory.NextRunSequence = sequence + 1;
+            }
+            Assert.That(save.runHistory.RecentOutcomes.Length, Is.EqualTo(10));
+            return save;
+        }
+
+        private static MvpOrderedRouteRoom ActiveRoom(int index, string monster) =>
+            new MvpOrderedRouteRoom
+            {
+                FloorIndex = 0, RoomIndex = index,
+                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                IncludeRoomPlacement = true, HasActiveContent = true,
+                AssignedMonsterOptionIds = new[] { monster },
+                AssignedTrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
+                AssignedLootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId },
+                Capacity = new MvpRoomSlotCapacity()
+            };
+
+        private static void AddSerializedSave(List<string> rows, string name, SaveData save)
+        {
+            byte[] raw = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":" +
+                JsonUtility.ToJson(save) + "}");
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, raw);
+            Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
+            rows.Add(Measure(name, fixture.Original, fixture.Classification,
+                fixture.Result.Attempt.Candidate.GetBytes(),
+                ParseState(fixture.Result.Attempt.Candidate.GetBytes(), fixture.Limits)));
+        }
+
+        private static void AddNativeCanonical(List<string> rows,
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture)
+        {
+            int contractVersion = fixture.Compatibility.SelectContract(7).Value.CanonicalLayoutContractVersion;
+            CompatibilitySelectionResult<CanonicalStarterLayoutProfile> starter =
+                fixture.Compatibility.SelectStarter(7, contractVersion);
+            Assert.That(starter.Success, Is.True, starter.Code);
+            Assert.That(starter.Value.CanonicalLayoutContractVersion, Is.EqualTo(contractVersion));
+            var state = new DetachedCanonicalSpatialSaveState
+            {
+                Authority = new CanonicalSpatialAuthorityMarker
+                {
+                    CanonicalLayoutContractVersion = contractVersion,
+                    CreationKind = CanonicalSpatialCreationKind.NativeCanonical
+                },
+                Floors = Array.Empty<SavedSpatialFloor>()
+            };
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> members =
+                CanonicalSpatialSaveSerializer.SerializeMembers(state, fixture.Limits);
+            Assert.That(members.IsValid, Is.True);
+            byte[] candidate = Encoding.UTF8.GetBytes(
+                "{\"schema\":\"save_root\",\"schemaVersion\":7,\"primary\":{\"canonicalSpatialAuthority\":" +
+                Encoding.UTF8.GetString(members.Value.Authority) + ",\"spatialFloors\":" +
+                Encoding.UTF8.GetString(members.Value.Floors) + "}}");
+            DetachedCompleteSaveValidationResult validated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, fixture.Limits);
+            Assert.That(validated.IsValid, Is.True, validated.Reason);
+            rows.Add("native-canonical-empty:raw=not-applicable,candidateBytes=" + candidate.Length +
+                ",strictNodes=" + MinimumStrict(candidate, validated.State, 0) +
+                ",strictRecords=" + MinimumStrict(candidate, validated.State, 1) +
+                ",strictStringChars=" + MinimumStrict(candidate, validated.State, 2) +
+                ",canonicalRecords=" + CountCanonicalRecords(validated.State) +
+                ",canonicalTiles=" + CountCanonicalTiles(validated.State) +
+                ",copiedBytes=0,unknownCount=0,unknownBytes=0");
         }
 
         private static void AddSemantic(List<string> rows, string name, string members)
@@ -199,6 +362,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static int MinimumRaw(byte[] bytes, int dimension) => Minimum(limit =>
         {
+            if (limit < 1) return false;
             int depth = dimension == 0 ? limit : 256;
             int members = dimension == 1 ? limit : High;
             int elements = dimension == 2 ? limit : High;
