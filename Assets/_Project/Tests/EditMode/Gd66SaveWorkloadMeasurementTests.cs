@@ -184,6 +184,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void LegacyPersistenceBytes_MatchPrettyPrintedSaveRootRepresentation()
+        {
+            SaveData save = RepresentativeSave();
+            byte[] measured = SerializeLegacyPersistence(save);
+            string expected = JsonUtility.ToJson(new SaveRoot
+            {
+                schemaVersion = SaveMigration.LatestSchemaVersion,
+                primary = save
+            }, true);
+
+            Assert.That(Encoding.UTF8.GetString(measured), Is.EqualTo(expected));
+            Assert.That(expected, Does.Contain("\n"));
+            Assert.That(expected, Is.Not.EqualTo(JsonUtility.ToJson(new SaveRoot
+            {
+                schemaVersion = SaveMigration.LatestSchemaVersion,
+                primary = save
+            })));
+        }
+
+        [Test]
         public void RawMinimumSearch_StartsAtValidOneAndFindsKnownFixtureDimensions()
         {
             byte[] bytes = Encoding.UTF8.GetBytes(
@@ -215,21 +235,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveData RepresentativeSave()
         {
-            return new SaveData
+            DungeonLayoutState expectedLayout = PopulatedDungeonLayout();
+            MvpRoomSlotAssignmentCollection expectedAssignments = LegacyRuntimeR2Assignments();
+            var root = new SaveRoot
             {
-                saveVersion = 6, contentVersion = "gd66-measurement",
-                createdUtcUnix = 1700000000L, lastPausedUtcUnix = 1700086400L,
-                lastResumedUtcUnix = 1700086460L, lastSavedUtcUnix = 1700172800L,
-                totalTicks = 987654L, lastKnownAppState = "Paused",
-                dungeonLayout = PopulatedDungeonLayout(),
-                structureRuntime = new StructureRuntimeState { ManaReserve = 250d, Heat = 37d },
-                mvpRoomSlotAssignments = LegacyRuntimeR2Assignments(),
-                lastOfflineSummary = new OfflineSummary
+                schemaVersion = SaveMigration.LatestSchemaVersion,
+                primary = new SaveData
                 {
-                    RuleResolved = true, OfflineSecondsObserved = 60,
-                    RuleSourceIdUsed = "offline.rule.measurement"
+                    saveVersion = 6, contentVersion = "gd66-measurement",
+                    createdUtcUnix = 1700000000L, lastPausedUtcUnix = 1700086400L,
+                    lastResumedUtcUnix = 1700086460L, lastSavedUtcUnix = 1700172800L,
+                    totalTicks = 987654L, lastKnownAppState = "Paused",
+                    dungeonLayout = expectedLayout,
+                    structureRuntime = new StructureRuntimeState { ManaReserve = 250d, Heat = 37d },
+                    mvpRoomSlotAssignments = expectedAssignments,
+                    lastOfflineSummary = new OfflineSummary
+                    {
+                        RuleResolved = true, OfflineSecondsObserved = 60,
+                        RuleSourceIdUsed = "offline.rule.measurement"
+                    }
                 }
             };
+
+            root = SaveMigration.MigrateToLatest(root);
+            SaveData save = root.primary;
+            Assert.That(root.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(save.dungeonLayout, Is.SameAs(expectedLayout));
+            Assert.That(save.dungeonLayout.Slots.Count, Is.EqualTo(30));
+            Assert.That(save.mvpRoomSlotAssignments, Is.SameAs(expectedAssignments));
+            Assert.That(save.mvpRoomSlotAssignments.Rooms.Count, Is.EqualTo(2));
+            Assert.That(save.mvpDungeonPlacements, Is.Not.Null);
+            Assert.That(save.mvpDungeonPlacements.Entries, Is.Not.Null);
+            Assert.That(save.mvpDungeonFloorLayout, Is.Not.Null);
+            Assert.That(save.mvpDungeonFloorLayout.Nodes, Is.Not.Null);
+            Assert.That(save.structureRuntime, Is.Not.Null);
+            Assert.That(save.runHistory, Is.Not.Null);
+            Assert.That(save.runHistory.RecentOutcomes, Is.Not.Null);
+            Assert.That(save.completedObjectives, Is.Not.Null);
+            Assert.That(save.completedObjectives.ObjectiveIds, Is.Not.Null);
+            return save;
         }
 
         private static SaveData RepresentativeLegacySaveWithTenPersistedRuns()
@@ -402,10 +446,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             LastCompletionRuleSourceId = CompletedObjectiveStateResolver.FirstSessionObjectiveCompletionRuleSourceId
         };
 
+        private static byte[] SerializeLegacyPersistence(SaveData save)
+        {
+            var root = new SaveRoot
+            {
+                schemaVersion = SaveMigration.LatestSchemaVersion,
+                primary = save
+            };
+            return Encoding.UTF8.GetBytes(JsonUtility.ToJson(root, true));
+        }
+
         private static void AddSerializedSave(List<string> rows, string name, SaveData save)
         {
-            byte[] raw = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":" +
-                JsonUtility.ToJson(save) + "}");
+            byte[] raw = SerializeLegacyPersistence(save);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, raw);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
