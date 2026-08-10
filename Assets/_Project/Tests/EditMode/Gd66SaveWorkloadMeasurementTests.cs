@@ -63,8 +63,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "{\"CategoryId\":\"placement.category.loot_node\",\"OptionId\":\"placement.option.loot_node.basic\",\"Revision\":3}],\"NextRevision\":4}";
             AddSemantic(rows, "implicit-content-container", implicitContainer);
 
-            SaveData runHistorySave = RepresentativeSaveWithTenPersistedRuns();
-            AddSerializedSave(rows, "representative-ten-run-history", runHistorySave);
+            SaveData runHistorySave = RepresentativeLegacySaveWithTenPersistedRuns();
+            AddSerializedSave(rows, "legacy-runtime-ten-run-history", runHistorySave);
+            SaveData canonicalTargetRunHistory = CanonicalTargetSaveWithTenPersistedRuns();
+            AddSerializedSave(rows, "canonical-target-ten-run-history", canonicalTargetRunHistory);
 
             ContentBootstrap bootstrap = ResearchBootstrap();
             SaveData pendingResearch = RepresentativeSave();
@@ -109,20 +111,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .RuleResolved, Is.True);
             AddSerializedSave(rows, "research-and-objective-completed", completed);
 
-            SaveData activeHighWater = RepresentativeSaveWithTenPersistedRuns();
+            SaveData activeHighWater = CanonicalTargetSaveWithTenPersistedRuns();
             activeHighWater.researchPending = Pending(bootstrap);
             activeHighWater.researchProgress = Progress(bootstrap,
                 bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / 2d, false);
             Assert.That(ResearchProgressStateResolver.Resolve(activeHighWater.researchPending,
                 activeHighWater.researchProgress).RuleResolved, Is.True);
-            AddSerializedSave(rows, "full-save-high-water-active-research", activeHighWater);
+            AddSerializedSave(rows, "canonical-target-full-save-high-water-active-research", activeHighWater);
 
-            SaveData completedHighWater = RepresentativeSaveWithTenPersistedRuns();
+            SaveData completedHighWater = CanonicalTargetSaveWithTenPersistedRuns();
             completedHighWater.completedResearch = completed.completedResearch;
             completedHighWater.completedObjectives = CompletedObjective();
             Assert.That(CompletedResearchStateResolver.Resolve(completedHighWater.completedResearch)
                 .RuleResolved, Is.True);
-            AddSerializedSave(rows, "full-save-high-water-completed-research-objective",
+            AddSerializedSave(rows, "canonical-target-full-save-high-water-completed-research-objective",
                 completedHighWater);
 
             const string unknownJson = "{\"rootBefore\":[1,{\"x\":true}],\"schema\":\"save_root\",\"schemaVersion\":6," +
@@ -178,7 +180,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             rows.Add(MeasureArtifact("restoration-intent", restoration));
 
             foreach (string row in rows) TestContext.Progress.WriteLine("GD66_LIMIT_MEASUREMENT " + row);
-            Assert.That(rows.Count, Is.EqualTo(29));
+            Assert.That(rows.Count, Is.EqualTo(30));
         }
 
         [Test]
@@ -216,11 +218,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return new SaveData
             {
                 saveVersion = 6, contentVersion = "gd66-measurement",
-                createdUtcUnix = 1, lastSavedUtcUnix = 2, lastPausedUtcUnix = 3,
-                lastResumedUtcUnix = 4, totalTicks = 5, lastKnownAppState = "Paused",
+                createdUtcUnix = 1700000000L, lastPausedUtcUnix = 1700086400L,
+                lastResumedUtcUnix = 1700086460L, lastSavedUtcUnix = 1700172800L,
+                totalTicks = 987654L, lastKnownAppState = "Paused",
                 dungeonLayout = PopulatedDungeonLayout(),
-                structureRuntime = new StructureRuntimeState { ManaReserve = 25d, Heat = 7d },
-                mvpRoomSlotAssignments = MaximumContentR2Assignments(),
+                structureRuntime = new StructureRuntimeState { ManaReserve = 250d, Heat = 37d },
+                mvpRoomSlotAssignments = LegacyRuntimeR2Assignments(),
                 lastOfflineSummary = new OfflineSummary
                 {
                     RuleResolved = true, OfflineSecondsObserved = 60,
@@ -229,70 +232,138 @@ namespace DungeonBuilder.M0.Tests.EditMode
             };
         }
 
-        private static SaveData RepresentativeSaveWithTenPersistedRuns()
+        private static SaveData RepresentativeLegacySaveWithTenPersistedRuns()
         {
             SaveData save = RepresentativeSave();
-            TextAsset configAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(
-                "Assets/_Project/Data/Bootstrap/run_simulation_config.json");
-            TextAsset lootAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(
-                "Assets/_Project/Data/Bootstrap/loot_config.json");
-            Assert.That(configAsset, Is.Not.Null);
-            Assert.That(lootAsset, Is.Not.Null);
-            RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(configAsset.text);
-            LootConfig loot = JsonUtility.FromJson<LootConfig>(lootAsset.text);
+            RunSimulationConfig config = ProductionRunConfig();
+            LootConfig loot = ProductionLootConfig();
             var simulation = new RunSimulationService(config, loot);
             MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, config);
             Assert.That(route.Length, Is.EqualTo(2));
             foreach (MvpOrderedRouteRoom room in route)
             {
-                Assert.That(room.Capacity.MonsterCapacity, Is.GreaterThanOrEqualTo(2));
-                Assert.That(room.Capacity.TrapCapacity, Is.GreaterThanOrEqualTo(2));
-                Assert.That(room.Capacity.LootCapacity, Is.GreaterThanOrEqualTo(2));
-                Assert.That(room.AssignedMonsterOptionIds.Length, Is.EqualTo(2));
-                Assert.That(room.AssignedTrapOptionIds.Length, Is.EqualTo(2));
-                Assert.That(room.AssignedLootNodeOptionIds.Length, Is.EqualTo(2));
+                Assert.That(room.Capacity.MonsterCapacity, Is.EqualTo(1));
+                Assert.That(room.Capacity.TrapCapacity, Is.EqualTo(1));
+                Assert.That(room.Capacity.LootCapacity, Is.EqualTo(1));
+                Assert.That(room.AssignedMonsterOptionIds.Length, Is.EqualTo(1));
+                Assert.That(room.AssignedTrapOptionIds.Length, Is.EqualTo(1));
+                Assert.That(room.AssignedLootNodeOptionIds.Length, Is.EqualTo(1));
             }
-            save.runHistory = new RunHistoryState();
-            for (int sequence = 1; sequence <= config.MaxRunHistoryEntries; sequence++)
-            {
-                RunOutcomeRecord outcome = simulation.SimulateRoute(save.structureRuntime,
-                    100L + sequence, sequence, RunPostureResolver.BalancedId, route);
-                save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
-                save.runHistory.NextRunSequence = sequence + 1;
-            }
-            Assert.That(save.runHistory.RecentOutcomes.Length, Is.EqualTo(10));
+            PopulateTenRuns(save, simulation, route, config.MaxRunHistoryEntries);
             return save;
         }
 
-        private static MvpRoomSlotAssignmentCollection MaximumContentR2Assignments()
+        private static SaveData CanonicalTargetSaveWithTenPersistedRuns()
         {
-            string[] monsters = { MvpDungeonPlacementIds.SkeletonOptionId,
-                MvpDungeonPlacementIds.GoblinOptionId };
-            string[] traps = { MvpDungeonPlacementIds.SpikeTrapOptionId,
-                MvpDungeonPlacementIds.SnareTrapOptionId };
-            string[] loot = { MvpDungeonPlacementIds.BasicLootNodeOptionId,
-                MvpDungeonPlacementIds.HiddenCacheOptionId };
-            return new MvpRoomSlotAssignmentCollection
-            {
-                NextRevision = 13,
-                Rooms = Enumerable.Range(0, 2).Select(index => new MvpRoomSlotAssignmentState
+            SaveData save = RepresentativeSave();
+            save.mvpRoomSlotAssignments = CanonicalTargetR2Assignments();
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture spatialFixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            string basicDefinitionId = spatialFixture.Compatibility.Value.GeometryRecords.Single()
+                .BasicRoomDefinitionId;
+            RoomSpatialDefinition definition = spatialFixture.Production.Catalog.Rooms.Single(
+                room => room.RoomDefinitionId == basicDefinitionId);
+            Assert.That(definition.MonsterCapacity, Is.EqualTo(2));
+            Assert.That(definition.TrapCapacity, Is.EqualTo(2));
+            Assert.That(definition.LootCapacity, Is.EqualTo(2));
+
+            RunSimulationConfig config = ProductionRunConfig();
+            LootConfig loot = ProductionLootConfig();
+            var simulation = new RunSimulationService(config, loot);
+            MvpOrderedRouteRoom[] route = Enumerable.Range(0, 2).Select(index =>
+                new MvpOrderedRouteRoom
                 {
                     FloorIndex = 0, RoomIndex = index,
                     RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
-                    MonsterOptionIds = (string[])monsters.Clone(),
-                    TrapOptionIds = (string[])traps.Clone(),
-                    LootNodeOptionIds = (string[])loot.Clone()
-                }).ToList()
-            };
+                    IncludeRoomPlacement = true, HasActiveContent = true,
+                    Capacity = new MvpRoomSlotCapacity
+                    {
+                        RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                        MonsterCapacity = definition.MonsterCapacity,
+                        TrapCapacity = definition.TrapCapacity,
+                        LootCapacity = definition.LootCapacity
+                    },
+                    AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId,
+                        MvpDungeonPlacementIds.GoblinOptionId },
+                    AssignedTrapOptionIds = new[] { MvpDungeonPlacementIds.SpikeTrapOptionId,
+                        MvpDungeonPlacementIds.SnareTrapOptionId },
+                    AssignedLootNodeOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                        MvpDungeonPlacementIds.HiddenCacheOptionId }
+                }).ToArray();
+            PopulateTenRuns(save, simulation, route, config.MaxRunHistoryEntries);
+            return save;
         }
+
+        private static MvpRoomSlotAssignmentCollection LegacyRuntimeR2Assignments() =>
+            Assignments(new[] { MvpDungeonPlacementIds.SkeletonOptionId },
+                new[] { MvpDungeonPlacementIds.SpikeTrapOptionId },
+                new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId }, 7);
+
+        private static MvpRoomSlotAssignmentCollection CanonicalTargetR2Assignments() =>
+            Assignments(new[] { MvpDungeonPlacementIds.SkeletonOptionId,
+                    MvpDungeonPlacementIds.GoblinOptionId },
+                new[] { MvpDungeonPlacementIds.SpikeTrapOptionId,
+                    MvpDungeonPlacementIds.SnareTrapOptionId },
+                new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                    MvpDungeonPlacementIds.HiddenCacheOptionId }, 13);
+
+        private static MvpRoomSlotAssignmentCollection Assignments(string[] monsters,
+            string[] traps, string[] loot, int nextRevision) => new MvpRoomSlotAssignmentCollection
+        {
+            NextRevision = nextRevision,
+            Rooms = Enumerable.Range(0, 2).Select(index => new MvpRoomSlotAssignmentState
+            {
+                FloorIndex = 0, RoomIndex = index,
+                RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                MonsterOptionIds = (string[])monsters.Clone(),
+                TrapOptionIds = (string[])traps.Clone(),
+                LootNodeOptionIds = (string[])loot.Clone()
+            }).ToList()
+        };
 
         private static DungeonLayoutState PopulatedDungeonLayout()
         {
-            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(1, 4);
-            layout.Slots[0] = new DungeonSlot(0, 0, StructureSimulationPass.ManaGeneratorBasicId);
-            layout.Slots[1] = new DungeonSlot(0, 1, StructureSimulationPass.HeatScrubberBasicId);
-            layout.Slots[2] = new DungeonSlot(0, 2, StructureSimulationPass.RiskLabBasicId);
+            DungeonLayoutState layout = DungeonLayoutState.CreateEmpty(
+                SaveMigration.DefaultFloorCount, SaveMigration.DefaultSlotsPerFloor);
+            string[] structures = { StructureSimulationPass.ManaGeneratorBasicId,
+                StructureSimulationPass.HeatScrubberBasicId, StructureSimulationPass.RiskLabBasicId };
+            for (int index = 0; index < layout.Slots.Count; index++)
+            {
+                DungeonSlot slot = layout.Slots[index];
+                layout.Slots[index] = new DungeonSlot(slot.FloorIndex, slot.SlotIndex,
+                    structures[index % structures.Length]);
+            }
+            Assert.That(layout.Slots.Count, Is.EqualTo(30));
+            Assert.That(layout.Slots.All(slot => slot.IsOccupied), Is.True);
             return layout;
+        }
+
+        private static RunSimulationConfig ProductionRunConfig() => LoadAsset<RunSimulationConfig>(
+            "Assets/_Project/Data/Bootstrap/run_simulation_config.json");
+
+        private static LootConfig ProductionLootConfig() => LoadAsset<LootConfig>(
+            "Assets/_Project/Data/Bootstrap/loot_config.json");
+
+        private static T LoadAsset<T>(string path) where T : class
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            Assert.That(asset, Is.Not.Null, path);
+            return JsonUtility.FromJson<T>(asset.text);
+        }
+
+        private static void PopulateTenRuns(SaveData save, RunSimulationService simulation,
+            MvpOrderedRouteRoom[] route, int maximumHistory)
+        {
+            Assert.That(maximumHistory, Is.EqualTo(10));
+            save.runHistory = new RunHistoryState();
+            for (int sequence = 1; sequence <= maximumHistory; sequence++)
+            {
+                RunOutcomeRecord outcome = simulation.SimulateRoute(save.structureRuntime,
+                    1700000000L + sequence * 60L, sequence, RunPostureResolver.BalancedId, route);
+                save.runHistory.AppendOutcome(outcome, maximumHistory);
+                save.runHistory.NextRunSequence = sequence + 1;
+            }
+            Assert.That(save.runHistory.RecentOutcomes.Length, Is.EqualTo(maximumHistory));
         }
 
         private static ContentBootstrap ResearchBootstrap()
