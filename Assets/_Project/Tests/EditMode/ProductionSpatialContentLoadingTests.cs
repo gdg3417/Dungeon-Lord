@@ -510,7 +510,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void EveryPublishedGraphIsDetachedAndSaveAuthorityRemainsUnchanged()
+        public void EveryPublishedGraphIsDetachedAndDoesNotBecomeSavePersistenceAuthority()
         {
             ProductionSpatialContentSnapshot snapshot = LoadWith(
                 manifest, catalog, new[] { english }).Value;
@@ -529,8 +529,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
             Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(6));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
-                .Any(field => field.Name.IndexOf("spatial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
+                .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
+
+            FieldInfo authority = typeof(SaveData).GetField("canonicalSpatialAuthority");
+            FieldInfo floors = typeof(SaveData).GetField("spatialFloors");
+            FieldInfo validated = typeof(SaveData).GetField("validatedCanonicalSpatialState",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(authority, Is.Not.Null);
+            Assert.That(floors, Is.Not.Null);
+            Assert.That(validated, Is.Not.Null);
+            Assert.That(authority.IsNotSerialized, Is.True);
+            Assert.That(floors.IsNotSerialized, Is.True);
+            Assert.That(validated.IsNotSerialized, Is.True);
+
+            string schemaSixJson = JsonUtility.ToJson(new SaveRoot
+                { schemaVersion = SaveMigration.LatestSchemaVersion, primary = new SaveData() });
+            Assert.That(schemaSixJson, Does.Not.Contain("canonicalSpatialAuthority"));
+            Assert.That(schemaSixJson, Does.Not.Contain("spatialFloors"));
         }
 
         [Test]

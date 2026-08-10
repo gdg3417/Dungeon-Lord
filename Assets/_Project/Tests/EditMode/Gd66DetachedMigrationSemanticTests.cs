@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -110,6 +111,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(run.Execute.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
             Assert.That(run.FirstRecovery.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
             Assert.That(run.SecondRecovery.Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
+        }
+
+        [TestCase(Winner.Placements)]
+        [TestCase(Winner.Floor)]
+        [TestCase(Winner.Assignments)]
+        public void PrettyAndCompactLegacyRouteEvidenceProduceEquivalentCanonicalProjection(Winner winner)
+        {
+            int schema = winner == Winner.Placements ? 3 : winner == Winner.Floor ? 4 : 6;
+            string compact = winner == Winner.Placements ? Placement(RoomPlacement(1)) :
+                winner == Winner.Floor ? Floor(Node(0, RoomCategory, BasicRoom)) : Assign(Room(0));
+            string pretty = compact.Replace(":{", ":\n  {").Replace(":[", ": [\n    ")
+                .Replace("},{", "},\n    {").Replace("],", "\n  ],\n  ")
+                .Replace(",\"", ",\n  \"");
+
+            var compactRun = Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                "compact-" + winner, schema, compact);
+            var prettyRun = Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                "pretty-" + winner, schema, pretty);
+
+            Assert.That(JsonUtility.ToJson(prettyRun.State.Floors[0]),
+                Is.EqualTo(JsonUtility.ToJson(compactRun.State.Floors[0])));
         }
 
         [Test]
