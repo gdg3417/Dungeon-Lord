@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Linq;
 using System.IO;
@@ -24,6 +25,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(inspected.AuthorityState,
                 Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(save.canonicalSpatialAuthority, Is.SameAs(save.validatedCanonicalSpatialState.Authority));
+            Assert.That(save.spatialFloors, Is.SameAs(save.validatedCanonicalSpatialState.Floors));
+            Assert.That(save.spatialFloors, Has.Length.EqualTo(1));
             Assert.That(route, Has.Length.EqualTo(2));
             Assert.That(route[0].AssignedMonsterOptionIds,
                 Is.EqualTo(new[] { MvpDungeonPlacementIds.SkeletonOptionId }));
@@ -40,6 +44,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             save.structureRuntime.Heat = 11d;
             save.runHistory.NextRunSequence = 4;
             string before = JsonUtility.ToJson(save);
+            CanonicalSpatialAuthorityMarker authorityBefore = save.canonicalSpatialAuthority;
+            SavedSpatialFloor[] floorsBefore = save.spatialFloors;
             var go = new GameObject("Gd66EmptyCanonicalRunGuard");
             try
             {
@@ -54,6 +60,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(root.LastRunRejectionReasonKey,
                     Is.EqualTo(RunSimulationService.RouteNoEncounterKey));
                 Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+                Assert.That(save.canonicalSpatialAuthority, Is.SameAs(authorityBefore));
+                Assert.That(save.spatialFloors, Is.SameAs(floorsBefore));
                 Assert.That(save.runHistory.LatestOutcome, Is.Null);
                 Assert.That(save.runHistory.RecentOutcomes, Is.Empty);
                 Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(4));
@@ -223,6 +231,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             SaveMigration.MigrateToLatest(new SaveRoot { schemaVersion = 6, primary = save });
             string before = JsonUtility.ToJson(save);
+            CanonicalSpatialAuthorityMarker authorityBefore = save.canonicalSpatialAuthority;
+            SavedSpatialFloor[] floorsBefore = save.spatialFloors;
             Assert.That(MvpRoomSlotLayoutResolver.TryAssignToPersistedRoom(save, null, 0,
                 MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.GoblinOptionId), Is.False);
@@ -234,6 +244,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(save.mvpDungeonFloorLayout, Is.Null);
             Assert.That(save.mvpRoomSlotAssignments, Is.Null);
             Assert.That(JsonUtility.ToJson(save), Is.EqualTo(before));
+            Assert.That(save.canonicalSpatialAuthority, Is.SameAs(authorityBefore));
+            Assert.That(save.spatialFloors, Is.SameAs(floorsBefore));
             Assert.That(save.dungeonLayout, Is.Not.Null);
             Assert.That(save.structureRuntime, Is.Not.Null);
         }
@@ -441,3 +453,4 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+#endif

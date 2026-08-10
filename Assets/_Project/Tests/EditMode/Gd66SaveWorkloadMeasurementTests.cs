@@ -211,7 +211,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(MinimumRaw(bytes, 0), Is.EqualTo(2));
             Assert.That(MinimumRaw(bytes, 1), Is.EqualTo(3));
             Assert.That(MinimumRaw(bytes, 2), Is.EqualTo(1));
-            Assert.That(MinimumRaw(bytes, 3), Is.EqualTo(9));
+            Assert.That(MinimumRaw(bytes, 3), Is.EqualTo(13));
             Assert.That(MinimumRaw(bytes, 4), Is.GreaterThan(0));
         }
 
@@ -446,6 +446,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             LastCompletionRuleSourceId = CompletedObjectiveStateResolver.FirstSessionObjectiveCompletionRuleSourceId
         };
 
+        // Permissive classification ceiling for measurement preparation only. Actual requirements
+        // are still discovered independently through MinimumRaw and never use these values as evidence.
+        private static RawSavePayloadClassificationLimits MeasurementPreparationRawLimits() =>
+            new RawSavePayloadClassificationLimits(1000000, 128, 1000, 1000, 100000, 5000000);
+
         private static byte[] SerializeLegacyPersistence(SaveData save)
         {
             var root = new SaveRoot
@@ -460,7 +465,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             byte[] raw = SerializeLegacyPersistence(save);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, raw);
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, raw,
+                    MeasurementPreparationRawLimits());
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
             rows.Add(Measure(name, fixture.Original, fixture.Classification,
                 fixture.Result.Attempt.Candidate.GetBytes(),

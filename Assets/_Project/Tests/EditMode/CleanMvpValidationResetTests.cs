@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0;
@@ -46,6 +47,35 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(didReset, Is.False);
             Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void LegacySaveServiceRoundTrip_RemainsWritableLegacyAuthorityAndResettable()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-schema6-roundtrip-" +
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var service = new SaveService(new SimpleLogger(false), new SaveConfig
+                { fileName = "save.json", useAtomicWrites = true }, directory);
+                service.Save(_root.Save, SaveReason.ManualDev);
+                Assert.That(File.Exists(service.SavePath), Is.True);
+
+                SaveData loaded = service.LoadOrCreate("gd66-test", out _);
+                Assert.That(CanonicalMvpRouteProjection.HasCanonicalLookingState(loaded), Is.False);
+                service.Save(loaded, SaveReason.ManualDev);
+                Assert.That(File.Exists(service.SavePath), Is.True);
+
+                SetBackingField("<Save>k__BackingField", loaded);
+                SetBackingField("<SaveService>k__BackingField", service);
+                Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+                Assert.That(CanonicalMvpRouteProjection.HasCanonicalLookingState(_root.Save), Is.False);
+            }
+            finally
+            {
+                if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            }
         }
 
         [Test]

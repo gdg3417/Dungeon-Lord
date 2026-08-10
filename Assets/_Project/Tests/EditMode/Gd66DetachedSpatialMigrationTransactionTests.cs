@@ -2388,7 +2388,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         internal static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
-            byte[] originalOverride = null)
+            byte[] originalOverride = null,
+            RawSavePayloadClassificationLimits? rawClassificationLimits = null)
         {
             const string root = "Assets/_Project/Data/Production/DungeonSpatial/";
             TextAsset limitAsset = Asset(root + "validation_limits.json");
@@ -2420,7 +2421,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] original = originalOverride ?? Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1}" :
                 "{\"schema\":\"save_root\",\"schemaVersion\":" + schema + ",\"primary\":{}}");
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(original,
-                RawLimits(),
+                rawClassificationLimits ?? RawLimits(),
                 new RawSaveEnvelopeVersionContract(1, 6), BlankFloor());
             var limits = new CanonicalSpatialSerializationLimits(
                 new SpatialSerializedInputLimits(1000000, 100000, 10000, 100000, 100),

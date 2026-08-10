@@ -1494,8 +1494,8 @@ namespace DungeonBuilder.M0
         public MvpRoomSlotAssignmentCollection mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
         // Schema 7 spatial authority. The legacy MVP route fields above remain serialized only as
         // migration/rollback evidence once this marker is present.
-        public CanonicalSpatialAuthorityMarker canonicalSpatialAuthority;
-        public SavedSpatialFloor[] spatialFloors;
+        [NonSerialized] public CanonicalSpatialAuthorityMarker canonicalSpatialAuthority;
+        [NonSerialized] public SavedSpatialFloor[] spatialFloors;
         [NonSerialized] internal DetachedCanonicalSpatialSaveState validatedCanonicalSpatialState;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
