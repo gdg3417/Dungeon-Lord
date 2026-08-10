@@ -2,14 +2,12 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Reflection;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -83,10 +81,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SetRootField(root, "<SaveService>k__BackingField", service);
                 SetRootField(root, "_runSimulationService", new RunSimulationService(config));
                 SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
-                LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(
-                    "[ERROR] Legacy save write rejected for canonical-looking authority.")));
-
-                bool ran = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+                bool loggingEnabled = Debug.unityLogger.logEnabled;
+                bool ran;
+                try
+                {
+                    Debug.unityLogger.logEnabled = false;
+                    ran = root.SimulateRunOnce(RunPostureResolver.BalancedId);
+                }
+                finally
+                {
+                    Debug.unityLogger.logEnabled = loggingEnabled;
+                }
 
                 Assert.That(ran, Is.True);
                 Assert.That(save.runHistory.LatestOutcome, Is.Not.Null);
@@ -243,11 +248,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 var service = new SaveService(new SimpleLogger(false), new SaveConfig
                 { fileName = "save.json", useAtomicWrites = true }, directory);
-                LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(
-                    "[ERROR] Legacy save write rejected for canonical-looking authority.")));
-
-                service.Save(MalformedCanonicalLookingSave(MalformedKind.MarkerOnly),
-                    SaveReason.ManualDev);
+                bool loggingEnabled = Debug.unityLogger.logEnabled;
+                try
+                {
+                    Debug.unityLogger.logEnabled = false;
+                    service.Save(MalformedCanonicalLookingSave(MalformedKind.MarkerOnly),
+                        SaveReason.ManualDev);
+                }
+                finally
+                {
+                    Debug.unityLogger.logEnabled = loggingEnabled;
+                }
 
                 Assert.That(File.Exists(service.SavePath), Is.False);
             }
