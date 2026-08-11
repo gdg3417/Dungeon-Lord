@@ -122,8 +122,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static bool IsReserved(string name) => name == "canonicalSpatialAuthority" || name == "spatialFloors";
-        private static bool TryCanonicalizeCopiedValue(byte[] original, out byte[] candidate) =>
-            original != null && LegacyJsonWhitespaceNormalizer.TryNormalize(original, original.Length, out candidate);
+        private static bool TryCanonicalizeCopiedValue(byte[] original, out byte[] candidate)
+        {
+            candidate = null;
+            return original != null &&
+                LegacyJsonWhitespaceNormalizer.TryNormalize(original, original.Length, out candidate);
+        }
         private static RawSaveMemberEvidence Find(IReadOnlyList<RawSaveMemberEvidence> values, string name)
         { for (int i = 0; i < values.Count; i++) if (values[i].Name == name) return values[i]; return null; }
         private static int CheckedAdd(int value, int addition, int maximum)
