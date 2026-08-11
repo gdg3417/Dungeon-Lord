@@ -73,9 +73,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     string name = RawSavePayloadClassifier.RecognizedSaveDataMemberNames[i];
                     RawSaveMemberEvidence evidence = Find(source.Members, name);
                     if (evidence == null || evidence.State == RawSaveMemberState.Absent) continue;
-                    byte[] value = evidence.GetRawValueBytes();
-                    copied = CheckedAdd(copied, value.Length, limits.MaximumCopiedValueBytes);
-                    Member(output, ref first, name, value);
+                    byte[] originalValue = evidence.GetRawValueBytes();
+                    copied = CheckedAdd(copied, originalValue.Length, limits.MaximumCopiedValueBytes);
+                    if (!TryCanonicalizeCopiedValue(originalValue, out byte[] candidateValue))
+                        return Failure(CandidateInvalidReason);
+                    Member(output, ref first, name, candidateValue);
                 }
                 IReadOnlyList<RawUnknownMemberEvidence> primaryUnknown = source.UnknownPrimaryMembers;
                 for (int i = 0; i < primaryUnknown.Count; i++)
@@ -83,9 +85,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     RawUnknownMemberEvidence evidence = primaryUnknown[i];
                     if (IsReserved(evidence.Name)) return Failure(UnknownMemberUnpreservableReason);
                     unknownCount = CheckedAdd(unknownCount, 1, limits.MaximumUnknownMembers);
-                    byte[] value = evidence.GetRawValueBytes();
-                    unknownBytes = CheckedAdd(unknownBytes, value.Length, limits.MaximumUnknownMemberBytes);
-                    Member(output, ref first, evidence.Name, value);
+                    byte[] originalValue = evidence.GetRawValueBytes();
+                    unknownBytes = CheckedAdd(unknownBytes, originalValue.Length, limits.MaximumUnknownMemberBytes);
+                    if (!TryCanonicalizeCopiedValue(originalValue, out byte[] candidateValue))
+                        return Failure(UnknownMemberUnpreservableReason);
+                    Member(output, ref first, evidence.Name, candidateValue);
                 }
                 Member(output, ref first, "canonicalSpatialAuthority", authority);
                 Member(output, ref first, "spatialFloors", floors);
@@ -97,9 +101,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (evidence.Name == "schema" || evidence.Name == "schemaVersion" || evidence.Name == "primary")
                         return Failure(UnknownMemberUnpreservableReason);
                     unknownCount = CheckedAdd(unknownCount, 1, limits.MaximumUnknownMembers);
-                    byte[] value = evidence.GetRawValueBytes();
-                    unknownBytes = CheckedAdd(unknownBytes, value.Length, limits.MaximumUnknownMemberBytes);
-                    output.Ascii(","); output.String(evidence.Name); output.Ascii(":"); output.Bytes(value);
+                    byte[] originalValue = evidence.GetRawValueBytes();
+                    unknownBytes = CheckedAdd(unknownBytes, originalValue.Length, limits.MaximumUnknownMemberBytes);
+                    if (!TryCanonicalizeCopiedValue(originalValue, out byte[] candidateValue))
+                        return Failure(UnknownMemberUnpreservableReason);
+                    output.Ascii(","); output.String(evidence.Name); output.Ascii(":"); output.Bytes(candidateValue);
                 }
                 output.Ascii("}");
                 byte[] candidate = output.Finish();
@@ -116,6 +122,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static bool IsReserved(string name) => name == "canonicalSpatialAuthority" || name == "spatialFloors";
+        private static bool TryCanonicalizeCopiedValue(byte[] original, out byte[] candidate) =>
+            original != null && LegacyJsonWhitespaceNormalizer.TryNormalize(original, original.Length, out candidate);
         private static RawSaveMemberEvidence Find(IReadOnlyList<RawSaveMemberEvidence> values, string name)
         { for (int i = 0; i < values.Count; i++) if (values[i].Name == name) return values[i]; return null; }
         private static int CheckedAdd(int value, int addition, int maximum)

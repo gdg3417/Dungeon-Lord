@@ -451,6 +451,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static RawSavePayloadClassificationLimits MeasurementPreparationRawLimits() =>
             new RawSavePayloadClassificationLimits(1000000, 128, 1000, 1000, 100000, 5000000);
 
+        // Permissive, bounded preparation ceiling for measurement only. These values are not
+        // measurements or proposed production authority; each workload is measured independently.
+        private static DetachedWholeSaveLimits MeasurementPreparationWholeLimits() =>
+            new DetachedWholeSaveLimits(2000000, 1000000, 10000, 1000000);
+
+        private static CanonicalSpatialSerializationLimits MeasurementPreparationSerializationLimits() =>
+            new CanonicalSpatialSerializationLimits(
+                new SpatialSerializedInputLimits(2000000, 200000, 20000, 200000, 100),
+                new CanonicalSpatialSaveWorkloadLimits(20000, 20000));
+
         private static byte[] SerializeLegacyPersistence(SaveData save)
         {
             var root = new SaveRoot
@@ -466,7 +476,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] raw = SerializeLegacyPersistence(save);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, raw,
-                    MeasurementPreparationRawLimits());
+                    MeasurementPreparationRawLimits(), MeasurementPreparationWholeLimits(),
+                    MeasurementPreparationSerializationLimits());
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
             rows.Add(Measure(name, fixture.Original, fixture.Classification,
                 fixture.Result.Attempt.Candidate.GetBytes(),

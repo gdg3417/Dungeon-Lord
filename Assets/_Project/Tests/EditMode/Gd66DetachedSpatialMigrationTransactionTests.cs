@@ -2383,13 +2383,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 FirstRecovery = recovered, SecondRecovery = recoveredAgain,
                 BasicRoomDefinitionId = geometry.BasicRoomDefinitionId, CurrentContext = currentContext,
                 UnfinishedContext = unfinished, Production = fixture.Production, Compatibility = fixture.Compatibility,
-                Limits = fixture.Limits, WholeLimits = WholeLimits(),
+                Limits = fixture.Limits, WholeLimits = fixture.WholeLimits,
                 LegacyBytes = fixture.LegacyBytes, ValidationInputs = new Dictionary<string, byte[]>() };
         }
 
         internal static PreparedFixture PrepareEmptyFixture(int schema, bool unwrapped = false,
             byte[] originalOverride = null,
-            RawSavePayloadClassificationLimits? rawClassificationLimits = null)
+            RawSavePayloadClassificationLimits? rawClassificationLimits = null,
+            DetachedWholeSaveLimits? wholeSaveLimits = null,
+            CanonicalSpatialSerializationLimits? serializationLimits = null)
         {
             const string root = "Assets/_Project/Data/Production/DungeonSpatial/";
             TextAsset limitAsset = Asset(root + "validation_limits.json");
@@ -2423,7 +2425,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(original,
                 rawClassificationLimits ?? RawLimits(),
                 new RawSaveEnvelopeVersionContract(1, 6), BlankFloor());
-            var limits = new CanonicalSpatialSerializationLimits(
+            CanonicalSpatialSerializationLimits limits = serializationLimits ?? new CanonicalSpatialSerializationLimits(
                 new SpatialSerializedInputLimits(1000000, 100000, 10000, 100000, 100),
                 new CanonicalSpatialSaveWorkloadLimits(10000, 10000));
             var descriptor = new SpatialMigrationInputDescriptor(SpatialContractSha256.Compute(original), schema,
@@ -2438,18 +2440,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Array.Empty<SpatialValidationInputHash>(), SpatialContractSha256.Compute(legacyBytes),
                 SpatialMigrationContractIdentity.CanonicalSerializerId,
                 SpatialMigrationContractIdentity.CanonicalSerializerVersion);
+            DetachedWholeSaveLimits selectedWholeLimits = wholeSaveLimits ?? WholeLimits();
             var inputs = new DetachedSpatialMigrationPreparationInputs(original, classification, descriptor,
                 compatibility, production, legacy, new Dictionary<string, byte[]>(), limits,
-                WholeLimits());
+                selectedWholeLimits);
             return new PreparedFixture(original, classification, production, compatibility, legacyBytes, limits,
-                DetachedSpatialMigrationPreparer.Prepare(inputs));
+                selectedWholeLimits, DetachedSpatialMigrationPreparer.Prepare(inputs));
         }
 
         internal static DetachedSpatialMigrationRecoveryContext Recovery(PreparedFixture fixture,
             byte[] legacyBytes = null) =>
             new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility, fixture.Production,
                 new Dictionary<string, byte[]>(), legacyBytes ?? fixture.LegacyBytes, fixture.Limits, RawLimits(),
-                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), WholeLimits());
+                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), fixture.WholeLimits);
 
         private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
             Enumerable.Range(0, 4).Select(index => new RawLegacyBlankFloorNodeContract(
@@ -2470,15 +2473,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal PreparedFixture(byte[] original, RawSavePayloadClassification classification,
                 ProductionSpatialContentSnapshot production,
                 SpatialLayoutCompatibilitySnapshot compatibility, byte[] legacyBytes,
-                CanonicalSpatialSerializationLimits limits, DetachedSpatialMigrationPreparationResult result)
+                CanonicalSpatialSerializationLimits limits, DetachedWholeSaveLimits wholeLimits,
+                DetachedSpatialMigrationPreparationResult result)
             { Original = original; Classification = classification; Production = production; Compatibility = compatibility;
-              LegacyBytes = legacyBytes; Limits = limits; Result = result; }
+              LegacyBytes = legacyBytes; Limits = limits; WholeLimits = wholeLimits; Result = result; }
             internal byte[] Original { get; }
             internal RawSavePayloadClassification Classification { get; }
             internal ProductionSpatialContentSnapshot Production { get; }
             internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
             internal byte[] LegacyBytes { get; }
             internal CanonicalSpatialSerializationLimits Limits { get; }
+            internal DetachedWholeSaveLimits WholeLimits { get; }
             internal DetachedSpatialMigrationPreparationResult Result { get; }
         }
 
