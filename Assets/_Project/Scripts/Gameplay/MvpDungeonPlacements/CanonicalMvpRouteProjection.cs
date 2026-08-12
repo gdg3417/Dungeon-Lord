@@ -39,13 +39,17 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
         internal static bool TryPublishValidated(DetachedCompleteSaveValidationResult validation,
             out SaveData save, out string reason)
+            => TryPublishValidated(validation, null, out save, out reason);
+
+        internal static bool TryPublishValidated(DetachedCompleteSaveValidationResult validation,
+            ProductionSpatialContentSnapshot production, out SaveData save, out string reason)
         {
             save = null;
             reason = ContradictoryAuthorityReason;
             if (validation == null || !validation.IsValid ||
                 !validation.CurrentTargetValidated || validation.State == null)
                 return false;
-            CanonicalMvpRouteProjectionResult projected = Project(validation.State, null);
+            CanonicalMvpRouteProjectionResult projected = Project(validation.State, null, production);
             if (projected.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
                 return false;
             try
@@ -84,7 +88,18 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 !ReferenceEquals(save.spatialFloors,
                     save.validatedCanonicalSpatialState.Floors))
                 return Contradictory();
-            return Project(save.validatedCanonicalSpatialState, config);
+            return Project(save.validatedCanonicalSpatialState, config, null);
+        }
+
+        public static CanonicalMvpRouteProjectionResult InspectWithProductionContent(SaveData save,
+            ProductionSpatialContentSnapshot production)
+        {
+            if (save == null || (!HasCanonicalLookingState(save) &&
+                save.validatedCanonicalSpatialState == null))
+                return new CanonicalMvpRouteProjectionResult(
+                    CanonicalMvpRuntimeAuthorityState.Legacy, null, null);
+            if (save.validatedCanonicalSpatialState == null) return Contradictory();
+            return Project(save.validatedCanonicalSpatialState, null, production);
         }
 
         public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config)
@@ -105,7 +120,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         }
 
         private static CanonicalMvpRouteProjectionResult Project(
-            DetachedCanonicalSpatialSaveState state, RunSimulationConfig config)
+            DetachedCanonicalSpatialSaveState state, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
             try
             {
@@ -221,8 +237,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                                 CanonicalSpatialSaveContracts.TrapCategoryId),
                             AssignedLootNodeOptionIds = Options(owned,
                                 CanonicalSpatialSaveContracts.LootNodeCategoryId),
-                            Capacity = MvpRoomSlotLayoutResolver.ResolveCapacity(
-                                MvpDungeonPlacementIds.BasicRoomOptionId, config),
+                            Capacity = ResolveCapacity(room, config, production),
                             HasActiveContent = owned.Length != 0
                         });
                     }
@@ -241,6 +256,22 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 // Projection is a trust boundary. Malformed state is classified, never surfaced.
                 return Contradictory();
             }
+        }
+
+        private static MvpRoomSlotCapacity ResolveCapacity(RoomSpatialInstance room,
+            RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production)
+        {
+            if (production != null)
+            {
+                if (!CanonicalRoomCapacityResolver.TryResolve(production, room.RoomDefinitionId,
+                    out MvpRoomSlotCapacity capacity, out string ignored))
+                    throw new InvalidOperationException();
+                capacity.RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId;
+                return capacity;
+            }
+            // Inactive compatibility overload only. Final live cutover injects production content.
+            return MvpRoomSlotLayoutResolver.ResolveCapacity(
+                MvpDungeonPlacementIds.BasicRoomOptionId, legacyConfig);
         }
 
         private static CanonicalMvpRouteProjectionResult Valid(MvpOrderedRouteRoom[] rooms) =>
