@@ -52,6 +52,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void FirstWritesRejectBogusRoomTargetWithoutMutation()
+        {
+            Fixture fixture = Create();
+            byte[] before = CanonicalSpatialSaveSerializer.Serialize(fixture.State,
+                fixture.Profile.Canonical).Value;
+
+            DetachedCanonicalMutationResult room = fixture.Prepare(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId, "missing.room"));
+            DetachedCanonicalMutationResult content = fixture.Prepare(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, "missing.room"));
+
+            Assert.That(room.Reason,
+                Is.EqualTo(DetachedCanonicalSpatialMutation.ValidationFailedReason));
+            Assert.That(content.Reason,
+                Is.EqualTo(DetachedCanonicalSpatialMutation.ValidationFailedReason));
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(fixture.State,
+                fixture.Profile.Canonical).Value, Is.EqualTo(before));
+        }
+
+        [Test]
         public void ImplicitContainerPromotesAndRetainsContentExactlyOnce()
         {
             Fixture fixture = Create();
@@ -105,6 +127,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.RoomInstanceId == other), Is.False);
             Assert.That(CanonicalSpatialSaveSerializer.Serialize(run.State, run.Limits).Value,
                 Is.EqualTo(otherBefore));
+        }
+
+        [Test]
+        public void R2ReplacementCapacityIgnoresOtherRoomAssignments()
+        {
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
+                "\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}";
+            Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
+                Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                    "writer-r2-capacity", 6, members);
+            SavedSpatialFloor floor = run.State.Floors[0];
+            string target = floor.Layout.Rooms[0].RoomInstanceId;
+            string other = floor.Layout.Rooms[1].RoomInstanceId;
+            RoomContentAssignment template = floor.RoomContents.Assignments.Single();
+            floor.RoomContents.Assignments = new[] { template,
+                Assignment(other, 1), Assignment(other, 2) };
+            floor.RoomContents.NextSequence = 3;
+            floor.Layout.Rooms[0].RoomDefinitionId = "spatial.room.large_chamber";
+            RunSimulationConfig config = LegacyGameplayConfigurationContract.Parse(run.LegacyBytes);
+
+            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(run.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId, target), run.Production,
+                run.Compatibility, config, run.Limits);
+
+            Assert.That(result.Reason,
+                Is.Not.EqualTo(DetachedCanonicalSpatialMutation.CapacityReductionReason));
         }
 
         [Test]
@@ -317,6 +370,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RecognizedOnlySaveMissingProductionFailsBeforeFilesystemMutation()
+        {
+            Fixture fixture = Create();
+            var authority = new DetachedCanonicalWriteAuthority(null, fixture.Compatibility,
+                fixture.Configuration, fixture.Context, fixture.Profile);
+
+            DetachedCanonicalWriteResult result = authority.SaveRecognizedState(fixture.ActivePath,
+                fixture.FileSystem, fixture.Session, fixture.Runtime);
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(fixture.FileSystem.Operations, Is.Empty);
+        }
+
+        [Test]
         public void StaleSuppliedStateCannotOverrideSessionAuthority()
         {
             Fixture fixture = Create();
@@ -346,6 +413,105 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(result.AuthorityState,
                 Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ContradictoryCanonical));
+        }
+
+        [TestCase("rollback")]
+        [TestCase("candidate")]
+        public void PartialPriorEvidenceWithValidatedActiveIsRetiredAndRetrySucceeds(string kind)
+        {
+            Fixture fixture = Create();
+            string evidence = EvidencePath(fixture, 'a', 'b', kind);
+            fixture.FileSystem.Seed(evidence, new byte[] { 1, 2, 3 });
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(fixture.FileSystem.Exists(evidence), Is.False);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void PartialDurableRollbackWriteIsSettledOnRetry()
+        {
+            Fixture fixture = Create();
+            fixture.FileSystem.EnablePartialWriteFailure(3);
+            DetachedCanonicalWriteResult interrupted = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            DetachedCanonicalWriteResult retry = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            Assert.That(interrupted.IsSuccess, Is.False);
+            Assert.That(retry.IsSuccess, Is.True, retry.Reason);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void PriorTransitionEvidenceIsSettledBeforeDifferentNextTransition()
+        {
+            Fixture fixture = Create();
+            string oldRollback = EvidencePath(fixture, '1', '2', "rollback");
+            fixture.FileSystem.Seed(oldRollback, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId));
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(fixture.FileSystem.Exists(oldRollback), Is.False);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void RepeatedAtoBtoAtoBTransitionsDoNotCollideOrLeakEvidence()
+        {
+            Fixture fixture = Create();
+            DetachedCanonicalWriteResult first = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            fixture.Accept(first);
+            string roomId = fixture.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            DetachedCanonicalWriteResult second = fixture.Execute(
+                DetachedCanonicalMutationRequest.RemoveRoom(roomId));
+            fixture.Accept(second);
+            DetachedCanonicalWriteResult third = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            Assert.That(first.IsSuccess, Is.True, first.Reason);
+            Assert.That(second.IsSuccess, Is.True, second.Reason);
+            Assert.That(third.IsSuccess, Is.True, third.Reason);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void EvidenceEnumerationIsBoundedAndFailsRecoveryRequired()
+        {
+            Fixture fixture = Create();
+            int maximum = fixture.Profile.Whole.MaximumUnknownMembers;
+            for (int index = 0; index <= maximum; index++)
+            {
+                string first = index.ToString("x16", CultureInfo.InvariantCulture);
+                string name = Path.GetFileName(fixture.ActivePath) + ".canonical-write-" + first +
+                    "-0000000000000000.rollback";
+                fixture.FileSystem.Seed(Path.Combine(Path.GetDirectoryName(fixture.ActivePath), name),
+                    new byte[] { 1 });
+            }
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            Assert.That(result.Reason,
+                Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
         }
 
         [Test]
@@ -419,6 +585,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CategoryId = MvpDungeonPlacementIds.MonsterCategoryId,
                 OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Sequence = sequence };
 
+        private static string EvidencePath(Fixture fixture, char first, char second, string kind) =>
+            Path.Combine(Path.GetDirectoryName(fixture.ActivePath), Path.GetFileName(fixture.ActivePath) +
+                ".canonical-write-" + new string(first, 16) + "-" + new string(second, 16) + "." + kind);
+
         private static MvpOrderedRouteRoom[] Route(DetachedCanonicalSpatialSaveState state, Fixture fixture)
         {
             var save = new SaveData { canonicalSpatialAuthority = state.Authority,
@@ -488,6 +658,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             internal DetachedCanonicalWriteResult Execute(DetachedCanonicalMutationRequest request) =>
                 Authority.Execute(ActivePath, FileSystem, Session, State, Runtime, request);
+
+            internal void Accept(DetachedCanonicalWriteResult result)
+            {
+                Assert.That(result.IsSuccess, Is.True, result.Reason);
+                Session = result.Session; State = result.Validation.State;
+                Runtime = result.RuntimeProjection;
+            }
 
             internal Fixture Rebase(DetachedCanonicalSpatialSaveState state)
             {

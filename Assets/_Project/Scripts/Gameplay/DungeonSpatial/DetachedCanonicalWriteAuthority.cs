@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
@@ -92,7 +94,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate);
+            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
+                limits.Whole.MaximumUnknownMembers, limits.Raw.MaximumInputBytes);
             if (persistenceReason != null) return Failure(persistenceReason);
             return new DetachedCanonicalWriteResult(true, null, false,
                 mutation.ApplyExplicitRoomEffect, candidate, reopened.Session, validated, runtime);
@@ -102,6 +105,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             SaveData currentRuntime)
         {
+            if (fileSystem == null || session == null || currentRuntime == null || context == null ||
+                limits == null || production == null || compatibility == null || configuration == null)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             DetachedCompleteSaveValidationResult owned = ValidateSession(session);
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated || currentRuntime == null)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -128,7 +134,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
                     production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate);
+            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
+                limits.Whole.MaximumUnknownMembers, limits.Raw.MaximumInputBytes);
             return persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
                     reopened.Session, validated, runtime)
@@ -148,7 +155,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
-            byte[] original, byte[] candidate)
+            byte[] original, byte[] candidate, int maximumEvidence, int maximumEvidenceBytes)
         {
             if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
                 return AtomicSaveFailedReason;
@@ -161,6 +168,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 byte[] activeBefore = fileSystem.ReadAllBytes(activePath);
                 if (!Same(activeBefore, original) && !Same(activeBefore, candidate))
                     return RecoveryRequiredReason;
+                string evidenceReason;
+                try { evidenceReason = SettleAllEvidence(fileSystem, activePath, directory,
+                    activeBefore, maximumEvidence, maximumEvidenceBytes); }
+                catch { return RecoveryRequiredReason; }
+                if (evidenceReason != null) return evidenceReason;
                 string token = SpatialContractSha256.Compute(original).Substring(0, 16) + "-" +
                     SpatialContractSha256.Compute(candidate).Substring(0, 16);
                 string rollback = Path.Combine(directory, Path.GetFileName(activePath) +
@@ -169,10 +181,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ".canonical-write-" + token + ".candidate");
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, rollback) ||
                     !fileSystem.IsPathContainedWithoutRedirection(directory, staging)) return AtomicSaveFailedReason;
-                string settled = SettleExisting(fileSystem, activePath, directory, rollback, staging,
-                    original, candidate, out bool alreadyCommitted);
-                if (settled != null) return settled;
-                if (alreadyCommitted) return null;
+                if (Same(activeBefore, candidate)) return null;
                 if (!Same(activeBefore, original)) return RecoveryRequiredReason;
                 fileSystem.WriteAllBytesDurable(rollback, original);
                 if (!Same(fileSystem.ReadAllBytes(rollback), original)) return RecoveryRequiredReason;
@@ -184,15 +193,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     fileSystem.FlushDirectory(directory);
                     if (!Same(fileSystem.ReadAllBytes(activePath), candidate))
                         throw new IOException();
-                    fileSystem.DeleteFile(rollback);
-                    fileSystem.FlushDirectory(directory);
-                    return null;
                 }
                 catch
                 {
                     return Restore(fileSystem, rollback, activePath, directory, original)
                         ? AtomicSaveFailedReason : RecoveryRequiredReason;
                 }
+                try
+                {
+                    fileSystem.DeleteFile(rollback);
+                    fileSystem.FlushDirectory(directory);
+                    return null;
+                }
+                catch { return RecoveryRequiredReason; }
             }
             catch
             {
@@ -205,35 +218,47 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private static string SettleExisting(ISpatialMigrationFileSystem fileSystem, string activePath,
-            string directory, string rollback, string staging, byte[] original, byte[] candidate,
-            out bool alreadyCommitted)
+        private static string SettleAllEvidence(ISpatialMigrationFileSystem fileSystem,
+            string activePath, string directory, byte[] validatedActive, int maximumEvidence,
+            int maximumEvidenceBytes)
         {
-            alreadyCommitted = false;
-            bool hasRollback = fileSystem.Exists(rollback), hasStaging = fileSystem.Exists(staging);
-            if (!hasRollback && !hasStaging)
+            if (maximumEvidence <= 0 || maximumEvidenceBytes <= 0) return RecoveryRequiredReason;
+            string activeName = Path.GetFileName(activePath);
+            string prefix = activeName + ".canonical-write-";
+            IReadOnlyList<string> discovered = fileSystem.EnumerateFiles(directory, prefix + "*",
+                maximumEvidence);
+            string[] evidence = discovered.Where(path => IsEvidenceName(Path.GetFileName(path), prefix))
+                .OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            foreach (string path in evidence)
             {
-                alreadyCommitted = Same(fileSystem.ReadAllBytes(activePath), candidate);
-                return null;
+                if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
+                    return RecoveryRequiredReason;
+                byte[] evidenceBytes = fileSystem.ReadAllBytes(path);
+                if (evidenceBytes == null || evidenceBytes.Length > maximumEvidenceBytes)
+                    return RecoveryRequiredReason;
+                // The caller has already contextually validated and byte-matched the active complete
+                // save. Thus prior ordinary-write sidecars are obsolete, including partial writes.
+                // Never overwrite or interpret their payload; retire only their strictly-owned names.
+                fileSystem.DeleteFile(path);
             }
-            if (hasRollback && !Same(fileSystem.ReadAllBytes(rollback), original))
-                return RecoveryRequiredReason;
-            if (hasStaging && !Same(fileSystem.ReadAllBytes(staging), candidate))
-                return RecoveryRequiredReason;
-            byte[] active = fileSystem.ReadAllBytes(activePath);
-            if (!Same(active, original) && !Same(active, candidate)) return RecoveryRequiredReason;
-            if (Same(active, candidate))
-            {
-                if (hasStaging) fileSystem.DeleteFile(staging);
-                if (hasRollback) fileSystem.DeleteFile(rollback);
-                fileSystem.FlushDirectory(directory);
-                alreadyCommitted = true;
-                return null;
-            }
-            if (hasStaging) fileSystem.DeleteFile(staging);
-            if (hasRollback) fileSystem.DeleteFile(rollback);
-            fileSystem.FlushDirectory(directory);
+            if (evidence.Length != 0) fileSystem.FlushDirectory(directory);
+            if (!Same(fileSystem.ReadAllBytes(activePath), validatedActive)) return RecoveryRequiredReason;
             return null;
+        }
+
+        private static bool IsEvidenceName(string name, string prefix)
+        {
+            if (name == null || !name.StartsWith(prefix, StringComparison.Ordinal)) return false;
+            string remainder = name.Substring(prefix.Length);
+            string suffix = remainder.EndsWith(".rollback", StringComparison.Ordinal) ? ".rollback" :
+                remainder.EndsWith(".candidate", StringComparison.Ordinal) ? ".candidate" : null;
+            if (suffix == null) return false;
+            string token = remainder.Substring(0, remainder.Length - suffix.Length);
+            if (token.Length != 33 || token[16] != '-') return false;
+            for (int index = 0; index < token.Length; index++)
+                if (index != 16 && !((token[index] >= '0' && token[index] <= '9') ||
+                    (token[index] >= 'a' && token[index] <= 'f'))) return false;
+            return true;
         }
 
         private static bool Restore(ISpatialMigrationFileSystem fileSystem, string rollback,

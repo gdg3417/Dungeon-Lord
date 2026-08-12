@@ -119,6 +119,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return DetachedSpatialMigrationPreparer.InvalidOptionReason;
             if (state.Floors.Length == 0)
             {
+                if (!string.IsNullOrEmpty(requestedRoomId)) return ValidationFailedReason;
                 if (!TryCreateStarter(state, production, compatibility,
                     LegacyRoomOriginKind.CanonicalPlayerPlaced, out SavedSpatialFloor floor, out string reason))
                     return reason;
@@ -135,11 +136,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out MvpRoomSlotCapacity replacementCapacity, out reason)) return reason;
                 RoomContentAssignment[] retained = existingFloor.RoomContents.Assignments ??
                     Array.Empty<RoomContentAssignment>();
-                if (retained.Count(value => value?.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId) >
+                if (retained.Count(value => value?.RoomInstanceId == room.RoomInstanceId &&
+                        value.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId) >
                         replacementCapacity.MonsterCapacity ||
-                    retained.Count(value => value?.CategoryId == MvpDungeonPlacementIds.TrapCategoryId) >
+                    retained.Count(value => value?.RoomInstanceId == room.RoomInstanceId &&
+                        value.CategoryId == MvpDungeonPlacementIds.TrapCategoryId) >
                         replacementCapacity.TrapCapacity ||
-                    retained.Count(value => value?.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) >
+                    retained.Count(value => value?.RoomInstanceId == room.RoomInstanceId &&
+                        value.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) >
                         replacementCapacity.LootCapacity) return CapacityReductionReason;
                 room.RoomDefinitionId = basicDefinition;
             }
@@ -163,6 +167,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return DetachedSpatialMigrationPreparer.InvalidOptionReason;
             if (state.Floors.Length == 0)
             {
+                if (!string.IsNullOrEmpty(requestedRoomId)) return ValidationFailedReason;
                 if (!TryCreateStarter(state, production, compatibility,
                     LegacyRoomOriginKind.ImplicitCompatibilityContainer, out SavedSpatialFloor starter,
                     out string reason)) return reason;
