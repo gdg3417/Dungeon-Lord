@@ -95,7 +95,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
-                limits.Whole.MaximumUnknownMembers, limits.Raw.MaximumInputBytes);
+                limits.Canonical.Serialized.MaximumCollectionRecords);
             if (persistenceReason != null) return Failure(persistenceReason);
             return new DetachedCanonicalWriteResult(true, null, false,
                 mutation.ApplyExplicitRoomEffect, candidate, reopened.Session, validated, runtime);
@@ -135,7 +135,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
-                limits.Whole.MaximumUnknownMembers, limits.Raw.MaximumInputBytes);
+                limits.Canonical.Serialized.MaximumCollectionRecords);
             return persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
                     reopened.Session, validated, runtime)
@@ -155,7 +155,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
-            byte[] original, byte[] candidate, int maximumEvidence, int maximumEvidenceBytes)
+            byte[] original, byte[] candidate, int maximumEvidence)
         {
             if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
                 return AtomicSaveFailedReason;
@@ -170,7 +170,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return RecoveryRequiredReason;
                 string evidenceReason;
                 try { evidenceReason = SettleAllEvidence(fileSystem, activePath, directory,
-                    activeBefore, maximumEvidence, maximumEvidenceBytes); }
+                    activeBefore, maximumEvidence); }
                 catch { return RecoveryRequiredReason; }
                 if (evidenceReason != null) return evidenceReason;
                 string token = SpatialContractSha256.Compute(original).Substring(0, 16) + "-" +
@@ -199,13 +199,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Restore(fileSystem, rollback, activePath, directory, original)
                         ? AtomicSaveFailedReason : RecoveryRequiredReason;
                 }
-                try
-                {
-                    fileSystem.DeleteFile(rollback);
-                    fileSystem.FlushDirectory(directory);
-                    return null;
-                }
-                catch { return RecoveryRequiredReason; }
+                // Candidate authority is already proven by replacement, durability flush, and exact
+                // readback. Cleanup is maintenance only; leave evidence for the next settlement pass.
+                try { fileSystem.DeleteFile(rollback); fileSystem.FlushDirectory(directory); }
+                catch { }
+                return null;
             }
             catch
             {
@@ -219,22 +217,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static string SettleAllEvidence(ISpatialMigrationFileSystem fileSystem,
-            string activePath, string directory, byte[] validatedActive, int maximumEvidence,
-            int maximumEvidenceBytes)
+            string activePath, string directory, byte[] validatedActive, int maximumEvidence)
         {
-            if (maximumEvidence <= 0 || maximumEvidenceBytes <= 0) return RecoveryRequiredReason;
+            if (maximumEvidence <= 0) return RecoveryRequiredReason;
             string activeName = Path.GetFileName(activePath);
             string prefix = activeName + ".canonical-write-";
             IReadOnlyList<string> discovered = fileSystem.EnumerateFiles(directory, prefix + "*",
-                maximumEvidence);
+                maximumEvidence + 1);
+            if (discovered.Count > maximumEvidence) return RecoveryRequiredReason;
             string[] evidence = discovered.Where(path => IsEvidenceName(Path.GetFileName(path), prefix))
                 .OrderBy(path => path, StringComparer.Ordinal).ToArray();
             foreach (string path in evidence)
             {
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
-                    return RecoveryRequiredReason;
-                byte[] evidenceBytes = fileSystem.ReadAllBytes(path);
-                if (evidenceBytes == null || evidenceBytes.Length > maximumEvidenceBytes)
                     return RecoveryRequiredReason;
                 // The caller has already contextually validated and byte-matched the active complete
                 // save. Thus prior ordinary-write sidecars are obsolete, including partial writes.

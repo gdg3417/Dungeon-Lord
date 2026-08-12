@@ -434,6 +434,73 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ObsoleteOwnedEvidenceIsDeletedWithoutReadingItsPayload()
+        {
+            Fixture fixture = Create();
+            string evidence = EvidencePath(fixture, 'a', 'b', "rollback");
+            fixture.FileSystem.Seed(evidence, new byte[] { 1, 2, 3 });
+            fixture.FileSystem.EnableTargetedFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,
+                paths => paths.Length == 1 && paths[0] == evidence, 1, false);
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(fixture.FileSystem.Operations.Any(operation =>
+                operation.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read &&
+                operation.Paths.Length == 1 && operation.Paths[0] == evidence), Is.False);
+            Assert.That(fixture.FileSystem.Exists(evidence), Is.False);
+        }
+
+        [Test]
+        public void RollbackDeleteFailureAfterCandidateProofReturnsCandidateSuccessAndNextSaveSettlesEvidence()
+        {
+            Fixture fixture = Create();
+            fixture.FileSystem.EnableTargetedFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Delete,
+                paths => paths.Length == 1 && paths[0].EndsWith(".rollback", StringComparison.Ordinal),
+                1, false);
+
+            DetachedCanonicalWriteResult first = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            AssertCandidateSuccess(fixture, first);
+            Assert.That(first.RuntimeProjection.validatedCanonicalSpatialState,
+                Is.Not.SameAs(fixture.Runtime.validatedCanonicalSpatialState));
+            Assert.That(fixture.FileSystem.Paths.Count(path => path.EndsWith(
+                ".rollback", StringComparison.Ordinal)), Is.EqualTo(1));
+
+            fixture.FileSystem.DisableFailure();
+            fixture.Accept(first);
+            fixture.Runtime.lastSavedUtcUnix++;
+            DetachedCanonicalWriteResult second = fixture.Authority.SaveRecognizedState(
+                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
+
+            AssertCandidateSuccess(fixture, second);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void CleanupFlushFailureAfterCandidateProofReturnsCandidateSuccess()
+        {
+            Fixture fixture = Create();
+            fixture.FileSystem.EnableFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 2);
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+
+            AssertCandidateSuccess(fixture, result);
+            Assert.That(fixture.FileSystem.Paths.Count(path =>
+                path.Contains(".canonical-write-")), Is.EqualTo(0));
+        }
+
+        [Test]
         public void PartialDurableRollbackWriteIsSettledOnRetry()
         {
             Fixture fixture = Create();
@@ -496,7 +563,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void EvidenceEnumerationIsBoundedAndFailsRecoveryRequired()
         {
             Fixture fixture = Create();
-            int maximum = fixture.Profile.Whole.MaximumUnknownMembers;
+            int maximum = fixture.Profile.Canonical.Serialized.MaximumCollectionRecords;
             for (int index = 0; index <= maximum; index++)
             {
                 string first = index.ToString("x16", CultureInfo.InvariantCulture);
@@ -588,6 +655,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static string EvidencePath(Fixture fixture, char first, char second, string kind) =>
             Path.Combine(Path.GetDirectoryName(fixture.ActivePath), Path.GetFileName(fixture.ActivePath) +
                 ".canonical-write-" + new string(first, 16) + "-" + new string(second, 16) + "." + kind);
+
+        private static void AssertCandidateSuccess(Fixture fixture,
+            DetachedCanonicalWriteResult result)
+        {
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(result.Session, Is.Not.Null);
+            Assert.That(result.RuntimeProjection, Is.Not.Null);
+            Assert.That(result.RuntimeProjection.validatedCanonicalSpatialState,
+                Is.SameAs(result.Validation.State));
+            Assert.That(result.GetPersistedBytes(),
+                Is.EqualTo(fixture.FileSystem.ReadAllBytes(fixture.ActivePath)));
+            Assert.That(result.Session.GetCurrentBytes(), Is.EqualTo(result.GetPersistedBytes()));
+        }
 
         private static MvpOrderedRouteRoom[] Route(DetachedCanonicalSpatialSaveState state, Fixture fixture)
         {
