@@ -179,7 +179,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 sidecarFixture.Limits.Serialized);
             rows.Add(MeasureArtifact("restoration-intent", restoration));
 
-            foreach (string row in rows) TestContext.Progress.WriteLine("GD66_LIMIT_MEASUREMENT " + row);
+            foreach (string row in rows)
+            {
+                string line = "GD66_LIMIT_MEASUREMENT " + row;
+                Debug.Log(line);
+                TestContext.Progress.WriteLine(line);
+            }
             Assert.That(rows.Count, Is.EqualTo(30));
         }
 
