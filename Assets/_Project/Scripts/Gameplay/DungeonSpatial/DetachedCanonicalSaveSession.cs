@@ -5,28 +5,48 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public sealed class DetachedRecognizedSaveStateSnapshotResult
+    {
+        internal DetachedRecognizedSaveStateSnapshotResult(
+            DetachedRecognizedSaveStateSnapshot snapshot, string reason)
+        { Snapshot = snapshot; Reason = reason; }
+        public DetachedRecognizedSaveStateSnapshot Snapshot { get; }
+        public string Reason { get; }
+        public bool IsSuccess => Snapshot != null;
+    }
+
     public sealed class DetachedRecognizedSaveStateSnapshot
     {
         private readonly Dictionary<string, byte[]> values;
         private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source) { values = source; }
 
-        public static DetachedRecognizedSaveStateSnapshot Create(SaveData source,
+        public static DetachedRecognizedSaveStateSnapshotResult Capture(SaveData source,
             SaveSpatialMigrationLimitsProfile limits)
         {
-            if (source == null || limits == null) return null;
-            byte[] json = Encoding.UTF8.GetBytes(JsonUtility.ToJson(source));
-            var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
-            if (!ContractJson.TryParse(json, limits.Canonical.Serialized, issues, out ContractJsonNode root) ||
-                root.Kind != ContractJsonKind.Object) return null;
-            var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
-            foreach (KeyValuePair<string, ContractJsonNode> field in root.Fields)
+            if (source == null || limits == null)
+                return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            try
             {
-                if (!DetachedCanonicalSaveSession.IsLiveRecognizedMember(field.Key)) continue;
-                var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
-                result.Add(field.Key, writer.Finish());
+                byte[] json = Encoding.UTF8.GetBytes(JsonUtility.ToJson(source));
+                var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+                if (!ContractJson.TryParse(json, limits.Canonical.Serialized, issues,
+                    out ContractJsonNode root) || root.Kind != ContractJsonKind.Object)
+                    return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason);
+                var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+                foreach (KeyValuePair<string, ContractJsonNode> field in root.Fields)
+                {
+                    if (!DetachedCanonicalSaveSession.IsLiveRecognizedMember(field.Key)) continue;
+                    var writer = new ContractJsonWriter(limits.Canonical.Serialized);
+                    DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+                    result.Add(field.Key, writer.Finish());
+                }
+                return new DetachedRecognizedSaveStateSnapshotResult(
+                    new DetachedRecognizedSaveStateSnapshot(result), null);
             }
-            return new DetachedRecognizedSaveStateSnapshot(result);
+            catch (ContractJsonBudgetException)
+            { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
+            catch
+            { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
         }
 
         internal bool TryGet(string name, out byte[] value)
@@ -34,6 +54,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!values.TryGetValue(name, out byte[] stored)) { value = null; return false; }
             value = (byte[])stored.Clone(); return true;
         }
+
+        private static DetachedRecognizedSaveStateSnapshotResult Failure(string reason) =>
+            new DetachedRecognizedSaveStateSnapshotResult(null, reason);
     }
 
     public sealed class DetachedCanonicalSaveSessionUpdate
@@ -87,10 +110,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
         }
 
-        public DetachedCanonicalSaveSessionResult PrepareReplacement(DetachedCanonicalSpatialSaveState replacement)
-            => PrepareReplacement(null, replacement);
+        public DetachedCanonicalSaveSessionResult PrepareSpatialOnlyReplacement(
+            DetachedCanonicalSpatialSaveState replacement) => PrepareReplacement(null, replacement);
 
-        public DetachedCanonicalSaveSessionResult PrepareReplacement(
+        public DetachedCanonicalSaveSessionResult PrepareLiveReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognizedState,
+            DetachedCanonicalSpatialSaveState replacement)
+        {
+            if (recognizedState == null || !recognizedState.IsSuccess)
+                return Failure(recognizedState?.Reason ??
+                    DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            return PrepareReplacement(recognizedState.Snapshot, replacement);
+        }
+
+        private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
             DetachedCanonicalSpatialSaveState replacement)
         {

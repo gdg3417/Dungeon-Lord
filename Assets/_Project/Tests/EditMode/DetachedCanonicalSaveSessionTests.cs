@@ -20,7 +20,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(
                 fixture.Bytes, fixture.Context, fixture.Profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
-            DetachedCanonicalSaveSessionResult first = opened.Session.PrepareReplacement(
+            DetachedCanonicalSaveSessionResult first = opened.Session.PrepareSpatialOnlyReplacement(
                 State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
             Assert.That(first.IsSuccess, Is.True, first.Reason);
             AssertEvidence(first.Update.GetBytes());
@@ -29,11 +29,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult reopened = DetachedCanonicalSaveSession.Open(
                 first.Update.GetBytes(), fixture.Context, fixture.Profile);
             Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
-            DetachedCanonicalSaveSessionResult second = reopened.Session.PrepareReplacement(fixture.State);
+            DetachedCanonicalSaveSessionResult second = reopened.Session.PrepareSpatialOnlyReplacement(fixture.State);
             Assert.That(second.IsSuccess, Is.True, second.Reason);
             AssertEvidence(second.Update.GetBytes());
             Assert.That(second.Update.State.Floors, Has.Length.EqualTo(1));
-            Assert.That(reopened.Session.PrepareReplacement(fixture.State).Update.GetBytes(),
+            Assert.That(reopened.Session.PrepareSpatialOnlyReplacement(fixture.State).Update.GetBytes(),
                 Is.EqualTo(second.Update.GetBytes()));
             Assert.That(opened.Session.GetCurrentBytes(), Is.EqualTo(fixture.Bytes));
         }
@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(
                 fixture.Bytes, fixture.Context, constrained);
             Assert.That(opened.IsSuccess, Is.True);
-            DetachedCanonicalSaveSessionResult failed = opened.Session.PrepareReplacement(fixture.State);
+            DetachedCanonicalSaveSessionResult failed = opened.Session.PrepareSpatialOnlyReplacement(fixture.State);
             Assert.That(failed.IsSuccess, Is.False);
             Assert.That(failed.Reason, Is.EqualTo(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason));
             Assert.That(opened.Session.GetCurrentBytes(), Is.EqualTo(fixture.Bytes));
@@ -68,10 +68,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Bytes, fixture.Context, fixture.Profile).Session;
             SaveData firstLive = LiveState(200, 17, 31d, "research.first", "objective.first");
             MutateLegacySpatialProjection(firstLive, "placement.option.room.narrow_hall");
-            DetachedRecognizedSaveStateSnapshot firstSnapshot =
-                DetachedRecognizedSaveStateSnapshot.Create(firstLive, fixture.Profile);
+            DetachedRecognizedSaveStateSnapshotResult firstSnapshot =
+                DetachedRecognizedSaveStateSnapshot.Capture(firstLive, fixture.Profile);
 
-            DetachedCanonicalSaveSessionResult first = session.PrepareReplacement(firstSnapshot, fixture.State);
+            DetachedCanonicalSaveSessionResult first = session.PrepareLiveReplacement(firstSnapshot, fixture.State);
 
             Assert.That(first.IsSuccess, Is.True, first.Reason);
             AssertLiveState(first.Update.GetBytes(), 200, 17, 31d, "research.first", "objective.first");
@@ -82,9 +82,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 first.Update.GetBytes(), fixture.Context, fixture.Profile).Session;
             SaveData secondLive = LiveState(300, 29, 47d, "research.second", "objective.second");
             MutateLegacySpatialProjection(secondLive, "placement.option.room.narrow_hall");
-            DetachedRecognizedSaveStateSnapshot secondSnapshot =
-                DetachedRecognizedSaveStateSnapshot.Create(secondLive, fixture.Profile);
-            DetachedCanonicalSaveSessionResult second = reopened.PrepareReplacement(secondSnapshot,
+            DetachedRecognizedSaveStateSnapshotResult secondSnapshot =
+                DetachedRecognizedSaveStateSnapshot.Capture(secondLive, fixture.Profile);
+            DetachedCanonicalSaveSessionResult second = reopened.PrepareLiveReplacement(secondSnapshot,
                 State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
 
             Assert.That(second.IsSuccess, Is.True, second.Reason);
@@ -93,7 +93,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertEvidence(second.Update.GetBytes());
             Assert.That(DetachedCanonicalSaveSession.Open(second.Update.GetBytes(), fixture.Context,
                 fixture.Profile).IsSuccess, Is.True);
-            Assert.That(reopened.PrepareReplacement(secondSnapshot,
+            Assert.That(reopened.PrepareLiveReplacement(secondSnapshot,
                 State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>())).Update.GetBytes(),
                 Is.EqualTo(second.Update.GetBytes()));
         }
@@ -105,8 +105,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
                 fixture.Bytes, fixture.Context, fixture.Profile).Session;
             SaveData live = LiveState(400, 41, 53d, "research.absent", "objective.absent");
-            DetachedCanonicalSaveSessionResult result = session.PrepareReplacement(
-                DetachedRecognizedSaveStateSnapshot.Create(live, fixture.Profile), fixture.State);
+            DetachedCanonicalSaveSessionResult result = session.PrepareLiveReplacement(
+                DetachedRecognizedSaveStateSnapshot.Capture(live, fixture.Profile), fixture.State);
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             string json = Encoding.UTF8.GetString(result.Update.GetBytes());
@@ -115,7 +115,82 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(json, Does.Not.Contain("mvpRoomSlotAssignments"));
         }
 
-        private static Fixture CreateFixture(bool includeLegacy = true)
+        [Test]
+        public void ClearedNullableRecognizedStateDoesNotRetainOrRevivePriorValue()
+        {
+            Fixture fixture = CreateFixture(false, false, true);
+            DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
+                fixture.Bytes, fixture.Context, fixture.Profile).Session;
+            SaveData live = LiveState(500, 43, 59d, "research.clear", "objective.clear");
+            live.researchPending = null;
+            live.researchProgress = null;
+            live.lastOfflineSummary = null;
+
+            DetachedCanonicalSaveSessionResult result = session.PrepareLiveReplacement(
+                DetachedRecognizedSaveStateSnapshot.Capture(live, fixture.Profile), fixture.State);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string json = Encoding.UTF8.GetString(result.Update.GetBytes());
+            Assert.That(json, Does.Not.Contain("research.old"));
+            Assert.That(json, Does.Not.Contain("rule.old"));
+            if (json.Contains("\"researchPending\""))
+                Assert.That(json, Does.Contain("\"researchPending\":null"));
+            if (json.Contains("\"researchProgress\""))
+                Assert.That(json, Does.Contain("\"researchProgress\":null"));
+            if (json.Contains("\"lastOfflineSummary\""))
+                Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
+            SaveData reopened = JsonUtility.FromJson<SaveRoot>(json).primary;
+            Assert.That(reopened.researchPending, Is.Null);
+            Assert.That(reopened.researchProgress, Is.Null);
+            Assert.That(reopened.lastOfflineSummary, Is.Null);
+        }
+
+        [Test]
+        public void FrozenLegacyNullEvidenceRemainsNullDespiteRuntimeInitializers()
+        {
+            Fixture fixture = CreateFixture(true, true);
+            DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
+                fixture.Bytes, fixture.Context, fixture.Profile).Session;
+            SaveData live = LiveState(600, 47, 61d, "research.null", "objective.null");
+
+            DetachedCanonicalSaveSessionResult result = session.PrepareLiveReplacement(
+                DetachedRecognizedSaveStateSnapshot.Capture(live, fixture.Profile), fixture.State);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string json = Encoding.UTF8.GetString(result.Update.GetBytes());
+            Assert.That(json, Does.Contain("\"mvpDungeonPlacements\":null"));
+            Assert.That(json, Does.Contain("\"mvpDungeonFloorLayout\":null"));
+            Assert.That(json, Does.Contain("\"mvpRoomSlotAssignments\":null"));
+        }
+
+        [Test]
+        public void SnapshotWorkloadFailureCannotFallBackToSpatialOnlyReplacement()
+        {
+            Fixture fixture = CreateFixture();
+            var constrainedCanonical = new CanonicalSpatialSerializationLimits(
+                new SpatialSerializedInputLimits(1, 1, 0, 0, 1), fixture.Profile.Canonical.Spatial);
+            var constrained = new SaveSpatialMigrationLimitsProfile(fixture.Profile.Raw,
+                constrainedCanonical, fixture.Profile.Whole);
+            DetachedRecognizedSaveStateSnapshotResult capture =
+                DetachedRecognizedSaveStateSnapshot.Capture(LiveState(700, 53, 67d,
+                    "research.fail", "objective.fail"), constrained);
+            DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
+                fixture.Bytes, fixture.Context, fixture.Profile).Session;
+
+            DetachedCanonicalSaveSessionResult failed =
+                session.PrepareLiveReplacement(capture, fixture.State);
+
+            Assert.That(capture.IsSuccess, Is.False);
+            Assert.That(capture.Snapshot, Is.Null);
+            Assert.That(capture.Reason, Is.EqualTo(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason));
+            Assert.That(failed.IsSuccess, Is.False);
+            Assert.That(failed.Update, Is.Null);
+            Assert.That(failed.Reason, Is.EqualTo(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason));
+            Assert.That(session.GetCurrentBytes(), Is.EqualTo(fixture.Bytes));
+        }
+
+        private static Fixture CreateFixture(bool includeLegacy = true, bool nullLegacy = false,
+            bool includeNullable = false)
         {
             SaveSpatialMigrationLimitsProfile profile = SaveSpatialMigrationLimitsLoader.Load(
                 File.ReadAllText(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
@@ -128,10 +203,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const string placements = "\"mvpDungeonPlacements\":{\"Entries\":[{" +
                 "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.basic\"," +
                 "\"Revision\":1}],\"NextRevision\":2}";
-            string legacy = includeLegacy ? placements + "," + floor + "," + assignments + "," : string.Empty;
+            string legacy = includeLegacy ? nullLegacy
+                ? "\"mvpDungeonPlacements\":null,\"mvpDungeonFloorLayout\":null," +
+                    "\"mvpRoomSlotAssignments\":null,"
+                : placements + "," + floor + "," + assignments + "," : string.Empty;
+            string nullable = includeNullable
+                ? "\"researchPending\":{\"SlotId\":\"slot.0\",\"ProjectId\":\"research.old\"}," +
+                    "\"researchProgress\":{\"SlotId\":\"slot.0\",\"ProjectId\":\"research.old\"," +
+                    "\"ProgressUnits\":1.00,\"CompletionPending\":false,\"RuleSourceIdUsed\":\"rule.old\"}," +
+                    "\"lastOfflineSummary\":{\"RuleResolved\":true},"
+                : string.Empty;
             string json = "{\"rootUnknown\":{\"lexical\":1.00,\"items\":[true,null,{\"s\":\"a \\\" b \\\\ c\"}]}," +
                 "\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
-                "\"dungeonLayout\":{\"Slots\":[]}," + legacy +
+                "\"dungeonLayout\":{\"Slots\":[]}," + legacy + nullable +
                 "\"unknownPrimary\":[1,{\"n\":1.00}]}}";
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture prepared =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false,
