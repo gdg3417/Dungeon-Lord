@@ -2,6 +2,8 @@
 using System.IO;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -80,6 +82,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SaveSpatialMigrationLimitsLoader.ProductionPath,
                 Does.Not.Contain("Bootstrap").And.Not.Contain("validation_limits.json"));
             Assert.That(ProductionJson, Does.Not.Contain("MaximumTopLevelRecords"));
+        }
+
+        [Test]
+        public void ProductionBootstrapSceneOwnsAndLoadsDedicatedProfile()
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                SaveSpatialMigrationLimitsLoader.ProductionPath);
+            Assert.That(asset, Is.Not.Null);
+            string guid = AssetDatabase.AssetPathToGUID(SaveSpatialMigrationLimitsLoader.ProductionPath);
+            string scene = File.ReadAllText("Assets/_Project/Scenes/Bootstrap.unity");
+            Assert.That(scene, Does.Contain(
+                "saveSpatialMigrationLimitsJson: {fileID: 4900000, guid: " + guid + ", type: 3}"));
+
+            SaveSpatialMigrationLimitsLoadResult result = SaveSpatialMigrationLimitsLoader.Load(asset);
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(524288));
+            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
+        }
+
+        [Test]
+        public void GameRootRejectsInvalidProfileBeforeConstructingLegacySaveService()
+        {
+            string source = File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
+            int load = source.IndexOf("SaveSpatialMigrationLimitsLoader.Load(saveSpatialMigrationLimitsJson)",
+                System.StringComparison.Ordinal);
+            int failure = source.IndexOf("if (!saveLimits.IsSuccess)", System.StringComparison.Ordinal);
+            int stop = source.IndexOf("return;", failure, System.StringComparison.Ordinal);
+            int legacy = source.IndexOf("new SaveService(", System.StringComparison.Ordinal);
+            Assert.That(load, Is.GreaterThanOrEqualTo(0));
+            Assert.That(failure, Is.GreaterThan(load));
+            Assert.That(stop, Is.GreaterThan(failure));
+            Assert.That(legacy, Is.GreaterThan(stop));
         }
 
         private static void AssertFailure(string json, string reason)

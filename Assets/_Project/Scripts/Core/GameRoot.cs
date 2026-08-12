@@ -336,7 +336,12 @@ namespace DungeonBuilder.M0
                 SaveSpatialMigrationLimitsLoader.Load(saveSpatialMigrationLimitsJson);
             SaveSpatialMigrationLimits = saveLimits.Profile;
             if (!saveLimits.IsSuccess)
+            {
                 Logger.Error("GD66 save workload configuration unavailable: " + saveLimits.Reason);
+                string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey(saveLimits.Reason);
+                SetBanner(Content.GetString(key, key));
+                return;
+            }
 
             if (!string.IsNullOrEmpty(contentBanner))
             {
