@@ -92,6 +92,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class WindowsSpatialMigrationFileSystem : ISpatialMigrationFileSystem,
         IWindowsSpatialMigrationCapabilityProbe
     {
+        public void DeleteFile(string path) => File.Delete(path);
         private const uint GenericWrite = 0x40000000;
         private const uint DeleteAccess = 0x00010000;
         private const uint FileShareRead = 0x1;

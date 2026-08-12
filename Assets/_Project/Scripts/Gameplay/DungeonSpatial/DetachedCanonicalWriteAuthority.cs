@@ -33,6 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCanonicalWriteAuthority
     {
         public const string AtomicSaveFailedReason = "gd66.write.atomic_save_failed";
+        public const string RecoveryRequiredReason = "gd66.transaction.recovery_failed";
         private readonly ProductionSpatialContentSnapshot production;
         private readonly SpatialLayoutCompatibilitySnapshot compatibility;
         private readonly RunSimulationConfig configuration;
@@ -52,10 +53,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSpatialSaveState currentState, SaveData currentRuntime,
             DetachedCanonicalMutationRequest request)
         {
-            if (fileSystem == null || session == null || currentState == null || currentRuntime == null ||
+            if (currentState == null) return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            DetachedCompleteSaveValidationResult owned = ValidateSession(session);
+            if (owned == null || !owned.IsValid || !CanonicalEqual(currentState, owned.State))
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            return Execute(activePath, fileSystem, session, currentRuntime, request);
+        }
+
+        public DetachedCanonicalWriteResult Execute(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, DetachedCanonicalMutationRequest request)
+        {
+            if (fileSystem == null || session == null || currentRuntime == null ||
                 context == null || limits == null || production == null || compatibility == null ||
                 configuration == null) return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(currentState,
+            DetachedCompleteSaveValidationResult owned = ValidateSession(session);
+            if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(owned.State,
                 request, production, compatibility, configuration, limits.Canonical);
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
                 false, null, null, null, null);
@@ -72,59 +87,156 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
             if (!validated.IsValid || !validated.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            if (!Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate))
-                return Failure(AtomicSaveFailedReason);
             DetachedCanonicalSaveSessionResult reopened =
                 DetachedCanonicalSaveSession.Open(candidate, context, limits);
             if (!reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 production, out SaveData runtime, out string reason))
-                return Failure(reason ?? AtomicSaveFailedReason);
+                return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate);
+            if (persistenceReason != null) return Failure(persistenceReason);
             return new DetachedCanonicalWriteResult(true, null, false,
                 mutation.ApplyExplicitRoomEffect, candidate, reopened.Session, validated, runtime);
         }
 
-        private static bool Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
+        public DetachedCanonicalWriteResult SaveRecognizedState(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime)
+        {
+            DetachedCompleteSaveValidationResult owned = ValidateSession(session);
+            if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated || currentRuntime == null)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            DetachedRecognizedSaveStateSnapshotResult snapshot =
+                DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            DetachedCanonicalSaveSessionResult prepared =
+                session.PrepareLiveReplacement(snapshot, owned.State);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
+        }
+
+        private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            DetachedCanonicalSaveSessionResult prepared, bool roomEffect)
+        {
+            if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
+                return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            byte[] candidate = prepared.Update.GetBytes();
+            DetachedCompleteSaveValidationResult validated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+            DetachedCanonicalSaveSessionResult reopened = validated.IsValid
+                ? DetachedCanonicalSaveSession.Open(candidate, context, limits) : null;
+            if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
+                !reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
+                    production, out SaveData runtime, out string reason))
+                return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate);
+            return persistenceReason == null
+                ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
+                    reopened.Session, validated, runtime)
+                : Failure(persistenceReason);
+        }
+
+        private DetachedCompleteSaveValidationResult ValidateSession(DetachedCanonicalSaveSession session) =>
+            session == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                session.GetCurrentBytes(), context);
+
+        private bool CanonicalEqual(DetachedCanonicalSpatialSaveState left,
+            DetachedCanonicalSpatialSaveState right)
+        {
+            SpatialContractResult<byte[]> a = CanonicalSpatialSaveSerializer.Serialize(left, limits.Canonical);
+            SpatialContractResult<byte[]> b = CanonicalSpatialSaveSerializer.Serialize(right, limits.Canonical);
+            return a.IsValid && b.IsValid && Same(a.Value, b.Value);
+        }
+
+        private static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
             byte[] original, byte[] candidate)
         {
-            if (string.IsNullOrEmpty(activePath) || original == null || candidate == null) return false;
+            if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
+                return AtomicSaveFailedReason;
             string directory;
             try
             {
                 string normalized = Path.GetFullPath(activePath);
                 directory = Path.GetDirectoryName(normalized);
-                if (normalized != activePath || !fileSystem.Exists(activePath) ||
-                    !Same(fileSystem.ReadAllBytes(activePath), original)) return false;
+                if (normalized != activePath || !fileSystem.Exists(activePath)) return AtomicSaveFailedReason;
+                byte[] activeBefore = fileSystem.ReadAllBytes(activePath);
+                if (!Same(activeBefore, original) && !Same(activeBefore, candidate))
+                    return RecoveryRequiredReason;
                 string token = SpatialContractSha256.Compute(original).Substring(0, 16) + "-" +
                     SpatialContractSha256.Compute(candidate).Substring(0, 16);
                 string rollback = Path.Combine(directory, Path.GetFileName(activePath) +
                     ".canonical-write-" + token + ".rollback");
                 string staging = Path.Combine(directory, Path.GetFileName(activePath) +
                     ".canonical-write-" + token + ".candidate");
-                if (fileSystem.Exists(rollback) || fileSystem.Exists(staging) ||
-                    !fileSystem.IsPathContainedWithoutRedirection(directory, rollback) ||
-                    !fileSystem.IsPathContainedWithoutRedirection(directory, staging)) return false;
+                if (!fileSystem.IsPathContainedWithoutRedirection(directory, rollback) ||
+                    !fileSystem.IsPathContainedWithoutRedirection(directory, staging)) return AtomicSaveFailedReason;
+                string settled = SettleExisting(fileSystem, activePath, directory, rollback, staging,
+                    original, candidate, out bool alreadyCommitted);
+                if (settled != null) return settled;
+                if (alreadyCommitted) return null;
+                if (!Same(activeBefore, original)) return RecoveryRequiredReason;
                 fileSystem.WriteAllBytesDurable(rollback, original);
-                if (!Same(fileSystem.ReadAllBytes(rollback), original)) return false;
+                if (!Same(fileSystem.ReadAllBytes(rollback), original)) return RecoveryRequiredReason;
                 fileSystem.WriteAllBytesDurable(staging, candidate);
-                if (!Same(fileSystem.ReadAllBytes(staging), candidate)) return false;
+                if (!Same(fileSystem.ReadAllBytes(staging), candidate)) return RecoveryRequiredReason;
                 try
                 {
                     fileSystem.ReplaceSameDirectoryAtomic(staging, activePath);
                     fileSystem.FlushDirectory(directory);
                     if (!Same(fileSystem.ReadAllBytes(activePath), candidate))
                         throw new IOException();
-                    return true;
+                    fileSystem.DeleteFile(rollback);
+                    fileSystem.FlushDirectory(directory);
+                    return null;
                 }
                 catch
                 {
-                    Restore(fileSystem, rollback, activePath, directory, original);
-                    return false;
+                    return Restore(fileSystem, rollback, activePath, directory, original)
+                        ? AtomicSaveFailedReason : RecoveryRequiredReason;
                 }
             }
-            catch { return false; }
+            catch
+            {
+                try
+                {
+                    byte[] active = fileSystem.ReadAllBytes(activePath);
+                    return Same(active, original) ? AtomicSaveFailedReason : RecoveryRequiredReason;
+                }
+                catch { return RecoveryRequiredReason; }
+            }
         }
 
-        private static void Restore(ISpatialMigrationFileSystem fileSystem, string rollback,
+        private static string SettleExisting(ISpatialMigrationFileSystem fileSystem, string activePath,
+            string directory, string rollback, string staging, byte[] original, byte[] candidate,
+            out bool alreadyCommitted)
+        {
+            alreadyCommitted = false;
+            bool hasRollback = fileSystem.Exists(rollback), hasStaging = fileSystem.Exists(staging);
+            if (!hasRollback && !hasStaging)
+            {
+                alreadyCommitted = Same(fileSystem.ReadAllBytes(activePath), candidate);
+                return null;
+            }
+            if (hasRollback && !Same(fileSystem.ReadAllBytes(rollback), original))
+                return RecoveryRequiredReason;
+            if (hasStaging && !Same(fileSystem.ReadAllBytes(staging), candidate))
+                return RecoveryRequiredReason;
+            byte[] active = fileSystem.ReadAllBytes(activePath);
+            if (!Same(active, original) && !Same(active, candidate)) return RecoveryRequiredReason;
+            if (Same(active, candidate))
+            {
+                if (hasStaging) fileSystem.DeleteFile(staging);
+                if (hasRollback) fileSystem.DeleteFile(rollback);
+                fileSystem.FlushDirectory(directory);
+                alreadyCommitted = true;
+                return null;
+            }
+            if (hasStaging) fileSystem.DeleteFile(staging);
+            if (hasRollback) fileSystem.DeleteFile(rollback);
+            fileSystem.FlushDirectory(directory);
+            return null;
+        }
+
+        private static bool Restore(ISpatialMigrationFileSystem fileSystem, string rollback,
             string activePath, string directory, byte[] original)
         {
             try
@@ -133,10 +245,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     fileSystem.ReplaceSameDirectoryAtomic(rollback, activePath);
                     fileSystem.FlushDirectory(directory);
-                    fileSystem.ReadAllBytes(activePath);
+                    return Same(fileSystem.ReadAllBytes(activePath), original);
                 }
             }
             catch { }
+            return false;
         }
 
         private static bool Same(byte[] left, byte[] right)

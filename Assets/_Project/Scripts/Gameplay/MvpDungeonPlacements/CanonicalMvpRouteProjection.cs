@@ -98,7 +98,11 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.validatedCanonicalSpatialState == null))
                 return new CanonicalMvpRouteProjectionResult(
                     CanonicalMvpRuntimeAuthorityState.Legacy, null, null);
-            if (save.validatedCanonicalSpatialState == null) return Contradictory();
+            if (save.validatedCanonicalSpatialState == null ||
+                !ReferenceEquals(save.canonicalSpatialAuthority,
+                    save.validatedCanonicalSpatialState.Authority) ||
+                !ReferenceEquals(save.spatialFloors,
+                    save.validatedCanonicalSpatialState.Floors)) return Contradictory();
             return Project(save.validatedCanonicalSpatialState, null, production);
         }
 

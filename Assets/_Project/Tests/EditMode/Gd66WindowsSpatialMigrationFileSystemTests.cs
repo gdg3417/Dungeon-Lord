@@ -550,6 +550,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private sealed class SelectorFileSystem : ISpatialMigrationFileSystem
         {
+            public void DeleteFile(string path) { }
             public bool Exists(string path) => false;
             public byte[] ReadAllBytes(string path) => throw new NotSupportedException();
             public void WriteAllBytesDurable(string path, byte[] bytes) => throw new NotSupportedException();
@@ -585,6 +586,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 inner.IsPathContainedWithoutRedirection(directoryPath, path);
             public void MoveSameDirectoryAtomic(string sourcePath, string destinationPath) =>
                 inner.MoveSameDirectoryAtomic(sourcePath, destinationPath);
+            public void DeleteFile(string path) => inner.DeleteFile(path);
         }
 
         private sealed class DiagnosticFileSystem : ISpatialMigrationFileSystem
@@ -608,6 +610,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 inner.IsPathContainedWithoutRedirection(directoryPath, path);
             public void MoveSameDirectoryAtomic(string source, string destination) => Record("Move", source,
                 destination, () => inner.MoveSameDirectoryAtomic(source, destination));
+            public void DeleteFile(string path) => inner.DeleteFile(path);
 
             private void Record(string operation, string source, string destination, Action action)
             {

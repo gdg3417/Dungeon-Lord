@@ -93,7 +93,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
                 StringComparison.Ordinal))
-                reason = PlaceRoom(proposed, request.OptionId, production, compatibility, ref roomEffect);
+                reason = PlaceRoom(proposed, request.OptionId, request.RoomInstanceId,
+                    production, compatibility, ref roomEffect);
             else
                 reason = PlaceContent(proposed, request.CategoryId, request.OptionId,
                     request.RoomInstanceId, production, compatibility);
@@ -108,6 +109,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static string PlaceRoom(DetachedCanonicalSpatialSaveState state, string optionId,
+            string requestedRoomId,
             ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
             ref bool roomEffect)
         {
@@ -122,7 +124,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return reason;
                 state.Floors = new[] { floor }; roomEffect = true; return null;
             }
-            if (!TrySingleRoom(state, null, out SavedSpatialFloor existingFloor,
+            if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor existingFloor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics semantics))
                 return ValidationFailedReason;
             string basicDefinition = ResolveBasicDefinition(state, production, compatibility, out string reason);
@@ -166,7 +168,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out string reason)) return reason;
                 state.Floors = new[] { starter };
             }
-            if (!TrySingleRoom(state, requestedRoomId, out SavedSpatialFloor floor,
+            if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics ignored))
                 return ValidationFailedReason;
             RoomContentAssignment[] assignments = floor.RoomContents.Assignments ??
@@ -202,12 +204,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static string Remove(DetachedCanonicalSpatialSaveState state, string requestedRoomId)
         {
-            if (!TrySingleRoom(state, requestedRoomId, out SavedSpatialFloor floor,
+            if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics ignored)) return ValidationFailedReason;
             if ((floor.RoomContents.Assignments ?? Array.Empty<RoomContentAssignment>()).Any(value =>
                 value != null && value.RoomInstanceId == room.RoomInstanceId)) return RemovalHasContentsReason;
-            state.Floors = Array.Empty<SavedSpatialFloor>();
-            return null;
+            // Only the approved R1 -> canonical-empty transition is representable here. R2 removal
+            // needs a future explicit topology rule; never infer an array-position mapping.
+            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1)
+                return ValidationFailedReason;
+            state.Floors = Array.Empty<SavedSpatialFloor>(); return null;
         }
 
         private static bool TryCreateStarter(DetachedCanonicalSpatialSaveState state,
@@ -300,15 +305,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ? "entrance" : role == CompatibilityRouteRole.Completion ? "completion" :
             role == CompatibilityRouteRole.BasicRoom0 ? "legacy-room.00" : "legacy-room.01";
 
-        private static bool TrySingleRoom(DetachedCanonicalSpatialSaveState state, string requestedRoomId,
+        private static bool TryTargetRoom(DetachedCanonicalSpatialSaveState state, string requestedRoomId,
             out SavedSpatialFloor floor, out RoomSpatialInstance room, out CanonicalRoomSemantics semantics)
         {
             floor = state.Floors?.Length == 1 ? state.Floors[0] : null;
-            room = floor?.Layout?.Rooms?.Length == 1 ? floor.Layout.Rooms[0] : null;
+            RoomSpatialInstance[] rooms = floor?.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>();
+            room = string.IsNullOrEmpty(requestedRoomId)
+                ? rooms.Length == 1 ? rooms[0] : null
+                : rooms.SingleOrDefault(value => value != null &&
+                    value.RoomInstanceId == requestedRoomId);
             semantics = floor?.RoomContents?.RoomSemantics?.SingleOrDefault(value => value != null &&
                 value.RoomInstanceId == room?.RoomInstanceId);
-            return room != null && semantics != null && (string.IsNullOrEmpty(requestedRoomId) ||
-                requestedRoomId == room.RoomInstanceId);
+            return room != null && semantics != null;
         }
 
         private static string ResolveBasicDefinition(DetachedCanonicalSpatialSaveState state,

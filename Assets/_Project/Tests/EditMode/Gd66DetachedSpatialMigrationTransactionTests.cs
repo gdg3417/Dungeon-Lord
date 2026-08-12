@@ -2490,7 +2490,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedSpatialMigrationPreparationResult Result { get; }
         }
 
-        public enum OperationType { Exists, Read, Write, Replace, Move, Flush, Enumerate, Containment }
+        public enum OperationType { Exists, Read, Write, Replace, Move, Flush, Enumerate, Containment, Delete }
 
         internal sealed class FileOperation
         {
@@ -2598,6 +2598,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Record(OperationType.Move, sourcePath, destinationPath); SameDirectory(sourcePath, destinationPath);
                 files.Add(destinationPath, (byte[])files[sourcePath].Clone()); files.Remove(sourcePath);
                 MarkMutation(OperationType.Move); FailAfter(OperationType.Move);
+            }
+            public void DeleteFile(string path)
+            {
+                path = Normalize(path); Record(OperationType.Delete, path);
+                files.Remove(path); MarkMutation(OperationType.Delete); FailAfter(OperationType.Delete);
             }
             public void FlushDirectory(string directoryPath)
             { directoryPath = Normalize(directoryPath); Record(OperationType.Flush, directoryPath); }
