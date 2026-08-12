@@ -2462,6 +2462,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static RawSavePayloadClassificationLimits RawLimits() =>
             new RawSavePayloadClassificationLimits(100000, 32, 100, 100, 10000, 500000);
+        internal static RawLegacyBlankFloorContract BlankFloorForCoordinator => BlankFloor();
+        internal static RawSavePayloadClassificationLimits RawLimitsForCoordinator => RawLimits();
         private static DetachedWholeSaveLimits WholeLimits() =>
             new DetachedWholeSaveLimits(1000000, 100000, 1000, 100000);
 

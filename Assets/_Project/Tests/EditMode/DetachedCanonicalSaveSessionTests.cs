@@ -14,6 +14,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class DetachedCanonicalSaveSessionTests
     {
         [Test]
+        public void Capture_InvalidNonWorkloadLimits_ReturnsCandidateInvalid()
+        {
+            var profile = new SaveSpatialMigrationLimitsProfile(
+                new RawSavePayloadClassificationLimits(100, 4, 4, 4, 20, 200),
+                new CanonicalSpatialSerializationLimits(default(SpatialSerializedInputLimits),
+                    new CanonicalSpatialSaveWorkloadLimits(10, 10)),
+                new DetachedWholeSaveLimits(100, 100, 10, 100));
+
+            DetachedRecognizedSaveStateSnapshotResult result =
+                DetachedRecognizedSaveStateSnapshot.Capture(new SaveData(), profile);
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason,
+                Is.EqualTo(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason));
+            Assert.That(result.Reason,
+                Is.Not.EqualTo(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason));
+        }
+
+        [Test]
         public void ReopenAndReplaceTwicePreservesCompleteSaveEvidence()
         {
             Fixture fixture = CreateFixture();

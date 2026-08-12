@@ -31,7 +31,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
                 if (!ContractJson.TryParse(json, limits.Canonical.Serialized, issues,
                     out ContractJsonNode root) || root.Kind != ContractJsonKind.Object)
-                    return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason);
+                    return Failure(IsWorkloadFailure(issues)
+                        ? DetachedWholeSaveCandidateSerializer.WorkloadExceededReason
+                        : DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
                 foreach (KeyValuePair<string, ContractJsonNode> field in root.Fields)
                 {
@@ -57,6 +59,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static DetachedRecognizedSaveStateSnapshotResult Failure(string reason) =>
             new DetachedRecognizedSaveStateSnapshotResult(null, reason);
+
+        private static bool IsWorkloadFailure(SpatialIssueCollector issues)
+        {
+            if (issues.IsExhausted) return true;
+            SpatialContractIssue[] values = issues.ToArray();
+            for (int index = 0; index < values.Length; index++)
+                if (values[index] == SpatialContractIssue.InputByteLimitExceeded ||
+                    values[index] == SpatialContractIssue.WorkloadExceeded) return true;
+            return false;
+        }
     }
 
     public sealed class DetachedCanonicalSaveSessionUpdate
