@@ -36,6 +36,7 @@ namespace DungeonBuilder.M0
         public TextAsset[] productionSpatialLanguageTables;
         public TextAsset productionSpatialValidationLimits;
         public TextAsset spatialLayoutCompatibilityProfilesJson;
+        public TextAsset saveSpatialMigrationLimitsJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -47,6 +48,7 @@ namespace DungeonBuilder.M0
         public ITelemetryService Telemetry { get; private set; }
         public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
+        public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
 
         public string BannerMessage { get; private set; } = string.Empty;
@@ -329,6 +331,12 @@ namespace DungeonBuilder.M0
             if (spatialLimits.Success && Content.ProductionSpatialContent != null)
                 Content.LoadSpatialLayoutCompatibilityProfiles(spatialLayoutCompatibilityProfilesJson,
                     Content.ProductionSpatialContent, spatialLimits.Limits);
+
+            SaveSpatialMigrationLimitsLoadResult saveLimits =
+                SaveSpatialMigrationLimitsLoader.Load(saveSpatialMigrationLimitsJson);
+            SaveSpatialMigrationLimits = saveLimits.Profile;
+            if (!saveLimits.IsSuccess)
+                Logger.Error("GD66 save workload configuration unavailable: " + saveLimits.Reason);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {
