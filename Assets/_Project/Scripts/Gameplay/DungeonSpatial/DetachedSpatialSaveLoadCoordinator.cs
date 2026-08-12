@@ -73,13 +73,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.rawVersions = rawVersions; this.blankFloor = blankFloor;
         }
 
-        public DetachedSpatialSaveLoadResult Load(string activePath) =>
-            Load(activePath, SpatialMigrationFileSystemSelector.Evaluate(activePath));
+        public DetachedSpatialSaveLoadResult Load(string activePath)
+        {
+            string dependencyReason = ValidateDependencies();
+            return dependencyReason == null
+                ? LoadAfterDependencies(activePath, SpatialMigrationFileSystemSelector.Evaluate(activePath))
+                : Failure(dependencyReason);
+        }
 
         public DetachedSpatialSaveLoadResult Load(string activePath,
             SpatialMigrationActivationPreflight preflight)
         {
-            if (!DependenciesValid()) return Failure("gd66.profile.invalid");
+            string dependencyReason = ValidateDependencies();
+            return dependencyReason == null ? LoadAfterDependencies(activePath, preflight) : Failure(dependencyReason);
+        }
+
+        internal DetachedSpatialSaveLoadResult Load(string activePath,
+            Func<string, SpatialMigrationActivationPreflight> preflightEvaluator)
+        {
+            string dependencyReason = ValidateDependencies();
+            if (dependencyReason != null) return Failure(dependencyReason);
+            if (preflightEvaluator == null) return Failure(SpatialMigrationCapabilityReason.NativeProbeFailed);
+            return LoadAfterDependencies(activePath, preflightEvaluator(activePath));
+        }
+
+        private DetachedSpatialSaveLoadResult LoadAfterDependencies(string activePath,
+            SpatialMigrationActivationPreflight preflight)
+        {
             if (preflight == null || !preflight.IsSupported || preflight.FileSystem == null)
                 return Failure(preflight?.Reason ?? SpatialMigrationCapabilityReason.NativeProbeFailed);
 
@@ -132,10 +152,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return PublishValidated(trusted, currentContext,
                     DetachedSpatialSaveLoadDisposition.CurrentTarget, recovered, null);
 
-            SpatialMigrationInputDescriptor descriptor;
-            try { descriptor = CreateDescriptorSeed(trusted, classification, schema); }
-            catch { return Failure("gd66.transaction.pinned_input_hash_mismatch",
-                recovered.TrustedPayload, recovered); }
+            DescriptorSeedResult descriptorResult = CreateDescriptorSeed(trusted, classification, schema);
+            if (!descriptorResult.IsSuccess)
+                return Failure(descriptorResult.Reason, recovered.TrustedPayload, recovered);
+            SpatialMigrationInputDescriptor descriptor = descriptorResult.Descriptor;
             var inputs = new DetachedSpatialMigrationPreparationInputs(trusted, classification, descriptor,
                 compatibility, production, legacy, validationInputs, limits.Canonical, limits.Whole);
             DetachedSpatialMigrationPreparationResult prepared = DetachedSpatialMigrationPreparer.Prepare(inputs);
@@ -184,32 +204,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 transaction?.Diagnostics ?? recovery?.Diagnostics);
         }
 
-        private SpatialMigrationInputDescriptor CreateDescriptorSeed(byte[] original,
+        private DescriptorSeedResult CreateDescriptorSeed(byte[] original,
             RawSavePayloadClassification classification, int schema)
         {
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> contract =
                 compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
-            if (!contract.Success) throw new InvalidOperationException();
+            if (!contract.Success) return DescriptorSeedResult.Failure(contract.Code);
             CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> profile =
                 compatibility.SelectMigration(schema, DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
                     contract.Value.CanonicalLayoutContractVersion);
-            if (!profile.Success) throw new InvalidOperationException();
-            SpatialMigrationCompatibilityProfile selected = profile.Value;
-            return new SpatialMigrationInputDescriptor(SpatialContractSha256.Compute(original), schema,
-                classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
-                    ? SpatialRawEnvelopeClassification.UnwrappedSaveData
-                    : SpatialRawEnvelopeClassification.WrappedSaveRoot,
-                DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                SpatialMigrationContractIdentity.AuthorityMarkerContractVersion,
-                SpatialMigrationContractIdentity.MigrationContractVersion, selected.ProfileId,
-                selected.ProfileVersion, selected.CanonicalHash, selected.GeometryId,
-                selected.GeometryVersion, selected.GeometryCanonicalHash,
-                SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                    production.Manifest)),
-                SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                    production.Catalog)), ValidationHashes(), SpatialContractSha256.Compute(legacyConfiguration),
-                SpatialMigrationContractIdentity.CanonicalSerializerId,
-                SpatialMigrationContractIdentity.CanonicalSerializerVersion);
+            if (!profile.Success) return DescriptorSeedResult.Failure(profile.Code);
+            try
+            {
+                SpatialMigrationCompatibilityProfile selected = profile.Value;
+                return DescriptorSeedResult.Success(new SpatialMigrationInputDescriptor(
+                    SpatialContractSha256.Compute(original), schema,
+                    classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
+                        ? SpatialRawEnvelopeClassification.UnwrappedSaveData
+                        : SpatialRawEnvelopeClassification.WrappedSaveRoot,
+                    DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
+                    SpatialMigrationContractIdentity.AuthorityMarkerContractVersion,
+                    SpatialMigrationContractIdentity.MigrationContractVersion, selected.ProfileId,
+                    selected.ProfileVersion, selected.CanonicalHash, selected.GeometryId,
+                    selected.GeometryVersion, selected.GeometryCanonicalHash,
+                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
+                        production.Manifest)),
+                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
+                        production.Catalog)), ValidationHashes(), SpatialContractSha256.Compute(legacyConfiguration),
+                    SpatialMigrationContractIdentity.CanonicalSerializerId,
+                    SpatialMigrationContractIdentity.CanonicalSerializerVersion));
+            }
+            catch { return DescriptorSeedResult.Failure("gd66.transaction.pinned_input_hash_mismatch"); }
         }
 
         private SpatialValidationInputHash[] ValidationHashes()
@@ -222,9 +247,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return values;
         }
 
-        private bool DependenciesValid() => limits != null && limits.Raw.IsValid &&
-            limits.Canonical.IsValid && limits.Whole.IsValid && compatibility != null && production != null &&
-            legacyConfiguration != null && rawVersions.IsValid && blankFloor != null;
+        private string ValidateDependencies()
+        {
+            if (limits == null || !limits.Raw.IsValid || !limits.Canonical.IsValid ||
+                !limits.Whole.IsValid || !rawVersions.IsValid || blankFloor == null ||
+                !blankFloor.IsValid) return "gd66.profile.invalid";
+            if (compatibility == null || production == null || legacyConfiguration == null ||
+                validationInputs == null) return "gd66.transaction.pinned_input_missing";
+            try
+            {
+                return LegacyGameplayConfigurationContract.Parse(legacyConfiguration) == null
+                    ? "gd66.transaction.pinned_input_missing" : null;
+            }
+            catch { return "gd66.profile.invalid"; }
+        }
+
+        private sealed class DescriptorSeedResult
+        {
+            private DescriptorSeedResult(SpatialMigrationInputDescriptor descriptor, string reason)
+            { Descriptor = descriptor; Reason = reason; }
+            internal SpatialMigrationInputDescriptor Descriptor { get; }
+            internal string Reason { get; }
+            internal bool IsSuccess => Descriptor != null;
+            internal static DescriptorSeedResult Success(SpatialMigrationInputDescriptor descriptor) =>
+                new DescriptorSeedResult(descriptor, null);
+            internal static DescriptorSeedResult Failure(string reason) =>
+                new DescriptorSeedResult(null, reason);
+        }
 
         private static DetachedSpatialSaveLoadResult Failure(string reason,
             SpatialTrustedPayload trusted = SpatialTrustedPayload.None,

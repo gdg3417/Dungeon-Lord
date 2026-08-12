@@ -352,7 +352,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Recovery_NoJournalLegacyMissingConfigurationReturnsPinnedInputMissing()
+        public void Recovery_NoJournalLegacyTrustDoesNotDependOnMigrationConfiguration()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             var fileSystem = new DeterministicFileSystem();
@@ -365,10 +365,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, recoveryContext).Recover(activePath);
 
-            Assert.That(outcome.IsSuccess, Is.False);
-            Assert.That(outcome.Reason, Is.EqualTo("gd66.transaction.pinned_input_missing"));
+            Assert.That(outcome.IsSuccess, Is.True);
+            Assert.That(outcome.Reason,
+                Is.EqualTo(DetachedSpatialMigrationTransaction.NoJournalLegacyDiagnostic));
             Assert.That(outcome.Stage, Is.Null);
-            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
             Assert.That(fileSystem.Paths, Is.EqualTo(new[] { activePath }));
             Assert.That(fileSystem.Operations.Any(operation =>

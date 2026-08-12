@@ -59,53 +59,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DetachedLegacyValidationResult ValidateLegacy(byte[] bytes)
         {
             if (bytes == null || !rawLimits.IsValid || !rawVersions.IsValid || blankFloor == null ||
+                !blankFloor.IsValid ||
                 !wholeSaveLimits.IsValid) return new DetachedLegacyValidationResult(false,
                     "gd66.transaction.pinned_input_missing");
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
                 bytes, rawLimits, rawVersions, blankFloor);
             if (!classification.IsSuccess) return new DetachedLegacyValidationResult(false,
                 classification.FailureReason);
-            int schema = classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
-                ? 1 : classification.SchemaVersion.GetValueOrDefault();
-            CompatibilitySelectionResult<CanonicalLayoutContractSelection> contract =
-                Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
-            if (!contract.Success) return new DetachedLegacyValidationResult(false, contract.Code);
-            CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> profile =
-                Compatibility.SelectMigration(schema, DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                    contract.Value.CanonicalLayoutContractVersion);
-            if (!profile.Success) return new DetachedLegacyValidationResult(false, profile.Code);
-            if (legacyConfigurationBytes == null) return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_missing");
-            try
-            {
-                var descriptor = new SpatialMigrationInputDescriptor(SpatialContractSha256.Compute(bytes), schema,
-                    classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
-                        ? SpatialRawEnvelopeClassification.UnwrappedSaveData
-                        : SpatialRawEnvelopeClassification.WrappedSaveRoot,
-                    DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                    SpatialMigrationContractIdentity.AuthorityMarkerContractVersion,
-                    SpatialMigrationContractIdentity.MigrationContractVersion, profile.Value.ProfileId,
-                    profile.Value.ProfileVersion, profile.Value.CanonicalHash, profile.Value.GeometryId,
-                    profile.Value.GeometryVersion, profile.Value.GeometryCanonicalHash,
-                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                        ProductionContent.Manifest)),
-                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                        ProductionContent.Catalog)), Array.Empty<SpatialValidationInputHash>(),
-                    SpatialContractSha256.Compute(legacyConfigurationBytes),
-                    SpatialMigrationContractIdentity.CanonicalSerializerId,
-                    SpatialMigrationContractIdentity.CanonicalSerializerVersion);
-                var inputs = new DetachedSpatialMigrationPreparationInputs(bytes, classification, descriptor,
-                    Compatibility, ProductionContent, LegacyGameplayConfigurationContract.Parse(
-                        legacyConfigurationBytes), validationInputs, Limits, wholeSaveLimits);
-                DetachedSpatialMigrationPreparationResult prepared = DetachedSpatialMigrationPreparer.Prepare(inputs);
-                return new DetachedLegacyValidationResult(prepared.IsSuccess, prepared.Reason);
-            }
-            catch (ArgumentException) { return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_hash_mismatch"); }
-            catch (FormatException) { return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_hash_mismatch"); }
-            catch (InvalidOperationException) { return new DetachedLegacyValidationResult(false,
-                "gd66.profile.invalid"); }
+            // Recovery answers only whether the active payload is trustworthy legacy evidence.
+            // Migration eligibility (including Narrow Hall) is decided later by the preparer.
+            return new DetachedLegacyValidationResult(true, null);
         }
 
         internal string ValidatePins(SpatialMigrationInputDescriptor descriptor)
