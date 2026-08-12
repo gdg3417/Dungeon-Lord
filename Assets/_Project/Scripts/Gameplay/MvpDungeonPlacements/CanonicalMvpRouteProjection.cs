@@ -232,6 +232,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                         result.Add(new MvpOrderedRouteRoom
                         {
                             FloorIndex = floor.FloorIndex, RoomIndex = result.Count,
+                            RoomInstanceId = room.RoomInstanceId,
                             RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
                             IncludeRoomPlacement = origin !=
                                 LegacyRoomOriginKind.ImplicitCompatibilityContainer,

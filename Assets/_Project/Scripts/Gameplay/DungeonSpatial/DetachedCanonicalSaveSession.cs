@@ -92,7 +92,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     /// <summary>
-    /// Inactive lossless owner for one contextually validated schema-7 complete save. It retains
+    /// Lossless owner for one contextually validated schema-7 complete save. It retains
     /// complete bytes and builds detached replacements; it never publishes runtime state or writes files.
     /// </summary>
     public sealed class DetachedCanonicalSaveSession

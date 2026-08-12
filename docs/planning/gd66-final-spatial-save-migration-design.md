@@ -2,7 +2,7 @@
 
 **Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B6B working status (2026-08-12):** The owner-approved 17-field save workload profile is now owned by `Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json` and parsed through a dedicated strict loader; it is not derived from DungeonSpatial content-validation limits and has no Bootstrap or compiled-value fallback. The executed 30-row measurement evidence is recorded in `gd66-save-spatial-migration-limit-sizing-evidence.md`. Schema-7 serialized ownership, canonical graph/content runtime projection, canonical-mode legacy-normalization suppression, and registry-owned Bootstrap English localization mappings remain implemented. Live activation is still not claimed by this status paragraph: `SaveMigration.LatestSchemaVersion` remains **6** until raw-before-legacy load composition, lossless subsequent canonical persistence, native creation, atomic canonical writers, production-capacity projection, and recovery publication are all integrated and validated together in PR #195.
+**Current Phase 2B6B working status (2026-08-12):** Schema 7 live activation is implemented in PR #195: existing saves enter through the raw-before-legacy recovery/migration coordinator, new saves are created as native empty canonical complete saves, ordinary lifecycle and player spatial writes use the lossless canonical session and qualified Windows atomic writer, production spatial content owns canonical capacity, and legacy spatial members are frozen evidence. Activation remains restricted to qualified Windows Editor/Standalone local NTFS paths. GD66 is not complete or merge-ready until owner Unity EditMode, PlayMode, and Windows durability/lifecycle validation passes.
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; it includes the authoritative detached candidate, transaction, recovery, activation preflight, and qualified Windows durability implementation. Phase 2B6A adds an explicit activation preflight and a Windows filesystem strategy using documented write-through file creation/flush and handle-based same-directory rename. Rename opens the source with `DELETE | GENERIC_WRITE`, read/write/delete sharing, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`; submits an absolute UTF-16 `FILE_RENAME_INFO` through `SetFileInformationByHandle(FileRenameInfo)`; then calls `FlushFileBuffers` on that same renamed file handle and verifies source absence/destination presence. Microsoft documents `FileRenameInfo` as the handle-based rename operation, `FILE_FLAG_WRITE_THROUGH` as bypassing intermediate write caching, and `FlushFileBuffers` as flushing buffered information for the file to the device; together these are the selected NTFS metadata-persistence contract rather than the copy-oriented `MOVEFILE_WRITE_THROUGH` guarantee. No directory-handle flush or Windows directory-`fsync` equivalent is claimed. Selection is limited to Windows Editor and Windows Standalone on a local, nonredirected NTFS path; every other platform, filesystem, redirected/reparse path, invalid path, and failed native probe fails closed. The operating-system guarantee cannot correct storage hardware or drivers that falsely acknowledge cache flushes. Windows Editor and Windows Standalone durability qualification passed for PR #194; this does not qualify a future activated schema-7 lifecycle. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 remains detached and inactive; `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy writable authority are unchanged. Phase 2B6B remains the final live-activation packet. GD66 is not complete.
 
@@ -13,10 +13,10 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 | Item | Reconciled state |
 |---|---|
 | Repository | `main` through merged PR #194 at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate/transaction and Windows durability qualification complete |
-| Save root | `SaveRoot.schemaVersion`; `SaveMigration.LatestSchemaVersion = 6` |
-| Route topology | ordered MVP representations; no spatial graph authority |
+| Save root | `SaveRoot.schemaVersion`; live `SaveMigration.LatestSchemaVersion = 7` through GD66 only |
+| Route topology | validated schema-7 spatial graph/content authority projected into the ordered MVP runtime view |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
-| Spatial content/layout | production catalog loaded behind an inactive boundary; `FloorSpatialLayout` contains rooms/nodes/edges only |
+| Spatial content/layout | validated production catalog owns canonical definitions and capacities; `FloorSpatialLayout` owns rooms/nodes/edges |
 
 ## 3. Sources inspected
 
@@ -358,7 +358,7 @@ Phase 2 fixtures cover no-file creation, default preservation, empty canonical r
 
 ## 18. Schema-version policy
 
-Current live schema is 6. Phase 2B2 selected schema 7 as the future GD66 target, but did not increment `SaveMigration.LatestSchemaVersion` or activate schema 7. Schema 7 may appear only in detached configuration and a future fully validated candidate C until it becomes active through §16's single replacement.
+Historical live schema was 6. Phase 2B2 selected schema 7 as the GD66 target; Phase 2B6B activates it only through §16's raw-before-legacy replacement and contextually validated complete-save authority.
 
 ## 19. Authoritative exact reason-code table
 

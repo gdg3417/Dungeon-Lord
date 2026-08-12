@@ -301,6 +301,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void NativeCreationPersistsContextuallyValidatedEmptySchema7WithoutLegacySpatialMembers()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false);
+            var profile = new SaveSpatialMigrationLimitsProfile(
+                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                source.Limits, source.WholeLimits);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string path = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-native-" +
+                Guid.NewGuid().ToString("N") + ".json"));
+            var recognized = new SaveData { contentVersion = "test", createdUtcUnix = 1,
+                lastSavedUtcUnix = 1 };
+
+            NativeCanonicalSaveResult result = NativeCanonicalSaveCreator.Create(path, fileSystem,
+                recognized, source.Compatibility, source.Production, source.LegacyBytes, profile);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(result.Validation.State.Authority.CreationKind,
+                Is.EqualTo(CanonicalSpatialCreationKind.NativeCanonical));
+            Assert.That(result.Validation.State.Authority.MigrationTransactionId, Is.Null.Or.Empty);
+            Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
+            Assert.That(result.Validation.State.Floors, Is.Empty);
+            string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
+            Assert.That(json, Does.Contain("\"schemaVersion\":7"));
+            Assert.That(json, Does.Not.Contain("\"mvpDungeonPlacements\""));
+            Assert.That(json, Does.Not.Contain("\"mvpDungeonFloorLayout\""));
+            Assert.That(json, Does.Not.Contain("\"mvpRoomSlotAssignments\""));
+            Assert.That(result.Session.GetCurrentBytes(), Is.EqualTo(fileSystem.ReadAllBytes(path)));
+        }
+
+        [Test]
         public void CanonicalRouteDerivesImplicitAndExplicitRoomEffectsExactlyOnce()
         {
             Fixture fixture = Create();

@@ -78,7 +78,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(8,1).Code,Is.EqualTo("gd66.starter_profile.missing"));
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(6));
+            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(7));
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
             Assert.That(geometry.FloorDefinitionId,Is.EqualTo("spatial.floor.01")); Assert.That(geometry.FloorIndex,Is.EqualTo(0));
             Assert.That(geometry.BasicRoomDefinitionId,Is.EqualTo("spatial.room.basic"));

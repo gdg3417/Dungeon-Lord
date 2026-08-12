@@ -7,9 +7,8 @@ namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
-        // Schema 7 activation remains gated by the live GD66 load boundary. Do not advance this
-        // value until production-owned save workload limits are available to that boundary.
-        public const int LatestSchemaVersion = 6;
+        // Schema 7 is reached live only through the GD66 raw-before-legacy boundary.
+        public const int LatestSchemaVersion = 7;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 

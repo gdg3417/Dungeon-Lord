@@ -45,8 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     /// <summary>
-    /// Inactive raw-before-legacy orchestration boundary. It may settle and execute the existing
-    /// durable GD66 transaction, but it never publishes gameplay state or participates in live save I/O.
+    /// Raw-before-legacy orchestration boundary used by the live schema-7 save service.
     /// </summary>
     public sealed class DetachedSpatialSaveLoadCoordinator
     {
@@ -192,7 +191,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult opened =
                 DetachedCanonicalSaveSession.Open(validation.GetBytes(), currentContext, limits);
             if (!opened.IsSuccess || !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.
-                CanonicalMvpRouteProjection.TryPublishValidated(validation, out SaveData runtime, out string reason))
+                CanonicalMvpRouteProjection.TryPublishValidated(validation, production,
+                    out SaveData runtime, out string reason))
                 return Failure(reason ?? opened.Reason ??
                     DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.
                         ContradictoryAuthorityReason,

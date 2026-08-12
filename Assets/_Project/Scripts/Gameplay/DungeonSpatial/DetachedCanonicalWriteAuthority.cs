@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     /// <summary>
-    /// Inactive complete-save writer. It prepares detached state, atomically persists exact session
+    /// Complete-save writer. It prepares detached state, atomically persists exact session
     /// bytes, verifies durable readback, and only then creates a new runtime projection.
     /// </summary>
     public sealed class DetachedCanonicalWriteAuthority

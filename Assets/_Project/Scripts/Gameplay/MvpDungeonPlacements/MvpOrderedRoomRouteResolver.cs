@@ -8,6 +8,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
     {
         public int FloorIndex;
         public int RoomIndex;
+        public string RoomInstanceId;
         public string RoomOptionId;
         public bool IncludeRoomPlacement;
         public string[] AssignedMonsterOptionIds = Array.Empty<string>();

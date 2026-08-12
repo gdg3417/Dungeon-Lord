@@ -1,18 +1,45 @@
 using System;
 using System.IO;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace DungeonBuilder.M0
 {
     public class SaveService
     {
-        private const int SaveSchemaVersion = SaveMigration.LatestSchemaVersion;
+        private const int LegacyCompatibilitySchemaVersion = 6;
         private readonly SimpleLogger _logger;
         private readonly SaveConfig _saveConfig;
         private readonly MigrationRunner _migrationRunner = new MigrationRunner();
+        private SaveSpatialMigrationLimitsProfile _limits;
+        private ProductionSpatialContentSnapshot _production;
+        private SpatialLayoutCompatibilitySnapshot _compatibility;
+        private byte[] _legacyConfiguration;
+        private DetachedCurrentTargetValidationContext _validationContext;
+        private DetachedCanonicalSaveSession _canonicalSession;
+        private ISpatialMigrationFileSystem _canonicalFileSystem;
+        private bool _canonicalConfigured;
+
+        public event Action<SaveData> CanonicalRuntimePublished;
 
         public string SavePath { get; private set; }
+        public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
+
+        public void ConfigureCanonical(SaveSpatialMigrationLimitsProfile limits,
+            ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
+            byte[] legacyConfiguration)
+        {
+            _canonicalConfigured = true;
+            _limits = limits; _production = production; _compatibility = compatibility;
+            _legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
+            _validationContext = limits == null || production == null || compatibility == null ||
+                legacyConfiguration == null ? null : new DetachedCurrentTargetValidationContext(
+                    compatibility, production, legacyConfiguration, limits.Canonical);
+        }
 
         public SaveService(SimpleLogger logger, SaveConfig saveConfig)
             : this(logger, saveConfig, Application.persistentDataPath)
@@ -39,51 +66,54 @@ namespace DungeonBuilder.M0
         {
             banner = string.Empty;
 
+            // Unconfigured instances are retained only for schema<=6 test/repair compatibility.
+            if (!_canonicalConfigured) return LoadOrCreateLegacy(contentVersion, out banner);
+            if (_validationContext == null || _limits == null)
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey("gd66.profile.invalid"); return null; }
+            SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(SavePath);
+            if (!preflight.IsSupported || preflight.FileSystem == null)
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(preflight.Reason); return null; }
+            _canonicalFileSystem = preflight.FileSystem;
             if (!File.Exists(SavePath))
             {
-                _logger.Info("No save found. Creating new save.");
-                return CreateNew(contentVersion);
+                SaveData initial = CreateNew(contentVersion);
+                NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
+                    _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration, _limits);
+                if (!created.IsSuccess)
+                { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
+                _canonicalSession = created.Session;
+                return created.RuntimeProjection;
             }
+            var coordinator = new DetachedSpatialSaveLoadCoordinator(_limits, _compatibility, _production,
+                _legacyConfiguration, new Dictionary<string, byte[]>(),
+                new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract());
+            DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
+            if (!loaded.IsSuccess)
+            {
+                _logger.Error("GD66 load failed: " + loaded.Reason);
+                banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(loaded.Reason);
+                return null;
+            }
+            _canonicalSession = loaded.Session;
+            return loaded.RuntimeProjection;
+        }
 
+        private SaveData LoadOrCreateLegacy(string contentVersion, out string banner)
+        {
+            banner = string.Empty;
+            if (!File.Exists(SavePath)) return CreateNew(contentVersion);
             try
             {
                 string json = File.ReadAllText(SavePath);
                 SaveRoot root = TryParseSaveRoot(json);
                 if (root == null)
-                {
-                    banner = "Save file invalid. Created a new save.";
-                    ArchiveCorruptSave();
-                    return CreateNew(contentVersion);
-                }
-
-                bool migrated = _migrationRunner.Run(root, SaveSchemaVersion, out string migrationError);
-                if (!migrated)
-                {
-                    _logger.Warn($"Save migration runner failed: {migrationError}. Falling back to direct latest migration.");
-                }
-
+                { banner = "Save file invalid. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
+                _migrationRunner.Run(root, 6, out _);
                 root = SaveMigration.MigrateToLatest(root);
-                SaveData data = root.primary;
-
-                if (data.createdUtcUnix <= 0)
-                {
-                    data.createdUtcUnix = TimeUtil.UtcNowUnixSeconds();
-                }
-
-                if (string.IsNullOrEmpty(data.contentVersion))
-                {
-                    data.contentVersion = contentVersion ?? "0.0.0";
-                }
-
-                return data;
+                return root.primary;
             }
-            catch (Exception ex)
-            {
-                _logger.Error($"Save load failed. Exception: {ex.Message}");
-                banner = "Save load failed. Created a new save.";
-                ArchiveCorruptSave();
-                return CreateNew(contentVersion);
-            }
+            catch
+            { banner = "Save load failed. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
         }
 
         public void Save(SaveData data, SaveReason reason)
@@ -94,11 +124,19 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            // The legacy serializer is not a schema-7 persistence boundary. Until activation,
-            // never rewrite canonical-looking bytes through JsonUtility.
             if (CanonicalMvpRouteProjection.HasCanonicalLookingState(data))
             {
-                _logger.Error("Legacy save write rejected for canonical-looking authority.");
+                if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                { _logger.Error("Canonical save authority is unavailable."); return; }
+                long previous = data.lastSavedUtcUnix;
+                data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+                DetachedCanonicalWriteResult result = CreateWriteAuthority().SaveRecognizedState(
+                    SavePath, _canonicalFileSystem, _canonicalSession, data);
+                if (!result.IsSuccess)
+                { data.lastSavedUtcUnix = previous; _logger.Error("GD66 save failed: " + result.Reason); return; }
+                _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+                _logger.Info($"Saved canonical complete save. Reason: {reason}");
                 return;
             }
 
@@ -107,7 +145,7 @@ namespace DungeonBuilder.M0
             string json = JsonUtility.ToJson(data, true);
             SaveRoot root = new SaveRoot
             {
-                schemaVersion = SaveSchemaVersion,
+                schemaVersion = LegacyCompatibilitySchemaVersion,
                 primary = data
             };
             json = JsonUtility.ToJson(root, true);
@@ -137,6 +175,25 @@ namespace DungeonBuilder.M0
                 _logger.Error($"Save write failed. Exception: {ex.Message}");
             }
         }
+
+        public DetachedCanonicalWriteResult ExecuteCanonicalMutation(SaveData current,
+            DetachedCanonicalMutationRequest request)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false,
+                    DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
+                    null, null, null, null);
+            DetachedCanonicalWriteResult result = CreateWriteAuthority().Execute(SavePath,
+                _canonicalFileSystem, _canonicalSession, current, request);
+            if (result.IsSuccess)
+            { _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
+            return result;
+        }
+
+        private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
+            new DetachedCanonicalWriteAuthority(_production, _compatibility,
+                LegacyGameplayConfigurationContract.Parse(_legacyConfiguration),
+                _validationContext, _limits);
 
         public void DeleteSave(out string banner)
         {
@@ -182,6 +239,16 @@ namespace DungeonBuilder.M0
             return data;
         }
 
+        private static RawLegacyBlankFloorContract CreateBlankFloorContract()
+        {
+            MvpDungeonFloorLayoutState state = MvpDungeonFloorLayoutState.CreateEmptyStarterFloor();
+            return new RawLegacyBlankFloorContract(state.NextRevision, state.Nodes.Select(node =>
+                new RawLegacyBlankFloorNodeContract(node.FloorIndex, node.NodeIndex, node.SlotId,
+                    node.CategoryId, node.OptionId, node.Revision)), true, true,
+                new[] { "Nodes", "NextRevision" }, new[] { "FloorIndex", "NodeIndex", "SlotId",
+                    "CategoryId", "OptionId", "Revision" });
+        }
+
         private SaveRoot TryParseSaveRoot(string json)
         {
             SaveRoot root = JsonUtility.FromJson<SaveRoot>(json);
@@ -198,7 +265,7 @@ namespace DungeonBuilder.M0
 
             return new SaveRoot
             {
-                schemaVersion = SaveSchemaVersion,
+                schemaVersion = LegacyCompatibilitySchemaVersion,
                 primary = legacy
             };
         }
