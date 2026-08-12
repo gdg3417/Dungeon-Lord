@@ -1,8 +1,41 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public sealed class DetachedRecognizedSaveStateSnapshot
+    {
+        private readonly Dictionary<string, byte[]> values;
+        private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source) { values = source; }
+
+        public static DetachedRecognizedSaveStateSnapshot Create(SaveData source,
+            SaveSpatialMigrationLimitsProfile limits)
+        {
+            if (source == null || limits == null) return null;
+            byte[] json = Encoding.UTF8.GetBytes(JsonUtility.ToJson(source));
+            var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+            if (!ContractJson.TryParse(json, limits.Canonical.Serialized, issues, out ContractJsonNode root) ||
+                root.Kind != ContractJsonKind.Object) return null;
+            var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, ContractJsonNode> field in root.Fields)
+            {
+                if (!DetachedCanonicalSaveSession.IsLiveRecognizedMember(field.Key)) continue;
+                var writer = new ContractJsonWriter(limits.Canonical.Serialized);
+                DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+                result.Add(field.Key, writer.Finish());
+            }
+            return new DetachedRecognizedSaveStateSnapshot(result);
+        }
+
+        internal bool TryGet(string name, out byte[] value)
+        {
+            if (!values.TryGetValue(name, out byte[] stored)) { value = null; return false; }
+            value = (byte[])stored.Clone(); return true;
+        }
+    }
+
     public sealed class DetachedCanonicalSaveSessionUpdate
     {
         private readonly byte[] bytes;
@@ -55,6 +88,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         public DetachedCanonicalSaveSessionResult PrepareReplacement(DetachedCanonicalSpatialSaveState replacement)
+            => PrepareReplacement(null, replacement);
+
+        public DetachedCanonicalSaveSessionResult PrepareReplacement(
+            DetachedRecognizedSaveStateSnapshot recognizedState,
+            DetachedCanonicalSpatialSaveState replacement)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -76,20 +114,29 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 int copiedBytes = 0, unknownBytes = 0, unknownCount = 0;
                 bool first = true;
+                IReadOnlyList<string> recognizedNames = RawSavePayloadClassifier.RecognizedSaveDataMemberNames;
+                for (int nameIndex = 0; nameIndex < recognizedNames.Count; nameIndex++)
+                {
+                    string name = recognizedNames[nameIndex];
+                    byte[] valueBytes;
+                    if (IsFrozenLegacySpatialMember(name) || recognizedState == null)
+                    {
+                        if (!TryFind(primary, name, out ContractJsonNode retained)) continue;
+                        valueBytes = SerializeNode(retained);
+                    }
+                    else if (!recognizedState.TryGet(name, out valueBytes)) continue;
+                    copiedBytes = Add(copiedBytes, valueBytes.Length,
+                        limits.Whole.MaximumCopiedValueBytes);
+                    WriteRawField(writer, name, valueBytes, first); first = false;
+                }
                 for (int index = 0; index < primary.Fields.Count - 2; index++)
                 {
                     KeyValuePair<string, ContractJsonNode> field = primary.Fields[index];
+                    if (Contains(recognizedNames, field.Key)) continue;
                     byte[] valueBytes = SerializeNode(field.Value);
-                    bool recognized = Contains(RawSavePayloadClassifier.RecognizedSaveDataMemberNames, field.Key);
-                    if (recognized)
-                        copiedBytes = Add(copiedBytes, valueBytes.Length,
-                            limits.Whole.MaximumCopiedValueBytes);
-                    else
-                    {
-                        unknownCount = Add(unknownCount, 1, limits.Whole.MaximumUnknownMembers);
-                        unknownBytes = Add(unknownBytes, valueBytes.Length,
-                            limits.Whole.MaximumUnknownMemberBytes);
-                    }
+                    unknownCount = Add(unknownCount, 1, limits.Whole.MaximumUnknownMembers);
+                    unknownBytes = Add(unknownBytes, valueBytes.Length,
+                        limits.Whole.MaximumUnknownMemberBytes);
                     WriteField(writer, field.Key, field.Value, first); first = false;
                 }
                 WriteRawField(writer, "canonicalSpatialAuthority", spatial.Value.Authority, first);
@@ -157,6 +204,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static bool Contains(IReadOnlyList<string> values, string value)
         { for (int index = 0; index < values.Count; index++) if (values[index] == value) return true; return false; }
+
+        internal static bool IsLiveRecognizedMember(string name) =>
+            Contains(RawSavePayloadClassifier.RecognizedSaveDataMemberNames, name) &&
+            !IsFrozenLegacySpatialMember(name);
+
+        private static bool IsFrozenLegacySpatialMember(string name) =>
+            name == "mvpDungeonPlacements" || name == "mvpDungeonFloorLayout" ||
+            name == "mvpRoomSlotAssignments";
+
+        private static bool TryFind(ContractJsonNode parent, string name, out ContractJsonNode value)
+        {
+            for (int index = 0; index < parent.Fields.Count; index++)
+                if (parent.Fields[index].Key == name) { value = parent.Fields[index].Value; return true; }
+            value = null; return false;
+        }
 
         private static bool SameLimits(CanonicalSpatialSerializationLimits left,
             CanonicalSpatialSerializationLimits right) =>

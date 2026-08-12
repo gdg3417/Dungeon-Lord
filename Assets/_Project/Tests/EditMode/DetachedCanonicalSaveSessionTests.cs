@@ -2,8 +2,12 @@
 using System;
 using System.IO;
 using System.Text;
+using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -56,16 +60,79 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(opened.Session.GetCurrentBytes(), Is.EqualTo(fixture.Bytes));
         }
 
-        private static Fixture CreateFixture()
+        [Test]
+        public void CurrentRecognizedStateUpdatesWhileLegacySpatialEvidenceStaysFrozen()
+        {
+            Fixture fixture = CreateFixture();
+            DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
+                fixture.Bytes, fixture.Context, fixture.Profile).Session;
+            SaveData firstLive = LiveState(200, 17, 31d, "research.first", "objective.first");
+            MutateLegacySpatialProjection(firstLive, "placement.option.room.narrow_hall");
+            DetachedRecognizedSaveStateSnapshot firstSnapshot =
+                DetachedRecognizedSaveStateSnapshot.Create(firstLive, fixture.Profile);
+
+            DetachedCanonicalSaveSessionResult first = session.PrepareReplacement(firstSnapshot, fixture.State);
+
+            Assert.That(first.IsSuccess, Is.True, first.Reason);
+            AssertLiveState(first.Update.GetBytes(), 200, 17, 31d, "research.first", "objective.first");
+            AssertFrozenLegacy(first.Update.GetBytes());
+            AssertEvidence(first.Update.GetBytes());
+
+            DetachedCanonicalSaveSession reopened = DetachedCanonicalSaveSession.Open(
+                first.Update.GetBytes(), fixture.Context, fixture.Profile).Session;
+            SaveData secondLive = LiveState(300, 29, 47d, "research.second", "objective.second");
+            MutateLegacySpatialProjection(secondLive, "placement.option.room.narrow_hall");
+            DetachedRecognizedSaveStateSnapshot secondSnapshot =
+                DetachedRecognizedSaveStateSnapshot.Create(secondLive, fixture.Profile);
+            DetachedCanonicalSaveSessionResult second = reopened.PrepareReplacement(secondSnapshot,
+                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
+
+            Assert.That(second.IsSuccess, Is.True, second.Reason);
+            AssertLiveState(second.Update.GetBytes(), 300, 29, 47d, "research.second", "objective.second");
+            AssertFrozenLegacy(second.Update.GetBytes());
+            AssertEvidence(second.Update.GetBytes());
+            Assert.That(DetachedCanonicalSaveSession.Open(second.Update.GetBytes(), fixture.Context,
+                fixture.Profile).IsSuccess, Is.True);
+            Assert.That(reopened.PrepareReplacement(secondSnapshot,
+                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>())).Update.GetBytes(),
+                Is.EqualTo(second.Update.GetBytes()));
+        }
+
+        [Test]
+        public void AbsentLegacySpatialEvidenceRemainsAbsentDespiteInitializedRuntimeFields()
+        {
+            Fixture fixture = CreateFixture(false);
+            DetachedCanonicalSaveSession session = DetachedCanonicalSaveSession.Open(
+                fixture.Bytes, fixture.Context, fixture.Profile).Session;
+            SaveData live = LiveState(400, 41, 53d, "research.absent", "objective.absent");
+            DetachedCanonicalSaveSessionResult result = session.PrepareReplacement(
+                DetachedRecognizedSaveStateSnapshot.Create(live, fixture.Profile), fixture.State);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string json = Encoding.UTF8.GetString(result.Update.GetBytes());
+            Assert.That(json, Does.Not.Contain("mvpDungeonPlacements"));
+            Assert.That(json, Does.Not.Contain("mvpDungeonFloorLayout"));
+            Assert.That(json, Does.Not.Contain("mvpRoomSlotAssignments"));
+        }
+
+        private static Fixture CreateFixture(bool includeLegacy = true)
         {
             SaveSpatialMigrationLimitsProfile profile = SaveSpatialMigrationLimitsLoader.Load(
                 File.ReadAllText(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
             const string assignments = "\"mvpRoomSlotAssignments\":{\"Rooms\":[{" +
                 "\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":2}";
+            const string floor = "\"mvpDungeonFloorLayout\":{\"Nodes\":[{" +
+                "\"FloorIndex\":0,\"NodeIndex\":0,\"SlotId\":\"slot.0\",\"CategoryId\":\"placement.category.room\"," +
+                "\"OptionId\":\"placement.option.room.basic\",\"Revision\":1}],\"NextRevision\":2}";
+            const string placements = "\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.basic\"," +
+                "\"Revision\":1}],\"NextRevision\":2}";
+            string legacy = includeLegacy ? placements + "," + floor + "," + assignments + "," : string.Empty;
             string json = "{\"rootUnknown\":{\"lexical\":1.00,\"items\":[true,null,{\"s\":\"a \\\" b \\\\ c\"}]}," +
                 "\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
-                "\"dungeonLayout\":{\"Slots\":[]},\"unknownPrimary\":[1,{\"n\":1.00}]," + assignments + "}}";
+                "\"dungeonLayout\":{\"Slots\":[]}," + legacy +
+                "\"unknownPrimary\":[1,{\"n\":1.00}]}}";
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture prepared =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false,
                     Encoding.UTF8.GetBytes(json), profile.Raw, profile.Whole, profile.Canonical);
@@ -98,8 +165,69 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(json, Does.Contain("\"dungeonLayout\":{\"Slots\":[]}"));
             Assert.That(json, Does.Contain("\"unknownPrimary\":[1,{\"n\":1.00}]"));
             Assert.That(json, Does.Contain("\"rootUnknown\":{\"lexical\":1.00,\"items\":[true,null,{\"s\":\"a \\\" b \\\\ c\"}]}"));
-            Assert.That(json, Does.Not.Contain("mvpDungeonPlacements"));
-            Assert.That(json, Does.Not.Contain("mvpDungeonFloorLayout"));
+        }
+
+        private static SaveData LiveState(long saved, int runSequence, double mana,
+            string researchId, string objectiveId) => new SaveData
+        {
+            saveVersion = 7,
+            contentVersion = "current-content",
+            createdUtcUnix = 100,
+            lastSavedUtcUnix = saved,
+            lastPausedUtcUnix = saved - 2,
+            lastResumedUtcUnix = saved - 1,
+            totalTicks = saved * 10,
+            lastKnownAppState = "Paused",
+            dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1),
+            structureRuntime = new StructureRuntimeState { ManaReserve = mana, Heat = 4d },
+            runHistory = new RunHistoryState { NextRunSequence = runSequence },
+            completedResearch = new CompletedResearchState
+            {
+                ProjectIds = new[] { researchId }, LastCompletedProjectId = researchId,
+                LastCompletionRuleSourceId = "rule.research"
+            },
+            completedObjectives = new CompletedObjectiveState
+            {
+                ObjectiveIds = new[] { objectiveId }, LastCompletedObjectiveId = objectiveId,
+                LastCompletionRuleSourceId = "rule.objective"
+            },
+            integrityFlags = new[] { "current" }
+        };
+
+        private static void MutateLegacySpatialProjection(SaveData save, string option)
+        {
+            save.mvpDungeonPlacements = new MvpDungeonPlacementState
+            {
+                Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>
+                { new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, option, 99) },
+                NextRevision = 100
+            };
+            save.mvpDungeonFloorLayout = null;
+            save.mvpRoomSlotAssignments = null;
+        }
+
+        private static void AssertLiveState(byte[] bytes, long saved, int runSequence, double mana,
+            string researchId, string objectiveId)
+        {
+            SaveData save = JsonUtility.FromJson<SaveRoot>(Encoding.UTF8.GetString(bytes)).primary;
+            Assert.That(save.lastSavedUtcUnix, Is.EqualTo(saved));
+            Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(runSequence));
+            Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(save.completedResearch.LastCompletedProjectId, Is.EqualTo(researchId));
+            Assert.That(save.completedObjectives.LastCompletedObjectiveId, Is.EqualTo(objectiveId));
+            Assert.That(save.dungeonLayout.FloorCount, Is.EqualTo(1));
+            Assert.That(save.dungeonLayout.SlotsPerFloor, Is.EqualTo(1));
+        }
+
+        private static void AssertFrozenLegacy(byte[] bytes)
+        {
+            string json = Encoding.UTF8.GetString(bytes);
+            Assert.That(json, Does.Contain("\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.basic\"," +
+                "\"Revision\":1}],\"NextRevision\":2}"));
+            Assert.That(json, Does.Contain("\"mvpDungeonFloorLayout\":{\"Nodes\":[{"));
+            Assert.That(json, Does.Contain("\"mvpRoomSlotAssignments\":{\"Rooms\":[{"));
+            Assert.That(json, Does.Not.Contain("placement.option.room.narrow_hall"));
         }
 
         private sealed class Fixture
