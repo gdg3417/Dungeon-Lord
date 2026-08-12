@@ -356,6 +356,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { if (index != 0) writer.Token(","); writer.String(node.Fields[index].Key); writer.Token(":"); WriteNode(writer, node.Fields[index].Value); }
             writer.Token("}");
         }
+
+        internal static void WriteCanonicalNode(ContractJsonWriter writer, ContractJsonNode node) =>
+            WriteNode(writer, node);
         private static bool Same(byte[] left, byte[] right) => left != null && right != null && left.SequenceEqual(right);
         private static DetachedCompleteSaveValidationResult Failure() =>
             new DetachedCompleteSaveValidationResult(null, "gd66.transaction.candidate_invalid");
