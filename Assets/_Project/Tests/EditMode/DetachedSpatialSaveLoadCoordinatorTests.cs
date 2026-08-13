@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
@@ -42,6 +43,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void NarrowHallRepairPatchesOnlyEffectivePlacementWinner()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[" +
+                "{\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}," +
+                "{\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":3}],\"NextRevision\":4}}}");
+            RawSavePayloadClassification classification = ClassifyRepair(original);
+
+            LegacyNarrowHallRepairResult result = LegacyNarrowHallRepair.Prepare(original,
+                classification, Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator, 0);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string repaired = Encoding.UTF8.GetString(result.GetBytes());
+            Assert.That(repaired, Does.Contain("\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1"));
+            Assert.That(repaired, Does.Contain("\"OptionId\":\"placement.option.room.basic\",\"Revision\":3"));
+        }
+
+        [Test]
+        public void NarrowHallRepairTargetsOnlyRequestedEffectiveR2Assignment()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"mvpSelectedRoomSlotIndex\":1,\"unknown\":{\"n\":1.00}," +
+                "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.narrow_hall\"}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.narrow_hall\"}]}}}");
+            RawSavePayloadClassification classification = ClassifyRepair(original);
+            Assert.That(LegacyNarrowHallRepair.FindRepairTargets(classification), Is.EqualTo(new[] { 0, 1 }));
+
+            LegacyNarrowHallRepairResult result = LegacyNarrowHallRepair.Prepare(original,
+                classification, Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator, 0);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string repaired = Encoding.UTF8.GetString(result.GetBytes());
+            Assert.That(repaired, Does.Contain("\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\""));
+            Assert.That(repaired, Does.Contain("\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.narrow_hall\""));
+            Assert.That(repaired, Does.Contain("\"unknown\":{\"n\":1.00}"));
+        }
+
+        private static RawSavePayloadClassification ClassifyRepair(byte[] bytes) =>
+            RawSavePayloadClassifier.Classify(bytes,
+                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+
+        [Test]
         public void RepairBytesUseSharedAtomicAuthorityAndRetryAfterPartialEvidenceWrite()
         {
             byte[] original = Encoding.UTF8.GetBytes("original");
@@ -62,6 +112,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(retried, Is.Null);
             Assert.That(fileSystem.ReadAllBytes(active), Is.EqualTo(candidate));
             Assert.That(fileSystem.Paths.Any(path => path.Contains(".canonical-write-")), Is.False);
+        }
+
+        [Test]
+        public void OrdinaryEvidenceDiscoveryIgnoresPrefixLookalikesAndOwnsExactHashGrammar()
+        {
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
+                "save_primary.json"));
+            string exact = active + ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
+            string lookalike = active + ".canonical-write-not-owned";
+            fileSystem.Seed(exact, Encoding.UTF8.GetBytes("evidence"));
+            fileSystem.Seed(lookalike, Encoding.UTF8.GetBytes("unrelated"));
+
+            IReadOnlyList<string> evidence = ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(
+                active, fileSystem, 8);
+
+            Assert.That(evidence, Is.EqualTo(new[] { exact }));
+            Assert.That(fileSystem.ReadAllBytes(lookalike), Is.EqualTo(Encoding.UTF8.GetBytes("unrelated")));
+        }
+
+        [Test]
+        public void LiveNewGameGateUsesExactMigrationAndOrdinaryEvidenceGrammar()
+        {
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "save_primary.json"));
+            string directory = Path.GetDirectoryName(active);
+            fileSystem.Seed(Path.Combine(directory, "save_primary.gd66-not-owned.txt"), new byte[] { 1 });
+            fileSystem.Seed(active + ".canonical-write-not-owned", new byte[] { 2 });
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(active, fileSystem, 8), Is.False);
+
+            string transaction = "gd66-" + new string('a', 64);
+            SpatialMigrationSidecarNames names = SpatialMigrationSidecarPaths.Derive(
+                Path.GetFileName(active), transaction).Value;
+            fileSystem.Seed(Path.Combine(directory, names.Journal), new byte[] { 3 });
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(active, fileSystem, 8), Is.True);
         }
         [TestCase(1)]
         [TestCase(2)]

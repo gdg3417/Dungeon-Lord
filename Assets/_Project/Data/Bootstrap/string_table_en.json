@@ -2778,6 +2778,14 @@
     {
       "key": "save.migration.spatial.gd66.repair.narrow_hall_to_basic",
       "text": "Replace Narrow Hall with Basic Room and retry"
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.target_room_1",
+      "text": "Repair Room 1"
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.target_room_2",
+      "text": "Repair Room 2"
     }
   ]
 }

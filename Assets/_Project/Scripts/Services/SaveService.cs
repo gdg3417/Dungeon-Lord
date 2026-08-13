@@ -25,6 +25,8 @@ namespace DungeonBuilder.M0
         private bool _canonicalConfigured;
         private bool _narrowHallRepairAvailable;
         private string _narrowHallTrustedOriginalSha256;
+        private int[] _narrowHallRepairTargets = Array.Empty<int>();
+        private int _narrowHallRepairTargetPosition;
         private Func<string, SpatialMigrationActivationPreflight> _preflightEvaluator =
             SpatialMigrationFileSystemSelector.Evaluate;
 
@@ -33,6 +35,16 @@ namespace DungeonBuilder.M0
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
         public bool NarrowHallRepairAvailable => _narrowHallRepairAvailable;
+        public IReadOnlyList<int> NarrowHallRepairTargets => _narrowHallRepairTargets;
+        public int NarrowHallRepairTargetRoomIndex => _narrowHallRepairTargets.Length == 0 ? 0 :
+            _narrowHallRepairTargets[Math.Min(_narrowHallRepairTargetPosition,
+                _narrowHallRepairTargets.Length - 1)];
+
+        public void SelectNarrowHallRepairTarget(int roomIndex)
+        {
+            int position = Array.IndexOf(_narrowHallRepairTargets, roomIndex);
+            if (_narrowHallRepairAvailable && position >= 0) _narrowHallRepairTargetPosition = position;
+        }
 
         internal void SetPreflightEvaluatorForTests(
             Func<string, SpatialMigrationActivationPreflight> evaluator)
@@ -111,8 +123,18 @@ namespace DungeonBuilder.M0
                 _narrowHallTrustedOriginalSha256 = null;
                 if (_narrowHallRepairAvailable)
                 {
-                    try { _narrowHallTrustedOriginalSha256 = SpatialContractSha256.Compute(
-                        _canonicalFileSystem.ReadAllBytes(SavePath)); }
+                    try
+                    {
+                        byte[] trusted = _canonicalFileSystem.ReadAllBytes(SavePath);
+                        _narrowHallTrustedOriginalSha256 = SpatialContractSha256.Compute(trusted);
+                        RawSavePayloadClassification trustedClassification = RawSavePayloadClassifier.Classify(
+                            trusted, _limits.Raw, new RawSaveEnvelopeVersionContract(1, 6),
+                            CreateBlankFloorContract());
+                        _narrowHallRepairTargets = LegacyNarrowHallRepair.FindRepairTargets(
+                            trustedClassification).ToArray();
+                        _narrowHallRepairTargetPosition = 0;
+                        if (_narrowHallRepairTargets.Length == 0) ClearNarrowHallRepairAuthorization();
+                    }
                     catch { ClearNarrowHallRepairAuthorization(); }
                 }
                 _logger.Error("GD66 load failed: " + loaded.Reason);
@@ -148,7 +170,7 @@ namespace DungeonBuilder.M0
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
                 original, _limits.Raw, versions, blank);
             LegacyNarrowHallRepairResult repaired = LegacyNarrowHallRepair.Prepare(original,
-                classification, _limits.Raw, versions, blank);
+                classification, _limits.Raw, versions, blank, NarrowHallRepairTargetRoomIndex);
             if (!repaired.IsSuccess)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(repaired.Reason); return null; }
             byte[] candidate = repaired.GetBytes();
@@ -162,7 +184,12 @@ namespace DungeonBuilder.M0
         }
 
         private void ClearNarrowHallRepairAuthorization()
-        { _narrowHallRepairAvailable = false; _narrowHallTrustedOriginalSha256 = null; }
+        {
+            _narrowHallRepairAvailable = false;
+            _narrowHallTrustedOriginalSha256 = null;
+            _narrowHallRepairTargets = Array.Empty<int>();
+            _narrowHallRepairTargetPosition = 0;
+        }
 
         private SaveData LoadOrCreateLegacy(string contentVersion, out string banner)
         {
@@ -263,22 +290,31 @@ namespace DungeonBuilder.M0
 
         private bool HasOwnedRecoveryEvidence()
         {
-            string directory = Path.GetDirectoryName(SavePath);
-            string activeName = Path.GetFileName(SavePath);
-            int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
+            return HasOwnedRecoveryEvidence(SavePath, _canonicalFileSystem,
+                _limits.Canonical.Serialized.MaximumCollectionRecords);
+        }
+
+        internal static bool HasOwnedRecoveryEvidence(string savePath,
+            ISpatialMigrationFileSystem fileSystem, int maximum)
+        {
+            string directory = Path.GetDirectoryName(savePath);
+            string activeName = Path.GetFileName(savePath);
             SpatialContractResult<string> migrationPattern =
                 SpatialMigrationSidecarPaths.EvidenceSearchPattern(activeName);
             if (!migrationPattern.IsValid) throw new IOException("Invalid GD66 evidence stem.");
-            IReadOnlyList<string> migration = _canonicalFileSystem.EnumerateFiles(directory,
+            IReadOnlyList<string> migration = fileSystem.EnumerateFiles(directory,
                 migrationPattern.Value, maximum + 1);
-            IReadOnlyList<string> ordinary = _canonicalFileSystem.EnumerateFiles(directory,
-                activeName + ".canonical-write-*", maximum + 1);
-            if (migration.Count > maximum || ordinary.Count > maximum)
+            if (migration.Count > maximum)
                 throw new IOException("GD66 evidence limit exceeded.");
-            foreach (string path in migration.Concat(ordinary))
-                if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, path))
+            string[] ownedMigration = migration.Where(path =>
+                SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(activeName,
+                    Path.GetFileName(path))).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            foreach (string path in ownedMigration)
+                if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
                     throw new IOException("GD66 evidence redirected.");
-            return migration.Count != 0 || ordinary.Count != 0;
+            IReadOnlyList<string> ordinary = ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(
+                savePath, fileSystem, maximum);
+            return ownedMigration.Length != 0 || ordinary.Count != 0;
         }
 
         public void DeleteSave(out string banner)

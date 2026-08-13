@@ -1145,6 +1145,20 @@ namespace DungeonBuilder.M0
                         DetachedSpatialMigrationPreparer.NarrowHallReason),
                     Gd66MigrationReasonRegistry.PlayerLocalizationKey(
                         DetachedSpatialMigrationPreparer.NarrowHallReason)), GUI.skin.label);
+                if (_root.SaveService.NarrowHallRepairTargets.Count > 1)
+                {
+                    foreach (int roomIndex in _root.SaveService.NarrowHallRepairTargets)
+                    {
+                        string key = roomIndex == 0
+                            ? "save.migration.spatial.gd66.repair.target_room_1"
+                            : "save.migration.spatial.gd66.repair.target_room_2";
+                        bool selected = roomIndex == _root.SaveService.NarrowHallRepairTargetRoomIndex;
+                        GUI.enabled = !selected;
+                        if (GUILayout.Button(GetLocalizedString(key, key), GUI.skin.button))
+                            _root.SaveService.SelectNarrowHallRepairTarget(roomIndex);
+                        GUI.enabled = true;
+                    }
+                }
                 if (GUILayout.Button(GetLocalizedString(NarrowHallRepairActionKey,
                     NarrowHallRepairActionKey), GUI.skin.button))
                     _root.TryRepairMigrationBlockedNarrowHall();

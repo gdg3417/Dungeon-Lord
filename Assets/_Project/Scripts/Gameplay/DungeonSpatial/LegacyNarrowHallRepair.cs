@@ -27,16 +27,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RawSavePayloadClassification classification, RawSavePayloadClassificationLimits limits,
             RawSaveEnvelopeVersionContract versions, RawLegacyBlankFloorContract blankFloor)
         {
+            int selectedRoom = ReadPersistedTarget(classification);
+            return Prepare(original, classification, limits, versions, blankFloor, selectedRoom);
+        }
+
+        public static LegacyNarrowHallRepairResult Prepare(byte[] original,
+            RawSavePayloadClassification classification, RawSavePayloadClassificationLimits limits,
+            RawSaveEnvelopeVersionContract versions, RawLegacyBlankFloorContract blankFloor,
+            int targetRoomIndex)
+        {
             if (original == null || classification == null || !classification.IsSuccess ||
                 SpatialContractSha256.Compute(original) != classification.SourcePayloadSha256)
                 return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
             var patches = new List<Patch>();
-            int selectedRoom = 0;
-            RawSaveMemberEvidence selectedEvidence = classification.Members.FirstOrDefault(member =>
-                member.Name == "mvpSelectedRoomSlotIndex" && member.State == RawSaveMemberState.NonNull);
-            if (selectedEvidence != null && !int.TryParse(Encoding.UTF8.GetString(
-                selectedEvidence.GetRawValueBytes()), NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out selectedRoom))
+            if (targetRoomIndex < 0 || targetRoomIndex > 1)
                 return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
             foreach (RawSaveMemberEvidence member in classification.Members)
             {
@@ -45,14 +49,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 JsonValue root;
                 try { root = JsonValue.Parse(member.GetRawValueBytes()); }
                 catch { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
-                foreach (JsonValue record in Records(member.Name, root))
+                IEnumerable<JsonValue> selected = EffectiveRecords(member.Name, root, classification,
+                    targetRoomIndex);
+                foreach (JsonValue record in selected)
                 {
                     JsonValue option = null;
                     if (member.Name == "mvpRoomSlotAssignments")
                     {
                         if (!int.TryParse(record.String("RoomIndex"), NumberStyles.Integer,
                             CultureInfo.InvariantCulture, out int roomIndex) ||
-                            roomIndex != selectedRoom) continue;
+                            roomIndex != targetRoomIndex) continue;
                         record.Fields.TryGetValue("RoomOptionId", out option);
                     }
                     else if (record.String("CategoryId") == "placement.category.room")
@@ -74,6 +80,95 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return verified.IsSuccess
                 ? new LegacyNarrowHallRepairResult(candidate, null)
                 : Failure(verified.FailureReason);
+        }
+
+        public static IReadOnlyList<int> FindRepairTargets(RawSavePayloadClassification classification)
+        {
+            if (classification == null || !classification.IsSuccess) return Array.Empty<int>();
+            RawSaveMemberEvidence member = EffectiveMember(classification);
+            if (member == null) return Array.Empty<int>();
+            try
+            {
+                JsonValue root = JsonValue.Parse(member.GetRawValueBytes());
+                if (member.Name == "mvpRoomSlotAssignments")
+                    return Records(member.Name, root).Where(IsNarrowAssignment)
+                        .Select(value => ParseInt(value.String("RoomIndex"))).Where(value => value >= 0 && value <= 1)
+                        .Distinct().OrderBy(value => value).ToArray();
+                return EffectiveRecords(member.Name, root, classification, 0).Any(IsNarrowRoomRecord)
+                    ? new[] { 0 } : Array.Empty<int>();
+            }
+            catch { return Array.Empty<int>(); }
+        }
+
+        private static RawSaveMemberEvidence EffectiveMember(RawSavePayloadClassification classification)
+        {
+            string name = classification.RoomSlotAssignmentsPresence == RawLegacyRoutePresence.Present
+                ? "mvpRoomSlotAssignments"
+                : classification.FloorLayoutPresence == RawLegacyRoutePresence.Present
+                    ? "mvpDungeonFloorLayout"
+                    : classification.DungeonPlacementsPresence == RawLegacyRoutePresence.Present
+                        ? "mvpDungeonPlacements" : null;
+            return name == null ? null : classification.Members.FirstOrDefault(value => value.Name == name &&
+                value.State == RawSaveMemberState.NonNull);
+        }
+
+        private static IEnumerable<JsonValue> EffectiveRecords(string member, JsonValue root,
+            RawSavePayloadClassification classification, int targetRoomIndex)
+        {
+            // Higher-precedence topology is the sole repair authority.  Lower models remain frozen evidence,
+            // except placement agreement required by an effective floor winner.
+            if (classification.RoomSlotAssignmentsPresence == RawLegacyRoutePresence.Present)
+                return member == "mvpRoomSlotAssignments"
+                    ? Records(member, root).Where(value => ParseInt(value.String("FloorIndex")) == 0 &&
+                        ParseInt(value.String("RoomIndex")) == targetRoomIndex)
+                    : Array.Empty<JsonValue>();
+            if (classification.FloorLayoutPresence == RawLegacyRoutePresence.Present)
+            {
+                if (member == "mvpDungeonFloorLayout") return GreatestRoomRevision(Records(member, root), true);
+                if (member == "mvpDungeonPlacements") return GreatestRoomRevision(Records(member, root), false);
+                return Array.Empty<JsonValue>();
+            }
+            return member == "mvpDungeonPlacements"
+                ? GreatestRoomRevision(Records(member, root), false) : Array.Empty<JsonValue>();
+        }
+
+        private static IEnumerable<JsonValue> GreatestRoomRevision(IEnumerable<JsonValue> records,
+            bool floor)
+        {
+            JsonValue[] room = records.Where(value => value.String("CategoryId") ==
+                "placement.category.room").ToArray();
+            if (room.Length == 0) return Array.Empty<JsonValue>();
+            if (floor)
+            {
+                // Migration first chooses the uniquely greatest revision for each node identity.
+                room = room.GroupBy(value => value.String("FloorIndex") + ":" + value.String("NodeIndex"),
+                        StringComparer.Ordinal)
+                    .SelectMany(group => UniqueGreatest(group)).ToArray();
+            }
+            return UniqueGreatest(room);
+        }
+
+        private static IEnumerable<JsonValue> UniqueGreatest(IEnumerable<JsonValue> values)
+        {
+            JsonValue[] array = values.ToArray();
+            if (array.Length == 0) return Array.Empty<JsonValue>();
+            int greatest = array.Max(value => ParseInt(value.String("Revision")));
+            JsonValue[] tied = array.Where(value => ParseInt(value.String("Revision")) == greatest).ToArray();
+            return tied.Length == 1 ? tied : Array.Empty<JsonValue>();
+        }
+
+        private static bool IsNarrowAssignment(JsonValue value) => value.String("RoomOptionId") ==
+            "placement.option.room.narrow_hall";
+        private static bool IsNarrowRoomRecord(JsonValue value) => value.String("OptionId") ==
+            "placement.option.room.narrow_hall";
+        private static int ParseInt(string value) => int.TryParse(value, NumberStyles.Integer,
+            CultureInfo.InvariantCulture, out int parsed) ? parsed : int.MinValue;
+
+        private static int ReadPersistedTarget(RawSavePayloadClassification classification)
+        {
+            RawSaveMemberEvidence selected = classification?.Members.FirstOrDefault(member =>
+                member.Name == "mvpSelectedRoomSlotIndex" && member.State == RawSaveMemberState.NonNull);
+            return selected == null ? 0 : ParseInt(Encoding.UTF8.GetString(selected.GetRawValueBytes()));
         }
 
         private static IEnumerable<JsonValue> Records(string member, JsonValue root)
