@@ -148,6 +148,210 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(Path.Combine(directory, names.Journal), new byte[] { 3 });
             Assert.That(SaveService.HasOwnedRecoveryEvidence(active, fileSystem, 8), Is.True);
         }
+
+        [TestCase("invalid-id.journal.json", true)]
+        [TestCase("invalid-id.journal.json.next", true)]
+        [TestCase("invalid-id.original.bak", true)]
+        [TestCase("invalid-id.original.bak.restore.intent", true)]
+        [TestCase("invalid-id.original.bak.restore", true)]
+        [TestCase("invalid-id.candidate.tmp", true)]
+        [TestCase("invalid-id.finalized", true)]
+        [TestCase("invalid-id.evidence", true)]
+        [TestCase("not-owned.txt", false)]
+        public void LiveNewGameGateSharesTransactionRecoveryRelevantSuffixes(string suffix,
+            bool expected)
+        {
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "save_primary.json"));
+            fileSystem.Seed(Path.Combine(Path.GetDirectoryName(active), "save_primary.gd66-" + suffix),
+                Encoding.UTF8.GetBytes("malformed-or-orphan-evidence"));
+
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(active, fileSystem, 8), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void LiveNewGameGateFailsClosedOnEvidenceOverflowAndRedirection()
+        {
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "save_primary.json"));
+            string directory = Path.GetDirectoryName(active);
+            var overflow = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            overflow.Seed(Path.Combine(directory, "save_primary.gd66-a.original.bak"), new byte[] { 1 });
+            overflow.Seed(Path.Combine(directory, "save_primary.gd66-b.original.bak"), new byte[] { 2 });
+            Assert.Throws<IOException>(() => SaveService.HasOwnedRecoveryEvidence(active, overflow, 1));
+
+            var redirected = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Containment, 1);
+            redirected.Seed(Path.Combine(directory, "save_primary.gd66-a.original.bak"), new byte[] { 1 });
+            Assert.Throws<IOException>(() => SaveService.HasOwnedRecoveryEvidence(active, redirected, 8));
+        }
+
+        [Test]
+        public void SaveServiceCleanNoSaveCreatesAndReloadsNativeCanonicalAuthority()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService first = ConfiguredService(fixture, fileSystem, "service-native.json");
+
+            SaveData created = first.LoadOrCreate("gd66-live", out string createBanner);
+
+            Assert.That(created, Is.Not.Null, createBanner);
+            Assert.That(created.validatedCanonicalSpatialState, Is.Not.Null);
+            Assert.That(first.CanonicalSession, Is.Not.Null);
+            Assert.That(fileSystem.ReadAllBytes(first.SavePath),
+                Is.EqualTo(first.CanonicalSession.GetCurrentBytes()));
+            SaveService reopened = ConfiguredService(fixture, fileSystem, "service-native.json");
+            SaveData loaded = reopened.LoadOrCreate("gd66-live", out string loadBanner);
+            Assert.That(loaded, Is.Not.Null, loadBanner);
+            Assert.That(reopened.CanonicalSession.GetCurrentBytes(),
+                Is.EqualTo(fileSystem.ReadAllBytes(reopened.SavePath)));
+        }
+
+        [Test]
+        public void SaveServiceSchemaSixUsesGd66MigrationAndRetainsCanonicalSession()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-legacy.json");
+            fileSystem.Seed(service.SavePath, fixture.Original);
+
+            SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
+
+            Assert.That(loaded, Is.Not.Null, banner);
+            Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+            Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
+                Does.Contain("\"schemaVersion\":7"));
+        }
+
+        [Test]
+        public void SaveServiceRecoveryRelevantEvidenceBlocksNativeButLookalikeDoesNot()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var blockedFileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService blocked = ConfiguredService(fixture, blockedFileSystem, "service-evidence.json");
+            blockedFileSystem.Seed(Path.Combine(Path.GetDirectoryName(blocked.SavePath),
+                "service-evidence.gd66-invalid-id.journal.json"), Encoding.UTF8.GetBytes("malformed"));
+
+            Assert.That(blocked.LoadOrCreate("gd66-live", out _), Is.Null);
+            Assert.That(blockedFileSystem.Exists(blocked.SavePath), Is.False);
+
+            var cleanFileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService clean = ConfiguredService(fixture, cleanFileSystem, "service-lookalike.json");
+            cleanFileSystem.Seed(Path.Combine(Path.GetDirectoryName(clean.SavePath),
+                "service-lookalike.gd66-not-owned.txt"), new byte[] { 1 });
+            Assert.That(clean.LoadOrCreate("gd66-live", out string banner), Is.Not.Null, banner);
+            Assert.That(cleanFileSystem.Exists(clean.SavePath), Is.True);
+        }
+
+        [Test]
+        public void SaveServiceExplicitDeleteClearsExactEvidenceAndAllowsNativeRecreation()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-delete.json");
+            Assert.That(service.LoadOrCreate("gd66-live", out string createBanner), Is.Not.Null,
+                createBanner);
+            string exactOrdinary = service.SavePath +
+                ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
+            fileSystem.Seed(exactOrdinary, Encoding.UTF8.GetBytes("evidence"));
+
+            service.DeleteSave(out string deleteBanner);
+
+            Assert.That(fileSystem.Exists(service.SavePath), Is.False, deleteBanner);
+            Assert.That(fileSystem.Exists(exactOrdinary), Is.False);
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(service.NarrowHallRepairAvailable, Is.False);
+            Assert.That(service.LoadOrCreate("gd66-live", out string recreateBanner), Is.Not.Null,
+                recreateBanner);
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+        }
+
+        [Test]
+        public void SaveServiceNarrowHallRepairRerunsGd66AndPreservesUnknownEvidence()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"contentVersion\":\"repair\",\"unknownPrimary\":{\"n\":1.00}," +
+                "\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
+                "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}],\"NextRevision\":2}}," +
+                "\"unknownRoot\":[true,null]}");
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json");
+            fileSystem.Seed(service.SavePath, original);
+
+            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            Assert.That(service.NarrowHallRepairAvailable, Is.True);
+            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0 }));
+            SaveData repaired = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
+
+            Assert.That(repaired, Is.Not.Null, banner);
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+            string persisted = Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes());
+            Assert.That(persisted, Does.Contain("\"unknownPrimary\":{\"n\":1.00}"));
+            Assert.That(persisted, Does.Contain("\"unknownRoot\":[true,null]"));
+        }
+
+        [Test]
+        public void SaveServiceTwoNarrowR2RepairsOneTargetAtATime()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"mvpSelectedRoomSlotIndex\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                Assignment(0, "narrow_hall") + "," + Assignment(1, "narrow_hall") +
+                "],\"NextRevision\":3}}}");
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json");
+            fileSystem.Seed(service.SavePath, original);
+
+            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0, 1 }));
+            service.SelectNarrowHallRepairTarget(0);
+            Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out _), Is.Null);
+            Assert.That(service.NarrowHallRepairAvailable, Is.True);
+            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 1 }));
+            SaveData repaired = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
+
+            Assert.That(repaired, Is.Not.Null, banner);
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+            Assert.That(repaired.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length,
+                Is.EqualTo(2));
+        }
+
+        [Test]
+        public void SaveServiceChangedTrustedOriginalInvalidatesRepairAndReevaluatesAuthority()
+        {
+            byte[] narrow = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
+                "\"Revision\":1}],\"NextRevision\":2}}}");
+            byte[] changed = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(narrow).Replace(
+                "placement.option.room.narrow_hall", "placement.option.room.basic"));
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, narrow);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json");
+            fileSystem.Seed(service.SavePath, narrow);
+            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            fileSystem.RemoveSeededEvidence(service.SavePath);
+            fileSystem.Seed(service.SavePath, changed);
+
+            SaveData result = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
+
+            Assert.That(result, Is.Not.Null, banner);
+            Assert.That(service.NarrowHallRepairAvailable, Is.False);
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+        }
+
+        private static string Assignment(int room, string option) =>
+            "{\"FloorIndex\":0,\"RoomIndex\":" + room +
+            ",\"RoomOptionId\":\"placement.option.room." + option +
+            "\",\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}";
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
@@ -439,6 +643,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-" + identity + ".json"));
             fileSystem.Seed(activePath, original);
             return Coordinator(fixture).Load(activePath, Supported(fileSystem));
+        }
+
+        private static SaveService ConfiguredService(
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
+            ISpatialMigrationFileSystem fileSystem, string filename)
+        {
+            string directory = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
+                "gd66-save-service-tests"));
+            var service = new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = filename, useAtomicWrites = true }, directory);
+            service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
+                    Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                    fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+            service.SetPreflightEvaluatorForTests(path => Supported(fileSystem));
+            return service;
         }
 
         private static DetachedSpatialSaveLoadCoordinator Coordinator(

@@ -1135,15 +1135,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static EvidenceKind ClassifyFilename(string name)
         {
-            if (name.EndsWith(".journal.json", StringComparison.Ordinal)) return EvidenceKind.LiveJournal;
-            if (name.EndsWith(".journal.json.next", StringComparison.Ordinal)) return EvidenceKind.JournalNext;
-            if (name.EndsWith(".original.bak.restore.intent", StringComparison.Ordinal)) return EvidenceKind.RestorationIntent;
-            if (name.EndsWith(".original.bak.restore", StringComparison.Ordinal)) return EvidenceKind.RestoreStaging;
-            if (name.EndsWith(".original.bak", StringComparison.Ordinal)) return EvidenceKind.OriginalBackup;
-            if (name.EndsWith(".candidate.tmp", StringComparison.Ordinal)) return EvidenceKind.CandidateStaging;
-            if (name.EndsWith(".finalized", StringComparison.Ordinal)) return EvidenceKind.FinalizationReceipt;
-            if (name.EndsWith(".evidence", StringComparison.Ordinal)) return EvidenceKind.ExistingQuarantine;
-            return EvidenceKind.Unknown;
+            switch (SpatialMigrationRecoveryEvidenceProbe.ClassifyFilename(name))
+            {
+                case SpatialMigrationEvidenceFilenameKind.Journal: return EvidenceKind.LiveJournal;
+                case SpatialMigrationEvidenceFilenameKind.JournalNext: return EvidenceKind.JournalNext;
+                case SpatialMigrationEvidenceFilenameKind.OriginalBackup: return EvidenceKind.OriginalBackup;
+                case SpatialMigrationEvidenceFilenameKind.RestorationIntent: return EvidenceKind.RestorationIntent;
+                case SpatialMigrationEvidenceFilenameKind.RestoreStaging: return EvidenceKind.RestoreStaging;
+                case SpatialMigrationEvidenceFilenameKind.CandidateStaging: return EvidenceKind.CandidateStaging;
+                case SpatialMigrationEvidenceFilenameKind.FinalizationReceipt: return EvidenceKind.FinalizationReceipt;
+                case SpatialMigrationEvidenceFilenameKind.ExistingQuarantine: return EvidenceKind.ExistingQuarantine;
+                default: return EvidenceKind.Unknown;
+            }
         }
 
         private bool QuarantineMalformedEvidence(string directory, IReadOnlyList<EvidenceRecord> malformed)

@@ -297,24 +297,11 @@ namespace DungeonBuilder.M0
         internal static bool HasOwnedRecoveryEvidence(string savePath,
             ISpatialMigrationFileSystem fileSystem, int maximum)
         {
-            string directory = Path.GetDirectoryName(savePath);
-            string activeName = Path.GetFileName(savePath);
-            SpatialContractResult<string> migrationPattern =
-                SpatialMigrationSidecarPaths.EvidenceSearchPattern(activeName);
-            if (!migrationPattern.IsValid) throw new IOException("Invalid GD66 evidence stem.");
-            IReadOnlyList<string> migration = fileSystem.EnumerateFiles(directory,
-                migrationPattern.Value, maximum + 1);
-            if (migration.Count > maximum)
-                throw new IOException("GD66 evidence limit exceeded.");
-            string[] ownedMigration = migration.Where(path =>
-                SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(activeName,
-                    Path.GetFileName(path))).OrderBy(path => path, StringComparer.Ordinal).ToArray();
-            foreach (string path in ownedMigration)
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
-                    throw new IOException("GD66 evidence redirected.");
+            bool migration = SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(
+                savePath, fileSystem, maximum);
             IReadOnlyList<string> ordinary = ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(
                 savePath, fileSystem, maximum);
-            return ownedMigration.Length != 0 || ordinary.Count != 0;
+            return migration || ordinary.Count != 0;
         }
 
         public void DeleteSave(out string banner)
