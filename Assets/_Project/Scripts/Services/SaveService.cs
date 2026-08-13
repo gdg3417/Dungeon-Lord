@@ -11,7 +11,6 @@ namespace DungeonBuilder.M0
 {
     public class SaveService
     {
-        private const int LegacyCompatibilitySchemaVersion = 6;
         private readonly SimpleLogger _logger;
         private readonly SaveConfig _saveConfig;
         private readonly MigrationRunner _migrationRunner = new MigrationRunner();
@@ -19,6 +18,7 @@ namespace DungeonBuilder.M0
         private ProductionSpatialContentSnapshot _production;
         private SpatialLayoutCompatibilitySnapshot _compatibility;
         private byte[] _legacyConfiguration;
+        private RunSimulationConfig _legacyGameplayConfiguration;
         private DetachedCurrentTargetValidationContext _validationContext;
         private DetachedCanonicalSaveSession _canonicalSession;
         private ISpatialMigrationFileSystem _canonicalFileSystem;
@@ -31,10 +31,11 @@ namespace DungeonBuilder.M0
 
         public void ConfigureCanonical(SaveSpatialMigrationLimitsProfile limits,
             ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
-            byte[] legacyConfiguration)
+            RunSimulationConfig legacyGameplayConfiguration, byte[] legacyConfiguration)
         {
             _canonicalConfigured = true;
             _limits = limits; _production = production; _compatibility = compatibility;
+            _legacyGameplayConfiguration = legacyGameplayConfiguration;
             _legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
             _validationContext = limits == null || production == null || compatibility == null ||
                 legacyConfiguration == null ? null : new DetachedCurrentTargetValidationContext(
@@ -74,7 +75,13 @@ namespace DungeonBuilder.M0
             if (!preflight.IsSupported || preflight.FileSystem == null)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(preflight.Reason); return null; }
             _canonicalFileSystem = preflight.FileSystem;
-            if (!File.Exists(SavePath))
+            bool activeExists = _canonicalFileSystem.Exists(SavePath);
+            bool evidenceExists;
+            try { evidenceExists = HasOwnedRecoveryEvidence(); }
+            catch
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                DetachedCanonicalWriteAuthority.RecoveryRequiredReason); return null; }
+            if (!activeExists && !evidenceExists)
             {
                 SaveData initial = CreateNew(contentVersion);
                 NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
@@ -108,7 +115,7 @@ namespace DungeonBuilder.M0
                 SaveRoot root = TryParseSaveRoot(json);
                 if (root == null)
                 { banner = "Save file invalid. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
-                _migrationRunner.Run(root, 6, out _);
+                _migrationRunner.Run(root, SaveMigration.LegacyCompatibilitySchemaVersion, out _);
                 root = SaveMigration.MigrateToLatest(root);
                 return root.primary;
             }
@@ -145,7 +152,7 @@ namespace DungeonBuilder.M0
             string json = JsonUtility.ToJson(data, true);
             SaveRoot root = new SaveRoot
             {
-                schemaVersion = LegacyCompatibilitySchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = data
             };
             json = JsonUtility.ToJson(root, true);
@@ -192,8 +199,25 @@ namespace DungeonBuilder.M0
 
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
-                LegacyGameplayConfigurationContract.Parse(_legacyConfiguration),
+                _legacyGameplayConfiguration,
                 _validationContext, _limits);
+
+        private bool HasOwnedRecoveryEvidence()
+        {
+            string directory = Path.GetDirectoryName(SavePath);
+            string stem = Path.GetFileName(SavePath);
+            int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
+            IReadOnlyList<string> migration = _canonicalFileSystem.EnumerateFiles(directory,
+                stem + ".gd66-*", maximum + 1);
+            IReadOnlyList<string> ordinary = _canonicalFileSystem.EnumerateFiles(directory,
+                stem + ".canonical-write-*", maximum + 1);
+            if (migration.Count > maximum || ordinary.Count > maximum)
+                throw new IOException("GD66 evidence limit exceeded.");
+            foreach (string path in migration.Concat(ordinary))
+                if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, path))
+                    throw new IOException("GD66 evidence redirected.");
+            return migration.Count != 0 || ordinary.Count != 0;
+        }
 
         public void DeleteSave(out string banner)
         {
@@ -265,7 +289,7 @@ namespace DungeonBuilder.M0
 
             return new SaveRoot
             {
-                schemaVersion = LegacyCompatibilitySchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = legacy
             };
         }

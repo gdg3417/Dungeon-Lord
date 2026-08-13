@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
@@ -109,6 +110,29 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             }
 
             return new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms.ToArray() };
+        }
+
+        public static MvpDungeonFloorSlotLayout ResolveDefaultFloor(SaveData save,
+            RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production)
+        {
+            if (!CanonicalMvpRouteProjection.IsCanonical(save))
+                return ResolveDefaultFloor(save, legacyConfig);
+            CanonicalMvpRouteProjectionResult canonical =
+                CanonicalMvpRouteProjection.InspectWithProductionContent(save, production);
+            if (canonical.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                return null;
+            return new MvpDungeonFloorSlotLayout
+            {
+                FloorIndex = 0,
+                Rooms = canonical.Rooms.Select(room => new MvpDungeonRoomInstance
+                {
+                    FloorIndex = room.FloorIndex, RoomIndex = room.RoomIndex,
+                    RoomOptionId = room.RoomOptionId, Capacity = room.Capacity,
+                    AssignedMonsterOptionIds = room.AssignedMonsterOptionIds,
+                    AssignedTrapOptionIds = room.AssignedTrapOptionIds,
+                    AssignedLootNodeOptionIds = room.AssignedLootNodeOptionIds
+                }).ToArray()
+            };
         }
 
         public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save, RunSimulationConfig config)

@@ -757,6 +757,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(parsed.Diagnostics, Is.Empty);
         }
 
+        [Test]
+        public void ProductionRunConfigurationHasWhitespaceIndependentCanonicalPinBytes()
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Bootstrap/run_simulation_config.json");
+            Assert.That(asset, Is.Not.Null);
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(asset.text,
+                out RunSimulationConfig parsed), Is.True);
+            byte[] canonical = LegacyGameplayConfigurationContract.SerializeCanonical(parsed);
+            Assert.That(LegacyGameplayConfigurationContract.Parse(canonical), Is.Not.Null);
+            string reformatted = JsonUtility.ToJson(parsed, true);
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(reformatted,
+                out RunSimulationConfig alternate), Is.True);
+            byte[] alternateCanonical = LegacyGameplayConfigurationContract.SerializeCanonical(alternate);
+            Assert.That(alternateCanonical, Is.EqualTo(canonical));
+            Assert.That(SpatialContractSha256.Compute(alternateCanonical),
+                Is.EqualTo(SpatialContractSha256.Compute(canonical)));
+        }
+
+        [Test]
+        public void BootTransitionsHomeOnlyAfterSuccessfulInitialization()
+        {
+            string source = File.ReadAllText(
+                "Assets/_Project/Scripts/States/BootState.cs");
+            Assert.That(source, Does.Contain("if (_root.InitializeServicesAndData())"));
+            Assert.That(source.IndexOf("if (_root.InitializeServicesAndData())",
+                StringComparison.Ordinal), Is.LessThan(source.IndexOf("_root.GoHomeStub();",
+                    StringComparison.Ordinal)));
+        }
+
+        [Test]
+        public void LiveSaveAuthorityChecksRecoveryEvidenceBeforeNativeCreation()
+        {
+            string source = File.ReadAllText(
+                "Assets/_Project/Scripts/Services/SaveService.cs");
+            int evidence = source.IndexOf("HasOwnedRecoveryEvidence()", StringComparison.Ordinal);
+            int creation = source.IndexOf("NativeCanonicalSaveCreator.Create", StringComparison.Ordinal);
+            Assert.That(evidence, Is.GreaterThanOrEqualTo(0));
+            Assert.That(evidence, Is.LessThan(creation));
+        }
+
         private static TextAsset Asset(string name)
         {
             TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + name);

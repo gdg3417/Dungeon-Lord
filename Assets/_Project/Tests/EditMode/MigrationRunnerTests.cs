@@ -157,7 +157,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.IsEmpty(migrated.primary.mvpDungeonPlacements.Entries);
             Assert.AreEqual(1, migrated.primary.mvpDungeonPlacements.NextRevision);
             Assert.NotNull(migrated.primary.structureRuntime);
-            Assert.AreEqual(SaveMigration.LatestSchemaVersion, migrated.schemaVersion);
+            Assert.AreEqual(SaveMigration.LegacyCompatibilitySchemaVersion, migrated.schemaVersion);
+        }
+
+        [TestCase(1, 6)]
+        [TestCase(5, 6)]
+        [TestCase(6, 6)]
+        [TestCase(7, 7)]
+        [TestCase(8, 8)]
+        public void LegacyNormalizerNeverManufacturesOrRewritesCanonicalSchema(
+            int sourceVersion, int expectedVersion)
+        {
+            var root = new SaveRoot { schemaVersion = sourceVersion, primary = new SaveData() };
+            Assert.That(SaveMigration.MigrateToLatest(root).schemaVersion,
+                Is.EqualTo(expectedVersion));
         }
 
     }

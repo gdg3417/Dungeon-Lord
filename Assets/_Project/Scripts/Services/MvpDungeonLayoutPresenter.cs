@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -35,6 +36,11 @@ namespace DungeonBuilder.M0
         }
 
         public static string BuildLayoutText(SaveData save, RunSimulationConfig config, string selectedPlacementCategoryId, Func<string, string, string> localize)
+            => BuildLayoutText(save, config, null, selectedPlacementCategoryId, localize);
+
+        public static string BuildLayoutText(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production, string selectedPlacementCategoryId,
+            Func<string, string, string> localize)
         {
             bool canonical = CanonicalMvpRouteProjection.HasCanonicalLookingState(save);
             MvpDungeonFloorLayoutState layout = canonical ? null : save?.mvpDungeonFloorLayout;
@@ -83,7 +89,7 @@ namespace DungeonBuilder.M0
             string floorText = string.Format(Localize(localize, FloorFormatKey), 0, nodes.ToString());
             string legacyLayout = string.Format(Localize(localize, LayoutFormatKey), floorText);
             MvpDungeonFloorSlotLayout slotLayout = config == null && !canonical
-                ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
+                ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config, production);
             if (slotLayout == null)
             {
                 return legacyLayout;

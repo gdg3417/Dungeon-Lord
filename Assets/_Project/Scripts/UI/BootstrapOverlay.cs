@@ -237,7 +237,8 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             return MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, selectedRoomIndex, (key, fallback) => GetLocalizedString(key, fallback));
         }
@@ -249,7 +250,8 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             return MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, selectedRoomIndex, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback));
         }
@@ -597,7 +599,9 @@ namespace DungeonBuilder.M0
                 firstSessionObjective,
                 greedTrial,
                 MvpRecentSpoilsLedgerPresenter.Resolve(_root.Save, greedTrial),
-                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig,
+                    _root.ProductionSpatialContent, _selectedMvpPlacementCategoryId,
+                    (key, fallback) => GetLocalizedString(key, fallback)),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 _selectedMvpPlacementCategoryId,
                 MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
@@ -1192,7 +1196,8 @@ namespace DungeonBuilder.M0
             {
                 CycleSelectedMvpRoomSlotTarget();
             }
-            if (GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
+            if (!CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
             {
                 AddMvpBasicRoomSlot();
             }
@@ -1301,11 +1306,13 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
                 _root.Save,
                 _root.RunSimulationConfig,
+                _root.ProductionSpatialContent,
                 selectedRoomIndex,
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
@@ -1353,7 +1360,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             if (layout?.Rooms == null)
             {
                 return false;

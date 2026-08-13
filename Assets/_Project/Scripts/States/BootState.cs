@@ -14,8 +14,8 @@ namespace DungeonBuilder.M0
         public void Enter()
         {
             _root.Logger.Info("Entered BootState.");
-            _root.InitializeServicesAndData();
-            _root.GoHomeStub();
+            if (_root.InitializeServicesAndData())
+                _root.GoHomeStub();
         }
 
         public void Exit()

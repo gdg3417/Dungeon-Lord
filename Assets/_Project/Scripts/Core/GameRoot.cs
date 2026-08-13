@@ -50,6 +50,7 @@ namespace DungeonBuilder.M0
         public SaveData Save { get; private set; }
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
+        public ProductionSpatialContentSnapshot ProductionSpatialContent => Content?.ProductionSpatialContent;
 
         public string BannerMessage { get; private set; } = string.Empty;
         public string LastRunRejectionReasonKey { get; private set; } = string.Empty;
@@ -304,7 +305,7 @@ namespace DungeonBuilder.M0
         }
 #endif
 
-        public void InitializeServicesAndData()
+        public bool InitializeServicesAndData()
         {
             EnsureContentAssetsAssigned();
 
@@ -340,7 +341,7 @@ namespace DungeonBuilder.M0
                 Logger.Error("GD66 save workload configuration unavailable: " + saveLimits.Reason);
                 string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey(saveLimits.Reason);
                 SetBanner(Content.GetString(key, key));
-                return;
+                return false;
             }
 
             if (!string.IsNullOrEmpty(contentBanner))
@@ -360,17 +361,26 @@ namespace DungeonBuilder.M0
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(),
                 devFeatureFlagEnabled);
 
+            if (!BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                runSimulationConfigJson == null ? null : runSimulationConfigJson.text,
+                out RunSimulationConfig parsedRunConfig))
+            {
+                string reason = "gd66.transaction.pinned_input_missing";
+                SetBanner(Content.GetString(Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason), reason));
+                return false;
+            }
+            byte[] canonicalLegacyConfiguration =
+                LegacyGameplayConfigurationContract.SerializeCanonical(parsedRunConfig);
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
             SaveService.ConfigureCanonical(SaveSpatialMigrationLimits, Content.ProductionSpatialContent,
-                Content.SpatialLayoutCompatibilityProfiles,
-                runSimulationConfigJson == null ? null : System.Text.Encoding.UTF8.GetBytes(
-                    runSimulationConfigJson.text));
+                Content.SpatialLayoutCompatibilityProfiles, parsedRunConfig,
+                canonicalLegacyConfiguration);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
             {
                 if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
-                return;
+                return false;
             }
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
             CaptureOfflineSummaryDiagnostics();
@@ -412,6 +422,7 @@ namespace DungeonBuilder.M0
             RefreshDashboardState();
             RefreshStructureRuntimeLines();
             RefreshRunLine();
+            return true;
         }
 
         private void InitializeStructureSimulationPass()
@@ -621,6 +632,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            // Native R1->R2 construction is deferred to Phase 3. Never re-open the legacy writer.
+            if (CanonicalMvpRouteProjection.IsCanonical(Save)) return false;
             bool added = MvpRoomSlotLayoutResolver.TryAddSecondBasicRoomSlot(Save, _runSimulationService?.Config);
             if (added)
             {

@@ -9,11 +9,14 @@ namespace DungeonBuilder.M0
     {
         // Schema 7 is reached live only through the GD66 raw-before-legacy boundary.
         public const int LatestSchemaVersion = 7;
+        public const int LegacyCompatibilitySchemaVersion = 6;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 
         public static SaveRoot MigrateToLatest(SaveRoot root)
         {
+            if (root != null && root.schemaVersion >= LatestSchemaVersion)
+                return root;
             if (root == null)
             {
                 root = new SaveRoot();
@@ -116,9 +119,11 @@ namespace DungeonBuilder.M0
                 history.RecentOutcomes = new[] { history.LatestOutcome };
             }
 
-            if (root.schemaVersion < LatestSchemaVersion)
+            // This compatibility normalizer never manufactures canonical schema 7. Only the
+            // raw-before-legacy GD66 coordinator owns the 6 -> 7 transition.
+            if (root.schemaVersion >= 1 && root.schemaVersion < LegacyCompatibilitySchemaVersion)
             {
-                root.schemaVersion = LatestSchemaVersion;
+                root.schemaVersion = LegacyCompatibilitySchemaVersion;
             }
 
             return root;

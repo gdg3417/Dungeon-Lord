@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             var migrated = SaveMigration.MigrateToLatest(legacy);
 
-            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
             Assert.That(migrated.primary.dungeonLayout, Is.Not.Null);
             Assert.That(migrated.primary.dungeonLayout.Slots.Count, Is.EqualTo(
                 SaveMigration.DefaultFloorCount * SaveMigration.DefaultSlotsPerFloor));

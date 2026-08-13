@@ -264,7 +264,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             root = SaveMigration.MigrateToLatest(root);
             SaveData save = root.primary;
-            Assert.That(root.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(root.schemaVersion, Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
             Assert.That(save.dungeonLayout, Is.SameAs(expectedLayout));
             Assert.That(save.dungeonLayout.Slots.Count, Is.EqualTo(30));
             Assert.That(save.mvpRoomSlotAssignments, Is.SameAs(expectedAssignments));

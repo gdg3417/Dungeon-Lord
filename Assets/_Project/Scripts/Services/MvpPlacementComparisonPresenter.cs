@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -37,6 +38,25 @@ namespace DungeonBuilder.M0
 
             string baselineOptionId = ResolveBaselineOptionId(layout, placements, selectedCategoryId, selectedOptionId);
             return ResolveWithBaseline(config, selectedOptionId, baselineOptionId, preview);
+        }
+
+        public static MvpPlacementComparisonPreview Resolve(SaveData save,
+            RunSimulationConfig config, ProductionSpatialContentSnapshot production,
+            int selectedRoomIndex, string selectedCategoryId, string selectedOptionId)
+        {
+            if (!CanonicalMvpRouteProjection.IsCanonical(save))
+                return Resolve(save, config, selectedRoomIndex, selectedCategoryId, selectedOptionId);
+            var preview = CreateEmptyPreview(selectedOptionId);
+            if (!CanCompare(config, selectedCategoryId, selectedOptionId)) return preview;
+            MvpDungeonFloorSlotLayout floor = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                save, config, production);
+            if (floor?.Rooms == null || floor.Rooms.Length == 0) return preview;
+            int target = selectedRoomIndex >= 0 && selectedRoomIndex < floor.Rooms.Length
+                ? selectedRoomIndex : MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, floor);
+            MvpDungeonRoomInstance room = floor.Rooms[target];
+            if (!MvpRoomSlotTargetResolver.CanAccept(room, selectedCategoryId)) return preview;
+            return ResolveWithBaseline(config, selectedOptionId,
+                ResolveRoomSlotBaselineOptionId(room, selectedCategoryId), preview);
         }
 
         public static MvpPlacementComparisonPreview Resolve(
