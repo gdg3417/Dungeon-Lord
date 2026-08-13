@@ -382,6 +382,14 @@ namespace DungeonBuilder.M0
                 if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
                 return false;
             }
+            return CompleteSuccessfulBoot(Save, saveBanner);
+        }
+
+        private bool CompleteSuccessfulBoot(SaveData validatedSave, string saveBanner)
+        {
+            if (validatedSave == null || !CanonicalMvpRouteProjection.IsCanonical(validatedSave))
+                return false;
+            Save = validatedSave;
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
             CaptureOfflineSummaryDiagnostics();
             RefreshOfflineSummaryLines();
@@ -396,6 +404,7 @@ namespace DungeonBuilder.M0
                 ? Content.Bootstrap.timeRules.detectClockSkewSeconds
                 : 300;
 
+            if (TimeService != null) return false;
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
             TimeService.AttachSave(Save);
             TimeService.OnTick += HandleSimulationTick;
@@ -507,8 +516,8 @@ namespace DungeonBuilder.M0
                     SetBanner(Content.GetString(bannerKey, bannerKey));
                 return false;
             }
-            Save = repaired;
-            TimeService?.AttachSave(Save);
+            if (!CompleteSuccessfulBoot(repaired, bannerKey)) return false;
+            GoHomeStub();
             return true;
         }
 

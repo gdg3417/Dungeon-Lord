@@ -17,7 +17,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"contentVersion\":\"repair\",\"mvpDungeonPlacements\":{" +
                 "\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
-                "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}]," +
+                "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1," +
+                "\"note\":\"placement.option.room.narrow_hall\"}]," +
                 "\"NextRevision\":2},\"unknownPrimary\":{\"n\":1.00}}," +
                 "\"unknownRoot\":[true,null]}");
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(original,
@@ -33,10 +34,34 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             string repaired = Encoding.UTF8.GetString(result.GetBytes());
             Assert.That(repaired, Does.Contain("\"OptionId\":\"placement.option.room.basic\""));
-            Assert.That(repaired, Does.Not.Contain("placement.option.room.narrow_hall"));
+            Assert.That(repaired, Does.Contain(
+                "\"note\":\"placement.option.room.narrow_hall\""));
             Assert.That(repaired, Does.Contain("\"unknownPrimary\":{\"n\":1.00}"));
             Assert.That(repaired, Does.Contain("\"unknownRoot\":[true,null]"));
             Assert.That(repaired, Does.Contain("\"contentVersion\":\"repair\""));
+        }
+
+        [Test]
+        public void RepairBytesUseSharedAtomicAuthorityAndRetryAfterPartialEvidenceWrite()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("original");
+            byte[] candidate = Encoding.UTF8.GetBytes("candidate");
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
+                "gd66-repair-atomic-" + Guid.NewGuid().ToString("N") + ".json"));
+            fileSystem.Seed(active, original);
+            fileSystem.EnablePartialWriteFailure(3);
+
+            string interrupted = ExactCompleteSaveAtomicPersistence.Persist(active, fileSystem,
+                original, candidate, 64);
+            fileSystem.DisableFailure();
+            string retried = ExactCompleteSaveAtomicPersistence.Persist(active, fileSystem,
+                original, candidate, 64);
+
+            Assert.That(interrupted, Is.Not.Null);
+            Assert.That(retried, Is.Null);
+            Assert.That(fileSystem.ReadAllBytes(active), Is.EqualTo(candidate));
+            Assert.That(fileSystem.Paths.Any(path => path.Contains(".canonical-write-")), Is.False);
         }
         [TestCase(1)]
         [TestCase(2)]

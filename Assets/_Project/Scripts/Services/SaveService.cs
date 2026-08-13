@@ -24,12 +24,19 @@ namespace DungeonBuilder.M0
         private ISpatialMigrationFileSystem _canonicalFileSystem;
         private bool _canonicalConfigured;
         private bool _narrowHallRepairAvailable;
+        private string _narrowHallTrustedOriginalSha256;
+        private Func<string, SpatialMigrationActivationPreflight> _preflightEvaluator =
+            SpatialMigrationFileSystemSelector.Evaluate;
 
         public event Action<SaveData> CanonicalRuntimePublished;
 
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
         public bool NarrowHallRepairAvailable => _narrowHallRepairAvailable;
+
+        internal void SetPreflightEvaluatorForTests(
+            Func<string, SpatialMigrationActivationPreflight> evaluator)
+        { _preflightEvaluator = evaluator ?? SpatialMigrationFileSystemSelector.Evaluate; }
 
         public void ConfigureCanonical(SaveSpatialMigrationLimitsProfile limits,
             ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
@@ -73,7 +80,7 @@ namespace DungeonBuilder.M0
             if (!_canonicalConfigured) return LoadOrCreateLegacy(contentVersion, out banner);
             if (_validationContext == null || _limits == null)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey("gd66.profile.invalid"); return null; }
-            SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(SavePath);
+            SpatialMigrationActivationPreflight preflight = _preflightEvaluator(SavePath);
             if (!preflight.IsSupported || preflight.FileSystem == null)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(preflight.Reason); return null; }
             _canonicalFileSystem = preflight.FileSystem;
@@ -101,12 +108,20 @@ namespace DungeonBuilder.M0
             {
                 _narrowHallRepairAvailable = loaded.TrustedPayload == SpatialTrustedPayload.Original &&
                     loaded.Reason == DetachedSpatialMigrationPreparer.NarrowHallReason;
+                _narrowHallTrustedOriginalSha256 = null;
+                if (_narrowHallRepairAvailable)
+                {
+                    try { _narrowHallTrustedOriginalSha256 = SpatialContractSha256.Compute(
+                        _canonicalFileSystem.ReadAllBytes(SavePath)); }
+                    catch { ClearNarrowHallRepairAuthorization(); }
+                }
                 _logger.Error("GD66 load failed: " + loaded.Reason);
                 banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(loaded.Reason);
                 return null;
             }
             _canonicalSession = loaded.Session;
             _narrowHallRepairAvailable = false;
+            _narrowHallTrustedOriginalSha256 = null;
             return loaded.RuntimeProjection;
         }
 
@@ -121,6 +136,12 @@ namespace DungeonBuilder.M0
             try { original = _canonicalFileSystem.ReadAllBytes(SavePath); }
             catch { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
                 DetachedCanonicalWriteAuthority.RecoveryRequiredReason); return null; }
+            if (!SpatialContractSha256.IsCanonical(_narrowHallTrustedOriginalSha256) ||
+                SpatialContractSha256.Compute(original) != _narrowHallTrustedOriginalSha256)
+            {
+                ClearNarrowHallRepairAuthorization();
+                return LoadOrCreate(contentVersion, out banner);
+            }
             RawLegacyBlankFloorContract blank = CreateBlankFloorContract();
             var versions = new RawSaveEnvelopeVersionContract(1,
                 SaveMigration.LegacyCompatibilitySchemaVersion);
@@ -131,37 +152,17 @@ namespace DungeonBuilder.M0
             if (!repaired.IsSuccess)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(repaired.Reason); return null; }
             byte[] candidate = repaired.GetBytes();
-            string directory = Path.GetDirectoryName(SavePath);
-            string staging = SavePath + ".narrow-hall-repair.candidate";
-            try
-            {
-                if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, staging) ||
-                    _canonicalFileSystem.Exists(staging)) throw new IOException();
-                _canonicalFileSystem.WriteAllBytesDurable(staging, candidate);
-                if (!candidate.SequenceEqual(_canonicalFileSystem.ReadAllBytes(staging))) throw new IOException();
-                _canonicalFileSystem.ReplaceSameDirectoryAtomic(staging, SavePath);
-                _canonicalFileSystem.FlushDirectory(directory);
-                if (!candidate.SequenceEqual(_canonicalFileSystem.ReadAllBytes(SavePath))) throw new IOException();
-            }
-            catch
-            {
-                try
-                {
-                    if (_canonicalFileSystem.Exists(SavePath) && candidate.SequenceEqual(
-                        _canonicalFileSystem.ReadAllBytes(SavePath)))
-                    {
-                        _narrowHallRepairAvailable = false;
-                        return LoadOrCreate(contentVersion, out banner);
-                    }
-                }
-                catch { }
-                banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
-                    DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
-                return null;
-            }
-            _narrowHallRepairAvailable = false;
+            string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(SavePath,
+                _canonicalFileSystem, original, candidate,
+                _limits.Canonical.Serialized.MaximumCollectionRecords);
+            if (persistenceReason != null)
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(persistenceReason); return null; }
+            ClearNarrowHallRepairAuthorization();
             return LoadOrCreate(contentVersion, out banner);
         }
+
+        private void ClearNarrowHallRepairAuthorization()
+        { _narrowHallRepairAvailable = false; _narrowHallTrustedOriginalSha256 = null; }
 
         private SaveData LoadOrCreateLegacy(string contentVersion, out string banner)
         {
@@ -286,10 +287,37 @@ namespace DungeonBuilder.M0
 
             try
             {
-                if (File.Exists(SavePath))
+                if (_canonicalConfigured && _canonicalFileSystem != null && _limits != null)
                 {
-                    File.Delete(SavePath);
+                    string directory = Path.GetDirectoryName(SavePath);
+                    string activeName = Path.GetFileName(SavePath);
+                    int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
+                    SpatialContractResult<string> pattern =
+                        SpatialMigrationSidecarPaths.EvidenceSearchPattern(activeName);
+                    if (!pattern.IsValid) throw new IOException();
+                    IReadOnlyList<string> migration = _canonicalFileSystem.EnumerateFiles(directory,
+                        pattern.Value, maximum + 1);
+                    if (migration.Count > maximum) throw new IOException();
+                    var owned = migration.Where(path => SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
+                        activeName, Path.GetFileName(path))).Concat(
+                        ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
+                            _canonicalFileSystem, maximum)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+                    foreach (string path in owned)
+                    {
+                        if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, path))
+                            throw new IOException();
+                        _canonicalFileSystem.DeleteFile(path);
+                    }
+                    if (_canonicalFileSystem.Exists(SavePath)) _canonicalFileSystem.DeleteFile(SavePath);
+                    _canonicalFileSystem.FlushDirectory(directory);
+                    _canonicalSession = null;
+                    ClearNarrowHallRepairAuthorization();
                     banner = "Save deleted.";
+                    _logger.Warn("Save deleted by dev command.");
+                }
+                else if (File.Exists(SavePath))
+                {
+                    File.Delete(SavePath); banner = "Save deleted.";
                     _logger.Warn("Save deleted by dev command.");
                 }
                 else

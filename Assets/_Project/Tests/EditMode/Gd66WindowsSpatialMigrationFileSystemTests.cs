@@ -27,6 +27,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(names.IsValid, Is.True);
             Assert.That(names.Value.Journal, Does.StartWith("save_primary.gd66-"));
             Assert.That(names.Value.Journal, Does.Not.StartWith("save_primary.json.gd66-"));
+            Assert.That(SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
+                "save_primary.json", names.Value.Journal), Is.True);
+            Assert.That(SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
+                "save_primary.json", "save_primary.gd66-lookalike.journal.json"), Is.False);
         }
         [Test]
         public void UnsupportedPlatformSelectionFailsClosedWithoutFileSystem()

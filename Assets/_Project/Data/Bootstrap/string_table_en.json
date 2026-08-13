@@ -2774,6 +2774,10 @@
     {
       "key": "save.migration.spatial.gd66.payload.workload_exceeded",
       "text": "The save is too large or complex to verify safely. The save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.narrow_hall_to_basic",
+      "text": "Replace Narrow Hall with Basic Room and retry"
     }
   ]
 }

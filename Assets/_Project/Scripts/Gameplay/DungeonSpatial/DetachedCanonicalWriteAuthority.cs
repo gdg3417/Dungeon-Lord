@@ -94,7 +94,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
+            string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords);
             if (persistenceReason != null) return Failure(persistenceReason);
             return new DetachedCanonicalWriteResult(true, null, false,
@@ -134,7 +134,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
                     production, out SaveData runtime, out string reason))
                 return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            string persistenceReason = Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
+            string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords);
             return persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
@@ -151,132 +151,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             SpatialContractResult<byte[]> a = CanonicalSpatialSaveSerializer.Serialize(left, limits.Canonical);
             SpatialContractResult<byte[]> b = CanonicalSpatialSaveSerializer.Serialize(right, limits.Canonical);
-            return a.IsValid && b.IsValid && Same(a.Value, b.Value);
-        }
-
-        private static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
-            byte[] original, byte[] candidate, int maximumEvidence)
-        {
-            if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
-                return AtomicSaveFailedReason;
-            string directory;
-            try
-            {
-                string normalized = Path.GetFullPath(activePath);
-                directory = Path.GetDirectoryName(normalized);
-                if (normalized != activePath || !fileSystem.Exists(activePath)) return AtomicSaveFailedReason;
-                byte[] activeBefore = fileSystem.ReadAllBytes(activePath);
-                if (!Same(activeBefore, original) && !Same(activeBefore, candidate))
-                    return RecoveryRequiredReason;
-                string evidenceReason;
-                try { evidenceReason = SettleAllEvidence(fileSystem, activePath, directory,
-                    activeBefore, maximumEvidence); }
-                catch { return RecoveryRequiredReason; }
-                if (evidenceReason != null) return evidenceReason;
-                string token = SpatialContractSha256.Compute(original).Substring(0, 16) + "-" +
-                    SpatialContractSha256.Compute(candidate).Substring(0, 16);
-                string rollback = Path.Combine(directory, Path.GetFileName(activePath) +
-                    ".canonical-write-" + token + ".rollback");
-                string staging = Path.Combine(directory, Path.GetFileName(activePath) +
-                    ".canonical-write-" + token + ".candidate");
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, rollback) ||
-                    !fileSystem.IsPathContainedWithoutRedirection(directory, staging)) return AtomicSaveFailedReason;
-                if (Same(activeBefore, candidate)) return null;
-                if (!Same(activeBefore, original)) return RecoveryRequiredReason;
-                fileSystem.WriteAllBytesDurable(rollback, original);
-                if (!Same(fileSystem.ReadAllBytes(rollback), original)) return RecoveryRequiredReason;
-                fileSystem.WriteAllBytesDurable(staging, candidate);
-                if (!Same(fileSystem.ReadAllBytes(staging), candidate)) return RecoveryRequiredReason;
-                try
-                {
-                    fileSystem.ReplaceSameDirectoryAtomic(staging, activePath);
-                    fileSystem.FlushDirectory(directory);
-                    if (!Same(fileSystem.ReadAllBytes(activePath), candidate))
-                        throw new IOException();
-                }
-                catch
-                {
-                    return Restore(fileSystem, rollback, activePath, directory, original)
-                        ? AtomicSaveFailedReason : RecoveryRequiredReason;
-                }
-                // Candidate authority is already proven by replacement, durability flush, and exact
-                // readback. Cleanup is maintenance only; leave evidence for the next settlement pass.
-                try { fileSystem.DeleteFile(rollback); fileSystem.FlushDirectory(directory); }
-                catch { }
-                return null;
-            }
-            catch
-            {
-                try
-                {
-                    byte[] active = fileSystem.ReadAllBytes(activePath);
-                    return Same(active, original) ? AtomicSaveFailedReason : RecoveryRequiredReason;
-                }
-                catch { return RecoveryRequiredReason; }
-            }
-        }
-
-        private static string SettleAllEvidence(ISpatialMigrationFileSystem fileSystem,
-            string activePath, string directory, byte[] validatedActive, int maximumEvidence)
-        {
-            if (maximumEvidence <= 0) return RecoveryRequiredReason;
-            string activeName = Path.GetFileName(activePath);
-            string prefix = activeName + ".canonical-write-";
-            IReadOnlyList<string> discovered = fileSystem.EnumerateFiles(directory, prefix + "*",
-                maximumEvidence + 1);
-            if (discovered.Count > maximumEvidence) return RecoveryRequiredReason;
-            string[] evidence = discovered.Where(path => IsEvidenceName(Path.GetFileName(path), prefix))
-                .OrderBy(path => path, StringComparer.Ordinal).ToArray();
-            foreach (string path in evidence)
-            {
-                if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
-                    return RecoveryRequiredReason;
-                // The caller has already contextually validated and byte-matched the active complete
-                // save. Thus prior ordinary-write sidecars are obsolete, including partial writes.
-                // Never overwrite or interpret their payload; retire only their strictly-owned names.
-                fileSystem.DeleteFile(path);
-            }
-            if (evidence.Length != 0) fileSystem.FlushDirectory(directory);
-            if (!Same(fileSystem.ReadAllBytes(activePath), validatedActive)) return RecoveryRequiredReason;
-            return null;
-        }
-
-        private static bool IsEvidenceName(string name, string prefix)
-        {
-            if (name == null || !name.StartsWith(prefix, StringComparison.Ordinal)) return false;
-            string remainder = name.Substring(prefix.Length);
-            string suffix = remainder.EndsWith(".rollback", StringComparison.Ordinal) ? ".rollback" :
-                remainder.EndsWith(".candidate", StringComparison.Ordinal) ? ".candidate" : null;
-            if (suffix == null) return false;
-            string token = remainder.Substring(0, remainder.Length - suffix.Length);
-            if (token.Length != 33 || token[16] != '-') return false;
-            for (int index = 0; index < token.Length; index++)
-                if (index != 16 && !((token[index] >= '0' && token[index] <= '9') ||
-                    (token[index] >= 'a' && token[index] <= 'f'))) return false;
-            return true;
-        }
-
-        private static bool Restore(ISpatialMigrationFileSystem fileSystem, string rollback,
-            string activePath, string directory, byte[] original)
-        {
-            try
-            {
-                if (fileSystem.Exists(rollback))
-                {
-                    fileSystem.ReplaceSameDirectoryAtomic(rollback, activePath);
-                    fileSystem.FlushDirectory(directory);
-                    return Same(fileSystem.ReadAllBytes(activePath), original);
-                }
-            }
-            catch { }
-            return false;
-        }
-
-        private static bool Same(byte[] left, byte[] right)
-        {
-            if (left == null || right == null || left.Length != right.Length) return false;
-            for (int index = 0; index < left.Length; index++) if (left[index] != right[index]) return false;
-            return true;
+            return a.IsValid && b.IsValid &&
+                ExactCompleteSaveAtomicPersistence.Same(a.Value, b.Value);
         }
 
         private static DetachedCanonicalWriteResult Failure(string reason) =>

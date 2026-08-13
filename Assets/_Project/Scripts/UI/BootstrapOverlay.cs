@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -46,6 +47,7 @@ namespace DungeonBuilder.M0
         private const string AddBasicRoomSlotButtonKey = "ui.mvp_room_slots.add_basic_room_slot_button";
         private const string AddBasicRoomSlotSuccessKey = "ui.mvp_room_slots.add_basic_room_slot_success";
         private const string AddBasicRoomSlotAlreadyExistsKey = "ui.mvp_room_slots.add_basic_room_slot_already_exists";
+        private const string NarrowHallRepairActionKey = "save.migration.spatial.gd66.repair.narrow_hall_to_basic";
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -912,6 +914,9 @@ namespace DungeonBuilder.M0
         {
             DrawMinimalMvpActionPanel();
 
+            if (_root != null && _root.Save == null && _root.SaveService != null &&
+                _root.SaveService.NarrowHallRepairAvailable) return;
+
             if (_root == null || !_root.DevPanelEnabled || !_devPanelVisible)
             {
                 return;
@@ -1131,6 +1136,22 @@ namespace DungeonBuilder.M0
                 return;
             }
 
+            if (_root.Save == null && _root.SaveService != null &&
+                _root.SaveService.NarrowHallRepairAvailable)
+            {
+                GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
+                GUILayout.Label(GetLocalizedString(
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                        DetachedSpatialMigrationPreparer.NarrowHallReason),
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                        DetachedSpatialMigrationPreparer.NarrowHallReason)), GUI.skin.label);
+                if (GUILayout.Button(GetLocalizedString(NarrowHallRepairActionKey,
+                    NarrowHallRepairActionKey), GUI.skin.button))
+                    _root.TryRepairMigrationBlockedNarrowHall();
+                GUILayout.EndArea();
+                return;
+            }
+
             if (_minimalMvpActionPanelCollapsed)
             {
                 DrawCollapsedMinimalMvpActionPanel();
@@ -1223,7 +1244,8 @@ namespace DungeonBuilder.M0
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);
             }
-            if (GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
+            if (!CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.NarrowHallOptionId);
