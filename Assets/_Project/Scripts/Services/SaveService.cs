@@ -313,16 +313,11 @@ namespace DungeonBuilder.M0
                 if (_canonicalConfigured && _canonicalFileSystem != null && _limits != null)
                 {
                     string directory = Path.GetDirectoryName(SavePath);
-                    string activeName = Path.GetFileName(SavePath);
                     int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
-                    SpatialContractResult<string> pattern =
-                        SpatialMigrationSidecarPaths.EvidenceSearchPattern(activeName);
-                    if (!pattern.IsValid) throw new IOException();
-                    IReadOnlyList<string> migration = _canonicalFileSystem.EnumerateFiles(directory,
-                        pattern.Value, maximum + 1);
-                    if (migration.Count > maximum) throw new IOException();
-                    var owned = migration.Where(path => SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
-                        activeName, Path.GetFileName(path))).Concat(
+                    IReadOnlyList<SpatialMigrationDiscoveredEvidence> migration =
+                        SpatialMigrationRecoveryEvidenceProbe.DiscoverEvidence(SavePath,
+                            _canonicalFileSystem, maximum);
+                    var owned = migration.Where(value => value.IsRecognized).Select(value => value.Path).Concat(
                         ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
                             _canonicalFileSystem, maximum)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
                     foreach (string path in owned)
@@ -333,6 +328,11 @@ namespace DungeonBuilder.M0
                     }
                     if (_canonicalFileSystem.Exists(SavePath)) _canonicalFileSystem.DeleteFile(SavePath);
                     _canonicalFileSystem.FlushDirectory(directory);
+                    if (SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(SavePath,
+                            _canonicalFileSystem, maximum) ||
+                        ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
+                            _canonicalFileSystem, maximum).Count != 0)
+                        throw new IOException("GD66 explicit delete verification failed.");
                     _canonicalSession = null;
                     ClearNarrowHallRepairAuthorization();
                     banner = "Save deleted.";

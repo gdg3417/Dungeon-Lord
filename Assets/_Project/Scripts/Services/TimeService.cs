@@ -7,6 +7,9 @@ namespace DungeonBuilder.M0
         private readonly SimpleLogger _logger;
         private readonly SimulationClock _clock;
         private SaveData _save;
+#if UNITY_EDITOR
+        internal SaveData AttachedSaveForTests => _save;
+#endif
 
         public event Action<long> OnTick;
 

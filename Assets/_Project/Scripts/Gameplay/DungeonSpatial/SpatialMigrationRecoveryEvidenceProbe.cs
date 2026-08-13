@@ -11,6 +11,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         CandidateStaging, FinalizationReceipt, ExistingQuarantine, Unknown
     }
 
+    internal sealed class SpatialMigrationDiscoveredEvidence
+    {
+        internal SpatialMigrationDiscoveredEvidence(string path,
+            SpatialMigrationEvidenceFilenameKind kind)
+        { Path = path; Kind = kind; }
+        internal string Path { get; }
+        internal SpatialMigrationEvidenceFilenameKind Kind { get; }
+        internal bool IsRecoveryBlocking => Kind != SpatialMigrationEvidenceFilenameKind.Unknown &&
+            Kind != SpatialMigrationEvidenceFilenameKind.FinalizationReceipt &&
+            Kind != SpatialMigrationEvidenceFilenameKind.ExistingQuarantine;
+        internal bool IsRecognized => Kind != SpatialMigrationEvidenceFilenameKind.Unknown;
+    }
+
     /// <summary>
     /// Pure startup probe sharing the transaction's broad discovery and suffix authority. It does
     /// not parse, quarantine, or recover evidence; it only prevents unsafe native creation.
@@ -19,6 +32,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         internal static bool HasRecoveryRelevantEvidence(string activePath,
             ISpatialMigrationFileSystem fileSystem, int maximumCollectionRecords)
+        {
+            return DiscoverEvidence(activePath, fileSystem, maximumCollectionRecords)
+                .Any(value => value.IsRecoveryBlocking);
+        }
+
+        internal static IReadOnlyList<SpatialMigrationDiscoveredEvidence> DiscoverEvidence(
+            string activePath, ISpatialMigrationFileSystem fileSystem,
+            int maximumCollectionRecords)
         {
             if (string.IsNullOrEmpty(activePath) || fileSystem == null || maximumCollectionRecords <= 0)
                 throw new IOException("Invalid GD66 evidence probe input.");
@@ -29,16 +50,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 maximumCollectionRecords + 1);
             if (paths.Count > maximumCollectionRecords)
                 throw new IOException("GD66 evidence limit exceeded.");
+            var discovered = new List<SpatialMigrationDiscoveredEvidence>(paths.Count);
             foreach (string enumerated in paths.OrderBy(value => value, StringComparer.Ordinal))
             {
                 string path = Path.GetFullPath(enumerated);
                 // DiscoverEvidence classifies every redirected broad-pattern result as unresolved.
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, path))
                     throw new IOException("GD66 evidence redirected.");
-                if (ClassifyFilename(Path.GetFileName(path)) !=
-                    SpatialMigrationEvidenceFilenameKind.Unknown) return true;
+                discovered.Add(new SpatialMigrationDiscoveredEvidence(path,
+                    ClassifyFilename(Path.GetFileName(path))));
             }
-            return false;
+            return discovered.AsReadOnly();
         }
 
         internal static SpatialMigrationEvidenceFilenameKind ClassifyFilename(string name)

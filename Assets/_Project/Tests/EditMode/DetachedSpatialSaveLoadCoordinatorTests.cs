@@ -155,8 +155,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("invalid-id.original.bak.restore.intent", true)]
         [TestCase("invalid-id.original.bak.restore", true)]
         [TestCase("invalid-id.candidate.tmp", true)]
-        [TestCase("invalid-id.finalized", true)]
-        [TestCase("invalid-id.evidence", true)]
+        [TestCase("invalid-id.finalized", false)]
+        [TestCase("invalid-id.evidence", false)]
         [TestCase("not-owned.txt", false)]
         public void LiveNewGameGateSharesTransactionRecoveryRelevantSuffixes(string suffix,
             bool expected)
@@ -258,11 +258,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string exactOrdinary = service.SavePath +
                 ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
             fileSystem.Seed(exactOrdinary, Encoding.UTF8.GetBytes("evidence"));
+            string directory = Path.GetDirectoryName(service.SavePath);
+            string stem = Path.GetFileNameWithoutExtension(service.SavePath);
+            string[] recognized =
+            {
+                stem + ".gd66-invalid-id.journal.json",
+                stem + ".gd66-invalid-id.original.bak",
+                stem + ".gd66-invalid-id.candidate.tmp",
+                stem + ".gd66-invalid-id.original.bak.restore",
+                stem + ".gd66-invalid-id.original.bak.restore.intent",
+                stem + ".gd66-invalid-id.finalized",
+                stem + ".gd66-invalid-id.evidence"
+            };
+            foreach (string filename in recognized)
+                fileSystem.Seed(Path.Combine(directory, filename), Encoding.UTF8.GetBytes("evidence"));
+            SpatialMigrationSidecarNames validNames = SpatialMigrationSidecarPaths.Derive(
+                Path.GetFileName(service.SavePath), "gd66-" + new string('a', 64)).Value;
+            string validJournal = Path.Combine(directory, validNames.Journal);
+            fileSystem.Seed(validJournal, Encoding.UTF8.GetBytes("valid-name-evidence"));
+            string unrelated = Path.Combine(directory, stem + ".gd66-not-owned.txt");
+            fileSystem.Seed(unrelated, Encoding.UTF8.GetBytes("unrelated"));
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(service.SavePath, fileSystem, 64), Is.True);
 
             service.DeleteSave(out string deleteBanner);
 
             Assert.That(fileSystem.Exists(service.SavePath), Is.False, deleteBanner);
             Assert.That(fileSystem.Exists(exactOrdinary), Is.False);
+            foreach (string filename in recognized)
+                Assert.That(fileSystem.Exists(Path.Combine(directory, filename)), Is.False, filename);
+            Assert.That(fileSystem.Exists(validJournal), Is.False);
+            Assert.That(fileSystem.Exists(unrelated), Is.True);
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(service.SavePath, fileSystem, 64), Is.False);
             Assert.That(service.CanonicalSession, Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.False);
             Assert.That(service.LoadOrCreate("gd66-live", out string recreateBanner), Is.Not.Null,

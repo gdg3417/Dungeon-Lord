@@ -434,6 +434,18 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+#if UNITY_EDITOR
+        internal bool CompleteSuccessfulBootForTests(SaveData validatedSave, bool enterHome)
+        {
+            bool completed = CompleteSuccessfulBoot(validatedSave, string.Empty);
+            if (completed && enterHome) GoHomeStub();
+            return completed;
+        }
+
+        internal bool GameplayServicesInitializedForTests => TimeService != null &&
+            _structureSimulationPass != null && _runSimulationService != null;
+#endif
+
         private void InitializeStructureSimulationPass()
         {
             _structureSimulationPass = null;
