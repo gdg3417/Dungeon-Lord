@@ -20,6 +20,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int MaximumGeneratedFilenameCharacters = 180;
         public const int WindowsMaximumAbsolutePathCharacters = 240;
 
+        public static SpatialContractResult<string> EvidenceSearchPattern(string activeFilename)
+        {
+            var issues = new List<SpatialContractIssue>();
+            if (!IsValidRelativeFilename(activeFilename, MaximumGeneratedFilenameCharacters) ||
+                !string.Equals(Path.GetFileName(activeFilename), activeFilename, StringComparison.Ordinal))
+                issues.Add(SpatialContractIssue.InvalidPath);
+            string stem = issues.Count == 0 ? Path.GetFileNameWithoutExtension(activeFilename) : string.Empty;
+            if (stem.Length == 0 || stem.Length > MaximumStemCharacters)
+                issues.Add(SpatialContractIssue.InvalidPath);
+            return new SpatialContractResult<string>(issues.Count == 0 ? EvidenceSearchPatternFromStem(stem) : null, issues);
+        }
+
+        internal static string EvidenceSearchPatternFromStem(string stem) => stem + ".gd66-*";
+
         public static SpatialContractResult<SpatialMigrationSidecarNames> Derive(string activeFilename,
             string transactionId)
         {

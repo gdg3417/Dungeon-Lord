@@ -15,6 +15,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class Gd66WindowsSpatialMigrationFileSystemTests
     {
         [Test]
+        public void EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar()
+        {
+            SpatialContractResult<string> pattern =
+                SpatialMigrationSidecarPaths.EvidenceSearchPattern("save_primary.json");
+            Assert.That(pattern.IsValid, Is.True);
+            Assert.That(pattern.Value, Is.EqualTo("save_primary.gd66-*"));
+            string transaction = "gd66-" + new string('a', 64);
+            SpatialContractResult<SpatialMigrationSidecarNames> names =
+                SpatialMigrationSidecarPaths.Derive("save_primary.json", transaction);
+            Assert.That(names.IsValid, Is.True);
+            Assert.That(names.Value.Journal, Does.StartWith("save_primary.gd66-"));
+            Assert.That(names.Value.Journal, Does.Not.StartWith("save_primary.json.gd66-"));
+        }
+        [Test]
         public void UnsupportedPlatformSelectionFailsClosedWithoutFileSystem()
         {
             SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(

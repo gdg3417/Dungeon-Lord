@@ -23,11 +23,13 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalSaveSession _canonicalSession;
         private ISpatialMigrationFileSystem _canonicalFileSystem;
         private bool _canonicalConfigured;
+        private bool _narrowHallRepairAvailable;
 
         public event Action<SaveData> CanonicalRuntimePublished;
 
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
+        public bool NarrowHallRepairAvailable => _narrowHallRepairAvailable;
 
         public void ConfigureCanonical(SaveSpatialMigrationLimitsProfile limits,
             ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
@@ -97,12 +99,68 @@ namespace DungeonBuilder.M0
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {
+                _narrowHallRepairAvailable = loaded.TrustedPayload == SpatialTrustedPayload.Original &&
+                    loaded.Reason == DetachedSpatialMigrationPreparer.NarrowHallReason;
                 _logger.Error("GD66 load failed: " + loaded.Reason);
                 banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(loaded.Reason);
                 return null;
             }
             _canonicalSession = loaded.Session;
+            _narrowHallRepairAvailable = false;
             return loaded.RuntimeProjection;
+        }
+
+        public SaveData RepairNarrowHallToBasicAndRetry(string contentVersion, out string banner)
+        {
+            banner = string.Empty;
+            if (!_narrowHallRepairAvailable || _canonicalFileSystem == null ||
+                !_canonicalFileSystem.Exists(SavePath))
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                DetachedSpatialMigrationPreparer.NarrowHallReason); return null; }
+            byte[] original;
+            try { original = _canonicalFileSystem.ReadAllBytes(SavePath); }
+            catch { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                DetachedCanonicalWriteAuthority.RecoveryRequiredReason); return null; }
+            RawLegacyBlankFloorContract blank = CreateBlankFloorContract();
+            var versions = new RawSaveEnvelopeVersionContract(1,
+                SaveMigration.LegacyCompatibilitySchemaVersion);
+            RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
+                original, _limits.Raw, versions, blank);
+            LegacyNarrowHallRepairResult repaired = LegacyNarrowHallRepair.Prepare(original,
+                classification, _limits.Raw, versions, blank);
+            if (!repaired.IsSuccess)
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(repaired.Reason); return null; }
+            byte[] candidate = repaired.GetBytes();
+            string directory = Path.GetDirectoryName(SavePath);
+            string staging = SavePath + ".narrow-hall-repair.candidate";
+            try
+            {
+                if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, staging) ||
+                    _canonicalFileSystem.Exists(staging)) throw new IOException();
+                _canonicalFileSystem.WriteAllBytesDurable(staging, candidate);
+                if (!candidate.SequenceEqual(_canonicalFileSystem.ReadAllBytes(staging))) throw new IOException();
+                _canonicalFileSystem.ReplaceSameDirectoryAtomic(staging, SavePath);
+                _canonicalFileSystem.FlushDirectory(directory);
+                if (!candidate.SequenceEqual(_canonicalFileSystem.ReadAllBytes(SavePath))) throw new IOException();
+            }
+            catch
+            {
+                try
+                {
+                    if (_canonicalFileSystem.Exists(SavePath) && candidate.SequenceEqual(
+                        _canonicalFileSystem.ReadAllBytes(SavePath)))
+                    {
+                        _narrowHallRepairAvailable = false;
+                        return LoadOrCreate(contentVersion, out banner);
+                    }
+                }
+                catch { }
+                banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                    DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+                return null;
+            }
+            _narrowHallRepairAvailable = false;
+            return LoadOrCreate(contentVersion, out banner);
         }
 
         private SaveData LoadOrCreateLegacy(string contentVersion, out string banner)
@@ -205,12 +263,15 @@ namespace DungeonBuilder.M0
         private bool HasOwnedRecoveryEvidence()
         {
             string directory = Path.GetDirectoryName(SavePath);
-            string stem = Path.GetFileName(SavePath);
+            string activeName = Path.GetFileName(SavePath);
             int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
+            SpatialContractResult<string> migrationPattern =
+                SpatialMigrationSidecarPaths.EvidenceSearchPattern(activeName);
+            if (!migrationPattern.IsValid) throw new IOException("Invalid GD66 evidence stem.");
             IReadOnlyList<string> migration = _canonicalFileSystem.EnumerateFiles(directory,
-                stem + ".gd66-*", maximum + 1);
+                migrationPattern.Value, maximum + 1);
             IReadOnlyList<string> ordinary = _canonicalFileSystem.EnumerateFiles(directory,
-                stem + ".canonical-write-*", maximum + 1);
+                activeName + ".canonical-write-*", maximum + 1);
             if (migration.Count > maximum || ordinary.Count > maximum)
                 throw new IOException("GD66 evidence limit exceeded.");
             foreach (string path in migration.Concat(ordinary))

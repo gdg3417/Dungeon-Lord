@@ -495,6 +495,23 @@ namespace DungeonBuilder.M0
             _sm.SetState(new HomeStubState(this));
         }
 
+        public bool TryRepairMigrationBlockedNarrowHall()
+        {
+            if (SaveService == null || !SaveService.NarrowHallRepairAvailable) return false;
+            string contentVersion = Content?.Bootstrap?.contentVersion ?? "0.0.0";
+            SaveData repaired = SaveService.RepairNarrowHallToBasicAndRetry(contentVersion,
+                out string bannerKey);
+            if (repaired == null)
+            {
+                if (!string.IsNullOrEmpty(bannerKey))
+                    SetBanner(Content.GetString(bannerKey, bannerKey));
+                return false;
+            }
+            Save = repaired;
+            TimeService?.AttachSave(Save);
+            return true;
+        }
+
         public void SetBanner(string message)
         {
             string baseMessage = message ?? string.Empty;
@@ -713,8 +730,8 @@ namespace DungeonBuilder.M0
                 string targetRoomId = null;
                 if (route.Rooms != null && route.Rooms.Length != 0)
                 {
-                    int target = Math.Max(0, Math.Min(_selectedSlotIndex, route.Rooms.Length - 1));
-                    targetRoomId = route.Rooms[target].RoomInstanceId;
+                    targetRoomId = ResolveCanonicalMutationTargetRoomId(Save,
+                        _runSimulationService?.Config, Content?.ProductionSpatialContent, route.Rooms);
                 }
                 DetachedCanonicalWriteResult written = SaveService.ExecuteCanonicalMutation(Save,
                     DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId));
@@ -832,6 +849,17 @@ namespace DungeonBuilder.M0
 
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
+        }
+
+        internal static string ResolveCanonicalMutationTargetRoomId(SaveData save,
+            RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production,
+            MvpOrderedRouteRoom[] rooms)
+        {
+            if (rooms == null || rooms.Length == 0) return null;
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                save, legacyConfig, production);
+            int selected = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, layout);
+            return selected >= 0 && selected < rooms.Length ? rooms[selected].RoomInstanceId : null;
         }
 
         private static string ResolveRoomTargetOptionId(MvpDungeonFloorSlotLayout layout, int roomIndex, string categoryId)

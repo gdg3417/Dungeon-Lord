@@ -11,6 +11,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class DetachedSpatialSaveLoadCoordinatorTests
     {
+        [Test]
+        public void NarrowHallRepairChangesOnlyRecognizedSpatialEvidenceAndPreservesUnknownBytes()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"contentVersion\":\"repair\",\"mvpDungeonPlacements\":{" +
+                "\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
+                "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}]," +
+                "\"NextRevision\":2},\"unknownPrimary\":{\"n\":1.00}}," +
+                "\"unknownRoot\":[true,null]}");
+            RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(original,
+                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+
+            LegacyNarrowHallRepairResult result = LegacyNarrowHallRepair.Prepare(original,
+                classification, Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string repaired = Encoding.UTF8.GetString(result.GetBytes());
+            Assert.That(repaired, Does.Contain("\"OptionId\":\"placement.option.room.basic\""));
+            Assert.That(repaired, Does.Not.Contain("placement.option.room.narrow_hall"));
+            Assert.That(repaired, Does.Contain("\"unknownPrimary\":{\"n\":1.00}"));
+            Assert.That(repaired, Does.Contain("\"unknownRoot\":[true,null]"));
+            Assert.That(repaired, Does.Contain("\"contentVersion\":\"repair\""));
+        }
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]

@@ -129,6 +129,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(otherBefore));
         }
 
+        [TestCase(0)]
+        [TestCase(1)]
+        public void LiveCanonicalTargetUsesSelectedRoomAuthorityNotEconomicSlot(int selectedRoom)
+        {
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}";
+            Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
+                Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                    "writer-live-target-" + selectedRoom, 6, members);
+            var save = new SaveData { mvpSelectedRoomSlotIndex = selectedRoom,
+                canonicalSpatialAuthority = run.State.Authority, spatialFloors = run.State.Floors,
+                validatedCanonicalSpatialState = run.State };
+            CanonicalMvpRouteProjectionResult projection =
+                CanonicalMvpRouteProjection.InspectWithProductionContent(save, run.Production);
+
+            string target = GameRoot.ResolveCanonicalMutationTargetRoomId(save,
+                LegacyGameplayConfigurationContract.Parse(run.LegacyBytes), run.Production,
+                projection.Rooms);
+
+            Assert.That(target, Is.EqualTo(run.State.Floors[0].Layout.Rooms[selectedRoom].RoomInstanceId));
+        }
+
         [Test]
         public void R2ReplacementCapacityIgnoresOtherRoomAssignments()
         {

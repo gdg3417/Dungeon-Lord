@@ -1097,7 +1097,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private EvidenceSnapshot DiscoverEvidence(string directory, string stem)
         {
             int maximum = limits.MaximumCollectionRecords;
-            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, stem + ".gd66-*", maximum + 1);
+            string searchPattern = SpatialMigrationSidecarPaths.EvidenceSearchPatternFromStem(stem);
+            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, searchPattern, maximum + 1);
             if (paths.Count > maximum) throw new IOException("GD66 evidence limit exceeded.");
             var records = new List<EvidenceRecord>(paths.Count);
             foreach (string enumerated in paths.OrderBy(value => value, StringComparer.Ordinal))
