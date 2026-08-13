@@ -121,19 +121,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!string.IsNullOrEmpty(requestedRoomId)) return ValidationFailedReason;
                 if (!TryCreateStarter(state, production, compatibility,
-                    LegacyRoomOriginKind.CanonicalPlayerPlaced, out SavedSpatialFloor floor, out string reason))
-                    return reason;
+                    LegacyRoomOriginKind.CanonicalPlayerPlaced, out SavedSpatialFloor floor,
+                    out string starterReason))
+                    return starterReason;
                 state.Floors = new[] { floor }; roomEffect = true; return null;
             }
             if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor existingFloor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics semantics))
                 return ValidationFailedReason;
-            string basicDefinition = ResolveBasicDefinition(state, production, compatibility, out string reason);
-            if (basicDefinition == null) return reason;
+            string basicDefinition = ResolveBasicDefinition(state, production, compatibility,
+                out string definitionReason);
+            if (basicDefinition == null) return definitionReason;
             if (room.RoomDefinitionId != basicDefinition)
             {
                 if (!CanonicalRoomCapacityResolver.TryResolve(production, basicDefinition,
-                    out MvpRoomSlotCapacity replacementCapacity, out reason)) return reason;
+                    out MvpRoomSlotCapacity replacementCapacity, out string capacityReason))
+                    return capacityReason;
                 RoomContentAssignment[] retained = existingFloor.RoomContents.Assignments ??
                     Array.Empty<RoomContentAssignment>();
                 if (retained.Count(value => value?.RoomInstanceId == room.RoomInstanceId &&
@@ -319,8 +322,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? rooms.Length == 1 ? rooms[0] : null
                 : rooms.SingleOrDefault(value => value != null &&
                     value.RoomInstanceId == requestedRoomId);
+            string roomInstanceId = room?.RoomInstanceId;
             semantics = floor?.RoomContents?.RoomSemantics?.SingleOrDefault(value => value != null &&
-                value.RoomInstanceId == room?.RoomInstanceId);
+                value.RoomInstanceId == roomInstanceId);
             return room != null && semantics != null;
         }
 

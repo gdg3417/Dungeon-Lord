@@ -190,10 +190,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     recovery, transaction);
             DetachedCanonicalSaveSessionResult opened =
                 DetachedCanonicalSaveSession.Open(validation.GetBytes(), currentContext, limits);
-            if (!opened.IsSuccess || !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.
-                CanonicalMvpRouteProjection.TryPublishValidated(validation, production,
-                    out SaveData runtime, out string reason))
-                return Failure(reason ?? opened.Reason ??
+            if (!opened.IsSuccess)
+                return Failure(opened.Reason ??
+                    DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.
+                        ContradictoryAuthorityReason,
+                    transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                    recovery, transaction);
+            if (!DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.
+                TryPublishValidated(validation, production, out SaveData runtime,
+                    out string publishReason))
+                return Failure(publishReason ??
                     DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.
                         ContradictoryAuthorityReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,

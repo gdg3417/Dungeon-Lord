@@ -81,10 +81,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
                 DetachedCanonicalSaveSessionResult opened = validation.IsValid && validation.CurrentTargetValidated
                     ? DetachedCanonicalSaveSession.Open(bytes, context, limits) : null;
-                if (opened == null || !opened.IsSuccess ||
-                    !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.TryPublishValidated(
-                        validation, production, out SaveData runtime, out string reason))
-                    return Failure(reason ?? DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                if (opened == null || !opened.IsSuccess)
+                    return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                if (!DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.
+                    TryPublishValidated(validation, production, out SaveData runtime,
+                        out string publishReason))
+                    return Failure(publishReason ??
+                        DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 string directory = System.IO.Path.GetDirectoryName(activePath);
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, activePath))
                     return Failure(SpatialMigrationCapabilityReason.PathRedirected);

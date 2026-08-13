@@ -91,9 +91,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             DetachedCanonicalSaveSessionResult reopened =
                 DetachedCanonicalSaveSession.Open(candidate, context, limits);
-            if (!reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
-                production, out SaveData runtime, out string reason))
-                return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (!reopened.IsSuccess)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (!CanonicalMvpRouteProjection.TryPublishValidated(validated,
+                    production, out SaveData runtime, out string publishReason))
+                return Failure(publishReason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords);
             if (persistenceReason != null) return Failure(persistenceReason);
@@ -131,9 +133,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult reopened = validated.IsValid
                 ? DetachedCanonicalSaveSession.Open(candidate, context, limits) : null;
             if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
-                !reopened.IsSuccess || !CanonicalMvpRouteProjection.TryPublishValidated(validated,
-                    production, out SaveData runtime, out string reason))
-                return Failure(reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                !reopened.IsSuccess)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (!CanonicalMvpRouteProjection.TryPublishValidated(validated,
+                    production, out SaveData runtime, out string publishReason))
+                return Failure(publishReason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords);
             return persistenceReason == null
