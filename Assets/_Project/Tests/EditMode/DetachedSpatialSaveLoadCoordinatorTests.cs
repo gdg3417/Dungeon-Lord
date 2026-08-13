@@ -297,6 +297,93 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CanonicalDeleteQualifiesFilesystemBeforeAnyCleanupWhenNotCached()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = ConfiguredService(fixture, fileSystem, "service-delete-preflight.json");
+            bool evaluated = false;
+            service.SetPreflightEvaluatorForTests(path =>
+            {
+                evaluated = true;
+                return Supported(fileSystem);
+            });
+            fileSystem.Seed(service.SavePath, fixture.Original);
+            string directory = Path.GetDirectoryName(service.SavePath);
+            string stem = Path.GetFileNameWithoutExtension(service.SavePath);
+            string journal = Path.Combine(directory, stem + ".gd66-invalid-id.journal.json");
+            string audit = Path.Combine(directory, stem + ".gd66-invalid-id.evidence");
+            string ordinary = service.SavePath +
+                ".canonical-write-0123456789abcdef-fedcba9876543210.candidate";
+            string unrelated = Path.Combine(directory, stem + ".gd66-not-owned.txt");
+            fileSystem.Seed(journal, new byte[] { 1 });
+            fileSystem.Seed(audit, new byte[] { 2 });
+            fileSystem.Seed(ordinary, new byte[] { 3 });
+            fileSystem.Seed(unrelated, new byte[] { 4 });
+
+            service.DeleteSave(out string banner);
+
+            Assert.That(evaluated, Is.True);
+            Assert.That(fileSystem.Exists(service.SavePath), Is.False, banner);
+            Assert.That(fileSystem.Exists(journal), Is.False);
+            Assert.That(fileSystem.Exists(audit), Is.False);
+            Assert.That(fileSystem.Exists(ordinary), Is.False);
+            Assert.That(fileSystem.Exists(unrelated), Is.True);
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(service.SavePath, fileSystem, 64), Is.False);
+        }
+
+        [Test]
+        public void CanonicalDeleteUnsupportedPreflightNeverFallsBackToSystemFileDelete()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-delete-unsupported-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var service = new SaveService(new SimpleLogger(false),
+                    new SaveConfig { fileName = "active.json" }, directory);
+                service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
+                        Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                        fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+                    LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+                service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(false,
+                    SpatialMigrationCapabilityReason.PlatformUnsupported,
+                    SpatialMigrationPlatform.Unsupported, null));
+                byte[] active = Encoding.UTF8.GetBytes("trusted-active");
+                string evidence = Path.Combine(directory, "active.gd66-invalid-id.original.bak");
+                File.WriteAllBytes(service.SavePath, active);
+                File.WriteAllBytes(evidence, new byte[] { 7 });
+
+                service.DeleteSave(out string banner);
+
+                Assert.That(File.ReadAllBytes(service.SavePath), Is.EqualTo(active), banner);
+                Assert.That(File.Exists(evidence), Is.True);
+                Assert.That(banner, Does.Contain("Failed"));
+            }
+            finally { Directory.Delete(directory, true); }
+        }
+
+        [Test]
+        public void LegacyUnconfiguredDeleteRetainsHistoricalSystemFileBehavior()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-delete-legacy-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var service = new SaveService(new SimpleLogger(false),
+                    new SaveConfig { fileName = "legacy.json" }, directory);
+                File.WriteAllText(service.SavePath, "legacy");
+
+                service.DeleteSave(out string banner);
+
+                Assert.That(File.Exists(service.SavePath), Is.False, banner);
+            }
+            finally { Directory.Delete(directory, true); }
+        }
+
+        [Test]
         public void SaveServiceNarrowHallRepairRerunsGd66AndPreservesUnknownEvidence()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +

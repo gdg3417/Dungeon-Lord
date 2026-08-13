@@ -435,6 +435,13 @@ namespace DungeonBuilder.M0
         }
 
 #if UNITY_EDITOR
+        internal void AttachSaveServiceForTests(SaveService service)
+        {
+            if (SaveService != null) SaveService.CanonicalRuntimePublished -= PublishCanonicalRuntime;
+            SaveService = service;
+            if (SaveService != null) SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
+        }
+
         internal bool CompleteSuccessfulBootForTests(SaveData validatedSave, bool enterHome)
         {
             bool completed = CompleteSuccessfulBoot(validatedSave, string.Empty);

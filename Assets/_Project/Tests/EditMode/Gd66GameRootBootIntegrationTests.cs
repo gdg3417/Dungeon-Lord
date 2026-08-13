@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System.IO;
-using System.Reflection;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
@@ -27,6 +26,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveService service = Service(fixture, fileSystem, "root-success.json");
             SaveData canonical = service.LoadOrCreate("gd66-live", out string banner);
             Assert.That(canonical, Is.Not.Null, banner);
+            DetachedCanonicalSaveSession beforeSession = service.CanonicalSession;
             GameRoot root = Root(service);
 
             bool completed = root.CompleteSuccessfulBootForTests(canonical, true);
@@ -36,6 +36,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.Save.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(root.TimeService, Is.Not.Null);
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            Assert.That(root.Save, Is.Not.SameAs(canonical));
+            Assert.That(service.CanonicalSession, Is.Not.SameAs(beforeSession));
+            Assert.That(service.CanonicalSession.GetCurrentBytes(),
+                Is.EqualTo(fileSystem.ReadAllBytes(service.SavePath)));
             Assert.That(root.GameplayServicesInitializedForTests, Is.True);
             Assert.That(root.StateLine, Does.Contain("Home"));
         }
@@ -71,12 +75,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.Save, Is.Null);
             Assert.That(root.TimeService, Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.True);
+            DetachedCanonicalSaveSession blockedSession = service.CanonicalSession;
 
             bool repaired = root.TryRepairMigrationBlockedNarrowHall();
 
             Assert.That(repaired, Is.True);
             Assert.That(root.Save, Is.Not.Null);
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            Assert.That(service.CanonicalSession, Is.Not.Null);
+            Assert.That(service.CanonicalSession, Is.Not.SameAs(blockedSession));
+            Assert.That(service.CanonicalSession.GetCurrentBytes(),
+                Is.EqualTo(fileSystem.ReadAllBytes(service.SavePath)));
             Assert.That(root.GameplayServicesInitializedForTests, Is.True);
             Assert.That(root.StateLine, Does.Contain("Home"));
             Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
@@ -115,7 +124,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             root.structureSimulationConfigJson = Asset("Assets/_Project/Data/Bootstrap/structure_simulation_config.json");
             root.runSimulationConfigJson = Asset("Assets/_Project/Data/Bootstrap/run_simulation_config.json");
             root.lootConfigJson = Asset("Assets/_Project/Data/Bootstrap/loot_config.json");
-            Set(root, "<SaveService>k__BackingField", service);
+            root.AttachSaveServiceForTests(service);
             return root;
         }
 
@@ -140,8 +149,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static TextAsset Asset(string path) => AssetDatabase.LoadAssetAtPath<TextAsset>(path);
 
-        private static void Set(GameRoot root, string field, object value) => typeof(GameRoot)
-            .GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(root, value);
     }
 }
 #endif

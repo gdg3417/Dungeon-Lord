@@ -310,8 +310,16 @@ namespace DungeonBuilder.M0
 
             try
             {
-                if (_canonicalConfigured && _canonicalFileSystem != null && _limits != null)
+                if (_canonicalConfigured)
                 {
+                    if (_limits == null) throw new IOException("GD66 canonical limits unavailable.");
+                    if (_canonicalFileSystem == null)
+                    {
+                        SpatialMigrationActivationPreflight preflight = _preflightEvaluator(SavePath);
+                        if (!preflight.IsSupported || preflight.FileSystem == null)
+                            throw new IOException("GD66 delete preflight failed: " + preflight.Reason);
+                        _canonicalFileSystem = preflight.FileSystem;
+                    }
                     string directory = Path.GetDirectoryName(SavePath);
                     int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
                     IReadOnlyList<SpatialMigrationDiscoveredEvidence> migration =
