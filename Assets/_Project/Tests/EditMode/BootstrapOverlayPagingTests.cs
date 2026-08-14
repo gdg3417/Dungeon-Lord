@@ -210,6 +210,7 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData canonical = DungeonBuilder.M0.Tests.EditMode.Gd66CanonicalRuntimeProjectionTests
                 .PublishedEmptyProductionFixture(out _);
             SetSave(canonical);
+            _root.SetBanner(string.Empty);
             Assert.That(CanonicalMvpRouteProjection.IsCanonical(canonical), Is.True);
             Assert.That(_overlay.NormalGameplayActionsAvailable, Is.True);
             Assert.That(_overlay.NarrowHallRepairOnlyVisible, Is.False);

@@ -79,19 +79,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.TimeService, Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.True);
             DetachedCanonicalSaveSession blockedSession = service.CanonicalSession;
+            const string blockedBanner = "Replace Narrow Hall to continue safely.";
+            root.SetBanner(blockedBanner);
+            Assert.That(root.BannerMessage, Is.EqualTo(blockedBanner));
 
             bool repaired = root.TryRepairMigrationBlockedNarrowHall();
 
             Assert.That(repaired, Is.True);
             Assert.That(root.Save, Is.Not.Null);
+            Assert.That(root.Save.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            Assert.That(service.NarrowHallRepairAvailable, Is.False);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.SameAs(blockedSession));
             Assert.That(service.CanonicalSession.GetCurrentBytes(),
                 Is.EqualTo(fileSystem.ReadAllBytes(service.SavePath)));
             Assert.That(root.GameplayServicesInitializedForTests, Is.True);
             Assert.That(root.StateLine, Does.Contain("Home"));
+            Assert.That(root.BannerMessage, Is.Not.EqualTo(blockedBanner));
+            Assert.That(root.BannerMessage, Does.Not.Contain("Narrow Hall"));
+            TimeService initializedTimeService = root.TimeService;
+            SaveData initializedSave = root.Save;
             Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
+            Assert.That(root.TimeService, Is.SameAs(initializedTimeService));
+            Assert.That(root.Save, Is.SameAs(initializedSave));
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
         }
 
@@ -111,6 +122,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
             GameRoot root = Root(service);
+            const string blockedBanner = "Replace Narrow Hall to continue safely.";
+            root.SetBanner(blockedBanner);
             fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);
 
             bool repaired = root.TryRepairMigrationBlockedNarrowHall();
@@ -120,6 +133,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.TimeService, Is.Null);
             Assert.That(root.GameplayServicesInitializedForTests, Is.False);
             Assert.That(root.StateLine, Does.Not.Contain("Home"));
+            Assert.That(root.BannerMessage, Is.Not.Empty);
+            Assert.That(root.BannerMessage, Is.Not.EqualTo(blockedBanner));
         }
 
         private GameRoot Root(SaveService service)

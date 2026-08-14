@@ -526,6 +526,7 @@ namespace DungeonBuilder.M0
         public bool TryRepairMigrationBlockedNarrowHall()
         {
             if (SaveService == null || !SaveService.NarrowHallRepairAvailable) return false;
+            string preRepairBlockedBanner = BannerMessage;
             string contentVersion = Content?.Bootstrap?.contentVersion ?? "0.0.0";
             SaveData repaired = SaveService.RepairNarrowHallToBasicAndRetry(contentVersion,
                 out string bannerKey);
@@ -536,6 +537,9 @@ namespace DungeonBuilder.M0
                 return false;
             }
             if (!CompleteSuccessfulBoot(repaired, bannerKey)) return false;
+            if (string.IsNullOrEmpty(bannerKey) && string.Equals(
+                    BannerMessage, preRepairBlockedBanner, System.StringComparison.Ordinal))
+                SetBanner(string.Empty);
             GoHomeStub();
             return true;
         }
