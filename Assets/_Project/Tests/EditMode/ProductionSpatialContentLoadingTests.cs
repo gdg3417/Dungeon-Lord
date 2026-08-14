@@ -559,9 +559,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .ToArray();
             CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath }, consumers);
             string composition = File.ReadAllText(compositionPath);
-            Assert.That(Regex.Matches(composition, @"\.ProductionSpatialContent\b").Count, Is.EqualTo(2));
             Assert.That(Regex.IsMatch(composition,
                 @"Content\.LoadSpatialLayoutCompatibilityProfiles[\s\S]{0,200}Content\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"SaveService\.ConfigureCanonical[\s\S]{0,200}Content\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"CanonicalMvpRouteProjection\.InspectWithProductionContent\([\s\S]{0,200}Content\?\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"ResolveCanonicalMutationTargetRoomId\([\s\S]{0,200}Content\?\.ProductionSpatialContent"),
                 Is.True);
         }
 
