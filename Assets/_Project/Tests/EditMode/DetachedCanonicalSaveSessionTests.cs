@@ -42,7 +42,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult first = opened.Session.PrepareSpatialOnlyReplacement(
                 State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
             Assert.That(first.IsSuccess, Is.True, first.Reason);
-            AssertEvidence(first.Update.GetBytes());
+            AssertSpatialOnlyEvidence(first.Update.GetBytes());
             Assert.That(first.Update.State.Floors, Is.Empty);
 
             DetachedCanonicalSaveSessionResult reopened = DetachedCanonicalSaveSession.Open(
@@ -50,7 +50,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
             DetachedCanonicalSaveSessionResult second = reopened.Session.PrepareSpatialOnlyReplacement(fixture.State);
             Assert.That(second.IsSuccess, Is.True, second.Reason);
-            AssertEvidence(second.Update.GetBytes());
+            AssertSpatialOnlyEvidence(second.Update.GetBytes());
             Assert.That(second.Update.State.Floors, Has.Length.EqualTo(1));
             Assert.That(reopened.Session.PrepareSpatialOnlyReplacement(fixture.State).Update.GetBytes(),
                 Is.EqualTo(second.Update.GetBytes()));
@@ -95,7 +95,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(first.IsSuccess, Is.True, first.Reason);
             AssertLiveState(first.Update.GetBytes(), 200, 17, 31d, "research.first", "objective.first");
             AssertFrozenLegacy(first.Update.GetBytes());
-            AssertEvidence(first.Update.GetBytes());
+            AssertUnknownEvidence(first.Update.GetBytes());
 
             DetachedCanonicalSaveSession reopened = DetachedCanonicalSaveSession.Open(
                 first.Update.GetBytes(), fixture.Context, fixture.Profile).Session;
@@ -109,7 +109,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(second.IsSuccess, Is.True, second.Reason);
             AssertLiveState(second.Update.GetBytes(), 300, 29, 47d, "research.second", "objective.second");
             AssertFrozenLegacy(second.Update.GetBytes());
-            AssertEvidence(second.Update.GetBytes());
+            AssertUnknownEvidence(second.Update.GetBytes());
             Assert.That(DetachedCanonicalSaveSession.Open(second.Update.GetBytes(), fixture.Context,
                 fixture.Profile).IsSuccess, Is.True);
             Assert.That(reopened.PrepareLiveReplacement(secondSnapshot,
@@ -152,12 +152,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string json = Encoding.UTF8.GetString(result.Update.GetBytes());
             Assert.That(json, Does.Not.Contain("research.old"));
             Assert.That(json, Does.Not.Contain("rule.old"));
-            if (json.Contains("\"researchPending\""))
-                Assert.That(json, Does.Contain("\"researchPending\":null"));
-            if (json.Contains("\"researchProgress\""))
-                Assert.That(json, Does.Contain("\"researchProgress\":null"));
-            if (json.Contains("\"lastOfflineSummary\""))
-                Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
+            Assert.That(json, Does.Contain("\"researchPending\":null"));
+            Assert.That(json, Does.Contain("\"researchProgress\":null"));
+            Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
             SaveData reopened = JsonUtility.FromJson<SaveRoot>(json).primary;
             Assert.That(reopened.researchPending, Is.Null);
             Assert.That(reopened.researchProgress, Is.Null);
@@ -264,10 +261,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Floors = floors
         };
 
-        private static void AssertEvidence(byte[] bytes)
+        private static void AssertSpatialOnlyEvidence(byte[] bytes)
         {
             string json = Encoding.UTF8.GetString(bytes);
             Assert.That(json, Does.Contain("\"dungeonLayout\":{\"Slots\":[]}"));
+            AssertUnknownEvidence(bytes);
+        }
+
+        private static void AssertUnknownEvidence(byte[] bytes)
+        {
+            string json = Encoding.UTF8.GetString(bytes);
             Assert.That(json, Does.Contain("\"unknownPrimary\":[1,{\"n\":1.00}]"));
             Assert.That(json, Does.Contain("\"rootUnknown\":{\"lexical\":1.00,\"items\":[true,null,{\"s\":\"a \\\" b \\\\ c\"}]}"));
         }
@@ -322,6 +325,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(save.completedObjectives.LastCompletedObjectiveId, Is.EqualTo(objectiveId));
             Assert.That(save.dungeonLayout.FloorCount, Is.EqualTo(1));
             Assert.That(save.dungeonLayout.SlotsPerFloor, Is.EqualTo(1));
+            Assert.That(save.dungeonLayout.Slots, Has.Count.EqualTo(1));
+            Assert.That(save.dungeonLayout.Slots[0].FloorIndex, Is.EqualTo(0));
+            Assert.That(save.dungeonLayout.Slots[0].SlotIndex, Is.EqualTo(0));
+            Assert.That(save.dungeonLayout.Slots[0].StructureId, Is.Empty);
         }
 
         private static void AssertFrozenLegacy(byte[] bytes)

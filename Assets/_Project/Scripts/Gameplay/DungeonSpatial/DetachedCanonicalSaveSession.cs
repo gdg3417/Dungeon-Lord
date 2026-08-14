@@ -42,6 +42,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
                     result.Add(field.Key, writer.Finish());
                 }
+                PreserveNullableState(result, "researchPending", source.researchPending);
+                PreserveNullableState(result, "researchProgress", source.researchProgress);
+                PreserveNullableState(result, "lastOfflineSummary", source.lastOfflineSummary);
                 return new DetachedRecognizedSaveStateSnapshotResult(
                     new DetachedRecognizedSaveStateSnapshot(result), null);
             }
@@ -59,6 +62,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static DetachedRecognizedSaveStateSnapshotResult Failure(string reason) =>
             new DetachedRecognizedSaveStateSnapshotResult(null, reason);
+
+        private static void PreserveNullableState(Dictionary<string, byte[]> result,
+            string memberName, object runtimeValue)
+        {
+            if (runtimeValue == null) result[memberName] = Encoding.UTF8.GetBytes("null");
+        }
 
         private static bool IsWorkloadFailure(SpatialIssueCollector issues)
         {

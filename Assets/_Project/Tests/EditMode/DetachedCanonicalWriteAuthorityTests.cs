@@ -426,6 +426,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RecognizedStateSavePersistsExplicitNullableClearsAndReopensThemAsNull()
+        {
+            Fixture fixture = Create();
+            fixture.Runtime.researchPending = new ResearchPendingState
+                { SlotId = "slot.old", ProjectId = "research.old" };
+            fixture.Runtime.researchProgress = new ResearchProgressState
+            {
+                SlotId = "slot.old", ProjectId = "research.old", ProgressUnits = 1d,
+                RuleSourceIdUsed = "rule.old"
+            };
+            fixture.Runtime.lastOfflineSummary = new OfflineSummary
+                { RuleResolved = true, RuleSourceIdUsed = "rule.old" };
+            DetachedCanonicalWriteResult populated = fixture.Authority.SaveRecognizedState(
+                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
+            fixture.Accept(populated);
+            fixture.Runtime.researchPending = null;
+            fixture.Runtime.researchProgress = null;
+            fixture.Runtime.lastOfflineSummary = null;
+
+            DetachedCanonicalWriteResult cleared = fixture.Authority.SaveRecognizedState(
+                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
+
+            Assert.That(cleared.IsSuccess, Is.True, cleared.Reason);
+            Assert.That(cleared.GetPersistedBytes(), Is.EqualTo(
+                fixture.FileSystem.ReadAllBytes(fixture.ActivePath)));
+            string json = Encoding.UTF8.GetString(cleared.GetPersistedBytes());
+            Assert.That(json, Does.Contain("\"researchPending\":null"));
+            Assert.That(json, Does.Contain("\"researchProgress\":null"));
+            Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
+            Assert.That(json, Does.Not.Contain("research.old"));
+            Assert.That(json, Does.Not.Contain("rule.old"));
+            Assert.That(cleared.RuntimeProjection.researchPending, Is.Null);
+            Assert.That(cleared.RuntimeProjection.researchProgress, Is.Null);
+            Assert.That(cleared.RuntimeProjection.lastOfflineSummary, Is.Null);
+            DetachedCanonicalSaveSessionResult reopened = DetachedCanonicalSaveSession.Open(
+                cleared.GetPersistedBytes(), fixture.Context, fixture.Profile);
+            Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
+            SaveData reloaded = UnityEngine.JsonUtility.FromJson<SaveRoot>(json).primary;
+            Assert.That(reloaded.researchPending, Is.Null);
+            Assert.That(reloaded.researchProgress, Is.Null);
+            Assert.That(reloaded.lastOfflineSummary, Is.Null);
+        }
+
+        [Test]
         public void RecognizedOnlySaveMissingProductionFailsBeforeFilesystemMutation()
         {
             Fixture fixture = Create();
