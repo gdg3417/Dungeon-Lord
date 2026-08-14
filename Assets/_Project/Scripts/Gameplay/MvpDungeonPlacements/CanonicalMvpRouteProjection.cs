@@ -59,6 +59,9 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 if (root?.primary == null || root.schemaVersion !=
                     DetachedWholeSaveCandidateSerializer.TargetSchemaVersion) return false;
                 save = root.primary;
+                if (validation.ResearchPendingExplicitNull) save.researchPending = null;
+                if (validation.ResearchProgressExplicitNull) save.researchProgress = null;
+                if (validation.LastOfflineSummaryExplicitNull) save.lastOfflineSummary = null;
                 // Runtime consumes the exact strict-parser state, not a second permissive parse
                 // of the two canonical members.
                 save.canonicalSpatialAuthority = validation.State.Authority;

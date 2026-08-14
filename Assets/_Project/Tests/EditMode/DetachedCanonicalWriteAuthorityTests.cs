@@ -441,6 +441,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalWriteResult populated = fixture.Authority.SaveRecognizedState(
                 fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
             fixture.Accept(populated);
+            Assert.That(fixture.Runtime.researchPending.SlotId, Is.EqualTo("slot.old"));
+            Assert.That(fixture.Runtime.researchPending.ProjectId, Is.EqualTo("research.old"));
+            Assert.That(fixture.Runtime.researchProgress.SlotId, Is.EqualTo("slot.old"));
+            Assert.That(fixture.Runtime.researchProgress.ProjectId, Is.EqualTo("research.old"));
+            Assert.That(fixture.Runtime.researchProgress.ProgressUnits, Is.EqualTo(1d));
+            Assert.That(fixture.Runtime.researchProgress.RuleSourceIdUsed, Is.EqualTo("rule.old"));
+            Assert.That(fixture.Runtime.lastOfflineSummary.RuleResolved, Is.True);
+            Assert.That(fixture.Runtime.lastOfflineSummary.RuleSourceIdUsed, Is.EqualTo("rule.old"));
             fixture.Runtime.researchPending = null;
             fixture.Runtime.researchProgress = null;
             fixture.Runtime.lastOfflineSummary = null;
@@ -463,10 +471,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult reopened = DetachedCanonicalSaveSession.Open(
                 cleared.GetPersistedBytes(), fixture.Context, fixture.Profile);
             Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
-            SaveData reloaded = UnityEngine.JsonUtility.FromJson<SaveRoot>(json).primary;
-            Assert.That(reloaded.researchPending, Is.Null);
-            Assert.That(reloaded.researchProgress, Is.Null);
-            Assert.That(reloaded.lastOfflineSummary, Is.Null);
+            DetachedCompleteSaveValidationResult revalidated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    reopened.Session.GetCurrentBytes(), fixture.Context);
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(revalidated,
+                fixture.Production, out SaveData republished, out string publishReason),
+                Is.True, publishReason);
+            Assert.That(republished.researchPending, Is.Null);
+            Assert.That(republished.researchProgress, Is.Null);
+            Assert.That(republished.lastOfflineSummary, Is.Null);
         }
 
         [Test]

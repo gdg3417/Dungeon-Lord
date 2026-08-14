@@ -155,10 +155,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(json, Does.Contain("\"researchPending\":null"));
             Assert.That(json, Does.Contain("\"researchProgress\":null"));
             Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
-            SaveData reopened = JsonUtility.FromJson<SaveRoot>(json).primary;
-            Assert.That(reopened.researchPending, Is.Null);
-            Assert.That(reopened.researchProgress, Is.Null);
-            Assert.That(reopened.lastOfflineSummary, Is.Null);
+            DetachedCompleteSaveValidationResult validated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    result.Update.GetBytes(), fixture.Context);
+            Assert.That(validated.IsValid, Is.True, validated.Reason);
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated,
+                fixture.Context.Production, out SaveData published, out string publishReason),
+                Is.True, publishReason);
+            Assert.That(published.researchPending, Is.Null);
+            Assert.That(published.researchProgress, Is.Null);
+            Assert.That(published.lastOfflineSummary, Is.Null);
         }
 
         [Test]
