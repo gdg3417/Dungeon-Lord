@@ -1,11 +1,11 @@
 #if UNITY_EDITOR
 using System.IO;
+using System.Collections.Generic;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -69,11 +69,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            SaveService service = Service(fixture, fileSystem, "root-repair.json");
+            var errors = new List<string>();
+            SaveService service = Service(fixture, fileSystem, "root-repair.json", errors);
             fileSystem.Seed(service.SavePath, original);
-            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
-                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
             GameRoot root = Root(service);
             Assert.That(root.Save, Is.Null);
             Assert.That(root.TimeService, Is.Null);
@@ -105,11 +105,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            SaveService service = Service(fixture, fileSystem, "root-repair-failed.json");
+            var errors = new List<string>();
+            SaveService service = Service(fixture, fileSystem, "root-repair-failed.json", errors);
             fileSystem.Seed(service.SavePath, original);
-            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
-                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
             GameRoot root = Root(service);
             fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);
 
@@ -135,9 +135,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveService Service(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
-            ISpatialMigrationFileSystem fileSystem, string filename)
+            ISpatialMigrationFileSystem fileSystem, string filename, ICollection<string> errors = null)
         {
-            var service = new SaveService(new SimpleLogger(false),
+            var logger = errors == null ? new SimpleLogger(false) :
+                new SimpleLogger(false, (level, formatted) =>
+                {
+                    if (level == "ERROR") errors.Add(formatted);
+                });
+            var service = new SaveService(logger,
                 new SaveConfig { fileName = filename, useAtomicWrites = true },
                 Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-root-tests")));
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
@@ -148,6 +153,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fileSystem));
             return service;
         }
+
+        private const string NarrowHallLoadError =
+            "[ERROR] GD66 load failed: gd66.content.migration_blocked_narrow_hall";
 
         private static Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture Fixture() =>
             Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
