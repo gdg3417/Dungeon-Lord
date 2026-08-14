@@ -543,20 +543,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(validated.IsNotSerialized, Is.True);
 
             string schemaSixJson = JsonUtility.ToJson(new SaveRoot
-                { schemaVersion = SaveMigration.LatestSchemaVersion, primary = new SaveData() });
+                { schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion, primary = new SaveData() });
             Assert.That(schemaSixJson, Does.Not.Contain("canonicalSpatialAuthority"));
             Assert.That(schemaSixJson, Does.Not.Contain("spatialFloors"));
         }
 
         [Test]
-        public void ProductionPublicationHasNoGameplayPresenterUiPlacementSimulationOrRouteConsumer()
+        public void ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers()
         {
             const string compositionPath = "Assets/_Project/Scripts/Core/GameRoot.cs";
+            const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
                 .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            CollectionAssert.AreEqual(new[] { compositionPath }, consumers);
+            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath }, consumers);
             string composition = File.ReadAllText(compositionPath);
             Assert.That(Regex.Matches(composition, @"\.ProductionSpatialContent\b").Count, Is.EqualTo(2));
             Assert.That(Regex.IsMatch(composition,
@@ -597,13 +598,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             StringAssert.Contains("productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6", scene);
             string source = System.IO.File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
             string fallback = source.Substring(source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal),
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal) -
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal) -
                 source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal));
             StringAssert.DoesNotContain("productionSpatial", fallback);
             string initialization = source.Substring(
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal),
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal),
                 source.IndexOf("private void InitializeStructureSimulationPass", StringComparison.Ordinal) -
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal));
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal));
             StringAssert.DoesNotContain("diagnostic.ToString", initialization);
             StringAssert.DoesNotContain("Logger?.Warn", initialization);
         }

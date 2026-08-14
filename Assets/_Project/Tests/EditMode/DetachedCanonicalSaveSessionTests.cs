@@ -211,8 +211,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static Fixture CreateFixture(bool includeLegacy = true, bool nullLegacy = false,
             bool includeNullable = false)
         {
-            SaveSpatialMigrationLimitsProfile profile = SaveSpatialMigrationLimitsLoader.Load(
-                File.ReadAllText(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            SaveSpatialMigrationLimitsLoadResult loadedLimits = SaveSpatialMigrationLimitsLoader.Load(
+                File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath));
+            Assert.That(loadedLimits.IsSuccess, Is.True, loadedLimits.Reason);
+            SaveSpatialMigrationLimitsProfile profile = loadedLimits.Profile;
             const string assignments = "\"mvpRoomSlotAssignments\":{\"Rooms\":[{" +
                 "\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":2}";

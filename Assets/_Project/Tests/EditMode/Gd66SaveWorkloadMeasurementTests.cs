@@ -195,7 +195,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] measured = SerializeLegacyPersistence(save);
             string expected = JsonUtility.ToJson(new SaveRoot
             {
-                schemaVersion = SaveMigration.LatestSchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = save
             }, true);
 
@@ -203,7 +203,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(expected, Does.Contain("\n"));
             Assert.That(expected, Is.Not.EqualTo(JsonUtility.ToJson(new SaveRoot
             {
-                schemaVersion = SaveMigration.LatestSchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = save
             })));
         }
@@ -244,7 +244,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             MvpRoomSlotAssignmentCollection expectedAssignments = LegacyRuntimeR2Assignments();
             var root = new SaveRoot
             {
-                schemaVersion = SaveMigration.LatestSchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = new SaveData
                 {
                     saveVersion = 6, contentVersion = "gd66-measurement",
@@ -470,7 +470,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var root = new SaveRoot
             {
-                schemaVersion = SaveMigration.LatestSchemaVersion,
+                schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion,
                 primary = save
             };
             return Encoding.UTF8.GetBytes(JsonUtility.ToJson(root, true));

@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
@@ -45,13 +46,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             "MaximumCopiedSourceValueBytes", "MaximumUnknownMembers", "MaximumUnknownMemberBytes"
         };
 
+        private static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, true);
+
         public static SaveSpatialMigrationLimitsLoadResult Load(TextAsset asset) =>
-            asset == null ? Failure(MissingReason) : Load(asset.text);
+            asset == null ? Failure(MissingReason) : Load(asset.bytes);
 
         public static SaveSpatialMigrationLimitsLoadResult Load(string json)
         {
             if (string.IsNullOrEmpty(json)) return Failure(MissingReason);
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            try { return Load(StrictUtf8.GetBytes(json)); }
+            catch (EncoderFallbackException) { return Failure(InvalidReason); }
+        }
+
+        public static SaveSpatialMigrationLimitsLoadResult Load(byte[] framedBytes)
+        {
+            if (framedBytes == null || framedBytes.Length == 0) return Failure(MissingReason);
+            // Production text assets use exactly one terminal LF. ContractJson receives only the
+            // strict JSON body; BOM, CR/CRLF, missing LF, and multiple terminal LFs fail closed.
+            if (framedBytes.Length < 2 || framedBytes[framedBytes.Length - 1] != (byte)'\n' ||
+                framedBytes[framedBytes.Length - 2] == (byte)'\n' ||
+                Array.IndexOf(framedBytes, (byte)'\r') >= 0 ||
+                (framedBytes.Length >= 3 && framedBytes[0] == 0xef &&
+                    framedBytes[1] == 0xbb && framedBytes[2] == 0xbf))
+                return Failure(InvalidReason);
+            var bytes = new byte[framedBytes.Length - 1];
+            Buffer.BlockCopy(framedBytes, 0, bytes, 0, bytes.Length);
             // Bootstrap parsing limits bound only this small technical configuration document;
             // they are not fallback save limits and are never returned to migration consumers.
             var parseLimits = new SpatialSerializedInputLimits(8192, 128, 32, 2048, 8);

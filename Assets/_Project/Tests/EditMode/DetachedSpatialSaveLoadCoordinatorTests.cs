@@ -7,6 +7,7 @@ using System;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -235,6 +236,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             blockedFileSystem.Seed(Path.Combine(Path.GetDirectoryName(blocked.SavePath),
                 "service-evidence.gd66-invalid-id.journal.json"), Encoding.UTF8.GetBytes("malformed"));
 
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationTransaction.PathInvalidReason);
             Assert.That(blocked.LoadOrCreate("gd66-live", out _), Is.Null);
             Assert.That(blockedFileSystem.Exists(blocked.SavePath), Is.False);
 
@@ -356,6 +359,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 File.WriteAllBytes(service.SavePath, active);
                 File.WriteAllBytes(evidence, new byte[] { 7 });
 
+                LogAssert.Expect(LogType.Error, "[ERROR] Delete save failed. Exception: " +
+                    "GD66 delete preflight failed: " + SpatialMigrationCapabilityReason.PlatformUnsupported);
                 service.DeleteSave(out string banner);
 
                 Assert.That(File.ReadAllBytes(service.SavePath), Is.EqualTo(active), banner);
@@ -397,6 +402,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json");
             fileSystem.Seed(service.SavePath, original);
 
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.True);
             Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0 }));
@@ -422,9 +429,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json");
             fileSystem.Seed(service.SavePath, original);
 
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0, 1 }));
             service.SelectNarrowHallRepairTarget(0);
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out _), Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.True);
             Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 1 }));
@@ -450,6 +461,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json");
             fileSystem.Seed(service.SavePath, narrow);
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             fileSystem.RemoveSeededEvidence(service.SavePath);
             fileSystem.Seed(service.SavePath, changed);
@@ -605,6 +618,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Load_TrustedLegacySemanticMismatchRetainsOriginalWithoutCanonicalPublication()
+        {
+            byte[] original = Encoding.UTF8.GetBytes(
+                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
+                "\"mvpDungeonPlacements\":{\"Entries\":{},\"NextRevision\":0}}}");
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
+                "gd66-semantic-mismatch.json"));
+            fileSystem.Seed(activePath, original);
+
+            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
+                Supported(fileSystem));
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(result.RuntimeProjection, Is.Null);
+            Assert.That(result.Session, Is.Null);
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(original));
+            Assert.That(Encoding.UTF8.GetString(fileSystem.ReadAllBytes(activePath)),
+                Does.Not.Contain("\"schemaVersion\":7"));
+        }
+
+        [Test]
         public void Load_NarrowHallBlocksMigrationButRetainsByteExactTrustedOriginal()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
@@ -731,9 +770,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(compactResult.IsSuccess, Is.True, compactResult.Reason);
             Assert.That(prettyResult.IsSuccess, Is.True, prettyResult.Reason);
-            Assert.That(JsonUtility.ToJson(prettyResult.Validation.State),
-                Is.EqualTo(JsonUtility.ToJson(compactResult.Validation.State)));
+            Assert.That(SemanticSpatialJson(prettyResult.Validation.State.Floors),
+                Is.EqualTo(SemanticSpatialJson(compactResult.Validation.State.Floors)));
+            Assert.That(SemanticSpatialJson(prettyResult.RuntimeProjection.spatialFloors),
+                Is.EqualTo(SemanticSpatialJson(compactResult.RuntimeProjection.spatialFloors)));
+            Assert.That(prettyResult.Validation.State.Authority.MigrationTransactionId,
+                Is.Not.EqualTo(compactResult.Validation.State.Authority.MigrationTransactionId));
+            Assert.That(prettyResult.Validation.State.Authority.MigrationDescriptorFingerprint,
+                Is.Not.EqualTo(compactResult.Validation.State.Authority.MigrationDescriptorFingerprint));
+            DetachedSpatialSaveLoadResult compactAgain = LoadOriginal(4, compact, "compact-again");
+            Assert.That(compactAgain.GetValidatedBytes(), Is.EqualTo(compactResult.GetValidatedBytes()));
         }
+
+        private static string SemanticSpatialJson(SavedSpatialFloor[] floors) => JsonUtility.ToJson(
+            new DetachedCanonicalSpatialSaveState
+            {
+                Authority = new CanonicalSpatialAuthorityMarker
+                {
+                    CanonicalLayoutContractVersion = 1,
+                    CreationKind = CanonicalSpatialCreationKind.Migrated,
+                    MigrationTransactionId = string.Empty,
+                    MigrationDescriptorFingerprint = string.Empty
+                },
+                Floors = floors
+            });
 
         [Test]
         public void Load_ActualPrettyJsonUtilitySaveRootMigrates()

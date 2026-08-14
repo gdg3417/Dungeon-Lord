@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.IO;
+using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
@@ -16,7 +17,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ProductionProfile_LoadsAllApprovedValues()
         {
             SaveSpatialMigrationLimitsLoadResult result =
-                SaveSpatialMigrationLimitsLoader.Load(ProductionJson);
+                SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(
+                    SaveSpatialMigrationLimitsLoader.ProductionPath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(524288));
@@ -36,6 +38,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Profile.Whole.MaximumCopiedValueBytes, Is.EqualTo(524288));
             Assert.That(result.Profile.Whole.MaximumUnknownMembers, Is.EqualTo(64));
             Assert.That(result.Profile.Whole.MaximumUnknownMemberBytes, Is.EqualTo(131072));
+        }
+
+        [Test]
+        public void ProductionFramingAcceptsExactlyOneLfAndRejectsOtherTerminators()
+        {
+            byte[] production = File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath);
+            Assert.That(production[production.Length - 1], Is.EqualTo((byte)'\n'));
+            Assert.That(SaveSpatialMigrationLimitsLoader.Load(production).IsSuccess, Is.True);
+            Assert.That(SaveSpatialMigrationLimitsLoader.Load(production.Take(
+                production.Length - 1).ToArray()).Reason,
+                Is.EqualTo(SaveSpatialMigrationLimitsLoader.InvalidReason));
+            Assert.That(SaveSpatialMigrationLimitsLoader.Load(production.Concat(
+                new byte[] { (byte)'\n' }).ToArray()).Reason,
+                Is.EqualTo(SaveSpatialMigrationLimitsLoader.InvalidReason));
+            Assert.That(SaveSpatialMigrationLimitsLoader.Load(new byte[] { 0xef, 0xbb, 0xbf }.Concat(
+                production).ToArray()).Reason, Is.EqualTo(SaveSpatialMigrationLimitsLoader.InvalidReason));
+            byte[] crlf = production.Take(production.Length - 1).Concat(
+                new byte[] { (byte)'\r', (byte)'\n' }).ToArray();
+            Assert.That(SaveSpatialMigrationLimitsLoader.Load(crlf).Reason,
+                Is.EqualTo(SaveSpatialMigrationLimitsLoader.InvalidReason));
         }
 
         [TestCase(null, SaveSpatialMigrationLimitsLoader.MissingReason)]
@@ -60,6 +82,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
             AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":524288",
                 "\"MaximumRawSaveBytes\":524288,\"MaximumRawSaveBytes\":524288"),
+                SaveSpatialMigrationLimitsLoader.InvalidReason);
+            AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":524288",
+                "\"MaximumRawSaveBytes\":\"524288\""),
+                SaveSpatialMigrationLimitsLoader.InvalidReason);
+            AssertFailure(ProductionJson.Replace("\"Schema\":\"save_spatial_migration_limits\"," +
+                "\"SchemaVersion\":1", "\"SchemaVersion\":1,\"Schema\":" +
+                "\"save_spatial_migration_limits\""),
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
         }
 
@@ -108,7 +137,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int load = source.IndexOf("SaveSpatialMigrationLimitsLoader.Load(saveSpatialMigrationLimitsJson)",
                 System.StringComparison.Ordinal);
             int failure = source.IndexOf("if (!saveLimits.IsSuccess)", System.StringComparison.Ordinal);
-            int stop = source.IndexOf("return;", failure, System.StringComparison.Ordinal);
+            int stop = source.IndexOf("return false;", failure, System.StringComparison.Ordinal);
             int legacy = source.IndexOf("new SaveService(", System.StringComparison.Ordinal);
             Assert.That(load, Is.GreaterThanOrEqualTo(0));
             Assert.That(failure, Is.GreaterThan(load));

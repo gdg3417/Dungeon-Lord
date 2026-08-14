@@ -558,7 +558,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (!ResolveEvidencePaths(directory, journal, out string journalPath, out string backupPath,
                 out string ignoredStaging)) return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
-            byte[] active = fileSystem.ReadAllBytes(activePath);
+            byte[] active = fileSystem.Exists(activePath) ? fileSystem.ReadAllBytes(activePath) : null;
             if (HashIs(active, journal.OriginalPayloadSha256))
             {
                 if ((int)journal.Stage > (int)SpatialMigrationJournalStage.DescriptorPinned &&
@@ -599,7 +599,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var diagnostics = new List<string>();
             if (!ResolveEvidencePaths(directory, journal, out string journalPath, out string backupPath,
                 out string stagingPath)) return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
-            byte[] active = fileSystem.ReadAllBytes(activePath);
+            byte[] active = fileSystem.Exists(activePath) ? fileSystem.ReadAllBytes(activePath) : null;
             bool activeOriginal = HashIs(active, journal.OriginalPayloadSha256);
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             bool backupValid = HashIs(backup, journal.OriginalPayloadSha256);

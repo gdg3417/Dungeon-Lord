@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -70,6 +71,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = Service(fixture, fileSystem, "root-repair.json");
             fileSystem.Seed(service.SavePath, original);
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             GameRoot root = Root(service);
             Assert.That(root.Save, Is.Null);
@@ -104,6 +107,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = Service(fixture, fileSystem, "root-repair-failed.json");
             fileSystem.Seed(service.SavePath, original);
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " +
+                DetachedSpatialMigrationPreparer.NarrowHallReason);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
             GameRoot root = Root(service);
             fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);

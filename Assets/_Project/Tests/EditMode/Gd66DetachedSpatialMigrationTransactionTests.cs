@@ -420,7 +420,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Recovery_NoJournalMalformedEffectiveRouteIsNotTrustedAsLegacyOriginal()
+        public void Recovery_NoJournalMalformedEffectiveRouteRetainsTrustedOriginalForSemanticRejection()
         {
             PreparedFixture fixture = PrepareEmptyFixture(6);
             byte[] malformed = Encoding.UTF8.GetBytes(
@@ -433,11 +433,57 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedSpatialMigrationOutcome outcome =
                 new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
 
-            Assert.That(outcome.IsSuccess, Is.False);
-            Assert.That(outcome.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
-            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(outcome.IsSuccess, Is.True, outcome.Reason);
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
             Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(malformed));
             Assert.That(fileSystem.Paths.Count(), Is.EqualTo(1));
+            PreparedFixture semantic = PrepareEmptyFixture(6, false, malformed);
+            Assert.That(semantic.Result.IsSuccess, Is.False);
+            Assert.That(semantic.Result.Reason,
+                Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+        }
+
+        [Test]
+        public void Recovery_ActiveAbsentWithVerifiedJournalBackupRestoresOriginal()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            var fileSystem = new DeterministicFileSystem();
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            MaterializeJournal(fileSystem, fixture, activePath,
+                SpatialMigrationJournalStage.BackupVerified, true, false, false);
+            fileSystem.RemoveSeededEvidence(activePath);
+
+            DetachedSpatialMigrationOutcome outcome =
+                new DetachedSpatialMigrationTransaction(fileSystem, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(outcome.IsSuccess, Is.True, outcome.Reason);
+            Assert.That(outcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+        }
+
+        [Test]
+        public void Recovery_ActiveAbsentMalformedOrContradictoryEvidenceFailsClosed()
+        {
+            PreparedFixture fixture = PrepareEmptyFixture(6);
+            string activePath = ActivePath(TestContext.CurrentContext.Test.Name);
+            string directory = Path.GetDirectoryName(activePath);
+            var malformed = new DeterministicFileSystem();
+            malformed.Seed(Path.Combine(directory, Path.GetFileNameWithoutExtension(activePath) +
+                ".gd66-invalid-id.journal.json"), Encoding.UTF8.GetBytes("malformed"));
+
+            DetachedSpatialMigrationOutcome malformedOutcome =
+                new DetachedSpatialMigrationTransaction(malformed, Recovery(fixture)).Recover(activePath);
+
+            Assert.That(malformedOutcome.IsSuccess, Is.False);
+            Assert.That(malformedOutcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            var contradictory = new DeterministicFileSystem();
+            contradictory.Seed(Path.Combine(directory, Path.GetFileNameWithoutExtension(activePath) +
+                ".gd66-invalid-id.original.bak"), Encoding.UTF8.GetBytes("unbound"));
+            DetachedSpatialMigrationOutcome contradictoryOutcome =
+                new DetachedSpatialMigrationTransaction(contradictory, Recovery(fixture)).Recover(activePath);
+            Assert.That(contradictoryOutcome.IsSuccess, Is.False);
+            Assert.That(contradictoryOutcome.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.None));
+            Assert.That(contradictory.Exists(activePath), Is.False);
         }
 
         [TestCase("{malformed", RawSavePayloadClassifier.UnreadableReason)]
@@ -2581,6 +2627,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 path = Normalize(path); Record(OperationType.Read, path);
                 if (readSubstitutions.TryGetValue(path, out Queue<byte[]> queue) && queue.Count != 0)
                     return queue.Dequeue();
+                if (!files.ContainsKey(path)) throw new FileNotFoundException("File not found.", path);
                 return (byte[])files[path].Clone();
             }
             public void WriteAllBytesDurable(string path, byte[] bytes)
