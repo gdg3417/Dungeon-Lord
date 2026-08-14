@@ -59,10 +59,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Unsupported(SpatialMigrationCapabilityReason.PlatformUnsupported, platform);
             try
             {
-                string path = Path.GetFullPath(activeSavePath);
+                if (string.IsNullOrEmpty(activeSavePath) || HasDotSegment(activeSavePath))
+                    return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
+                string suppliedPath = NormalizeWindowsSeparators(activeSavePath);
+                if (!Path.IsPathFullyQualified(suppliedPath))
+                    return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
+                string path = Path.GetFullPath(suppliedPath);
                 string directory = Path.GetDirectoryName(path);
-                if (string.IsNullOrEmpty(activeSavePath) || !string.Equals(path, activeSavePath,
-                    StringComparison.Ordinal) || path.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters)
+                if (!string.Equals(NormalizeWindowsSeparators(path), suppliedPath,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    path.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters)
                     return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
                 if (!probe.IsPathContainedWithoutRedirection(directory, path))
                     return Unsupported(SpatialMigrationCapabilityReason.PathRedirected, platform);
@@ -81,6 +87,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static SpatialMigrationActivationPreflight Unsupported(string reason,
             SpatialMigrationPlatform platform) => new SpatialMigrationActivationPreflight(false, reason,
                 platform, null);
+
+        private static string NormalizeWindowsSeparators(string path) => path
+            .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
+
+        private static bool HasDotSegment(string path)
+        {
+            string[] segments = path.Split(new[] { '/', '\\' }, StringSplitOptions.None);
+            for (int index = 0; index < segments.Length; index++)
+                if (segments[index] == "." || segments[index] == "..") return true;
+            return false;
+        }
     }
 
     public interface IWindowsSpatialMigrationCapabilityProbe

@@ -163,6 +163,62 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void GenericBlockedBootShowsOnlyLocalizedBannerAndCannotInvokeGameplayActions()
+        {
+            SetSave(null);
+            SetBackingField("<SaveService>k__BackingField", new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = "blocked-ui.json", useAtomicWrites = false }));
+            _root.SetBanner("The save location is unavailable.");
+            string placementFeedback = _overlay.MvpStructurePlacementFeedback;
+            string runFeedback = _overlay.MvpRunResultFeedback;
+
+            _overlay.PlaceSelectedMvpStructure();
+            _overlay.RunOrObserveDungeon();
+            string text = _overlay.BuildCurrentPlayerFacingSmokeText();
+
+            Assert.That(_overlay.NormalGameplayActionsAvailable, Is.False);
+            Assert.That(_overlay.NarrowHallRepairOnlyVisible, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.False);
+            Assert.That(text, Is.EqualTo("The save location is unavailable."));
+            Assert.That(text, Does.Not.Contain("gd66."));
+            Assert.That(text, Does.Not.Contain("== Action Controls =="));
+            Assert.That(text, Does.Not.Contain("Placement:"));
+            Assert.That(text, Does.Not.Contain("Run posture:"));
+            Assert.That(_overlay.MvpStructurePlacementFeedback, Is.EqualTo(placementFeedback));
+            Assert.That(_overlay.MvpRunResultFeedback, Is.EqualTo(runFeedback));
+        }
+
+        [Test]
+        public void NarrowHallBlockedBootExposesRepairOnlyAndValidSaveRestoresGameplayPanel()
+        {
+            SetSave(null);
+            var service = new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = "narrow-repair-ui.json", useAtomicWrites = false });
+            typeof(SaveService).GetField("_narrowHallRepairAvailable",
+                BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(service, true);
+            typeof(SaveService).GetField("_narrowHallRepairTargets",
+                BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(service, new[] { 0 });
+            SetBackingField("<SaveService>k__BackingField", service);
+            _root.SetBanner("Replace Narrow Hall to continue safely.");
+
+            Assert.That(_overlay.NormalGameplayActionsAvailable, Is.False);
+            Assert.That(_overlay.NarrowHallRepairOnlyVisible, Is.True);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(_overlay.BuildCurrentPlayerFacingSmokeText(),
+                Is.EqualTo("Replace Narrow Hall to continue safely."));
+
+            SaveData canonical = DungeonBuilder.M0.Tests.EditMode.Gd66CanonicalRuntimeProjectionTests
+                .PublishedEmptyProductionFixture(out _);
+            SetSave(canonical);
+            Assert.That(CanonicalMvpRouteProjection.IsCanonical(canonical), Is.True);
+            Assert.That(_overlay.NormalGameplayActionsAvailable, Is.True);
+            Assert.That(_overlay.NarrowHallRepairOnlyVisible, Is.False);
+            Assert.That(_overlay.MinimalMvpActionGuiVisible, Is.True);
+            Assert.That(_overlay.BuildCurrentPlayerFacingSmokeText(), Does.Contain("== Action Controls =="));
+            Assert.That(_overlay.BuildCurrentPlayerFacingSmokeText(), Does.Not.Contain("Narrow Hall"));
+        }
+
+        [Test]
         public void PlayerFacingDefault_ShowsPlayableMvpScreenSectionsAndHidesDiagnostics()
         {
             string text = RefreshText();

@@ -84,7 +84,11 @@ namespace DungeonBuilder.M0
         public bool DiagnosticsVisible => DiagnosticsAllowed && (_diagnosticsVisible || _runDiagnosticsOnlyVisible);
         private bool DiagnosticsAllowed => _root != null && _root.DevPanelEnabled;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
-        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
+        public bool NormalGameplayActionsAvailable => _root?.Save != null;
+        public bool NarrowHallRepairOnlyVisible => _root != null && _root.Save == null &&
+            _root.SaveService != null && _root.SaveService.NarrowHallRepairAvailable;
+        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible &&
+            !_minimalMvpActionPanelCollapsed && (NormalGameplayActionsAvailable || NarrowHallRepairOnlyVisible);
         public Vector2 MinimalMvpActionPanelScrollPosition => _minimalMvpActionPanelScrollPosition;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
         public string SelectedMvpPlacementCategoryId => _selectedMvpPlacementCategoryId;
@@ -281,6 +285,7 @@ namespace DungeonBuilder.M0
 
         public void PlaceSelectedMvpStructure()
         {
+            if (!NormalGameplayActionsAvailable) return;
             BootstrapMvpActionHandler.PlacementResult result = CreateMvpActionHandler().PlaceOrModifySelectedMvpPlacement(
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
@@ -291,6 +296,7 @@ namespace DungeonBuilder.M0
 
         public void AddMvpBasicRoomSlot()
         {
+            if (!NormalGameplayActionsAvailable) return;
             bool added = _root != null && _root.TryAddSecondMvpBasicRoomSlot();
             _mvpStructurePlacementFeedback = GetLocalizedString(added ? AddBasicRoomSlotSuccessKey : AddBasicRoomSlotAlreadyExistsKey);
             _roomSlotPlacementFailureIsLatestAction = false;
@@ -300,6 +306,7 @@ namespace DungeonBuilder.M0
 
         public void CycleSelectedMvpRoomSlotTarget()
         {
+            if (!NormalGameplayActionsAvailable) return;
             _root?.CycleSelectedMvpRoomSlotTarget();
             ClearRoomSlotPlacementFailureFeedback();
             RefreshOverlayText();
@@ -307,6 +314,7 @@ namespace DungeonBuilder.M0
 
         public void RunOrObserveDungeon()
         {
+            if (!NormalGameplayActionsAvailable) return;
             BootstrapMvpActionHandler.RunResult result = CreateMvpActionHandler().RunOrObserveDungeon(_selectedMvpRunPostureId);
             ApplyRunResultFeedback(result);
             RefreshOverlayText();
@@ -625,11 +633,13 @@ namespace DungeonBuilder.M0
 
         public string BuildFullPlayerFacingSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCurrentPlayerFacingSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             if (_compactSmokeViewEnabled)
             {
                 return BuildCompactSmokeText();
@@ -651,12 +661,23 @@ namespace DungeonBuilder.M0
 
         public string BuildPlayableMvpScreenText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildPlayableMvpScreenText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCompactSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildCompactSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        private string BuildBlockedBootPlayerText()
+        {
+            if (_root == null) return string.Empty;
+            if (!string.IsNullOrEmpty(_root.BannerMessage)) return _root.BannerMessage;
+            string reason = DetachedSpatialMigrationTransaction.NoTrustedPayloadReason;
+            string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
+            return GetLocalizedString(key, key);
         }
 
         private string BuildLoopSummarySectionText()
@@ -1136,8 +1157,7 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            if (_root.Save == null && _root.SaveService != null &&
-                _root.SaveService.NarrowHallRepairAvailable)
+            if (NarrowHallRepairOnlyVisible)
             {
                 GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
                 GUILayout.Label(GetLocalizedString(
@@ -1165,6 +1185,8 @@ namespace DungeonBuilder.M0
                 GUILayout.EndArea();
                 return;
             }
+
+            if (!NormalGameplayActionsAvailable) return;
 
             if (_minimalMvpActionPanelCollapsed)
             {

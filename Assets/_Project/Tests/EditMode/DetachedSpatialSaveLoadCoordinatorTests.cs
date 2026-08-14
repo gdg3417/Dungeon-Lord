@@ -257,8 +257,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = ConfiguredService(fixture, fileSystem, "service-delete.json");
+            int preflightEvaluations = 0;
+            service.SetPreflightEvaluatorForTests(path =>
+            {
+                preflightEvaluations++;
+                return Supported(fileSystem);
+            });
             Assert.That(service.LoadOrCreate("gd66-live", out string createBanner), Is.Not.Null,
                 createBanner);
+            Assert.That(preflightEvaluations, Is.EqualTo(1));
             string exactOrdinary = service.SavePath +
                 ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
             fileSystem.Seed(exactOrdinary, Encoding.UTF8.GetBytes("evidence"));
@@ -286,6 +293,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             service.DeleteSave(out string deleteBanner);
 
+            Assert.That(preflightEvaluations, Is.EqualTo(1),
+                "Delete must reuse the filesystem qualified and cached by LoadOrCreate.");
             Assert.That(fileSystem.Exists(service.SavePath), Is.False, deleteBanner);
             Assert.That(fileSystem.Exists(exactOrdinary), Is.False);
             foreach (string filename in recognized)

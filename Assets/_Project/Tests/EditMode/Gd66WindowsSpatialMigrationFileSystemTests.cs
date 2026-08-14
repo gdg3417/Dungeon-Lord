@@ -55,6 +55,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void WindowsSelectionAcceptsCanonicalAlternateAndMixedEquivalentSeparators()
+        {
+            string canonical = Path.GetFullPath(Path.Combine("gd66-path-equivalence", "save.json"));
+            char alternate = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
+            string alternatePath = canonical.Replace(Path.DirectorySeparatorChar, alternate);
+            int lastSeparator = canonical.LastIndexOf(Path.DirectorySeparatorChar);
+            string mixed = lastSeparator < 0 ? canonical :
+                canonical.Substring(0, lastSeparator) + alternate + canonical.Substring(lastSeparator + 1);
+            var probe = new CapabilityProbe(true, null);
+            var fileSystem = new SelectorFileSystem();
+
+            foreach (string path in new[] { canonical, alternatePath, mixed, canonical.ToUpperInvariant() })
+            {
+                SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(
+                    SpatialMigrationPlatform.WindowsEditor, path, probe, fileSystem);
+                Assert.That(result.IsSupported, Is.True, path + ": " + result.Reason);
+                Assert.That(result.FileSystem, Is.SameAs(fileSystem));
+            }
+        }
+
+        [Test]
+        public void WindowsSelectionStillRejectsDotDotDotAndOverLimitPaths()
+        {
+            string directory = Path.GetFullPath("gd66-path-canonicality");
+            string[] invalid =
+            {
+                "." + Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar + "." + Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar + "child" + Path.DirectorySeparatorChar + ".." +
+                    Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar +
+                    new string('a', SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters) + ".json"
+            };
+            var probe = new CapabilityProbe(true, null);
+            foreach (string path in invalid)
+            {
+                SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(
+                    SpatialMigrationPlatform.WindowsStandalone, path, probe, new SelectorFileSystem());
+                Assert.That(result.IsSupported, Is.False, path);
+                Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.PathInvalid), path);
+            }
+        }
+
+        [Test]
         public void CurrentNonWindowsRuntimeFailsClosed()
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
@@ -96,6 +140,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 if (Directory.Exists(directory)) Directory.Delete(directory, true);
             }
+        }
+
+        [Test]
+        public void WindowsUnityPersistentDataPathRepresentationQualifiesAndSupportsCreateReadDelete()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string active = Path.Combine(Application.persistentDataPath,
+                "gd66-unity-shaped-path-" + Guid.NewGuid().ToString("N") + ".json");
+            try
+            {
+                SpatialMigrationActivationPreflight preflight =
+                    SpatialMigrationFileSystemSelector.Evaluate(active);
+                Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
+                preflight.FileSystem.WriteAllBytesDurable(active, new byte[] { 6, 6 });
+                CollectionAssert.AreEqual(new byte[] { 6, 6 }, preflight.FileSystem.ReadAllBytes(active));
+                preflight.FileSystem.DeleteFile(active);
+                preflight.FileSystem.FlushDirectory(Path.GetDirectoryName(Path.GetFullPath(active)));
+                Assert.That(preflight.FileSystem.Exists(active), Is.False);
+            }
+            finally { if (File.Exists(active)) File.Delete(active); }
         }
 
         [Test]
