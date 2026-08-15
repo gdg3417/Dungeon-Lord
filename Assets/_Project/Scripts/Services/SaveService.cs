@@ -306,7 +306,7 @@ namespace DungeonBuilder.M0
             return migration || ordinary.Count != 0;
         }
 
-        public void DeleteSave(out string banner)
+        public bool DeleteSave(out string banner)
         {
             banner = string.Empty;
 
@@ -347,21 +347,25 @@ namespace DungeonBuilder.M0
                     ClearNarrowHallRepairAuthorization();
                     banner = "Save deleted.";
                     _logger.Warn("Save deleted by dev command.");
+                    return true;
                 }
                 else if (File.Exists(SavePath))
                 {
                     File.Delete(SavePath); banner = "Save deleted.";
                     _logger.Warn("Save deleted by dev command.");
+                    return true;
                 }
                 else
                 {
                     banner = "No save to delete.";
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 banner = "Failed to delete save.";
                 _logger.Error($"Delete save failed. Exception: {ex.Message}");
+                return false;
             }
         }
 

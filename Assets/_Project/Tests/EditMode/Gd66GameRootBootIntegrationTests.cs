@@ -60,6 +60,96 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ExplicitDevDeleteQuiescesCanonicalRuntimeAndFreshRootCreatesNativeSave()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var errors = new List<string>();
+            const string filename = "root-delete-success.json";
+            SaveService service = Service(fixture, fileSystem, filename, errors);
+            SaveData canonical = service.LoadOrCreate("gd66-live", out string loadBanner);
+            Assert.That(canonical, Is.Not.Null, loadBanner);
+            GameRoot root = Root(service);
+            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            SaveData deletedRuntime = root.Save;
+            long ticksBeforeDelete = deletedRuntime.totalTicks;
+
+            bool deleted = root.TryDeleteSaveFromDevPanel(out string deleteBanner);
+
+            Assert.That(deleted, Is.True, deleteBanner);
+            Assert.That(deleteBanner, Is.EqualTo("Save deleted."));
+            Assert.That(root.BannerMessage, Does.Contain("Save deleted."));
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(fileSystem.Exists(service.SavePath), Is.False);
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(service.SavePath, fileSystem, 64), Is.False);
+            Assert.That(root.Save, Is.Null);
+            Assert.That(root.TimeService, Is.Null);
+            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
+            Assert.That(root.ExplicitSaveDeleteQuiescedForTests, Is.True);
+            var overlay = rootObject.AddComponent<BootstrapOverlay>();
+            overlay.Bind(root);
+            Assert.That(overlay.NormalGameplayActionsAvailable, Is.False);
+            Assert.That(overlay.NarrowHallRepairOnlyVisible, Is.False);
+            Assert.That(overlay.BuildCurrentPlayerFacingSmokeText(), Does.Contain("Save deleted."));
+            Assert.That(overlay.BuildCurrentPlayerFacingSmokeText(), Does.Not.Contain("gd66."));
+            int errorsAfterDelete = errors.Count;
+            root.ApplyPauseState(true);
+            root.ApplyPauseState(false);
+            root.ApplyApplicationQuit();
+            Assert.That(errors, Has.Count.EqualTo(errorsAfterDelete));
+            Assert.That(fileSystem.Exists(service.SavePath), Is.False);
+            Assert.That(deletedRuntime.totalTicks, Is.EqualTo(ticksBeforeDelete));
+
+            Object.DestroyImmediate(rootObject);
+            rootObject = null;
+            SaveService restartedService = Service(fixture, fileSystem, filename, errors);
+            SaveData fresh = restartedService.LoadOrCreate("gd66-live", out string restartBanner);
+            Assert.That(fresh, Is.Not.Null, restartBanner);
+            Assert.That(fresh.validatedCanonicalSpatialState, Is.Not.Null);
+            GameRoot restartedRoot = Root(restartedService);
+            Assert.That(restartedRoot.CompleteSuccessfulBootForTests(fresh, true), Is.True);
+            Assert.That(restartedRoot.Save, Is.Not.Null);
+            Assert.That(restartedRoot.TimeService.AttachedSaveForTests,
+                Is.SameAs(restartedRoot.Save));
+            Assert.That(restartedRoot.GameplayServicesInitializedForTests, Is.True);
+            Assert.That(restartedRoot.StateLine, Does.Contain("Home"));
+            var restartedOverlay = rootObject.AddComponent<BootstrapOverlay>();
+            restartedOverlay.Bind(restartedRoot);
+            Assert.That(restartedOverlay.NormalGameplayActionsAvailable, Is.True);
+        }
+
+        [Test]
+        public void FailedExplicitDevDeleteStillQuiescesAndBlocksLifecycleWrites()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var errors = new List<string>();
+            SaveService service = Service(fixture, fileSystem, "root-delete-failed.json", errors);
+            SaveData canonical = service.LoadOrCreate("gd66-live", out string loadBanner);
+            Assert.That(canonical, Is.Not.Null, loadBanner);
+            GameRoot root = Root(service);
+            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            fileSystem.EnableFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Delete, 1);
+
+            bool deleted = root.TryDeleteSaveFromDevPanel(out string deleteBanner);
+
+            Assert.That(deleted, Is.False);
+            Assert.That(deleteBanner, Is.EqualTo("Failed to delete save."));
+            Assert.That(root.BannerMessage, Does.Contain("Failed to delete save."));
+            Assert.That(root.Save, Is.Null);
+            Assert.That(root.TimeService, Is.Null);
+            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
+            Assert.That(root.ExplicitSaveDeleteQuiescedForTests, Is.True);
+            int errorsAfterDelete = errors.Count;
+            Assert.That(errorsAfterDelete, Is.GreaterThan(0));
+            root.ApplyPauseState(true);
+            root.ApplyPauseState(false);
+            root.ApplyApplicationQuit();
+            Assert.That(errors, Has.Count.EqualTo(errorsAfterDelete));
+        }
+
+        [Test]
         public void NarrowHallBlockedRootRepairsThroughRealBootCompletionOnce()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +

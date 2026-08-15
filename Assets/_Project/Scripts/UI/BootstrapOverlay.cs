@@ -950,14 +950,16 @@ namespace DungeonBuilder.M0
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.save_now", "ui.dev.button.save_now")))
             {
-                _root.SaveService.Save(_root.Save, SaveReason.ManualDev);
-                _root.SetBanner(_root.Content.GetString("ui.banner.saved_dev", "ui.banner.saved_dev"));
+                if (_root.Save != null)
+                {
+                    _root.SaveService.Save(_root.Save, SaveReason.ManualDev);
+                    _root.SetBanner(_root.Content.GetString("ui.banner.saved_dev", "ui.banner.saved_dev"));
+                }
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.delete_save", "ui.dev.button.delete_save")))
             {
-                _root.SaveService.DeleteSave(out string banner);
-                _root.SetBanner(banner);
+                _root.TryDeleteSaveFromDevPanel(out _);
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_banner", "ui.dev.button.clear_banner")))

@@ -102,6 +102,7 @@ namespace DungeonBuilder.M0
         private readonly PlacementService _placementService = new PlacementService();
         private StructureSimulationPass _structureSimulationPass;
         private RunSimulationService _runSimulationService;
+        private bool _explicitSaveDeleteQuiesced;
         private OfflineSummaryResolver _offlineSummaryResolver;
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
@@ -213,7 +214,7 @@ namespace DungeonBuilder.M0
 
         public void ApplyApplicationQuit()
         {
-            if (SaveService == null || Save == null)
+            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null)
             {
                 return;
             }
@@ -222,8 +223,35 @@ namespace DungeonBuilder.M0
             SaveLine = "Save: AppQuit";
         }
 
+        public bool TryDeleteSaveFromDevPanel(out string banner)
+        {
+            banner = string.Empty;
+            if (SaveService == null) return false;
+            bool quiesce = CanonicalMvpRouteProjection.IsCanonical(Save);
+            bool deleted = SaveService.DeleteSave(out banner);
+            if (quiesce) QuiesceAfterExplicitSaveDelete();
+            SetBanner(banner);
+            return deleted;
+        }
+
+        private void QuiesceAfterExplicitSaveDelete()
+        {
+            _explicitSaveDeleteQuiesced = true;
+            if (TimeService != null)
+            {
+                TimeService.OnTick -= HandleSimulationTick;
+                TimeService.OnTick -= HandleTickTelemetry;
+                TimeService.AttachSave(null);
+            }
+            TimeService = null;
+            _structureSimulationPass = null;
+            _runSimulationService = null;
+            Save = null;
+        }
+
         public void ApplyPauseState(bool pause)
         {
+            if (_explicitSaveDeleteQuiesced) return;
             if (pause)
             {
                 PauseLine = "Pause: Paused";
@@ -387,7 +415,8 @@ namespace DungeonBuilder.M0
 
         private bool CompleteSuccessfulBoot(SaveData validatedSave, string saveBanner)
         {
-            if (validatedSave == null || !CanonicalMvpRouteProjection.IsCanonical(validatedSave))
+            if (_explicitSaveDeleteQuiesced || validatedSave == null ||
+                !CanonicalMvpRouteProjection.IsCanonical(validatedSave))
                 return false;
             Save = validatedSave;
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
@@ -451,6 +480,7 @@ namespace DungeonBuilder.M0
 
         internal bool GameplayServicesInitializedForTests => TimeService != null &&
             _structureSimulationPass != null && _runSimulationService != null;
+        internal bool ExplicitSaveDeleteQuiescedForTests => _explicitSaveDeleteQuiesced;
 #endif
 
         private void InitializeStructureSimulationPass()
@@ -471,7 +501,7 @@ namespace DungeonBuilder.M0
 
         private void PublishCanonicalRuntime(SaveData published)
         {
-            if (published == null) return;
+            if (published == null || _explicitSaveDeleteQuiesced) return;
             Save = published;
             TimeService?.AttachSave(Save);
             RefreshDashboardState();
