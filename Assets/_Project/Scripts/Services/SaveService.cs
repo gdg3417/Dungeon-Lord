@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0
         private DetachedCurrentTargetValidationContext _validationContext;
         private DetachedCanonicalSaveSession _canonicalSession;
         private ISpatialMigrationFileSystem _canonicalFileSystem;
+        private SpatialMigrationActivationPreflight _canonicalPreflight;
         private bool _canonicalConfigured;
         private bool _narrowHallRepairAvailable;
         private string _narrowHallTrustedOriginalSha256;
@@ -92,10 +93,11 @@ namespace DungeonBuilder.M0
             if (!_canonicalConfigured) return LoadOrCreateLegacy(contentVersion, out banner);
             if (_validationContext == null || _limits == null)
             { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey("gd66.profile.invalid"); return null; }
-            SpatialMigrationActivationPreflight preflight = _preflightEvaluator(SavePath);
-            if (!preflight.IsSupported || preflight.FileSystem == null)
-            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(preflight.Reason); return null; }
-            _canonicalFileSystem = preflight.FileSystem;
+            SpatialMigrationActivationPreflight preflight = _canonicalPreflight ??
+                _preflightEvaluator(SavePath);
+            if (!AdoptQualifiedPreflight(preflight))
+            { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(preflight?.Reason ??
+                DetachedSpatialMigrationTransaction.PathInvalidReason); return null; }
             bool activeExists = _canonicalFileSystem.Exists(SavePath);
             bool evidenceExists;
             try { evidenceExists = HasOwnedRecoveryEvidence(); }
@@ -316,9 +318,9 @@ namespace DungeonBuilder.M0
                     if (_canonicalFileSystem == null)
                     {
                         SpatialMigrationActivationPreflight preflight = _preflightEvaluator(SavePath);
-                        if (!preflight.IsSupported || preflight.FileSystem == null)
-                            throw new IOException("GD66 delete preflight failed: " + preflight.Reason);
-                        _canonicalFileSystem = preflight.FileSystem;
+                        if (!AdoptQualifiedPreflight(preflight))
+                            throw new IOException("GD66 delete preflight failed: " +
+                                (preflight?.Reason ?? DetachedSpatialMigrationTransaction.PathInvalidReason));
                     }
                     string directory = Path.GetDirectoryName(SavePath);
                     int maximum = _limits.Canonical.Serialized.MaximumCollectionRecords;
@@ -381,6 +383,16 @@ namespace DungeonBuilder.M0
             };
 
             return data;
+        }
+
+        private bool AdoptQualifiedPreflight(SpatialMigrationActivationPreflight preflight)
+        {
+            if (preflight == null || !preflight.IsSupported || preflight.FileSystem == null ||
+                string.IsNullOrEmpty(preflight.QualifiedActiveSavePath)) return false;
+            SavePath = preflight.QualifiedActiveSavePath;
+            _canonicalFileSystem = preflight.FileSystem;
+            _canonicalPreflight = preflight;
+            return true;
         }
 
         private static RawLegacyBlankFloorContract CreateBlankFloorContract()

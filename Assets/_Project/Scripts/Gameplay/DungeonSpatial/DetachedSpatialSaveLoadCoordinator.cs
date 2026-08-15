@@ -75,9 +75,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedSpatialSaveLoadResult Load(string activePath)
         {
             string dependencyReason = ValidateDependencies();
-            return dependencyReason == null
-                ? LoadAfterDependencies(activePath, SpatialMigrationFileSystemSelector.Evaluate(activePath))
-                : Failure(dependencyReason);
+            if (dependencyReason != null) return Failure(dependencyReason);
+            SpatialMigrationActivationPreflight preflight =
+                SpatialMigrationFileSystemSelector.Evaluate(activePath);
+            return LoadAfterDependencies(preflight?.QualifiedActiveSavePath ?? activePath, preflight);
         }
 
         public DetachedSpatialSaveLoadResult Load(string activePath,
@@ -93,7 +94,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string dependencyReason = ValidateDependencies();
             if (dependencyReason != null) return Failure(dependencyReason);
             if (preflightEvaluator == null) return Failure(SpatialMigrationCapabilityReason.NativeProbeFailed);
-            return LoadAfterDependencies(activePath, preflightEvaluator(activePath));
+            SpatialMigrationActivationPreflight preflight = preflightEvaluator(activePath);
+            return LoadAfterDependencies(preflight?.QualifiedActiveSavePath ?? activePath, preflight);
         }
 
         private DetachedSpatialSaveLoadResult LoadAfterDependencies(string activePath,
@@ -101,6 +103,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (preflight == null || !preflight.IsSupported || preflight.FileSystem == null)
                 return Failure(preflight?.Reason ?? SpatialMigrationCapabilityReason.NativeProbeFailed);
+            if (string.IsNullOrEmpty(preflight.QualifiedActiveSavePath) ||
+                !string.Equals(activePath, preflight.QualifiedActiveSavePath, StringComparison.Ordinal))
+                return Failure(DetachedSpatialMigrationTransaction.PathInvalidReason);
+            activePath = preflight.QualifiedActiveSavePath;
 
             DetachedSpatialMigrationRecoveryContext recoveryContext;
             DetachedCurrentTargetValidationContext currentContext;

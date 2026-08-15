@@ -16,7 +16,7 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [SetUp]
         public void SetUp()
         {
-            root = Path.Combine(Application.temporaryCachePath,
+            root = Path.Combine(Application.persistentDataPath,
                 "gd66-windows-standalone-qualification");
             RemoveRoot();
             Directory.CreateDirectory(root);
@@ -42,10 +42,12 @@ namespace DungeonBuilder.M0.Tests.PlayMode
             bool supported = (bool)GetProperty(preflight, "IsSupported");
             string reason = (string)GetProperty(preflight, "Reason");
             object selectedFileSystem = GetProperty(preflight, "FileSystem");
+            string qualifiedActivePath = (string)GetProperty(preflight, "QualifiedActiveSavePath");
             Assert.That(platform, Is.EqualTo("WindowsStandalone"));
             Assert.That(supported, Is.True, reason);
             Assert.That(reason, Is.EqualTo("gd66.preflight.ready"));
             Assert.That(selectedFileSystem, Is.Not.Null);
+            Assert.That(qualifiedActivePath, Is.EqualTo(activePath));
             Assert.That(selectedFileSystem.GetType().FullName, Is.EqualTo(
                 "DungeonBuilder.M0.Gameplay.DungeonSpatial.WindowsSpatialMigrationFileSystem"));
 

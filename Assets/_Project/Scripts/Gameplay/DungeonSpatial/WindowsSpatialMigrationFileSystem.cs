@@ -23,12 +23,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class SpatialMigrationActivationPreflight
     {
         internal SpatialMigrationActivationPreflight(bool supported, string reason,
-            SpatialMigrationPlatform platform, ISpatialMigrationFileSystem fileSystem)
-        { IsSupported = supported; Reason = reason; Platform = platform; FileSystem = fileSystem; }
+            SpatialMigrationPlatform platform, ISpatialMigrationFileSystem fileSystem,
+            string qualifiedActiveSavePath = null)
+        { IsSupported = supported; Reason = reason; Platform = platform; FileSystem = fileSystem;
+          QualifiedActiveSavePath = supported ? qualifiedActiveSavePath : null; }
         public bool IsSupported { get; }
         public string Reason { get; }
         public SpatialMigrationPlatform Platform { get; }
         public ISpatialMigrationFileSystem FileSystem { get; }
+        public string QualifiedActiveSavePath { get; }
     }
 
     public static class SpatialMigrationFileSystemSelector
@@ -75,7 +78,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string reason = probe.ProbeSupportedVolume(directory);
                 return reason == null
                     ? new SpatialMigrationActivationPreflight(true, SpatialMigrationCapabilityReason.Ready,
-                        platform, fileSystem)
+                        platform, fileSystem, path)
                     : Unsupported(reason, platform);
             }
             catch (ArgumentException) { return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform); }

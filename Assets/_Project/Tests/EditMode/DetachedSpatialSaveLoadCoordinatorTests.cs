@@ -226,6 +226,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void SaveServiceAdoptsQualifiedPreflightPathBeforeLegacyRecoveryAndMigration()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string canonicalDirectory = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
+                "gd66-qualified-adoption"));
+            char alternate = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
+            string suppliedDirectory = canonicalDirectory.Replace(Path.DirectorySeparatorChar, alternate);
+            var service = new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = "save.json", useAtomicWrites = true }, suppliedDirectory);
+            service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
+                    Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                    fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+            string qualified = Path.Combine(canonicalDirectory, "save.json");
+            fileSystem.Seed(qualified, fixture.Original);
+            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
+                fileSystem, qualified));
+
+            SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
+
+            Assert.That(loaded, Is.Not.Null, banner);
+            Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
+            Assert.That(service.SavePath, Is.EqualTo(qualified));
+            Assert.That(service.CanonicalSession.GetCurrentBytes(),
+                Is.EqualTo(fileSystem.ReadAllBytes(qualified)));
+        }
+
+        [Test]
         public void SaveServiceRecoveryRelevantEvidenceBlocksNativeButLookalikeDoesNot()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
@@ -261,7 +292,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.SetPreflightEvaluatorForTests(path =>
             {
                 preflightEvaluations++;
-                return Supported(fileSystem);
+                return Supported(fileSystem, path);
             });
             Assert.That(service.LoadOrCreate("gd66-live", out string createBanner), Is.Not.Null,
                 createBanner);
@@ -320,7 +351,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.SetPreflightEvaluatorForTests(path =>
             {
                 evaluated = true;
-                return Supported(fileSystem);
+                return Supported(fileSystem, path);
             });
             fileSystem.Seed(service.SavePath, fixture.Original);
             string directory = Path.GetDirectoryName(service.SavePath);
@@ -506,7 +537,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, fixture.Original);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.Migrated));
@@ -527,7 +558,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, fixture.Original);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.Migrated));
@@ -543,7 +574,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, fixture.Result.Attempt.Candidate.GetBytes());
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.AlreadyCommitted));
@@ -564,7 +595,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 includeStaging: true, activeCandidate: false);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Recovery.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
@@ -586,7 +617,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, original);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             string sessionJson = Encoding.UTF8.GetString(result.Session.GetCurrentBytes());
@@ -612,6 +643,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Load_QualifiedPreflightCannotAuthorizeDifferentOrNoncanonicalActivePath()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string qualified = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-bound.json"));
+            SpatialMigrationActivationPreflight preflight = Supported(fileSystem, qualified);
+            string directory = Path.GetDirectoryName(qualified);
+            string[] mismatched =
+            {
+                Path.Combine(directory, "gd66-sibling.json"),
+                Path.Combine(directory, "other", "gd66-bound.json"),
+                directory + Path.DirectorySeparatorChar + "." + Path.DirectorySeparatorChar +
+                    "gd66-bound.json",
+                directory + Path.DirectorySeparatorChar + "child" + Path.DirectorySeparatorChar + ".." +
+                    Path.DirectorySeparatorChar + "gd66-bound.json"
+            };
+
+            foreach (string activePath in mismatched)
+            {
+                DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath, preflight);
+                Assert.That(result.IsSuccess, Is.False, activePath);
+                Assert.That(result.Reason,
+                    Is.EqualTo(DetachedSpatialMigrationTransaction.PathInvalidReason), activePath);
+            }
+
+            var redirected = new SpatialMigrationActivationPreflight(false,
+                SpatialMigrationCapabilityReason.PathRedirected,
+                SpatialMigrationPlatform.WindowsEditor, null);
+            DetachedSpatialSaveLoadResult redirectedResult =
+                Coordinator(fixture).Load(qualified, redirected);
+            Assert.That(redirectedResult.IsSuccess, Is.False);
+            Assert.That(redirectedResult.Reason,
+                Is.EqualTo(SpatialMigrationCapabilityReason.PathRedirected));
+        }
+
+        [Test]
         public void Load_MalformedRawPayload_FailsWithoutRuntimeProjection()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
@@ -621,7 +689,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, System.Text.Encoding.UTF8.GetBytes("{not-json"));
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.RuntimeProjection, Is.Null);
@@ -642,7 +710,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, original);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
@@ -672,7 +740,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.Seed(activePath, original);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
@@ -696,7 +764,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             bool evaluated = false;
 
             DetachedSpatialSaveLoadResult result = coordinator.Load("invalid-path", path =>
-            { evaluated = true; return Supported(new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem()); });
+            { evaluated = true; return Supported(new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem(), path); });
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo("gd66.profile.invalid"));
@@ -717,7 +785,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedSpatialSaveLoadCoordinator coordinator = Coordinator(fixture,
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator, compatibility);
 
-            DetachedSpatialSaveLoadResult result = coordinator.Load(activePath, Supported(fileSystem));
+            DetachedSpatialSaveLoadResult result = coordinator.Load(activePath, Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo("gd66.profile.missing"));
@@ -736,7 +804,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem));
+                Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
@@ -826,7 +894,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-" + identity + ".json"));
             fileSystem.Seed(activePath, original);
-            return Coordinator(fixture).Load(activePath, Supported(fileSystem));
+            return Coordinator(fixture).Load(activePath, Supported(fileSystem, activePath));
         }
 
         private static SaveService ConfiguredService(
@@ -841,7 +909,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
-            service.SetPreflightEvaluatorForTests(path => Supported(fileSystem));
+            service.SetPreflightEvaluatorForTests(path => Supported(fileSystem, path));
             return service;
         }
 
@@ -869,8 +937,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static SpatialMigrationActivationPreflight Supported(
-            ISpatialMigrationFileSystem fileSystem) => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fileSystem);
+            ISpatialMigrationFileSystem fileSystem, string activePath) =>
+            new SpatialMigrationActivationPreflight(true, SpatialMigrationCapabilityReason.Ready,
+                SpatialMigrationPlatform.WindowsEditor, fileSystem, Path.GetFullPath(activePath));
     }
 }
 #endif

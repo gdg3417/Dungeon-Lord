@@ -165,7 +165,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fileSystem));
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
+                fileSystem, Path.GetFullPath(path)));
             return service;
         }
 
