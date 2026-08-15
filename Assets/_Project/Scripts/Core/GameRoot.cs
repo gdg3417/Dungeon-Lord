@@ -802,6 +802,9 @@ namespace DungeonBuilder.M0
                     bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
                     return false;
                 }
+                // Canonical state remains the sole spatial authority. This detached entry exists
+                // only so the existing localized action feedback can describe the mutation.
+                newEntry = new MvpDungeonPlacementEntry(categoryId, optionId, 0);
                 bannerKey = "ui.banner.place_success";
                 return true;
             }
