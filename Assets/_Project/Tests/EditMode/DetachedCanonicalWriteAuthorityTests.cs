@@ -52,6 +52,101 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void SameCategoryContentsAppendDeterministicallyAndDuplicateIsByteExactNoOp()
+        {
+            Fixture fixture = Create();
+            DetachedCanonicalMutationResult room = fixture.Prepare(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            string roomId = room.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            DetachedCanonicalMutationResult skeleton = DetachedCanonicalSpatialMutation.Prepare(room.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            RoomContentAssignment firstBefore = skeleton.State.Floors[0].RoomContents.Assignments.Single();
+            string firstId = firstBefore.AssignmentId;
+            long firstSequence = firstBefore.Sequence;
+            DetachedCanonicalMutationResult goblin = DetachedCanonicalSpatialMutation.Prepare(skeleton.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.GoblinOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+
+            Assert.That(skeleton.IsSuccess, Is.True, skeleton.Reason);
+            Assert.That(goblin.IsSuccess, Is.True, goblin.Reason);
+            RoomContentAssignment[] monsters = goblin.State.Floors[0].RoomContents.Assignments
+                .Where(value => value.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).ToArray();
+            Assert.That(monsters, Has.Length.EqualTo(2));
+            CollectionAssert.AreEqual(new[]
+            {
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId
+            }, monsters.Select(value => value.OptionId).ToArray());
+            CollectionAssert.AreEqual(new long[] { 0, 1 }, monsters.Select(value => value.Sequence).ToArray());
+            Assert.That(monsters.Select(value => value.AssignmentId).Distinct().Count(), Is.EqualTo(2));
+            Assert.That(monsters[0].AssignmentId, Does.EndWith(".content.monster.0000"));
+            Assert.That(monsters[1].AssignmentId, Does.EndWith(".content.monster.0001"));
+            Assert.That(monsters[0].AssignmentId, Is.EqualTo(firstId));
+            Assert.That(monsters[0].Sequence, Is.EqualTo(firstSequence));
+            Assert.That(goblin.State.Floors[0].RoomContents.NextSequence, Is.EqualTo(2));
+            Assert.That(CanonicalRoomCapacityResolver.TryResolve(fixture.Production,
+                goblin.State.Floors[0].Layout.Rooms[0].RoomDefinitionId,
+                out MvpRoomSlotCapacity capacity, out string capacityReason), Is.True, capacityReason);
+            Assert.That(monsters.Length, Is.EqualTo(capacity.MonsterCapacity));
+            byte[] beforeDuplicate = CanonicalSpatialSaveSerializer.Serialize(
+                goblin.State, fixture.Profile.Canonical).Value;
+
+            DetachedCanonicalMutationResult duplicate = DetachedCanonicalSpatialMutation.Prepare(goblin.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+
+            Assert.That(duplicate.IsNoOp, Is.True);
+            Assert.That(duplicate.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(goblin.State,
+                fixture.Profile.Canonical).Value, Is.EqualTo(beforeDuplicate));
+        }
+
+        [Test]
+        public void ThirdUniqueTrapIsRejectedAtProductionCapacityWithoutChangingBytes()
+        {
+            Fixture fixture = Create();
+            DetachedCanonicalMutationResult room = fixture.Prepare(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            string roomId = room.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            DetachedCanonicalMutationResult first = DetachedCanonicalSpatialMutation.Prepare(room.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
+                    MvpDungeonPlacementIds.SpikeTrapOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            DetachedCanonicalMutationResult second = DetachedCanonicalSpatialMutation.Prepare(first.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
+                    MvpDungeonPlacementIds.SnareTrapOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            byte[] beforeThird = CanonicalSpatialSaveSerializer.Serialize(
+                second.State, fixture.Profile.Canonical).Value;
+
+            DetachedCanonicalMutationResult third = DetachedCanonicalSpatialMutation.Prepare(second.State,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
+                    MvpDungeonPlacementIds.ChillingSigilOptionId, roomId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+
+            Assert.That(first.IsSuccess, Is.True, first.Reason);
+            Assert.That(second.IsSuccess, Is.True, second.Reason);
+            Assert.That(third.IsSuccess, Is.False);
+            Assert.That(third.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
+            RoomContentAssignment[] traps = second.State.Floors[0].RoomContents.Assignments
+                .Where(value => value.CategoryId == MvpDungeonPlacementIds.TrapCategoryId).ToArray();
+            Assert.That(traps, Has.Length.EqualTo(2));
+            CollectionAssert.AreEqual(new[]
+            {
+                MvpDungeonPlacementIds.SpikeTrapOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId
+            }, traps.Select(value => value.OptionId).ToArray());
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(second.State,
+                fixture.Profile.Canonical).Value, Is.EqualTo(beforeThird));
+        }
+
+        [Test]
         public void FirstWritesRejectBogusRoomTargetWithoutMutation()
         {
             Fixture fixture = Create();

@@ -181,32 +181,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return ValidationFailedReason;
             RoomContentAssignment[] assignments = floor.RoomContents.Assignments ??
                 Array.Empty<RoomContentAssignment>();
-            RoomContentAssignment existing = assignments.FirstOrDefault(value => value != null &&
-                value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == categoryId);
-            if (existing != null && existing.OptionId == optionId) return NoOpReason;
+            RoomContentAssignment[] matching = assignments.Where(value => value != null &&
+                value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == categoryId).ToArray();
+            if (matching.Any(value => value.OptionId == optionId)) return NoOpReason;
             if (!CanonicalRoomCapacityResolver.TryResolve(production, room.RoomDefinitionId,
                 out MvpRoomSlotCapacity capacity, out string capacityReason)) return capacityReason;
             int maximum = categoryId == MvpDungeonPlacementIds.MonsterCategoryId ? capacity.MonsterCapacity :
                 categoryId == MvpDungeonPlacementIds.TrapCategoryId ? capacity.TrapCapacity : capacity.LootCapacity;
-            int count = assignments.Count(value => value != null && value.RoomInstanceId == room.RoomInstanceId &&
-                value.CategoryId == categoryId);
-            if (existing == null && count >= maximum) return DetachedSpatialMigrationPreparer.CapacityReason;
-            if (existing != null) existing.OptionId = optionId;
-            else
+            if (matching.Length >= maximum) return DetachedSpatialMigrationPreparer.CapacityReason;
+            long sequence = floor.RoomContents.NextSequence;
+            string shortCategory = categoryId == MvpDungeonPlacementIds.MonsterCategoryId ? "monster" :
+                categoryId == MvpDungeonPlacementIds.TrapCategoryId ? "trap" : "loot";
+            var added = new RoomContentAssignment
             {
-                long sequence = floor.RoomContents.NextSequence;
-                string shortCategory = categoryId == MvpDungeonPlacementIds.MonsterCategoryId ? "monster" :
-                    categoryId == MvpDungeonPlacementIds.TrapCategoryId ? "trap" : "loot";
-                var added = new RoomContentAssignment
-                {
-                    AssignmentId = room.RoomInstanceId + ".content." + shortCategory + "." +
-                        sequence.ToString("D4", CultureInfo.InvariantCulture),
-                    RoomInstanceId = room.RoomInstanceId, CategoryId = categoryId,
-                    OptionId = optionId, Sequence = sequence
-                };
-                floor.RoomContents.Assignments = assignments.Concat(new[] { added }).ToArray();
-                floor.RoomContents.NextSequence = sequence + 1;
-            }
+                AssignmentId = room.RoomInstanceId + ".content." + shortCategory + "." +
+                    sequence.ToString("D4", CultureInfo.InvariantCulture),
+                RoomInstanceId = room.RoomInstanceId, CategoryId = categoryId,
+                OptionId = optionId, Sequence = sequence
+            };
+            floor.RoomContents.Assignments = assignments.Concat(new[] { added }).ToArray();
+            floor.RoomContents.NextSequence = sequence + 1;
             return null;
         }
 

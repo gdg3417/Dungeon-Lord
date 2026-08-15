@@ -799,7 +799,10 @@ namespace DungeonBuilder.M0
                     DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId));
                 if (!written.IsSuccess)
                 {
-                    bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
+                    string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
+                    bannerKey = written.IsNoOp || string.IsNullOrEmpty(playerKey)
+                        ? "ui.banner.place_failed"
+                        : playerKey;
                     return false;
                 }
                 // Canonical state remains the sole spatial authority. This detached entry exists

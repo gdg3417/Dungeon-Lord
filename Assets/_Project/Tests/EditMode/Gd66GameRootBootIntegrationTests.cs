@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -274,7 +275,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            SaveService service = Service(fixture, fileSystem, "root-additive-feedback.json");
+            const string filename = "root-additive-feedback.json";
+            SaveService service = Service(fixture, fileSystem, filename);
             SaveData canonical = service.LoadOrCreate("gd66-live", out string loadBanner);
             Assert.That(canonical, Is.Not.Null, loadBanner);
             GameRoot root = Root(service);
@@ -296,12 +298,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(overlay.MvpStructurePlacementFeedback, Does.Contain("Empty slot"));
             Assert.That(overlay.MvpStructurePlacementFeedback, Does.Not.Contain("Skeleton"));
 
+            SaveService reopenedService = Service(fixture, fileSystem, filename);
+            SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string reopenBanner);
+            Assert.That(reopened, Is.Not.Null, reopenBanner);
+            CanonicalMvpRouteProjectionResult reopenedRoute =
+                CanonicalMvpRouteProjection.InspectWithProductionContent(reopened, fixture.Production);
+            CollectionAssert.AreEqual(new[]
+            {
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId
+            }, reopenedRoute.Rooms[0].AssignedMonsterOptionIds);
+            RoomContentAssignment[] reopenedMonsters = reopened.validatedCanonicalSpatialState.Floors[0]
+                .RoomContents.Assignments.Where(value =>
+                    value.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).ToArray();
+            CollectionAssert.AreEqual(new long[] { 0, 1 },
+                reopenedMonsters.Select(value => value.Sequence).ToArray());
+            Assert.That(reopenedMonsters.Select(value => value.AssignmentId).Distinct().Count(), Is.EqualTo(2));
+            Assert.That(CaptureLegacySpatialEvidence(reopened), Is.EqualTo(frozenLegacyEvidence));
+
             Assert.That(overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
             Assert.That(overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.SkeletonOptionId), Is.True);
             overlay.PlaceSelectedMvpStructure();
 
             Assert.That(overlay.MvpStructurePlacementFeedback, Is.Empty);
-            Assert.That(root.BannerMessage, Is.Not.Empty);
+            Assert.That(root.BannerMessage,
+                Is.EqualTo(root.Content.GetString("ui.banner.place_failed", "ui.banner.place_failed")));
             Assert.That(root.BannerMessage, Does.Not.Contain("gd66."));
             Assert.That(root.BannerMessage, Does.Not.Contain("Unknown category"));
             Assert.That(CaptureLegacySpatialEvidence(root.Save), Is.EqualTo(frozenLegacyEvidence));
@@ -312,6 +333,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MvpDungeonPlacementIds.SkeletonOptionId,
                 MvpDungeonPlacementIds.GoblinOptionId
             }, route.Rooms[0].AssignedMonsterOptionIds);
+
+            PlaceAndAssertFeedback(overlay, root,
+                MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId,
+                "Trap", "Spike Trap", frozenLegacyEvidence);
+            PlaceAndAssertFeedback(overlay, root,
+                MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId,
+                "Trap", "Snare Trap", frozenLegacyEvidence);
+            byte[] beforeCapacityFailure = service.CanonicalSession.GetCurrentBytes();
+            Assert.That(overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.TrapCategoryId), Is.True);
+            Assert.That(overlay.SelectMvpPlacementOption(MvpDungeonPlacementIds.ChillingSigilOptionId), Is.True);
+            overlay.PlaceSelectedMvpStructure();
+            Assert.That(overlay.MvpStructurePlacementFeedback, Is.Empty);
+            Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(
+                Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                    DetachedSpatialMigrationPreparer.CapacityReason),
+                DetachedSpatialMigrationPreparer.CapacityReason)));
+            Assert.That(root.BannerMessage, Does.Not.Contain("gd66."));
+            Assert.That(service.CanonicalSession.GetCurrentBytes(), Is.EqualTo(beforeCapacityFailure));
+            route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                root.Save, root.ProductionSpatialContent);
+            CollectionAssert.AreEqual(new[]
+            {
+                MvpDungeonPlacementIds.SpikeTrapOptionId,
+                MvpDungeonPlacementIds.SnareTrapOptionId
+            }, route.Rooms[0].AssignedTrapOptionIds);
+            Assert.That(CaptureLegacySpatialEvidence(root.Save), Is.EqualTo(frozenLegacyEvidence));
         }
 
         private static void PlaceAndAssertFeedback(BootstrapOverlay overlay, GameRoot root,
@@ -345,16 +392,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static void LoadPlayerFacingContent(GameRoot root)
         {
-            root.Content.LoadAll(null, null, null, null, null,
-                Asset("Assets/_Project/Data/Bootstrap/string_table_en.json"), null,
-                root.Logger, out _);
+            const string bootstrapRoot = "Assets/_Project/Data/Bootstrap/";
+            TextAsset contentBootstrap = RequiredAsset(bootstrapRoot + "content_bootstrap.json");
+            TextAsset buildConfig = RequiredAsset(bootstrapRoot + "build_config.json");
+            TextAsset schemaVersions = RequiredAsset(bootstrapRoot + "schema_versions.json");
+            TextAsset contentManifest = RequiredAsset(bootstrapRoot + "content_manifest.json");
+            TextAsset devCommands = RequiredAsset(bootstrapRoot + "dev_commands.json");
+            TextAsset strings = RequiredAsset(bootstrapRoot + "string_table_en.json");
+            TextAsset heatRuntime = RequiredAsset(bootstrapRoot + "heat_runtime.json");
+            root.Content.LoadAll(contentBootstrap, buildConfig, schemaVersions, contentManifest,
+                devCommands, strings, heatRuntime, root.Logger, out string warningBanner);
+            Assert.That(warningBanner, Is.Empty);
             const string spatialRoot = "Assets/_Project/Data/Production/DungeonSpatial/";
             ProductionSpatialContentLoadResult loaded = root.Content.LoadProductionSpatialContent(
-                Asset(spatialRoot + "content_manifest.json"),
-                Asset(spatialRoot + "dungeon_spatial_content.json"),
-                new[] { Asset(spatialRoot + "string_table_en.json") },
-                Asset(spatialRoot + "validation_limits.json"));
+                RequiredAsset(spatialRoot + "content_manifest.json"),
+                RequiredAsset(spatialRoot + "dungeon_spatial_content.json"),
+                new[] { RequiredAsset(spatialRoot + "string_table_en.json") },
+                RequiredAsset(spatialRoot + "validation_limits.json"));
             Assert.That(loaded.Success, Is.True);
+        }
+
+        private static TextAsset RequiredAsset(string path)
+        {
+            TextAsset asset = Asset(path);
+            Assert.That(asset, Is.Not.Null, "Required test fixture asset is missing: " + path);
+            return asset;
         }
 
         private GameRoot Root(SaveService service)
