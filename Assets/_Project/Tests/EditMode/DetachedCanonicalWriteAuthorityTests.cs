@@ -147,6 +147,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void WriteAuthorityPersistsTwoMonstersAndRejectsDuplicateWithoutTouchingDisk()
+        {
+            Fixture fixture = Create();
+            DetachedCanonicalWriteResult room = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            fixture.Accept(room);
+            string roomId = fixture.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            DetachedCanonicalWriteResult skeleton = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId));
+            fixture.Accept(skeleton);
+            RoomContentAssignment persistedFirst = fixture.State.Floors[0].RoomContents.Assignments.Single();
+            string firstId = persistedFirst.AssignmentId;
+            long firstSequence = persistedFirst.Sequence;
+
+            DetachedCanonicalWriteResult goblin = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.GoblinOptionId, roomId));
+            fixture.Accept(goblin);
+
+            MvpOrderedRouteRoom projected = Route(fixture.State, fixture).Single();
+            Assert.That(projected.Capacity.MonsterCapacity, Is.EqualTo(2));
+            CollectionAssert.AreEqual(new[]
+            {
+                MvpDungeonPlacementIds.SkeletonOptionId,
+                MvpDungeonPlacementIds.GoblinOptionId
+            }, projected.AssignedMonsterOptionIds);
+            RoomContentAssignment[] persisted = fixture.State.Floors[0].RoomContents.Assignments;
+            Assert.That(persisted, Has.Length.EqualTo(2));
+            Assert.That(persisted[0].AssignmentId, Is.EqualTo(firstId));
+            Assert.That(persisted[0].Sequence, Is.EqualTo(firstSequence));
+            CollectionAssert.AreEqual(new long[] { 0, 1 }, persisted.Select(value => value.Sequence).ToArray());
+            Assert.That(persisted.Select(value => value.AssignmentId).Distinct().Count(), Is.EqualTo(2));
+            byte[] committed = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+            DetachedCanonicalSaveSession committedSession = fixture.Session;
+
+            DetachedCanonicalWriteResult duplicate = fixture.Execute(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId));
+
+            Assert.That(duplicate.IsNoOp, Is.True);
+            Assert.That(duplicate.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(duplicate.Session, Is.Null);
+            Assert.That(fixture.Session, Is.SameAs(committedSession));
+            Assert.That(fixture.FileSystem.ReadAllBytes(fixture.ActivePath), Is.EqualTo(committed));
+        }
+
+        [Test]
         public void FirstWritesRejectBogusRoomTargetWithoutMutation()
         {
             Fixture fixture = Create();
