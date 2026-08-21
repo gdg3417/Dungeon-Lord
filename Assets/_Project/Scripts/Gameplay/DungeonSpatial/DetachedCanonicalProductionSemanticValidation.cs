@@ -45,7 +45,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var rooms = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>()).Where(value => value != null).ToArray();
                 var corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>()).Where(value => value != null).ToArray();
                 if (!FloorLayoutValidator.Validate(floor.Layout, floorDefinition, rooms, corridors,
-                    new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles)).IsValid)
+                    new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles),
+                    floor.FixedStructures, catalog.FixedStructures).IsValid)
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 var roomByInstance = new Dictionary<string, RoomSpatialDefinition>(StringComparer.Ordinal);
                 foreach (RoomSpatialInstance room in floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>())

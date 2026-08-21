@@ -19,7 +19,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string CategoryId { get; private set; }
         public string OptionId { get; private set; }
         public string RoomInstanceId { get; private set; }
-        internal DetachedCanonicalSpatialSaveState StructuralCandidate { get; private set; }
+        internal StructuralConstructionRequest StructuralIntent { get; private set; }
+        internal string StructuralBaselineFingerprint { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
             string roomInstanceId = null) => new DetachedCanonicalMutationRequest
@@ -34,7 +35,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             new DetachedCanonicalMutationRequest
             {
                 Kind = DetachedCanonicalMutationKind.StructuralConstruction,
-                StructuralCandidate = preview != null && preview.IsValid ? preview.DetachedCandidate : null
+                StructuralIntent = preview != null && preview.IsValid ? preview.Intent : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
             };
     }
 
@@ -100,9 +102,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string reason;
             if (request.Kind == DetachedCanonicalMutationKind.StructuralConstruction)
             {
-                if (request.StructuralCandidate == null ||
-                    !CanonicalSpatialSaveContracts.TryCanonicalize(request.StructuralCandidate, limits.Spatial,
-                        out proposed)) return Failure(ValidationFailedReason);
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    request.StructuralIntent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(StructuralEditService.StalePreviewReason);
+                StructuralEditPreview refreshed = StructuralEditService.Preview(current,
+                    request.StructuralIntent, production, compatibility, configuration, limits);
+                if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate;
                 reason = null;
             }
             else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)

@@ -2790,6 +2790,30 @@
     {
       "key": "save.migration.spatial.gd66.repair.target_room_2",
       "text": "Repair Room 2"
+    },
+    {
+      "key": "structural.edit.invalid_context",
+      "text": "Structural preview is unavailable."
+    },
+    {
+      "key": "structural.edit.unsupported_geometry",
+      "text": "That structural construction is not supported."
+    },
+    {
+      "key": "structural.edit.invalid_identity",
+      "text": "A stable structural identity could not be allocated."
+    },
+    {
+      "key": "structural.edit.placement_mismatch",
+      "text": "That placement does not match an approved construction candidate."
+    },
+    {
+      "key": "structural.edit.layout_invalid",
+      "text": "The structural layout is invalid."
+    },
+    {
+      "key": "structural.edit.stale_preview",
+      "text": "The dungeon changed after this preview. Preview the construction again."
     }
   ]
 }

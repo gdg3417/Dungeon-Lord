@@ -50,7 +50,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public static FloorLayoutValidationResult Validate(FloorSpatialLayout suppliedLayout, FloorSpatialConfiguration floor,
             IEnumerable<RoomSpatialDefinition> suppliedRoomDefinitions, IEnumerable<CorridorSpatialDefinition> suppliedCorridorDefinitions,
-            SpatialValidationWorkloadLimits limits)
+            SpatialValidationWorkloadLimits limits, IEnumerable<SavedFixedSpatialStructure> suppliedFixedStructures = null,
+            IEnumerable<FixedSpatialStructureDefinition> suppliedFixedDefinitions = null)
         {
             var issues = new List<FloorLayoutValidationIssue>();
             FloorSpatialLayout layout = suppliedLayout ?? new FloorSpatialLayout();
@@ -96,6 +97,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             "room:" + (room.RoomInstanceId ?? string.Empty), issues);
                     }
                 }
+            }
+
+            var fixedDefinitions = Unambiguous((suppliedFixedDefinitions ??
+                Enumerable.Empty<FixedSpatialStructureDefinition>()).Where(value => value != null),
+                value => value.StructureDefinitionId);
+            foreach (SavedFixedSpatialStructure structure in (suppliedFixedStructures ??
+                Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value != null)
+                .OrderBy(value => value.FixedStructureInstanceId, StringComparer.Ordinal))
+            {
+                if (!fixedDefinitions.TryGetValue(structure.FixedStructureDefinitionId ?? string.Empty,
+                        out FixedSpatialStructureDefinition definition) ||
+                    !TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
+                        structure.Orientation, limits, out ResolvedTileFootprint footprint))
+                {
+                    Add(issues, FloorLayoutValidationReason.InvalidRoomFootprint,
+                        structure.FixedStructureInstanceId, structure.FixedStructureDefinitionId);
+                    continue;
+                }
+                AddOccupants(occupancy, footprint.OccupiedTiles,
+                    new OccupantIdentity(OccupantKind.FixedStructure, structure.FixedStructureInstanceId));
+                AddStructureTiles(usedTiles, footprint.OccupiedTiles, floor?.Bounds, boundsValid,
+                    "fixed:" + (structure.FixedStructureInstanceId ?? string.Empty), issues);
             }
 
             ValidateRoomNodeBijection(rooms, nodes, roomById, issues);
@@ -381,7 +404,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private enum OccupantKind { Room = 0, Corridor = 1 }
+        private enum OccupantKind { Room = 0, Corridor = 1, FixedStructure = 2 }
 
         private readonly struct OccupantIdentity : IEquatable<OccupantIdentity>
         {

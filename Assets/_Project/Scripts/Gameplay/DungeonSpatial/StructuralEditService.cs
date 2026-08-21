@@ -9,12 +9,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId;
         public TileCoordinate Anchor;
         public CardinalOrientation Orientation;
-        public string RoomInstanceId;
     }
 
     public sealed class StructuralEditPreview
     {
         internal DetachedCanonicalSpatialSaveState DetachedCandidate { get; set; }
+        internal StructuralConstructionRequest Intent { get; set; }
+        internal string BaselineFingerprint { get; set; }
         public string RoomDefinitionId { get; internal set; }
         public TileCoordinate Anchor { get; internal set; }
         public CardinalOrientation Orientation { get; internal set; }
@@ -24,7 +25,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public int ResultingRemainingFloorSpace { get; internal set; }
         public FloorRouteConnectionKind ConnectionKind { get; internal set; }
         public string[] ReasonCodes { get; internal set; } = Array.Empty<string>();
+        public StructuralChange[] Consequences { get; internal set; } = Array.Empty<StructuralChange>();
         public bool IsValid => DetachedCandidate != null && ReasonCodes.Length == 0;
+    }
+
+    public enum StructuralChangeKind { RoomAdded = 1, FixedStructureMoved = 2, EdgeAdded = 3, EdgeRemoved = 4 }
+    public sealed class StructuralChange
+    {
+        public StructuralChangeKind Kind { get; internal set; }
+        public string StableId { get; internal set; }
+        public TileCoordinate From { get; internal set; }
+        public TileCoordinate To { get; internal set; }
     }
 
     /// <summary>
@@ -38,6 +49,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string InvalidIdentityReason = "structural.edit.invalid_identity";
         public const string PlacementMismatchReason = "structural.edit.placement_mismatch";
         public const string LayoutInvalidReason = "structural.edit.layout_invalid";
+        public const string StalePreviewReason = "structural.edit.stale_preview";
 
         public static StructuralEditPreview Preview(DetachedCanonicalSpatialSaveState current,
             StructuralConstructionRequest request, ProductionSpatialContentSnapshot production,
@@ -53,7 +65,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (current?.Authority == null || request == null || production == null || compatibility == null ||
                 configuration == null || !limits.IsValid || current.Floors?.Length != 1)
                 return Fail(result, InvalidContextReason);
-            if (!IsStableId(request.RoomInstanceId)) return Fail(result, InvalidIdentityReason);
+            if (!TryFingerprint(current, limits, out string baseline)) return Fail(result, InvalidContextReason);
+            result.BaselineFingerprint = baseline;
+            result.Intent = new StructuralConstructionRequest { RoomDefinitionId = request.RoomDefinitionId,
+                Anchor = request.Anchor, Orientation = request.Orientation };
 
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selection = compatibility.SelectStarter(
                 DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
@@ -90,27 +105,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!Clone(current, limits, out DetachedCanonicalSpatialSaveState candidate))
                 return Fail(result, InvalidContextReason);
             SavedSpatialFloor floor = candidate.Floors[0];
-            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1 ||
-                floor.Layout.Rooms.Any(value => value?.RoomInstanceId == request.RoomInstanceId))
+            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1)
                 return Fail(result, InvalidIdentityReason);
 
             string floorId = floor.FloorInstanceId;
+            string roomInstanceId = floorId + ".room.player." + baseline.Substring(0, 16);
             RoomSpatialInstance existing = floor.Layout.Rooms[0];
-            var newRoom = new RoomSpatialInstance { RoomInstanceId = request.RoomInstanceId,
+            var newRoom = new RoomSpatialInstance { RoomInstanceId = roomInstanceId,
                 RoomDefinitionId = request.RoomDefinitionId, FloorId = floorId,
                 Anchor = request.Anchor, Orientation = request.Orientation };
             floor.Layout.Rooms = new[] { existing, newRoom };
             floor.Layout.Nodes = r2.Placements.Select(value => Node(floorId, value,
-                existing.RoomInstanceId, request.RoomInstanceId)).ToArray();
+                existing.RoomInstanceId, roomInstanceId)).ToArray();
             floor.Layout.Edges = r2.Connections.Select(value => Edge(floorId, value)).ToArray();
             CompatibilityLayoutPlacement completion = r2.Placements.Single(value =>
                 value.Role == CompatibilityRouteRole.Completion);
             SavedFixedSpatialStructure terminal = floor.FixedStructures.Single(value =>
                 value.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            TileCoordinate previousTerminalAnchor = terminal.Anchor;
             terminal.Anchor = completion.Anchor; terminal.Orientation = completion.Orientation;
             floor.RoomContents.RoomSemantics = (floor.RoomContents.RoomSemantics ??
                 Array.Empty<CanonicalRoomSemantics>()).Concat(new[] { new CanonicalRoomSemantics
-                { RoomInstanceId = request.RoomInstanceId,
+                { RoomInstanceId = roomInstanceId,
                   LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } }).ToArray();
 
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate) ||
@@ -122,9 +138,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value.FloorDefinitionId == floor.FloorDefinitionId && value.FloorIndex == floor.FloorIndex);
             FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
                 floorDefinition, catalog.Rooms, catalog.Corridors,
-                new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles));
+                new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
+                candidate.Floors[0].FixedStructures, catalog.FixedStructures);
             result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
+            string[] oldEdges = current.Floors[0].Layout.Edges.Select(value => value.EdgeId).ToArray();
+            string[] newEdges = candidate.Floors[0].Layout.Edges.Select(value => value.EdgeId).ToArray();
+            result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
+                    StableId = roomInstanceId, To = request.Anchor },
+                new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
+                    StableId = terminal.FixedStructureInstanceId, From = previousTerminalAnchor, To = terminal.Anchor } }
+                .Concat(oldEdges.Except(newEdges, StringComparer.Ordinal).Select(id => new StructuralChange
+                    { Kind = StructuralChangeKind.EdgeRemoved, StableId = id }))
+                .Concat(newEdges.Except(oldEdges, StringComparer.Ordinal).Select(id => new StructuralChange
+                    { Kind = StructuralChangeKind.EdgeAdded, StableId = id }))
+                .OrderBy(value => value.Kind).ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
             result.DetachedCandidate = candidate;
             return result;
         }
@@ -161,8 +189,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             clone = parsed.Value; return parsed.IsValid;
         }
 
-        private static bool IsStableId(string value) => !string.IsNullOrWhiteSpace(value) && value.Length <= 128 &&
-            value.All(character => char.IsLower(character) || char.IsDigit(character) || character == '.' || character == '-' || character == '_');
+        internal static bool TryFingerprint(DetachedCanonicalSpatialSaveState state,
+            CanonicalSpatialSerializationLimits limits, out string fingerprint)
+        {
+            fingerprint = null;
+            SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(state, limits);
+            if (!serialized.IsValid) return false;
+            fingerprint = SpatialContractSha256.Compute(serialized.Value);
+            return !string.IsNullOrEmpty(fingerprint);
+        }
         private static StructuralEditPreview Fail(StructuralEditPreview result, string reason)
         { result.ReasonCodes = new[] { reason }; return result; }
     }
