@@ -9,6 +9,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId;
         public TileCoordinate Anchor;
         public CardinalOrientation Orientation;
+        public string TerminalConnectionPointId;
     }
 
     public sealed class StructuralEditPreview
@@ -38,169 +39,239 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public TileCoordinate To { get; internal set; }
     }
 
-    /// <summary>
-    /// Pure construction preview. The current production compatibility geometry is the authority
-    /// for the native R1-to-R2 transition; no migration entry point or live save object is touched.
-    /// </summary>
     public static class StructuralEditService
     {
         public const string InvalidContextReason = "structural.edit.invalid_context";
-        public const string UnsupportedGeometryReason = "structural.edit.unsupported_geometry";
         public const string InvalidIdentityReason = "structural.edit.invalid_identity";
-        public const string PlacementMismatchReason = "structural.edit.placement_mismatch";
         public const string LayoutInvalidReason = "structural.edit.layout_invalid";
         public const string StalePreviewReason = "structural.edit.stale_preview";
+        public const string RoomDefinitionInvalidReason = "structural.edit.room_definition_invalid";
+        public const string RoomNotAllowedReason = "structural.edit.room_not_allowed";
+        public const string OrientationInvalidReason = "structural.edit.orientation_invalid";
+        public const string OutOfBoundsReason = "structural.edit.out_of_bounds";
+        public const string RoomOverlapReason = "structural.edit.room_overlap";
+        public const string FixedOverlapReason = "structural.edit.fixed_structure_overlap";
+        public const string CorridorOverlapReason = "structural.edit.corridor_overlap";
+        public const string CapacityReason = "structural.edit.capacity_exceeded";
+        public const string ConnectionUnavailableReason = "structural.edit.connection_unavailable";
+        public const string ConnectionAmbiguousReason = "structural.edit.connection_ambiguous";
+        public const string SocketIncompatibleReason = "structural.edit.socket_incompatible";
+        public const string ConnectionPointInvalidReason = "structural.edit.connection_point_invalid";
+        public const string TerminalPlacementInvalidReason = "structural.edit.terminal_placement_invalid";
+        public const string RequiredRouteReason = "structural.edit.required_route_disconnected";
+        public const string CompletionUnreachableReason = "structural.edit.completion_unreachable";
+        public const string WorkloadReason = "structural.edit.workload_exceeded";
 
         public static StructuralEditPreview Preview(DetachedCanonicalSpatialSaveState current,
             StructuralConstructionRequest request, ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
             CanonicalSpatialSerializationLimits limits)
         {
-            var result = new StructuralEditPreview
-            {
-                RoomDefinitionId = request?.RoomDefinitionId,
-                Anchor = request?.Anchor ?? default,
-                Orientation = request?.Orientation ?? default
-            };
+            var result = new StructuralEditPreview { RoomDefinitionId = request?.RoomDefinitionId,
+                Anchor = request?.Anchor ?? default, Orientation = request?.Orientation ?? default };
             if (current?.Authority == null || request == null || production == null || compatibility == null ||
                 configuration == null || !limits.IsValid || current.Floors?.Length != 1)
                 return Fail(result, InvalidContextReason);
             if (!TryFingerprint(current, limits, out string baseline)) return Fail(result, InvalidContextReason);
             result.BaselineFingerprint = baseline;
             result.Intent = new StructuralConstructionRequest { RoomDefinitionId = request.RoomDefinitionId,
-                Anchor = request.Anchor, Orientation = request.Orientation };
-
-            CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selection = compatibility.SelectStarter(
-                DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                current.Authority.CanonicalLayoutContractVersion);
-            CompatibilityLayoutGeometryRecord geometry = selection.Success
-                ? (compatibility.Value.GeometryRecords ?? Array.Empty<CompatibilityLayoutGeometryRecord>())
-                    .SingleOrDefault(value => value != null && value.GeometryId == selection.Value.GeometryId &&
-                        value.GeometryVersion == selection.Value.GeometryVersion &&
-                        value.CanonicalHash == selection.Value.GeometryCanonicalHash)
-                : null;
-            CompatibilityLayoutVariant r2 = (geometry?.Layouts ?? Array.Empty<CompatibilityLayoutVariant>())
-                .SingleOrDefault(value => value != null && value.Placements.Count(item =>
-                    item != null && item.Role == CompatibilityRouteRole.BasicRoom1) == 1);
-            CompatibilityLayoutPlacement placement = r2?.Placements.SingleOrDefault(value =>
-                value != null && value.Role == CompatibilityRouteRole.BasicRoom1);
-            if (geometry == null || r2 == null || placement == null ||
-                request.RoomDefinitionId != geometry.BasicRoomDefinitionId)
-                return Fail(result, UnsupportedGeometryReason);
-            if (!request.Anchor.Equals(placement.Anchor) || request.Orientation != placement.Orientation)
-                return Fail(result, PlacementMismatchReason);
+                Anchor = request.Anchor, Orientation = request.Orientation,
+                TerminalConnectionPointId = request.TerminalConnectionPointId };
 
             SpatialContentCatalog catalog = production.Catalog;
-            RoomSpatialDefinition definition = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
-                .SingleOrDefault(value => value != null && value.RoomDefinitionId == request.RoomDefinitionId);
-            if (definition == null || !(definition.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
-                    .Contains(request.Orientation) || !definition.TryResolveGrossTiles(request.Anchor,
-                    request.Orientation, new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
-                    out ResolvedTileFootprint footprint))
-                return Fail(result, LayoutInvalidReason);
-            result.OccupiedTiles = footprint.OccupiedTiles.OrderBy(value => value).ToArray();
+            SavedSpatialFloor sourceFloor = current.Floors[0];
+            FloorSpatialConfiguration floorDefinition = (catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
+                .SingleOrDefault(value => value != null && value.FloorDefinitionId == sourceFloor.FloorDefinitionId &&
+                    value.FloorIndex == sourceFloor.FloorIndex);
+            RoomSpatialDefinition[] roomMatches = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                .Where(value => value != null && value.RoomDefinitionId == request.RoomDefinitionId).ToArray();
+            if (roomMatches.Length != 1) return Fail(result, RoomDefinitionInvalidReason);
+            RoomSpatialDefinition roomDefinition = roomMatches[0];
+            if (floorDefinition == null || !(floorDefinition.AllowedRoomDefinitionIds ?? Array.Empty<string>())
+                    .Contains(roomDefinition.RoomDefinitionId)) return Fail(result, RoomNotAllowedReason);
+            if (!(roomDefinition.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(request.Orientation))
+                return Fail(result, OrientationInvalidReason);
+            var workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+            if (!roomDefinition.TryResolveGrossTiles(request.Anchor, request.Orientation, workload,
+                    out ResolvedTileFootprint roomFootprint)) return Fail(result, WorkloadReason);
+            result.OccupiedTiles = roomFootprint.OccupiedTiles.OrderBy(value => value).ToArray();
             result.ProspectiveFloorSpace = result.OccupiedTiles.Length;
-            result.ConnectionKind = r2.Connections.Select(value => value.ConnectionKind).Distinct().Single();
+            if (result.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile))) return Fail(result, OutOfBoundsReason);
 
-            if (!Clone(current, limits, out DetachedCanonicalSpatialSaveState candidate))
-                return Fail(result, InvalidContextReason);
+            if (!Clone(current, limits, out DetachedCanonicalSpatialSaveState candidate)) return Fail(result, InvalidContextReason);
             SavedSpatialFloor floor = candidate.Floors[0];
-            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1)
-                return Fail(result, InvalidIdentityReason);
-
-            string floorId = floor.FloorInstanceId;
             if (!NativeStructuralIdentity.TryAllocateRoomId(candidate, floor.FloorInstanceId,
-                    out string roomInstanceId,
-                    out string identityReason)) return Fail(result, identityReason);
-            RoomSpatialInstance existing = floor.Layout.Rooms[0];
-            var newRoom = new RoomSpatialInstance { RoomInstanceId = roomInstanceId,
-                RoomDefinitionId = request.RoomDefinitionId, FloorId = floorId,
-                Anchor = request.Anchor, Orientation = request.Orientation };
-            floor.Layout.Rooms = new[] { existing, newRoom };
-            floor.Layout.Nodes = r2.Placements.Select(value => Node(floorId, value,
-                existing.RoomInstanceId, roomInstanceId)).ToArray();
-            floor.Layout.Edges = r2.Connections.Select(value => Edge(floorId, value)).ToArray();
-            CompatibilityLayoutPlacement completion = r2.Placements.Single(value =>
-                value.Role == CompatibilityRouteRole.Completion);
-            SavedFixedSpatialStructure terminal = floor.FixedStructures.Single(value =>
-                value.Kind == FixedSpatialStructureKind.CompletionTerminal);
-            TileCoordinate previousTerminalAnchor = terminal.Anchor;
-            terminal.Anchor = completion.Anchor; terminal.Orientation = completion.Orientation;
-            floor.RoomContents.RoomSemantics = (floor.RoomContents.RoomSemantics ??
-                Array.Empty<CanonicalRoomSemantics>()).Concat(new[] { new CanonicalRoomSemantics
-                { RoomInstanceId = roomInstanceId,
-                  LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } }).ToArray();
+                    out string roomId, out string identityReason)) return Fail(result, identityReason);
+            if (OverlapsRooms(result.OccupiedTiles, floor.Layout.Rooms, catalog.Rooms, workload)) return Fail(result, RoomOverlapReason);
+            if (OverlapsFixed(result.OccupiedTiles, floor.FixedStructures, catalog.FixedStructures, workload)) return Fail(result, FixedOverlapReason);
+            if (OverlapsCorridors(result.OccupiedTiles, floor.Layout.Edges)) return Fail(result, CorridorOverlapReason);
 
-            if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate) ||
-                !CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
-                !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production,
-                    configuration, limits.Spatial).IsValid)
-                return Fail(result, LayoutInvalidReason);
-            FloorSpatialConfiguration floorDefinition = catalog.Floors.Single(value =>
-                value.FloorDefinitionId == floor.FloorDefinitionId && value.FloorIndex == floor.FloorIndex);
+            FloorRouteNode completionNode = floor.Layout.Nodes.SingleOrDefault(value => value?.Kind == FloorRouteNodeKind.Completion);
+            FloorRouteEdge oldTerminalEdge = floor.Layout.Edges.SingleOrDefault(value => value != null &&
+                value.Classification == RouteClassification.Required && value.DestinationNodeId == completionNode?.NodeId);
+            FloorRouteNode previousNode = floor.Layout.Nodes.SingleOrDefault(value => value?.NodeId == oldTerminalEdge?.SourceNodeId &&
+                value.Kind == FloorRouteNodeKind.Room);
+            RoomSpatialInstance previousRoom = floor.Layout.Rooms.SingleOrDefault(value => value?.RoomInstanceId == previousNode?.RoomInstanceId);
+            RoomSpatialDefinition previousDefinition = catalog.Rooms.SingleOrDefault(value =>
+                value?.RoomDefinitionId == previousRoom?.RoomDefinitionId);
+            if (completionNode == null || oldTerminalEdge == null || previousRoom == null || previousDefinition == null)
+                return Fail(result, RequiredRouteReason);
+
+            var newRoom = new RoomSpatialInstance { RoomInstanceId = roomId, RoomDefinitionId = roomDefinition.RoomDefinitionId,
+                FloorId = floor.FloorInstanceId, Anchor = request.Anchor, Orientation = request.Orientation };
+            DoorPair[] incoming = Pairs(previousRoom, previousDefinition, newRoom, roomDefinition, catalog).ToArray();
+            if (incoming.Length == 0) return Fail(result, ConnectionUnavailableReason);
+            if (incoming.Length != 1) return Fail(result, ConnectionAmbiguousReason);
+
+            SpatialConnectionPointDefinition outgoing = (roomDefinition.ConnectionPoints ??
+                Array.Empty<SpatialConnectionPointDefinition>()).SingleOrDefault(value =>
+                    value != null && value.ConnectionPointId == request.TerminalConnectionPointId);
+            if (outgoing == null) return Fail(result, ConnectionPointInvalidReason);
+            SavedFixedSpatialStructure terminal = floor.FixedStructures.SingleOrDefault(value =>
+                value?.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            FixedSpatialStructureDefinition terminalDefinition = catalog.FixedStructures.SingleOrDefault(value =>
+                value?.StructureDefinitionId == terminal?.FixedStructureDefinitionId);
+            SpatialConnectionPointDefinition terminalPoint = (terminalDefinition?.ConnectionPoints ??
+                Array.Empty<SpatialConnectionPointDefinition>()).SingleOrDefault();
+            if (terminal == null || terminalDefinition == null || terminalPoint == null ||
+                !Compatible(outgoing.SocketTypeId, terminalPoint.SocketTypeId, catalog)) return Fail(result, SocketIncompatibleReason);
+            CardinalOrientation outgoingFacing = Rotate(outgoing.Facing, request.Orientation);
+            CardinalOrientation terminalOrientation = (terminalDefinition.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                .Where(value => Rotate(terminalPoint.Facing, value) == Opposite(outgoingFacing)).SingleOrDefaultInvalid(out bool unique);
+            if (!unique) return Fail(result, TerminalPlacementInvalidReason);
+            TileCoordinate outgoingWorld = World(outgoing.Offset, request.Anchor, request.Orientation,
+                roomDefinition.GrossFootprint);
+            TileCoordinate terminalSocketWorld = Step(outgoingWorld, outgoingFacing);
+            TileCoordinate terminalAnchor = AnchorFor(terminalSocketWorld, terminalPoint.Offset,
+                terminalOrientation, terminalDefinition.GrossFootprint);
+            if (!TileFootprintResolver.TryResolveRectangle(terminalDefinition.GrossFootprint, terminalAnchor,
+                    terminalOrientation, workload, out ResolvedTileFootprint terminalFootprint)) return Fail(result, WorkloadReason);
+            if (terminalFootprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile)))
+                return Fail(result, TerminalPlacementInvalidReason);
+            TileCoordinate oldTerminalAnchor = terminal.Anchor;
+            terminal.Anchor = terminalAnchor; terminal.Orientation = terminalOrientation;
+
+            floor.Layout.Rooms = floor.Layout.Rooms.Concat(new[] { newRoom }).ToArray();
+            var newNode = new FloorRouteNode { NodeId = roomId + ".node", FloorId = floor.FloorInstanceId,
+                Kind = FloorRouteNodeKind.Room, RoomInstanceId = roomId };
+            floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { newNode }).ToArray();
+            var incomingEdge = Direct(roomId + ".edge.incoming", floor.FloorInstanceId, previousNode.NodeId, newNode.NodeId);
+            var outgoingEdge = Direct(roomId + ".edge.terminal", floor.FloorInstanceId, newNode.NodeId, completionNode.NodeId);
+            floor.Layout.Edges = floor.Layout.Edges.Where(value => value?.EdgeId != oldTerminalEdge.EdgeId)
+                .Concat(new[] { incomingEdge, outgoingEdge }).ToArray();
+            floor.RoomContents.RoomSemantics = (floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())
+                .Concat(new[] { new CanonicalRoomSemantics { RoomInstanceId = roomId,
+                    LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } }).ToArray();
+
+            if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
+                return Fail(result, WorkloadReason);
             FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
-                floorDefinition, catalog.Rooms, catalog.Corridors,
-                new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
-                candidate.Floors[0].FixedStructures, catalog.FixedStructures);
+                floorDefinition, catalog.Rooms, catalog.Corridors, workload, candidate.Floors[0].FixedStructures,
+                catalog.FixedStructures);
+            if (!validation.IsValid) return Fail(result, Map(validation.Issues));
+            if (!CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
+                !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production, configuration,
+                    limits.Spatial).IsValid) return Fail(result, LayoutInvalidReason);
             result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
-            string[] oldEdges = current.Floors[0].Layout.Edges.Select(value => value.EdgeId).ToArray();
-            string[] newEdges = candidate.Floors[0].Layout.Edges.Select(value => value.EdgeId).ToArray();
+            result.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
             result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
-                    StableId = roomInstanceId, To = request.Anchor },
-                new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
-                    StableId = terminal.FixedStructureInstanceId, From = previousTerminalAnchor, To = terminal.Anchor } }
-                .Concat(oldEdges.Except(newEdges, StringComparer.Ordinal).Select(id => new StructuralChange
-                    { Kind = StructuralChangeKind.EdgeRemoved, StableId = id }))
-                .Concat(newEdges.Except(oldEdges, StringComparer.Ordinal).Select(id => new StructuralChange
-                    { Kind = StructuralChangeKind.EdgeAdded, StableId = id }))
+                    StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
+                    StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = incomingEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = outgoingEdge.EdgeId } }
                 .OrderBy(value => value.Kind).ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
             result.DetachedCandidate = candidate;
             return result;
         }
 
-        private static FloorRouteNode Node(string floorId, CompatibilityLayoutPlacement placement,
-            string firstRoomId, string secondRoomId) => new FloorRouteNode
+        private sealed class DoorPair { }
+        private static IEnumerable<DoorPair> Pairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
+            RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog)
         {
-            NodeId = floorId + ".node." + Role(placement.Role), FloorId = floorId,
-            Kind = placement.Role == CompatibilityRouteRole.Entrance ? FloorRouteNodeKind.Entrance :
-                placement.Role == CompatibilityRouteRole.Completion ? FloorRouteNodeKind.Completion : FloorRouteNodeKind.Room,
-            RoomInstanceId = placement.Role == CompatibilityRouteRole.BasicRoom0 ? firstRoomId :
-                placement.Role == CompatibilityRouteRole.BasicRoom1 ? secondRoomId : null
-        };
-
-        private static FloorRouteEdge Edge(string floorId, CompatibilityLayoutConnection connection) =>
-            new FloorRouteEdge { EdgeId = floorId + ".edge.direct." + Role(connection.SourceRole) + "." + Role(connection.DestinationRole),
-                CorridorDefinitionId = connection.CorridorDefinitionId ?? string.Empty, FloorId = floorId,
-                SourceNodeId = floorId + ".node." + Role(connection.SourceRole),
-                DestinationNodeId = floorId + ".node." + Role(connection.DestinationRole),
+            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            {
+                CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
+                if (bf == Opposite(af) && Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) &&
+                    Step(World(ap.Offset, a.Anchor, a.Orientation, ad.GrossFootprint), af).Equals(
+                        World(bp.Offset, b.Anchor, b.Orientation, bd.GrossFootprint))) yield return new DoorPair();
+            }
+        }
+        private static bool Compatible(string a, string b, SpatialContentCatalog catalog) =>
+            (catalog.SocketTypes ?? Array.Empty<SpatialSocketTypeDefinition>()).Any(value => value != null &&
+                value.SocketTypeId == a && (value.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(b));
+        private static CardinalOrientation Rotate(CardinalOrientation facing, CardinalOrientation rotation) =>
+            (CardinalOrientation)(((int)facing + (int)rotation) % 4);
+        private static CardinalOrientation Opposite(CardinalOrientation value) => (CardinalOrientation)(((int)value + 2) % 4);
+        private static TileCoordinate Step(TileCoordinate value, CardinalOrientation facing) => facing == CardinalOrientation.Zero
+            ? new TileCoordinate(value.X, value.Y + 1) : facing == CardinalOrientation.Ninety
+            ? new TileCoordinate(value.X + 1, value.Y) : facing == CardinalOrientation.OneEighty
+            ? new TileCoordinate(value.X, value.Y - 1) : new TileCoordinate(value.X - 1, value.Y);
+        private static TileCoordinate World(TileCoordinate offset, TileCoordinate anchor, CardinalOrientation orientation,
+            RectangularFootprintDefinition footprint) => orientation == CardinalOrientation.Ninety
+            ? new TileCoordinate(anchor.X + footprint.Height - 1 - offset.Y, anchor.Y + offset.X)
+            : orientation == CardinalOrientation.OneEighty
+            ? new TileCoordinate(anchor.X + footprint.Width - 1 - offset.X, anchor.Y + footprint.Height - 1 - offset.Y)
+            : orientation == CardinalOrientation.TwoSeventy
+            ? new TileCoordinate(anchor.X + offset.Y, anchor.Y + footprint.Width - 1 - offset.X)
+            : new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y);
+        private static TileCoordinate AnchorFor(TileCoordinate world, TileCoordinate offset, CardinalOrientation orientation,
+            RectangularFootprintDefinition footprint)
+        { TileCoordinate transformed = World(offset, new TileCoordinate(0, 0), orientation, footprint);
+          return new TileCoordinate(world.X - transformed.X, world.Y - transformed.Y); }
+        private static FloorRouteEdge Direct(string id, string floor, string source, string destination) =>
+            new FloorRouteEdge { EdgeId = id, CorridorDefinitionId = string.Empty, FloorId = floor,
+                SourceNodeId = source, DestinationNodeId = destination, Footprint = null,
                 Classification = RouteClassification.Required, OptionalBranchId = string.Empty,
-                ConnectionKind = connection.ConnectionKind, Footprint = null };
-
-        private static string Role(CompatibilityRouteRole role) => role == CompatibilityRouteRole.Entrance
-            ? "entrance" : role == CompatibilityRouteRole.Completion ? "completion" :
-            role == CompatibilityRouteRole.BasicRoom0 ? "legacy-room.00" : "legacy-room.01";
-
+                ConnectionKind = FloorRouteConnectionKind.DirectDoorway };
+        private static bool OverlapsRooms(IEnumerable<TileCoordinate> tiles, IEnumerable<RoomSpatialInstance> rooms,
+            IEnumerable<RoomSpatialDefinition> definitions, SpatialValidationWorkloadLimits limits) =>
+            Overlaps(tiles, (rooms ?? Enumerable.Empty<RoomSpatialInstance>()).SelectMany(room =>
+            { RoomSpatialDefinition d = definitions.Single(value => value.RoomDefinitionId == room.RoomDefinitionId);
+              return d.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out ResolvedTileFootprint f)
+                ? f.OccupiedTiles : Array.Empty<TileCoordinate>(); }));
+        private static bool OverlapsFixed(IEnumerable<TileCoordinate> tiles, IEnumerable<SavedFixedSpatialStructure> values,
+            IEnumerable<FixedSpatialStructureDefinition> definitions, SpatialValidationWorkloadLimits limits) =>
+            Overlaps(tiles, (values ?? Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value.Kind != FixedSpatialStructureKind.CompletionTerminal).SelectMany(value =>
+            { FixedSpatialStructureDefinition d = definitions.Single(item => item.StructureDefinitionId == value.FixedStructureDefinitionId);
+              return TileFootprintResolver.TryResolveRectangle(d.GrossFootprint, value.Anchor, value.Orientation, limits,
+                    out ResolvedTileFootprint f) ? f.OccupiedTiles : Array.Empty<TileCoordinate>(); }));
+        private static bool OverlapsCorridors(IEnumerable<TileCoordinate> tiles, IEnumerable<FloorRouteEdge> edges) =>
+            Overlaps(tiles, (edges ?? Enumerable.Empty<FloorRouteEdge>()).Where(value => value?.ConnectionKind ==
+                FloorRouteConnectionKind.PhysicalCorridor).SelectMany(value => value.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()));
+        private static bool Overlaps(IEnumerable<TileCoordinate> a, IEnumerable<TileCoordinate> b) =>
+            new HashSet<TileCoordinate>(a).Overlaps(b);
+        private static string Map(IEnumerable<FloorLayoutValidationIssue> issues)
+        {
+            FloorLayoutValidationReason[] reasons = issues.Select(value => value.Reason).ToArray();
+            if (reasons.Contains(FloorLayoutValidationReason.CapacityExceeded)) return CapacityReason;
+            if (reasons.Contains(FloorLayoutValidationReason.StructureTileOutsideFloorBounds)) return TerminalPlacementInvalidReason;
+            if (reasons.Contains(FloorLayoutValidationReason.FootprintOverlap)) return TerminalPlacementInvalidReason;
+            if (reasons.Contains(FloorLayoutValidationReason.UnreachableRoom)) return RequiredRouteReason;
+            if (reasons.Contains(FloorLayoutValidationReason.RequiredRouteWithoutTerminal)) return CompletionUnreachableReason;
+            return LayoutInvalidReason;
+        }
         private static bool Clone(DetachedCanonicalSpatialSaveState state, CanonicalSpatialSerializationLimits limits,
             out DetachedCanonicalSpatialSaveState clone)
-        {
-            clone = null;
-            SpatialContractResult<byte[]> bytes = CanonicalSpatialSaveSerializer.Serialize(state, limits);
-            if (!bytes.IsValid) return false;
-            SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed = CanonicalSpatialSaveSerializer.Parse(bytes.Value, limits);
-            clone = parsed.Value; return parsed.IsValid;
-        }
-
+        { clone = null; SpatialContractResult<byte[]> bytes = CanonicalSpatialSaveSerializer.Serialize(state, limits);
+          if (!bytes.IsValid) return false; SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
+              CanonicalSpatialSaveSerializer.Parse(bytes.Value, limits); clone = parsed.Value; return parsed.IsValid; }
         internal static bool TryFingerprint(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSerializationLimits limits, out string fingerprint)
-        {
-            fingerprint = null;
-            SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(state, limits);
-            if (!serialized.IsValid) return false;
-            fingerprint = SpatialContractSha256.Compute(serialized.Value);
-            return !string.IsNullOrEmpty(fingerprint);
-        }
+        { fingerprint = null; SpatialContractResult<byte[]> serialized = CanonicalSpatialSaveSerializer.Serialize(state, limits);
+          if (!serialized.IsValid) return false; fingerprint = SpatialContractSha256.Compute(serialized.Value);
+          return !string.IsNullOrEmpty(fingerprint); }
         private static StructuralEditPreview Fail(StructuralEditPreview result, string reason)
         { result.ReasonCodes = new[] { reason }; return result; }
+    }
+
+    internal static class StructuralEditEnumerableExtensions
+    {
+        internal static CardinalOrientation SingleOrDefaultInvalid(this IEnumerable<CardinalOrientation> values,
+            out bool unique)
+        { CardinalOrientation[] array = values.ToArray(); unique = array.Length == 1;
+          return unique ? array[0] : default; }
     }
 }

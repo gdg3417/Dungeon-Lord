@@ -7,6 +7,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class StructuralEditServiceTests
     {
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Zero, 4, 1, "north", true)]
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 1, "north", false)]
+        [TestCase("spatial.room.large_chamber", CardinalOrientation.Zero, 4, 1, "north", true)]
+        public void NativeRoomAppend_UsesProductionGeometry(string definitionId,
+            CardinalOrientation orientation, int x, int y, string terminalPoint, bool expectedValid)
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                    fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
+            DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            StructuralEditPreview preview = StructuralEditService.Preview(r1.State,
+                new StructuralConstructionRequest { RoomDefinitionId = definitionId,
+                    Anchor = new TileCoordinate(x, y), Orientation = orientation,
+                    TerminalConnectionPointId = terminalPoint }, fixture.Production,
+                fixture.Compatibility, configuration, fixture.Limits);
+            Assert.That(preview.IsValid, Is.EqualTo(expectedValid), string.Join(",", preview.ReasonCodes));
+            if (!expectedValid)
+            {
+                Assert.That(preview.ReasonCodes[0], Is.EqualTo(StructuralEditService.ConnectionUnavailableReason));
+                return;
+            }
+            Assert.That(preview.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(preview.Consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved), Is.True);
+            DetachedCanonicalSpatialSaveState candidate = preview.DetachedCandidate;
+            Assert.That(candidate.Floors[0].Layout.Edges.Where(value =>
+                value.EdgeId.Contains("room.player.0000")).All(value =>
+                    value.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                    value.Footprint == null && value.CorridorDefinitionId == string.Empty), Is.True);
+            Assert.That(r1.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(1));
+        }
+
         [Test]
         public void ApprovedBasicRoomPreview_IsDeterministicAndProducesCanonicalR2()
         {
@@ -31,7 +66,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 layout.Placements.Any(value => value.Role == CompatibilityRouteRole.BasicRoom1))
                 .Placements.Single(value => value.Role == CompatibilityRouteRole.BasicRoom1);
             var request = new StructuralConstructionRequest { RoomDefinitionId = geometry.BasicRoomDefinitionId,
-                Anchor = placement.Anchor, Orientation = placement.Orientation };
+                Anchor = placement.Anchor, Orientation = placement.Orientation, TerminalConnectionPointId = "north" };
 
             StructuralEditPreview first = StructuralEditService.Preview(r1.State, request,
                 fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
@@ -92,12 +127,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
                 fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
             var request = new StructuralConstructionRequest { RoomDefinitionId = geometry.BasicRoomDefinitionId,
-                Anchor = new TileCoordinate(-1, -1), Orientation = CardinalOrientation.Zero };
+                Anchor = new TileCoordinate(-1, -1), Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" };
             StructuralEditPreview preview = StructuralEditService.Preview(r1.State, request,
                 fixture.Production, fixture.Compatibility,
                 configuration, fixture.Limits);
             Assert.That(preview.IsValid, Is.False);
-            Assert.That(preview.ReasonCodes[0], Is.EqualTo(StructuralEditService.PlacementMismatchReason));
+            Assert.That(preview.ReasonCodes[0], Is.EqualTo(StructuralEditService.OutOfBoundsReason));
             Assert.That(r1.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(1));
         }
     }

@@ -2814,6 +2814,70 @@
     {
       "key": "structural.edit.stale_preview",
       "text": "The dungeon changed after this preview. Preview the construction again."
+    },
+    {
+      "key": "structural.edit.room_definition_invalid",
+      "text": "The selected room definition is invalid."
+    },
+    {
+      "key": "structural.edit.room_not_allowed",
+      "text": "That room is not allowed on this floor."
+    },
+    {
+      "key": "structural.edit.orientation_invalid",
+      "text": "That room orientation is not supported."
+    },
+    {
+      "key": "structural.edit.out_of_bounds",
+      "text": "The room footprint is outside the floor bounds."
+    },
+    {
+      "key": "structural.edit.room_overlap",
+      "text": "The room overlaps another room."
+    },
+    {
+      "key": "structural.edit.fixed_structure_overlap",
+      "text": "The room overlaps a required structure."
+    },
+    {
+      "key": "structural.edit.corridor_overlap",
+      "text": "The room overlaps an existing corridor."
+    },
+    {
+      "key": "structural.edit.capacity_exceeded",
+      "text": "The construction exceeds the floor-space capacity."
+    },
+    {
+      "key": "structural.edit.connection_unavailable",
+      "text": "No direct doorway is available for this placement."
+    },
+    {
+      "key": "structural.edit.connection_ambiguous",
+      "text": "More than one direct doorway matches this placement."
+    },
+    {
+      "key": "structural.edit.socket_incompatible",
+      "text": "The selected connection sockets are incompatible."
+    },
+    {
+      "key": "structural.edit.connection_point_invalid",
+      "text": "The selected room connection point is invalid."
+    },
+    {
+      "key": "structural.edit.terminal_placement_invalid",
+      "text": "The Completion Terminal cannot be placed at the derived position."
+    },
+    {
+      "key": "structural.edit.required_route_disconnected",
+      "text": "The required route would be disconnected."
+    },
+    {
+      "key": "structural.edit.completion_unreachable",
+      "text": "The Completion Terminal would be unreachable."
+    },
+    {
+      "key": "structural.edit.workload_exceeded",
+      "text": "The structural preview exceeds its validation workload limit."
     }
   ]
 }
