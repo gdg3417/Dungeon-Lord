@@ -50,6 +50,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void PhysicalCorridor_WidthAndDeterminateAxisMustMatchDefinition()
+        {
+            CorridorSpatialDefinition definition = CorridorDefinitions()[0];
+            definition.Width = 2;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+            definition.Width = 1;
+            definition.AllowedOrientations = new[] { CardinalOrientation.Zero };
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+        }
+
+        [Test]
         public void CapacityExceededByOne_AndNegativeConfiguration_AreReported()
         {
             AssertReason(ValidLayout(), Configuration(FinalCapacity - 1), Definitions(), CorridorDefinitions(), FloorLayoutValidationReason.CapacityExceeded);

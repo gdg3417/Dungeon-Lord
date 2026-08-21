@@ -7,6 +7,74 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class StructuralEditServiceTests
     {
+        [Test]
+        public void StraightStoneCorridor_MaximumLengthUsesProductionLimit()
+        {
+            PreviewFixture fixture = CreateR1();
+            var request = new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(8, 2), Orientation = CardinalOrientation.Zero,
+                TerminalConnectionPointId = "north" };
+            StructuralEditPreview first = StructuralEditService.Preview(fixture.State, request,
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            StructuralEditPreview second = StructuralEditService.Preview(fixture.State, request,
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            FloorRouteEdge edge = first.DetachedCandidate.Floors[0].Layout.Edges.Single(value =>
+                value.EdgeId.EndsWith(".edge.incoming"));
+            Assert.That(edge.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            Assert.That(edge.Footprint.OccupiedTiles.Length, Is.EqualTo(4));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 3), new TileCoordinate(5, 3),
+                new TileCoordinate(6, 3), new TileCoordinate(7, 3) }, edge.Footprint.OccupiedTiles);
+            Assert.That(first.ResultingUsedFloorSpace, Is.EqualTo(46));
+            Assert.That(first.ResultingRemainingFloorSpace, Is.EqualTo(14));
+            SpatialContractResult<byte[]> a = CanonicalSpatialSaveSerializer.Serialize(first.DetachedCandidate, fixture.Limits);
+            SpatialContractResult<byte[]> b = CanonicalSpatialSaveSerializer.Serialize(second.DetachedCandidate, fixture.Limits);
+            CollectionAssert.AreEqual(a.Value, b.Value);
+        }
+
+        [Test]
+        public void StraightStoneCorridor_AboveMaximumHasLengthReason()
+        {
+            PreviewFixture fixture = CreateR1();
+            AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
+            { RoomDefinitionId = "spatial.room.rectangle", Anchor = new TileCoordinate(9, 1),
+              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
+                fixture.Production, fixture.Limits, StructuralEditService.CorridorLengthReason);
+        }
+
+        [Test]
+        public void CorridorTileAloneCanExceedTestOnlyCapacity()
+        {
+            PreviewFixture fixture = CreateR1();
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Floors[0].FinalFloorSpaceCapacity = 42;
+            ProductionSpatialContentSnapshot production = new ProductionSpatialContentSnapshot(
+                fixture.Production.Manifest, catalog, fixture.Production.Languages);
+            AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
+            { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(5, 2),
+              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "east" },
+                production, fixture.Limits, StructuralEditService.CapacityReason);
+        }
+
+        [Test]
+        public void CorridorRequiresBothEndpointSocketTypesInDefinition()
+        {
+            PreviewFixture fixture = CreateR1();
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            RoomSpatialDefinition basic = catalog.Rooms.Single(value => value.RoomDefinitionId == "spatial.room.basic");
+            basic.ConnectionPoints.Single(value => value.ConnectionPointId == "west").SocketTypeId = "test.socket.destination";
+            catalog.SocketTypes[0].CompatibleSocketTypeIds = catalog.SocketTypes[0].CompatibleSocketTypeIds
+                .Concat(new[] { "test.socket.destination" }).ToArray();
+            catalog.SocketTypes = catalog.SocketTypes.Concat(new[] { new SpatialSocketTypeDefinition
+            { SocketTypeId = "test.socket.destination", CompatibleSocketTypeIds = new[] { "spatial.socket.standard_passage" } } }).ToArray();
+            ProductionSpatialContentSnapshot production = new ProductionSpatialContentSnapshot(
+                fixture.Production.Manifest, catalog, fixture.Production.Languages);
+            AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
+            { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(5, 2),
+              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "east" },
+                production, fixture.Limits, StructuralEditService.ConnectionUnavailableReason);
+        }
+
         [TestCase(5, 2, "east", 4, 3)]
         [TestCase(0, 7, "east", 1, 6)]
         public void StraightStoneCorridor_OneTileAppendIsDeterministic(int x, int y,
@@ -141,6 +209,34 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
             { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
               Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
+                fixture.Production, fixture.Limits, StructuralEditService.CorridorOverlapReason);
+        }
+
+        [Test]
+        public void DerivedIncomingCorridorCannotOverlapExistingPhysicalCorridor()
+        {
+            PreviewFixture fixture = CreateR1();
+            SavedSpatialFloor floor = fixture.State.Floors[0];
+            FloorRouteNode room = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Room);
+            FloorRouteNode completion = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion);
+            floor.Layout.Edges = floor.Layout.Edges.Concat(new[] { new FloorRouteEdge
+            {
+                EdgeId = "compat.floor.00.edge.test-corridor-derived", FloorId = floor.FloorInstanceId,
+                SourceNodeId = room.NodeId, DestinationNodeId = completion.NodeId,
+                CorridorDefinitionId = "spatial.corridor.straight_stone",
+                ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor,
+                Classification = RouteClassification.Optional, OptionalBranchId = "test.branch.derived",
+                Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 3) })
+            } }).ToArray();
+            Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(fixture.State, fixture.Limits.Spatial,
+                out DetachedCanonicalSpatialSaveState canonical), Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(canonical, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(DetachedCanonicalProductionSemanticValidation.Validate(canonical,
+                fixture.Production, fixture.Configuration, fixture.Limits.Spatial).IsValid, Is.True);
+            fixture.State = canonical;
+            AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
+            { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(5, 2),
+              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "east" },
                 fixture.Production, fixture.Limits, StructuralEditService.CorridorOverlapReason);
         }
 

@@ -132,9 +132,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         .Contains(value.CorridorDefinitionId) && value.Category == CorridorSpatialCategory.Straight).ToArray();
                 if (corridors.Length != 1) return Fail(result, CorridorDefinitionReason);
                 corridor = corridors[0];
-                incoming = CorridorPairs(previousRoom, previousDefinition, newRoom, roomDefinition,
-                    catalog, corridor).ToArray();
-                if (incoming.Length == 0) return Fail(result, ConnectionUnavailableReason);
+                CorridorAnalysis analysis = AnalyzeCorridors(previousRoom, previousDefinition, newRoom,
+                    roomDefinition, catalog, corridor);
+                incoming = analysis.ValidPairs;
+                if (incoming.Length == 0) return Fail(result, analysis.HasLengthInvalidPair
+                    ? CorridorLengthReason : ConnectionUnavailableReason);
             }
             if (incoming.Length != 1) return Fail(result, ConnectionAmbiguousReason);
 
@@ -219,6 +221,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private sealed class DoorPair
         { internal TileCoordinate[] Tiles = Array.Empty<TileCoordinate>(); }
+        private sealed class CorridorAnalysis
+        { internal DoorPair[] ValidPairs; internal bool HasLengthInvalidPair; }
         private static IEnumerable<DoorPair> Pairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
             RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog)
         {
@@ -231,16 +235,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         World(bp.Offset, b.Anchor, b.Orientation, bd.GrossFootprint))) yield return new DoorPair();
             }
         }
-        private static IEnumerable<DoorPair> CorridorPairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
+        private static CorridorAnalysis AnalyzeCorridors(RoomSpatialInstance a, RoomSpatialDefinition ad,
             RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog,
             CorridorSpatialDefinition corridor)
         {
+            var valid = new List<DoorPair>(); bool lengthInvalid = false;
             foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
             foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
             {
                 CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
                 if (bf != Opposite(af) || !Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) ||
-                    !(corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(ap.SocketTypeId)) continue;
+                    !(corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(ap.SocketTypeId) ||
+                    !(corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(bp.SocketTypeId)) continue;
                 TileCoordinate source = World(ap.Offset, a.Anchor, a.Orientation, ad.GrossFootprint);
                 TileCoordinate destination = World(bp.Offset, b.Anchor, b.Orientation, bd.GrossFootprint);
                 bool horizontal = source.Y == destination.Y &&
@@ -251,14 +257,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 int distance = Math.Abs(destination.X - source.X) + Math.Abs(destination.Y - source.Y);
                 int length = distance - 1;
                 CardinalOrientation axis = horizontal ? CardinalOrientation.Ninety : CardinalOrientation.Zero;
-                if (length < corridor.MinimumLength || length > corridor.MaximumLength || corridor.Width != 1 ||
-                    !(corridor.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(axis) ||
-                    !Step(source, af).Equals(horizontal || vertical ? StepToward(source, destination) : source)) continue;
+                if (!Step(source, af).Equals(StepToward(source, destination))) continue;
+                if (length < corridor.MinimumLength || length > corridor.MaximumLength)
+                { lengthInvalid = true; continue; }
+                if (corridor.Width != 1 ||
+                    !(corridor.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(axis)) continue;
                 var tiles = new List<TileCoordinate>();
                 TileCoordinate value = StepToward(source, destination);
                 while (!value.Equals(destination)) { tiles.Add(value); value = StepToward(value, destination); }
-                yield return new DoorPair { Tiles = tiles.OrderBy(tile => tile).ToArray() };
+                valid.Add(new DoorPair { Tiles = tiles.OrderBy(tile => tile).ToArray() });
             }
+            return new CorridorAnalysis { ValidPairs = valid.ToArray(), HasLengthInvalidPair = lengthInvalid };
         }
         private static bool Compatible(string a, string b, SpatialContentCatalog catalog) =>
             (catalog.SocketTypes ?? Array.Empty<SpatialSocketTypeDefinition>()).Any(value => value != null &&
