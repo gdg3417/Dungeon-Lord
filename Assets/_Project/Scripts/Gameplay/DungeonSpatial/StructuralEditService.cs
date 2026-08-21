@@ -100,8 +100,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             if (!Clone(current, limits, out DetachedCanonicalSpatialSaveState candidate)) return Fail(result, InvalidContextReason);
             SavedSpatialFloor floor = candidate.Floors[0];
-            if (!NativeStructuralIdentity.TryAllocateRoomId(candidate, floor.FloorInstanceId,
-                    out string roomId, out string identityReason)) return Fail(result, identityReason);
+            if (!NativeStructuralIdentity.TryAllocateConstructionIdentity(candidate, floor.FloorInstanceId,
+                    out NativeRoomConstructionIdentity identity, out string identityReason))
+                return Fail(result, identityReason);
+            string roomId = identity.RoomInstanceId;
             if (OverlapsRooms(result.OccupiedTiles, floor.Layout.Rooms, catalog.Rooms, workload)) return Fail(result, RoomOverlapReason);
             if (OverlapsFixed(result.OccupiedTiles, floor.FixedStructures, catalog.FixedStructures, workload)) return Fail(result, FixedOverlapReason);
             if (OverlapsCorridors(result.OccupiedTiles, floor.Layout.Edges)) return Fail(result, CorridorOverlapReason);
@@ -152,11 +154,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             terminal.Anchor = terminalAnchor; terminal.Orientation = terminalOrientation;
 
             floor.Layout.Rooms = floor.Layout.Rooms.Concat(new[] { newRoom }).ToArray();
-            var newNode = new FloorRouteNode { NodeId = roomId + ".node", FloorId = floor.FloorInstanceId,
+            var newNode = new FloorRouteNode { NodeId = identity.RoomNodeId, FloorId = floor.FloorInstanceId,
                 Kind = FloorRouteNodeKind.Room, RoomInstanceId = roomId };
             floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { newNode }).ToArray();
-            var incomingEdge = Direct(roomId + ".edge.incoming", floor.FloorInstanceId, previousNode.NodeId, newNode.NodeId);
-            var outgoingEdge = Direct(roomId + ".edge.terminal", floor.FloorInstanceId, newNode.NodeId, completionNode.NodeId);
+            var incomingEdge = Direct(identity.IncomingRequiredEdgeId, floor.FloorInstanceId,
+                previousNode.NodeId, newNode.NodeId);
+            var outgoingEdge = Direct(identity.TerminalRequiredEdgeId, floor.FloorInstanceId,
+                newNode.NodeId, completionNode.NodeId);
             floor.Layout.Edges = floor.Layout.Edges.Where(value => value?.EdgeId != oldTerminalEdge.EdgeId)
                 .Concat(new[] { incomingEdge, outgoingEdge }).ToArray();
             floor.RoomContents.RoomSemantics = (floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())

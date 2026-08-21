@@ -1,8 +1,20 @@
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public sealed class NativeRoomConstructionIdentity
+    {
+        internal NativeRoomConstructionIdentity(string room, string node, string incoming, string terminal)
+        { RoomInstanceId = room; RoomNodeId = node; IncomingRequiredEdgeId = incoming;
+          TerminalRequiredEdgeId = terminal; }
+        public string RoomInstanceId { get; }
+        public string RoomNodeId { get; }
+        public string IncomingRequiredEdgeId { get; }
+        public string TerminalRequiredEdgeId { get; }
+    }
+
     /// <summary>Phase 3A structural-only room identity allocation. Deletion is not supported.</summary>
     public static class NativeStructuralIdentity
     {
@@ -14,7 +26,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             out string roomInstanceId,
             out string reason)
         {
-            roomInstanceId = null;
+            bool success = TryAllocateConstructionIdentity(state, targetFloorId,
+                out NativeRoomConstructionIdentity identity, out reason);
+            roomInstanceId = identity?.RoomInstanceId;
+            return success;
+        }
+
+        public static bool TryAllocateConstructionIdentity(DetachedCanonicalSpatialSaveState state,
+            string targetFloorId, out NativeRoomConstructionIdentity identity, out string reason)
+        {
+            identity = null;
             reason = InvalidIdentityReason;
             if (state?.Floors == null || string.IsNullOrWhiteSpace(targetFloorId))
                 return false;
@@ -50,13 +71,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
 
             if (target == null || maximum >= MaximumOrdinal) return false;
-            roomInstanceId = prefix + (maximum + 1).ToString("D4", CultureInfo.InvariantCulture);
-            if (identities.Contains(roomInstanceId)) { roomInstanceId = null; return false; }
+            string room = prefix + (maximum + 1).ToString("D4", CultureInfo.InvariantCulture);
+            var proposed = new[] { room, room + ".node", room + ".edge.incoming", room + ".edge.terminal" };
+            if (proposed.Any(value => !Persistent(value)) ||
+                proposed.Distinct(StringComparer.Ordinal).Count() != proposed.Length ||
+                proposed.Any(identities.Contains)) return false;
+            identity = new NativeRoomConstructionIdentity(proposed[0], proposed[1], proposed[2], proposed[3]);
             reason = null;
             return true;
         }
 
         private static bool Add(System.Collections.Generic.HashSet<string> identities, string value) =>
             !string.IsNullOrWhiteSpace(value) && identities.Add(value);
+
+        private static bool Persistent(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return false;
+            bool separator = true;
+            foreach (char character in value)
+            {
+                bool alphaNumeric = character >= 'a' && character <= 'z' ||
+                    character >= '0' && character <= '9';
+                if (alphaNumeric) { separator = false; continue; }
+                if ((character != '.' && character != '_' && character != '-') || separator) return false;
+                separator = true;
+            }
+            return !separator;
+        }
     }
 }

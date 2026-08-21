@@ -7,6 +7,61 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class NativeStructuralIdentityTests
     {
         [Test]
+        public void ConstructionAllocation_ReturnsCompleteDeterministicBundle()
+        {
+            SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00");
+            Assert.That(NativeStructuralIdentity.TryAllocateConstructionIdentity(State(floor),
+                floor.FloorInstanceId, out NativeRoomConstructionIdentity identity,
+                out string reason), Is.True, reason);
+            Assert.That(identity.RoomInstanceId, Is.EqualTo("compat.floor.00.room.player.0000"));
+            Assert.That(identity.RoomNodeId, Is.EqualTo("compat.floor.00.room.player.0000.node"));
+            Assert.That(identity.IncomingRequiredEdgeId,
+                Is.EqualTo("compat.floor.00.room.player.0000.edge.incoming"));
+            Assert.That(identity.TerminalRequiredEdgeId,
+                Is.EqualTo("compat.floor.00.room.player.0000.edge.terminal"));
+        }
+
+        [TestCase("node", "node")]
+        [TestCase("node", "edge")]
+        [TestCase("node", "fixed")]
+        [TestCase("node", "assignment")]
+        [TestCase("node", "room")]
+        [TestCase("incoming", "node")]
+        [TestCase("incoming", "edge")]
+        [TestCase("incoming", "assignment")]
+        [TestCase("terminal", "edge")]
+        [TestCase("terminal", "fixed")]
+        [TestCase("terminal", "assignment")]
+        public void ConstructionAllocation_DerivedBundleCollisionFailsClosed(string member, string owner)
+        {
+            SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00");
+            string root = "compat.floor.00.room.player.0000";
+            string occupied = member == "node" ? root + ".node" : member == "incoming"
+                ? root + ".edge.incoming" : root + ".edge.terminal";
+            Occupy(floor, owner, occupied);
+            Assert.That(NativeStructuralIdentity.TryAllocateConstructionIdentity(State(floor),
+                floor.FloorInstanceId, out NativeRoomConstructionIdentity identity,
+                out string reason), Is.False);
+            Assert.That(identity, Is.Null);
+            Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
+        }
+
+        [Test]
+        public void ConstructionAllocation_DerivedNodeCollisionOnAnotherFloorFailsClosed()
+        {
+            SavedSpatialFloor target = Floor("compat.floor.00.legacy-room.00");
+            SavedSpatialFloor other = Floor("other.floor.legacy-room.00");
+            other.FloorInstanceId = "compat.floor.00.room.player.0000.node";
+            other.Layout.FloorId = other.FloorInstanceId;
+            var state = new DetachedCanonicalSpatialSaveState { Floors = new[] { target, other } };
+            Assert.That(NativeStructuralIdentity.TryAllocateConstructionIdentity(state,
+                target.FloorInstanceId, out NativeRoomConstructionIdentity identity,
+                out string reason), Is.False);
+            Assert.That(identity, Is.Null);
+            Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
+        }
+
+        [Test]
         public void Allocation_DependsOnlyOnPersistedStructuralRoomIdentities()
         {
             SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00");
@@ -117,6 +172,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static RoomContentAssignment Assignment(string id, string category) =>
             new RoomContentAssignment { AssignmentId = id, CategoryId = category };
+
+        private static void Occupy(SavedSpatialFloor floor, string owner, string identity)
+        {
+            if (owner == "node") floor.Layout.Nodes = new[] { new FloorRouteNode { NodeId = identity } };
+            if (owner == "edge") floor.Layout.Edges = new[] { new FloorRouteEdge { EdgeId = identity } };
+            if (owner == "fixed") floor.FixedStructures = new[]
+                { new SavedFixedSpatialStructure { FixedStructureInstanceId = identity } };
+            if (owner == "assignment") floor.RoomContents.Assignments = new[]
+                { new RoomContentAssignment { AssignmentId = identity } };
+            if (owner == "room") floor.Layout.Rooms = new[] { floor.Layout.Rooms[0],
+                new RoomSpatialInstance { RoomInstanceId = identity } };
+        }
 
         private static DetachedCanonicalSpatialSaveState State(SavedSpatialFloor floor) =>
             new DetachedCanonicalSpatialSaveState { Floors = new[] { floor } };

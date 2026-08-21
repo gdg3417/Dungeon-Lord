@@ -7,6 +7,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class StructuralEditServiceTests
     {
+        [Test]
+        public void Preview_DerivedIdentityCollisionFailsBeforeCandidatePublication()
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                    fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
+            DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            DetachedCanonicalMutationResult content = DetachedCanonicalSpatialMutation.Prepare(r1.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.monster",
+                    "placement.option.monster.skeleton"), fixture.Production, fixture.Compatibility,
+                configuration, fixture.Limits);
+            content.State.Floors[0].RoomContents.Assignments[0].AssignmentId =
+                "compat.floor.00.room.player.0000.node";
+            Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(content.State, fixture.Limits.Spatial,
+                out DetachedCanonicalSpatialSaveState source), Is.True);
+            SpatialContractResult<byte[]> before = CanonicalSpatialSaveSerializer.Serialize(source, fixture.Limits);
+            StructuralEditPreview preview = StructuralEditService.Preview(source,
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(0, 6), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" }, fixture.Production, fixture.Compatibility,
+                configuration, fixture.Limits);
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.ReasonCodes[0], Is.EqualTo(StructuralEditService.InvalidIdentityReason));
+            Assert.That(preview.DetachedCandidate, Is.Null);
+            SpatialContractResult<byte[]> after = CanonicalSpatialSaveSerializer.Serialize(source, fixture.Limits);
+            CollectionAssert.AreEqual(before.Value, after.Value);
+        }
+
         [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 2, "west", 6, 5, 41, 19)]
         [TestCase("spatial.room.large_chamber", CardinalOrientation.Ninety, 4, 1, "west", 6, 6, 56, 4)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, 4, 2, "east", 8, 2, 42, 18)]
