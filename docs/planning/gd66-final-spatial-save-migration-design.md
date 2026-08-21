@@ -2,7 +2,7 @@
 
 **Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B6B working status (2026-08-12):** Schema 7 live activation is implemented in PR #195: existing saves enter through the raw-before-legacy recovery/migration coordinator, new saves are created as native empty canonical complete saves, ordinary lifecycle and player spatial writes use the lossless canonical session and qualified Windows atomic writer, production spatial content owns canonical capacity, and legacy spatial members are frozen evidence. Activation remains restricted to qualified Windows Editor/Standalone local NTFS paths. GD66 is not complete or merge-ready until owner Unity EditMode, PlayMode, and Windows durability/lifecycle validation passes.
+**Current Phase 2B6B closeout status (2026-08-21):** Schema 7 live activation is implemented and its required validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`. Existing schemas 1–6 enter through the raw-before-legacy recovery/migration coordinator and production compatibility profile; new saves use native empty canonical creation; ordinary lifecycle and player spatial writes use the lossless canonical session and qualified Windows atomic writer. Production spatial content owns Basic Room capacity 2/2/2, same-category content placement is additive to capacity, and exact duplicates reject without mutation. Canonical spatial state is the sole writable spatial authority; legacy spatial members are frozen evidence and `dungeonLayout` remains independently writable nonspatial/economic state. Narrow Hall remains a legacy repair-only migration blocker and is absent from canonical placement. Activation remains restricted to qualified Windows Editor/Standalone local, nonredirected NTFS paths. GD66 is complete pending merge of PR #195; native R1→R2 structural construction remains deferred to Phase 3.
 
 The legacy **Add Basic Room Slot** control is hidden for canonical authority. Native R1→R2 construction is deferred with Phase 3 structural editing; migrated R2 saves remain fully targetable, but Phase 2B6B does not invent a new R1→R2 topology rule.
 
@@ -14,7 +14,7 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 
 | Item | Reconciled state |
 |---|---|
-| Repository | `main` through merged PR #194 at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate/transaction and Windows durability qualification complete |
+| Repository | PR #195 reviewed implementation at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`, based on merged PR #194 at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; schema-7 activation and required validation complete pending merge |
 | Save root | `SaveRoot.schemaVersion`; live `SaveMigration.LatestSchemaVersion = 7` through GD66 only |
 | Route topology | validated schema-7 spatial graph/content authority projected into the ordered MVP runtime view |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
@@ -531,15 +531,13 @@ Journal discovery precedes every row on initial load and every application resta
 
 Before any changed-dependency or repaired-O attempt, the sole prior live attempt must reach `Finalized`, restore verified O, or be quarantined after verified O is established. Finalized audit evidence is never counted as live. Same O/same fingerprint retries are deterministic; dependency or O changes produce a new compact identity only after this one-live-attempt gate.
 
-### Missing production save-workload configuration authority
+### Approved production save-workload configuration authority
 
-Phase 2B6B cannot activate until Save/Data, Performance, and QA approve one dedicated, explicitly injected production configuration contract for the save-specific validation workload. The existing spatial-content `validation_limits.json` is not this authority and cannot be copied, translated, inferred, or used as a fallback. No numeric values are approved by this working PR.
+Phase 2B6B uses one dedicated, explicitly injected production configuration contract for the save-specific validation workload. `Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json` is the approved authority and is consumed through `SaveSpatialMigrationLimitsLoader`; the spatial-content `validation_limits.json` is a different authority and is never copied, translated, inferred, or used as fallback. The owner-approved sizing evidence is recorded in [`gd66-save-spatial-migration-limit-sizing-evidence.md`](gd66-save-spatial-migration-limit-sizing-evidence.md).
 
-The owner-review sizing analysis and provisional, explicitly unapproved numeric proposal are recorded in [`gd66-save-spatial-migration-limit-sizing-evidence.md`](gd66-save-spatial-migration-limit-sizing-evidence.md); that evidence does not create production authority.
+`TryPublishValidated` remains a runtime projection seam rather than persistence ownership. The live canonical save session retains complete validated save bytes and merges current recognized state and canonical spatial state without dropping preserved unknown root or primary members during ordinary canonical writes.
 
-`TryPublishValidated` is only a runtime projection seam; its `JsonUtility` materialization is not final persistence ownership. Before activation, the live canonical save session must retain the complete validated save bytes or equivalent lossless root/primary extension evidence and merge that evidence into every ordinary canonical save. Otherwise later canonical mutations could drop unknown members that migration preserved.
-
-The smallest proposed contract is one separately authored `save_spatial_migration_limits` versioned record with these semantically explicit positive fields:
+The separately authored `save_spatial_migration_limits` versioned record owns these semantically explicit positive fields:
 
 | Consumer | Required field | Unit / distinct meaning |
 |---|---|---|
@@ -561,7 +559,7 @@ The smallest proposed contract is one separately authored `save_spatial_migratio
 | same | `MaximumUnknownMembers` | Preserved unknown root plus primary member count |
 | same | `MaximumUnknownMemberBytes` | Cumulative preserved unknown-member value bytes |
 
-All seventeen fields may share one configuration **authority and lifecycle**, but their units and accounting semantics remain distinct and code must not derive one from another. Owner approval may deliberately assign equal numeric values to byte or record fields, but equality is configuration, not an implicit fallback. In particular, raw string bytes cannot be inferred from decoded UTF-16 characters; raw scan work cannot be inferred from input bytes; canonical spatial records cannot be inferred from strict parsed nodes/collection records; candidate, copied-source, and unknown-member byte totals have different accumulation rules; and the canonical saved-tile workload is not the existing production-content materialized-tile limit. The composed canonical serialization and recovery/transaction contexts must receive these parsed fields explicitly. This working PR removes the detached-era derivation in `DetachedSpatialMigrationTransaction.IsCanonicalSchemaSeven` that reused `SpatialSerializedInputLimits.MaximumCollectionRecords` for both canonical fields; transaction validation now preserves the caller-injected composed limits, while live production composition remains blocked until the dedicated values exist. Missing, malformed, incomplete, duplicated, nonpositive, or unapproved configuration fails closed before filesystem selection or save mutation.
+All seventeen fields share one configuration **authority and lifecycle**, but their units and accounting semantics remain distinct and code does not derive one from another. Equal approved numeric values are configuration, not implicit fallback. Raw string bytes are not inferred from decoded UTF-16 characters; raw scan work is not inferred from input bytes; canonical spatial records are not inferred from strict parsed nodes/collection records; candidate, copied-source, and unknown-member byte totals retain different accumulation rules; and canonical saved-tile workload is not the production-content materialized-tile limit. Composed canonical serialization and recovery/transaction contexts receive the parsed fields explicitly. Transaction validation preserves the caller-injected composed limits. Missing, malformed, incomplete, duplicated, or nonpositive production configuration fails closed before filesystem selection or save mutation.
 
 ## 22. Phase 2 dependency breakdown
 
@@ -575,13 +573,13 @@ All seventeen fields may share one configuration **authority and lifecycle**, bu
 8. Implement verified B, one atomic C replacement, durable verification/O recovery, and deterministic retry rules.
 9. Activate canonical topology/content readers and writers together while preserving independent economic writers; add localization keys and full EditMode/PlayMode/build/lifecycle evidence.
 
-## 23. Explicit non-goals
+## 23. Historical design-approval non-goals
 
-No migration, save field, exact future schema number, code, fixture/test, content, localization, runtime activation, structure spatial mapping, corridor gameplay, cost, Floor 2, UI, tuning, scene/asset/settings/package change, or fun claim is included.
+The PR #187 design-approval packet itself included no migration, save field, schema activation, code, fixture/test, content, localization, structure spatial mapping, corridor gameplay, cost, Floor 2, UI, tuning, scene/asset/settings/package change, or fun claim. Later Phase 2B implementation in PR #195 activates only the approved GD66 scope; Phase 3 structural construction/editing and other listed exclusions remain deferred.
 
 ## 24. Acceptance checklist
 
-- [x] Candidate status while PR #187 is open; schema 6/current authorities unchanged.
+- [x] Historical PR #187 candidate approval completed; PR #195 activates schema 7 and transitions to canonical writable spatial authority.
 - [x] Route precedence excludes independent `dungeonLayout`/`structureRuntime`.
 - [x] Exact nonspatial canonical room-content ownership precedes migration builder.
 - [x] Saved floor instance binds explicitly to production definition/index.
@@ -605,11 +603,11 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 - [x] One complete atomic replacement is the sole schema/authority switch.
 - [x] No hidden fallback, partial publication, localized identity, or dual route/content writers.
 
-## 25. Candidate approval statement
+## 25. Historical candidate approval statement
 
 PR #187 proposes approval of this route precedence, independent economic-structure preservation, canonical room-content and saved-floor contracts, raw-load interception, schema-specific fixtures, stable identities/geometry, and one-replacement transaction for later Phase 2 implementation. It is not repository-approved until merged and changes no present behavior. Unsupported states retain O with stable diagnostics; Phase 2 remains blocked until this candidate is approved and merged.
 
-### Phase 2B3 inactive serialization and transaction-metadata contracts
+### Historical Phase 2B3 inactive serialization and transaction-metadata contracts
 
 Phase 2B3 establishes technical identities in the single `SpatialMigrationContractIdentity` authority: canonical serializer `gd66.serializer.canonical_spatial_save` version **1**, authority-marker contract version **1**, migration contract version **1**, and journal schema version **1**. These contracts remain detached from `SaveRoot`, `SaveData`, and `SaveService`.
 

@@ -1,28 +1,28 @@
 # Post-GD60 MVP Execution Plan
 
-**Current Phase 2B6B working status (2026-08-12):** PR #195 implements the live schema-7 boundary using the production-owned save workload profile: raw-before-legacy recovery/migration for existing saves, native canonical creation, lossless canonical lifecycle/player writes, production-capacity projection, runtime rebinding, and frozen legacy spatial evidence. Production activation remains Windows Editor/Standalone on qualified local nonredirected NTFS only. GD66 remains under review and requires owner Unity and Windows lifecycle/durability validation before completion or merge readiness.**
+**Current Phase 2B6B closeout status (2026-08-21):** PR #195 implements the live schema-7 boundary using the production-owned save workload profile: raw-before-legacy recovery/migration for schemas 1–6, native canonical creation, lossless canonical lifecycle/player writes, production 2/2/2 additive capacity, runtime rebinding, frozen legacy spatial evidence, Narrow Hall repair-and-retry, and quiescent Dev Delete Save. Canonical spatial state is the sole writable spatial authority; `dungeonLayout` remains independent writable economic state. Required automated, Editor, Windows Player, and Windows x86_64 Development-build validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`. Production activation remains fail-closed outside qualified Windows Editor/Standalone local, nonredirected NTFS paths. GD66 is complete pending merge of PR #195; native R1→R2 construction remains deferred to Phase 3.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
 
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 2 active; Phase 2B1 complete; Phase 2B2 release identity selected** |
+| Status | **Phase 2B6B implementation and required validation complete; PR #195 pending merge** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main through merged PR #194 at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd` |
+| Current implementation baseline | PR #195 reviewed head `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`, based on main at merged PR #194 `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-08-01 |
+| Last reconciled | 2026-08-21 |
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 ## 1. Authority and purpose
 
 This is the single active dependency order from the GD60 prototype to a fun MVP, a usable graphical editor, and external testing. Older sprint plans, closeouts, evidence records, and vertical-slice plans remain historical traceability: they retain useful acceptance criteria, but are **not** the authoritative execution sequence. A planned status is not implementation evidence. The merged repository and committed tests/evidence are authoritative; uncertain closure is marked **requires confirmation**.
 
-GD64 completed the inactive spatial contract and layout-validator alignment without activating the graph. GD65A then completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Neither packet added production spatial records, export registration, a runtime catalog consumer, migration, economy, additional floors, or UI. The save schema remains version 6, and the existing ordered two-room models remain runtime and save authorities.
+Historically, GD64 completed the inactive spatial contract and layout-validator alignment, and GD65A completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Later GD65B packets supplied production records and composition, and GD66/PR #195 activated schema 7. Validated canonical spatial state now owns writable route topology/content; the older ordered-room models remain frozen migration evidence rather than writable authority. Additional floors and native R1→R2 structural construction remain later-phase work.
 
-Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B1 is complete and remaining GD65B implementation is unblocked.
+**Historical GD65B0C7 approval scope:** Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B1 is complete and remaining GD65B implementation is unblocked.
 
 ## 2. Repository baseline and current implementation state
 
@@ -39,12 +39,12 @@ Merged history establishes the following at prototype scope:
 
 ### Partially implemented capabilities
 
-- **Layout:** GD64 completed the inactive rectangular floor-bound, occupied-tile capacity, direct-doorway, physical-corridor, bounded canonicalization, and pure deterministic layout-validation contracts with stable reason codes 1–45. Two ordered room slots still own runtime route order; the spatial domain is not active or authoritative.
+- **Layout:** GD64 established rectangular floor-bound, occupied-tile capacity, direct-doorway, physical-corridor, bounded canonicalization, and deterministic validation contracts. GD66 now projects the validated canonical R1/R2 graph as live route authority. Native structural editing, corridor construction, and R1→R2 construction remain deferred to Phase 3.
 - **Construction:** choices and replacement exist, but spatial placement, corridors, structural removal/renovation, and mana-backed costs do not.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** prototype mana/heat flows exist; construction spending, floor expansion, and production-grade offline behavior remain incomplete or require confirmation.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** lifecycle integrity is hardened for current models; the GD62 migration proposal exists, but final mapping is not approved and no graph-version migration is implemented. Schema version remains 6.
+- **Saves:** schema 7 is live. Schemas 1–6 migrate through the production compatibility profile and raw-before-legacy transaction/recovery path; native canonical creation, exact-byte canonical writes, reopen, duplicate no-op, Narrow Hall repair, and Delete Save quiescence are validated. Windows activation remains fail-closed outside the qualified platform/filesystem boundary.
 
 ### Missing MVP capabilities
 
@@ -106,9 +106,9 @@ Curved/freeform corridors, intra-floor elevations, teleporters, secret rooms, lo
 
 **Exit:** aligned inactive contracts and approved content represent the MVP layout; deterministic validation and exports pass; and final migration design is reviewed before persistence changes. **Technical gate:** focused contract/validator and schema tests; no gameplay constants or player-facing literals. **Fantasy gate:** paper/prototype review may test whether capacity and fit explanations are understandable; correctness does not prove fun.
 
-### Phase 2 — Backward-compatible migration
+### Phase 2 — Backward-compatible migration (complete in PR #195 pending merge)
 
-Phase 2 exclusively owns migration implementation and authority transition:
+Phase 2 implementation and required validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`. It owns the completed migration implementation and authority transition:
 
 1. Change the save schema and migrate/adapter-map legacy ordered two-room state to entrance → rooms → completion.
 2. Switch runtime readers to canonical graph order and transition to one writable authority while preserving current player flow and outcomes.
@@ -234,9 +234,9 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 ## 9. Current dependency packet
 
-**GD66 candidate approval is active in PR #187; GD65B is closed through merged PR #186.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
+**GD66 implementation and required validation are complete in PR #195 pending merge; GD65B is closed through merged PR #186.** PR #177 / GD65B0C6 is merged at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves final rows 66–70 and 72, leaving the register at 72 `APPROVED` and zero rows in every unresolved status. The exact future limits are 128 top-level records, 512 nested records, 4,096 tiles per individual footprint/bounds, 256 issues, and 32,768 characters, solely owned by `validation_limits.json`. The future pipeline suite includes unit, export, transaction recovery, loading, pre-build, and 80-floor scalability-contract stages.
 
-GD65B1 created the separately authored approved limits configuration, strict parser/conversion boundary, and initial workload/scalability tests. GD65B2B added the approved production records and source projection; PR #182 added deterministic generated-set construction; PR #183 added recoverable publication/recovery; and PR #184 added export invocation and committed generated files. PR #185 completed strict inactive loading and explicit composition. PR #186 implemented the pre-build recovery/build-entry gate, required owner validation and evidence passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`, and the PR is merged; GD65B is closed. No runtime/save activation is authorized: save schema remains 6 and existing abstract placement, ordered two-room state, and room-slot assignments remain runtime/save authority. GD66 was subsequently approved in merged PR #187, and Phase 2 migration/authority implementation remains blocked until it is approved and merged.
+GD65B supplied the separately authored spatial-content limits, production records, deterministic generated-set construction, recoverable publication, committed outputs, inactive loading/composition, and build-entry gate through merged PR #186. GD66 was approved in merged PR #187. PR #195 now supplies the distinct approved production save-workload profile and completes Phase 2 migration/authority activation: `LatestSchemaVersion = 7`, `LegacyCompatibilitySchemaVersion = 6`, schemas 1–6 migrate to canonical schema 7, and canonical spatial state is the sole writable spatial authority. Required validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`; merge of PR #195 is the remaining repository-integration step. Phase 3 retains native structural editing and R1→R2 construction.
 
 
 ### Historical GD65B2A reconciliation amendment
