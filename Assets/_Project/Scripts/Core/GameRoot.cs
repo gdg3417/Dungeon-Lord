@@ -509,7 +509,11 @@ namespace DungeonBuilder.M0
             RefreshRunLine();
         }
 
-        private void InitializeRunSimulationService()
+            CanonicalMvpRouteProjectionResult route = Save == null ? null :
+                CanonicalMvpRouteProjection.InspectWithProductionContent(
+                    Save, Content?.ProductionSpatialContent);
+            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null ||
+                route?.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
         {
             _runSimulationService = null;
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;

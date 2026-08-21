@@ -209,12 +209,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
             result.ConnectionKind = incomingEdge.ConnectionKind;
             result.IncomingConnectionTiles = incomingEdge.Footprint?.OccupiedTiles?
-                    StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
-                    StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = incomingEdge.EdgeId },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = outgoingEdge.EdgeId } }
-                .OrderBy(value => value.Kind).ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
+            result.Consequences = new[]
+            {
+                new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
+                    StableId = roomId, To = request.Anchor },
+                new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
+                    StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor,
+                    To = terminal.Anchor },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved,
+                    StableId = oldTerminalEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded,
+                    StableId = incomingEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded,
+                    StableId = outgoingEdge.EdgeId }
+            }
             result.DetachedCandidate = candidate;
             return result;
         }
