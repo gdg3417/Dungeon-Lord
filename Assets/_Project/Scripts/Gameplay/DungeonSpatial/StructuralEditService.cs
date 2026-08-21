@@ -109,7 +109,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Fail(result, InvalidIdentityReason);
 
             string floorId = floor.FloorInstanceId;
-            if (!NativeStructuralIdentity.TryAllocateRoomId(floor, out string roomInstanceId,
+            if (!NativeStructuralIdentity.TryAllocateRoomId(candidate, floor.FloorInstanceId,
+                    out string roomInstanceId,
                     out string identityReason)) return Fail(result, identityReason);
             RoomSpatialInstance existing = floor.Layout.Rooms[0];
             var newRoom = new RoomSpatialInstance { RoomInstanceId = roomInstanceId,

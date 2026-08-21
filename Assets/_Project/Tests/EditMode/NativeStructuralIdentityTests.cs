@@ -10,7 +10,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Allocation_DependsOnlyOnPersistedStructuralRoomIdentities()
         {
             SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00");
-            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(floor, out string initial,
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId, out string initial,
                 out string reason), Is.True, reason);
             Assert.That(initial, Is.EqualTo("compat.floor.00.room.player.0000"));
 
@@ -24,7 +24,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Assignment("loot", "placement.category.loot_node")
                 }
             };
-            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(floor, out string afterContent,
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId, out string afterContent,
                 out reason), Is.True, reason);
             Assert.That(afterContent, Is.EqualTo(initial));
             Assert.That(floor.Layout.Rooms[0].RoomInstanceId,
@@ -36,12 +36,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             SavedSpatialFloor floor = Floor("compat.floor.00.room.player.0007",
                 "compat.floor.00.legacy-room.00", "compat.floor.00.room.player.0002");
-            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(floor, out string allocated,
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId, out string allocated,
                 out string reason), Is.True, reason);
             Assert.That(allocated, Is.EqualTo("compat.floor.00.room.player.0008"));
 
             floor.Layout.Rooms = new[] { floor.Layout.Rooms[2], floor.Layout.Rooms[0], floor.Layout.Rooms[1] };
-            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(floor, out string reordered,
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId, out string reordered,
                 out reason), Is.True, reason);
             Assert.That(reordered, Is.EqualTo(allocated));
         }
@@ -52,8 +52,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Allocation_MalformedNativeIdentityFailsClosed(string malformed)
         {
             SavedSpatialFloor floor = Floor(malformed);
-            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(floor, out string allocated,
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId, out string allocated,
                 out string reason), Is.False);
+            Assert.That(allocated, Is.Null);
+            Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
+        }
+
+        [Test]
+        public void Allocation_DuplicateExistingRoomIdentityFailsClosed()
+        {
+            SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00",
+                "compat.floor.00.legacy-room.00");
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId,
+                out string allocated, out string reason), Is.False);
+            Assert.That(allocated, Is.Null);
+            Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
+        }
+
+        [TestCase("node")]
+        [TestCase("edge")]
+        [TestCase("fixed")]
+        [TestCase("assignment")]
+        public void Allocation_ProposedIdentityOccupiedByAnotherCanonicalKindFailsClosed(string kind)
+        {
+            SavedSpatialFloor floor = Floor("compat.floor.00.legacy-room.00");
+            string collision = "compat.floor.00.room.player.0000";
+            if (kind == "node") floor.Layout.Nodes = new[] { new FloorRouteNode { NodeId = collision } };
+            if (kind == "edge") floor.Layout.Edges = new[] { new FloorRouteEdge { EdgeId = collision } };
+            if (kind == "fixed") floor.FixedStructures = new[]
+                { new SavedFixedSpatialStructure { FixedStructureInstanceId = collision } };
+            if (kind == "assignment") floor.RoomContents.Assignments = new[]
+                { new RoomContentAssignment { AssignmentId = collision } };
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(State(floor), floor.FloorInstanceId,
+                out string allocated, out string reason), Is.False);
+            Assert.That(allocated, Is.Null);
+            Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
+        }
+
+        [Test]
+        public void Allocation_CollisionOnAnotherFloorFailsClosed()
+        {
+            SavedSpatialFloor target = Floor("compat.floor.00.legacy-room.00");
+            SavedSpatialFloor other = Floor("other.floor.legacy-room.00");
+            other.FloorInstanceId = "other.floor"; other.Layout.FloorId = "other.floor";
+            other.Layout.Nodes = new[] { new FloorRouteNode
+                { NodeId = "compat.floor.00.room.player.0000" } };
+            var state = new DetachedCanonicalSpatialSaveState { Floors = new[] { target, other } };
+            Assert.That(NativeStructuralIdentity.TryAllocateRoomId(state, target.FloorInstanceId,
+                out string allocated, out string reason), Is.False);
             Assert.That(allocated, Is.Null);
             Assert.That(reason, Is.EqualTo(NativeStructuralIdentity.InvalidIdentityReason));
         }
@@ -71,6 +117,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static RoomContentAssignment Assignment(string id, string category) =>
             new RoomContentAssignment { AssignmentId = id, CategoryId = category };
+
+        private static DetachedCanonicalSpatialSaveState State(SavedSpatialFloor floor) =>
+            new DetachedCanonicalSpatialSaveState { Floors = new[] { floor } };
     }
 }
 #endif
