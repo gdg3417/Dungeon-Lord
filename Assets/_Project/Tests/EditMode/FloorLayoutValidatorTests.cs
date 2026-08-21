@@ -713,16 +713,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortyFive()
+        public void ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortySix()
         {
             int[] values = Enum.GetValues(typeof(FloorLayoutValidationReason)).Cast<int>().ToArray();
-            CollectionAssert.AreEqual(Enumerable.Range(1, 45), values);
+            CollectionAssert.AreEqual(Enumerable.Range(1, 46), values);
             Assert.That((int)FloorLayoutValidationReason.InvalidFloorBounds, Is.EqualTo(40));
             Assert.That((int)FloorLayoutValidationReason.StructureTileOutsideFloorBounds, Is.EqualTo(41));
             Assert.That((int)FloorLayoutValidationReason.FinalCapacityExceedsFloorBounds, Is.EqualTo(42));
             Assert.That((int)FloorLayoutValidationReason.InvalidConnectionKind, Is.EqualTo(43));
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition, Is.EqualTo(44));
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasFootprint, Is.EqualTo(45));
+            Assert.That((int)FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch, Is.EqualTo(46));
         }
 
         private static FloorSpatialLayout Canonicalize(FloorSpatialLayout source, int maximumTiles = 100)
