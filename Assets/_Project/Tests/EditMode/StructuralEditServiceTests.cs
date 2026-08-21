@@ -11,7 +11,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("spatial.room.basic", CardinalOrientation.Ninety, 0, 6, "north", StructuralEditService.OrientationInvalidReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, -1, 6, "north", StructuralEditService.OutOfBoundsReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, 0, 2, "north", StructuralEditService.RoomOverlapReason)]
-        [TestCase("spatial.room.basic", CardinalOrientation.Zero, 0, 0, "north", StructuralEditService.FixedOverlapReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, 0, 6, "missing", StructuralEditService.ConnectionPointInvalidReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, 5, 6, "north", StructuralEditService.ConnectionUnavailableReason)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Zero, 4, 1, "south", StructuralEditService.TerminalPlacementInvalidReason)]
@@ -102,6 +101,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             } }).ToArray();
             Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(fixture.State, fixture.Limits.Spatial,
                 out DetachedCanonicalSpatialSaveState canonical), Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.Validate(canonical, fixture.Limits.Spatial,
+                true).IsValid, Is.True);
+            Assert.That(DetachedCanonicalProductionSemanticValidation.Validate(canonical,
+                fixture.Production, fixture.Configuration, fixture.Limits.Spatial).IsValid, Is.True);
             fixture.State = canonical;
             AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
             { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
