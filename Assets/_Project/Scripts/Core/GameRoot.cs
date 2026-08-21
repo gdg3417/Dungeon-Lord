@@ -526,7 +526,7 @@ namespace DungeonBuilder.M0
 
         internal static bool TryCreateRunSimulationService(string configJson, string lootConfigJson, out RunSimulationService service)
         {
-            return BootstrapConfigValidationService.TryCreateRunSimulationService(configJson, lootConfigJson, out service);
+            if (!result.IsSuccess && !string.IsNullOrEmpty(result.Reason))
         }
 
         internal static LootConfig TryParseLootConfig(string lootConfigJson)

@@ -208,22 +208,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
             result.ConnectionKind = incomingEdge.ConnectionKind;
-            result.IncomingConnectionTiles = incomingEdge.Footprint?.OccupiedTiles?
-            result.Consequences = new[]
-            {
-                new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
-                    StableId = roomId, To = request.Anchor },
-                new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
-                    StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor,
-                    To = terminal.Anchor },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved,
-                    StableId = oldTerminalEdge.EdgeId },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded,
-                    StableId = incomingEdge.EdgeId },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded,
-                    StableId = outgoingEdge.EdgeId }
-            }
-            result.DetachedCandidate = candidate;
+            result.IncomingConnectionTiles = incomingEdge.Footprint?.OccupiedTiles?.ToArray()
+                ?? Array.Empty<TileCoordinate>();
+            result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
+                    StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
+                    StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = incomingEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = outgoingEdge.EdgeId } }
             return result;
         }
 
