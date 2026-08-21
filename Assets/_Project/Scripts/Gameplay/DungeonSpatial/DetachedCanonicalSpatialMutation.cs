@@ -9,7 +9,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public enum DetachedCanonicalMutationKind
     {
         PlaceOrReplace = 1,
-        RemoveRoom = 2
+        RemoveRoom = 2,
+        StructuralConstruction = 3
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -18,6 +19,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string CategoryId { get; private set; }
         public string OptionId { get; private set; }
         public string RoomInstanceId { get; private set; }
+        internal DetachedCanonicalSpatialSaveState StructuralCandidate { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
             string roomInstanceId = null) => new DetachedCanonicalMutationRequest
@@ -27,6 +29,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCanonicalMutationRequest RemoveRoom(string roomInstanceId) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RemoveRoom, RoomInstanceId = roomInstanceId };
+
+        public static DetachedCanonicalMutationRequest Construct(StructuralEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.StructuralConstruction,
+                StructuralCandidate = preview != null && preview.IsValid ? preview.DetachedCandidate : null
+            };
     }
 
     public sealed class DetachedCanonicalMutationResult
@@ -89,7 +98,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(ValidationFailedReason);
             bool roomEffect = false;
             string reason;
-            if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
+            if (request.Kind == DetachedCanonicalMutationKind.StructuralConstruction)
+            {
+                if (request.StructuralCandidate == null ||
+                    !CanonicalSpatialSaveContracts.TryCanonicalize(request.StructuralCandidate, limits.Spatial,
+                        out proposed)) return Failure(ValidationFailedReason);
+                reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
                 StringComparison.Ordinal))
