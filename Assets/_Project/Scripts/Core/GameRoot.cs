@@ -48,6 +48,8 @@ namespace DungeonBuilder.M0
         public ITelemetryService Telemetry { get; private set; }
         public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
+        public StructuralEditPreview StructuralConstructionPreview { get; private set; }
+        public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
         public ProductionSpatialContentSnapshot ProductionSpatialContent => Content?.ProductionSpatialContent;
@@ -503,17 +505,54 @@ namespace DungeonBuilder.M0
         {
             if (published == null || _explicitSaveDeleteQuiesced) return;
             Save = published;
+            StructuralConstructionPreview = null;
+            StructuralConstructionReasonKey = string.Empty;
             TimeService?.AttachSave(Save);
             RefreshDashboardState();
             RefreshStructureRuntimeLines();
             RefreshRunLine();
         }
 
+        public StructuralEditPreview PreviewStructuralConstruction(
+            StructuralConstructionRequest request)
+        {
             CanonicalMvpRouteProjectionResult route = Save == null ? null :
                 CanonicalMvpRouteProjection.InspectWithProductionContent(
                     Save, Content?.ProductionSpatialContent);
+            StructuralConstructionPreview = _explicitSaveDeleteQuiesced || SaveService == null ||
+                Save == null || route?.AuthorityState !=
+                    CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
+                ? StructuralEditService.InvalidPreview(
+                    StructuralEditService.InvalidContextReason, request)
+                : SaveService.PreviewStructuralConstruction(request);
+            StructuralConstructionReasonKey = StructuralConstructionPreview.IsValid
+                ? string.Empty
+                : StructuralConstructionPreview.ReasonCodes.FirstOrDefault() ??
+                    StructuralEditService.InvalidContextReason;
+            return StructuralConstructionPreview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralConstruction()
+        {
             if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null ||
-                route?.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                StructuralConstructionPreview == null || !StructuralConstructionPreview.IsValid)
+                return StructuralCommitFailure(StructuralEditService.InvalidContextReason);
+            DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(
+                Save, DetachedCanonicalMutationRequest.Construct(StructuralConstructionPreview));
+            if (!result.IsSuccess)
+                StructuralConstructionReasonKey = string.IsNullOrEmpty(result.Reason)
+                    ? StructuralEditService.InvalidContextReason : result.Reason;
+            return result;
+        }
+
+        private DetachedCanonicalWriteResult StructuralCommitFailure(string reason)
+        {
+            StructuralConstructionReasonKey = reason;
+            return new DetachedCanonicalWriteResult(false, reason, false, false,
+                null, null, null, null);
+        }
+
+        private void InitializeRunSimulationService()
         {
             _runSimulationService = null;
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
@@ -526,7 +565,7 @@ namespace DungeonBuilder.M0
 
         internal static bool TryCreateRunSimulationService(string configJson, string lootConfigJson, out RunSimulationService service)
         {
-            if (!result.IsSuccess && !string.IsNullOrEmpty(result.Reason))
+            return BootstrapConfigValidationService.TryCreateRunSimulationService(configJson, lootConfigJson, out service);
         }
 
         internal static LootConfig TryParseLootConfig(string lootConfigJson)

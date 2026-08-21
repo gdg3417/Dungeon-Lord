@@ -21,6 +21,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public TileCoordinate Anchor { get; internal set; }
         public CardinalOrientation Orientation { get; internal set; }
         public TileCoordinate[] OccupiedTiles { get; internal set; } = Array.Empty<TileCoordinate>();
+        public TileCoordinate[] IncomingConnectionTiles { get; internal set; }
+            = Array.Empty<TileCoordinate>();
         public int ProspectiveFloorSpace { get; internal set; }
         public int ResultingUsedFloorSpace { get; internal set; }
         public int ResultingRemainingFloorSpace { get; internal set; }
@@ -63,6 +65,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string WorkloadReason = "structural.edit.workload_exceeded";
         public const string CorridorDefinitionReason = "structural.edit.corridor_definition_invalid";
         public const string CorridorLengthReason = "structural.edit.corridor_length_invalid";
+
+        public static StructuralEditPreview InvalidPreview(string reason,
+            StructuralConstructionRequest request)
+        {
+            var result = new StructuralEditPreview
+            {
+                RoomDefinitionId = request?.RoomDefinitionId,
+                Anchor = request?.Anchor ?? default,
+                Orientation = request?.Orientation ?? default,
+                ReasonCodes = new[] { reason }
+            };
+            return result;
+        }
 
         public static StructuralEditPreview Preview(DetachedCanonicalSpatialSaveState current,
             StructuralConstructionRequest request, ProductionSpatialContentSnapshot production,
@@ -216,6 +231,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },
                 new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = incomingEdge.EdgeId },
                 new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = outgoingEdge.EdgeId } }
+                .OrderBy(value => value.Kind).ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
+            result.DetachedCandidate = candidate;
             return result;
         }
 

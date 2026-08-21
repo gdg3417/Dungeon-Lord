@@ -285,6 +285,24 @@ namespace DungeonBuilder.M0
             return result;
         }
 
+        public StructuralEditPreview PreviewStructuralConstruction(
+            StructuralConstructionRequest request)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _validationContext == null ||
+                _limits == null || _production == null || _compatibility == null ||
+                _legacyGameplayConfiguration == null)
+                return StructuralEditService.InvalidPreview(
+                    StructuralEditService.InvalidContextReason, request);
+            DetachedCompleteSaveValidationResult validated =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    _canonicalSession.GetCurrentBytes(), _validationContext);
+            if (!validated.IsValid || !validated.CurrentTargetValidated || validated.State == null)
+                return StructuralEditService.InvalidPreview(
+                    StructuralEditService.InvalidContextReason, request);
+            return StructuralEditService.Preview(validated.State, request, _production,
+                _compatibility, _legacyGameplayConfiguration, _limits.Canonical);
+        }
+
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,

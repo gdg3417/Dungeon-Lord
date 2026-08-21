@@ -2886,3 +2886,6 @@
     {
       "key": "structural.edit.corridor_length_invalid",
       "text": "The straight corridor length is not supported."
+    }
+  ]
+}

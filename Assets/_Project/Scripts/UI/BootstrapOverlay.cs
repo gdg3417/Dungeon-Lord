@@ -1,4 +1,5 @@
 using System.Text;
+using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
 using DungeonBuilder.M0.Gameplay.Structures;
@@ -72,6 +73,16 @@ namespace DungeonBuilder.M0
         private int _playerFacingSectionIndex;
         private bool _minimalMvpActionPanelCollapsed;
         private string _smokeViewportStatusMessage = string.Empty;
+
+        public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
+        public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
+        public int PlayerFacingScrollOffset => _playerFacingScrollOffset;
+        public bool CompactSmokeViewEnabled => _compactSmokeViewEnabled;
+        public int PlayerFacingSectionNumber => _playerFacingSectionIndex + 1;
+        public bool MinimalMvpActionPanelCollapsed => _minimalMvpActionPanelCollapsed;
+        public bool DevPanelVisible => _devPanelVisible;
+        public bool DiagnosticsVisible => DiagnosticsAllowed && (_diagnosticsVisible || _runDiagnosticsOnlyVisible);
+        private bool DiagnosticsAllowed => _root != null && _root.DevPanelEnabled;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
         public bool NormalGameplayActionsAvailable => _root?.Save != null;
         public bool NarrowHallRepairOnlyVisible => _root != null && _root.Save == null &&
@@ -1254,6 +1265,8 @@ namespace DungeonBuilder.M0
                 PlaceSelectedMvpStructure();
             }
 
+            if (GUILayout.Button(labels.RunButton, compactButton, buttonHeight))
+            {
                 RunOrObserveDungeon();
             }
             PlayerResearchPanelPresentation research = ResolvePlayerResearchPanelPresentation();
@@ -1346,6 +1359,70 @@ namespace DungeonBuilder.M0
             GUILayout.EndArea();
         }
 
+        private string BuildSelectedMvpPlacementComparisonText()
+        {
+            if (_root == null)
+            {
+                return string.Empty;
+            }
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
+            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
+            MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
+                _root.Save,
+                _root.RunSimulationConfig,
+                _root.ProductionSpatialContent,
+                selectedRoomIndex,
+                _selectedMvpPlacementCategoryId,
+                _selectedMvpPlacementOptionId);
+            return MvpPlacementComparisonPresenter.BuildComparisonText(preview, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        private void ClearStaleRoomSlotPlacementFailureFeedback()
+        {
+            if (!_roomSlotPlacementFailureIsLatestAction && IsRoomSlotPlacementFailureFeedback() && IsSelectedPlacementAssignedInValidRoomSlot())
+            {
+                _mvpStructurePlacementFeedback = string.Empty;
+                _roomSlotPlacementFailureIsLatestAction = false;
+            }
+        }
+
+        private void ClearRoomSlotPlacementFailureFeedback()
+        {
+            if (IsRoomSlotPlacementFailureFeedback())
+            {
+                _mvpStructurePlacementFeedback = string.Empty;
+            }
+
+            _roomSlotPlacementFailureIsLatestAction = false;
+        }
+
+        private bool IsRoomSlotPlacementFailureFeedback()
+        {
+            if (string.IsNullOrWhiteSpace(_mvpStructurePlacementFeedback))
+            {
+                return false;
+            }
+
+            string format = GetLocalizedString(MvpRoomSlotTargetPresenter.NoValidSlotFormatKey, MvpRoomSlotTargetPresenter.NoValidSlotFormatKey);
+            string prefix = format.Split('{')[0];
+            return !string.IsNullOrWhiteSpace(prefix) && _mvpStructurePlacementFeedback.StartsWith(prefix, System.StringComparison.Ordinal);
+        }
+
+        private bool IsSelectedPlacementAssignedInValidRoomSlot()
+        {
+            if (_root?.Save == null ||
+                string.IsNullOrWhiteSpace(_selectedMvpPlacementCategoryId) ||
+                string.IsNullOrWhiteSpace(_selectedMvpPlacementOptionId) ||
+                string.Equals(_selectedMvpPlacementCategoryId, MvpDungeonPlacementIds.RoomCategoryId, System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
+            if (layout?.Rooms == null)
             {
                 return false;
             }
