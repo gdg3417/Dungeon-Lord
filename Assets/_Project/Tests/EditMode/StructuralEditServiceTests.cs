@@ -48,6 +48,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCanonicalMutationRequest.Construct(first), fixture.Production, fixture.Compatibility,
                 configuration, fixture.Limits);
             Assert.That(mutation.IsSuccess, Is.True, mutation.Reason);
+            Assert.That(mutation.State.Floors[0].Layout.Rooms.Any(value =>
+                value.RoomInstanceId == "compat.floor.00.room.player.0000"), Is.True);
+            SpatialContractResult<byte[]> canonicalBytes = CanonicalSpatialSaveSerializer.Serialize(
+                mutation.State, fixture.Limits);
+            Assert.That(canonicalBytes.IsValid, Is.True);
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> reopened =
+                CanonicalSpatialSaveSerializer.Parse(canonicalBytes.Value, fixture.Limits);
+            Assert.That(reopened.IsValid, Is.True);
+            Assert.That(reopened.Value.Floors[0].Layout.Rooms.Any(value =>
+                value.RoomInstanceId == "compat.floor.00.room.player.0000"), Is.True);
             Assert.That(mutation.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             Assert.That(r1.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(1));
 
@@ -56,6 +66,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     "placement.option.monster.skeleton"), fixture.Production, fixture.Compatibility,
                 configuration, fixture.Limits);
             Assert.That(intervening.IsSuccess, Is.True, intervening.Reason);
+            StructuralEditPreview afterContent = StructuralEditService.Preview(intervening.State, request,
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            Assert.That(afterContent.IsValid, Is.True, string.Join(",", afterContent.ReasonCodes));
+            Assert.That(afterContent.Consequences.Single(value => value.Kind == StructuralChangeKind.RoomAdded).StableId,
+                Is.EqualTo(first.Consequences.Single(value => value.Kind == StructuralChangeKind.RoomAdded).StableId));
             DetachedCanonicalMutationResult stale = DetachedCanonicalSpatialMutation.Prepare(intervening.State,
                 DetachedCanonicalMutationRequest.Construct(first), fixture.Production, fixture.Compatibility,
                 configuration, fixture.Limits);
