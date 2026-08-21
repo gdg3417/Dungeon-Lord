@@ -7,9 +7,90 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class StructuralEditServiceTests
     {
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 2, "west", 6, 5, 41, 19)]
+        [TestCase("spatial.room.large_chamber", CardinalOrientation.Ninety, 4, 1, "west", 6, 6, 56, 4)]
+        [TestCase("spatial.room.basic", CardinalOrientation.Zero, 4, 2, "east", 8, 2, 42, 18)]
+        public void RotatedConnectionGeometry_DerivesExpectedTerminal(string definitionId,
+            CardinalOrientation orientation, int x, int y, string pointId, int terminalX,
+            int terminalY, int used, int remaining)
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                    fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
+            DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            var request = new StructuralConstructionRequest { RoomDefinitionId = definitionId,
+                Anchor = new TileCoordinate(x, y), Orientation = orientation,
+                TerminalConnectionPointId = pointId };
+            StructuralEditPreview first = StructuralEditService.Preview(r1.State, request,
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            StructuralEditPreview second = StructuralEditService.Preview(r1.State, request,
+                fixture.Production, fixture.Compatibility, configuration, fixture.Limits);
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            SavedFixedSpatialStructure terminal = first.DetachedCandidate.Floors[0].FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            Assert.That(terminal.Anchor.X, Is.EqualTo(terminalX));
+            Assert.That(terminal.Anchor.Y, Is.EqualTo(terminalY));
+            Assert.That(terminal.Orientation, Is.EqualTo(pointId == "east"
+                ? CardinalOrientation.Ninety : CardinalOrientation.Zero));
+            Assert.That(first.ResultingUsedFloorSpace, Is.EqualTo(used));
+            Assert.That(first.ResultingRemainingFloorSpace, Is.EqualTo(remaining));
+            SpatialContractResult<byte[]> firstBytes = CanonicalSpatialSaveSerializer.Serialize(
+                first.DetachedCandidate, fixture.Limits);
+            SpatialContractResult<byte[]> secondBytes = CanonicalSpatialSaveSerializer.Serialize(
+                second.DetachedCandidate, fixture.Limits);
+            Assert.That(firstBytes.IsValid, Is.True);
+            Assert.That(secondBytes.IsValid, Is.True);
+            CollectionAssert.AreEqual(firstBytes.Value, secondBytes.Value);
+        }
+
+        [Test]
+        public void ConnectionPointTransforms_StayOnRotatedFacingBoundary()
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            foreach (RoomSpatialDefinition room in catalog.Rooms)
+            foreach (CardinalOrientation orientation in new[] { CardinalOrientation.Zero,
+                CardinalOrientation.Ninety, CardinalOrientation.OneEighty, CardinalOrientation.TwoSeventy })
+            foreach (SpatialConnectionPointDefinition point in room.ConnectionPoints)
+            {
+                TileCoordinate transformed = StructuralEditService.TransformConnectionPointOffset(
+                    point.Offset, orientation, room.GrossFootprint);
+                CardinalOrientation facing = StructuralEditService.Rotate(point.Facing, orientation);
+                int width = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy
+                    ? room.GrossFootprint.Height : room.GrossFootprint.Width;
+                int height = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy
+                    ? room.GrossFootprint.Width : room.GrossFootprint.Height;
+                bool onBoundary = facing == CardinalOrientation.Zero ? transformed.Y == height - 1 :
+                    facing == CardinalOrientation.Ninety ? transformed.X == width - 1 :
+                    facing == CardinalOrientation.OneEighty ? transformed.Y == 0 : transformed.X == 0;
+                Assert.That(onBoundary, Is.True, room.RoomDefinitionId + ":" + point.ConnectionPointId + ":" + orientation);
+            }
+            foreach (FixedSpatialStructureDefinition structure in catalog.FixedStructures)
+            foreach (CardinalOrientation orientation in structure.AllowedOrientations)
+            foreach (SpatialConnectionPointDefinition point in structure.ConnectionPoints)
+            {
+                TileCoordinate transformed = StructuralEditService.TransformConnectionPointOffset(
+                    point.Offset, orientation, structure.GrossFootprint);
+                CardinalOrientation facing = StructuralEditService.Rotate(point.Facing, orientation);
+                int width = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy
+                    ? structure.GrossFootprint.Height : structure.GrossFootprint.Width;
+                int height = orientation == CardinalOrientation.Ninety || orientation == CardinalOrientation.TwoSeventy
+                    ? structure.GrossFootprint.Width : structure.GrossFootprint.Height;
+                bool onBoundary = facing == CardinalOrientation.Zero ? transformed.Y == height - 1 :
+                    facing == CardinalOrientation.Ninety ? transformed.X == width - 1 :
+                    facing == CardinalOrientation.OneEighty ? transformed.Y == 0 : transformed.X == 0;
+                Assert.That(onBoundary, Is.True, structure.StructureDefinitionId + ":" + orientation);
+            }
+        }
+
         [TestCase("spatial.room.rectangle", CardinalOrientation.Zero, 4, 1, "north", true)]
-        [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 1, "north", false)]
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 2, "west", true)]
         [TestCase("spatial.room.large_chamber", CardinalOrientation.Zero, 4, 1, "north", true)]
+        [TestCase("spatial.room.large_chamber", CardinalOrientation.Ninety, 4, 1, "west", true)]
         public void NativeRoomAppend_UsesProductionGeometry(string definitionId,
             CardinalOrientation orientation, int x, int y, string terminalPoint, bool expectedValid)
         {
@@ -27,11 +108,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     TerminalConnectionPointId = terminalPoint }, fixture.Production,
                 fixture.Compatibility, configuration, fixture.Limits);
             Assert.That(preview.IsValid, Is.EqualTo(expectedValid), string.Join(",", preview.ReasonCodes));
-            if (!expectedValid)
-            {
-                Assert.That(preview.ReasonCodes[0], Is.EqualTo(StructuralEditService.ConnectionUnavailableReason));
-                return;
-            }
+            if (!expectedValid) return;
             Assert.That(preview.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
             Assert.That(preview.Consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved), Is.True);
             DetachedCanonicalSpatialSaveState candidate = preview.DetachedCandidate;

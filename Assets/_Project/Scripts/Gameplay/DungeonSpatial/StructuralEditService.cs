@@ -202,21 +202,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool Compatible(string a, string b, SpatialContentCatalog catalog) =>
             (catalog.SocketTypes ?? Array.Empty<SpatialSocketTypeDefinition>()).Any(value => value != null &&
                 value.SocketTypeId == a && (value.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(b));
-        private static CardinalOrientation Rotate(CardinalOrientation facing, CardinalOrientation rotation) =>
+        internal static CardinalOrientation Rotate(CardinalOrientation facing, CardinalOrientation rotation) =>
             (CardinalOrientation)(((int)facing + (int)rotation) % 4);
         private static CardinalOrientation Opposite(CardinalOrientation value) => (CardinalOrientation)(((int)value + 2) % 4);
         private static TileCoordinate Step(TileCoordinate value, CardinalOrientation facing) => facing == CardinalOrientation.Zero
             ? new TileCoordinate(value.X, value.Y + 1) : facing == CardinalOrientation.Ninety
             ? new TileCoordinate(value.X + 1, value.Y) : facing == CardinalOrientation.OneEighty
             ? new TileCoordinate(value.X, value.Y - 1) : new TileCoordinate(value.X - 1, value.Y);
-        private static TileCoordinate World(TileCoordinate offset, TileCoordinate anchor, CardinalOrientation orientation,
-            RectangularFootprintDefinition footprint) => orientation == CardinalOrientation.Ninety
-            ? new TileCoordinate(anchor.X + footprint.Height - 1 - offset.Y, anchor.Y + offset.X)
+        internal static TileCoordinate TransformConnectionPointOffset(TileCoordinate offset,
+            CardinalOrientation orientation, RectangularFootprintDefinition footprint) =>
+            orientation == CardinalOrientation.Ninety
+            ? new TileCoordinate(offset.Y, footprint.Width - 1 - offset.X)
             : orientation == CardinalOrientation.OneEighty
-            ? new TileCoordinate(anchor.X + footprint.Width - 1 - offset.X, anchor.Y + footprint.Height - 1 - offset.Y)
+            ? new TileCoordinate(footprint.Width - 1 - offset.X, footprint.Height - 1 - offset.Y)
             : orientation == CardinalOrientation.TwoSeventy
-            ? new TileCoordinate(anchor.X + offset.Y, anchor.Y + footprint.Width - 1 - offset.X)
-            : new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y);
+            ? new TileCoordinate(footprint.Height - 1 - offset.Y, offset.X)
+            : offset;
+        private static TileCoordinate World(TileCoordinate offset, TileCoordinate anchor, CardinalOrientation orientation,
+            RectangularFootprintDefinition footprint)
+        { TileCoordinate transformed = TransformConnectionPointOffset(offset, orientation, footprint);
+          return new TileCoordinate(anchor.X + transformed.X, anchor.Y + transformed.Y); }
         private static TileCoordinate AnchorFor(TileCoordinate world, TileCoordinate offset, CardinalOrientation orientation,
             RectangularFootprintDefinition footprint)
         { TileCoordinate transformed = World(offset, new TileCoordinate(0, 0), orientation, footprint);
