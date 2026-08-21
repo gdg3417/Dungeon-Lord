@@ -7,6 +7,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class StructuralEditServiceTests
     {
+        [TestCase(5, 2, "east", 4, 3)]
+        [TestCase(0, 7, "east", 1, 6)]
+        public void StraightStoneCorridor_OneTileAppendIsDeterministic(int x, int y,
+            string terminalPoint, int corridorX, int corridorY)
+        {
+            PreviewFixture fixture = CreateR1();
+            var request = new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(x, y), Orientation = CardinalOrientation.Zero,
+                TerminalConnectionPointId = terminalPoint };
+            StructuralEditPreview first = StructuralEditService.Preview(fixture.State, request,
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            StructuralEditPreview second = StructuralEditService.Preview(fixture.State, request,
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            Assert.That(first.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            FloorRouteEdge incoming = first.DetachedCandidate.Floors[0].Layout.Edges.Single(value =>
+                value.EdgeId.EndsWith(".edge.incoming"));
+            Assert.That(incoming.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            Assert.That(incoming.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone"));
+            Assert.That(incoming.Footprint.OccupiedTiles.Length, Is.EqualTo(1));
+            Assert.That(incoming.Footprint.OccupiedTiles[0].X, Is.EqualTo(corridorX));
+            Assert.That(incoming.Footprint.OccupiedTiles[0].Y, Is.EqualTo(corridorY));
+            FloorRouteEdge terminal = first.DetachedCandidate.Floors[0].Layout.Edges.Single(value =>
+                value.EdgeId.EndsWith(".edge.terminal"));
+            Assert.That(terminal.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(terminal.Footprint, Is.Null);
+            Assert.That(first.ResultingUsedFloorSpace, Is.EqualTo(43));
+            SpatialContractResult<byte[]> a = CanonicalSpatialSaveSerializer.Serialize(first.DetachedCandidate, fixture.Limits);
+            SpatialContractResult<byte[]> b = CanonicalSpatialSaveSerializer.Serialize(second.DetachedCandidate, fixture.Limits);
+            CollectionAssert.AreEqual(a.Value, b.Value);
+        }
+
         [TestCase("unknown", CardinalOrientation.Zero, 0, 6, "north", StructuralEditService.RoomDefinitionInvalidReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Ninety, 0, 6, "north", StructuralEditService.OrientationInvalidReason)]
         [TestCase("spatial.room.basic", CardinalOrientation.Zero, -1, 6, "north", StructuralEditService.OutOfBoundsReason)]

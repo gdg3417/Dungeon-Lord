@@ -18,7 +18,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         InvalidOrientation = 35, InvalidNodeKind = 36, InvalidRouteClassification = 37,
         InvalidRoomFootprint = 38, InvalidCorridorFootprint = 39,
         InvalidFloorBounds = 40, StructureTileOutsideFloorBounds = 41, FinalCapacityExceedsFloorBounds = 42,
-        InvalidConnectionKind = 43, DirectDoorwayHasCorridorDefinition = 44, DirectDoorwayHasFootprint = 45
+        InvalidConnectionKind = 43, DirectDoorwayHasCorridorDefinition = 44, DirectDoorwayHasFootprint = 45,
+        CorridorDefinitionGeometryMismatch = 46
     }
 
     [Serializable]
@@ -140,9 +141,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 else if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
                 {
-                    bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty, out _);
+                    bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty,
+                        out CorridorSpatialDefinition corridorDefinition);
                     if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
                     bool footprintValid = ValidateCorridorFootprint(edge, limits, issues);
+                    if (definitionResolved && footprintValid && !MatchesCorridorDefinition(edge.Footprint.OccupiedTiles,
+                            corridorDefinition))
+                        Add(issues, FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch,
+                            edge.EdgeId, edge.CorridorDefinitionId);
+                    footprintValid = footprintValid && definitionResolved &&
+                        MatchesCorridorDefinition(edge.Footprint.OccupiedTiles, corridorDefinition);
                     kindContractValid = definitionResolved && footprintValid;
                     TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
                     if (suppliedTiles != null && suppliedTiles.Length > 0 && limits.Allows(suppliedTiles.LongLength))
@@ -260,6 +268,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (!valid) Add(issues, FloorLayoutValidationReason.InvalidCorridorFootprint, edge.EdgeId);
             return valid;
+        }
+
+        private static bool MatchesCorridorDefinition(TileCoordinate[] tiles,
+            CorridorSpatialDefinition definition)
+        {
+            if (definition == null || tiles == null || definition.Width != 1 ||
+                tiles.Length < definition.MinimumLength || tiles.Length > definition.MaximumLength) return false;
+            bool horizontal = tiles.Length == 1 || tiles.All(value => value.Y == tiles[0].Y);
+            bool vertical = tiles.Length == 1 || tiles.All(value => value.X == tiles[0].X);
+            CardinalOrientation[] allowed = definition.AllowedOrientations ?? Array.Empty<CardinalOrientation>();
+            return horizontal && allowed.Contains(CardinalOrientation.Ninety) ||
+                vertical && allowed.Contains(CardinalOrientation.Zero);
         }
 
         private static bool ResolveEndpoint(string nodeId, string edgeId, bool source, Dictionary<string, FloorRouteNode> nodeById,

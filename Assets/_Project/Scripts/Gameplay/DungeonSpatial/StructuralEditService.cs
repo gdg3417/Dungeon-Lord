@@ -61,6 +61,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string RequiredRouteReason = "structural.edit.required_route_disconnected";
         public const string CompletionUnreachableReason = "structural.edit.completion_unreachable";
         public const string WorkloadReason = "structural.edit.workload_exceeded";
+        public const string CorridorDefinitionReason = "structural.edit.corridor_definition_invalid";
+        public const string CorridorLengthReason = "structural.edit.corridor_length_invalid";
 
         public static StructuralEditPreview Preview(DetachedCanonicalSpatialSaveState current,
             StructuralConstructionRequest request, ProductionSpatialContentSnapshot production,
@@ -122,7 +124,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var newRoom = new RoomSpatialInstance { RoomInstanceId = roomId, RoomDefinitionId = roomDefinition.RoomDefinitionId,
                 FloorId = floor.FloorInstanceId, Anchor = request.Anchor, Orientation = request.Orientation };
             DoorPair[] incoming = Pairs(previousRoom, previousDefinition, newRoom, roomDefinition, catalog).ToArray();
-            if (incoming.Length == 0) return Fail(result, ConnectionUnavailableReason);
+            CorridorSpatialDefinition corridor = null;
+            if (incoming.Length == 0)
+            {
+                CorridorSpatialDefinition[] corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
+                    .Where(value => value != null && (floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>())
+                        .Contains(value.CorridorDefinitionId) && value.Category == CorridorSpatialCategory.Straight).ToArray();
+                if (corridors.Length != 1) return Fail(result, CorridorDefinitionReason);
+                corridor = corridors[0];
+                incoming = CorridorPairs(previousRoom, previousDefinition, newRoom, roomDefinition,
+                    catalog, corridor).ToArray();
+                if (incoming.Length == 0) return Fail(result, ConnectionUnavailableReason);
+            }
             if (incoming.Length != 1) return Fail(result, ConnectionAmbiguousReason);
 
             SpatialConnectionPointDefinition outgoing = (roomDefinition.ConnectionPoints ??
@@ -153,12 +166,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TileCoordinate oldTerminalAnchor = terminal.Anchor;
             terminal.Anchor = terminalAnchor; terminal.Orientation = terminalOrientation;
 
+            if (corridor != null)
+            {
+                TileCoordinate[] corridorTiles = incoming[0].Tiles;
+                if (corridorTiles.Any(tile => !floorDefinition.Bounds.Contains(tile)))
+                    return Fail(result, OutOfBoundsReason);
+                if (OverlapsRooms(corridorTiles, floor.Layout.Rooms.Concat(new[] { newRoom }),
+                        catalog.Rooms, workload) || OverlapsFixed(corridorTiles, floor.FixedStructures,
+                        catalog.FixedStructures, workload) || Overlaps(corridorTiles, terminalFootprint.OccupiedTiles) ||
+                        OverlapsCorridors(corridorTiles, floor.Layout.Edges))
+                    return Fail(result, CorridorOverlapReason);
+            }
+
             floor.Layout.Rooms = floor.Layout.Rooms.Concat(new[] { newRoom }).ToArray();
             var newNode = new FloorRouteNode { NodeId = identity.RoomNodeId, FloorId = floor.FloorInstanceId,
                 Kind = FloorRouteNodeKind.Room, RoomInstanceId = roomId };
             floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { newNode }).ToArray();
-            var incomingEdge = Direct(identity.IncomingRequiredEdgeId, floor.FloorInstanceId,
-                previousNode.NodeId, newNode.NodeId);
+            var incomingEdge = corridor == null
+                ? Direct(identity.IncomingRequiredEdgeId, floor.FloorInstanceId, previousNode.NodeId, newNode.NodeId)
+                : Physical(identity.IncomingRequiredEdgeId, floor.FloorInstanceId, previousNode.NodeId,
+                    newNode.NodeId, corridor.CorridorDefinitionId, incoming[0].Tiles);
             var outgoingEdge = Direct(identity.TerminalRequiredEdgeId, floor.FloorInstanceId,
                 newNode.NodeId, completionNode.NodeId);
             floor.Layout.Edges = floor.Layout.Edges.Where(value => value?.EdgeId != oldTerminalEdge.EdgeId)
@@ -178,7 +205,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     limits.Spatial).IsValid) return Fail(result, LayoutInvalidReason);
             result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
-            result.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            result.ConnectionKind = incomingEdge.ConnectionKind;
             result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
                     StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
                     StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
@@ -190,7 +217,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return result;
         }
 
-        private sealed class DoorPair { }
+        private sealed class DoorPair
+        { internal TileCoordinate[] Tiles = Array.Empty<TileCoordinate>(); }
         private static IEnumerable<DoorPair> Pairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
             RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog)
         {
@@ -201,6 +229,35 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (bf == Opposite(af) && Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) &&
                     Step(World(ap.Offset, a.Anchor, a.Orientation, ad.GrossFootprint), af).Equals(
                         World(bp.Offset, b.Anchor, b.Orientation, bd.GrossFootprint))) yield return new DoorPair();
+            }
+        }
+        private static IEnumerable<DoorPair> CorridorPairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
+            RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog,
+            CorridorSpatialDefinition corridor)
+        {
+            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            {
+                CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
+                if (bf != Opposite(af) || !Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) ||
+                    !(corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(ap.SocketTypeId)) continue;
+                TileCoordinate source = World(ap.Offset, a.Anchor, a.Orientation, ad.GrossFootprint);
+                TileCoordinate destination = World(bp.Offset, b.Anchor, b.Orientation, bd.GrossFootprint);
+                bool horizontal = source.Y == destination.Y &&
+                    (af == CardinalOrientation.Ninety || af == CardinalOrientation.TwoSeventy);
+                bool vertical = source.X == destination.X &&
+                    (af == CardinalOrientation.Zero || af == CardinalOrientation.OneEighty);
+                if (!horizontal && !vertical) continue;
+                int distance = Math.Abs(destination.X - source.X) + Math.Abs(destination.Y - source.Y);
+                int length = distance - 1;
+                CardinalOrientation axis = horizontal ? CardinalOrientation.Ninety : CardinalOrientation.Zero;
+                if (length < corridor.MinimumLength || length > corridor.MaximumLength || corridor.Width != 1 ||
+                    !(corridor.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(axis) ||
+                    !Step(source, af).Equals(horizontal || vertical ? StepToward(source, destination) : source)) continue;
+                var tiles = new List<TileCoordinate>();
+                TileCoordinate value = StepToward(source, destination);
+                while (!value.Equals(destination)) { tiles.Add(value); value = StepToward(value, destination); }
+                yield return new DoorPair { Tiles = tiles.OrderBy(tile => tile).ToArray() };
             }
         }
         private static bool Compatible(string a, string b, SpatialContentCatalog catalog) =>
@@ -235,6 +292,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SourceNodeId = source, DestinationNodeId = destination, Footprint = null,
                 Classification = RouteClassification.Required, OptionalBranchId = string.Empty,
                 ConnectionKind = FloorRouteConnectionKind.DirectDoorway };
+        private static FloorRouteEdge Physical(string id, string floor, string source, string destination,
+            string definition, TileCoordinate[] tiles) => new FloorRouteEdge { EdgeId = id,
+                CorridorDefinitionId = definition, FloorId = floor, SourceNodeId = source,
+                DestinationNodeId = destination, Footprint = new ResolvedTileFootprint(tiles),
+                Classification = RouteClassification.Required, OptionalBranchId = string.Empty,
+                ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor };
+        private static TileCoordinate StepToward(TileCoordinate from, TileCoordinate to) =>
+            new TileCoordinate(from.X == to.X ? from.X : from.X + Math.Sign(to.X - from.X),
+                from.Y == to.Y ? from.Y : from.Y + Math.Sign(to.Y - from.Y));
         private static bool OverlapsRooms(IEnumerable<TileCoordinate> tiles, IEnumerable<RoomSpatialInstance> rooms,
             IEnumerable<RoomSpatialDefinition> definitions, SpatialValidationWorkloadLimits limits) =>
             Overlaps(tiles, (rooms ?? Enumerable.Empty<RoomSpatialInstance>()).SelectMany(room =>
@@ -258,6 +324,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (reasons.Contains(FloorLayoutValidationReason.CapacityExceeded)) return CapacityReason;
             if (reasons.Contains(FloorLayoutValidationReason.StructureTileOutsideFloorBounds)) return TerminalPlacementInvalidReason;
             if (reasons.Contains(FloorLayoutValidationReason.FootprintOverlap)) return TerminalPlacementInvalidReason;
+            if (reasons.Contains(FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch)) return CorridorLengthReason;
             if (reasons.Contains(FloorLayoutValidationReason.UnreachableRoom)) return RequiredRouteReason;
             if (reasons.Contains(FloorLayoutValidationReason.RequiredRouteWithoutTerminal)) return CompletionUnreachableReason;
             return LayoutInvalidReason;

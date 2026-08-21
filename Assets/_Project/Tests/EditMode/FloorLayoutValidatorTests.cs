@@ -16,7 +16,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         public static FloorSpatialConfiguration Configuration(int capacity = FinalCapacity, int branches = 0) => new FloorSpatialConfiguration { FloorDefinitionId = "floor.definition.test", FloorIndex = 0, Bounds = new RectangularFloorBounds(new TileCoordinate(-100, -100), 400, 400), FinalFloorSpaceCapacity = capacity, OptionalBranchAllowance = branches };
         public static RoomSpatialDefinition[] Definitions(int connections = 2) => new[] { new RoomSpatialDefinition { RoomDefinitionId = RoomDefinitionId, GrossFootprint = new RectangularFootprintDefinition(1, 1), MaximumConnectionCount = connections, MonsterCapacity = 1, TrapCapacity = 2, LootCapacity = 3 } };
-        public static CorridorSpatialDefinition[] CorridorDefinitions() => new[] { new CorridorSpatialDefinition { CorridorDefinitionId = CorridorDefinitionId } };
+        public static CorridorSpatialDefinition[] CorridorDefinitions() => new[] { new CorridorSpatialDefinition
+        { CorridorDefinitionId = CorridorDefinitionId, Width = 1, MinimumLength = 1, MaximumLength = 100,
+          AllowedOrientations = new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety } } };
 
         public static FloorSpatialLayout ValidLayout(FloorRouteNodeKind terminal = FloorRouteNodeKind.Completion)
         {
@@ -33,6 +35,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var result = FloorLayoutValidator.Validate(ValidLayout(terminal), Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.IsValid, Is.True); Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(FinalCapacity)); Assert.That(result.Capacity.RemainingFloorSpaceCapacity, Is.Zero);
+        }
+
+        [Test]
+        public void PhysicalCorridor_LengthMustMatchReferencedDefinition()
+        {
+            CorridorSpatialDefinition definition = CorridorDefinitions()[0];
+            definition.MinimumLength = 3;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+            definition.MinimumLength = 1; definition.MaximumLength = 1;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
         }
 
         [Test]

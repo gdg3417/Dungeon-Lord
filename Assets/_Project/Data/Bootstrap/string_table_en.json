@@ -2878,6 +2878,14 @@
     {
       "key": "structural.edit.workload_exceeded",
       "text": "The structural preview exceeds its validation workload limit."
+    },
+    {
+      "key": "structural.edit.corridor_definition_invalid",
+      "text": "The required corridor definition is unavailable."
+    },
+    {
+      "key": "structural.edit.corridor_length_invalid",
+      "text": "The straight corridor length is not supported."
     }
   ]
 }
