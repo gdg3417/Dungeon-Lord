@@ -208,7 +208,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
             result.ConnectionKind = incomingEdge.ConnectionKind;
-            result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
+            result.IncomingConnectionTiles = incomingEdge.Footprint?.OccupiedTiles?
                     StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
                     StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
                 new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },

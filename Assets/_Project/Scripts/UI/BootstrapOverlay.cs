@@ -1366,7 +1366,20 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+            {
+                RoomSpatialDefinition nextRoom = (_root.ProductionSpatialContent?.Catalog?.Rooms ??
+                    System.Array.Empty<RoomSpatialDefinition>()).FirstOrDefault(value =>
+                        value?.RoomDefinitionId == _structuralRoomIds[_structuralRoomIndex]);
+                if (nextRoom?.AllowedOrientations?.Length > 0)
+                    _structuralOrientationIndex = (int)nextRoom.AllowedOrientations[0];
+            }
+            {
+                CardinalOrientation[] allowed = selectedRoom?.AllowedOrientations ??
+                    System.Array.Empty<CardinalOrientation>();
+                int current = System.Array.IndexOf(allowed, selectedOrientation);
+                if (allowed.Length > 0)
+                    _structuralOrientationIndex = (int)allowed[(current + 1) % allowed.Length];
+            }
                 _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
