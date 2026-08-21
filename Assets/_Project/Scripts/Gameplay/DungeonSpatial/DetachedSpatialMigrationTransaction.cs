@@ -59,53 +59,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DetachedLegacyValidationResult ValidateLegacy(byte[] bytes)
         {
             if (bytes == null || !rawLimits.IsValid || !rawVersions.IsValid || blankFloor == null ||
+                !blankFloor.IsValid ||
                 !wholeSaveLimits.IsValid) return new DetachedLegacyValidationResult(false,
                     "gd66.transaction.pinned_input_missing");
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
                 bytes, rawLimits, rawVersions, blankFloor);
             if (!classification.IsSuccess) return new DetachedLegacyValidationResult(false,
                 classification.FailureReason);
-            int schema = classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
-                ? 1 : classification.SchemaVersion.GetValueOrDefault();
-            CompatibilitySelectionResult<CanonicalLayoutContractSelection> contract =
-                Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
-            if (!contract.Success) return new DetachedLegacyValidationResult(false, contract.Code);
-            CompatibilitySelectionResult<SpatialMigrationCompatibilityProfile> profile =
-                Compatibility.SelectMigration(schema, DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                    contract.Value.CanonicalLayoutContractVersion);
-            if (!profile.Success) return new DetachedLegacyValidationResult(false, profile.Code);
-            if (legacyConfigurationBytes == null) return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_missing");
-            try
-            {
-                var descriptor = new SpatialMigrationInputDescriptor(SpatialContractSha256.Compute(bytes), schema,
-                    classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
-                        ? SpatialRawEnvelopeClassification.UnwrappedSaveData
-                        : SpatialRawEnvelopeClassification.WrappedSaveRoot,
-                    DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
-                    SpatialMigrationContractIdentity.AuthorityMarkerContractVersion,
-                    SpatialMigrationContractIdentity.MigrationContractVersion, profile.Value.ProfileId,
-                    profile.Value.ProfileVersion, profile.Value.CanonicalHash, profile.Value.GeometryId,
-                    profile.Value.GeometryVersion, profile.Value.GeometryCanonicalHash,
-                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                        ProductionContent.Manifest)),
-                    SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(
-                        ProductionContent.Catalog)), Array.Empty<SpatialValidationInputHash>(),
-                    SpatialContractSha256.Compute(legacyConfigurationBytes),
-                    SpatialMigrationContractIdentity.CanonicalSerializerId,
-                    SpatialMigrationContractIdentity.CanonicalSerializerVersion);
-                var inputs = new DetachedSpatialMigrationPreparationInputs(bytes, classification, descriptor,
-                    Compatibility, ProductionContent, LegacyGameplayConfigurationContract.Parse(
-                        legacyConfigurationBytes), validationInputs, Limits, wholeSaveLimits);
-                DetachedSpatialMigrationPreparationResult prepared = DetachedSpatialMigrationPreparer.Prepare(inputs);
-                return new DetachedLegacyValidationResult(prepared.IsSuccess, prepared.Reason);
-            }
-            catch (ArgumentException) { return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_hash_mismatch"); }
-            catch (FormatException) { return new DetachedLegacyValidationResult(false,
-                "gd66.transaction.pinned_input_hash_mismatch"); }
-            catch (InvalidOperationException) { return new DetachedLegacyValidationResult(false,
-                "gd66.profile.invalid"); }
+            // Recovery answers only whether the active payload is trustworthy legacy evidence.
+            // Migration eligibility (including Narrow Hall) is decided later by the preparer.
+            return new DetachedLegacyValidationResult(true, null);
         }
 
         internal string ValidatePins(SpatialMigrationInputDescriptor descriptor)
@@ -234,6 +197,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         IReadOnlyList<string> EnumerateFiles(string directoryPath, string searchPattern, int maximumResults);
         bool IsPathContainedWithoutRedirection(string directoryPath, string path);
         void MoveSameDirectoryAtomic(string sourcePath, string destinationPath);
+        void DeleteFile(string path);
     }
 
     public sealed class RuntimeSpatialMigrationFileSystem : ISpatialMigrationFileSystem
@@ -296,6 +260,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 throw new IOException();
             File.Move(sourcePath, destinationPath);
         }
+        public void DeleteFile(string path) => File.Delete(path);
         private static StringComparison PlatformPathComparison => Path.DirectorySeparatorChar == '\\'
             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     }
@@ -593,7 +558,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (!ResolveEvidencePaths(directory, journal, out string journalPath, out string backupPath,
                 out string ignoredStaging)) return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
-            byte[] active = fileSystem.ReadAllBytes(activePath);
+            byte[] active = fileSystem.Exists(activePath) ? fileSystem.ReadAllBytes(activePath) : null;
             if (HashIs(active, journal.OriginalPayloadSha256))
             {
                 if ((int)journal.Stage > (int)SpatialMigrationJournalStage.DescriptorPinned &&
@@ -634,7 +599,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var diagnostics = new List<string>();
             if (!ResolveEvidencePaths(directory, journal, out string journalPath, out string backupPath,
                 out string stagingPath)) return Failure(PathInvalidReason, journal.Stage, SpatialTrustedPayload.None);
-            byte[] active = fileSystem.ReadAllBytes(activePath);
+            byte[] active = fileSystem.Exists(activePath) ? fileSystem.ReadAllBytes(activePath) : null;
             bool activeOriginal = HashIs(active, journal.OriginalPayloadSha256);
             byte[] backup = fileSystem.Exists(backupPath) ? fileSystem.ReadAllBytes(backupPath) : null;
             bool backupValid = HashIs(backup, journal.OriginalPayloadSha256);
@@ -1132,7 +1097,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private EvidenceSnapshot DiscoverEvidence(string directory, string stem)
         {
             int maximum = limits.MaximumCollectionRecords;
-            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, stem + ".gd66-*", maximum + 1);
+            string searchPattern = SpatialMigrationSidecarPaths.EvidenceSearchPatternFromStem(stem);
+            IReadOnlyList<string> paths = fileSystem.EnumerateFiles(directory, searchPattern, maximum + 1);
             if (paths.Count > maximum) throw new IOException("GD66 evidence limit exceeded.");
             var records = new List<EvidenceRecord>(paths.Count);
             foreach (string enumerated in paths.OrderBy(value => value, StringComparer.Ordinal))
@@ -1169,15 +1135,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static EvidenceKind ClassifyFilename(string name)
         {
-            if (name.EndsWith(".journal.json", StringComparison.Ordinal)) return EvidenceKind.LiveJournal;
-            if (name.EndsWith(".journal.json.next", StringComparison.Ordinal)) return EvidenceKind.JournalNext;
-            if (name.EndsWith(".original.bak.restore.intent", StringComparison.Ordinal)) return EvidenceKind.RestorationIntent;
-            if (name.EndsWith(".original.bak.restore", StringComparison.Ordinal)) return EvidenceKind.RestoreStaging;
-            if (name.EndsWith(".original.bak", StringComparison.Ordinal)) return EvidenceKind.OriginalBackup;
-            if (name.EndsWith(".candidate.tmp", StringComparison.Ordinal)) return EvidenceKind.CandidateStaging;
-            if (name.EndsWith(".finalized", StringComparison.Ordinal)) return EvidenceKind.FinalizationReceipt;
-            if (name.EndsWith(".evidence", StringComparison.Ordinal)) return EvidenceKind.ExistingQuarantine;
-            return EvidenceKind.Unknown;
+            switch (SpatialMigrationRecoveryEvidenceProbe.ClassifyFilename(name))
+            {
+                case SpatialMigrationEvidenceFilenameKind.Journal: return EvidenceKind.LiveJournal;
+                case SpatialMigrationEvidenceFilenameKind.JournalNext: return EvidenceKind.JournalNext;
+                case SpatialMigrationEvidenceFilenameKind.OriginalBackup: return EvidenceKind.OriginalBackup;
+                case SpatialMigrationEvidenceFilenameKind.RestorationIntent: return EvidenceKind.RestorationIntent;
+                case SpatialMigrationEvidenceFilenameKind.RestoreStaging: return EvidenceKind.RestoreStaging;
+                case SpatialMigrationEvidenceFilenameKind.CandidateStaging: return EvidenceKind.CandidateStaging;
+                case SpatialMigrationEvidenceFilenameKind.FinalizationReceipt: return EvidenceKind.FinalizationReceipt;
+                case SpatialMigrationEvidenceFilenameKind.ExistingQuarantine: return EvidenceKind.ExistingQuarantine;
+                default: return EvidenceKind.Unknown;
+            }
         }
 
         private bool QuarantineMalformedEvidence(string directory, IReadOnlyList<EvidenceRecord> malformed)
@@ -1369,9 +1338,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string expectedCandidateSha256 = null)
         {
             if (productionContent == null) return false;
-            var completeLimits = new CanonicalSpatialSerializationLimits(limits,
-                new CanonicalSpatialSaveWorkloadLimits(limits.MaximumCollectionRecords,
-                    limits.MaximumCollectionRecords));
+            CanonicalSpatialSerializationLimits completeLimits = recoveryContext.Limits;
             if (descriptor != null)
             {
                 return recoveryContext.TryCreateUnfinishedValidationContext(descriptor,

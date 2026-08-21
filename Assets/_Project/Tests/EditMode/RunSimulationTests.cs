@@ -3242,7 +3242,7 @@ namespace DungeonBuilder.Tests.EditMode
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
             MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(migrated.primary.mvpDungeonFloorLayout, migrated.primary.mvpDungeonPlacements);
 
-            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
             Assert.That(migrated.primary.mvpDungeonFloorLayout, Is.Not.Null);
             Assert.That(migrated.primary.mvpDungeonFloorLayout.Nodes, Has.Count.EqualTo(MvpDungeonPlacementIds.OrderedCategoryIds.Length));
             Assert.That(MvpDungeonLayoutResolver.ResolveOrderedNodePlacements(migrated.primary.mvpDungeonFloorLayout), Has.Length.EqualTo(4));

@@ -108,7 +108,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             SaveRoot migrated = SaveMigration.MigrateToLatest(root);
 
-            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(migrated.schemaVersion, Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
             Assert.That(migrated.primary.structureRuntime, Is.Not.Null);
         }
 

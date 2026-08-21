@@ -108,6 +108,10 @@
       "text": "Unable to place the selected placement entry."
     },
     {
+      "key": "ui.banner.place_room_capacity_full",
+      "text": "The selected room is already at capacity for that placement type."
+    },
+    {
       "key": "ui.banner.simulated_tick",
       "text": "Structure simulation tick applied."
     },
@@ -2426,6 +2430,366 @@
     {
       "key": "run.reason.no_encounter",
       "text": "The route has no active encounter or reward content."
+    },
+    {
+      "key": "save.migration.spatial.gd66.preflight.platform_unsupported",
+      "text": "This save can only be upgraded on a supported Windows installation. Your existing save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.preflight.path_invalid",
+      "text": "The save location cannot be used safely. Choose a valid local save location and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.preflight.path_redirected",
+      "text": "The save location is redirected or linked. Move the game to a supported local save location and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.preflight.volume_unsupported",
+      "text": "The save must be on a supported local NTFS drive before it can be upgraded."
+    },
+    {
+      "key": "save.migration.spatial.gd66.preflight.native_probe_failed",
+      "text": "The game could not verify that this save location supports a safe upgrade. Resolve the drive or folder problem and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.unreadable",
+      "text": "The save could not be read. It was not replaced or changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.ambiguous_envelope",
+      "text": "The save format could not be identified safely. The save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.missing_schema",
+      "text": "The save is missing required format information and cannot be upgraded safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.invalid_schema",
+      "text": "The save contains invalid format information and cannot be upgraded safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.null_primary",
+      "text": "The save is missing its primary game state and cannot be opened safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.unknown_member_unpreservable",
+      "text": "The save contains data that cannot be preserved safely during the upgrade."
+    },
+    {
+      "key": "save.migration.spatial.gd66.success.recovered_original",
+      "text": "The original save was recovered successfully. You can continue playing."
+    },
+    {
+      "key": "save.migration.spatial.gd66.route.duplicate_room_slot",
+      "text": "More than one room claims the same route position. Repair is required before the save can be upgraded."
+    },
+    {
+      "key": "save.migration.spatial.gd66.route.duplicate_floor_node_revision",
+      "text": "The dungeon route has conflicting floor changes. Repair is required before upgrade."
+    },
+    {
+      "key": "save.migration.spatial.gd66.route.duplicate_placement_revision",
+      "text": "The dungeon contents have conflicting placement changes. Repair is required before upgrade."
+    },
+    {
+      "key": "save.migration.spatial.gd66.route.record_out_of_range",
+      "text": "The dungeon route contains a position or sequence outside the supported range."
+    },
+    {
+      "key": "save.migration.spatial.gd66.route.gap",
+      "text": "The dungeon route has a later room without the required earlier room."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.outcome_mismatch",
+      "text": "The upgraded dungeon would not preserve the current run behavior, so the upgrade was stopped."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.invalid_legacy_room",
+      "text": "The save contains an invalid room selection that must be repaired before upgrade."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.missing_production_room",
+      "text": "A room required by this save is missing from the installed game data."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.invalid_production_room",
+      "text": "A room required by this save is invalid in the installed game data."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.invalid_option",
+      "text": "The save contains an unknown or invalid monster, trap, or loot selection."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.category_mismatch",
+      "text": "A saved dungeon item is assigned to the wrong content category."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.room_capacity_exceeded",
+      "text": "A saved room contains more content than its supported capacity."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.duplicate_assignment",
+      "text": "The save contains duplicate room-content assignments."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.room_semantics_invalid",
+      "text": "The saved room origin information is missing or contradictory."
+    },
+    {
+      "key": "save.migration.spatial.gd66.floor.missing_definition",
+      "text": "A dungeon floor required by this save is missing from the installed game data."
+    },
+    {
+      "key": "save.migration.spatial.gd66.floor.invalid_definition",
+      "text": "A dungeon floor required by this save is invalid in the installed game data."
+    },
+    {
+      "key": "save.migration.spatial.gd66.floor.index_mismatch",
+      "text": "A saved dungeon floor does not match its configured floor position."
+    },
+    {
+      "key": "save.migration.spatial.gd66.floor.duplicate_binding",
+      "text": "More than one saved floor claims the same dungeon position."
+    },
+    {
+      "key": "save.migration.spatial.gd66.profile.missing",
+      "text": "No supported layout upgrade profile matches this save."
+    },
+    {
+      "key": "save.migration.spatial.gd66.profile.duplicate",
+      "text": "Conflicting layout upgrade profiles match this save."
+    },
+    {
+      "key": "save.migration.spatial.gd66.profile.invalid",
+      "text": "The selected layout upgrade profile is invalid."
+    },
+    {
+      "key": "save.migration.spatial.gd66.profile.version_mismatch",
+      "text": "The exact layout upgrade profile version required by this save is unavailable."
+    },
+    {
+      "key": "save.migration.spatial.gd66.id.malformed",
+      "text": "The save contains an invalid persistent dungeon identifier."
+    },
+    {
+      "key": "save.migration.spatial.gd66.id.collision",
+      "text": "The save contains duplicate persistent dungeon identifiers."
+    },
+    {
+      "key": "save.migration.spatial.gd66.geometry.bounds",
+      "text": "Part of the dungeon layout lies outside the supported floor area."
+    },
+    {
+      "key": "save.migration.spatial.gd66.geometry.overlap",
+      "text": "Dungeon structures overlap in the upgraded layout."
+    },
+    {
+      "key": "save.migration.spatial.gd66.geometry.capacity",
+      "text": "The upgraded dungeon layout exceeds the floor capacity."
+    },
+    {
+      "key": "save.migration.spatial.gd66.geometry.socket",
+      "text": "Dungeon connections do not fit together correctly."
+    },
+    {
+      "key": "save.migration.spatial.gd66.geometry.adjacency",
+      "text": "Connected dungeon spaces are not positioned next to each other."
+    },
+    {
+      "key": "save.migration.spatial.gd66.graph.endpoint",
+      "text": "The dungeon route is missing a valid entrance or completion point."
+    },
+    {
+      "key": "save.migration.spatial.gd66.graph.reachability",
+      "text": "The required dungeon route cannot reach its completion point."
+    },
+    {
+      "key": "save.migration.spatial.gd66.graph.terminal",
+      "text": "The dungeon completion point has invalid route connections."
+    },
+    {
+      "key": "save.migration.spatial.gd66.graph.ordering",
+      "text": "The dungeon route cannot be saved in a stable order."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.backup_failed",
+      "text": "A verified safety backup could not be created. The original save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.journal_malformed_with_verified_original",
+      "text": "An interrupted upgrade record is damaged, but the original save is verified and remains protected."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.candidate_invalid",
+      "text": "The upgraded save did not pass validation. The original save remains protected."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.commit_failed",
+      "text": "The upgraded save could not be installed safely. The original save remains protected."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.durability_failed",
+      "text": "The upgraded save could not be verified after writing. Recovery is required before play can continue."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.recovery_failed",
+      "text": "Neither the original nor upgraded save could be recovered safely. Gameplay is blocked to protect your data."
+    },
+    {
+      "key": "save.migration.spatial.gd66.authority.contradictory_state",
+      "text": "Conflicting dungeon layout data was found. Gameplay is blocked to protect the save."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.missing_schema_version",
+      "text": "The save is missing its version information and cannot be upgraded safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.nonintegral_schema_version",
+      "text": "The save has invalid version information and cannot be upgraded safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.unsupported_legacy_version",
+      "text": "This save version is not supported by the available upgrade path."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.newer_than_application",
+      "text": "This save was created by a newer game version. Update the game before opening it."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.missing_primary",
+      "text": "The save is missing its primary game state and cannot be opened safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.input_fingerprint_mismatch",
+      "text": "The save changed during upgrade verification. The upgrade was stopped without replacing it."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_input_missing",
+      "text": "Required game data for this save upgrade is unavailable. Install the complete game data and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_input_hash_mismatch",
+      "text": "Required game data no longer matches this upgrade attempt. Restore the matching game version and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_profile_missing",
+      "text": "The exact layout upgrade profile required by this save is unavailable."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_profile_hash_mismatch",
+      "text": "The layout upgrade profile changed during an unfinished upgrade. Restore the matching game version and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_spatial_input_missing",
+      "text": "Required dungeon layout data for this upgrade is unavailable."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.pinned_spatial_input_hash_mismatch",
+      "text": "Dungeon layout data changed during an unfinished upgrade. Restore the matching game version and try again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.active_payload_unknown",
+      "text": "The active save does not match the verified original or upgraded save. Gameplay is blocked to prevent data loss."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.no_trusted_active_payload",
+      "text": "No verified playable save could be established. Gameplay is blocked to prevent data loss."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.rollback_source_missing",
+      "text": "The original save cannot be restored, and the upgrade cannot yet be finalized safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.layout_contract.selection_missing",
+      "text": "The game is missing the configured starter layout for new saves."
+    },
+    {
+      "key": "save.migration.spatial.gd66.layout_contract.selection_duplicate",
+      "text": "The game has conflicting starter layout selections and cannot create a safe new save."
+    },
+    {
+      "key": "save.migration.spatial.gd66.marker.layout_contract_missing",
+      "text": "The save is missing its dungeon layout contract version and cannot be opened safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.marker.layout_contract_unsupported",
+      "text": "This dungeon layout version is not supported by the installed game version."
+    },
+    {
+      "key": "save.migration.spatial.gd66.starter_profile.marker_mismatch",
+      "text": "The save\u2019s dungeon layout version does not match its starter layout profile."
+    },
+    {
+      "key": "save.migration.spatial.gd66.starter_profile.missing",
+      "text": "The required starter dungeon layout is unavailable."
+    },
+    {
+      "key": "save.migration.spatial.gd66.starter_profile.duplicate",
+      "text": "Conflicting starter dungeon layouts were found."
+    },
+    {
+      "key": "save.migration.spatial.gd66.starter_profile.invalid",
+      "text": "The configured starter dungeon layout is invalid."
+    },
+    {
+      "key": "save.migration.spatial.gd66.starter_profile.version_mismatch",
+      "text": "The required starter dungeon layout version is not supported."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.multiple_live_attempts",
+      "text": "More than one unfinished save upgrade was found. Gameplay is blocked until the save can be repaired safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.transaction.path_invalid",
+      "text": "A required save-upgrade file location is unsafe. The active save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.native_save_persist_failed",
+      "text": "The new save could not be created safely. No unsaved dungeon state was activated."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.unsupported_room_selection",
+      "text": "Narrow Hall is not supported in the new dungeon layout and was not placed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.first_write_validation_failed",
+      "text": "The dungeon change could not be validated and was not applied."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.atomic_save_failed",
+      "text": "The dungeon change could not be saved safely. Your previous dungeon remains unchanged."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.room_removal_has_contents",
+      "text": "Remove this room\u2019s monsters, traps, and loot before removing the room."
+    },
+    {
+      "key": "save.migration.spatial.gd66.write.capacity_reduction_invalid",
+      "text": "This change would leave the room over capacity. Remove some room contents first."
+    },
+    {
+      "key": "save.migration.spatial.gd66.content.migration_blocked_narrow_hall",
+      "text": "Replace the Narrow Hall with a Basic Room, save the repair, and try the upgrade again."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.invalid_primary",
+      "text": "The save contains invalid primary game state and cannot be opened safely."
+    },
+    {
+      "key": "save.migration.spatial.gd66.payload.workload_exceeded",
+      "text": "The save is too large or complex to verify safely. The save was not changed."
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.narrow_hall_to_basic",
+      "text": "Replace Narrow Hall with Basic Room and retry"
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.target_room_1",
+      "text": "Repair Room 1"
+    },
+    {
+      "key": "save.migration.spatial.gd66.repair.target_room_2",
+      "text": "Repair Room 2"
     }
   ]
 }

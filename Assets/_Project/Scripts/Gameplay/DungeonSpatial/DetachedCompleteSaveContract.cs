@@ -109,15 +109,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCompleteSaveValidationResult
     {
         internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason,
-            int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null)
+            int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null,
+            bool currentTargetValidated = false, bool researchPendingExplicitNull = false,
+            bool researchProgressExplicitNull = false, bool lastOfflineSummaryExplicitNull = false)
         { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason;
-          LayoutContractVersion = layoutContractVersion; State = state; }
+          LayoutContractVersion = layoutContractVersion; State = state;
+          CurrentTargetValidated = currentTargetValidated;
+          ResearchPendingExplicitNull = researchPendingExplicitNull;
+          ResearchProgressExplicitNull = researchProgressExplicitNull;
+          LastOfflineSummaryExplicitNull = lastOfflineSummaryExplicitNull; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
         public string Reason { get; }
         private byte[] Bytes { get; }
         internal int? LayoutContractVersion { get; }
         internal DetachedCanonicalSpatialSaveState State { get; }
+        internal bool CurrentTargetValidated { get; }
+        internal bool ResearchPendingExplicitNull { get; }
+        internal bool ResearchProgressExplicitNull { get; }
+        internal bool LastOfflineSummaryExplicitNull { get; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -134,7 +144,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 context.Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
-                result.LayoutContractVersion.Value ? result : Failure();
+                result.LayoutContractVersion.Value
+                ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
+                    result.LayoutContractVersion, result.State, true,
+                    result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
+                    result.LastOfflineSummaryExplicitNull)
+                : Failure();
         }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
@@ -191,7 +206,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
                 return new DetachedCompleteSaveValidationResult(bytes, null,
-                    parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value);
+                    parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value,
+                    false, ExplicitNull(primary, "researchPending"),
+                    ExplicitNull(primary, "researchProgress"),
+                    ExplicitNull(primary, "lastOfflineSummary"));
             }
             catch { return Failure(); }
         }
@@ -287,6 +305,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static bool Field(ContractJsonNode node, int index, string name, ContractJsonKind kind) =>
             node.Fields[index].Key == name && node.Fields[index].Value.Kind == kind;
+        private static bool ExplicitNull(ContractJsonNode primary, string name)
+        {
+            foreach (KeyValuePair<string, ContractJsonNode> field in primary.Fields)
+                if (field.Key == name) return field.Value.Kind == ContractJsonKind.Null;
+            return false;
+        }
         private static bool PrimaryOrderIsCanonical(ContractJsonNode primary)
         {
             IReadOnlyList<string> recognized = RawSavePayloadClassifier.RecognizedSaveDataMemberNames;
@@ -350,6 +374,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { if (index != 0) writer.Token(","); writer.String(node.Fields[index].Key); writer.Token(":"); WriteNode(writer, node.Fields[index].Value); }
             writer.Token("}");
         }
+
+        internal static void WriteCanonicalNode(ContractJsonWriter writer, ContractJsonNode node) =>
+            WriteNode(writer, node);
         private static bool Same(byte[] left, byte[] right) => left != null && right != null && left.SequenceEqual(right);
         private static DetachedCompleteSaveValidationResult Failure() =>
             new DetachedCompleteSaveValidationResult(null, "gd66.transaction.candidate_invalid");

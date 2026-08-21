@@ -7,12 +7,16 @@ namespace DungeonBuilder.M0
 {
     public static class SaveMigration
     {
-        public const int LatestSchemaVersion = 6;
+        // Schema 7 is reached live only through the GD66 raw-before-legacy boundary.
+        public const int LatestSchemaVersion = 7;
+        public const int LegacyCompatibilitySchemaVersion = 6;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;
 
         public static SaveRoot MigrateToLatest(SaveRoot root)
         {
+            if (root != null && root.schemaVersion >= LatestSchemaVersion)
+                return root;
             if (root == null)
             {
                 root = new SaveRoot();
@@ -28,49 +32,56 @@ namespace DungeonBuilder.M0
                 root.primary.dungeonLayout = DungeonLayoutState.CreateEmpty(DefaultFloorCount, DefaultSlotsPerFloor);
             }
 
-            if (root.primary.mvpDungeonPlacements == null)
+            bool canonicalSpatialAuthority =
+                CanonicalMvpRouteProjection.HasCanonicalLookingState(root.primary);
+
+            // Canonical saves must never revive or normalize the three legacy writable models.
+            // They remain untouched as migration/rollback evidence; normalization is
+            // legacy-repair-only.
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonPlacements == null)
             {
                 root.primary.mvpDungeonPlacements = new MvpDungeonPlacementState();
             }
 
-            if (root.primary.mvpDungeonPlacements.Entries == null)
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonPlacements.Entries == null)
             {
                 root.primary.mvpDungeonPlacements.Entries = new System.Collections.Generic.List<MvpDungeonPlacementEntry>();
             }
 
-            if (root.primary.mvpDungeonPlacements.NextRevision < 1)
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonPlacements.NextRevision < 1)
             {
                 root.primary.mvpDungeonPlacements.NextRevision = 1;
             }
 
-            if (root.primary.mvpDungeonFloorLayout == null)
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonFloorLayout == null)
             {
                 root.primary.mvpDungeonFloorLayout = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements);
             }
 
-            if (root.primary.mvpDungeonFloorLayout.Nodes == null)
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonFloorLayout.Nodes == null)
             {
                 root.primary.mvpDungeonFloorLayout.Nodes = MvpDungeonFloorLayoutState.CreateStarterFloorFromLegacyPlacements(root.primary.mvpDungeonPlacements).Nodes;
             }
 
-            MvpDungeonLayoutResolver.BackfillMissingStarterNodesFromLegacy(root.primary.mvpDungeonFloorLayout, root.primary.mvpDungeonPlacements);
+            if (!canonicalSpatialAuthority)
+                MvpDungeonLayoutResolver.BackfillMissingStarterNodesFromLegacy(root.primary.mvpDungeonFloorLayout, root.primary.mvpDungeonPlacements);
 
-            if (root.primary.mvpDungeonFloorLayout.NextRevision < 1)
+            if (!canonicalSpatialAuthority && root.primary.mvpDungeonFloorLayout.NextRevision < 1)
             {
                 root.primary.mvpDungeonFloorLayout.NextRevision = 1;
             }
 
-            if (root.primary.mvpRoomSlotAssignments == null)
+            if (!canonicalSpatialAuthority && root.primary.mvpRoomSlotAssignments == null)
             {
                 root.primary.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection();
             }
 
-            if (root.primary.mvpRoomSlotAssignments.Rooms == null)
+            if (!canonicalSpatialAuthority && root.primary.mvpRoomSlotAssignments.Rooms == null)
             {
                 root.primary.mvpRoomSlotAssignments.Rooms = new System.Collections.Generic.List<MvpRoomSlotAssignmentState>();
             }
 
-            if (root.primary.mvpRoomSlotAssignments.NextRevision < 1)
+            if (!canonicalSpatialAuthority && root.primary.mvpRoomSlotAssignments.NextRevision < 1)
             {
                 root.primary.mvpRoomSlotAssignments.NextRevision = 1;
             }
@@ -108,9 +119,11 @@ namespace DungeonBuilder.M0
                 history.RecentOutcomes = new[] { history.LatestOutcome };
             }
 
-            if (root.schemaVersion < LatestSchemaVersion)
+            // This compatibility normalizer never manufactures canonical schema 7. Only the
+            // raw-before-legacy GD66 coordinator owns the 6 -> 7 transition.
+            if (root.schemaVersion >= 1 && root.schemaVersion < LegacyCompatibilitySchemaVersion)
             {
-                root.schemaVersion = LatestSchemaVersion;
+                root.schemaVersion = LegacyCompatibilitySchemaVersion;
             }
 
             return root;

@@ -2,7 +2,11 @@
 
 **Phase 2B3 foundation (2026-08-02):** Phase 2B3 added detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. It did not activate migration, filesystem transactions, canonical spatial readers, writers, or runtime authority.
 
-**Current Phase 2B6A implementation status (2026-08-06):** PR #193 is merged and is authoritative for the completed detached candidate, transaction, and recovery implementation. Phase 2B6A adds an explicit activation preflight and a Windows filesystem strategy using documented write-through file creation/flush and handle-based same-directory rename. Rename opens the source with `DELETE | GENERIC_WRITE`, read/write/delete sharing, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`; submits an absolute UTF-16 `FILE_RENAME_INFO` through `SetFileInformationByHandle(FileRenameInfo)`; then calls `FlushFileBuffers` on that same renamed file handle and verifies source absence/destination presence. Microsoft documents `FileRenameInfo` as the handle-based rename operation, `FILE_FLAG_WRITE_THROUGH` as bypassing intermediate write caching, and `FlushFileBuffers` as flushing buffered information for the file to the device; together these are the selected NTFS metadata-persistence contract rather than the copy-oriented `MOVEFILE_WRITE_THROUGH` guarantee. No directory-handle flush or Windows directory-`fsync` equivalent is claimed. Selection is limited to Windows Editor and Windows Standalone on a local, nonredirected NTFS path; every other platform, filesystem, redirected/reparse path, invalid path, and failed native probe fails closed. The operating-system guarantee cannot correct storage hardware or drivers that falsely acknowledge cache flushes. Windows qualification at the reviewed head remains required. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 remains detached and inactive; `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy writable authority are unchanged. Phase 2B6B remains the final live-activation packet. GD66 is not complete.
+**Current Phase 2B6B closeout status (2026-08-21):** Schema 7 live activation is implemented and its required validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`. Existing schemas 1–6 enter through the raw-before-legacy recovery/migration coordinator and production compatibility profile; new saves use native empty canonical creation; ordinary lifecycle and player spatial writes use the lossless canonical session and qualified Windows atomic writer. Production spatial content owns Basic Room capacity 2/2/2, same-category content placement is additive to capacity, and exact duplicates reject without mutation. Canonical spatial state is the sole writable spatial authority; legacy spatial members are frozen evidence and `dungeonLayout` remains independently writable nonspatial/economic state. Narrow Hall remains a legacy repair-only migration blocker and is absent from canonical placement. Activation remains restricted to qualified Windows Editor/Standalone local, nonredirected NTFS paths. GD66 is complete pending merge of PR #195; native R1→R2 structural construction remains deferred to Phase 3.
+
+The legacy **Add Basic Room Slot** control is hidden for canonical authority. Native R1→R2 construction is deferred with Phase 3 structural editing; migrated R2 saves remain fully targetable, but Phase 2B6B does not invent a new R1→R2 topology rule.
+
+**Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; it includes the authoritative detached candidate, transaction, recovery, activation preflight, and qualified Windows durability implementation. Phase 2B6A adds an explicit activation preflight and a Windows filesystem strategy using documented write-through file creation/flush and handle-based same-directory rename. Rename opens the source with `DELETE | GENERIC_WRITE`, read/write/delete sharing, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`; submits an absolute UTF-16 `FILE_RENAME_INFO` through `SetFileInformationByHandle(FileRenameInfo)`; then calls `FlushFileBuffers` on that same renamed file handle and verifies source absence/destination presence. Microsoft documents `FileRenameInfo` as the handle-based rename operation, `FILE_FLAG_WRITE_THROUGH` as bypassing intermediate write caching, and `FlushFileBuffers` as flushing buffered information for the file to the device; together these are the selected NTFS metadata-persistence contract rather than the copy-oriented `MOVEFILE_WRITE_THROUGH` guarantee. No directory-handle flush or Windows directory-`fsync` equivalent is claimed. Selection is limited to Windows Editor and Windows Standalone on a local, nonredirected NTFS path; every other platform, filesystem, redirected/reparse path, invalid path, and failed native probe fails closed. The operating-system guarantee cannot correct storage hardware or drivers that falsely acknowledge cache flushes. Windows Editor and Windows Standalone durability qualification passed for PR #194; this does not qualify a future activated schema-7 lifecycle. Live `SaveMigration.LatestSchemaVersion` remains **6**; schema 7 remains detached and inactive; `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy writable authority are unchanged. Phase 2B6B remains the final live-activation packet. GD66 is not complete.
 
 Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and **Phase 2**.
 
@@ -10,11 +14,11 @@ Labels below are **Fact**, **Observed**, **GD66 decision**, **Unsupported**, and
 
 | Item | Reconciled state |
 |---|---|
-| Repository | `main` through merged PR #193 at `d9d39871732f28f61c4958dc4a55fda922c66320`; detached candidate/transaction complete |
-| Save root | `SaveRoot.schemaVersion`; `SaveMigration.LatestSchemaVersion = 6` |
-| Route topology | ordered MVP representations; no spatial graph authority |
+| Repository | PR #195 reviewed implementation at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`, based on merged PR #194 at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; schema-7 activation and required validation complete pending merge |
+| Save root | `SaveRoot.schemaVersion`; live `SaveMigration.LatestSchemaVersion = 7` through GD66 only |
+| Route topology | validated schema-7 spatial graph/content authority projected into the ordered MVP runtime view |
 | Economic structures | `dungeonLayout` placements plus `structureRuntime`, concurrently active and independent of route topology |
-| Spatial content/layout | production catalog loaded behind an inactive boundary; `FloorSpatialLayout` contains rooms/nodes/edges only |
+| Spatial content/layout | validated production catalog owns canonical definitions and capacities; `FloorSpatialLayout` owns rooms/nodes/edges |
 
 ## 3. Sources inspected
 
@@ -356,7 +360,7 @@ Phase 2 fixtures cover no-file creation, default preservation, empty canonical r
 
 ## 18. Schema-version policy
 
-Current live schema is 6. Phase 2B2 selected schema 7 as the future GD66 target, but did not increment `SaveMigration.LatestSchemaVersion` or activate schema 7. Schema 7 may appear only in detached configuration and a future fully validated candidate C until it becomes active through §16's single replacement.
+Historical live schema was 6. Phase 2B2 selected schema 7 as the GD66 target; Phase 2B6B activates it only through §16's raw-before-legacy replacement and contextually validated complete-save authority.
 
 ## 19. Authoritative exact reason-code table
 
@@ -527,6 +531,36 @@ Journal discovery precedes every row on initial load and every application resta
 
 Before any changed-dependency or repaired-O attempt, the sole prior live attempt must reach `Finalized`, restore verified O, or be quarantined after verified O is established. Finalized audit evidence is never counted as live. Same O/same fingerprint retries are deterministic; dependency or O changes produce a new compact identity only after this one-live-attempt gate.
 
+### Approved production save-workload configuration authority
+
+Phase 2B6B uses one dedicated, explicitly injected production configuration contract for the save-specific validation workload. `Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json` is the approved authority and is consumed through `SaveSpatialMigrationLimitsLoader`; the spatial-content `validation_limits.json` is a different authority and is never copied, translated, inferred, or used as fallback. The owner-approved sizing evidence is recorded in [`gd66-save-spatial-migration-limit-sizing-evidence.md`](gd66-save-spatial-migration-limit-sizing-evidence.md).
+
+`TryPublishValidated` remains a runtime projection seam rather than persistence ownership. The live canonical save session retains complete validated save bytes and merges current recognized state and canonical spatial state without dropping preserved unknown root or primary members during ordinary canonical writes.
+
+The separately authored `save_spatial_migration_limits` versioned record owns these semantically explicit positive fields:
+
+| Consumer | Required field | Unit / distinct meaning |
+|---|---|---|
+| `RawSavePayloadClassifier` | `MaximumRawSaveBytes` | Exact active-payload bytes inspected before deserialization |
+| `RawSavePayloadClassifier` | `MaximumRawNestingDepth` | Simultaneously open raw containers |
+| `RawSavePayloadClassifier` | `MaximumRawObjectMembers` | Members in one raw object |
+| `RawSavePayloadClassifier` | `MaximumRawArrayElements` | Elements in one raw array |
+| `RawSavePayloadClassifier` | `MaximumRawStringBytes` | Encoded bytes in one raw string token |
+| `RawSavePayloadClassifier` | `MaximumRawScanWork` | Total lexical scan-work charges |
+| `SpatialSerializedInputLimits` and strict canonical/journal/descriptor parsers | `MaximumSerializedInputBytes` | Bytes accepted or emitted by one strict serialized contract |
+| same | `MaximumSerializedParsedNodes` | Logical nodes parsed by one strict contract |
+| same | `MaximumSerializedCollectionRecords` | Collection records parsed or emitted by one strict contract |
+| same | `MaximumSerializedStringCharacters` | Cumulative decoded UTF-16 property-name and value units |
+| same | `MaximumSerializedDiagnostics` | Collected validation issues before stable exhaustion |
+| `CanonicalSpatialSaveContracts` | `MaximumCanonicalSpatialRecords` | Canonical floors/rooms/nodes/edges/fixed/content/semantics records |
+| `CanonicalSpatialSaveContracts` | `MaximumCanonicalMaterializedTiles` | Canonical saved edge-footprint tiles inspected/materialized |
+| `DetachedWholeSaveCandidateSerializer` | `MaximumWholeSaveCandidateBytes` | Complete schema-7 candidate output bytes |
+| same | `MaximumCopiedSourceValueBytes` | Cumulative recognized source-value bytes copied losslessly |
+| same | `MaximumUnknownMembers` | Preserved unknown root plus primary member count |
+| same | `MaximumUnknownMemberBytes` | Cumulative preserved unknown-member value bytes |
+
+All seventeen fields share one configuration **authority and lifecycle**, but their units and accounting semantics remain distinct and code does not derive one from another. Equal approved numeric values are configuration, not implicit fallback. Raw string bytes are not inferred from decoded UTF-16 characters; raw scan work is not inferred from input bytes; canonical spatial records are not inferred from strict parsed nodes/collection records; candidate, copied-source, and unknown-member byte totals retain different accumulation rules; and canonical saved-tile workload is not the production-content materialized-tile limit. Composed canonical serialization and recovery/transaction contexts receive the parsed fields explicitly. Transaction validation preserves the caller-injected composed limits. Missing, malformed, incomplete, duplicated, or nonpositive production configuration fails closed before filesystem selection or save mutation.
+
 ## 22. Phase 2 dependency breakdown
 
 1. Add the direct-authored shared geometry, migration-profile, and native-starter-profile schema/input; distinct selection/lifecycle validation; explicit composition; runtime validation; expanded pre-build gate; focused tests/evidence.
@@ -539,13 +573,13 @@ Before any changed-dependency or repaired-O attempt, the sole prior live attempt
 8. Implement verified B, one atomic C replacement, durable verification/O recovery, and deterministic retry rules.
 9. Activate canonical topology/content readers and writers together while preserving independent economic writers; add localization keys and full EditMode/PlayMode/build/lifecycle evidence.
 
-## 23. Explicit non-goals
+## 23. Historical design-approval non-goals
 
-No migration, save field, exact future schema number, code, fixture/test, content, localization, runtime activation, structure spatial mapping, corridor gameplay, cost, Floor 2, UI, tuning, scene/asset/settings/package change, or fun claim is included.
+The PR #187 design-approval packet itself included no migration, save field, schema activation, code, fixture/test, content, localization, structure spatial mapping, corridor gameplay, cost, Floor 2, UI, tuning, scene/asset/settings/package change, or fun claim. Later Phase 2B implementation in PR #195 activates only the approved GD66 scope; Phase 3 structural construction/editing and other listed exclusions remain deferred.
 
 ## 24. Acceptance checklist
 
-- [x] Candidate status while PR #187 is open; schema 6/current authorities unchanged.
+- [x] Historical PR #187 candidate approval completed; PR #195 activates schema 7 and transitions to canonical writable spatial authority.
 - [x] Route precedence excludes independent `dungeonLayout`/`structureRuntime`.
 - [x] Exact nonspatial canonical room-content ownership precedes migration builder.
 - [x] Saved floor instance binds explicitly to production definition/index.
@@ -569,11 +603,11 @@ No migration, save field, exact future schema number, code, fixture/test, conten
 - [x] One complete atomic replacement is the sole schema/authority switch.
 - [x] No hidden fallback, partial publication, localized identity, or dual route/content writers.
 
-## 25. Candidate approval statement
+## 25. Historical candidate approval statement
 
 PR #187 proposes approval of this route precedence, independent economic-structure preservation, canonical room-content and saved-floor contracts, raw-load interception, schema-specific fixtures, stable identities/geometry, and one-replacement transaction for later Phase 2 implementation. It is not repository-approved until merged and changes no present behavior. Unsupported states retain O with stable diagnostics; Phase 2 remains blocked until this candidate is approved and merged.
 
-### Phase 2B3 inactive serialization and transaction-metadata contracts
+### Historical Phase 2B3 inactive serialization and transaction-metadata contracts
 
 Phase 2B3 establishes technical identities in the single `SpatialMigrationContractIdentity` authority: canonical serializer `gd66.serializer.canonical_spatial_save` version **1**, authority-marker contract version **1**, migration contract version **1**, and journal schema version **1**. These contracts remain detached from `SaveRoot`, `SaveData`, and `SaveService`.
 

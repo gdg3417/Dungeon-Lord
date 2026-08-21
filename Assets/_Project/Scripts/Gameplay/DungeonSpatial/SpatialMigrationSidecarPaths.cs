@@ -20,6 +20,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int MaximumGeneratedFilenameCharacters = 180;
         public const int WindowsMaximumAbsolutePathCharacters = 240;
 
+        public static SpatialContractResult<string> EvidenceSearchPattern(string activeFilename)
+        {
+            var issues = new List<SpatialContractIssue>();
+            if (!IsValidRelativeFilename(activeFilename, MaximumGeneratedFilenameCharacters) ||
+                !string.Equals(Path.GetFileName(activeFilename), activeFilename, StringComparison.Ordinal))
+                issues.Add(SpatialContractIssue.InvalidPath);
+            string stem = issues.Count == 0 ? Path.GetFileNameWithoutExtension(activeFilename) : string.Empty;
+            if (stem.Length == 0 || stem.Length > MaximumStemCharacters)
+                issues.Add(SpatialContractIssue.InvalidPath);
+            return new SpatialContractResult<string>(issues.Count == 0 ? EvidenceSearchPatternFromStem(stem) : null, issues);
+        }
+
+        internal static string EvidenceSearchPatternFromStem(string stem) => stem + ".gd66-*";
+
+        public static bool IsOwnedEvidenceFilename(string activeFilename, string evidenceFilename)
+        {
+            SpatialContractResult<string> pattern = EvidenceSearchPattern(activeFilename);
+            if (!pattern.IsValid || string.IsNullOrEmpty(evidenceFilename)) return false;
+            string prefix = pattern.Value.Substring(0, pattern.Value.Length - 1);
+            if (!evidenceFilename.StartsWith(prefix, StringComparison.Ordinal)) return false;
+            string remainder = evidenceFilename.Substring(prefix.Length);
+            string[] suffixes = { ".journal.json", ".journal.json.next", ".original.bak",
+                ".original.bak.restore.intent", ".original.bak.restore", ".candidate.tmp",
+                ".finalized", ".evidence" };
+            string suffix = null;
+            foreach (string value in suffixes)
+                if (remainder.EndsWith(value, StringComparison.Ordinal)) { suffix = value; break; }
+            if (suffix == null) return false;
+            string transaction = remainder.Substring(0, remainder.Length - suffix.Length);
+            return SpatialMigrationTransactionIdentity.IsCanonicalTransactionId("gd66-" + transaction);
+        }
+
         public static SpatialContractResult<SpatialMigrationSidecarNames> Derive(string activeFilename,
             string transactionId)
         {

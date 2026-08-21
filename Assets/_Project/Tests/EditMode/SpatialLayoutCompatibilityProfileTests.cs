@@ -78,7 +78,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(8,1).Code,Is.EqualTo("gd66.starter_profile.missing"));
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(6));
+            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(7));
+            Assert.That(SaveMigration.LegacyCompatibilitySchemaVersion,Is.EqualTo(6));
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(data),Is.True);
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
             Assert.That(geometry.FloorDefinitionId,Is.EqualTo("spatial.floor.01")); Assert.That(geometry.FloorIndex,Is.EqualTo(0));
             Assert.That(geometry.BasicRoomDefinitionId,Is.EqualTo("spatial.room.basic"));
@@ -90,6 +92,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertPlacement(geometry.Layouts[0],CompatibilityRouteRole.Completion,1,6);
             AssertPlacement(geometry.Layouts[1],CompatibilityRouteRole.BasicRoom1,0,6);
             AssertPlacement(geometry.Layouts[1],CompatibilityRouteRole.Completion,1,10);
+        }
+
+        [Test] public void ProductionReleasePolicyRejectsSchemaEightAndSchemaSevenSources()
+        {
+            SpatialLayoutCompatibilityProfilesData production =
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(production), Is.True);
+            Assert.That(production.MigrationProfiles[0].MaximumSourceSchemaVersion,
+                Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
+            Assert.That(production.MigrationProfiles[0].TargetSchemaVersion,
+                Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(production.StarterProfiles[0].TargetSchemaVersion,
+                Is.EqualTo(SaveMigration.LatestSchemaVersion));
+            Assert.That(production.ContractSelections[0].TargetSchemaVersion,
+                Is.EqualTo(SaveMigration.LatestSchemaVersion));
+
+            SpatialLayoutCompatibilityProfilesData schemaEight =
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            schemaEight.MigrationProfiles[0].TargetSchemaVersion = 8;
+            schemaEight.StarterProfiles[0].TargetSchemaVersion = 8;
+            schemaEight.ContractSelections[0].TargetSchemaVersion = 8;
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(schemaEight), Is.False);
+
+            SpatialLayoutCompatibilityProfilesData schemaSevenSource =
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            schemaSevenSource.MigrationProfiles[0].MaximumSourceSchemaVersion = 7;
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(schemaSevenSource), Is.False);
         }
 
         [Test] public void StrictParser_FailsClosedAndPreservesPreviouslyPublishedSnapshot()

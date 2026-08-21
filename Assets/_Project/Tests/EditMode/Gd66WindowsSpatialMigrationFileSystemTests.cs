@@ -15,6 +15,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class Gd66WindowsSpatialMigrationFileSystemTests
     {
         [Test]
+        public void EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar()
+        {
+            SpatialContractResult<string> pattern =
+                SpatialMigrationSidecarPaths.EvidenceSearchPattern("save_primary.json");
+            Assert.That(pattern.IsValid, Is.True);
+            Assert.That(pattern.Value, Is.EqualTo("save_primary.gd66-*"));
+            string transaction = "gd66-" + new string('a', 64);
+            SpatialContractResult<SpatialMigrationSidecarNames> names =
+                SpatialMigrationSidecarPaths.Derive("save_primary.json", transaction);
+            Assert.That(names.IsValid, Is.True);
+            Assert.That(names.Value.Journal, Does.StartWith("save_primary.gd66-"));
+            Assert.That(names.Value.Journal, Does.Not.StartWith("save_primary.json.gd66-"));
+            Assert.That(SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
+                "save_primary.json", names.Value.Journal), Is.True);
+            Assert.That(SpatialMigrationSidecarPaths.IsOwnedEvidenceFilename(
+                "save_primary.json", "save_primary.gd66-lookalike.journal.json"), Is.False);
+        }
+        [Test]
         public void UnsupportedPlatformSelectionFailsClosedWithoutFileSystem()
         {
             SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(
@@ -23,6 +41,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSupported, Is.False);
             Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.PlatformUnsupported));
             Assert.That(result.FileSystem, Is.Null);
+            Assert.That(result.QualifiedActiveSavePath, Is.Null);
         }
 
         [Test]
@@ -34,6 +53,53 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSupported, Is.False);
             Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.PathInvalid));
             Assert.That(result.FileSystem, Is.Null);
+        }
+
+        [Test]
+        public void WindowsSelectionAcceptsCanonicalAlternateAndMixedEquivalentSeparators()
+        {
+            string canonical = Path.GetFullPath(Path.Combine("gd66-path-equivalence", "save.json"));
+            char alternate = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
+            string alternatePath = canonical.Replace(Path.DirectorySeparatorChar, alternate);
+            int lastSeparator = canonical.LastIndexOf(Path.DirectorySeparatorChar);
+            string mixed = lastSeparator < 0 ? canonical :
+                canonical.Substring(0, lastSeparator) + alternate + canonical.Substring(lastSeparator + 1);
+            var probe = new CapabilityProbe(true, null);
+            var fileSystem = new SelectorFileSystem();
+
+            foreach (string path in new[] { canonical, alternatePath, mixed, canonical.ToUpperInvariant() })
+            {
+                SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(
+                    SpatialMigrationPlatform.WindowsEditor, path, probe, fileSystem);
+                Assert.That(result.IsSupported, Is.True, path + ": " + result.Reason);
+                Assert.That(result.FileSystem, Is.SameAs(fileSystem));
+                string expectedQualified = Path.GetFullPath(path.Replace('/', Path.DirectorySeparatorChar)
+                    .Replace('\\', Path.DirectorySeparatorChar));
+                Assert.That(result.QualifiedActiveSavePath, Is.EqualTo(expectedQualified));
+            }
+        }
+
+        [Test]
+        public void WindowsSelectionStillRejectsDotDotDotAndOverLimitPaths()
+        {
+            string directory = Path.GetFullPath("gd66-path-canonicality");
+            string[] invalid =
+            {
+                "." + Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar + "." + Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar + "child" + Path.DirectorySeparatorChar + ".." +
+                    Path.DirectorySeparatorChar + "save.json",
+                directory + Path.DirectorySeparatorChar +
+                    new string('a', SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters) + ".json"
+            };
+            var probe = new CapabilityProbe(true, null);
+            foreach (string path in invalid)
+            {
+                SpatialMigrationActivationPreflight result = SpatialMigrationFileSystemSelector.Evaluate(
+                    SpatialMigrationPlatform.WindowsStandalone, path, probe, new SelectorFileSystem());
+                Assert.That(result.IsSupported, Is.False, path);
+                Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.PathInvalid), path);
+            }
         }
 
         [Test]
@@ -77,6 +143,76 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally
             {
                 if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            }
+        }
+
+        [Test]
+        public void WindowsUnityPersistentDataPathRepresentationQualifiesAndSupportsCreateReadDelete()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            string active = Path.Combine(Application.persistentDataPath,
+                "gd66-unity-shaped-path-" + Guid.NewGuid().ToString("N") + ".json");
+            try
+            {
+                SpatialMigrationActivationPreflight preflight =
+                    SpatialMigrationFileSystemSelector.Evaluate(active);
+                Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
+                preflight.FileSystem.WriteAllBytesDurable(active, new byte[] { 6, 6 });
+                CollectionAssert.AreEqual(new byte[] { 6, 6 }, preflight.FileSystem.ReadAllBytes(active));
+                preflight.FileSystem.DeleteFile(active);
+                preflight.FileSystem.FlushDirectory(Path.GetDirectoryName(Path.GetFullPath(active)));
+                Assert.That(preflight.FileSystem.Exists(active), Is.False);
+            }
+            finally { if (File.Exists(active)) File.Delete(active); }
+        }
+
+        [Test]
+        public void WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+                Assert.Ignore("gd66.test.windows_only");
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            string filename = "gd66-unity-save-service-" + Guid.NewGuid().ToString("N") + ".json";
+            string unityShapedPath = Path.Combine(Application.persistentDataPath, filename);
+            SaveService migratedService = WindowsService(fixture, filename);
+            try
+            {
+                File.WriteAllBytes(unityShapedPath, fixture.Original);
+
+                SaveData migrated = migratedService.LoadOrCreate("gd66-live", out string migrationBanner);
+
+                Assert.That(migrated, Is.Not.Null, migrationBanner);
+                Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
+                Assert.That(migratedService.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
+                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":7"));
+
+                SaveService reopenedService = WindowsService(fixture, filename);
+                SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string reopenBanner);
+                Assert.That(reopened, Is.Not.Null, reopenBanner);
+                Assert.That(reopened.validatedCanonicalSpatialState, Is.Not.Null);
+                Assert.That(reopenedService.CanonicalSession, Is.Not.Null);
+
+                reopenedService.DeleteSave(out string deleteBanner);
+                Assert.That(File.Exists(reopenedService.SavePath), Is.False, deleteBanner);
+
+                SaveService nativeService = WindowsService(fixture, filename);
+                SaveData created = nativeService.LoadOrCreate("gd66-live", out string nativeBanner);
+                Assert.That(created, Is.Not.Null, nativeBanner);
+                Assert.That(created.validatedCanonicalSpatialState, Is.Not.Null);
+                Assert.That(nativeService.CanonicalSession, Is.Not.Null);
+                nativeService.DeleteSave(out string cleanupBanner);
+                Assert.That(File.Exists(nativeService.SavePath), Is.False, cleanupBanner);
+            }
+            finally
+            {
+                if (File.Exists(unityShapedPath)) File.Delete(unityShapedPath);
+                string stem = Path.GetFileNameWithoutExtension(filename);
+                foreach (string path in Directory.GetFiles(Application.persistentDataPath,
+                    stem + ".gd66-*", SearchOption.TopDirectoryOnly)) File.Delete(path);
+                foreach (string path in Directory.GetFiles(Application.persistentDataPath,
+                    filename + ".canonical-write-*", SearchOption.TopDirectoryOnly)) File.Delete(path);
             }
         }
 
@@ -536,6 +672,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.NativeProbeFailed));
         }
 
+        private static SaveService WindowsService(
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename)
+        {
+            var service = new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = filename, useAtomicWrites = true },
+                Application.persistentDataPath);
+            service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
+                    Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                    fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+            return service;
+        }
+
         private sealed class CapabilityProbe : IWindowsSpatialMigrationCapabilityProbe
         {
             private readonly bool contained;
@@ -550,6 +699,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private sealed class SelectorFileSystem : ISpatialMigrationFileSystem
         {
+            public void DeleteFile(string path) { }
             public bool Exists(string path) => false;
             public byte[] ReadAllBytes(string path) => throw new NotSupportedException();
             public void WriteAllBytesDurable(string path, byte[] bytes) => throw new NotSupportedException();
@@ -585,6 +735,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 inner.IsPathContainedWithoutRedirection(directoryPath, path);
             public void MoveSameDirectoryAtomic(string sourcePath, string destinationPath) =>
                 inner.MoveSameDirectoryAtomic(sourcePath, destinationPath);
+            public void DeleteFile(string path) => inner.DeleteFile(path);
         }
 
         private sealed class DiagnosticFileSystem : ISpatialMigrationFileSystem
@@ -608,6 +759,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 inner.IsPathContainedWithoutRedirection(directoryPath, path);
             public void MoveSameDirectoryAtomic(string source, string destination) => Record("Move", source,
                 destination, () => inner.MoveSameDirectoryAtomic(source, destination));
+            public void DeleteFile(string path) => inner.DeleteFile(path);
 
             private void Record(string operation, string source, string destination, Action action)
             {

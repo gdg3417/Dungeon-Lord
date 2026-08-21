@@ -1,10 +1,12 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
@@ -45,6 +47,64 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(didReset, Is.False);
             Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void LegacySaveServiceRoundTrip_RemainsWritableLegacyAuthorityAndResettable()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "gd66-schema6-roundtrip-" +
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var service = new SaveService(new SimpleLogger(false), new SaveConfig
+                { fileName = "save.json", useAtomicWrites = true }, directory);
+                service.Save(_root.Save, SaveReason.ManualDev);
+                Assert.That(File.Exists(service.SavePath), Is.True);
+
+                SaveData loaded = service.LoadOrCreate("gd66-test", out _);
+                Assert.That(CanonicalMvpRouteProjection.HasCanonicalLookingState(loaded), Is.False);
+                service.Save(loaded, SaveReason.ManualDev);
+                Assert.That(File.Exists(service.SavePath), Is.True);
+
+                SetBackingField("<Save>k__BackingField", loaded);
+                SetBackingField("<SaveService>k__BackingField", service);
+                Assert.That(_root.ResetCleanMvpValidationSession(), Is.True);
+                Assert.That(CanonicalMvpRouteProjection.HasCanonicalLookingState(_root.Save), Is.False);
+            }
+            finally
+            {
+                if (Directory.Exists(directory)) Directory.Delete(directory, true);
+            }
+        }
+
+        [Test]
+        public void ResetCleanMvpValidationSession_CanonicalLookingAuthorityFailsWithoutAnyMutation()
+        {
+            _root.Save.canonicalSpatialAuthority = new CanonicalSpatialAuthorityMarker
+            {
+                CanonicalLayoutContractVersion = 1,
+                CreationKind = CanonicalSpatialCreationKind.NativeCanonical
+            };
+            _root.Save.spatialFloors = System.Array.Empty<SavedSpatialFloor>();
+            SetBackingField("_selectedFloorIndex", 3);
+            SetBackingField("_selectedSlotIndex", 4);
+            SetBackingField("_selectedRunHistoryIndex", 1);
+            SetBackingField("_activeSessionTickCount", 29L);
+            SetBackingField("<CurrentHeat>k__BackingField", 37d);
+            SetBackingField("<SaveLine>k__BackingField", "Save: before canonical reset");
+            string before = JsonUtility.ToJson(_root.Save);
+
+            bool didReset = _root.ResetCleanMvpValidationSession();
+
+            Assert.That(didReset, Is.False);
+            Assert.That(JsonUtility.ToJson(_root.Save), Is.EqualTo(before));
+            Assert.That(_root.SelectedFloorIndex, Is.EqualTo(3));
+            Assert.That(_root.SelectedSlotIndex, Is.EqualTo(4));
+            Assert.That(_root.CurrentHeat, Is.EqualTo(37d));
+            Assert.That(_root.SaveLine, Is.EqualTo("Save: before canonical reset"));
+            Assert.That(GetPrivateField<int>("_selectedRunHistoryIndex"), Is.EqualTo(1));
+            Assert.That(GetPrivateField<long>("_activeSessionTickCount"), Is.EqualTo(29L));
         }
 
         [Test]
@@ -106,6 +166,9 @@ namespace DungeonBuilder.Tests.EditMode
         {
             typeof(GameRoot).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(_root, value);
         }
+
+        private T GetPrivateField<T>(string fieldName) => (T)typeof(GameRoot)
+            .GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(_root);
 
         private static void AssertCleanMvpBaseline(SaveData save)
         {

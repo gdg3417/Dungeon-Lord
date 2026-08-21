@@ -510,7 +510,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void EveryPublishedGraphIsDetachedAndSaveAuthorityRemainsUnchanged()
+        public void EveryPublishedGraphIsDetachedAndDoesNotBecomeSavePersistenceAuthority()
         {
             ProductionSpatialContentSnapshot snapshot = LoadWith(
                 manifest, catalog, new[] { english }).Value;
@@ -527,25 +527,49 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
                 Is.Not.EqualTo("mutated"));
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(6));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(7));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
-                .Any(field => field.Name.IndexOf("spatial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
+                .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
+
+            FieldInfo authority = typeof(SaveData).GetField("canonicalSpatialAuthority");
+            FieldInfo floors = typeof(SaveData).GetField("spatialFloors");
+            FieldInfo validated = typeof(SaveData).GetField("validatedCanonicalSpatialState",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(authority, Is.Not.Null);
+            Assert.That(floors, Is.Not.Null);
+            Assert.That(validated, Is.Not.Null);
+            Assert.That(authority.IsNotSerialized, Is.True);
+            Assert.That(floors.IsNotSerialized, Is.True);
+            Assert.That(validated.IsNotSerialized, Is.True);
+
+            string schemaSixJson = JsonUtility.ToJson(new SaveRoot
+                { schemaVersion = SaveMigration.LegacyCompatibilitySchemaVersion, primary = new SaveData() });
+            Assert.That(schemaSixJson, Does.Not.Contain("canonicalSpatialAuthority"));
+            Assert.That(schemaSixJson, Does.Not.Contain("spatialFloors"));
         }
 
         [Test]
-        public void ProductionPublicationHasNoGameplayPresenterUiPlacementSimulationOrRouteConsumer()
+        public void ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers()
         {
             const string compositionPath = "Assets/_Project/Scripts/Core/GameRoot.cs";
+            const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
                 .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            CollectionAssert.AreEqual(new[] { compositionPath }, consumers);
+            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath }, consumers);
             string composition = File.ReadAllText(compositionPath);
-            Assert.That(Regex.Matches(composition, @"\.ProductionSpatialContent\b").Count, Is.EqualTo(2));
             Assert.That(Regex.IsMatch(composition,
                 @"Content\.LoadSpatialLayoutCompatibilityProfiles[\s\S]{0,200}Content\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"SaveService\.ConfigureCanonical[\s\S]{0,200}Content\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"CanonicalMvpRouteProjection\.InspectWithProductionContent\([\s\S]{0,200}Content\?\.ProductionSpatialContent"),
+                Is.True);
+            Assert.That(Regex.IsMatch(composition,
+                @"ResolveCanonicalMutationTargetRoomId\([\s\S]{0,200}Content\?\.ProductionSpatialContent"),
                 Is.True);
         }
 
@@ -582,13 +606,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             StringAssert.Contains("productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6", scene);
             string source = System.IO.File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
             string fallback = source.Substring(source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal),
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal) -
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal) -
                 source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal));
             StringAssert.DoesNotContain("productionSpatial", fallback);
             string initialization = source.Substring(
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal),
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal),
                 source.IndexOf("private void InitializeStructureSimulationPass", StringComparison.Ordinal) -
-                source.IndexOf("public void InitializeServicesAndData", StringComparison.Ordinal));
+                source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal));
             StringAssert.DoesNotContain("diagnostic.ToString", initialization);
             StringAssert.DoesNotContain("Logger?.Warn", initialization);
         }
@@ -740,6 +764,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(parsed.Success, Is.True);
             Assert.That(parsed.Value, Is.Not.Null);
             Assert.That(parsed.Diagnostics, Is.Empty);
+        }
+
+        [Test]
+        public void ProductionRunConfigurationHasWhitespaceIndependentCanonicalPinBytes()
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Bootstrap/run_simulation_config.json");
+            Assert.That(asset, Is.Not.Null);
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(asset.text,
+                out RunSimulationConfig parsed), Is.True);
+            byte[] canonical = LegacyGameplayConfigurationContract.SerializeCanonical(parsed);
+            Assert.That(LegacyGameplayConfigurationContract.Parse(canonical), Is.Not.Null);
+            string reformatted = JsonUtility.ToJson(parsed, true);
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(reformatted,
+                out RunSimulationConfig alternate), Is.True);
+            byte[] alternateCanonical = LegacyGameplayConfigurationContract.SerializeCanonical(alternate);
+            Assert.That(alternateCanonical, Is.EqualTo(canonical));
+            Assert.That(SpatialContractSha256.Compute(alternateCanonical),
+                Is.EqualTo(SpatialContractSha256.Compute(canonical)));
+        }
+
+        [Test]
+        public void BootTransitionsHomeOnlyAfterSuccessfulInitialization()
+        {
+            string source = File.ReadAllText(
+                "Assets/_Project/Scripts/States/BootState.cs");
+            Assert.That(source, Does.Contain("if (_root.InitializeServicesAndData())"));
+            Assert.That(source.IndexOf("if (_root.InitializeServicesAndData())",
+                StringComparison.Ordinal), Is.LessThan(source.IndexOf("_root.GoHomeStub();",
+                    StringComparison.Ordinal)));
+        }
+
+        [Test]
+        public void LiveSaveAuthorityChecksRecoveryEvidenceBeforeNativeCreation()
+        {
+            string source = File.ReadAllText(
+                "Assets/_Project/Scripts/Services/SaveService.cs");
+            int evidence = source.IndexOf("HasOwnedRecoveryEvidence()", StringComparison.Ordinal);
+            int creation = source.IndexOf("NativeCanonicalSaveCreator.Create", StringComparison.Ordinal);
+            Assert.That(evidence, Is.GreaterThanOrEqualTo(0));
+            Assert.That(evidence, Is.LessThan(creation));
         }
 
         private static TextAsset Asset(string name)

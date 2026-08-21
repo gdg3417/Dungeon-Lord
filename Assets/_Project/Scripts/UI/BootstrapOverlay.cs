@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -46,6 +47,7 @@ namespace DungeonBuilder.M0
         private const string AddBasicRoomSlotButtonKey = "ui.mvp_room_slots.add_basic_room_slot_button";
         private const string AddBasicRoomSlotSuccessKey = "ui.mvp_room_slots.add_basic_room_slot_success";
         private const string AddBasicRoomSlotAlreadyExistsKey = "ui.mvp_room_slots.add_basic_room_slot_already_exists";
+        private const string NarrowHallRepairActionKey = "save.migration.spatial.gd66.repair.narrow_hall_to_basic";
 
         private GameRoot _root;
         private bool _devPanelVisible;
@@ -82,7 +84,11 @@ namespace DungeonBuilder.M0
         public bool DiagnosticsVisible => DiagnosticsAllowed && (_diagnosticsVisible || _runDiagnosticsOnlyVisible);
         private bool DiagnosticsAllowed => _root != null && _root.DevPanelEnabled;
         public bool PlayerFacingPanelsVisible => !_runDiagnosticsOnlyVisible;
-        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible && !_minimalMvpActionPanelCollapsed;
+        public bool NormalGameplayActionsAvailable => _root?.Save != null;
+        public bool NarrowHallRepairOnlyVisible => _root != null && _root.Save == null &&
+            _root.SaveService != null && _root.SaveService.NarrowHallRepairAvailable;
+        public bool MinimalMvpActionGuiVisible => _root != null && PlayerFacingPanelsVisible &&
+            !_minimalMvpActionPanelCollapsed && (NormalGameplayActionsAvailable || NarrowHallRepairOnlyVisible);
         public Vector2 MinimalMvpActionPanelScrollPosition => _minimalMvpActionPanelScrollPosition;
         public string SelectedMvpStructureId => _selectedMvpStructureId;
         public string SelectedMvpPlacementCategoryId => _selectedMvpPlacementCategoryId;
@@ -237,7 +243,8 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             return MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, selectedRoomIndex, (key, fallback) => GetLocalizedString(key, fallback));
         }
@@ -249,7 +256,8 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             return MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, selectedRoomIndex, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback));
         }
@@ -277,6 +285,7 @@ namespace DungeonBuilder.M0
 
         public void PlaceSelectedMvpStructure()
         {
+            if (!NormalGameplayActionsAvailable) return;
             BootstrapMvpActionHandler.PlacementResult result = CreateMvpActionHandler().PlaceOrModifySelectedMvpPlacement(
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
@@ -287,6 +296,7 @@ namespace DungeonBuilder.M0
 
         public void AddMvpBasicRoomSlot()
         {
+            if (!NormalGameplayActionsAvailable) return;
             bool added = _root != null && _root.TryAddSecondMvpBasicRoomSlot();
             _mvpStructurePlacementFeedback = GetLocalizedString(added ? AddBasicRoomSlotSuccessKey : AddBasicRoomSlotAlreadyExistsKey);
             _roomSlotPlacementFailureIsLatestAction = false;
@@ -296,6 +306,7 @@ namespace DungeonBuilder.M0
 
         public void CycleSelectedMvpRoomSlotTarget()
         {
+            if (!NormalGameplayActionsAvailable) return;
             _root?.CycleSelectedMvpRoomSlotTarget();
             ClearRoomSlotPlacementFailureFeedback();
             RefreshOverlayText();
@@ -303,6 +314,7 @@ namespace DungeonBuilder.M0
 
         public void RunOrObserveDungeon()
         {
+            if (!NormalGameplayActionsAvailable) return;
             BootstrapMvpActionHandler.RunResult result = CreateMvpActionHandler().RunOrObserveDungeon(_selectedMvpRunPostureId);
             ApplyRunResultFeedback(result);
             RefreshOverlayText();
@@ -597,7 +609,9 @@ namespace DungeonBuilder.M0
                 firstSessionObjective,
                 greedTrial,
                 MvpRecentSpoilsLedgerPresenter.Resolve(_root.Save, greedTrial),
-                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
+                MvpDungeonLayoutPresenter.BuildLayoutText(_root.Save, _root.RunSimulationConfig,
+                    _root.ProductionSpatialContent, _selectedMvpPlacementCategoryId,
+                    (key, fallback) => GetLocalizedString(key, fallback)),
                 MvpDungeonPlacementPresenter.ResolveCategoryName(_selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback)),
                 _selectedMvpPlacementCategoryId,
                 MvpDungeonPlacementPresenter.ResolveOptionName(_selectedMvpPlacementOptionId, (key, fallback) => GetLocalizedString(key, fallback)),
@@ -619,11 +633,13 @@ namespace DungeonBuilder.M0
 
         public string BuildFullPlayerFacingSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCurrentPlayerFacingSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             if (_compactSmokeViewEnabled)
             {
                 return BuildCompactSmokeText();
@@ -645,12 +661,23 @@ namespace DungeonBuilder.M0
 
         public string BuildPlayableMvpScreenText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildPlayableMvpScreenText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public string BuildCompactSmokeText()
         {
+            if (!NormalGameplayActionsAvailable) return BuildBlockedBootPlayerText();
             return BootstrapSmokeTextComposer.BuildCompactSmokeText(BuildSmokeTextContext(), (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        private string BuildBlockedBootPlayerText()
+        {
+            if (_root == null) return string.Empty;
+            if (!string.IsNullOrEmpty(_root.BannerMessage)) return _root.BannerMessage;
+            string reason = DetachedSpatialMigrationTransaction.NoTrustedPayloadReason;
+            string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
+            return GetLocalizedString(key, key);
         }
 
         private string BuildLoopSummarySectionText()
@@ -908,6 +935,9 @@ namespace DungeonBuilder.M0
         {
             DrawMinimalMvpActionPanel();
 
+            if (_root != null && _root.Save == null && _root.SaveService != null &&
+                _root.SaveService.NarrowHallRepairAvailable) return;
+
             if (_root == null || !_root.DevPanelEnabled || !_devPanelVisible)
             {
                 return;
@@ -920,14 +950,16 @@ namespace DungeonBuilder.M0
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.save_now", "ui.dev.button.save_now")))
             {
-                _root.SaveService.Save(_root.Save, SaveReason.ManualDev);
-                _root.SetBanner(_root.Content.GetString("ui.banner.saved_dev", "ui.banner.saved_dev"));
+                if (_root.Save != null)
+                {
+                    _root.SaveService.Save(_root.Save, SaveReason.ManualDev);
+                    _root.SetBanner(_root.Content.GetString("ui.banner.saved_dev", "ui.banner.saved_dev"));
+                }
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.delete_save", "ui.dev.button.delete_save")))
             {
-                _root.SaveService.DeleteSave(out string banner);
-                _root.SetBanner(banner);
+                _root.TryDeleteSaveFromDevPanel(out _);
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_banner", "ui.dev.button.clear_banner")))
@@ -1127,6 +1159,37 @@ namespace DungeonBuilder.M0
                 return;
             }
 
+            if (NarrowHallRepairOnlyVisible)
+            {
+                GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), GUI.skin.box);
+                GUILayout.Label(GetLocalizedString(
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                        DetachedSpatialMigrationPreparer.NarrowHallReason),
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                        DetachedSpatialMigrationPreparer.NarrowHallReason)), GUI.skin.label);
+                if (_root.SaveService.NarrowHallRepairTargets.Count > 1)
+                {
+                    foreach (int roomIndex in _root.SaveService.NarrowHallRepairTargets)
+                    {
+                        string key = roomIndex == 0
+                            ? "save.migration.spatial.gd66.repair.target_room_1"
+                            : "save.migration.spatial.gd66.repair.target_room_2";
+                        bool selected = roomIndex == _root.SaveService.NarrowHallRepairTargetRoomIndex;
+                        GUI.enabled = !selected;
+                        if (GUILayout.Button(GetLocalizedString(key, key), GUI.skin.button))
+                            _root.SaveService.SelectNarrowHallRepairTarget(roomIndex);
+                        GUI.enabled = true;
+                    }
+                }
+                if (GUILayout.Button(GetLocalizedString(NarrowHallRepairActionKey,
+                    NarrowHallRepairActionKey), GUI.skin.button))
+                    _root.TryRepairMigrationBlockedNarrowHall();
+                GUILayout.EndArea();
+                return;
+            }
+
+            if (!NormalGameplayActionsAvailable) return;
+
             if (_minimalMvpActionPanelCollapsed)
             {
                 DrawCollapsedMinimalMvpActionPanel();
@@ -1192,7 +1255,8 @@ namespace DungeonBuilder.M0
             {
                 CycleSelectedMvpRoomSlotTarget();
             }
-            if (GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
+            if (!CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
             {
                 AddMvpBasicRoomSlot();
             }
@@ -1218,7 +1282,8 @@ namespace DungeonBuilder.M0
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);
             }
-            if (GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
+            if (!CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                GUILayout.Button(labels.NarrowHallSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.NarrowHallOptionId);
@@ -1301,11 +1366,13 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
             MvpPlacementComparisonPreview preview = MvpPlacementComparisonPresenter.Resolve(
                 _root.Save,
                 _root.RunSimulationConfig,
+                _root.ProductionSpatialContent,
                 selectedRoomIndex,
                 _selectedMvpPlacementCategoryId,
                 _selectedMvpPlacementOptionId);
@@ -1353,7 +1420,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(_root.Save, _root.RunSimulationConfig);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             if (layout?.Rooms == null)
             {
                 return false;

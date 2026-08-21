@@ -42,6 +42,18 @@ namespace DungeonBuilder.M0
             }
         }
 
+        internal static bool TryParseRunSimulationConfig(string configJson,
+            out RunSimulationConfig config)
+        {
+            config = null;
+            try
+            {
+                config = JsonUtility.FromJson<RunSimulationConfig>(configJson);
+                return IsValidRunSimulationConfig(config);
+            }
+            catch { config = null; return false; }
+        }
+
         internal static LootConfig TryParseLootConfig(string lootConfigJson)
         {
             if (string.IsNullOrWhiteSpace(lootConfigJson))

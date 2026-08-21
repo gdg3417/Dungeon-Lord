@@ -68,7 +68,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public FloorRoomContentState RoomContents;
     }
 
-    // Detached test/canonicalization holder only; deliberately absent from SaveData and SaveRoot.
+    // Canonicalization holder used by the strict serializer and the schema-7 SaveData owners.
     [Serializable]
     public sealed class DetachedCanonicalSpatialSaveState
     {

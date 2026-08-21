@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
@@ -54,6 +55,25 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
         public static MvpDungeonFloorSlotLayout ResolveDefaultFloor(SaveData save, RunSimulationConfig config)
         {
+            MvpOrderedRouteRoom[] canonical = CanonicalMvpRouteProjection.Resolve(save, config);
+            if (canonical != null)
+            {
+                return new MvpDungeonFloorSlotLayout
+                {
+                    FloorIndex = 0,
+                    Rooms = canonical.Select(room => new MvpDungeonRoomInstance
+                    {
+                        FloorIndex = room.FloorIndex,
+                        RoomIndex = room.RoomIndex,
+                        RoomOptionId = room.RoomOptionId,
+                        Capacity = room.Capacity,
+                        AssignedMonsterOptionIds = room.AssignedMonsterOptionIds,
+                        AssignedTrapOptionIds = room.AssignedTrapOptionIds,
+                        AssignedLootNodeOptionIds = room.AssignedLootNodeOptionIds
+                    }).ToArray()
+                };
+            }
+
             MvpDungeonFloorSlotLayout persisted = ResolvePersistedDefaultFloor(save, config);
             if (persisted != null)
             {
@@ -92,8 +112,35 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             return new MvpDungeonFloorSlotLayout { FloorIndex = 0, Rooms = rooms.ToArray() };
         }
 
+        public static MvpDungeonFloorSlotLayout ResolveDefaultFloor(SaveData save,
+            RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production)
+        {
+            if (!CanonicalMvpRouteProjection.IsCanonical(save))
+                return ResolveDefaultFloor(save, legacyConfig);
+            CanonicalMvpRouteProjectionResult canonical =
+                CanonicalMvpRouteProjection.InspectWithProductionContent(save, production);
+            if (canonical.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                return null;
+            return new MvpDungeonFloorSlotLayout
+            {
+                FloorIndex = 0,
+                Rooms = canonical.Rooms.Select(room => new MvpDungeonRoomInstance
+                {
+                    FloorIndex = room.FloorIndex, RoomIndex = room.RoomIndex,
+                    RoomOptionId = room.RoomOptionId, Capacity = room.Capacity,
+                    AssignedMonsterOptionIds = room.AssignedMonsterOptionIds,
+                    AssignedTrapOptionIds = room.AssignedTrapOptionIds,
+                    AssignedLootNodeOptionIds = room.AssignedLootNodeOptionIds
+                }).ToArray()
+            };
+        }
+
         public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save, RunSimulationConfig config)
         {
+            MvpDungeonPlacementEntry[] canonical =
+                CanonicalMvpRouteProjection.ResolveActivePlacements(save, config);
+            if (canonical != null) return canonical;
+
             bool hasPersistedRooms = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
             if (config == null || (!hasPersistedRooms && !HasRoomSlotCapacityConfig(config)))
             {
@@ -123,7 +170,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
         public static bool TryAssignToPersistedRoom(SaveData save, RunSimulationConfig config, int roomIndex, string categoryId, string optionId)
         {
-            if (save == null ||
+            if (save == null || CanonicalMvpRouteProjection.HasCanonicalLookingState(save) ||
                 string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal) ||
                 !MvpDungeonPlacementIds.IsAllowedCategory(categoryId) ||
                 !MvpDungeonPlacementIds.IsAllowedOption(optionId))
@@ -182,7 +229,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
         public static bool TryAddSecondBasicRoomSlot(SaveData save, RunSimulationConfig config)
         {
-            if (save == null)
+            if (save == null || CanonicalMvpRouteProjection.HasCanonicalLookingState(save))
             {
                 return false;
             }
@@ -226,6 +273,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 
         public static void SetPersistedRoomOptionIfPresent(SaveData save, RunSimulationConfig config, int roomIndex, string roomOptionId)
         {
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(save)) return;
             List<MvpRoomSlotAssignmentState> rooms = save?.mvpRoomSlotAssignments?.Rooms;
             if (rooms == null ||
                 rooms.Count == 0 ||

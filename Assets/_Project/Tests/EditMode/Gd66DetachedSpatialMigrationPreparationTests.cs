@@ -1,10 +1,13 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -85,6 +88,127 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
             Assert.That(DetachedRequiredValidationInputSpecification.Current.TargetSchemaVersion, Is.EqualTo(7));
         }
+
+        [TestCase("assignments")]
+        [TestCase("floor")]
+        [TestCase("placements")]
+        public void LegacyRouteContracts_PrettyAndCompactSaveRootEvidenceAreEquivalent(string authority)
+        {
+            SaveData save = RouteSave(authority);
+            byte[] compact = Encoding.UTF8.GetBytes(JsonUtility.ToJson(new SaveRoot
+                { schemaVersion = 6, primary = save }));
+            byte[] pretty = Encoding.UTF8.GetBytes(JsonUtility.ToJson(new SaveRoot
+                { schemaVersion = 6, primary = save }, true));
+
+            object compactProjection = ParseAuthority(Classify(compact), authority, out string compactReason);
+            object prettyProjection = ParseAuthority(Classify(pretty), authority, out string prettyReason);
+
+            Assert.That(compactReason, Is.Null);
+            Assert.That(prettyReason, Is.Null);
+            Assert.That(JsonUtility.ToJson(prettyProjection), Is.EqualTo(JsonUtility.ToJson(compactProjection)));
+        }
+
+        [Test]
+        public void LegacyWhitespaceNormalization_PreservesStringsAndIsBoundedByOriginalBytes()
+        {
+            byte[] source = Encoding.UTF8.GetBytes(" { \n \"value\" : \"space \\\" quote \\\\ slash\" \n } ");
+
+            Assert.That(LegacyJsonWhitespaceNormalizer.TryNormalize(source, source.Length,
+                out byte[] normalized), Is.True);
+            Assert.That(Encoding.UTF8.GetString(normalized),
+                Is.EqualTo("{\"value\":\"space \\\" quote \\\\ slash\"}"));
+            Assert.That(LegacyJsonWhitespaceNormalizer.TryNormalize(source, source.Length - 1,
+                out _), Is.False);
+            Assert.That(LegacyJsonWhitespaceNormalizer.TryNormalize(
+                Encoding.UTF8.GetBytes("{\"unterminated\":\"value}"), 1024, out _), Is.False);
+        }
+
+        [TestCase("{\"Entries\":[],\"Entries\":[],\"NextRevision\":1}")]
+        [TestCase("{\"NextRevision\":1,\"Entries\":[]}")]
+        [TestCase("{\"Entries\":[],\"Unknown\":0,\"NextRevision\":1}")]
+        [TestCase("{\"Entries\":[,],\"NextRevision\":1}")]
+        public void LegacyWhitespaceNormalization_DoesNotWeakenStrictRouteShape(string placementJson)
+        {
+            string root = "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"mvpDungeonPlacements\":" +
+                placementJson + "}}";
+
+            MvpDungeonPlacementState parsed = RawLegacyRouteContracts.ParsePlacements(
+                Classify(Encoding.UTF8.GetBytes(root)), "mvpDungeonPlacements", SerializedLimits(),
+                out string reason);
+
+            Assert.That(parsed, Is.Null);
+            Assert.That(reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+        }
+
+        private static object ParseAuthority(RawSavePayloadClassification classification, string authority,
+            out string reason)
+        {
+            switch (authority)
+            {
+                case "assignments":
+                    return RawLegacyRouteContracts.ParseAssignments(classification,
+                        "mvpRoomSlotAssignments", SerializedLimits(), out reason);
+                case "floor":
+                    return RawLegacyRouteContracts.ParseFloor(classification,
+                        "mvpDungeonFloorLayout", SerializedLimits(), out reason);
+                default:
+                    return RawLegacyRouteContracts.ParsePlacements(classification,
+                        "mvpDungeonPlacements", SerializedLimits(), out reason);
+            }
+        }
+
+        private static SaveData RouteSave(string authority)
+        {
+            var save = new SaveData
+            {
+                mvpRoomSlotAssignments = null,
+                mvpDungeonFloorLayout = null,
+                mvpDungeonPlacements = null
+            };
+            if (authority == "assignments")
+                save.mvpRoomSlotAssignments = new MvpRoomSlotAssignmentCollection
+                {
+                    Rooms = new List<MvpRoomSlotAssignmentState>
+                    {
+                        new MvpRoomSlotAssignmentState
+                        {
+                            FloorIndex = 0, RoomIndex = 0,
+                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                            MonsterOptionIds = new[] { "placement.option.monster.goblin" }
+                        }
+                    },
+                    NextRevision = 2
+                };
+            else if (authority == "floor")
+                save.mvpDungeonFloorLayout = new MvpDungeonFloorLayoutState
+                {
+                    Nodes = new List<MvpDungeonNodeState>
+                    {
+                        new MvpDungeonNodeState(0, 0, "slot.0", MvpDungeonPlacementIds.RoomCategoryId,
+                            MvpDungeonPlacementIds.BasicRoomOptionId, 1)
+                    },
+                    NextRevision = 2
+                };
+            else
+                save.mvpDungeonPlacements = new MvpDungeonPlacementState
+                {
+                    Entries = new List<MvpDungeonPlacementEntry>
+                    {
+                        new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId,
+                            MvpDungeonPlacementIds.BasicRoomOptionId, 1)
+                    },
+                    NextRevision = 2
+                };
+            return save;
+        }
+
+        private static RawSavePayloadClassification Classify(byte[] bytes) =>
+            RawSavePayloadClassifier.Classify(bytes,
+                new RawSavePayloadClassificationLimits(100000, 64, 128, 128, 4096, 1000000),
+                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor());
+
+        private static SpatialSerializedInputLimits SerializedLimits() =>
+            new SpatialSerializedInputLimits(100000, 10000, 1000, 10000, 32);
 
         private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
             new[]

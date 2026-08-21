@@ -468,8 +468,13 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers()
         {
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(6));
-            string json = JsonUtility.ToJson(new SaveRoot { schemaVersion = 6, primary = new SaveData() });
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(7));
+            var ordinary = new SaveData
+            {
+                canonicalSpatialAuthority = NativeMarker(),
+                spatialFloors = new[] { Floor("runtime.floor", 0, "runtime.room") }
+            };
+            string json = JsonUtility.ToJson(new SaveRoot { schemaVersion = 6, primary = ordinary });
             Assert.That(json, Does.Not.Contain("spatialFloors"));
             Assert.That(json, Does.Not.Contain("canonicalSpatial"));
             Assert.That(json, Does.Not.Contain("CanonicalSpatialAuthority"));

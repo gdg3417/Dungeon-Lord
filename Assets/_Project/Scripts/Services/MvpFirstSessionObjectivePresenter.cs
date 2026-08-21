@@ -55,8 +55,14 @@ namespace DungeonBuilder.M0
             }
 
             summary.RuleResolved = true;
-            MvpDungeonPlacementEntry[] placements = MvpDungeonLayoutResolver.ResolveOrderedPlacements(save.mvpDungeonFloorLayout, save.mvpDungeonPlacements);
-            summary.CurrentPathPlacementCount = placements.Length;
+            bool canonical = CanonicalMvpRouteProjection.HasCanonicalLookingState(save);
+            MvpDungeonPlacementEntry[] placements = canonical
+                ? MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config)
+                : MvpDungeonLayoutResolver.ResolveOrderedPlacements(
+                    save.mvpDungeonFloorLayout, save.mvpDungeonPlacements);
+            summary.CurrentPathPlacementCount = canonical
+                ? CountRequiredCategoryCoverage(placements)
+                : placements.Length;
             summary.RequiredPathPlacementCount = MvpDungeonPlacementIds.OrderedCategoryIds.Length;
             summary.PathComplete = !summary.RequiredCompletePath || summary.CurrentPathPlacementCount >= summary.RequiredPathPlacementCount;
 
@@ -75,6 +81,16 @@ namespace DungeonBuilder.M0
             summary.CurrentRequirementsComplete = summary.PathComplete && summary.RunObservedComplete && summary.LootRecoveredComplete && summary.HeatTargetComplete && summary.AnalysisComplete;
             summary.IsComplete = summary.CompletionRecorded || summary.CurrentRequirementsComplete;
             return summary;
+        }
+
+        private static int CountRequiredCategoryCoverage(
+            MvpDungeonPlacementEntry[] placements)
+        {
+            var represented = new System.Collections.Generic.HashSet<string>(
+                (placements ?? System.Array.Empty<MvpDungeonPlacementEntry>())
+                    .Where(value => value != null).Select(value => value.CategoryId),
+                System.StringComparer.Ordinal);
+            return MvpDungeonPlacementIds.OrderedCategoryIds.Count(represented.Contains);
         }
 
         public static string BuildPanelText(MvpFirstSessionObjectiveSummary summary, Func<string, string, string> localize)

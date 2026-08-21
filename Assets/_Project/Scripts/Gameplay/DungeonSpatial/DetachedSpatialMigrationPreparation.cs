@@ -816,8 +816,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             reason = null; RawSaveMemberEvidence evidence = source.Members.FirstOrDefault(value => value.Name == member);
             if (evidence == null || evidence.State != RawSaveMemberState.NonNull)
             { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return null; }
+            if (!LegacyJsonWhitespaceNormalizer.TryNormalize(evidence.GetRawValueBytes(), limits.MaximumInputBytes,
+                out byte[] normalized))
+            { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return null; }
             var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
-            if (!ContractJson.TryParse(evidence.GetRawValueBytes(), limits, issues, out ContractJsonNode root))
+            if (!ContractJson.TryParse(normalized, limits, issues, out ContractJsonNode root))
             { reason = DetachedSpatialMigrationPreparer.OutcomeMismatchReason; return null; }
             return root;
         }
@@ -841,6 +844,56 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (ContractJsonNode item in node.Items)
             { if (!String(item, out string value)) return false; result.Add(value); }
             values = result.ToArray(); return true;
+        }
+    }
+
+    // Historical SaveService payloads are pretty printed. This projection removes only JSON
+    // whitespace outside strings so the deliberately strict canonical parser can validate the
+    // legacy route shape without making ContractJson permissive for canonical contracts.
+    internal static class LegacyJsonWhitespaceNormalizer
+    {
+        internal static bool TryNormalize(byte[] source, int maximumOriginalBytes, out byte[] normalized)
+        {
+            normalized = null;
+            if (source == null || maximumOriginalBytes <= 0 || source.Length > maximumOriginalBytes)
+                return false;
+
+            var buffer = new byte[source.Length];
+            int count = 0;
+            bool inString = false;
+            bool escaped = false;
+            for (int index = 0; index < source.Length; index++)
+            {
+                byte value = source[index];
+                if (inString)
+                {
+                    buffer[count++] = value;
+                    if (escaped)
+                        escaped = false;
+                    else if (value == (byte)'\\')
+                        escaped = true;
+                    else if (value == (byte)'"')
+                        inString = false;
+                    continue;
+                }
+
+                if (value == (byte)'"')
+                {
+                    inString = true;
+                    buffer[count++] = value;
+                }
+                else if (value != (byte)' ' && value != (byte)'\t' &&
+                    value != (byte)'\r' && value != (byte)'\n')
+                {
+                    buffer[count++] = value;
+                }
+            }
+
+            if (inString || escaped)
+                return false;
+            normalized = new byte[count];
+            Buffer.BlockCopy(buffer, 0, normalized, 0, count);
+            return true;
         }
     }
 

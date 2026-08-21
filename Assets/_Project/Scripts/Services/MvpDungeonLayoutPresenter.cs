@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -35,10 +36,18 @@ namespace DungeonBuilder.M0
         }
 
         public static string BuildLayoutText(SaveData save, RunSimulationConfig config, string selectedPlacementCategoryId, Func<string, string, string> localize)
+            => BuildLayoutText(save, config, null, selectedPlacementCategoryId, localize);
+
+        public static string BuildLayoutText(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production, string selectedPlacementCategoryId,
+            Func<string, string, string> localize)
         {
-            MvpDungeonFloorLayoutState layout = save?.mvpDungeonFloorLayout;
-            MvpDungeonPlacementState legacyPlacements = save?.mvpDungeonPlacements;
-            MvpDungeonPlacementEntry[] resolvedPlacements = config == null
+            bool canonical = CanonicalMvpRouteProjection.HasCanonicalLookingState(save);
+            MvpDungeonFloorLayoutState layout = canonical ? null : save?.mvpDungeonFloorLayout;
+            MvpDungeonPlacementState legacyPlacements = canonical ? null : save?.mvpDungeonPlacements;
+            MvpDungeonPlacementEntry[] resolvedPlacements = canonical
+                ? CanonicalMvpRouteProjection.ResolveActivePlacements(save, config)
+                : config == null
                 ? MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, legacyPlacements)
                 : MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);
             var placementsByCategory = new Dictionary<string, MvpDungeonPlacementEntry>(StringComparer.Ordinal);
@@ -79,7 +88,8 @@ namespace DungeonBuilder.M0
 
             string floorText = string.Format(Localize(localize, FloorFormatKey), 0, nodes.ToString());
             string legacyLayout = string.Format(Localize(localize, LayoutFormatKey), floorText);
-            MvpDungeonFloorSlotLayout slotLayout = config == null ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config);
+            MvpDungeonFloorSlotLayout slotLayout = config == null && !canonical
+                ? null : MvpRoomSlotLayoutResolver.ResolveDefaultFloor(save, config, production);
             if (slotLayout == null)
             {
                 return legacyLayout;

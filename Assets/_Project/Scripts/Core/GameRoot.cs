@@ -36,6 +36,7 @@ namespace DungeonBuilder.M0
         public TextAsset[] productionSpatialLanguageTables;
         public TextAsset productionSpatialValidationLimits;
         public TextAsset spatialLayoutCompatibilityProfilesJson;
+        public TextAsset saveSpatialMigrationLimitsJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -47,7 +48,9 @@ namespace DungeonBuilder.M0
         public ITelemetryService Telemetry { get; private set; }
         public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
+        public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
+        public ProductionSpatialContentSnapshot ProductionSpatialContent => Content?.ProductionSpatialContent;
 
         public string BannerMessage { get; private set; } = string.Empty;
         public string LastRunRejectionReasonKey { get; private set; } = string.Empty;
@@ -99,6 +102,7 @@ namespace DungeonBuilder.M0
         private readonly PlacementService _placementService = new PlacementService();
         private StructureSimulationPass _structureSimulationPass;
         private RunSimulationService _runSimulationService;
+        private bool _explicitSaveDeleteQuiesced;
         private OfflineSummaryResolver _offlineSummaryResolver;
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
@@ -210,7 +214,7 @@ namespace DungeonBuilder.M0
 
         public void ApplyApplicationQuit()
         {
-            if (SaveService == null || Save == null)
+            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null)
             {
                 return;
             }
@@ -219,8 +223,35 @@ namespace DungeonBuilder.M0
             SaveLine = "Save: AppQuit";
         }
 
+        public bool TryDeleteSaveFromDevPanel(out string banner)
+        {
+            banner = string.Empty;
+            if (SaveService == null) return false;
+            bool quiesce = CanonicalMvpRouteProjection.IsCanonical(Save);
+            bool deleted = SaveService.DeleteSave(out banner);
+            if (quiesce) QuiesceAfterExplicitSaveDelete();
+            SetBanner(banner);
+            return deleted;
+        }
+
+        private void QuiesceAfterExplicitSaveDelete()
+        {
+            _explicitSaveDeleteQuiesced = true;
+            if (TimeService != null)
+            {
+                TimeService.OnTick -= HandleSimulationTick;
+                TimeService.OnTick -= HandleTickTelemetry;
+                TimeService.AttachSave(null);
+            }
+            TimeService = null;
+            _structureSimulationPass = null;
+            _runSimulationService = null;
+            Save = null;
+        }
+
         public void ApplyPauseState(bool pause)
         {
+            if (_explicitSaveDeleteQuiesced) return;
             if (pause)
             {
                 PauseLine = "Pause: Paused";
@@ -302,7 +333,7 @@ namespace DungeonBuilder.M0
         }
 #endif
 
-        public void InitializeServicesAndData()
+        public bool InitializeServicesAndData()
         {
             EnsureContentAssetsAssigned();
 
@@ -330,6 +361,17 @@ namespace DungeonBuilder.M0
                 Content.LoadSpatialLayoutCompatibilityProfiles(spatialLayoutCompatibilityProfilesJson,
                     Content.ProductionSpatialContent, spatialLimits.Limits);
 
+            SaveSpatialMigrationLimitsLoadResult saveLimits =
+                SaveSpatialMigrationLimitsLoader.Load(saveSpatialMigrationLimitsJson);
+            SaveSpatialMigrationLimits = saveLimits.Profile;
+            if (!saveLimits.IsSuccess)
+            {
+                Logger.Error("GD66 save workload configuration unavailable: " + saveLimits.Reason);
+                string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey(saveLimits.Reason);
+                SetBanner(Content.GetString(key, key));
+                return false;
+            }
+
             if (!string.IsNullOrEmpty(contentBanner))
             {
                 SetBanner(contentBanner);
@@ -347,15 +389,43 @@ namespace DungeonBuilder.M0
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(),
                 devFeatureFlagEnabled);
 
+            if (!BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                runSimulationConfigJson == null ? null : runSimulationConfigJson.text,
+                out RunSimulationConfig parsedRunConfig))
+            {
+                string reason = "gd66.transaction.pinned_input_missing";
+                SetBanner(Content.GetString(Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason), reason));
+                return false;
+            }
+            byte[] canonicalLegacyConfiguration =
+                LegacyGameplayConfigurationContract.SerializeCanonical(parsedRunConfig);
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
+            SaveService.ConfigureCanonical(SaveSpatialMigrationLimits, Content.ProductionSpatialContent,
+                Content.SpatialLayoutCompatibilityProfiles, parsedRunConfig,
+                canonicalLegacyConfiguration);
+            SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            if (Save == null)
+            {
+                if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
+                return false;
+            }
+            return CompleteSuccessfulBoot(Save, saveBanner);
+        }
+
+        private bool CompleteSuccessfulBoot(SaveData validatedSave, string saveBanner)
+        {
+            if (_explicitSaveDeleteQuiesced || validatedSave == null ||
+                !CanonicalMvpRouteProjection.IsCanonical(validatedSave))
+                return false;
+            Save = validatedSave;
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
             CaptureOfflineSummaryDiagnostics();
             RefreshOfflineSummaryLines();
 
             if (!string.IsNullOrEmpty(saveBanner))
             {
-                SetBanner(saveBanner);
+                SetBanner(Content.GetString(saveBanner, saveBanner));
             }
 
             int tickSeconds = Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 10;
@@ -363,6 +433,7 @@ namespace DungeonBuilder.M0
                 ? Content.Bootstrap.timeRules.detectClockSkewSeconds
                 : 300;
 
+            if (TimeService != null) return false;
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
             TimeService.AttachSave(Save);
             TimeService.OnTick += HandleSimulationTick;
@@ -377,7 +448,6 @@ namespace DungeonBuilder.M0
                 : 0.1d;
 
             Save.lastKnownAppState = "Boot";
-            SaveMigration.MigrateToLatest(new SaveRoot { primary = Save });
             CurrentHeat = Save.structureRuntime != null ? Save.structureRuntime.Heat : 0d;
             _selectedFloorIndex = 0;
             _selectedSlotIndex = 0;
@@ -390,7 +460,28 @@ namespace DungeonBuilder.M0
             RefreshDashboardState();
             RefreshStructureRuntimeLines();
             RefreshRunLine();
+            return true;
         }
+
+#if UNITY_EDITOR
+        internal void AttachSaveServiceForTests(SaveService service)
+        {
+            if (SaveService != null) SaveService.CanonicalRuntimePublished -= PublishCanonicalRuntime;
+            SaveService = service;
+            if (SaveService != null) SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
+        }
+
+        internal bool CompleteSuccessfulBootForTests(SaveData validatedSave, bool enterHome)
+        {
+            bool completed = CompleteSuccessfulBoot(validatedSave, string.Empty);
+            if (completed && enterHome) GoHomeStub();
+            return completed;
+        }
+
+        internal bool GameplayServicesInitializedForTests => TimeService != null &&
+            _structureSimulationPass != null && _runSimulationService != null;
+        internal bool ExplicitSaveDeleteQuiescedForTests => _explicitSaveDeleteQuiesced;
+#endif
 
         private void InitializeStructureSimulationPass()
         {
@@ -406,6 +497,16 @@ namespace DungeonBuilder.M0
             {
                 _structureSimulationPass.NormalizeRuntimeFlags(Save.structureRuntime);
             }
+        }
+
+        private void PublishCanonicalRuntime(SaveData published)
+        {
+            if (published == null || _explicitSaveDeleteQuiesced) return;
+            Save = published;
+            TimeService?.AttachSave(Save);
+            RefreshDashboardState();
+            RefreshStructureRuntimeLines();
+            RefreshRunLine();
         }
 
         private void InitializeRunSimulationService()
@@ -450,6 +551,27 @@ namespace DungeonBuilder.M0
         public void GoHomeStub()
         {
             _sm.SetState(new HomeStubState(this));
+        }
+
+        public bool TryRepairMigrationBlockedNarrowHall()
+        {
+            if (SaveService == null || !SaveService.NarrowHallRepairAvailable) return false;
+            string preRepairBlockedBanner = BannerMessage;
+            string contentVersion = Content?.Bootstrap?.contentVersion ?? "0.0.0";
+            SaveData repaired = SaveService.RepairNarrowHallToBasicAndRetry(contentVersion,
+                out string bannerKey);
+            if (repaired == null)
+            {
+                if (!string.IsNullOrEmpty(bannerKey))
+                    SetBanner(Content.GetString(bannerKey, bannerKey));
+                return false;
+            }
+            if (!CompleteSuccessfulBoot(repaired, bannerKey)) return false;
+            if (string.IsNullOrEmpty(bannerKey) && string.Equals(
+                    BannerMessage, preRepairBlockedBanner, System.StringComparison.Ordinal))
+                SetBanner(string.Empty);
+            GoHomeStub();
+            return true;
         }
 
         public void SetBanner(string message)
@@ -589,6 +711,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            // Native R1->R2 construction is deferred to Phase 3. Never re-open the legacy writer.
+            if (CanonicalMvpRouteProjection.IsCanonical(Save)) return false;
             bool added = MvpRoomSlotLayoutResolver.TryAddSecondBasicRoomSlot(Save, _runSimulationService?.Config);
             if (added)
             {
@@ -652,6 +776,44 @@ namespace DungeonBuilder.M0
             {
                 bannerKey = "ui.banner.place_blocked_heat_crisis";
                 return false;
+            }
+
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
+            {
+                CanonicalMvpRouteProjectionResult route =
+                    CanonicalMvpRouteProjection.InspectWithProductionContent(
+                        Save, Content?.ProductionSpatialContent);
+                if (route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                {
+                    bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                        CanonicalMvpRouteProjection.ContradictoryAuthorityReason);
+                    return false;
+                }
+                string targetRoomId = null;
+                if (route.Rooms != null && route.Rooms.Length != 0)
+                {
+                    targetRoomId = ResolveCanonicalMutationTargetRoomId(Save,
+                        _runSimulationService?.Config, Content?.ProductionSpatialContent, route.Rooms);
+                }
+                DetachedCanonicalWriteResult written = SaveService.ExecuteCanonicalMutation(Save,
+                    DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId));
+                if (!written.IsSuccess)
+                {
+                    string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
+                    if (written.IsNoOp)
+                        bannerKey = "ui.banner.place_failed";
+                    else if (string.Equals(written.Reason,
+                        DetachedSpatialMigrationPreparer.CapacityReason, StringComparison.Ordinal))
+                        bannerKey = "ui.banner.place_room_capacity_full";
+                    else
+                        bannerKey = string.IsNullOrEmpty(playerKey) ? "ui.banner.place_failed" : playerKey;
+                    return false;
+                }
+                // Canonical state remains the sole spatial authority. This detached entry exists
+                // only so the existing localized action feedback can describe the mutation.
+                newEntry = new MvpDungeonPlacementEntry(categoryId, optionId, 0);
+                bannerKey = "ui.banner.place_success";
+                return true;
             }
 
             if (enforceSelectedRoomTarget && !string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
@@ -759,6 +921,17 @@ namespace DungeonBuilder.M0
 
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
+        }
+
+        internal static string ResolveCanonicalMutationTargetRoomId(SaveData save,
+            RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production,
+            MvpOrderedRouteRoom[] rooms)
+        {
+            if (rooms == null || rooms.Length == 0) return null;
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                save, legacyConfig, production);
+            int selected = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(save, layout);
+            return selected >= 0 && selected < rooms.Length ? rooms[selected].RoomInstanceId : null;
         }
 
         private static string ResolveRoomTargetOptionId(MvpDungeonFloorSlotLayout layout, int roomIndex, string categoryId)
@@ -881,6 +1054,11 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
+            {
+                return false;
+            }
+
             ApplyCleanMvpValidationBaseline(Save);
             _selectedFloorIndex = 0;
             _selectedSlotIndex = 0;
@@ -906,7 +1084,7 @@ namespace DungeonBuilder.M0
 
         internal static void ApplyCleanMvpValidationBaseline(SaveData save)
         {
-            if (save == null)
+            if (save == null || CanonicalMvpRouteProjection.HasCanonicalLookingState(save))
             {
                 return;
             }
@@ -975,7 +1153,25 @@ namespace DungeonBuilder.M0
             route = Array.Empty<MvpOrderedRouteRoom>();
             rejectionReasonKey = string.Empty;
             if (_runSimulationService == null || Save?.structureRuntime == null || Save.runHistory == null) return false;
-            route = MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+            CanonicalMvpRouteProjectionResult authority =
+                CanonicalMvpRouteProjection.InspectWithProductionContent(
+                    Save, Content?.ProductionSpatialContent);
+            if (authority.AuthorityState ==
+                CanonicalMvpRuntimeAuthorityState.ContradictoryCanonical)
+            {
+                rejectionReasonKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
+                    authority.Reason);
+                return false;
+            }
+            route = authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
+                ? authority.Rooms
+                : MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+            if (authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
+                route.Length == 0)
+            {
+                rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
+                return false;
+            }
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;

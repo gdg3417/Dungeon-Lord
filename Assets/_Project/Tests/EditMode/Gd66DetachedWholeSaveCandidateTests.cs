@@ -35,6 +35,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void PrettyCopiedValuesBecomeCanonicalWithoutChangingRecognizedOrUnknownEvidence()
+        {
+            const string json = "{\n  \"rootObject\": { \"number\": 1.00, \"items\": [ true, false ] },\n" +
+                "  \"schema\": \"save_root\",\n  \"schemaVersion\": 6,\n  \"primary\": {\n" +
+                "    \"dungeonLayout\": { \"Slots\": [ ] },\n" +
+                "    \"unknownObject\": { \"message\": \"keep spaces \\\" and \\\\ here\", \"n\": 1.00 },\n" +
+                "    \"unknownArray\": [ { \"x\": 1 }, 2 ]\n  },\n" +
+                "  \"rootArray\": [ 1, { \"y\": 2 } ]\n}";
+            RawSavePayloadClassification classification = Classify(json);
+            RawSaveMemberEvidence recognized = classification.Members.Single(value =>
+                value.Name == "dungeonLayout");
+            byte[] recognizedBefore = recognized.GetRawValueBytes();
+            byte[][] primaryUnknownBefore = classification.UnknownPrimaryMembers
+                .Select(value => value.GetRawValueBytes()).ToArray();
+            byte[][] rootUnknownBefore = classification.UnknownRootMembers
+                .Select(value => value.GetRawValueBytes()).ToArray();
+
+            DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(
+                classification, EmptySpatial(), SpatialLimits, WholeLimits);
+
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            string candidate = Encoding.UTF8.GetString(result.Candidate.GetBytes());
+            Assert.That(candidate, Does.Contain("\"dungeonLayout\":{\"Slots\":[]}"));
+            Assert.That(candidate, Does.Contain(
+                "\"unknownObject\":{\"message\":\"keep spaces \\\" and \\\\ here\",\"n\":1.00}"));
+            Assert.That(candidate, Does.Contain("\"unknownArray\":[{\"x\":1},2]"));
+            Assert.That(candidate, Does.Contain("\"rootObject\":{\"number\":1.00,\"items\":[true,false]}"));
+            Assert.That(candidate, Does.Contain("\"rootArray\":[1,{\"y\":2}]"));
+            Assert.That(recognized.GetRawValueBytes(), Is.EqualTo(recognizedBefore));
+            for (int index = 0; index < primaryUnknownBefore.Length; index++)
+                Assert.That(classification.UnknownPrimaryMembers[index].GetRawValueBytes(),
+                    Is.EqualTo(primaryUnknownBefore[index]));
+            for (int index = 0; index < rootUnknownBefore.Length; index++)
+                Assert.That(classification.UnknownRootMembers[index].GetRawValueBytes(),
+                    Is.EqualTo(rootUnknownBefore[index]));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                result.Candidate.GetBytes(), SpatialLimits).IsValid, Is.True);
+        }
+
+        [Test]
         public void UnwrappedSchemaOne_RemainsHistoricalAndDoesNotAcquireCurrentDefaults()
         {
             DetachedWholeSaveResult result = DetachedWholeSaveCandidateSerializer.BuildPrepared(

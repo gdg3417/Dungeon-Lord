@@ -23,12 +23,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class SpatialMigrationActivationPreflight
     {
         internal SpatialMigrationActivationPreflight(bool supported, string reason,
-            SpatialMigrationPlatform platform, ISpatialMigrationFileSystem fileSystem)
-        { IsSupported = supported; Reason = reason; Platform = platform; FileSystem = fileSystem; }
+            SpatialMigrationPlatform platform, ISpatialMigrationFileSystem fileSystem,
+            string qualifiedActiveSavePath = null)
+        { IsSupported = supported; Reason = reason; Platform = platform; FileSystem = fileSystem;
+          QualifiedActiveSavePath = supported ? qualifiedActiveSavePath : null; }
         public bool IsSupported { get; }
         public string Reason { get; }
         public SpatialMigrationPlatform Platform { get; }
         public ISpatialMigrationFileSystem FileSystem { get; }
+        public string QualifiedActiveSavePath { get; }
     }
 
     public static class SpatialMigrationFileSystemSelector
@@ -59,17 +62,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Unsupported(SpatialMigrationCapabilityReason.PlatformUnsupported, platform);
             try
             {
-                string path = Path.GetFullPath(activeSavePath);
+                if (string.IsNullOrEmpty(activeSavePath) || HasDotSegment(activeSavePath))
+                    return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
+                string suppliedPath = NormalizeWindowsSeparators(activeSavePath);
+                if (!Path.IsPathFullyQualified(suppliedPath))
+                    return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
+                string path = Path.GetFullPath(suppliedPath);
                 string directory = Path.GetDirectoryName(path);
-                if (string.IsNullOrEmpty(activeSavePath) || !string.Equals(path, activeSavePath,
-                    StringComparison.Ordinal) || path.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters)
+                if (!string.Equals(NormalizeWindowsSeparators(path), suppliedPath,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    path.Length > SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters)
                     return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform);
                 if (!probe.IsPathContainedWithoutRedirection(directory, path))
                     return Unsupported(SpatialMigrationCapabilityReason.PathRedirected, platform);
                 string reason = probe.ProbeSupportedVolume(directory);
                 return reason == null
                     ? new SpatialMigrationActivationPreflight(true, SpatialMigrationCapabilityReason.Ready,
-                        platform, fileSystem)
+                        platform, fileSystem, path)
                     : Unsupported(reason, platform);
             }
             catch (ArgumentException) { return Unsupported(SpatialMigrationCapabilityReason.PathInvalid, platform); }
@@ -81,6 +90,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static SpatialMigrationActivationPreflight Unsupported(string reason,
             SpatialMigrationPlatform platform) => new SpatialMigrationActivationPreflight(false, reason,
                 platform, null);
+
+        private static string NormalizeWindowsSeparators(string path) => path
+            .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
+
+        private static bool HasDotSegment(string path)
+        {
+            string[] segments = path.Split(new[] { '/', '\\' }, StringSplitOptions.None);
+            for (int index = 0; index < segments.Length; index++)
+                if (segments[index] == "." || segments[index] == "..") return true;
+            return false;
+        }
     }
 
     public interface IWindowsSpatialMigrationCapabilityProbe
@@ -92,6 +114,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class WindowsSpatialMigrationFileSystem : ISpatialMigrationFileSystem,
         IWindowsSpatialMigrationCapabilityProbe
     {
+        public void DeleteFile(string path) => File.Delete(path);
         private const uint GenericWrite = 0x40000000;
         private const uint DeleteAccess = 0x00010000;
         private const uint FileShareRead = 0x1;

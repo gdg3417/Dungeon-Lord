@@ -240,7 +240,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static bool IsAuthorized(SpatialLayoutCompatibilityProfilesData data)
         {
-            if (data == null || !TryGetTargetSchemaVersion(out int targetSchemaVersion)) return false;
+            int legacyMaximum = SaveMigration.LegacyCompatibilitySchemaVersion;
+            int targetSchemaVersion = SaveMigration.LatestSchemaVersion;
+            if (data == null || legacyMaximum < MinimumLegacySchemaVersion ||
+                targetSchemaVersion <= legacyMaximum) return false;
             SpatialMigrationCompatibilityProfile[] migrations = (data.MigrationProfiles ??
                 Array.Empty<SpatialMigrationCompatibilityProfile>())
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
@@ -260,7 +263,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                    migration.ProfileId == MigrationProfileId(targetSchemaVersion) &&
                    migration.ProfileVersion == InitialProfileVersion &&
                    migration.MinimumSourceSchemaVersion == MinimumLegacySchemaVersion &&
-                   migration.MaximumSourceSchemaVersion == SaveMigration.LatestSchemaVersion &&
+                   migration.MaximumSourceSchemaVersion == legacyMaximum &&
                    migration.TargetSchemaVersion == contract.TargetSchemaVersion &&
                    migration.TargetCanonicalLayoutContractVersion == contract.CanonicalLayoutContractVersion &&
                    starter.ProfileId == StarterProfileId(targetSchemaVersion) &&
@@ -273,24 +276,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                        StringComparison.Ordinal);
         }
 
-        private static bool TryGetTargetSchemaVersion(out int targetSchemaVersion)
-        {
-            targetSchemaVersion = 0;
-            if (SaveMigration.LatestSchemaVersion < MinimumLegacySchemaVersion) return false;
-            try
-            {
-                targetSchemaVersion = checked(SaveMigration.LatestSchemaVersion + 1);
-                return targetSchemaVersion > SaveMigration.LatestSchemaVersion;
-            }
-            catch (OverflowException)
-            {
-                return false;
-            }
-        }
-
         private static string MigrationProfileId(int targetSchemaVersion) =>
             "compat.profile.migration.schema_" + MinimumLegacySchemaVersion.ToString(CultureInfo.InvariantCulture) +
-            "_" + SaveMigration.LatestSchemaVersion.ToString(CultureInfo.InvariantCulture) + "_to_" +
+            "_" + SaveMigration.LegacyCompatibilitySchemaVersion.ToString(CultureInfo.InvariantCulture) + "_to_" +
             targetSchemaVersion.ToString(CultureInfo.InvariantCulture) + ".contract_" +
             CanonicalLayoutContractVersion.ToString(CultureInfo.InvariantCulture);
 
