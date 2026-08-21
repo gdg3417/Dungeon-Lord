@@ -108,6 +108,10 @@
       "text": "Unable to place the selected placement entry."
     },
     {
+      "key": "ui.banner.place_room_capacity_full",
+      "text": "The selected room is already at capacity for that placement type."
+    },
+    {
       "key": "ui.banner.simulated_tick",
       "text": "Structure simulation tick applied."
     },

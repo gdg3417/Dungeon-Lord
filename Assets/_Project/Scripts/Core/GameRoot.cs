@@ -800,9 +800,13 @@ namespace DungeonBuilder.M0
                 if (!written.IsSuccess)
                 {
                     string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
-                    bannerKey = written.IsNoOp || string.IsNullOrEmpty(playerKey)
-                        ? "ui.banner.place_failed"
-                        : playerKey;
+                    if (written.IsNoOp)
+                        bannerKey = "ui.banner.place_failed";
+                    else if (string.Equals(written.Reason,
+                        DetachedSpatialMigrationPreparer.CapacityReason, StringComparison.Ordinal))
+                        bannerKey = "ui.banner.place_room_capacity_full";
+                    else
+                        bannerKey = string.IsNullOrEmpty(playerKey) ? "ui.banner.place_failed" : playerKey;
                     return false;
                 }
                 // Canonical state remains the sole spatial authority. This detached entry exists

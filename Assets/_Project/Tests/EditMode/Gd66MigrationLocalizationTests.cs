@@ -36,6 +36,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void LiveCapacityMessageDoesNotReplaceMigrationCapacityDiagnostic()
+        {
+            string path = Path.Combine(Application.dataPath,
+                "_Project/Data/Bootstrap/string_table_en.json");
+            StringEntry[] entries = JsonUtility.FromJson<StringTable>(File.ReadAllText(path)).entries;
+            StringEntry live = entries.Single(entry =>
+                entry.key == "ui.banner.place_room_capacity_full");
+            StringEntry migration = entries.Single(entry => entry.key ==
+                "save.migration.spatial.gd66.content.room_capacity_exceeded");
+
+            Assert.That(live.text, Is.EqualTo(
+                "The selected room is already at capacity for that placement type."));
+            Assert.That(migration.text, Is.EqualTo(
+                "A saved room contains more content than its supported capacity."));
+        }
+
+        [Test]
         public void PlayerMessagesDoNotExposeInternalMigrationNotation()
         {
             string path = Path.Combine(Application.dataPath,

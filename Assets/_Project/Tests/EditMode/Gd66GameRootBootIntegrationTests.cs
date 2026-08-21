@@ -346,13 +346,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             overlay.PlaceSelectedMvpStructure();
             Assert.That(overlay.MvpStructurePlacementFeedback, Is.Empty);
             Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(
-                Gd66MigrationReasonRegistry.PlayerLocalizationKey(
-                    DetachedSpatialMigrationPreparer.CapacityReason),
-                DetachedSpatialMigrationPreparer.CapacityReason)));
+                "ui.banner.place_room_capacity_full", "ui.banner.place_room_capacity_full")));
             Assert.That(root.BannerMessage, Does.Not.Contain("gd66."));
+            Assert.That(root.BannerMessage, Does.Not.Contain("save.migration."));
+            Assert.That(root.BannerMessage, Does.Not.Contain("placement."));
+            Assert.That(root.BannerMessage, Does.Not.Contain("ui."));
+            Assert.That(root.BannerMessage,
+                Does.Not.Contain("saved room contains more content").IgnoreCase);
             Assert.That(service.CanonicalSession.GetCurrentBytes(), Is.EqualTo(beforeCapacityFailure));
             route = CanonicalMvpRouteProjection.InspectWithProductionContent(
                 root.Save, root.ProductionSpatialContent);
+            Assert.That(route.Rooms[0].Capacity.TrapCapacity, Is.EqualTo(2));
+            Assert.That(route.Rooms[0].AssignedTrapOptionIds, Has.Length.EqualTo(2));
             CollectionAssert.AreEqual(new[]
             {
                 MvpDungeonPlacementIds.SpikeTrapOptionId,
