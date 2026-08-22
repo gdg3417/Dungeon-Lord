@@ -50,6 +50,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview()
         {
+            RequireSynchronousEditModeFixture();
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = Service(fixture, fileSystem, "root-structural-construction.json");
@@ -293,6 +294,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void StructuralReplacementThroughRealRootPersistsPublishesAndReopens()
         {
+            RequireSynchronousEditModeFixture();
             RenovationHarness harness = Renovation("root-renovation-replace.json",
                 "spatial.room.large_chamber", new TileCoordinate(4, 1));
             string roomId = "compat.floor.00.room.player.0000";
@@ -392,6 +394,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences()
         {
+            RequireSynchronousEditModeFixture();
             string roomId = "compat.floor.00.room.player.0000";
             RenovationHarness direct = Renovation("root-renovation-presentation-direct.json",
                 "spatial.room.basic", new TileCoordinate(4, 2));
@@ -853,6 +856,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(actual.CategoryId, Is.EqualTo(expected.CategoryId));
             Assert.That(actual.OptionId, Is.EqualTo(expected.OptionId));
             Assert.That(actual.Sequence, Is.EqualTo(expected.Sequence));
+        }
+
+        private static void RequireSynchronousEditModeFixture()
+        {
+            if (Application.isPlaying)
+                Assert.Ignore("gd66.test.synchronous_edit_mode_fixture");
         }
 
         private sealed class RenovationHarness

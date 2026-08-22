@@ -642,18 +642,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(direct.Footprint, Is.Null);
         }
 
-        [TestCase(5, 2, 1, true, null)]
-        [TestCase(8, 2, 4, true, null)]
-        [TestCase(9, 2, 0, false, StructuralEditService.CorridorLengthReason)]
-        public void Movement_UsesProductionCorridorLengthBoundaries(int x, int y, int length,
-            bool valid, string reason)
+        [TestCase(5, 2, 1)]
+        [TestCase(8, 2, 4)]
+        public void Movement_UsesProductionCorridorLengthBoundaries(int x, int y, int length)
         {
             PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
             StructuralEditPreview preview = Move(fixture, "compat.floor.00.room.player.0000",
                 new TileCoordinate(x, y));
-            Assert.That(preview.IsValid, Is.EqualTo(valid), string.Join(",", preview.ReasonCodes));
-            if (valid) Assert.That(preview.IncomingConnectionTiles.Length, Is.EqualTo(length));
-            else Assert.That(preview.ReasonCodes, Is.EqualTo(new[] { reason }));
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            Assert.That(preview.IncomingConnectionTiles.Length, Is.EqualTo(length));
+        }
+
+        [Test]
+        public void Movement_AboveMaximumCorridorLengthUsesInBoundsTestOwnedFloorGeometry()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Floors[0].Bounds.Width += 4;
+            ProductionSpatialContentSnapshot production = Snapshot(fixture, catalog);
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(9, 2),
+                StructuralEditService.CorridorLengthReason, production);
         }
 
         [Test]
@@ -679,10 +687,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.RoomInstanceId != "compat.floor.00.room.player.0000").Anchor,
                 StructuralEditService.RoomOverlapReason);
 
-            PreviewFixture capacity = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
-            FloorLayoutValidationResult before = Validate(capacity);
-            capacity.Production.Catalog.Floors[0].FinalFloorSpaceCapacity = before.Capacity.UsedFloorSpaceCapacity;
-            AssertMoveInvalidUnchanged(capacity, new TileCoordinate(5, 2), StructuralEditService.CapacityReason);
+        }
+
+        [Test]
+        public void Movement_FloorCapacityFailureUsesIsolatedTestOwnedSnapshot()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
+            FloorLayoutValidationResult before = Validate(fixture);
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Floors[0].FinalFloorSpaceCapacity = before.Capacity.UsedFloorSpaceCapacity;
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(5, 2),
+                StructuralEditService.CapacityReason, Snapshot(fixture, catalog));
         }
 
         [Test]
@@ -714,39 +729,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Movement_ConnectionFailuresDistinguishLengthSocketAmbiguityAndDefinition()
+        public void Movement_UnsupportedCorridorSocketIsConnectionUnavailable()
         {
-            PreviewFixture length = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
-            AssertMoveInvalidUnchanged(length, new TileCoordinate(9, 2), StructuralEditService.CorridorLengthReason);
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Corridors[0].CompatibleSocketTypeIds = System.Array.Empty<string>();
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(5, 2),
+                StructuralEditService.ConnectionUnavailableReason, Snapshot(fixture, catalog));
+        }
 
-            PreviewFixture socket = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
-            socket.Production.Catalog.Corridors[0].CompatibleSocketTypeIds = System.Array.Empty<string>();
-            AssertMoveInvalidUnchanged(socket, new TileCoordinate(5, 2),
-                StructuralEditService.ConnectionUnavailableReason);
-
-            PreviewFixture ambiguous = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
-            RoomSpatialDefinition basic = ambiguous.Production.Catalog.Rooms.Single(value =>
+        [Test]
+        public void Movement_DuplicateConnectionPairIsAmbiguous()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            RoomSpatialDefinition basic = catalog.Rooms.Single(value =>
                 value.RoomDefinitionId == "spatial.room.basic");
             SpatialConnectionPointDefinition west = basic.ConnectionPoints.Single(value => value.ConnectionPointId == "west");
             basic.ConnectionPoints = basic.ConnectionPoints.Concat(new[] { new SpatialConnectionPointDefinition
             { ConnectionPointId = "test.duplicate.west", Offset = west.Offset, Facing = west.Facing,
               SocketTypeId = west.SocketTypeId } }).ToArray();
-            AssertMoveInvalidUnchanged(ambiguous, new TileCoordinate(5, 2),
-                StructuralEditService.ConnectionAmbiguousReason);
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(5, 2),
+                StructuralEditService.ConnectionAmbiguousReason, Snapshot(fixture, catalog));
+        }
 
-            PreviewFixture definition = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
-            CorridorSpatialDefinition original = definition.Production.Catalog.Corridors[0];
-            definition.Production.Catalog.Corridors = definition.Production.Catalog.Corridors.Concat(new[]
+        [Test]
+        public void Movement_MultipleApprovedCorridorDefinitionsAreInvalid()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            CorridorSpatialDefinition original = catalog.Corridors[0];
+            catalog.Corridors = catalog.Corridors.Concat(new[]
             { new CorridorSpatialDefinition { CorridorDefinitionId = "test.corridor.second",
               Category = CorridorSpatialCategory.Straight, MinimumLength = original.MinimumLength,
               MaximumLength = original.MaximumLength, Width = original.Width,
               AllowedOrientations = original.AllowedOrientations,
               CompatibleSocketTypeIds = original.CompatibleSocketTypeIds } }).ToArray();
-            definition.Production.Catalog.Floors[0].AllowedCorridorDefinitionIds =
-                definition.Production.Catalog.Floors[0].AllowedCorridorDefinitionIds.Concat(
+            catalog.Floors[0].AllowedCorridorDefinitionIds =
+                catalog.Floors[0].AllowedCorridorDefinitionIds.Concat(
                     new[] { "test.corridor.second" }).ToArray();
-            AssertMoveInvalidUnchanged(definition, new TileCoordinate(5, 2),
-                StructuralEditService.CorridorDefinitionReason);
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(5, 2),
+                StructuralEditService.CorridorDefinitionReason, Snapshot(fixture, catalog));
         }
 
         [Test]
@@ -776,7 +799,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void Replacement_TranslatedDownstreamRoomContentIsDisclosed()
         {
-            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(5, 2));
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
             SavedSpatialFloor floor = fixture.State.Floors[0];
             string targetId = floor.Layout.Rooms.Single(value =>
                 value.RoomInstanceId != "compat.floor.00.room.player.0000").RoomInstanceId;
@@ -787,8 +810,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "placement.option.trap.spike", downstreamId);
             RoomSpatialInstance downstreamBefore = fixture.State.Floors[0].Layout.Rooms.Single(value =>
                 value.RoomInstanceId == downstreamId);
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            RoomSpatialDefinition downstreamDefinition = catalog.Rooms.Single(value =>
+                value.RoomDefinitionId == "spatial.room.large_chamber");
+            downstreamDefinition.ConnectionPoints = downstreamDefinition.ConnectionPoints.Where(value =>
+                value.ConnectionPointId != "east").ToArray();
 
-            StructuralEditPreview preview = Replace(fixture, targetId, "spatial.room.rectangle");
+            StructuralEditPreview preview = Replace(fixture, targetId, "spatial.room.rectangle",
+                Snapshot(fixture, catalog));
 
             Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
             Assert.That(preview.DetachedCandidate.Floors[0].Layout.Rooms.Single(value =>
@@ -825,7 +854,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void Replacement_CapacityOrientationAndConnectionFailuresDoNotMutateSource()
+        public void Replacement_CapacityFailureDoesNotMutateSource()
         {
             PreviewFixture capacity = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
             string targetId = "compat.floor.00.room.player.0000";
@@ -836,19 +865,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertReplaceInvalidUnchanged(capacity, targetId, "spatial.room.rectangle",
                 StructuralEditService.ContentCapacityReason);
 
-            PreviewFixture orientation = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
-            orientation.Production.Catalog.Rooms.Single(value => value.RoomDefinitionId ==
-                "spatial.room.rectangle").AllowedOrientations = new[] { CardinalOrientation.Ninety };
-            AssertReplaceInvalidUnchanged(orientation, targetId, "spatial.room.rectangle",
-                StructuralEditService.OrientationInvalidReason);
+        }
 
-            PreviewFixture connection = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
-            RoomSpatialDefinition replacement = connection.Production.Catalog.Rooms.Single(value =>
+        [Test]
+        public void Replacement_OrientationFailureUsesIsolatedTestOwnedSnapshot()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Rooms.Single(value => value.RoomDefinitionId ==
+                "spatial.room.rectangle").AllowedOrientations = new[] { CardinalOrientation.Ninety };
+            AssertReplaceInvalidUnchanged(fixture, "compat.floor.00.room.player.0000",
+                "spatial.room.rectangle", StructuralEditService.OrientationInvalidReason,
+                Snapshot(fixture, catalog));
+        }
+
+        [Test]
+        public void Replacement_MissingConnectionPointFailsWithoutMutation()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            RoomSpatialDefinition replacement = catalog.Rooms.Single(value =>
                 value.RoomDefinitionId == "spatial.room.rectangle");
             replacement.ConnectionPoints = replacement.ConnectionPoints.Where(value =>
                 value.ConnectionPointId != "north").ToArray();
-            AssertReplaceInvalidUnchanged(connection, targetId, "spatial.room.rectangle",
-                StructuralEditService.ConnectionAmbiguousReason);
+            AssertReplaceInvalidUnchanged(fixture, "compat.floor.00.room.player.0000",
+                "spatial.room.rectangle", StructuralEditService.ConnectionAmbiguousReason,
+                Snapshot(fixture, catalog));
         }
 
         [Test]
@@ -907,15 +949,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion, Is.EqualTo(7));
         }
 
-        private static StructuralEditPreview Move(PreviewFixture fixture, string roomId, TileCoordinate anchor) =>
+        private static StructuralEditPreview Move(PreviewFixture fixture, string roomId, TileCoordinate anchor,
+            ProductionSpatialContentSnapshot production = null) =>
             StructuralRenovationService.PreviewMovement(fixture.State,
                 new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = anchor },
-                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+                production ?? fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
 
-        private static StructuralEditPreview Replace(PreviewFixture fixture, string roomId, string definitionId) =>
+        private static StructuralEditPreview Replace(PreviewFixture fixture, string roomId, string definitionId,
+            ProductionSpatialContentSnapshot production = null) =>
             StructuralRenovationService.PreviewReplacement(fixture.State,
                 new StructuralReplacementRequest { RoomInstanceId = roomId, RoomDefinitionId = definitionId },
-                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+                production ?? fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
 
         private static DetachedCanonicalSpatialSaveState Place(PreviewFixture fixture,
             DetachedCanonicalSpatialSaveState state, string category, string option, string roomId)
@@ -928,20 +972,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static void AssertMoveInvalidUnchanged(PreviewFixture fixture, TileCoordinate anchor,
-            string expectedReason)
+            string expectedReason, ProductionSpatialContentSnapshot production = null)
         {
             byte[] before = Bytes(fixture.State, fixture.Limits);
-            StructuralEditPreview preview = Move(fixture, "compat.floor.00.room.player.0000", anchor);
+            StructuralEditPreview preview = Move(fixture, "compat.floor.00.room.player.0000", anchor, production);
             Assert.That(preview.IsValid, Is.False);
             Assert.That(preview.ReasonCodes, Is.EqualTo(new[] { expectedReason }));
             CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
         }
 
         private static void AssertReplaceInvalidUnchanged(PreviewFixture fixture, string roomId,
-            string definitionId, string expectedReason)
+            string definitionId, string expectedReason, ProductionSpatialContentSnapshot production = null)
         {
             byte[] before = Bytes(fixture.State, fixture.Limits);
-            StructuralEditPreview preview = Replace(fixture, roomId, definitionId);
+            StructuralEditPreview preview = Replace(fixture, roomId, definitionId, production);
             Assert.That(preview.IsValid, Is.False);
             Assert.That(preview.ReasonCodes, Is.EqualTo(new[] { expectedReason }));
             CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
@@ -970,10 +1014,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.State.Floors[0].FixedStructures, fixture.Production.Catalog.FixedStructures);
 
         private static string ConsequenceKey(StructuralChange value) => string.Join("|",
-            ((int)value.Kind).ToString(), value.StableId, value.From.ToString(), value.To.ToString(),
+            ((int)value.Kind).ToString(), value.StableId, Coordinate(value.From), Coordinate(value.To),
             ((int)value.PreviousConnectionKind).ToString(), ((int)value.ProposedConnectionKind).ToString(),
-            string.Join(",", value.PreviousFootprint.Select(tile => tile.ToString())),
-            string.Join(",", value.ProposedFootprint.Select(tile => tile.ToString())));
+            string.Join(",", value.PreviousFootprint.Select(Coordinate)),
+            string.Join(",", value.ProposedFootprint.Select(Coordinate)));
+
+        private static string Coordinate(TileCoordinate value) =>
+            value.X.ToString(System.Globalization.CultureInfo.InvariantCulture) + "," +
+            value.Y.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        private static ProductionSpatialContentSnapshot Snapshot(PreviewFixture fixture,
+            SpatialContentCatalog catalog) => new ProductionSpatialContentSnapshot(
+                fixture.Production.Manifest, catalog, fixture.Production.Languages);
 
         private static void AssertAssignmentEqual(RoomContentAssignment expected, RoomContentAssignment actual)
         {

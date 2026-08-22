@@ -79,6 +79,7 @@ namespace DungeonBuilder.M0
         private string _smokeViewportStatusMessage = string.Empty;
         private string _selectedStructuralRoomDefinitionId;
         private TileCoordinate _selectedStructuralAnchor;
+        private TileCoordinate _selectedRenovationAnchor;
         private CardinalOrientation _selectedStructuralOrientation;
         private string _selectedStructuralTerminalConnectionPointId;
         private string _structuralFeedback = string.Empty;
@@ -108,6 +109,7 @@ namespace DungeonBuilder.M0
         public string MvpRunResultFeedback => _mvpRunResultFeedback;
         public string SelectedStructuralRoomDefinitionId => _selectedStructuralRoomDefinitionId;
         public TileCoordinate SelectedStructuralAnchor => _selectedStructuralAnchor;
+        public TileCoordinate SelectedRenovationAnchor => _selectedRenovationAnchor;
         public CardinalOrientation SelectedStructuralOrientation => _selectedStructuralOrientation;
         public string SelectedStructuralTerminalConnectionPointId => _selectedStructuralTerminalConnectionPointId;
         public string StructuralFeedback => _structuralFeedback;
@@ -176,6 +178,9 @@ namespace DungeonBuilder.M0
         public string StructuralAnchorDisplay => string.Format(CultureInfo.InvariantCulture,
             GetLocalizedString("ui.structural.anchor.format"), _selectedStructuralAnchor.X,
             _selectedStructuralAnchor.Y);
+        public string RenovationAnchorDisplay => string.Format(CultureInfo.InvariantCulture,
+            GetLocalizedString("ui.structural.anchor.format"), _selectedRenovationAnchor.X,
+            _selectedRenovationAnchor.Y);
         public string StructuralConnectionPointDisplay => BuildStructuralConnectionPointDisplay();
 
         public bool CycleStructuralRoom()
@@ -213,7 +218,14 @@ namespace DungeonBuilder.M0
         {
             _selectedStructuralAnchor = new TileCoordinate(
                 _selectedStructuralAnchor.X + deltaX, _selectedStructuralAnchor.Y + deltaY);
-            InvalidateStructuralPreview();
+            _root?.InvalidateStructuralConstructionPreview(); _structuralFeedback = string.Empty;
+        }
+
+        public void AdjustRenovationAnchor(int deltaX, int deltaY)
+        {
+            _selectedRenovationAnchor = new TileCoordinate(
+                _selectedRenovationAnchor.X + deltaX, _selectedRenovationAnchor.Y + deltaY);
+            _root?.InvalidateStructuralRenovationPreview(); _structuralFeedback = string.Empty;
         }
 
         public bool CycleRenovationTarget()
@@ -223,14 +235,14 @@ namespace DungeonBuilder.M0
             int index = Array.IndexOf(ids, _selectedRenovationRoomInstanceId);
             _selectedRenovationRoomInstanceId = ids[(index + 1 + ids.Length) % ids.Length];
             RoomSpatialInstance room = ResolveRenovationRoom();
-            if (room != null) _selectedStructuralAnchor = room.Anchor;
-            InvalidateStructuralPreview(); return true;
+            if (room != null) _selectedRenovationAnchor = room.Anchor;
+            _root?.InvalidateStructuralRenovationPreview(); _structuralFeedback = string.Empty; return true;
         }
 
         public StructuralEditPreview PreviewStructuralMovement()
         {
             StructuralEditPreview preview = _root?.PreviewStructuralMovement(new StructuralMovementRequest
-            { RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedStructuralAnchor });
+            { RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedRenovationAnchor });
             _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
         }
 
@@ -420,7 +432,7 @@ namespace DungeonBuilder.M0
             if (ids.Length == 0) { _selectedRenovationRoomInstanceId = null; return; }
             if (!ids.Contains(_selectedRenovationRoomInstanceId)) _selectedRenovationRoomInstanceId = ids[0];
             RoomSpatialInstance room = ResolveRenovationRoom();
-            if (room != null) _selectedStructuralAnchor = room.Anchor;
+            if (room != null) _selectedRenovationAnchor = room.Anchor;
         }
 
         private RoomSpatialInstance ResolveRenovationRoom() =>
@@ -1823,18 +1835,18 @@ namespace DungeonBuilder.M0
                 Array.IndexOf(ResolveRenovationRoomIds(), _selectedRenovationRoomInstanceId) + 1), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.target.next"), button, buttonHeight))
                 CycleRenovationTarget();
-            GUILayout.Label(StructuralAnchorDisplay, label, labelHeight);
+            GUILayout.Label(RenovationAnchorDisplay, label, labelHeight);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
-                AdjustStructuralAnchor(-1, 0);
+                AdjustRenovationAnchor(-1, 0);
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
-                AdjustStructuralAnchor(1, 0);
+                AdjustRenovationAnchor(1, 0);
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
-                AdjustStructuralAnchor(0, -1);
+                AdjustRenovationAnchor(0, -1);
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
-                AdjustStructuralAnchor(0, 1);
+                AdjustRenovationAnchor(0, 1);
             GUILayout.EndHorizontal();
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.move.preview.action"), button, buttonHeight))
                 PreviewStructuralMovement();

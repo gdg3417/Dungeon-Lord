@@ -146,11 +146,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SetProperty(root, "Save", SaveWithTwoPlayerRoomsInReverseStorageOrder());
 
                 overlay.Bind(root);
+                overlay.AdjustStructuralAnchor(2, 3);
+                TileCoordinate constructionAnchor = overlay.SelectedStructuralAnchor;
+                overlay.RefreshStructuralConstructionAuthority();
 
                 Assert.That(overlay.StructuralRenovationControlsAvailable, Is.True);
                 Assert.That(overlay.SelectedRenovationRoomInstanceId, Is.EqualTo("test.room.first"));
+                Assert.That(overlay.SelectedRenovationAnchor, Is.EqualTo(new TileCoordinate(1, 1)));
+                Assert.That(overlay.SelectedStructuralAnchor, Is.EqualTo(constructionAnchor));
                 Assert.That(overlay.CycleRenovationTarget(), Is.True);
                 Assert.That(overlay.SelectedRenovationRoomInstanceId, Is.EqualTo("test.room.second"));
+                Assert.That(overlay.SelectedRenovationAnchor, Is.EqualTo(new TileCoordinate(5, 1)));
+                Assert.That(overlay.SelectedStructuralAnchor, Is.EqualTo(constructionAnchor));
             }
             finally
             {
@@ -172,12 +179,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 overlay.Bind(root);
                 SetProperty(root, "StructuralRenovationPreview", RetainedPreview());
 
-                overlay.AdjustStructuralAnchor(1, 0);
+                TileCoordinate constructionAnchor = overlay.SelectedStructuralAnchor;
+                overlay.AdjustRenovationAnchor(1, 0);
                 Assert.That(root.StructuralRenovationPreview, Is.Null);
+                Assert.That(overlay.SelectedStructuralAnchor, Is.EqualTo(constructionAnchor));
 
                 SetProperty(root, "StructuralRenovationPreview", RetainedPreview());
                 overlay.CycleRenovationTarget();
                 Assert.That(root.StructuralRenovationPreview, Is.Null);
+                Assert.That(overlay.SelectedStructuralAnchor, Is.EqualTo(constructionAnchor));
             }
             finally
             {
@@ -216,9 +226,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             const string floorId = "test.floor";
             var first = new RoomSpatialInstance { RoomInstanceId = "test.room.first",
-                RoomDefinitionId = "spatial.room.basic", FloorId = floorId };
+                RoomDefinitionId = "spatial.room.basic", FloorId = floorId,
+                Anchor = new TileCoordinate(1, 1) };
             var second = new RoomSpatialInstance { RoomInstanceId = "test.room.second",
-                RoomDefinitionId = "spatial.room.basic", FloorId = floorId };
+                RoomDefinitionId = "spatial.room.basic", FloorId = floorId,
+                Anchor = new TileCoordinate(5, 1) };
             var entrance = new FloorRouteNode { NodeId = "test.node.entrance", FloorId = floorId,
                 Kind = FloorRouteNodeKind.Entrance, RoomInstanceId = string.Empty };
             var firstNode = new FloorRouteNode { NodeId = "test.node.first", FloorId = floorId,
