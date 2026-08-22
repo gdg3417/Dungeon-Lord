@@ -121,6 +121,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
             Assert.That(overlay.PreviewStructuralConstruction().IsValid, Is.True);
             Assert.That(overlay.StructuralFeedback, Is.Not.Empty);
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (0, 6)"));
+            Assert.That(overlay.StructuralConnectionPointDisplay, Does.Contain("North"));
+            overlay.AdjustStructuralAnchor(1, 0);
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (1, 6)"));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            overlay.AdjustStructuralAnchor(-1, 0);
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (0, 6)"));
+            Assert.That(root.PreviewStructuralConstruction(new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" }).IsValid, Is.True);
+            overlay.AdjustStructuralAnchor(-1, 0);
+            Assert.That(overlay.SelectedStructuralAnchor.X, Is.EqualTo(-1));
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (-1, 6)"));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            overlay.AdjustStructuralAnchor(1, 0);
+            Assert.That(root.PreviewStructuralConstruction(new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" }).IsValid, Is.True);
+            overlay.AdjustStructuralAnchor(0, 1);
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (0, 7)"));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            overlay.AdjustStructuralAnchor(0, -1);
+            Assert.That(root.PreviewStructuralConstruction(new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" }).IsValid, Is.True);
+            overlay.AdjustStructuralAnchor(0, -1);
+            Assert.That(overlay.StructuralAnchorDisplay, Is.EqualTo("Anchor: (0, 5)"));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            overlay.AdjustStructuralAnchor(0, 1);
+            Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
+            Assert.That(overlay.StructuralConnectionPointDisplay, Does.Contain("South"));
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(overlay.StructuralConnectionPointDisplay, Does.Contain("East"));
+            Assert.That(overlay.CycleStructuralOrientation(), Is.True);
+            Assert.That(overlay.StructuralConnectionPointDisplay, Does.Contain("South"));
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            while (overlay.SelectedStructuralTerminalConnectionPointId != "north")
+                Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
+            Assert.That(overlay.PreviewStructuralConstruction().IsValid, Is.True);
             DetachedCanonicalWriteResult intervening = service.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId));

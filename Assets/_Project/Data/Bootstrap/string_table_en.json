@@ -2998,6 +2998,30 @@
     {
       "key": "ui.structural.exit.ordinal.format",
       "text": "Exit {0}"
+    },
+    {
+      "key": "ui.structural.anchor.format",
+      "text": "Anchor: ({0}, {1})"
+    },
+    {
+      "key": "ui.structural.exit.ordinal_direction.format",
+      "text": "Exit {0} ({1})"
+    },
+    {
+      "key": "ui.structural.direction.0",
+      "text": "North"
+    },
+    {
+      "key": "ui.structural.direction.1",
+      "text": "East"
+    },
+    {
+      "key": "ui.structural.direction.2",
+      "text": "South"
+    },
+    {
+      "key": "ui.structural.direction.3",
+      "text": "West"
     }
   ]
 }

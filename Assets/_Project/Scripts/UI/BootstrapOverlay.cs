@@ -168,6 +168,10 @@ namespace DungeonBuilder.M0
 
         public string SelectedStructuralRoomDisplayName => ResolveStructuralRoomDisplayName(
             ResolveSelectedStructuralRoom());
+        public string StructuralAnchorDisplay => string.Format(CultureInfo.InvariantCulture,
+            GetLocalizedString("ui.structural.anchor.format"), _selectedStructuralAnchor.X,
+            _selectedStructuralAnchor.Y);
+        public string StructuralConnectionPointDisplay => BuildStructuralConnectionPointDisplay();
 
         public bool CycleStructuralRoom()
         {
@@ -238,7 +242,7 @@ namespace DungeonBuilder.M0
             string request = string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.request.format"), roomName,
                 _selectedStructuralAnchor.X, _selectedStructuralAnchor.Y,
-                StructuralOrientationDisplay(), StructuralConnectionPointDisplay());
+                StructuralOrientationDisplay(), BuildStructuralConnectionPointDisplay());
             if (preview == null || !preview.IsValid)
                 return string.Format(CultureInfo.InvariantCulture,
                     GetLocalizedString("ui.structural.preview.invalid.format"), request,
@@ -325,13 +329,18 @@ namespace DungeonBuilder.M0
             "ui.structural.orientation." + ((int)_selectedStructuralOrientation).ToString(
                 CultureInfo.InvariantCulture));
 
-        private string StructuralConnectionPointDisplay()
+        private string BuildStructuralConnectionPointDisplay()
         {
             SpatialConnectionPointDefinition[] points = OrderedStructuralConnectionPoints();
             int index = Array.FindIndex(points, value => value.ConnectionPointId ==
                 _selectedStructuralTerminalConnectionPointId);
+            if (index < 0) return string.Empty;
+            CardinalOrientation worldFacing = StructuralEditService.Rotate(
+                points[index].Facing, _selectedStructuralOrientation);
             return string.Format(CultureInfo.InvariantCulture,
-                GetLocalizedString("ui.structural.exit.ordinal.format"), index + 1);
+                GetLocalizedString("ui.structural.exit.ordinal_direction.format"), index + 1,
+                GetLocalizedString("ui.structural.direction." + ((int)worldFacing).ToString(
+                    CultureInfo.InvariantCulture)));
         }
 
         private string ResolveStructuralRoomDisplayName(RoomSpatialDefinition room)
@@ -1597,11 +1606,14 @@ namespace DungeonBuilder.M0
                 StructuralOrientationDisplay()), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.structural.orientation.next"), button, buttonHeight))
                 CycleStructuralOrientation();
+            GUILayout.Label(StructuralAnchorDisplay, label, labelHeight);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
                 AdjustStructuralAnchor(-1, 0);
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
                 AdjustStructuralAnchor(1, 0);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
                 AdjustStructuralAnchor(0, -1);
             if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
@@ -1609,7 +1621,7 @@ namespace DungeonBuilder.M0
             GUILayout.EndHorizontal();
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.exit.format"),
-                StructuralConnectionPointDisplay()), label, labelHeight);
+                BuildStructuralConnectionPointDisplay()), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.structural.exit.next"), button, buttonHeight))
                 CycleStructuralConnectionPoint();
             if (GUILayout.Button(GetLocalizedString("ui.structural.preview.action"), button, buttonHeight))
