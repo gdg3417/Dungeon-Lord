@@ -238,25 +238,29 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !Clone(current, limits, out candidate))
             { Fail(preview, StructuralEditService.InvalidContextReason); return false; }
             preview.BaselineFingerprint = fingerprint;
-            floor = candidate.Floors[0];
+            SavedSpatialFloor candidateFloor = candidate.Floors[0];
+            floor = candidateFloor;
             floorDefinition = (production.Catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
-                .SingleOrDefault(value => value != null && value.FloorDefinitionId == floor.FloorDefinitionId &&
-                    value.FloorIndex == floor.FloorIndex);
-            if (floorDefinition == null || !TryPath(floor, out path))
+                .SingleOrDefault(value => value != null &&
+                    value.FloorDefinitionId == candidateFloor.FloorDefinitionId &&
+                    value.FloorIndex == candidateFloor.FloorIndex);
+            if (floorDefinition == null || !TryPath(candidateFloor, out Path resolvedPath))
             { Fail(preview, StructuralEditService.RequiredRouteAmbiguousReason); return false; }
+            path = resolvedPath;
             string targetId = request is StructuralMovementRequest movement ? movement.RoomInstanceId :
                 ((StructuralReplacementRequest)request).RoomInstanceId;
-            targetIndex = Array.FindIndex(path.Nodes, value => value?.Kind == FloorRouteNodeKind.Room &&
+            targetIndex = Array.FindIndex(resolvedPath.Nodes, value => value?.Kind == FloorRouteNodeKind.Room &&
                 value.RoomInstanceId == targetId);
-            if (targetIndex < 1 || targetIndex >= path.Nodes.Length - 1)
+            if (targetIndex < 1 || targetIndex >= resolvedPath.Nodes.Length - 1)
             { Fail(preview, StructuralEditService.TargetRoomNotFoundReason); return false; }
-            CanonicalRoomSemantics semantics = (floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())
+            CanonicalRoomSemantics semantics = (candidateFloor.RoomContents.RoomSemantics ??
+                    Array.Empty<CanonicalRoomSemantics>())
                 .SingleOrDefault(value => value?.RoomInstanceId == targetId);
             if (semantics == null || semantics.LegacyRoomOriginKind == LegacyRoomOriginKind.ImplicitCompatibilityContainer)
             { Fail(preview, StructuralEditService.TargetRoomNotBuildableReason); return false; }
-            FloorLayoutValidationResult prior = FloorLayoutValidator.Validate(floor.Layout, floorDefinition,
+            FloorLayoutValidationResult prior = FloorLayoutValidator.Validate(candidateFloor.Layout, floorDefinition,
                 production.Catalog.Rooms, production.Catalog.Corridors, workload,
-                floor.FixedStructures, production.Catalog.FixedStructures);
+                candidateFloor.FixedStructures, production.Catalog.FixedStructures);
             if (!prior.IsValid) { Fail(preview, StructuralEditService.LayoutInvalidReason); return false; }
             preview.PreviousUsedFloorSpace = prior.Capacity.UsedFloorSpaceCapacity;
             return true;
