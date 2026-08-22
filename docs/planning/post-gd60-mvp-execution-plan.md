@@ -9,7 +9,7 @@
 |---|---|
 | Status | **Phase 3A / PR #196 merged and complete; Phase 3B1 movement and replacement implemented in this PR** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main at merged PR #195 `4b8bb95ba3a5e202861e6aa4b3ec0e0cb427b34c` |
+| Current implementation baseline | Main at merged PR #196 `b6bd4a2dfa85a1b8899c617dd0d1982a91a879c1` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-08-21 |

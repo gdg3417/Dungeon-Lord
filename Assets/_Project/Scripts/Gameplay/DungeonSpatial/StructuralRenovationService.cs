@@ -116,6 +116,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentCatalog catalog = production.Catalog;
             var changes = new List<StructuralChange>();
             var movedNodeIds = new HashSet<string>(StringComparer.Ordinal);
+            var consequenceRoomIds = new HashSet<string>(StringComparer.Ordinal);
+            if (replacedIndex.HasValue)
+            {
+                RoomSpatialInstance replaced = Room(floor, path.Nodes[replacedIndex.Value]);
+                if (replaced != null) consequenceRoomIds.Add(replaced.RoomInstanceId);
+            }
             int firstRoomIndex = Math.Max(1, moveStart);
             for (int index = firstRoomIndex; index < path.Nodes.Length - 1; index++)
             {
@@ -124,6 +130,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 TileCoordinate old = room.Anchor;
                 room.Anchor = Add(room.Anchor, delta);
                 movedNodeIds.Add(path.Nodes[index].NodeId);
+                if ((!replacedIndex.HasValue && index == moveStart) ||
+                    !delta.Equals(default(TileCoordinate)))
+                    consequenceRoomIds.Add(room.RoomInstanceId);
                 if (!delta.Equals(default(TileCoordinate))) changes.Add(new StructuralChange
                 { Kind = StructuralChangeKind.RoomMoved, StableId = room.RoomInstanceId, From = old, To = room.Anchor });
             }
@@ -162,6 +171,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
             }
 
+            string structureReason = InspectGeometry(floor, floorDefinition, catalog, workload, false);
+            if (structureReason != null) return Fail(preview, structureReason);
+
             int[] boundaryIndices = replacedIndex.HasValue
                 ? new[] { replacedIndex.Value - 1, replacedIndex.Value }
                 : new[] { moveStart - 1 };
@@ -183,11 +195,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
 
             preview.PreservedAssignmentIds = (floor.RoomContents.Assignments ?? Array.Empty<RoomContentAssignment>())
-                .Where(value => value != null).Select(value => value.AssignmentId)
+                .Where(value => value != null && consequenceRoomIds.Contains(value.RoomInstanceId))
+                .Select(value => value.AssignmentId)
                 .OrderBy(value => value, StringComparer.Ordinal).ToArray();
             changes.AddRange(preview.PreservedAssignmentIds.Select(value => new StructuralChange
                 { Kind = StructuralChangeKind.ContentPreserved, StableId = value }));
-            string geometryReason = InspectGeometry(floor, floorDefinition, catalog, workload);
+            string geometryReason = InspectGeometry(floor, floorDefinition, catalog, workload, true);
             if (geometryReason != null) return Fail(preview, geometryReason);
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
                 return Fail(preview, StructuralEditService.WorkloadReason);
@@ -294,7 +307,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             Connection[] corridors = Pairs(source, destination, catalog, definitions[0], true).ToArray();
             if (corridors.Length == 1) { result = corridors[0]; reason = null; return true; }
             if (corridors.Length > 1) reason = StructuralEditService.ConnectionAmbiguousReason;
-            else if (HasAlignedPair(source, destination, catalog)) reason = StructuralEditService.CorridorLengthReason;
+            else if (HasLengthInvalidPair(source, destination, catalog, definitions[0]))
+                reason = StructuralEditService.CorridorLengthReason;
             return false;
         }
 
@@ -360,15 +374,27 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private static bool HasAlignedPair(TileEndpoint a, TileEndpoint b, SpatialContentCatalog catalog) =>
+        private static bool HasLengthInvalidPair(TileEndpoint a, TileEndpoint b,
+            SpatialContentCatalog catalog, CorridorSpatialDefinition corridor) =>
             (a.Points ?? Array.Empty<SpatialConnectionPointDefinition>()).Any(ap =>
                 (b.Points ?? Array.Empty<SpatialConnectionPointDefinition>()).Any(bp =>
                 {
                     CardinalOrientation af = StructuralEditService.Rotate(ap.Facing, a.Orientation);
                     CardinalOrientation bf = StructuralEditService.Rotate(bp.Facing, b.Orientation);
                     TileCoordinate aw = World(ap, a), bw = World(bp, b);
+                    bool horizontal = aw.Y == bw.Y &&
+                        (af == CardinalOrientation.Ninety || af == CardinalOrientation.TwoSeventy);
+                    bool vertical = aw.X == bw.X &&
+                        (af == CardinalOrientation.Zero || af == CardinalOrientation.OneEighty);
+                    CardinalOrientation axis = horizontal ? CardinalOrientation.Ninety : CardinalOrientation.Zero;
+                    int length = Math.Abs(bw.X - aw.X) + Math.Abs(bw.Y - aw.Y) - 1;
                     return bf == Opposite(af) && Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) &&
-                        (aw.X == bw.X || aw.Y == bw.Y) && Step(aw, af).Equals(StepToward(aw, bw));
+                        (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(ap.SocketTypeId) &&
+                        (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(bp.SocketTypeId) &&
+                        (horizontal || vertical) && Step(aw, af).Equals(StepToward(aw, bw)) &&
+                        corridor.Width == 1 &&
+                        (corridor.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(axis) &&
+                        (length < corridor.MinimumLength || length > corridor.MaximumLength);
                 }));
 
         private static bool TryUniqueEndpointShift(RoomSpatialInstance room, RoomSpatialDefinition oldDefinition,
@@ -416,7 +442,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
           ProposedConnectionKind = edge.ConnectionKind, PreviousFootprint = previousTiles,
           ProposedFootprint = edge.Footprint?.OccupiedTiles?.ToArray() ?? Array.Empty<TileCoordinate>() };
         private static string InspectGeometry(SavedSpatialFloor floor, FloorSpatialConfiguration floorDefinition,
-            SpatialContentCatalog catalog, SpatialValidationWorkloadLimits workload)
+            SpatialContentCatalog catalog, SpatialValidationWorkloadLimits workload, bool includeCorridors)
         {
             var rooms = new List<HashSet<TileCoordinate>>();
             foreach (RoomSpatialInstance room in floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>())
@@ -447,6 +473,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 fixedSets.Add(set);
             }
             var corridors = new List<HashSet<TileCoordinate>>();
+            if (!includeCorridors) return null;
             foreach (FloorRouteEdge edge in (floor.Layout.Edges ?? Array.Empty<FloorRouteEdge>()).Where(value =>
                 value?.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor))
             {

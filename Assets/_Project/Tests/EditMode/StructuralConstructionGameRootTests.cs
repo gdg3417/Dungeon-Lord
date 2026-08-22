@@ -83,6 +83,34 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void RenovationRequiresPreviewAndCanonicalPublicationClearsRetainedPreview()
+        {
+            var go = new GameObject("StructuralRenovationGameRootPublication");
+            try
+            {
+                GameRoot root = go.AddComponent<GameRoot>();
+                var oldSave = new SaveData();
+                var published = new SaveData();
+                SetProperty(root, "Save", oldSave);
+                DetachedCanonicalWriteResult missingPreview = root.CommitStructuralRenovation();
+                Assert.That(missingPreview.IsSuccess, Is.False);
+                Assert.That(missingPreview.Reason, Is.EqualTo(StructuralEditService.InvalidContextReason));
+
+                StructuralEditPreview retained = StructuralRenovationService.InvalidMovement(
+                    StructuralEditService.OutOfBoundsReason, new StructuralMovementRequest
+                    { RoomInstanceId = "test.room", Anchor = new TileCoordinate(1, 1) });
+                SetProperty(root, "StructuralRenovationPreview", retained);
+                typeof(GameRoot).GetMethod("PublishCanonicalRuntime",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { published });
+
+                Assert.That(root.Save, Is.SameAs(published));
+                Assert.That(root.StructuralRenovationPreview, Is.Null);
+                Assert.That(root.StructuralConstructionPreview, Is.Null);
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void SaveDeleteQuiescenceBlocksStructuralPreviewAndCommit()
         {
             var go = new GameObject("StructuralConstructionGameRootQuiescence");
