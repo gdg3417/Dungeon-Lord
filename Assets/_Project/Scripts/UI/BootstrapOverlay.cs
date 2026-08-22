@@ -255,14 +255,94 @@ namespace DungeonBuilder.M0
         {
             if (preview == null || !preview.IsValid) return LocalizeStructuralReason(
                 preview?.ReasonCodes?.FirstOrDefault());
-            int moved = preview.Consequences.Count(value => value.Kind == StructuralChangeKind.RoomMoved);
-            int connections = preview.Consequences.Count(value => value.Kind == StructuralChangeKind.EdgeReconnected);
-            return string.Format(CultureInfo.InvariantCulture,
-                GetLocalizedString(preview.Operation == StructuralEditOperation.Movement
-                    ? "ui.structural.renovation.move.preview.format"
-                    : "ui.structural.renovation.replace.preview.format"),
-                moved, connections, preview.PreservedAssignmentIds.Length,
-                preview.ResultingUsedFloorSpace, preview.ResultingRemainingFloorSpace);
+            Dictionary<string, int> roomNumbers = ResolveRequiredRouteRoomNumbers();
+            int targetNumber = roomNumbers.TryGetValue(preview.TargetRoomInstanceId, out int number) ? number : 0;
+            var lines = new List<string>();
+            if (preview.Operation == StructuralEditOperation.Movement)
+                lines.Add(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.renovation.move.detail.format"), targetNumber,
+                    preview.PreviousAnchor.X, preview.PreviousAnchor.Y, preview.Anchor.X, preview.Anchor.Y));
+            else
+                lines.Add(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.renovation.replace.detail.format"), targetNumber,
+                    ResolveStructuralRoomDisplayName(ResolveRoomDefinition(preview.PreviousRoomDefinitionId)),
+                    ResolveStructuralRoomDisplayName(ResolveRoomDefinition(preview.RoomDefinitionId))));
+            int[] downstream = (preview.Consequences ?? Array.Empty<StructuralChange>())
+                .Where(value => value.Kind == StructuralChangeKind.RoomMoved &&
+                    value.StableId != preview.TargetRoomInstanceId && roomNumbers.ContainsKey(value.StableId))
+                .Select(value => roomNumbers[value.StableId]).OrderBy(value => value).ToArray();
+            if (downstream.Length != 0) lines.Add(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.downstream.format"),
+                string.Join(", ", downstream.Select(value => value.ToString(CultureInfo.InvariantCulture)))));
+            if (preview.Consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved))
+                lines.Add(GetLocalizedString("ui.structural.renovation.terminal_moved"));
+            FloorRouteNode targetNode = preview.DetachedCandidate?.Floors?.SingleOrDefault()?.Layout?.Nodes?
+                .SingleOrDefault(value => value?.RoomInstanceId == preview.TargetRoomInstanceId);
+            FloorRouteEdge[] candidateEdges = preview.DetachedCandidate?.Floors?.SingleOrDefault()?.Layout?.Edges ??
+                Array.Empty<FloorRouteEdge>();
+            StructuralChange[] connections = (preview.Consequences ?? Array.Empty<StructuralChange>())
+                .Where(value => value.Kind == StructuralChangeKind.EdgeReconnected)
+                .OrderBy(value => value.StableId, StringComparer.Ordinal).ToArray();
+            for (int index = 0; index < connections.Length; index++)
+            {
+                StructuralChange change = connections[index];
+                FloorRouteEdge edge = candidateEdges.SingleOrDefault(value => value?.EdgeId == change.StableId);
+                string relationKey = edge?.DestinationNodeId == targetNode?.NodeId
+                    ? "ui.structural.renovation.connection.incoming"
+                    : edge?.SourceNodeId == targetNode?.NodeId
+                        ? "ui.structural.renovation.connection.outgoing"
+                        : "ui.structural.renovation.connection.affected";
+                lines.Add(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.renovation.connection.format"),
+                    GetLocalizedString(relationKey), ConnectionKindDisplay(change.PreviousConnectionKind),
+                    ConnectionKindDisplay(change.ProposedConnectionKind)));
+                TileCoordinate[] corridorTiles = change.ProposedConnectionKind ==
+                    FloorRouteConnectionKind.PhysicalCorridor ? change.ProposedFootprint : change.PreviousFootprint;
+                if (corridorTiles.Length != 0) lines.Add(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.renovation.corridor.format"),
+                    ResolveCorridorDisplayName(edge?.CorridorDefinitionId), corridorTiles.Length,
+                    string.Join(" ", corridorTiles.OrderBy(value => value).Select(value =>
+                        string.Format(CultureInfo.InvariantCulture, "({0},{1})", value.X, value.Y)))));
+            }
+            lines.Add(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.contents.format"),
+                preview.PreservedAssignmentIds.Length));
+            lines.Add(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.floor_space.format"),
+                preview.PreviousUsedFloorSpace, preview.ResultingUsedFloorSpace,
+                preview.ResultingRemainingFloorSpace));
+            return string.Join("\n", lines);
+        }
+
+        private string ConnectionKindDisplay(FloorRouteConnectionKind kind) => GetLocalizedString(
+            kind == FloorRouteConnectionKind.PhysicalCorridor
+                ? "ui.structural.connection.corridor" : "ui.structural.connection.direct");
+
+        private RoomSpatialDefinition ResolveRoomDefinition(string definitionId) =>
+            (_root?.ProductionSpatialContent?.Catalog?.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                .SingleOrDefault(value => value?.RoomDefinitionId == definitionId);
+
+        private string ResolveCorridorDisplayName(string definitionId)
+        {
+            CorridorSpatialDefinition[] corridors = (_root?.ProductionSpatialContent?.Catalog?.Corridors ??
+                Array.Empty<CorridorSpatialDefinition>()).Where(value => value != null).ToArray();
+            CorridorSpatialDefinition corridor = string.IsNullOrEmpty(definitionId) && corridors.Length == 1
+                ? corridors[0] : corridors.SingleOrDefault(value => value.CorridorDefinitionId == definitionId);
+            string key = corridor?.LocalizationKey ?? string.Empty;
+            if (string.IsNullOrEmpty(key)) return key;
+            StringTable table = (_root?.ProductionSpatialContent?.Languages ?? Array.Empty<StringTable>())
+                .SingleOrDefault(value => value != null && value.language == _root?.Content?.Strings?.language);
+            StringEntry[] entries = (table?.entries ?? Array.Empty<StringEntry>()).Where(value =>
+                value?.key == key).ToArray();
+            return entries.Length == 1 ? entries[0].text : key;
+        }
+
+        private Dictionary<string, int> ResolveRequiredRouteRoomNumbers()
+        {
+            string[] ids = ResolveRenovationRoomIds();
+            var result = new Dictionary<string, int>(StringComparer.Ordinal);
+            for (int index = 0; index < ids.Length; index++) result.Add(ids[index], index + 1);
+            return result;
         }
 
         public StructuralEditPreview PreviewStructuralConstruction()

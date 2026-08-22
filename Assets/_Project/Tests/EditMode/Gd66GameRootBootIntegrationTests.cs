@@ -241,6 +241,216 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void StructuralMovementThroughRealRootPersistsPublishesAndReopens()
+        {
+            RenovationHarness harness = Renovation("root-renovation-move.json", "spatial.room.basic",
+                new TileCoordinate(4, 2));
+            string roomId = "compat.floor.00.room.player.0000";
+            DetachedCanonicalWriteResult content = harness.Service.ExecuteCanonicalMutation(harness.Root.Save,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId));
+            Assert.That(content.IsSuccess, Is.True, content.Reason);
+            SavedSpatialFloor before = harness.Root.Save.validatedCanonicalSpatialState.Floors[0];
+            string nodeId = before.Layout.Nodes.Single(value => value.RoomInstanceId == roomId).NodeId;
+            string[] edgeIds = before.Layout.Edges.Select(value => value.EdgeId).OrderBy(value => value).ToArray();
+            string terminalId = before.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId;
+            RoomContentAssignment assignment = before.RoomContents.Assignments.Single();
+            string frozenLegacy = CaptureLegacySpatialEvidence(harness.Root.Save);
+            DetachedCanonicalSaveSession beforeSession = harness.Service.CanonicalSession;
+            StructuralEditPreview preview = harness.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(5, 2) });
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+
+            DetachedCanonicalWriteResult committed = harness.Root.CommitStructuralRenovation();
+
+            Assert.That(committed.IsSuccess, Is.True, committed.Reason);
+            Assert.That(harness.Root.Save, Is.SameAs(committed.RuntimeProjection));
+            Assert.That(harness.Root.StructuralRenovationPreview, Is.Null);
+            Assert.That(harness.Service.CanonicalSession, Is.Not.SameAs(beforeSession));
+            CollectionAssert.AreEqual(harness.Service.CanonicalSession.GetCurrentBytes(),
+                harness.FileSystem.ReadAllBytes(harness.Service.SavePath));
+            SavedSpatialFloor after = harness.Root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(after.Layout.Rooms.Single(value => value.RoomInstanceId == roomId).Anchor,
+                Is.EqualTo(new TileCoordinate(5, 2)));
+            Assert.That(after.Layout.Nodes.Single(value => value.RoomInstanceId == roomId).NodeId, Is.EqualTo(nodeId));
+            CollectionAssert.AreEqual(edgeIds, after.Layout.Edges.Select(value => value.EdgeId).OrderBy(value => value));
+            Assert.That(after.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId,
+                Is.EqualTo(terminalId));
+            AssertAssignment(assignment, after.RoomContents.Assignments.Single());
+            Assert.That(CaptureLegacySpatialEvidence(harness.Root.Save), Is.EqualTo(frozenLegacy));
+            SaveService reopenedService = Service(harness.Fixture, harness.FileSystem,
+                "root-renovation-move.json");
+            SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            Assert.That(reopened.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == roomId).Anchor, Is.EqualTo(new TileCoordinate(5, 2)));
+            AssertAssignment(assignment, reopened.validatedCanonicalSpatialState.Floors[0]
+                .RoomContents.Assignments.Single());
+        }
+
+        [Test]
+        public void StructuralReplacementThroughRealRootPersistsPublishesAndReopens()
+        {
+            RenovationHarness harness = Renovation("root-renovation-replace.json",
+                "spatial.room.large_chamber", new TileCoordinate(4, 1));
+            string roomId = "compat.floor.00.room.player.0000";
+            DetachedCanonicalWriteResult content = harness.Service.ExecuteCanonicalMutation(harness.Root.Save,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId));
+            Assert.That(content.IsSuccess, Is.True, content.Reason);
+            SavedSpatialFloor before = harness.Root.Save.validatedCanonicalSpatialState.Floors[0];
+            string nodeId = before.Layout.Nodes.Single(value => value.RoomInstanceId == roomId).NodeId;
+            string[] edgeIds = before.Layout.Edges.Select(value => value.EdgeId).OrderBy(value => value).ToArray();
+            string terminalId = before.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId;
+            RoomContentAssignment assignment = before.RoomContents.Assignments.Single();
+            string frozenLegacy = CaptureLegacySpatialEvidence(harness.Root.Save);
+            DetachedCanonicalSaveSession beforeSession = harness.Service.CanonicalSession;
+            StructuralEditPreview preview = harness.Root.PreviewStructuralReplacement(
+                new StructuralReplacementRequest { RoomInstanceId = roomId,
+                    RoomDefinitionId = "spatial.room.rectangle" });
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+
+            DetachedCanonicalWriteResult committed = harness.Root.CommitStructuralRenovation();
+
+            Assert.That(committed.IsSuccess, Is.True, committed.Reason);
+            Assert.That(harness.Root.Save, Is.SameAs(committed.RuntimeProjection));
+            Assert.That(harness.Root.StructuralRenovationPreview, Is.Null);
+            Assert.That(harness.Service.CanonicalSession, Is.Not.SameAs(beforeSession));
+            CollectionAssert.AreEqual(harness.Service.CanonicalSession.GetCurrentBytes(),
+                harness.FileSystem.ReadAllBytes(harness.Service.SavePath));
+            SavedSpatialFloor after = harness.Root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(after.Layout.Rooms.Single(value => value.RoomInstanceId == roomId).RoomDefinitionId,
+                Is.EqualTo("spatial.room.rectangle"));
+            Assert.That(after.Layout.Nodes.Single(value => value.RoomInstanceId == roomId).NodeId, Is.EqualTo(nodeId));
+            CollectionAssert.AreEqual(edgeIds, after.Layout.Edges.Select(value => value.EdgeId).OrderBy(value => value));
+            Assert.That(after.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId,
+                Is.EqualTo(terminalId));
+            AssertAssignment(assignment, after.RoomContents.Assignments.Single());
+            Assert.That(CaptureLegacySpatialEvidence(harness.Root.Save), Is.EqualTo(frozenLegacy));
+            SaveService reopenedService = Service(harness.Fixture, harness.FileSystem,
+                "root-renovation-replace.json");
+            SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            Assert.That(reopened.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == roomId).RoomDefinitionId, Is.EqualTo("spatial.room.rectangle"));
+            AssertAssignment(assignment, reopened.validatedCanonicalSpatialState.Floors[0]
+                .RoomContents.Assignments.Single());
+        }
+
+        [Test]
+        public void StructuralRenovationPersistenceFailureDoesNotPublishOrReplaceSession()
+        {
+            RenovationHarness harness = Renovation("root-renovation-failure.json", "spatial.room.basic",
+                new TileCoordinate(4, 2));
+            string roomId = "compat.floor.00.room.player.0000";
+            StructuralEditPreview preview = harness.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(5, 2) });
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            SaveData beforeRuntime = harness.Root.Save;
+            DetachedCanonicalSaveSession beforeSession = harness.Service.CanonicalSession;
+            byte[] beforeBytes = harness.FileSystem.ReadAllBytes(harness.Service.SavePath);
+            harness.FileSystem.EnableTargetedFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, paths => true, 1, false);
+
+            DetachedCanonicalWriteResult result = harness.Root.CommitStructuralRenovation();
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(harness.Root.Save, Is.SameAs(beforeRuntime));
+            Assert.That(harness.Service.CanonicalSession, Is.SameAs(beforeSession));
+            CollectionAssert.AreEqual(beforeBytes, harness.FileSystem.ReadAllBytes(harness.Service.SavePath));
+            Assert.That(harness.Root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == roomId).Anchor, Is.EqualTo(new TileCoordinate(4, 2)));
+        }
+
+        [Test]
+        public void CanonicalInterveningWritePublishesClearsFeedbackAndRejectsRetainedRenovation()
+        {
+            RenovationHarness harness = Renovation("root-renovation-stale.json", "spatial.room.basic",
+                new TileCoordinate(4, 2));
+            string roomId = "compat.floor.00.room.player.0000";
+            StructuralEditPreview retained = harness.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(5, 2) });
+            Assert.That(retained.IsValid, Is.True, string.Join(",", retained.ReasonCodes));
+            Assert.That(harness.Overlay.BuildRenovationPreviewPresentation(retained), Is.Not.Empty);
+            DetachedCanonicalWriteResult intervening = harness.Service.ExecuteCanonicalMutation(harness.Root.Save,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, roomId));
+            Assert.That(intervening.IsSuccess, Is.True, intervening.Reason);
+            Assert.That(harness.Root.Save, Is.SameAs(intervening.RuntimeProjection));
+            Assert.That(harness.Root.StructuralRenovationPreview, Is.Null);
+            Assert.That(harness.Overlay.StructuralFeedback, Is.Empty);
+            DetachedCanonicalWriteResult stale = harness.Service.ExecuteCanonicalMutation(harness.Root.Save,
+                DetachedCanonicalMutationRequest.Move(retained));
+            Assert.That(stale.IsSuccess, Is.False);
+            Assert.That(stale.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+        }
+
+        [Test]
+        public void BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences()
+        {
+            string roomId = "compat.floor.00.room.player.0000";
+            RenovationHarness direct = Renovation("root-renovation-presentation-direct.json",
+                "spatial.room.basic", new TileCoordinate(4, 2));
+            StructuralEditPreview toCorridor = direct.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(5, 2) });
+            string corridorText = direct.Overlay.BuildRenovationPreviewPresentation(toCorridor);
+            Assert.That(corridorText, Does.Contain("Move Room 2: (4,2) -> (5,2)"));
+            Assert.That(corridorText, Does.Contain("Direct Doorway -> Straight Stone Corridor"));
+            Assert.That(corridorText, Does.Contain("Straight Stone Corridor: 1 tiles (4,3)"));
+            Assert.That(corridorText, Does.Contain("Completion Terminal"));
+            Assert.That(corridorText, Does.Contain("Floor space used: 42 -> 43; remaining: 17"));
+            Assert.That(corridorText, Does.Not.Contain("spatial.room."));
+            Assert.That(corridorText, Does.Not.Contain("spatial.corridor."));
+
+            Object.DestroyImmediate(rootObject); rootObject = null;
+            RenovationHarness physical = Renovation("root-renovation-presentation-physical.json",
+                "spatial.room.basic", new TileCoordinate(5, 2));
+            StructuralEditPreview toDirect = physical.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(4, 2) });
+            string directText = physical.Overlay.BuildRenovationPreviewPresentation(toDirect);
+            Assert.That(directText, Does.Contain("Straight Stone Corridor -> Direct Doorway"));
+
+            Object.DestroyImmediate(rootObject); rootObject = null;
+            RenovationHarness replacement = Renovation("root-renovation-presentation-replace.json",
+                "spatial.room.large_chamber", new TileCoordinate(4, 1));
+            StructuralEditPreview replace = replacement.Root.PreviewStructuralReplacement(
+                new StructuralReplacementRequest { RoomInstanceId = roomId,
+                    RoomDefinitionId = "spatial.room.rectangle" });
+            string replacementText = replacement.Overlay.BuildRenovationPreviewPresentation(replace);
+            Assert.That(replacementText, Does.Contain("Replace Room 2: Large Chamber -> Rectangle Room"));
+            Assert.That(replacementText, Does.Contain("Incoming connection"));
+            Assert.That(replacementText, Does.Contain("Outgoing connection"));
+            Assert.That(replacementText, Does.Not.Contain("spatial.room."));
+
+            StructuralEditPreview invalid = replacement.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = roomId, Anchor = new TileCoordinate(-100, -100) });
+            Assert.That(replacement.Overlay.BuildRenovationPreviewPresentation(invalid), Does.Contain(
+                replacement.Root.Content.GetString(StructuralEditService.OutOfBoundsReason, string.Empty)));
+        }
+
+        [Test]
+        public void BootstrapRenovationPresentationDisclosesDownstreamRoomAndTerminalMovement()
+        {
+            RenovationHarness harness = Renovation("root-renovation-presentation-downstream.json",
+                "spatial.room.basic", new TileCoordinate(5, 2));
+            SavedSpatialFloor floor = harness.Root.Save.validatedCanonicalSpatialState.Floors[0];
+            string firstRoomId = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Room &&
+                value.RoomInstanceId != "compat.floor.00.room.player.0000").RoomInstanceId;
+            RoomSpatialInstance first = floor.Layout.Rooms.Single(value => value.RoomInstanceId == firstRoomId);
+            StructuralEditPreview preview = harness.Root.PreviewStructuralMovement(
+                new StructuralMovementRequest { RoomInstanceId = firstRoomId,
+                    Anchor = new TileCoordinate(first.Anchor.X, first.Anchor.Y + 1) });
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            string text = harness.Overlay.BuildRenovationPreviewPresentation(preview);
+            Assert.That(text, Does.Contain("Downstream rooms moved: 2"));
+            Assert.That(text, Does.Contain("Completion Terminal moves"));
+        }
+
+        [Test]
         public void FailedBootCompletionLeavesGameplayAndHomeUninitialized()
         {
             GameRoot root = Root(null);
@@ -608,6 +818,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new[] { RequiredAsset(spatialRoot + "string_table_en.json") },
                 RequiredAsset(spatialRoot + "validation_limits.json"));
             Assert.That(loaded.Success, Is.True);
+        }
+
+        private RenovationHarness Renovation(string filename, string definitionId, TileCoordinate anchor)
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = Service(fixture, fileSystem, filename);
+            SaveData empty = service.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(empty, Is.Not.Null, banner);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(starter.IsSuccess, Is.True, starter.Reason);
+            GameRoot root = Root(service);
+            LoadPlayerFacingContent(root);
+            var overlay = rootObject.AddComponent<BootstrapOverlay>();
+            root.overlay = overlay;
+            overlay.Bind(root);
+            Assert.That(root.CompleteSuccessfulBootForTests(starter.RuntimeProjection, true), Is.True);
+            StructuralEditPreview construction = root.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = definitionId, Anchor = anchor,
+                    Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" });
+            Assert.That(construction.IsValid, Is.True, string.Join(",", construction.ReasonCodes));
+            DetachedCanonicalWriteResult constructed = root.CommitStructuralConstruction();
+            Assert.That(constructed.IsSuccess, Is.True, constructed.Reason);
+            return new RenovationHarness(fixture, fileSystem, service, root, overlay);
+        }
+
+        private static void AssertAssignment(RoomContentAssignment expected, RoomContentAssignment actual)
+        {
+            Assert.That(actual.AssignmentId, Is.EqualTo(expected.AssignmentId));
+            Assert.That(actual.RoomInstanceId, Is.EqualTo(expected.RoomInstanceId));
+            Assert.That(actual.CategoryId, Is.EqualTo(expected.CategoryId));
+            Assert.That(actual.OptionId, Is.EqualTo(expected.OptionId));
+            Assert.That(actual.Sequence, Is.EqualTo(expected.Sequence));
+        }
+
+        private sealed class RenovationHarness
+        {
+            internal RenovationHarness(Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
+                Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem fileSystem,
+                SaveService service, GameRoot root, BootstrapOverlay overlay)
+            { Fixture = fixture; FileSystem = fileSystem; Service = service; Root = root; Overlay = overlay; }
+            internal Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture Fixture { get; }
+            internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem { get; }
+            internal SaveService Service { get; }
+            internal GameRoot Root { get; }
+            internal BootstrapOverlay Overlay { get; }
         }
 
         private static TextAsset RequiredAsset(string path)

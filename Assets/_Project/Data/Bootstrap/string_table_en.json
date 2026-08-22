@@ -3078,6 +3078,50 @@
     {
       "key": "structural.edit.content_capacity_exceeded",
       "text": "The replacement room cannot hold the room's existing contents."
+    },
+    {
+      "key": "ui.structural.renovation.move.detail.format",
+      "text": "Move Room {0}: ({1},{2}) -> ({3},{4})"
+    },
+    {
+      "key": "ui.structural.renovation.replace.detail.format",
+      "text": "Replace Room {0}: {1} -> {2}"
+    },
+    {
+      "key": "ui.structural.renovation.downstream.format",
+      "text": "Downstream rooms moved: {0}"
+    },
+    {
+      "key": "ui.structural.renovation.terminal_moved",
+      "text": "Completion Terminal moves with the downstream group."
+    },
+    {
+      "key": "ui.structural.renovation.connection.format",
+      "text": "{0} connection: {1} -> {2}"
+    },
+    {
+      "key": "ui.structural.renovation.connection.incoming",
+      "text": "Incoming"
+    },
+    {
+      "key": "ui.structural.renovation.connection.outgoing",
+      "text": "Outgoing"
+    },
+    {
+      "key": "ui.structural.renovation.connection.affected",
+      "text": "Affected"
+    },
+    {
+      "key": "ui.structural.renovation.corridor.format",
+      "text": "{0}: {1} tiles {2}"
+    },
+    {
+      "key": "ui.structural.renovation.contents.format",
+      "text": "Contents preserved: {0}"
+    },
+    {
+      "key": "ui.structural.renovation.floor_space.format",
+      "text": "Floor space used: {0} -> {1}; remaining: {2}"
     }
   ]
 }
