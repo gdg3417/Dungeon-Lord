@@ -61,25 +61,95 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(starter.IsSuccess, Is.True, starter.Reason);
             GameRoot root = Root(service);
             LoadPlayerFacingContent(root);
+            var overlay = rootObject.AddComponent<BootstrapOverlay>();
+            root.overlay = overlay;
+            overlay.Bind(root);
+            Assert.That(overlay.StructuralConstructionControlsAvailable, Is.False);
+            Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.Null);
             Assert.That(root.CompleteSuccessfulBootForTests(starter.RuntimeProjection, true), Is.True);
             SaveData before = root.Save;
-            var overlay = rootObject.AddComponent<BootstrapOverlay>();
-            overlay.Bind(root);
             Assert.That(overlay.StructuralConstructionControlsAvailable, Is.True);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.basic"));
+            CollectionAssert.AreEqual(new[] { CardinalOrientation.Zero },
+                overlay.SelectableStructuralOrientations);
+            Assert.That(overlay.SelectedStructuralOrientation, Is.EqualTo(CardinalOrientation.Zero));
+            Assert.That(overlay.SelectableStructuralConnectionPointIds, Does.Contain(
+                overlay.SelectedStructuralTerminalConnectionPointId));
+            CollectionAssert.AreEqual(fixture.Production.Catalog.Rooms.Single(value =>
+                value.RoomDefinitionId == overlay.SelectedStructuralRoomDefinitionId).ConnectionPoints
+                .Select(value => value.ConnectionPointId).OrderBy(value => value, System.StringComparer.Ordinal),
+                overlay.SelectableStructuralConnectionPointIds);
+            Assert.That(overlay.SelectedStructuralTerminalConnectionPointId,
+                Is.EqualTo(overlay.SelectableStructuralConnectionPointIds[0]));
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Is.EqualTo("Basic Room"));
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Does.Not.Contain("spatial.room."));
+            StructuralEditPreview immediate = overlay.PreviewStructuralConstruction();
+            Assert.That(immediate.ReasonCodes, Does.Not.Contain(StructuralEditService.InvalidContextReason));
+            string[] productionAllowed = fixture.Production.Catalog.Floors.Single(value =>
+                value.FloorDefinitionId == root.Save.validatedCanonicalSpatialState.Floors[0].FloorDefinitionId &&
+                value.FloorIndex == root.Save.validatedCanonicalSpatialState.Floors[0].FloorIndex)
+                .AllowedRoomDefinitionIds.OrderBy(value => value, System.StringComparer.Ordinal).ToArray();
+            CollectionAssert.AreEqual(productionAllowed, overlay.SelectableStructuralRoomDefinitionIds);
             Assert.That(overlay.CycleStructuralRoom(), Is.True);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.large_chamber"));
+            CollectionAssert.AreEqual(new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
+                overlay.SelectableStructuralOrientations);
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Is.EqualTo("Large Chamber"));
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Does.Not.Contain("spatial.room."));
+            CollectionAssert.AreEqual(fixture.Production.Catalog.Rooms.Single(value =>
+                value.RoomDefinitionId == overlay.SelectedStructuralRoomDefinitionId).ConnectionPoints
+                .Select(value => value.ConnectionPointId).OrderBy(value => value, System.StringComparer.Ordinal),
+                overlay.SelectableStructuralConnectionPointIds);
+            Assert.That(overlay.SelectableStructuralConnectionPointIds, Does.Contain(
+                overlay.SelectedStructuralTerminalConnectionPointId));
             Assert.That(overlay.CycleStructuralRoom(), Is.True);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.rectangle"));
+            CollectionAssert.AreEqual(new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
+                overlay.SelectableStructuralOrientations);
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Is.EqualTo("Rectangle Room"));
+            Assert.That(overlay.SelectedStructuralRoomDisplayName, Does.Not.Contain("spatial.room."));
+            CollectionAssert.AreEqual(fixture.Production.Catalog.Rooms.Single(value =>
+                value.RoomDefinitionId == overlay.SelectedStructuralRoomDefinitionId).ConnectionPoints
+                .Select(value => value.ConnectionPointId).OrderBy(value => value, System.StringComparer.Ordinal),
+                overlay.SelectableStructuralConnectionPointIds);
+            Assert.That(overlay.SelectedStructuralTerminalConnectionPointId,
+                Is.EqualTo(overlay.SelectableStructuralConnectionPointIds[0]));
             Assert.That(overlay.CycleStructuralRoom(), Is.True);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.basic"));
             for (int step = 0; step < 6; step++) overlay.AdjustStructuralAnchor(0, 1);
             while (overlay.SelectedStructuralTerminalConnectionPointId != "north")
                 Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
             Assert.That(overlay.PreviewStructuralConstruction().IsValid, Is.True);
+            Assert.That(overlay.StructuralFeedback, Is.Not.Empty);
+            DetachedCanonicalWriteResult intervening = service.ExecuteCanonicalMutation(root.Save,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(intervening.IsSuccess, Is.True, intervening.Reason);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            Assert.That(overlay.StructuralFeedback, Is.Empty);
             overlay.AdjustStructuralAnchor(1, 0);
             Assert.That(root.StructuralConstructionPreview, Is.Null);
             overlay.AdjustStructuralAnchor(-1, 0);
+            var validRequest = new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(0, 6), Orientation = CardinalOrientation.Zero,
+                TerminalConnectionPointId = "north" };
+            Assert.That(root.PreviewStructuralConstruction(validRequest).IsValid, Is.True);
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            Assert.That(overlay.CommitStructuralConstruction(), Is.Null);
+            Assert.That(root.PreviewStructuralConstruction(validRequest).IsValid, Is.True);
+            Assert.That(overlay.CycleStructuralOrientation(), Is.True);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            Assert.That(overlay.CommitStructuralConstruction(), Is.Null);
+            Assert.That(root.PreviewStructuralConstruction(validRequest).IsValid, Is.True);
+            overlay.AdjustStructuralAnchor(1, 0);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            Assert.That(overlay.CommitStructuralConstruction(), Is.Null);
+            overlay.AdjustStructuralAnchor(-1, 0);
+            Assert.That(root.PreviewStructuralConstruction(validRequest).IsValid, Is.True);
+            Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            Assert.That(overlay.CommitStructuralConstruction(), Is.Null);
             TileCoordinate terminalBefore = before.validatedCanonicalSpatialState.Floors[0]
                 .FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor;
             StructuralEditPreview invalid = root.PreviewStructuralConstruction(

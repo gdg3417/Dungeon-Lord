@@ -456,6 +456,7 @@ namespace DungeonBuilder.M0
             InitializeStructureSimulationPass();
             InitializeRunSimulationService();
             SaveService.Save(Save, SaveReason.Boot);
+            overlay?.RefreshStructuralConstructionAuthority();
             SaveLine = "Save: Boot";
 
             Logger.Info("M0 init complete.");
@@ -507,6 +508,7 @@ namespace DungeonBuilder.M0
             Save = published;
             StructuralConstructionPreview = null;
             StructuralConstructionReasonKey = string.Empty;
+            overlay?.SynchronizeStructuralConstructionPublication();
             TimeService?.AttachSave(Save);
             RefreshDashboardState();
             RefreshStructureRuntimeLines();

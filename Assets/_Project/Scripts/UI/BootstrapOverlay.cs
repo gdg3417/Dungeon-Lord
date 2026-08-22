@@ -142,8 +142,32 @@ namespace DungeonBuilder.M0
         public void Bind(GameRoot root)
         {
             _root = root;
-            ReconcileStructuralSelection(true);
+            RefreshStructuralConstructionAuthority();
         }
+
+        public void RefreshStructuralConstructionAuthority()
+        {
+            ReconcileStructuralSelection(string.IsNullOrEmpty(_selectedStructuralRoomDefinitionId));
+        }
+
+        public void SynchronizeStructuralConstructionPublication()
+        {
+            _structuralFeedback = string.Empty;
+            RefreshStructuralConstructionAuthority();
+        }
+
+        public string[] SelectableStructuralRoomDefinitionIds => ResolveCanonicalStructuralRooms()
+            .Select(value => value.RoomDefinitionId).ToArray();
+
+        public CardinalOrientation[] SelectableStructuralOrientations =>
+            (ResolveSelectedStructuralRoom()?.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                .Distinct().OrderBy(value => value).ToArray();
+
+        public string[] SelectableStructuralConnectionPointIds => OrderedStructuralConnectionPoints()
+            .Select(value => value.ConnectionPointId).ToArray();
+
+        public string SelectedStructuralRoomDisplayName => ResolveStructuralRoomDisplayName(
+            ResolveSelectedStructuralRoom());
 
         public bool CycleStructuralRoom()
         {
@@ -210,8 +234,7 @@ namespace DungeonBuilder.M0
         public string BuildStructuralPreviewPresentation(StructuralEditPreview preview)
         {
             RoomSpatialDefinition room = ResolveSelectedStructuralRoom();
-            string roomName = GetLocalizedString(room?.LocalizationKey ?? string.Empty,
-                room?.LocalizationKey ?? string.Empty);
+            string roomName = ResolveStructuralRoomDisplayName(room);
             string request = string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.request.format"), roomName,
                 _selectedStructuralAnchor.X, _selectedStructuralAnchor.Y,
@@ -267,13 +290,25 @@ namespace DungeonBuilder.M0
 
         private RoomSpatialDefinition[] ResolveCanonicalStructuralRooms()
         {
-            if (_root?.Save == null || _root.ProductionSpatialContent?.Catalog == null ||
+            if (_root?.Save?.validatedCanonicalSpatialState?.Floors == null ||
+                _root.ProductionSpatialContent?.Catalog == null ||
                 CanonicalMvpRouteProjection.InspectWithProductionContent(_root.Save,
                     _root.ProductionSpatialContent).AuthorityState !=
                     CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) return Array.Empty<RoomSpatialDefinition>();
-            string[] supported = { "spatial.room.basic", "spatial.room.large_chamber", "spatial.room.rectangle" };
-            return (_root.ProductionSpatialContent.Catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
-                .Where(value => value != null && supported.Contains(value.RoomDefinitionId))
+            SpatialContentCatalog catalog = _root.ProductionSpatialContent.Catalog;
+            SavedSpatialFloor[] activeFloors = _root.Save.validatedCanonicalSpatialState.Floors;
+            if (activeFloors.Length != 1 || activeFloors[0] == null) return Array.Empty<RoomSpatialDefinition>();
+            SavedSpatialFloor active = activeFloors[0];
+            FloorSpatialConfiguration[] floors = (catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
+                .Where(value => value != null && value.FloorDefinitionId == active.FloorDefinitionId &&
+                    value.FloorIndex == active.FloorIndex).ToArray();
+            if (floors.Length != 1) return Array.Empty<RoomSpatialDefinition>();
+            string[] allowed = (floors[0].AllowedRoomDefinitionIds ?? Array.Empty<string>())
+                .Where(value => !string.IsNullOrEmpty(value)).Distinct(StringComparer.Ordinal).ToArray();
+            return (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                .Where(value => value != null && allowed.Contains(value.RoomDefinitionId) &&
+                    catalog.Rooms.Count(candidate => candidate != null &&
+                        candidate.RoomDefinitionId == value.RoomDefinitionId) == 1)
                 .OrderBy(value => value.RoomDefinitionId, StringComparer.Ordinal).ToArray();
         }
 
@@ -297,6 +332,22 @@ namespace DungeonBuilder.M0
                 _selectedStructuralTerminalConnectionPointId);
             return string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.exit.ordinal.format"), index + 1);
+        }
+
+        private string ResolveStructuralRoomDisplayName(RoomSpatialDefinition room)
+        {
+            string key = room?.LocalizationKey ?? string.Empty;
+            if (string.IsNullOrEmpty(key)) return key;
+            string language = _root?.Content?.Strings?.language;
+            StringTable[] matches = (_root?.ProductionSpatialContent?.Languages ??
+                Array.Empty<StringTable>()).Where(value => value != null &&
+                    string.Equals(value.language, language, StringComparison.Ordinal)).ToArray();
+            if (matches.Length != 1) return key;
+            StringEntry[] entries = (matches[0].entries ?? Array.Empty<StringEntry>())
+                .Where(value => value != null && string.Equals(value.key, key,
+                    StringComparison.Ordinal)).ToArray();
+            return entries.Length == 1 && !string.IsNullOrEmpty(entries[0].text)
+                ? entries[0].text : key;
         }
 
         public void CycleFullDiagnosticsPage()
@@ -1538,7 +1589,7 @@ namespace DungeonBuilder.M0
             GUILayout.Label(GetLocalizedString("ui.structural.heading"), heading, labelHeight);
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.room.format"),
-                GetLocalizedString(room?.LocalizationKey ?? string.Empty)), label, labelHeight);
+                ResolveStructuralRoomDisplayName(room)), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.structural.room.next"), button, buttonHeight))
                 CycleStructuralRoom();
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
