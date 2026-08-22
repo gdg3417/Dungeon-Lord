@@ -16,7 +16,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         public static FloorSpatialConfiguration Configuration(int capacity = FinalCapacity, int branches = 0) => new FloorSpatialConfiguration { FloorDefinitionId = "floor.definition.test", FloorIndex = 0, Bounds = new RectangularFloorBounds(new TileCoordinate(-100, -100), 400, 400), FinalFloorSpaceCapacity = capacity, OptionalBranchAllowance = branches };
         public static RoomSpatialDefinition[] Definitions(int connections = 2) => new[] { new RoomSpatialDefinition { RoomDefinitionId = RoomDefinitionId, GrossFootprint = new RectangularFootprintDefinition(1, 1), MaximumConnectionCount = connections, MonsterCapacity = 1, TrapCapacity = 2, LootCapacity = 3 } };
-        public static CorridorSpatialDefinition[] CorridorDefinitions() => new[] { new CorridorSpatialDefinition { CorridorDefinitionId = CorridorDefinitionId } };
+        public static CorridorSpatialDefinition[] CorridorDefinitions() => new[] { new CorridorSpatialDefinition
+        { CorridorDefinitionId = CorridorDefinitionId, Width = 1, MinimumLength = 1, MaximumLength = 100,
+          AllowedOrientations = new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety } } };
 
         public static FloorSpatialLayout ValidLayout(FloorRouteNodeKind terminal = FloorRouteNodeKind.Completion)
         {
@@ -33,6 +35,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var result = FloorLayoutValidator.Validate(ValidLayout(terminal), Configuration(), Definitions(), CorridorDefinitions(), Limits());
             Assert.That(result.IsValid, Is.True); Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(FinalCapacity)); Assert.That(result.Capacity.RemainingFloorSpaceCapacity, Is.Zero);
+        }
+
+        [Test]
+        public void PhysicalCorridor_LengthMustMatchReferencedDefinition()
+        {
+            CorridorSpatialDefinition definition = CorridorDefinitions()[0];
+            definition.MinimumLength = 3;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+            definition.MinimumLength = 1; definition.MaximumLength = 1;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+        }
+
+        [Test]
+        public void PhysicalCorridor_WidthAndDeterminateAxisMustMatchDefinition()
+        {
+            CorridorSpatialDefinition definition = CorridorDefinitions()[0];
+            definition.Width = 2;
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
+            definition.Width = 1;
+            definition.AllowedOrientations = new[] { CardinalOrientation.Zero };
+            AssertReason(ValidLayout(), Configuration(), Definitions(), new[] { definition },
+                FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch);
         }
 
         [Test]
@@ -686,16 +713,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortyFive()
+        public void ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortySix()
         {
             int[] values = Enum.GetValues(typeof(FloorLayoutValidationReason)).Cast<int>().ToArray();
-            CollectionAssert.AreEqual(Enumerable.Range(1, 45), values);
+            CollectionAssert.AreEqual(Enumerable.Range(1, 46), values);
             Assert.That((int)FloorLayoutValidationReason.InvalidFloorBounds, Is.EqualTo(40));
             Assert.That((int)FloorLayoutValidationReason.StructureTileOutsideFloorBounds, Is.EqualTo(41));
             Assert.That((int)FloorLayoutValidationReason.FinalCapacityExceedsFloorBounds, Is.EqualTo(42));
             Assert.That((int)FloorLayoutValidationReason.InvalidConnectionKind, Is.EqualTo(43));
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition, Is.EqualTo(44));
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasFootprint, Is.EqualTo(45));
+            Assert.That((int)FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch, Is.EqualTo(46));
         }
 
         private static FloorSpatialLayout Canonicalize(FloorSpatialLayout source, int maximumTiles = 100)

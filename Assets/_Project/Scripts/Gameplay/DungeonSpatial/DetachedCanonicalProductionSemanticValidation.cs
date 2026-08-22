@@ -44,9 +44,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var allowedCorridors = new HashSet<string>(floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>(), StringComparer.Ordinal);
                 var rooms = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>()).Where(value => value != null).ToArray();
                 var corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>()).Where(value => value != null).ToArray();
-                if (!FloorLayoutValidator.Validate(floor.Layout, floorDefinition, rooms, corridors,
-                    new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles)).IsValid)
-                    issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
+                FloorLayoutValidationResult layoutValidation = FloorLayoutValidator.Validate(
+                    floor.Layout, floorDefinition, rooms, corridors,
+                    new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles),
+                    floor.FixedStructures, catalog.FixedStructures);
                 var roomByInstance = new Dictionary<string, RoomSpatialDefinition>(StringComparer.Ordinal);
                 foreach (RoomSpatialInstance room in floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>())
                 {
@@ -61,9 +62,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         !allowedCorridors.Contains(edge.CorridorDefinitionId))
                         issues.Add(DetachedCanonicalProductionSemanticIssue.CorridorDefinition);
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
+                if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
+                        layoutValidation, floor.FixedStructures))
+                    issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateAssignments(floor, roomByInstance, configured, issues);
             }
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
+        }
+
+        private static bool ContainsOnlyIndividuallyClassifiedFixedIssues(
+            FloorLayoutValidationResult validation, IEnumerable<SavedFixedSpatialStructure> fixedStructures)
+        {
+            if (validation?.Issues == null || validation.Issues.Length == 0) return false;
+            var instanceIds = new HashSet<string>((fixedStructures ??
+                Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value != null)
+                .Select(value => value.FixedStructureInstanceId), StringComparer.Ordinal);
+            return validation.Issues.All(issue => issue != null &&
+                (issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds &&
+                    issue.SubjectId != null && issue.SubjectId.StartsWith("fixed:", StringComparison.Ordinal) ||
+                 issue.Reason == FloorLayoutValidationReason.InvalidRoomFootprint &&
+                    instanceIds.Contains(issue.SubjectId)));
         }
 
         private static void ValidateFixed(SavedSpatialFloor floor, FloorSpatialConfiguration floorDefinition,

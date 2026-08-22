@@ -771,7 +771,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((int)FloorRouteConnectionKind.PhysicalCorridor, Is.EqualTo(2));
             int[] layoutReasons = Enum.GetValues(typeof(FloorLayoutValidationReason))
                 .Cast<FloorLayoutValidationReason>().Select(value => (int)value).ToArray();
-            CollectionAssert.AreEqual(Enumerable.Range(1, 45), layoutReasons);
+            CollectionAssert.AreEqual(Enumerable.Range(1, 46), layoutReasons);
         }
 
         [Test]

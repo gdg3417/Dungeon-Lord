@@ -1,3 +1,6 @@
+using System;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using TMPro;
@@ -73,6 +76,11 @@ namespace DungeonBuilder.M0
         private int _playerFacingSectionIndex;
         private bool _minimalMvpActionPanelCollapsed;
         private string _smokeViewportStatusMessage = string.Empty;
+        private string _selectedStructuralRoomDefinitionId;
+        private TileCoordinate _selectedStructuralAnchor;
+        private CardinalOrientation _selectedStructuralOrientation;
+        private string _selectedStructuralTerminalConnectionPointId;
+        private string _structuralFeedback = string.Empty;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -96,6 +104,12 @@ namespace DungeonBuilder.M0
         public string SelectedMvpRunPostureId => _selectedMvpRunPostureId;
         public string MvpStructurePlacementFeedback => _mvpStructurePlacementFeedback;
         public string MvpRunResultFeedback => _mvpRunResultFeedback;
+        public string SelectedStructuralRoomDefinitionId => _selectedStructuralRoomDefinitionId;
+        public TileCoordinate SelectedStructuralAnchor => _selectedStructuralAnchor;
+        public CardinalOrientation SelectedStructuralOrientation => _selectedStructuralOrientation;
+        public string SelectedStructuralTerminalConnectionPointId => _selectedStructuralTerminalConnectionPointId;
+        public string StructuralFeedback => _structuralFeedback;
+        public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
 
         public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
         {
@@ -128,6 +142,221 @@ namespace DungeonBuilder.M0
         public void Bind(GameRoot root)
         {
             _root = root;
+            RefreshStructuralConstructionAuthority();
+        }
+
+        public void RefreshStructuralConstructionAuthority()
+        {
+            ReconcileStructuralSelection(string.IsNullOrEmpty(_selectedStructuralRoomDefinitionId));
+        }
+
+        public void SynchronizeStructuralConstructionPublication()
+        {
+            _structuralFeedback = string.Empty;
+            RefreshStructuralConstructionAuthority();
+        }
+
+        public string[] SelectableStructuralRoomDefinitionIds => ResolveCanonicalStructuralRooms()
+            .Select(value => value.RoomDefinitionId).ToArray();
+
+        public CardinalOrientation[] SelectableStructuralOrientations =>
+            (ResolveSelectedStructuralRoom()?.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                .Distinct().OrderBy(value => value).ToArray();
+
+        public string[] SelectableStructuralConnectionPointIds => OrderedStructuralConnectionPoints()
+            .Select(value => value.ConnectionPointId).ToArray();
+
+        public string SelectedStructuralRoomDisplayName => ResolveStructuralRoomDisplayName(
+            ResolveSelectedStructuralRoom());
+        public string StructuralAnchorDisplay => string.Format(CultureInfo.InvariantCulture,
+            GetLocalizedString("ui.structural.anchor.format"), _selectedStructuralAnchor.X,
+            _selectedStructuralAnchor.Y);
+        public string StructuralConnectionPointDisplay => BuildStructuralConnectionPointDisplay();
+
+        public bool CycleStructuralRoom()
+        {
+            RoomSpatialDefinition[] rooms = ResolveCanonicalStructuralRooms();
+            if (rooms.Length == 0) return false;
+            int index = Array.FindIndex(rooms, value => value.RoomDefinitionId == _selectedStructuralRoomDefinitionId);
+            _selectedStructuralRoomDefinitionId = rooms[(index + 1 + rooms.Length) % rooms.Length].RoomDefinitionId;
+            ReconcileStructuralSelection(false); InvalidateStructuralPreview(); return true;
+        }
+
+        public bool CycleStructuralOrientation()
+        {
+            RoomSpatialDefinition room = ResolveSelectedStructuralRoom();
+            CardinalOrientation[] values = (room?.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                .Distinct().OrderBy(value => value).ToArray();
+            if (values.Length == 0) return false;
+            int index = Array.IndexOf(values, _selectedStructuralOrientation);
+            _selectedStructuralOrientation = values[(index + 1 + values.Length) % values.Length];
+            InvalidateStructuralPreview(); return true;
+        }
+
+        public bool CycleStructuralConnectionPoint()
+        {
+            SpatialConnectionPointDefinition[] values = OrderedStructuralConnectionPoints();
+            if (values.Length == 0) return false;
+            int index = Array.FindIndex(values, value => value.ConnectionPointId ==
+                _selectedStructuralTerminalConnectionPointId);
+            _selectedStructuralTerminalConnectionPointId = values[(index + 1 + values.Length) % values.Length]
+                .ConnectionPointId;
+            InvalidateStructuralPreview(); return true;
+        }
+
+        public void AdjustStructuralAnchor(int deltaX, int deltaY)
+        {
+            _selectedStructuralAnchor = new TileCoordinate(
+                _selectedStructuralAnchor.X + deltaX, _selectedStructuralAnchor.Y + deltaY);
+            InvalidateStructuralPreview();
+        }
+
+        public StructuralEditPreview PreviewStructuralConstruction()
+        {
+            StructuralEditPreview preview = _root?.PreviewStructuralConstruction(new StructuralConstructionRequest
+            {
+                RoomDefinitionId = _selectedStructuralRoomDefinitionId,
+                Anchor = _selectedStructuralAnchor,
+                Orientation = _selectedStructuralOrientation,
+                TerminalConnectionPointId = _selectedStructuralTerminalConnectionPointId
+            });
+            _structuralFeedback = BuildStructuralPreviewPresentation(preview);
+            return preview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralConstruction()
+        {
+            if (_root?.StructuralConstructionPreview == null || !_root.StructuralConstructionPreview.IsValid)
+            { _structuralFeedback = LocalizeStructuralReason(_root?.StructuralConstructionReasonKey); return null; }
+            DetachedCanonicalWriteResult result = _root.CommitStructuralConstruction();
+            _structuralFeedback = result.IsSuccess
+                ? GetLocalizedString("ui.structural.commit.success")
+                : LocalizeStructuralReason(_root.StructuralConstructionReasonKey);
+            RefreshOverlayText(); return result;
+        }
+
+        public string BuildStructuralPreviewPresentation(StructuralEditPreview preview)
+        {
+            RoomSpatialDefinition room = ResolveSelectedStructuralRoom();
+            string roomName = ResolveStructuralRoomDisplayName(room);
+            string request = string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.request.format"), roomName,
+                _selectedStructuralAnchor.X, _selectedStructuralAnchor.Y,
+                StructuralOrientationDisplay(), BuildStructuralConnectionPointDisplay());
+            if (preview == null || !preview.IsValid)
+                return string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.preview.invalid.format"), request,
+                    LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault()));
+            string connection = GetLocalizedString(preview.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor
+                ? "ui.structural.connection.corridor" : "ui.structural.connection.direct");
+            string summary = string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.preview.valid.format"), request,
+                preview.OccupiedTiles.Length, connection, preview.ResultingUsedFloorSpace,
+                preview.ResultingRemainingFloorSpace);
+            StructuralChange[] consequences = preview.Consequences ?? Array.Empty<StructuralChange>();
+            if (consequences.Any(value => value.Kind == StructuralChangeKind.RoomAdded))
+                summary += "\n" + GetLocalizedString("ui.structural.consequence.room_added");
+            if (consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved))
+                summary += "\n" + GetLocalizedString("ui.structural.consequence.terminal_moved");
+            if (consequences.Any(value => value.Kind == StructuralChangeKind.EdgeAdded ||
+                    value.Kind == StructuralChangeKind.EdgeRemoved))
+                summary += "\n" + GetLocalizedString("ui.structural.consequence.route_changed");
+            if (preview.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
+                summary += "\n" + string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.corridor_tiles.format"),
+                    preview.IncomingConnectionTiles.Length,
+                    string.Join(" ", preview.IncomingConnectionTiles.OrderBy(value => value)
+                        .Select(value => string.Format(CultureInfo.InvariantCulture,
+                            "({0},{1})", value.X, value.Y))));
+            return summary;
+        }
+
+        private string LocalizeStructuralReason(string reason) => GetLocalizedString(
+            string.IsNullOrEmpty(reason) ? StructuralEditService.InvalidContextReason : reason,
+            GetLocalizedString(StructuralEditService.InvalidContextReason));
+
+        private void InvalidateStructuralPreview()
+        { _root?.InvalidateStructuralConstructionPreview(); _structuralFeedback = string.Empty; }
+
+        private void ReconcileStructuralSelection(bool reset)
+        {
+            RoomSpatialDefinition[] rooms = ResolveCanonicalStructuralRooms();
+            if (rooms.Length == 0) return;
+            if (reset || !rooms.Any(value => value.RoomDefinitionId == _selectedStructuralRoomDefinitionId))
+                _selectedStructuralRoomDefinitionId = rooms[0].RoomDefinitionId;
+            RoomSpatialDefinition room = ResolveSelectedStructuralRoom();
+            CardinalOrientation[] orientations = (room.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                .Distinct().OrderBy(value => value).ToArray();
+            _selectedStructuralOrientation = orientations.FirstOrDefault();
+            _selectedStructuralTerminalConnectionPointId = OrderedStructuralConnectionPoints()
+                .Select(value => value.ConnectionPointId).FirstOrDefault();
+        }
+
+        private RoomSpatialDefinition[] ResolveCanonicalStructuralRooms()
+        {
+            if (_root?.Save?.validatedCanonicalSpatialState?.Floors == null ||
+                _root.ProductionSpatialContent?.Catalog == null ||
+                CanonicalMvpRouteProjection.InspectWithProductionContent(_root.Save,
+                    _root.ProductionSpatialContent).AuthorityState !=
+                    CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) return Array.Empty<RoomSpatialDefinition>();
+            SpatialContentCatalog catalog = _root.ProductionSpatialContent.Catalog;
+            SavedSpatialFloor[] activeFloors = _root.Save.validatedCanonicalSpatialState.Floors;
+            if (activeFloors.Length != 1 || activeFloors[0] == null) return Array.Empty<RoomSpatialDefinition>();
+            SavedSpatialFloor active = activeFloors[0];
+            FloorSpatialConfiguration[] floors = (catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
+                .Where(value => value != null && value.FloorDefinitionId == active.FloorDefinitionId &&
+                    value.FloorIndex == active.FloorIndex).ToArray();
+            if (floors.Length != 1) return Array.Empty<RoomSpatialDefinition>();
+            string[] allowed = (floors[0].AllowedRoomDefinitionIds ?? Array.Empty<string>())
+                .Where(value => !string.IsNullOrEmpty(value)).Distinct(StringComparer.Ordinal).ToArray();
+            return (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                .Where(value => value != null && allowed.Contains(value.RoomDefinitionId) &&
+                    catalog.Rooms.Count(candidate => candidate != null &&
+                        candidate.RoomDefinitionId == value.RoomDefinitionId) == 1)
+                .OrderBy(value => value.RoomDefinitionId, StringComparer.Ordinal).ToArray();
+        }
+
+        private RoomSpatialDefinition ResolveSelectedStructuralRoom() =>
+            ResolveCanonicalStructuralRooms().SingleOrDefault(value =>
+                value.RoomDefinitionId == _selectedStructuralRoomDefinitionId);
+
+        private SpatialConnectionPointDefinition[] OrderedStructuralConnectionPoints() =>
+            (ResolveSelectedStructuralRoom()?.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+                .Where(value => value != null).OrderBy(value => value.ConnectionPointId,
+                    StringComparer.Ordinal).ToArray();
+
+        private string StructuralOrientationDisplay() => GetLocalizedString(
+            "ui.structural.orientation." + ((int)_selectedStructuralOrientation).ToString(
+                CultureInfo.InvariantCulture));
+
+        private string BuildStructuralConnectionPointDisplay()
+        {
+            SpatialConnectionPointDefinition[] points = OrderedStructuralConnectionPoints();
+            int index = Array.FindIndex(points, value => value.ConnectionPointId ==
+                _selectedStructuralTerminalConnectionPointId);
+            if (index < 0) return string.Empty;
+            CardinalOrientation worldFacing = StructuralEditService.Rotate(
+                points[index].Facing, _selectedStructuralOrientation);
+            return string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.exit.ordinal_direction.format"), index + 1,
+                GetLocalizedString("ui.structural.direction." + ((int)worldFacing).ToString(
+                    CultureInfo.InvariantCulture)));
+        }
+
+        private string ResolveStructuralRoomDisplayName(RoomSpatialDefinition room)
+        {
+            string key = room?.LocalizationKey ?? string.Empty;
+            if (string.IsNullOrEmpty(key)) return key;
+            string language = _root?.Content?.Strings?.language;
+            StringTable[] matches = (_root?.ProductionSpatialContent?.Languages ??
+                Array.Empty<StringTable>()).Where(value => value != null &&
+                    string.Equals(value.language, language, StringComparison.Ordinal)).ToArray();
+            if (matches.Length != 1) return key;
+            StringEntry[] entries = (matches[0].entries ?? Array.Empty<StringEntry>())
+                .Where(value => value != null && string.Equals(value.key, key,
+                    StringComparison.Ordinal)).ToArray();
+            return entries.Length == 1 && !string.IsNullOrEmpty(entries[0].text)
+                ? entries[0].text : key;
         }
 
         public void CycleFullDiagnosticsPage()
@@ -1260,6 +1489,9 @@ namespace DungeonBuilder.M0
             {
                 AddMvpBasicRoomSlot();
             }
+            if (StructuralConstructionControlsAvailable)
+                DrawStructuralConstructionControls(compactLabel, compactButton, groupHeaderLabel,
+                    labelHeight, buttonHeight);
             if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
@@ -1357,6 +1589,52 @@ namespace DungeonBuilder.M0
             }
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawStructuralConstructionControls(GUIStyle label, GUIStyle button,
+            GUIStyle heading, GUILayoutOption labelHeight, GUILayoutOption buttonHeight)
+        {
+            RoomSpatialDefinition room = ResolveSelectedStructuralRoom();
+            GUILayout.Label(GetLocalizedString("ui.structural.heading"), heading, labelHeight);
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.room.format"),
+                ResolveStructuralRoomDisplayName(room)), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.room.next"), button, buttonHeight))
+                CycleStructuralRoom();
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.orientation.format"),
+                StructuralOrientationDisplay()), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.orientation.next"), button, buttonHeight))
+                CycleStructuralOrientation();
+            GUILayout.Label(StructuralAnchorDisplay, label, labelHeight);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
+                AdjustStructuralAnchor(-1, 0);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
+                AdjustStructuralAnchor(1, 0);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
+                AdjustStructuralAnchor(0, -1);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
+                AdjustStructuralAnchor(0, 1);
+            GUILayout.EndHorizontal();
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.exit.format"),
+                BuildStructuralConnectionPointDisplay()), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.exit.next"), button, buttonHeight))
+                CycleStructuralConnectionPoint();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.preview.action"), button, buttonHeight))
+                PreviewStructuralConstruction();
+            bool priorEnabled = GUI.enabled;
+            GUI.enabled = priorEnabled && _root.StructuralConstructionPreview != null &&
+                _root.StructuralConstructionPreview.IsValid;
+            if (GUILayout.Button(GetLocalizedString("ui.structural.commit.action"), button, buttonHeight))
+                CommitStructuralConstruction();
+            GUI.enabled = priorEnabled;
+            if (!string.IsNullOrEmpty(_structuralFeedback))
+                GUILayout.Label(_structuralFeedback, label, GUILayout.Height(
+                    MinimalMvpActionPanelLabelHeight * 6f));
         }
 
         private string BuildSelectedMvpPlacementComparisonText()

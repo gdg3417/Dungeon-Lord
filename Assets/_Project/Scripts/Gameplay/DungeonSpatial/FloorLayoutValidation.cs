@@ -18,7 +18,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         InvalidOrientation = 35, InvalidNodeKind = 36, InvalidRouteClassification = 37,
         InvalidRoomFootprint = 38, InvalidCorridorFootprint = 39,
         InvalidFloorBounds = 40, StructureTileOutsideFloorBounds = 41, FinalCapacityExceedsFloorBounds = 42,
-        InvalidConnectionKind = 43, DirectDoorwayHasCorridorDefinition = 44, DirectDoorwayHasFootprint = 45
+        InvalidConnectionKind = 43, DirectDoorwayHasCorridorDefinition = 44, DirectDoorwayHasFootprint = 45,
+        CorridorDefinitionGeometryMismatch = 46
     }
 
     [Serializable]
@@ -50,7 +51,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public static FloorLayoutValidationResult Validate(FloorSpatialLayout suppliedLayout, FloorSpatialConfiguration floor,
             IEnumerable<RoomSpatialDefinition> suppliedRoomDefinitions, IEnumerable<CorridorSpatialDefinition> suppliedCorridorDefinitions,
-            SpatialValidationWorkloadLimits limits)
+            SpatialValidationWorkloadLimits limits, IEnumerable<SavedFixedSpatialStructure> suppliedFixedStructures = null,
+            IEnumerable<FixedSpatialStructureDefinition> suppliedFixedDefinitions = null)
         {
             var issues = new List<FloorLayoutValidationIssue>();
             FloorSpatialLayout layout = suppliedLayout ?? new FloorSpatialLayout();
@@ -98,6 +100,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
             }
 
+            var fixedDefinitions = Unambiguous((suppliedFixedDefinitions ??
+                Enumerable.Empty<FixedSpatialStructureDefinition>()).Where(value => value != null),
+                value => value.StructureDefinitionId);
+            foreach (SavedFixedSpatialStructure structure in (suppliedFixedStructures ??
+                Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value != null)
+                .OrderBy(value => value.FixedStructureInstanceId, StringComparer.Ordinal))
+            {
+                if (!fixedDefinitions.TryGetValue(structure.FixedStructureDefinitionId ?? string.Empty,
+                        out FixedSpatialStructureDefinition definition) ||
+                    !TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
+                        structure.Orientation, limits, out ResolvedTileFootprint footprint))
+                {
+                    Add(issues, FloorLayoutValidationReason.InvalidRoomFootprint,
+                        structure.FixedStructureInstanceId, structure.FixedStructureDefinitionId);
+                    continue;
+                }
+                AddOccupants(occupancy, footprint.OccupiedTiles,
+                    new OccupantIdentity(OccupantKind.FixedStructure, structure.FixedStructureInstanceId));
+                AddStructureTiles(usedTiles, footprint.OccupiedTiles, floor?.Bounds, boundsValid,
+                    "fixed:" + (structure.FixedStructureInstanceId ?? string.Empty), issues);
+            }
+
             ValidateRoomNodeBijection(rooms, nodes, roomById, issues);
             Dictionary<string, FloorRouteNode> validNodeById = BuildValidNodeAuthority(layout, nodes, roomById);
             var validEdges = new List<FloorRouteEdge>();
@@ -117,9 +141,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 else if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
                 {
-                    bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty, out _);
+                    bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty,
+                        out CorridorSpatialDefinition corridorDefinition);
                     if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
                     bool footprintValid = ValidateCorridorFootprint(edge, limits, issues);
+                    if (definitionResolved && footprintValid && !MatchesCorridorDefinition(edge.Footprint.OccupiedTiles,
+                            corridorDefinition))
+                        Add(issues, FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch,
+                            edge.EdgeId, edge.CorridorDefinitionId);
+                    footprintValid = footprintValid && definitionResolved &&
+                        MatchesCorridorDefinition(edge.Footprint.OccupiedTiles, corridorDefinition);
                     kindContractValid = definitionResolved && footprintValid;
                     TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
                     if (suppliedTiles != null && suppliedTiles.Length > 0 && limits.Allows(suppliedTiles.LongLength))
@@ -237,6 +268,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (!valid) Add(issues, FloorLayoutValidationReason.InvalidCorridorFootprint, edge.EdgeId);
             return valid;
+        }
+
+        private static bool MatchesCorridorDefinition(TileCoordinate[] tiles,
+            CorridorSpatialDefinition definition)
+        {
+            if (definition == null || tiles == null || definition.Width != 1 ||
+                tiles.Length < definition.MinimumLength || tiles.Length > definition.MaximumLength) return false;
+            bool horizontal = tiles.Length == 1 || tiles.All(value => value.Y == tiles[0].Y);
+            bool vertical = tiles.Length == 1 || tiles.All(value => value.X == tiles[0].X);
+            CardinalOrientation[] allowed = definition.AllowedOrientations ?? Array.Empty<CardinalOrientation>();
+            return horizontal && allowed.Contains(CardinalOrientation.Ninety) ||
+                vertical && allowed.Contains(CardinalOrientation.Zero);
         }
 
         private static bool ResolveEndpoint(string nodeId, string edgeId, bool source, Dictionary<string, FloorRouteNode> nodeById,
@@ -381,7 +424,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
-        private enum OccupantKind { Room = 0, Corridor = 1 }
+        private enum OccupantKind { Room = 0, Corridor = 1, FixedStructure = 2 }
 
         private readonly struct OccupantIdentity : IEquatable<OccupantIdentity>
         {

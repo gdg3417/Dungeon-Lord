@@ -2790,6 +2790,238 @@
     {
       "key": "save.migration.spatial.gd66.repair.target_room_2",
       "text": "Repair Room 2"
+    },
+    {
+      "key": "structural.edit.invalid_context",
+      "text": "Structural preview is unavailable."
+    },
+    {
+      "key": "structural.edit.unsupported_geometry",
+      "text": "That structural construction is not supported."
+    },
+    {
+      "key": "structural.edit.invalid_identity",
+      "text": "A stable structural identity could not be allocated."
+    },
+    {
+      "key": "structural.edit.placement_mismatch",
+      "text": "That placement does not match an approved construction candidate."
+    },
+    {
+      "key": "structural.edit.layout_invalid",
+      "text": "The structural layout is invalid."
+    },
+    {
+      "key": "structural.edit.stale_preview",
+      "text": "The dungeon changed after this preview. Preview the construction again."
+    },
+    {
+      "key": "structural.edit.room_definition_invalid",
+      "text": "The selected room definition is invalid."
+    },
+    {
+      "key": "structural.edit.room_not_allowed",
+      "text": "That room is not allowed on this floor."
+    },
+    {
+      "key": "structural.edit.orientation_invalid",
+      "text": "That room orientation is not supported."
+    },
+    {
+      "key": "structural.edit.out_of_bounds",
+      "text": "The room footprint is outside the floor bounds."
+    },
+    {
+      "key": "structural.edit.room_overlap",
+      "text": "The room overlaps another room."
+    },
+    {
+      "key": "structural.edit.fixed_structure_overlap",
+      "text": "The room overlaps a required structure."
+    },
+    {
+      "key": "structural.edit.corridor_overlap",
+      "text": "The room overlaps an existing corridor."
+    },
+    {
+      "key": "structural.edit.capacity_exceeded",
+      "text": "The construction exceeds the floor-space capacity."
+    },
+    {
+      "key": "structural.edit.connection_unavailable",
+      "text": "No direct doorway is available for this placement."
+    },
+    {
+      "key": "structural.edit.connection_ambiguous",
+      "text": "More than one direct doorway matches this placement."
+    },
+    {
+      "key": "structural.edit.socket_incompatible",
+      "text": "The selected connection sockets are incompatible."
+    },
+    {
+      "key": "structural.edit.connection_point_invalid",
+      "text": "The selected room connection point is invalid."
+    },
+    {
+      "key": "structural.edit.terminal_placement_invalid",
+      "text": "The Completion Terminal cannot be placed at the derived position."
+    },
+    {
+      "key": "structural.edit.required_route_disconnected",
+      "text": "The required route would be disconnected."
+    },
+    {
+      "key": "structural.edit.completion_unreachable",
+      "text": "The Completion Terminal would be unreachable."
+    },
+    {
+      "key": "structural.edit.workload_exceeded",
+      "text": "The structural preview exceeds its validation workload limit."
+    },
+    {
+      "key": "structural.edit.corridor_definition_invalid",
+      "text": "The required corridor definition is unavailable."
+    },
+    {
+      "key": "structural.edit.corridor_length_invalid",
+      "text": "The straight corridor length is not supported."
+    },
+    {
+      "key": "ui.structural.heading",
+      "text": "Structural Construction"
+    },
+    {
+      "key": "ui.structural.room.format",
+      "text": "Room: {0}"
+    },
+    {
+      "key": "ui.structural.room.next",
+      "text": "Next Room Type"
+    },
+    {
+      "key": "ui.structural.orientation.format",
+      "text": "Orientation: {0}"
+    },
+    {
+      "key": "ui.structural.orientation.next",
+      "text": "Next Orientation"
+    },
+    {
+      "key": "ui.structural.anchor.x.decrease",
+      "text": "X -"
+    },
+    {
+      "key": "ui.structural.anchor.x.increase",
+      "text": "X +"
+    },
+    {
+      "key": "ui.structural.anchor.y.decrease",
+      "text": "Y -"
+    },
+    {
+      "key": "ui.structural.anchor.y.increase",
+      "text": "Y +"
+    },
+    {
+      "key": "ui.structural.exit.format",
+      "text": "Completion exit: {0}"
+    },
+    {
+      "key": "ui.structural.exit.next",
+      "text": "Next Exit"
+    },
+    {
+      "key": "ui.structural.preview.action",
+      "text": "Preview Construction"
+    },
+    {
+      "key": "ui.structural.commit.action",
+      "text": "Commit Construction"
+    },
+    {
+      "key": "ui.structural.request.format",
+      "text": "{0} at ({1}, {2}), {3}, exit {4}"
+    },
+    {
+      "key": "ui.structural.preview.valid.format",
+      "text": "Valid preview: {0}. Footprint {1} tiles; {2}; floor space {3} used, {4} remaining."
+    },
+    {
+      "key": "ui.structural.preview.invalid.format",
+      "text": "Invalid preview: {0}. {1}"
+    },
+    {
+      "key": "ui.structural.connection.direct",
+      "text": "Direct Doorway"
+    },
+    {
+      "key": "ui.structural.connection.corridor",
+      "text": "Straight Stone Corridor"
+    },
+    {
+      "key": "ui.structural.corridor_tiles.format",
+      "text": "Corridor tiles ({0}): {1}"
+    },
+    {
+      "key": "ui.structural.consequence.room_added",
+      "text": "The room will be added."
+    },
+    {
+      "key": "ui.structural.consequence.terminal_moved",
+      "text": "The Completion Terminal will move."
+    },
+    {
+      "key": "ui.structural.consequence.route_changed",
+      "text": "The required route connections will change."
+    },
+    {
+      "key": "ui.structural.commit.success",
+      "text": "Construction committed successfully."
+    },
+    {
+      "key": "ui.structural.orientation.0",
+      "text": "0\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.1",
+      "text": "90\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.2",
+      "text": "180\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.3",
+      "text": "270\u00b0"
+    },
+    {
+      "key": "ui.structural.exit.ordinal.format",
+      "text": "Exit {0}"
+    },
+    {
+      "key": "ui.structural.anchor.format",
+      "text": "Anchor: ({0}, {1})"
+    },
+    {
+      "key": "ui.structural.exit.ordinal_direction.format",
+      "text": "Exit {0} ({1})"
+    },
+    {
+      "key": "ui.structural.direction.0",
+      "text": "North"
+    },
+    {
+      "key": "ui.structural.direction.1",
+      "text": "East"
+    },
+    {
+      "key": "ui.structural.direction.2",
+      "text": "South"
+    },
+    {
+      "key": "ui.structural.direction.3",
+      "text": "West"
     }
   ]
 }

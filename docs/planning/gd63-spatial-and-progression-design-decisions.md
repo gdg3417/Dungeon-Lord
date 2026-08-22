@@ -212,3 +212,7 @@ Later implementation must preserve deterministic simulation; stable IDs; ordinal
 - Offline efficiency percentage, timestamp/clock safeguards, rounding, and result presentation; Spec 29 retains no time cap and the storage-cap clamp.
 
 These gates must not be guessed in runtime code. Phase 3, 5, 7, and 9 observation gates remain responsible for testing whether the spatial fantasy is understandable and fun.
+
+## Phase 3A native required-route append rule (approved 2026-08-21)
+
+Native required-room construction is append-only at the current required-route tail. The previous final room remains fixed; the new room connects through exactly one unambiguous authored compatible DirectDoorway and becomes the final room. The Completion Terminal preserves its fixed-structure identity and moves downstream. The player selects the new room's outgoing authored connection point; its world socket position and facing mechanically determine the adjacent terminal `route` socket, terminal orientation, and anchor. An invalid derived terminal placement fails without searching alternatives or moving unrelated structures. Middle insertion and branches remain deferred. Physical-corridor construction is a later Phase 3A group.

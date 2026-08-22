@@ -9,7 +9,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public enum DetachedCanonicalMutationKind
     {
         PlaceOrReplace = 1,
-        RemoveRoom = 2
+        RemoveRoom = 2,
+        StructuralConstruction = 3
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -18,6 +19,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string CategoryId { get; private set; }
         public string OptionId { get; private set; }
         public string RoomInstanceId { get; private set; }
+        internal StructuralConstructionRequest StructuralIntent { get; private set; }
+        internal string StructuralBaselineFingerprint { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
             string roomInstanceId = null) => new DetachedCanonicalMutationRequest
@@ -27,6 +30,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCanonicalMutationRequest RemoveRoom(string roomInstanceId) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RemoveRoom, RoomInstanceId = roomInstanceId };
+
+        public static DetachedCanonicalMutationRequest Construct(StructuralEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.StructuralConstruction,
+                StructuralIntent = preview != null && preview.IsValid ? preview.Intent : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
+            };
     }
 
     public sealed class DetachedCanonicalMutationResult
@@ -89,7 +100,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(ValidationFailedReason);
             bool roomEffect = false;
             string reason;
-            if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
+            if (request.Kind == DetachedCanonicalMutationKind.StructuralConstruction)
+            {
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    request.StructuralIntent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(StructuralEditService.StalePreviewReason);
+                StructuralEditPreview refreshed = StructuralEditService.Preview(current,
+                    request.StructuralIntent, production, compatibility, configuration, limits);
+                if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate;
+                reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
                 StringComparison.Ordinal))
