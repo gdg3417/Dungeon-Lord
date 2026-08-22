@@ -71,8 +71,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
 
             if (target == null || maximum >= MaximumOrdinal) return false;
-            string room = prefix + (maximum + 1).ToString("D4", CultureInfo.InvariantCulture);
-            var proposed = new[] { room, room + ".node", room + ".edge.incoming", room + ".edge.terminal" };
+            string candidateRoomId = prefix + (maximum + 1).ToString("D4", CultureInfo.InvariantCulture);
+            var proposed = new[] { candidateRoomId, candidateRoomId + ".node",
+                candidateRoomId + ".edge.incoming", candidateRoomId + ".edge.terminal" };
             if (proposed.Any(value => !Persistent(value)) ||
                 proposed.Distinct(StringComparer.Ordinal).Count() != proposed.Length ||
                 proposed.Any(identities.Contains)) return false;
