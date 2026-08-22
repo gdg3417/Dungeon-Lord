@@ -48,6 +48,89 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = Service(fixture, fileSystem, "root-structural-construction.json");
+            SaveData empty = service.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(empty, Is.Not.Null, banner);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(starter.IsSuccess, Is.True, starter.Reason);
+            GameRoot root = Root(service);
+            LoadPlayerFacingContent(root);
+            Assert.That(root.CompleteSuccessfulBootForTests(starter.RuntimeProjection, true), Is.True);
+            SaveData before = root.Save;
+            var overlay = rootObject.AddComponent<BootstrapOverlay>();
+            overlay.Bind(root);
+            Assert.That(overlay.StructuralConstructionControlsAvailable, Is.True);
+            Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.basic"));
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.large_chamber"));
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.rectangle"));
+            Assert.That(overlay.CycleStructuralRoom(), Is.True);
+            Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.basic"));
+            for (int step = 0; step < 6; step++) overlay.AdjustStructuralAnchor(0, 1);
+            while (overlay.SelectedStructuralTerminalConnectionPointId != "north")
+                Assert.That(overlay.CycleStructuralConnectionPoint(), Is.True);
+            Assert.That(overlay.PreviewStructuralConstruction().IsValid, Is.True);
+            overlay.AdjustStructuralAnchor(1, 0);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            overlay.AdjustStructuralAnchor(-1, 0);
+            TileCoordinate terminalBefore = before.validatedCanonicalSpatialState.Floors[0]
+                .FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor;
+            StructuralEditPreview invalid = root.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(-100, -100), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" });
+            Assert.That(invalid.IsValid, Is.False);
+            Assert.That(invalid.ReasonCodes, Does.Contain(StructuralEditService.OutOfBoundsReason));
+            Assert.That(overlay.BuildStructuralPreviewPresentation(invalid), Does.Contain(
+                root.Content.GetString(StructuralEditService.OutOfBoundsReason, string.Empty)));
+
+            StructuralEditPreview corridorPreview = root.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(5, 2), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "east" });
+            Assert.That(corridorPreview.IsValid, Is.True, string.Join(",", corridorPreview.ReasonCodes));
+            Assert.That(corridorPreview.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 3) },
+                corridorPreview.IncomingConnectionTiles);
+            Assert.That(corridorPreview.ResultingUsedFloorSpace, Is.EqualTo(43));
+            Assert.That(corridorPreview.ResultingRemainingFloorSpace, Is.EqualTo(17));
+            Assert.That(overlay.BuildStructuralPreviewPresentation(corridorPreview),
+                Does.Contain(root.Content.GetString("ui.structural.connection.corridor", string.Empty)));
+
+            StructuralEditPreview preview = root.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(0, 6), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" });
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            Assert.That(preview.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(preview.ResultingUsedFloorSpace, Is.EqualTo(42));
+            Assert.That(preview.ResultingRemainingFloorSpace, Is.EqualTo(18));
+            string presentation = overlay.BuildStructuralPreviewPresentation(preview);
+            Assert.That(presentation, Does.Contain(root.Content.GetString(
+                "ui.structural.connection.direct", string.Empty)));
+            Assert.That(presentation, Does.Contain(root.Content.GetString(
+                "ui.structural.consequence.terminal_moved", string.Empty)));
+            DetachedCanonicalWriteResult committed = root.CommitStructuralConstruction();
+
+            Assert.That(committed.IsSuccess, Is.True, committed.Reason);
+            Assert.That(root.Save, Is.Not.SameAs(before));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            SavedSpatialFloor floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(floor.Layout.Rooms, Has.Length.EqualTo(2));
+            Assert.That(floor.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor, Is.Not.EqualTo(terminalBefore));
+            Assert.That(service.CanonicalSession.GetCurrentBytes(),
+                Is.EqualTo(fileSystem.ReadAllBytes(service.SavePath)));
+        }
+
+        [Test]
         public void FailedBootCompletionLeavesGameplayAndHomeUninitialized()
         {
             GameRoot root = Root(null);

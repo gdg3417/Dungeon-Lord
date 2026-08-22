@@ -2886,6 +2886,118 @@
     {
       "key": "structural.edit.corridor_length_invalid",
       "text": "The straight corridor length is not supported."
+    },
+    {
+      "key": "ui.structural.heading",
+      "text": "Structural Construction"
+    },
+    {
+      "key": "ui.structural.room.format",
+      "text": "Room: {0}"
+    },
+    {
+      "key": "ui.structural.room.next",
+      "text": "Next Room Type"
+    },
+    {
+      "key": "ui.structural.orientation.format",
+      "text": "Orientation: {0}"
+    },
+    {
+      "key": "ui.structural.orientation.next",
+      "text": "Next Orientation"
+    },
+    {
+      "key": "ui.structural.anchor.x.decrease",
+      "text": "X -"
+    },
+    {
+      "key": "ui.structural.anchor.x.increase",
+      "text": "X +"
+    },
+    {
+      "key": "ui.structural.anchor.y.decrease",
+      "text": "Y -"
+    },
+    {
+      "key": "ui.structural.anchor.y.increase",
+      "text": "Y +"
+    },
+    {
+      "key": "ui.structural.exit.format",
+      "text": "Completion exit: {0}"
+    },
+    {
+      "key": "ui.structural.exit.next",
+      "text": "Next Exit"
+    },
+    {
+      "key": "ui.structural.preview.action",
+      "text": "Preview Construction"
+    },
+    {
+      "key": "ui.structural.commit.action",
+      "text": "Commit Construction"
+    },
+    {
+      "key": "ui.structural.request.format",
+      "text": "{0} at ({1}, {2}), {3}, exit {4}"
+    },
+    {
+      "key": "ui.structural.preview.valid.format",
+      "text": "Valid preview: {0}. Footprint {1} tiles; {2}; floor space {3} used, {4} remaining."
+    },
+    {
+      "key": "ui.structural.preview.invalid.format",
+      "text": "Invalid preview: {0}. {1}"
+    },
+    {
+      "key": "ui.structural.connection.direct",
+      "text": "Direct Doorway"
+    },
+    {
+      "key": "ui.structural.connection.corridor",
+      "text": "Straight Stone Corridor"
+    },
+    {
+      "key": "ui.structural.corridor_tiles.format",
+      "text": "Corridor tiles ({0}): {1}"
+    },
+    {
+      "key": "ui.structural.consequence.room_added",
+      "text": "The room will be added."
+    },
+    {
+      "key": "ui.structural.consequence.terminal_moved",
+      "text": "The Completion Terminal will move."
+    },
+    {
+      "key": "ui.structural.consequence.route_changed",
+      "text": "The required route connections will change."
+    },
+    {
+      "key": "ui.structural.commit.success",
+      "text": "Construction committed successfully."
+    },
+    {
+      "key": "ui.structural.orientation.0",
+      "text": "0\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.1",
+      "text": "90\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.2",
+      "text": "180\u00b0"
+    },
+    {
+      "key": "ui.structural.orientation.3",
+      "text": "270\u00b0"
+    },
+    {
+      "key": "ui.structural.exit.ordinal.format",
+      "text": "Exit {0}"
     }
   ]
 }

@@ -34,6 +34,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CommitRetainedInvalidPreviewPreservesSpecificReasonAndRuntime()
+        {
+            var go = new GameObject("StructuralConstructionGameRootInvalidPreview");
+            try
+            {
+                GameRoot root = go.AddComponent<GameRoot>();
+                var current = new SaveData();
+                SetProperty(root, "Save", current);
+                SetProperty(root, "StructuralConstructionPreview",
+                    StructuralEditService.InvalidPreview(StructuralEditService.OutOfBoundsReason, Request()));
+
+                DetachedCanonicalWriteResult result = root.CommitStructuralConstruction();
+
+                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.Reason, Is.EqualTo(StructuralEditService.OutOfBoundsReason));
+                Assert.That(root.StructuralConstructionReasonKey,
+                    Is.EqualTo(StructuralEditService.OutOfBoundsReason));
+                Assert.That(root.Save, Is.SameAs(current));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [Test]
         public void CanonicalPublicationReplacesRuntimeAndClearsPreviewPresentation()
         {
             var go = new GameObject("StructuralConstructionGameRootPublication");

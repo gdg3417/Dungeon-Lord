@@ -534,8 +534,13 @@ namespace DungeonBuilder.M0
 
         public DetachedCanonicalWriteResult CommitStructuralConstruction()
         {
-            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null ||
-                StructuralConstructionPreview == null || !StructuralConstructionPreview.IsValid)
+            if (StructuralConstructionPreview == null)
+                return StructuralCommitFailure(StructuralEditService.InvalidContextReason);
+            if (!StructuralConstructionPreview.IsValid)
+                return StructuralCommitFailure(
+                    StructuralConstructionPreview.ReasonCodes?.FirstOrDefault() ??
+                    StructuralEditService.InvalidContextReason);
+            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null)
                 return StructuralCommitFailure(StructuralEditService.InvalidContextReason);
             DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(
                 Save, DetachedCanonicalMutationRequest.Construct(StructuralConstructionPreview));
@@ -543,6 +548,12 @@ namespace DungeonBuilder.M0
                 StructuralConstructionReasonKey = string.IsNullOrEmpty(result.Reason)
                     ? StructuralEditService.InvalidContextReason : result.Reason;
             return result;
+        }
+
+        public void InvalidateStructuralConstructionPreview()
+        {
+            StructuralConstructionPreview = null;
+            StructuralConstructionReasonKey = string.Empty;
         }
 
         private DetachedCanonicalWriteResult StructuralCommitFailure(string reason)
