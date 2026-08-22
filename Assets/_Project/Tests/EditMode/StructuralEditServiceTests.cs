@@ -1,4 +1,4 @@
-#if UNITY_EDITOR && UNITY_INCLUDE_TESTS
+#if UNITY_EDITOR
 using System.Linq;
 using NUnit.Framework;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;

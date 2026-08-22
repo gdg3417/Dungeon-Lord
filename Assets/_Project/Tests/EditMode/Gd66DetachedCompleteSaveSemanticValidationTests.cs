@@ -184,7 +184,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
             Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
-            Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.True);
+            Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.False);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, fixture.Production,
                 fixture.LegacyBytes, fixture.Limits);
             Assert.That(issues, Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FixedStructure }));
@@ -262,16 +262,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertSemanticIssues(fixture.State, testProduction, fixture.LegacyBytes, fixture.Limits);
             DetachedCanonicalSpatialSaveState changed = Clone(fixture.State, fixture.Limits);
             SavedSpatialFloor floor = changed.Floors[0];
-            SavedFixedSpatialStructure exemplar = floor.FixedStructures.Single(value => value.Kind == kind);
             FixedSpatialStructureDefinition definition = ResolveFixed(catalog, definitionId);
+            CardinalOrientation orientation = (definition.AllowedOrientations ??
+                Array.Empty<CardinalOrientation>())[0];
             var extra = new SavedFixedSpatialStructure
             {
                 FixedStructureInstanceId = instanceId,
                 FixedStructureDefinitionId = definitionId,
                 Kind = kind,
                 FloorInstanceId = floor.FloorInstanceId,
-                Anchor = exemplar.Anchor,
-                Orientation = (definition.AllowedOrientations ?? Array.Empty<CardinalOrientation>())[0]
+                Anchor = FreeFixedAnchor(floor, catalog, definition, orientation, fixture.Limits),
+                Orientation = orientation
             };
             floor.FixedStructures = floor.FixedStructures.Concat(new[] { extra })
                 .OrderBy(value => value.FixedStructureInstanceId, StringComparer.Ordinal).ToArray();
@@ -279,6 +280,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
             Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(FloorLayoutValid(floor, catalog, fixture.Limits), Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, testProduction,
                 fixture.LegacyBytes, fixture.Limits);
             Assert.That(issues, Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FixedStructure }));
@@ -286,6 +288,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 testProduction, fixture.LegacyBytes, fixture.Limits);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 changedCandidate.Candidate.GetBytes(), context).IsValid, Is.False);
+        }
+
+        [Test]
+        public void ExtraFixedStructure_ActualOverlapRetainsFloorLayoutIssue()
+        {
+            var fixture = Baseline("extra-fixed-overlap", false);
+            ProductionSpatialContentSnapshot production = CloneProductionWithExtraFixed(fixture.Production,
+                FixedSpatialStructureKind.Entrance, "spatial.fixed.test_extra_overlap",
+                out SpatialContentCatalog catalog);
+            DetachedCanonicalSpatialSaveState changed = Clone(fixture.State, fixture.Limits);
+            SavedSpatialFloor floor = changed.Floors[0];
+            SavedFixedSpatialStructure exemplar = floor.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.Entrance);
+            floor.FixedStructures = floor.FixedStructures.Concat(new[] { new SavedFixedSpatialStructure
+            {
+                FixedStructureInstanceId = "compat.floor.00.fixed.test-extra-overlap",
+                FixedStructureDefinitionId = "spatial.fixed.test_extra_overlap",
+                Kind = FixedSpatialStructureKind.Entrance,
+                FloorInstanceId = floor.FloorInstanceId,
+                Anchor = exemplar.Anchor,
+                Orientation = exemplar.Orientation
+            } }).ToArray();
+            Assert.That(FloorLayoutValid(floor, catalog, fixture.Limits), Is.False);
+            Assert.That(SemanticIssues(changed, production, fixture.LegacyBytes, fixture.Limits),
+                Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FloorLayout,
+                    DetachedCanonicalProductionSemanticIssue.FixedStructure }));
         }
 
 
@@ -406,7 +434,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return FloorLayoutValidator.Validate(floor.Layout, floorDefinition,
                 catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>(),
                 catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>(),
-                new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles)).IsValid;
+                new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
+                floor.FixedStructures, catalog.FixedStructures).IsValid;
         }
 
         private static byte[] WithoutOption(byte[] sourceConfigBytes, string optionId)
@@ -510,17 +539,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CanonicalSpatialSerializationLimits limits)
         {
             FloorSpatialConfiguration floorDefinition = ResolveFloor(catalog, floor);
-            var occupied = new HashSet<TileCoordinate>();
-            foreach (RoomSpatialInstance room in floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>())
-            {
-                RoomSpatialDefinition definition = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
-                    .Single(value => value != null && value.RoomDefinitionId == room.RoomDefinitionId);
-                Assert.That(TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint,
-                    room.Anchor, room.Orientation,
-                    new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles),
-                    out ResolvedTileFootprint footprint), Is.True);
-                foreach (TileCoordinate tile in footprint.OccupiedTiles) occupied.Add(tile);
-            }
+            HashSet<TileCoordinate> occupied = OccupiedTiles(floor, catalog, limits);
             RectangularFloorBounds bounds = floorDefinition.Bounds;
             for (int x = 0; x < bounds.Width; x++)
                 for (int y = 0; y < bounds.Height; y++)
@@ -530,6 +549,61 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 }
             Assert.Fail("No free corridor tile found in test-owned production bounds.");
             return default(TileCoordinate);
+        }
+
+        private static TileCoordinate FreeFixedAnchor(SavedSpatialFloor floor,
+            SpatialContentCatalog catalog, FixedSpatialStructureDefinition definition,
+            CardinalOrientation orientation, CanonicalSpatialSerializationLimits limits)
+        {
+            FloorSpatialConfiguration floorDefinition = ResolveFloor(catalog, floor);
+            HashSet<TileCoordinate> occupied = OccupiedTiles(floor, catalog, limits);
+            var workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+            RectangularFloorBounds bounds = floorDefinition.Bounds;
+            for (int x = 0; x < bounds.Width; x++)
+                for (int y = 0; y < bounds.Height; y++)
+                {
+                    var candidate = new TileCoordinate(bounds.Minimum.X + x, bounds.Minimum.Y + y);
+                    if (!TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, candidate,
+                            orientation, workload, out ResolvedTileFootprint footprint) ||
+                        footprint.OccupiedTiles.Any(tile => !bounds.Contains(tile) || occupied.Contains(tile)) ||
+                        occupied.Count + footprint.OccupiedTiles.Length >
+                            floorDefinition.FinalFloorSpaceCapacity) continue;
+                    return candidate;
+                }
+            Assert.Fail("No non-overlapping fixed-structure anchor found in test-owned production bounds.");
+            return default(TileCoordinate);
+        }
+
+        private static HashSet<TileCoordinate> OccupiedTiles(SavedSpatialFloor floor,
+            SpatialContentCatalog catalog, CanonicalSpatialSerializationLimits limits)
+        {
+            var occupied = new HashSet<TileCoordinate>();
+            var workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+            foreach (RoomSpatialInstance room in floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>())
+            {
+                RoomSpatialDefinition definition = (catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                    .Single(value => value != null && value.RoomDefinitionId == room.RoomDefinitionId);
+                Assert.That(TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint,
+                    room.Anchor, room.Orientation,
+                    workload,
+                    out ResolvedTileFootprint footprint), Is.True);
+                foreach (TileCoordinate tile in footprint.OccupiedTiles) occupied.Add(tile);
+            }
+            foreach (SavedFixedSpatialStructure structure in floor.FixedStructures ??
+                Array.Empty<SavedFixedSpatialStructure>())
+            {
+                FixedSpatialStructureDefinition definition = ResolveFixed(catalog,
+                    structure.FixedStructureDefinitionId);
+                Assert.That(TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint,
+                    structure.Anchor, structure.Orientation, workload,
+                    out ResolvedTileFootprint footprint), Is.True);
+                foreach (TileCoordinate tile in footprint.OccupiedTiles) occupied.Add(tile);
+            }
+            foreach (FloorRouteEdge edge in floor.Layout.Edges ?? Array.Empty<FloorRouteEdge>())
+                if (edge?.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
+                    foreach (TileCoordinate tile in edge.Footprint?.OccupiedTiles ??
+                        Array.Empty<TileCoordinate>()) occupied.Add(tile);
+            return occupied;
         }
 
         private static void Overflow(DetachedCanonicalSpatialSaveState state)
