@@ -81,6 +81,7 @@ namespace DungeonBuilder.M0
         private CardinalOrientation _selectedStructuralOrientation;
         private string _selectedStructuralTerminalConnectionPointId;
         private string _structuralFeedback = string.Empty;
+        private string _selectedRenovationRoomInstanceId;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -110,6 +111,8 @@ namespace DungeonBuilder.M0
         public string SelectedStructuralTerminalConnectionPointId => _selectedStructuralTerminalConnectionPointId;
         public string StructuralFeedback => _structuralFeedback;
         public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
+        public bool StructuralRenovationControlsAvailable => ResolveRenovationRoomIds().Length != 0;
+        public string SelectedRenovationRoomInstanceId => _selectedRenovationRoomInstanceId;
 
         public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
         {
@@ -148,6 +151,7 @@ namespace DungeonBuilder.M0
         public void RefreshStructuralConstructionAuthority()
         {
             ReconcileStructuralSelection(string.IsNullOrEmpty(_selectedStructuralRoomDefinitionId));
+            ReconcileRenovationSelection();
         }
 
         public void SynchronizeStructuralConstructionPublication()
@@ -209,6 +213,56 @@ namespace DungeonBuilder.M0
             _selectedStructuralAnchor = new TileCoordinate(
                 _selectedStructuralAnchor.X + deltaX, _selectedStructuralAnchor.Y + deltaY);
             InvalidateStructuralPreview();
+        }
+
+        public bool CycleRenovationTarget()
+        {
+            string[] ids = ResolveRenovationRoomIds();
+            if (ids.Length == 0) return false;
+            int index = Array.IndexOf(ids, _selectedRenovationRoomInstanceId);
+            _selectedRenovationRoomInstanceId = ids[(index + 1 + ids.Length) % ids.Length];
+            RoomSpatialInstance room = ResolveRenovationRoom();
+            if (room != null) _selectedStructuralAnchor = room.Anchor;
+            InvalidateStructuralPreview(); return true;
+        }
+
+        public StructuralEditPreview PreviewStructuralMovement()
+        {
+            StructuralEditPreview preview = _root?.PreviewStructuralMovement(new StructuralMovementRequest
+            { RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedStructuralAnchor });
+            _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
+        }
+
+        public StructuralEditPreview PreviewStructuralReplacement()
+        {
+            StructuralEditPreview preview = _root?.PreviewStructuralReplacement(new StructuralReplacementRequest
+            { RoomInstanceId = _selectedRenovationRoomInstanceId,
+              RoomDefinitionId = _selectedStructuralRoomDefinitionId });
+            _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralRenovation()
+        {
+            if (_root?.StructuralRenovationPreview == null || !_root.StructuralRenovationPreview.IsValid)
+            { _structuralFeedback = LocalizeStructuralReason(_root?.StructuralConstructionReasonKey); return null; }
+            DetachedCanonicalWriteResult result = _root.CommitStructuralRenovation();
+            _structuralFeedback = result.IsSuccess ? GetLocalizedString("ui.structural.renovation.commit.success") :
+                LocalizeStructuralReason(_root.StructuralConstructionReasonKey);
+            RefreshOverlayText(); return result;
+        }
+
+        public string BuildRenovationPreviewPresentation(StructuralEditPreview preview)
+        {
+            if (preview == null || !preview.IsValid) return LocalizeStructuralReason(
+                preview?.ReasonCodes?.FirstOrDefault());
+            int moved = preview.Consequences.Count(value => value.Kind == StructuralChangeKind.RoomMoved);
+            int connections = preview.Consequences.Count(value => value.Kind == StructuralChangeKind.EdgeReconnected);
+            return string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString(preview.Operation == StructuralEditOperation.Movement
+                    ? "ui.structural.renovation.move.preview.format"
+                    : "ui.structural.renovation.replace.preview.format"),
+                moved, connections, preview.PreservedAssignmentIds.Length,
+                preview.ResultingUsedFloorSpace, preview.ResultingRemainingFloorSpace);
         }
 
         public StructuralEditPreview PreviewStructuralConstruction()
@@ -276,7 +330,46 @@ namespace DungeonBuilder.M0
             GetLocalizedString(StructuralEditService.InvalidContextReason));
 
         private void InvalidateStructuralPreview()
-        { _root?.InvalidateStructuralConstructionPreview(); _structuralFeedback = string.Empty; }
+        { _root?.InvalidateStructuralConstructionPreview(); _root?.InvalidateStructuralRenovationPreview();
+          _structuralFeedback = string.Empty; }
+
+        private void ReconcileRenovationSelection()
+        {
+            string[] ids = ResolveRenovationRoomIds();
+            if (ids.Length == 0) { _selectedRenovationRoomInstanceId = null; return; }
+            if (!ids.Contains(_selectedRenovationRoomInstanceId)) _selectedRenovationRoomInstanceId = ids[0];
+            RoomSpatialInstance room = ResolveRenovationRoom();
+            if (room != null) _selectedStructuralAnchor = room.Anchor;
+        }
+
+        private RoomSpatialInstance ResolveRenovationRoom() =>
+            _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault()?.Layout?.Rooms?
+                .SingleOrDefault(value => value?.RoomInstanceId == _selectedRenovationRoomInstanceId);
+
+        private string[] ResolveRenovationRoomIds()
+        {
+            SavedSpatialFloor floor = _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault();
+            if (floor == null) return Array.Empty<string>();
+            var semantics = new HashSet<string>((floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())
+                .Where(value => value != null && value.LegacyRoomOriginKind !=
+                    LegacyRoomOriginKind.ImplicitCompatibilityContainer)
+                .Select(value => value.RoomInstanceId), StringComparer.Ordinal);
+            FloorRouteNode entrance = (floor.Layout.Nodes ?? Array.Empty<FloorRouteNode>())
+                .SingleOrDefault(value => value?.Kind == FloorRouteNodeKind.Entrance);
+            var result = new List<string>(); var visited = new HashSet<string>(StringComparer.Ordinal);
+            FloorRouteNode current = entrance;
+            while (current != null && visited.Add(current.NodeId))
+            {
+                FloorRouteEdge[] outgoing = (floor.Layout.Edges ?? Array.Empty<FloorRouteEdge>()).Where(value =>
+                    value?.Classification == RouteClassification.Required && value.SourceNodeId == current.NodeId).ToArray();
+                if (outgoing.Length != 1) break;
+                current = floor.Layout.Nodes.SingleOrDefault(value => value?.NodeId == outgoing[0].DestinationNodeId);
+                if (current?.Kind == FloorRouteNodeKind.Room && semantics.Contains(current.RoomInstanceId))
+                    result.Add(current.RoomInstanceId);
+                if (current?.Kind == FloorRouteNodeKind.Completion) break;
+            }
+            return result.ToArray();
+        }
 
         private void ReconcileStructuralSelection(bool reset)
         {
@@ -1492,6 +1585,9 @@ namespace DungeonBuilder.M0
             if (StructuralConstructionControlsAvailable)
                 DrawStructuralConstructionControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
+            if (StructuralRenovationControlsAvailable)
+                DrawStructuralRenovationControls(compactLabel, compactButton, groupHeaderLabel,
+                    labelHeight, buttonHeight);
             if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
@@ -1635,6 +1731,44 @@ namespace DungeonBuilder.M0
             if (!string.IsNullOrEmpty(_structuralFeedback))
                 GUILayout.Label(_structuralFeedback, label, GUILayout.Height(
                     MinimalMvpActionPanelLabelHeight * 6f));
+        }
+
+        private void DrawStructuralRenovationControls(GUIStyle label, GUIStyle button,
+            GUIStyle heading, GUILayoutOption labelHeight, GUILayoutOption buttonHeight)
+        {
+            GUILayout.Label(GetLocalizedString("ui.structural.renovation.heading"), heading, labelHeight);
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.target.format"),
+                Array.IndexOf(ResolveRenovationRoomIds(), _selectedRenovationRoomInstanceId) + 1), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.target.next"), button, buttonHeight))
+                CycleRenovationTarget();
+            GUILayout.Label(StructuralAnchorDisplay, label, labelHeight);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
+                AdjustStructuralAnchor(-1, 0);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
+                AdjustStructuralAnchor(1, 0);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
+                AdjustStructuralAnchor(0, -1);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
+                AdjustStructuralAnchor(0, 1);
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.move.preview.action"), button, buttonHeight))
+                PreviewStructuralMovement();
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.replacement.format"),
+                ResolveStructuralRoomDisplayName(ResolveSelectedStructuralRoom())), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.structural.room.next"), button, buttonHeight))
+                CycleStructuralRoom();
+            if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.replace.preview.action"), button, buttonHeight))
+                PreviewStructuralReplacement();
+            bool enabled = GUI.enabled;
+            GUI.enabled = enabled && _root.StructuralRenovationPreview?.IsValid == true;
+            if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.commit.action"), button, buttonHeight))
+                CommitStructuralRenovation();
+            GUI.enabled = enabled;
         }
 
         private string BuildSelectedMvpPlacementComparisonText()

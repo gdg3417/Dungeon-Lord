@@ -303,6 +303,34 @@ namespace DungeonBuilder.M0
                 _compatibility, _legacyGameplayConfiguration, _limits.Canonical);
         }
 
+        public StructuralEditPreview PreviewStructuralMovement(StructuralMovementRequest request)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return StructuralRenovationService.InvalidMovement(StructuralEditService.InvalidContextReason, request);
+            return StructuralRenovationService.PreviewMovement(state, request, _production,
+                _compatibility, _legacyGameplayConfiguration, _limits.Canonical);
+        }
+
+        public StructuralEditPreview PreviewStructuralReplacement(StructuralReplacementRequest request)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return StructuralRenovationService.InvalidReplacement(StructuralEditService.InvalidContextReason, request);
+            return StructuralRenovationService.PreviewReplacement(state, request, _production,
+                _compatibility, _legacyGameplayConfiguration, _limits.Canonical);
+        }
+
+        private bool TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state)
+        {
+            state = null;
+            if (!_canonicalConfigured || _canonicalSession == null || _validationContext == null ||
+                _limits == null || _production == null || _compatibility == null ||
+                _legacyGameplayConfiguration == null) return false;
+            DetachedCompleteSaveValidationResult validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                _canonicalSession.GetCurrentBytes(), _validationContext);
+            state = validated.State;
+            return validated.IsValid && validated.CurrentTargetValidated && state != null;
+        }
+
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,

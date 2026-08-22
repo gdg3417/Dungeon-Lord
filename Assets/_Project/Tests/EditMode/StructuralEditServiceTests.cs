@@ -480,6 +480,71 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(r1.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Movement_PreservesStableIdentitiesAndRejectsStalePreview()
+        {
+            PreviewFixture fixture = CreateR2();
+            SavedSpatialFloor source = fixture.State.Floors[0];
+            RoomSpatialInstance target = source.Layout.Rooms.Single(value =>
+                value.RoomInstanceId == "compat.floor.00.room.player.0000");
+            FloorRouteNode node = source.Layout.Nodes.Single(value => value.RoomInstanceId == target.RoomInstanceId);
+            SavedFixedSpatialStructure terminal = source.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            var request = new StructuralMovementRequest { RoomInstanceId = target.RoomInstanceId,
+                Anchor = new TileCoordinate(5, 2) };
+            StructuralEditPreview preview = StructuralRenovationService.PreviewMovement(fixture.State, request,
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            SavedSpatialFloor proposed = preview.DetachedCandidate.Floors[0];
+            Assert.That(proposed.Layout.Rooms.Single(value => value.RoomInstanceId == target.RoomInstanceId).Anchor,
+                Is.EqualTo(request.Anchor));
+            Assert.That(proposed.Layout.Nodes.Single(value => value.RoomInstanceId == target.RoomInstanceId).NodeId,
+                Is.EqualTo(node.NodeId));
+            Assert.That(proposed.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId,
+                Is.EqualTo(terminal.FixedStructureInstanceId));
+
+            DetachedCanonicalMutationResult intervening = DetachedCanonicalSpatialMutation.Prepare(fixture.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.monster",
+                    "placement.option.monster.skeleton", target.RoomInstanceId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(intervening.IsSuccess, Is.True, intervening.Reason);
+            DetachedCanonicalMutationResult stale = DetachedCanonicalSpatialMutation.Prepare(intervening.State,
+                DetachedCanonicalMutationRequest.Move(preview), fixture.Production, fixture.Compatibility,
+                fixture.Configuration, fixture.Limits);
+            Assert.That(stale.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+        }
+
+        [Test]
+        public void Replacement_PreservesRoomNodeAndAssignments()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            RoomSpatialInstance target = fixture.State.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == "compat.floor.00.room.player.0000");
+            FloorRouteNode node = fixture.State.Floors[0].Layout.Nodes.Single(value =>
+                value.RoomInstanceId == target.RoomInstanceId);
+            DetachedCanonicalMutationResult content = DetachedCanonicalSpatialMutation.Prepare(fixture.State,
+                DetachedCanonicalMutationRequest.Place("placement.category.monster",
+                    "placement.option.monster.skeleton", target.RoomInstanceId), fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(content.IsSuccess, Is.True, content.Reason);
+            RoomContentAssignment assignment = content.State.Floors[0].RoomContents.Assignments.Single();
+            StructuralEditPreview preview = StructuralRenovationService.PreviewReplacement(content.State,
+                new StructuralReplacementRequest { RoomInstanceId = target.RoomInstanceId,
+                    RoomDefinitionId = "spatial.room.rectangle" }, fixture.Production,
+                fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            SavedSpatialFloor proposed = preview.DetachedCandidate.Floors[0];
+            RoomSpatialInstance replacement = proposed.Layout.Rooms.Single(value =>
+                value.RoomInstanceId == target.RoomInstanceId);
+            Assert.That(replacement.RoomDefinitionId, Is.EqualTo("spatial.room.rectangle"));
+            Assert.That(replacement.Anchor, Is.EqualTo(target.Anchor));
+            Assert.That(proposed.Layout.Nodes.Single(value => value.RoomInstanceId == target.RoomInstanceId).NodeId,
+                Is.EqualTo(node.NodeId));
+            Assert.That(proposed.RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(assignment.AssignmentId));
+            Assert.That(proposed.RoomContents.Assignments.Single().Sequence, Is.EqualTo(assignment.Sequence));
+        }
+
         private sealed class PreviewFixture
         {
             internal DetachedCanonicalSpatialSaveState State;
@@ -502,6 +567,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(r1.IsSuccess, Is.True, r1.Reason);
             return new PreviewFixture { State = r1.State, Production = source.Production,
                 Compatibility = source.Compatibility, Configuration = configuration, Limits = source.Limits };
+        }
+
+        private static PreviewFixture CreateR2()
+        {
+            return CreateR2("spatial.room.basic", new TileCoordinate(0, 6));
+        }
+
+        private static PreviewFixture CreateR2(string definitionId, TileCoordinate anchor)
+        {
+            PreviewFixture fixture = CreateR1();
+            StructuralEditPreview construction = StructuralEditService.Preview(fixture.State,
+                new StructuralConstructionRequest { RoomDefinitionId = definitionId,
+                    Anchor = anchor, Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" }, fixture.Production, fixture.Compatibility,
+                fixture.Configuration, fixture.Limits);
+            Assert.That(construction.IsValid, Is.True, string.Join(",", construction.ReasonCodes));
+            fixture.State = construction.DetachedCandidate;
+            return fixture;
         }
 
         private static void AssertInvalidUnchanged(PreviewFixture fixture,

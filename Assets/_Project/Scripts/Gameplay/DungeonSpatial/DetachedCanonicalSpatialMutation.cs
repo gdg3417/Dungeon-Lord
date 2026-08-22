@@ -10,7 +10,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         PlaceOrReplace = 1,
         RemoveRoom = 2,
-        StructuralConstruction = 3
+        StructuralConstruction = 3,
+        StructuralMovement = 4,
+        StructuralReplacement = 5
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -20,6 +22,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string OptionId { get; private set; }
         public string RoomInstanceId { get; private set; }
         internal StructuralConstructionRequest StructuralIntent { get; private set; }
+        internal StructuralMovementRequest MovementIntent { get; private set; }
+        internal StructuralReplacementRequest ReplacementIntent { get; private set; }
         internal string StructuralBaselineFingerprint { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
@@ -35,7 +39,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             new DetachedCanonicalMutationRequest
             {
                 Kind = DetachedCanonicalMutationKind.StructuralConstruction,
-                StructuralIntent = preview != null && preview.IsValid ? preview.Intent : null,
+                StructuralIntent = preview != null && preview.IsValid ?
+                    preview.Intent as StructuralConstructionRequest : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
+            };
+
+        public static DetachedCanonicalMutationRequest Move(StructuralEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.StructuralMovement,
+                MovementIntent = preview != null && preview.IsValid ? preview.Intent as StructuralMovementRequest : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
+            };
+
+        public static DetachedCanonicalMutationRequest Replace(StructuralEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.StructuralReplacement,
+                ReplacementIntent = preview != null && preview.IsValid ? preview.Intent as StructuralReplacementRequest : null,
                 StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
             };
     }
@@ -108,6 +129,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(StructuralEditService.StalePreviewReason);
                 StructuralEditPreview refreshed = StructuralEditService.Preview(current,
                     request.StructuralIntent, production, compatibility, configuration, limits);
+                if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate;
+                reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.StructuralMovement ||
+                request.Kind == DetachedCanonicalMutationKind.StructuralReplacement)
+            {
+                object intent = request.Kind == DetachedCanonicalMutationKind.StructuralMovement
+                    ? (object)request.MovementIntent : request.ReplacementIntent;
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    intent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(StructuralEditService.StalePreviewReason);
+                StructuralEditPreview refreshed = request.Kind == DetachedCanonicalMutationKind.StructuralMovement
+                    ? StructuralRenovationService.PreviewMovement(current, request.MovementIntent, production,
+                        compatibility, configuration, limits)
+                    : StructuralRenovationService.PreviewReplacement(current, request.ReplacementIntent, production,
+                        compatibility, configuration, limits);
                 if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
                 proposed = refreshed.DetachedCandidate;
                 reason = null;
