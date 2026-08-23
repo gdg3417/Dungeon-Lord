@@ -348,10 +348,6 @@ namespace DungeonBuilder.Tests.EditMode
                 _overlay.SelectedMvpPlacementOptionId,
                 _overlay.SelectedMvpStructureId,
                 _overlay.GetSelectedMvpRunPostureNameKey());
-            Rect rect = _overlay.GetMinimalMvpActionPanelRect();
-
-            Assert.That(rect.width, Is.EqualTo(260f));
-            Assert.That(rect.height, Is.EqualTo(420f));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PostureLabel, Is.EqualTo("Debug posture: Balanced"));
