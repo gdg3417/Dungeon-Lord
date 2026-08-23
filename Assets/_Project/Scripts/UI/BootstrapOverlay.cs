@@ -34,8 +34,9 @@ namespace DungeonBuilder.M0
         private const int PlayerFacingSectionLoopSummary = 1;
         private const int PlayerFacingSectionPlanAndAction = 2;
         private const int PlayerFacingSectionLatestRunFeedback = 3;
-        private const float MinimalMvpActionPanelWidth = 260f;
-        private const float MinimalMvpActionPanelHeight = 420f;
+        private const float MinimalMvpActionPanelMinimumWidth = 300f;
+        private const float MinimalMvpActionPanelMaximumWidth = 500f;
+        private const float MinimalMvpActionPanelViewportWidthRatio = 0.34f;
         private const float MinimalMvpActionPanelMargin = 10f;
         private const float MinimalMvpActionPanelLabelHeight = 17f;
         private const float MinimalMvpActionPanelButtonHeight = 19f;
@@ -43,7 +44,6 @@ namespace DungeonBuilder.M0
         private const float OverlayTextSafeLeftMargin = 24f;
         private const float OverlayTextSafeTopMargin = 14f;
         private const float OverlayTextSafeBottomMargin = 10f;
-        private const float OverlayTextRightActionPanelReserve = MinimalMvpActionPanelWidth + (MinimalMvpActionPanelMargin * 2f) + OverlayTextSafeLeftMargin;
         private const float OverlayTextRightCollapsedActionPanelReserve = 96f;
         private const string DefaultMvpStructureId = StructureSimulationPass.ManaGeneratorBasicId;
         private const string DefaultMvpPlacementCategoryId = MvpDungeonPlacementIds.RoomCategoryId;
@@ -902,8 +902,10 @@ namespace DungeonBuilder.M0
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.pivot = new Vector2(0f, 1f);
-            rectTransform.offsetMin = new Vector2(OverlayTextSafeLeftMargin, OverlayTextSafeBottomMargin);
-            float rightReserve = _minimalMvpActionPanelCollapsed ? OverlayTextRightCollapsedActionPanelReserve : OverlayTextRightActionPanelReserve;
+            Rect safeArea = CalculateOverlayTextSafeArea(Screen.width, Screen.height,
+                _minimalMvpActionPanelCollapsed);
+            rectTransform.offsetMin = new Vector2(safeArea.xMin, OverlayTextSafeBottomMargin);
+            float rightReserve = Mathf.Max(0f, Screen.width - safeArea.xMax);
             rectTransform.offsetMax = new Vector2(-rightReserve, -OverlayTextSafeTopMargin);
             overlayText.alignment = TextAlignmentOptions.TopLeft;
         }
@@ -1552,18 +1554,27 @@ namespace DungeonBuilder.M0
 
         public static Rect CalculateMinimalMvpActionPanelRect(float viewportWidth, float viewportHeight)
         {
-            float height = Mathf.Min(MinimalMvpActionPanelHeight, Mathf.Max(220f, viewportHeight - (MinimalMvpActionPanelMargin * 2f)));
-            float x = Mathf.Max(MinimalMvpActionPanelMargin, viewportWidth - MinimalMvpActionPanelWidth - MinimalMvpActionPanelMargin);
-            return new Rect(x, MinimalMvpActionPanelMargin, MinimalMvpActionPanelWidth, height);
+            float availableWidth = Mathf.Max(1f, viewportWidth - (MinimalMvpActionPanelMargin * 2f));
+            float desiredWidth = Mathf.Clamp(viewportWidth * MinimalMvpActionPanelViewportWidthRatio,
+                MinimalMvpActionPanelMinimumWidth, MinimalMvpActionPanelMaximumWidth);
+            float width = Mathf.Min(availableWidth, desiredWidth);
+            float height = Mathf.Max(1f, viewportHeight - (MinimalMvpActionPanelMargin * 2f));
+            float x = Mathf.Max(MinimalMvpActionPanelMargin,
+                viewportWidth - width - MinimalMvpActionPanelMargin);
+            return new Rect(x, MinimalMvpActionPanelMargin, width, height);
         }
 
         public static Rect CalculateOverlayTextSafeArea(float viewportWidth, float viewportHeight, bool actionPanelCollapsed)
         {
-            float rightReserve = actionPanelCollapsed ? OverlayTextRightCollapsedActionPanelReserve : OverlayTextRightActionPanelReserve;
+            float rightEdge = actionPanelCollapsed
+                ? viewportWidth - OverlayTextRightCollapsedActionPanelReserve
+                : CalculateMinimalMvpActionPanelRect(viewportWidth, viewportHeight).xMin -
+                    MinimalMvpActionPanelMargin;
+            float leftEdge = Mathf.Min(OverlayTextSafeLeftMargin, Mathf.Max(0f, rightEdge - 1f));
             return new Rect(
-                OverlayTextSafeLeftMargin,
+                leftEdge,
                 OverlayTextSafeTopMargin,
-                Mathf.Max(1f, viewportWidth - OverlayTextSafeLeftMargin - rightReserve),
+                Mathf.Max(1f, rightEdge - leftEdge),
                 Mathf.Max(1f, viewportHeight - OverlayTextSafeTopMargin - OverlayTextSafeBottomMargin));
         }
 
@@ -1630,6 +1641,11 @@ namespace DungeonBuilder.M0
                 margin = new RectOffset(0, 0, 0, 0),
                 padding = new RectOffset(2, 2, 0, 0)
             };
+            GUIStyle wrappedLabel = new GUIStyle(compactLabel)
+            {
+                clipping = TextClipping.Overflow,
+                wordWrap = true
+            };
             GUIStyle compactButton = new GUIStyle(GUI.skin.button)
             {
                 margin = new RectOffset(0, 0, 1, 1),
@@ -1640,31 +1656,31 @@ namespace DungeonBuilder.M0
                 fontStyle = FontStyle.Bold
             };
             GUILayoutOption labelHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight);
-            GUILayoutOption previewHeight = GUILayout.Height(MinimalMvpActionPanelLabelHeight * 2f);
             GUILayoutOption buttonHeight = GUILayout.Height(MinimalMvpActionPanelButtonHeight);
 
-            GUILayout.BeginArea(GetMinimalMvpActionPanelRect(), compactBox);
+            Rect panelRect = GetMinimalMvpActionPanelRect();
+            GUILayout.BeginArea(panelRect, compactBox);
             _minimalMvpActionPanelScrollPosition = GUILayout.BeginScrollView(
                 _minimalMvpActionPanelScrollPosition,
                 false,
                 true,
-                GUILayout.Width(MinimalMvpActionPanelWidth - MinimalMvpActionPanelScrollBarWidth));
+                GUILayout.Width(Mathf.Max(1f, panelRect.width - MinimalMvpActionPanelScrollBarWidth)));
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
             GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
-            GUILayout.Label(labels.PreviewText, compactLabel, labelHeight);
+            GUILayout.Label(labels.PreviewText, wrappedLabel);
             if (!string.IsNullOrWhiteSpace(labels.ComparisonText))
             {
-                GUILayout.Label(labels.ComparisonText, compactLabel, labelHeight);
+                GUILayout.Label(labels.ComparisonText, wrappedLabel);
             }
-            GUILayout.Label(labels.RunPlanPreviewText, compactLabel, previewHeight);
-            GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), compactLabel, labelHeight);
-            GUILayout.Label(GetSelectedMvpRoomCapacityText(), compactLabel, labelHeight);
+            GUILayout.Label(labels.RunPlanPreviewText, wrappedLabel);
+            GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), wrappedLabel);
+            GUILayout.Label(GetSelectedMvpRoomCapacityText(), wrappedLabel);
             string selectedPlacementFitText = GetSelectedMvpPlacementFitText();
             if (!string.IsNullOrWhiteSpace(selectedPlacementFitText))
             {
-                GUILayout.Label(selectedPlacementFitText, compactLabel, labelHeight);
+                GUILayout.Label(selectedPlacementFitText, wrappedLabel);
             }
             if (GUILayout.Button(GetLocalizedString("ui.mvp_room_slots.cycle_target_button"), compactButton, buttonHeight))
             {
@@ -1681,6 +1697,8 @@ namespace DungeonBuilder.M0
             if (StructuralRenovationControlsAvailable)
                 DrawStructuralRenovationControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
+            if (!string.IsNullOrEmpty(_structuralFeedback))
+                GUILayout.Label(_structuralFeedback, wrappedLabel);
             if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
@@ -1691,7 +1709,7 @@ namespace DungeonBuilder.M0
                 RunOrObserveDungeon();
             }
             PlayerResearchPanelPresentation research = ResolvePlayerResearchPanelPresentation();
-            GUILayout.Label(research.StatusText, compactLabel, labelHeight);
+            GUILayout.Label(research.StatusText, wrappedLabel);
             if (research.ShowAction && GUILayout.Button(research.ActionText, compactButton, buttonHeight))
             {
                 if (research.ActionClaimsResearch) ClaimPlayerResearch();
@@ -1821,9 +1839,6 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(GetLocalizedString("ui.structural.commit.action"), button, buttonHeight))
                 CommitStructuralConstruction();
             GUI.enabled = priorEnabled;
-            if (!string.IsNullOrEmpty(_structuralFeedback))
-                GUILayout.Label(_structuralFeedback, label, GUILayout.Height(
-                    MinimalMvpActionPanelLabelHeight * 6f));
         }
 
         private void DrawStructuralRenovationControls(GUIStyle label, GUIStyle button,
