@@ -201,13 +201,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static bool TryCanonicalize(DetachedCanonicalSpatialSaveState source,
             CanonicalSpatialSaveWorkloadLimits limits, out DetachedCanonicalSpatialSaveState canonical) =>
-            TryCanonicalizeCore(source, limits, out canonical) == CanonicalizationFailure.None;
+            TryCanonicalizeCore(source, limits, true, out canonical) == CanonicalizationFailure.None;
+
+        internal static bool TryCanonicalizeFrozenSchemaSeven(DetachedCanonicalSpatialSaveState source,
+            CanonicalSpatialSaveWorkloadLimits limits, out DetachedCanonicalSpatialSaveState canonical) =>
+            TryCanonicalizeCore(source, limits, false, out canonical) == CanonicalizationFailure.None;
 
         public static CanonicalSpatialSaveValidationResult Validate(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering = false)
         {
             var issues = new List<CanonicalSpatialSaveValidationIssue>();
-            CanonicalizationFailure failure = TryCanonicalizeCore(state, limits, out DetachedCanonicalSpatialSaveState canonical);
+            return ValidateCore(state, limits, requireCanonicalOrdering, true);
+        }
+
+        internal static CanonicalSpatialSaveValidationResult ValidateFrozenSchemaSeven(
+            DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
+            bool requireCanonicalOrdering = false) =>
+            ValidateCore(state, limits, requireCanonicalOrdering, false);
+
+        private static CanonicalSpatialSaveValidationResult ValidateCore(DetachedCanonicalSpatialSaveState state,
+            CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering, bool includeLifecycle)
+        {
+            var issues = new List<CanonicalSpatialSaveValidationIssue>();
+            CanonicalizationFailure failure = TryCanonicalizeCore(state, limits, includeLifecycle,
+                out DetachedCanonicalSpatialSaveState canonical);
             if (failure != CanonicalizationFailure.None)
             {
                 issues.Add(FailureIssue(failure));
@@ -223,7 +240,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (SavedSpatialFloor floor in floors)
                 ValidateFloor(floor, instanceIds, issues);
 
-            ValidateLifecycleAndOwnership(state, instanceIds, issues);
+            if (includeLifecycle) ValidateLifecycleAndOwnership(state, instanceIds, issues);
 
             if (requireCanonicalOrdering && !HasCanonicalOrdering(state))
                 issues.Add(CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering);
@@ -231,7 +248,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static CanonicalizationFailure TryCanonicalizeCore(DetachedCanonicalSpatialSaveState source,
-            CanonicalSpatialSaveWorkloadLimits limits, out DetachedCanonicalSpatialSaveState canonical)
+            CanonicalSpatialSaveWorkloadLimits limits, bool includeLifecycle,
+            out DetachedCanonicalSpatialSaveState canonical)
         {
             canonical = null;
             if (source == null) return CanonicalizationFailure.InvalidSource;
@@ -240,7 +258,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             long records = 0L, tiles = 0L;
             if (!TryAdd(ref records, floors.LongLength, limits.MaximumRecords)) return CanonicalizationFailure.RecordLimit;
             StructuralLifecycleAndOwnershipState lifecycle = source.LifecycleAndOwnership;
-            if (lifecycle != null &&
+            if (includeLifecycle && lifecycle != null &&
                 (!TryAdd(ref records, lifecycle.Floors?.LongLength ?? 0L, limits.MaximumRecords) ||
                  !TryAdd(ref records, lifecycle.ReturnedContents?.LongLength ?? 0L, limits.MaximumRecords)))
                 return CanonicalizationFailure.RecordLimit;
@@ -267,7 +285,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Authority = CopyMarker(source.Authority),
                 Floors = copies.OrderBy(floor => floor?.FloorIndex ?? 0)
                     .ThenBy(floor => floor?.FloorInstanceId, StringComparer.Ordinal).ToArray(),
-                LifecycleAndOwnership = CopyLifecycle(source.LifecycleAndOwnership)
+                LifecycleAndOwnership = includeLifecycle ? CopyLifecycle(source.LifecycleAndOwnership) : null
             };
             return CanonicalizationFailure.None;
         }
@@ -624,7 +642,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 foreach (FloorRouteEdge edge in floor.Layout.Edges.Where(value => value?.Footprint?.OccupiedTiles != null))
                     if (!Ordered(edge.Footprint.OccupiedTiles, (left, right) => left.CompareTo(right))) return false;
             }
-            FloorStructuralIdentityLifecycle[] lifecycle = state.LifecycleAndOwnership?.Floors ??
+            if (state.LifecycleAndOwnership == null) return true;
+            FloorStructuralIdentityLifecycle[] lifecycle = state.LifecycleAndOwnership.Floors ??
                 Array.Empty<FloorStructuralIdentityLifecycle>();
             ReturnedStructuralContent[] returned = state.LifecycleAndOwnership?.ReturnedContents ??
                 Array.Empty<ReturnedStructuralContent>();

@@ -528,7 +528,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(narrow.IsSuccess, Is.False);
             Assert.That(narrow.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.UnsupportedRoomReason));
             Assert.That(removed.IsSuccess, Is.False);
-            Assert.That(removed.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.RemovalHasContentsReason));
+            Assert.That(removed.Reason, Is.EqualTo(
+                DetachedCanonicalSpatialMutation.StructuralRemovalDeferredReason));
         }
 
         [Test]
@@ -922,7 +923,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void RepeatedAtoBtoAtoBTransitionsDoNotCollideOrLeakEvidence()
+        public void PrototypeRemovalIsRejectedWithoutWriteOrPublication()
         {
             Fixture fixture = Create();
             DetachedCanonicalWriteResult first = fixture.Execute(
@@ -930,16 +931,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MvpDungeonPlacementIds.BasicRoomOptionId));
             fixture.Accept(first);
             string roomId = fixture.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            byte[] before = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
             DetachedCanonicalWriteResult second = fixture.Execute(
                 DetachedCanonicalMutationRequest.RemoveRoom(roomId));
-            fixture.Accept(second);
-            DetachedCanonicalWriteResult third = fixture.Execute(
-                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
-                    MvpDungeonPlacementIds.BasicRoomOptionId));
 
             Assert.That(first.IsSuccess, Is.True, first.Reason);
-            Assert.That(second.IsSuccess, Is.True, second.Reason);
-            Assert.That(third.IsSuccess, Is.True, third.Reason);
+            Assert.That(second.IsSuccess, Is.False);
+            Assert.That(second.Reason, Is.EqualTo(
+                DetachedCanonicalSpatialMutation.StructuralRemovalDeferredReason));
+            Assert.That(second.RuntimeProjection, Is.Null);
+            Assert.That(second.Session, Is.Null);
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
             Assert.That(fixture.FileSystem.Paths.Count(path =>
                 path.Contains(".canonical-write-")), Is.EqualTo(0));
         }

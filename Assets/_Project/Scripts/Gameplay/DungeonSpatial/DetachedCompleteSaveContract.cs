@@ -221,10 +221,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteNode(spatialWriter, floorsNode);
                 spatialWriter.Token(","); spatialWriter.String("LifecycleAndOwnership"); spatialWriter.Token(":");
                 if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value);
-                else if (!SchemaSevenToEightUpgrade.TryWriteInitialLifecycle(spatialWriter, floorsNode)) return Failure();
+                else spatialWriter.Token("null");
                 spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
-                    CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
+                    requireLifecycle ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
+                    CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(spatialWriter.Finish(), limits);
                 if (!parsedSpatial.IsValid || !CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
                         limits.Spatial, true).IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||

@@ -260,6 +260,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                       new CanonicalRoomSemantics { RoomInstanceId = second.RoomInstanceId,
                         LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } } } } }
             };
+            state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
             return new SaveData { validatedCanonicalSpatialState = state };
         }
 

@@ -59,7 +59,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (source == null || !source.IsSuccess || sourceVersion < 1 || sourceVersion > 6)
                 return Failure(CandidateInvalidReason);
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> serialized =
-                CanonicalSpatialSaveSerializer.SerializeMembers(spatial, spatialLimits);
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(spatial, spatialLimits);
             if (!serialized.IsValid) return Failure(CandidateInvalidReason);
             byte[] authority = serialized.Value.Authority;
             byte[] floors = serialized.Value.Floors;

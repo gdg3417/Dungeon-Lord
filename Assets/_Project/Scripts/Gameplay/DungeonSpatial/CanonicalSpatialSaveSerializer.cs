@@ -114,8 +114,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
+        internal static SpatialContractResult<SerializedMembers> SerializeFrozenSchemaSevenMembers(
+            DetachedCanonicalSpatialSaveState source, CanonicalSpatialSerializationLimits limits)
+        {
+            var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
+            try
+            {
+                ValidateAuthority(source?.Authority, issues);
+                if (!limits.IsValid || issues.Count != 0 ||
+                    !CanonicalSpatialSaveContracts.TryCanonicalizeFrozenSchemaSeven(source,
+                        limits.Spatial, out DetachedCanonicalSpatialSaveState canonical) ||
+                    !CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(canonical,
+                        limits.Spatial, true).IsValid)
+                    return new SpatialContractResult<SerializedMembers>(null,
+                        new[] { SpatialContractIssue.StructuralValidationFailed });
+                var authorityWriter = new ContractJsonWriter(limits.Serialized);
+                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
+                var floorsWriter = new ContractJsonWriter(limits.Serialized);
+                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]));
+                return new SpatialContractResult<SerializedMembers>(new SerializedMembers(
+                    authorityWriter.Finish(), floorsWriter.Finish(), null),
+                    Array.Empty<SpatialContractIssue>());
+            }
+            catch { return new SpatialContractResult<SerializedMembers>(null,
+                new[] { SpatialContractIssue.StructuralValidationFailed }); }
+        }
+
         public static SpatialContractResult<DetachedCanonicalSpatialSaveState> Parse(byte[] bytes,
-            CanonicalSpatialSerializationLimits limits)
+            CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, true);
+
+        internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenSchemaSeven(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, false);
+
+        private static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseCore(byte[] bytes,
+            CanonicalSpatialSerializationLimits limits, bool includeLifecycle)
         {
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (!limits.IsValid)
@@ -135,9 +167,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var value = (DetachedCanonicalSpatialSaveState)materialized;
                 ValidateAuthority(value == null ? null : value.Authority, issues);
                 if (issues.Count == 0) NormalizeNativeAuthorityForCanonicalBytes(value == null ? null : value.Authority);
-                if (issues.Count == 0 && !CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true).IsValid)
+                CanonicalSpatialSaveValidationResult validation = includeLifecycle
+                    ? CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true)
+                    : CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(value, limits.Spatial, true);
+                if (issues.Count == 0 && !validation.IsValid)
                     issues.Add(SpatialContractIssue.StructuralValidationFailed);
-                if (issues.Count == 0)
+                if (issues.Count == 0 && includeLifecycle)
                 {
                     SpatialContractResult<byte[]> again = Serialize(value, limits);
                     if (!again.IsValid || !BytesEqual(bytes, again.Value)) issues.Add(SpatialContractIssue.NonCanonicalBytes);

@@ -871,7 +871,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MigrationTransactionId = string.Empty,
                     MigrationDescriptorFingerprint = string.Empty
                 },
-                Floors = floors
+                Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors)
             });
 
         [Test]

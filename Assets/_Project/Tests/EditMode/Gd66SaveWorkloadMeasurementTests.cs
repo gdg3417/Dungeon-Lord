@@ -232,7 +232,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             byte[] bytes = fixture.Result.Attempt.Candidate.GetBytes();
             Assert.That(bytes.Length, Is.LessThanOrEqualTo(candidate));
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes,
                 new CanonicalSpatialSerializationLimits(
                     new SpatialSerializedInputLimits(serializedInput, 8192, 2048, 131072, 64),
                     new CanonicalSpatialSaveWorkloadLimits(64, 64))).IsValid, Is.True);
@@ -507,7 +507,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Floors = Array.Empty<SavedSpatialFloor>()
             };
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> members =
-                CanonicalSpatialSaveSerializer.SerializeMembers(state, fixture.Limits);
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(state, fixture.Limits);
             Assert.That(members.IsValid, Is.True);
             byte[] candidate = Encoding.UTF8.GetBytes(
                 "{\"schema\":\"save_root\",\"schemaVersion\":7,\"primary\":{\"canonicalSpatialAuthority\":" +
@@ -537,7 +537,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CanonicalSpatialSerializationLimits limits)
         {
             DetachedCompleteSaveValidationResult result =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(candidate, limits);
             Assert.That(result.IsValid, Is.True, result.Reason);
             return result.State;
         }

@@ -90,9 +90,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void FrozenSchemaSevenUpgrade_PreservesPopulatedCanonicalSpatialMembersAndAssignments()
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
-            byte[] schemaSeven = fixture.Result.Attempt.Candidate.GetBytes();
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
+                "\"TrapOptionIds\":[\"placement.option.trap.spike\"]," +
+                "\"LootNodeOptionIds\":[\"placement.option.loot_node.basic\"]}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}]," +
+                "\"NextRevision\":4},\"futurePrimary\":{\"value\":1}";
+            Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                    "schema-8-populated-preservation", 6, members);
+            byte[] schemaSeven = fixture.Attempt.Candidate.GetBytes();
             DetachedCompleteSaveValidationResult before =
                 DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(schemaSeven,
                     fixture.Limits);
@@ -104,7 +113,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(after.IsValid, Is.True);
 
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> beforeMembers =
-                CanonicalSpatialSaveSerializer.SerializeMembers(before.State, fixture.Limits);
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(before.State, fixture.Limits);
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> afterMembers =
                 CanonicalSpatialSaveSerializer.SerializeMembers(after.State, fixture.Limits);
             CollectionAssert.AreEqual(beforeMembers.Value.Authority, afterMembers.Value.Authority);

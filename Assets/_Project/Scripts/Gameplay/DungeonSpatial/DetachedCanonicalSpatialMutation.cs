@@ -105,6 +105,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public const string UnsupportedRoomReason = "gd66.write.unsupported_room_selection";
         public const string RemovalHasContentsReason = "gd66.write.room_removal_has_contents";
+        public const string StructuralRemovalDeferredReason = "structural.edit.removal_deferred_phase_3b2b";
         public const string CapacityReductionReason = "gd66.write.capacity_reduction_invalid";
         public const string NoOpReason = "gd66.diagnostic.canonical_write_noop";
         public const string ValidationFailedReason = "gd66.write.first_write_validation_failed";
@@ -271,15 +272,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static string Remove(DetachedCanonicalSpatialSaveState state, string requestedRoomId)
         {
-            if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
-                out RoomSpatialInstance room, out CanonicalRoomSemantics ignored)) return ValidationFailedReason;
-            if ((floor.RoomContents.Assignments ?? Array.Empty<RoomContentAssignment>()).Any(value =>
-                value != null && value.RoomInstanceId == room.RoomInstanceId)) return RemovalHasContentsReason;
-            // Only the approved R1 -> canonical-empty transition is representable here. R2 removal
-            // needs a future explicit topology rule; never infer an array-position mapping.
-            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1)
-                return ValidationFailedReason;
-            state.Floors = Array.Empty<SavedSpatialFloor>(); return null;
+            return StructuralRemovalDeferredReason;
         }
 
         private static bool TryCreateStarter(DetachedCanonicalSpatialSaveState state,

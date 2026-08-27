@@ -228,9 +228,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     Authority = marker,
                     Floors = projection.Floors,
-                    LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(projection.Floors)
+                    LifecycleAndOwnership = null
                 };
-                CanonicalSpatialSaveContracts.TryCanonicalize(spatial, inputs.SpatialLimits.Spatial, out spatial);
+                CanonicalSpatialSaveContracts.TryCanonicalizeFrozenSchemaSeven(spatial,
+                    inputs.SpatialLimits.Spatial, out spatial);
                 DetachedWholeSaveResult candidate = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                     inputs.Classification, spatial, inputs.SpatialLimits, inputs.WholeSaveLimits);
                 if (!candidate.IsSuccess) return Failure(candidate.Reason, projection.Diagnostics);
