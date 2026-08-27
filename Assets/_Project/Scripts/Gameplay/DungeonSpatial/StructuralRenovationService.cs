@@ -87,6 +87,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             preview.Intent = new StructuralReplacementRequest { RoomInstanceId = request.RoomInstanceId,
                 RoomDefinitionId = request.RoomDefinitionId };
             if (replacement == null) return Fail(preview, StructuralEditService.RoomDefinitionInvalidReason);
+            if (string.Equals(request.RoomDefinitionId, target.RoomDefinitionId, StringComparison.Ordinal))
+                return Fail(preview, StructuralEditService.ReplacementSameDefinitionReason);
             if (!(floorDefinition.AllowedRoomDefinitionIds ?? Array.Empty<string>()).Contains(request.RoomDefinitionId))
                 return Fail(preview, StructuralEditService.RoomNotAllowedReason);
             if (!(replacement.AllowedOrientations ?? Array.Empty<CardinalOrientation>()).Contains(target.Orientation))

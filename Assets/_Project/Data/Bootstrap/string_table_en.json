@@ -3080,6 +3080,10 @@
       "text": "The replacement room cannot hold the room's existing contents."
     },
     {
+      "key": "structural.edit.replacement_same_definition",
+      "text": "The selected room already uses that room type."
+    },
+    {
       "key": "ui.structural.renovation.move.detail.format",
       "text": "Move Room {0}: ({1},{2}) -> ({3},{4})"
     },

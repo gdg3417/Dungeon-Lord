@@ -546,6 +546,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Replacement_SameDefinitionIsRejectedWithoutCandidateOrSourceMutation()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            string roomId = "compat.floor.00.room.player.0000";
+            byte[] before = Bytes(fixture.State, fixture.Limits);
+
+            StructuralEditPreview preview = Replace(fixture, roomId, "spatial.room.large_chamber");
+
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.DetachedCandidate, Is.Null);
+            Assert.That(preview.ReasonCodes, Is.EqualTo(new[]
+                { StructuralEditService.ReplacementSameDefinitionReason }));
+            Assert.That(preview.Consequences, Is.Empty);
+            CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
+
+            StructuralEditPreview differentDefinition = Replace(fixture, roomId, "spatial.room.rectangle");
+            Assert.That(differentDefinition.IsValid, Is.True,
+                string.Join(",", differentDefinition.ReasonCodes));
+        }
+
+        [Test]
         public void Movement_ContentConsequencesIncludeOnlyMovedGroupAndLeaveUpstreamAssignmentUnchanged()
         {
             PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(4, 2));

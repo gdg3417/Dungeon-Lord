@@ -63,6 +63,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string LayoutInvalidReason = "structural.edit.layout_invalid";
         public const string StalePreviewReason = "structural.edit.stale_preview";
         public const string RoomDefinitionInvalidReason = "structural.edit.room_definition_invalid";
+        public const string ReplacementSameDefinitionReason = "structural.edit.replacement_same_definition";
         public const string RoomNotAllowedReason = "structural.edit.room_not_allowed";
         public const string OrientationInvalidReason = "structural.edit.orientation_invalid";
         public const string OutOfBoundsReason = "structural.edit.out_of_bounds";

@@ -454,6 +454,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void BootstrapSameDefinitionReplacementShowsLocalizedReasonAndCannotCommit()
+        {
+            RenovationHarness harness = Renovation("root-renovation-same-definition.json",
+                "spatial.room.basic", new TileCoordinate(4, 2));
+
+            StructuralEditPreview preview = harness.Overlay.PreviewStructuralReplacement();
+
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.DetachedCandidate, Is.Null);
+            Assert.That(preview.ReasonCodes, Is.EqualTo(new[]
+                { StructuralEditService.ReplacementSameDefinitionReason }));
+            string localizedReason = harness.Root.Content.GetString(
+                StructuralEditService.ReplacementSameDefinitionReason, string.Empty);
+            Assert.That(harness.Overlay.StructuralFeedback, Is.EqualTo(localizedReason));
+            Assert.That(harness.Overlay.StructuralFeedback, Does.Not.Contain("spatial.room."));
+            Assert.That(harness.Root.StructuralRenovationPreview, Is.SameAs(preview));
+            Assert.That(harness.Overlay.CommitStructuralRenovation(), Is.Null);
+        }
+
+        [Test]
         public void FailedBootCompletionLeavesGameplayAndHomeUninitialized()
         {
             GameRoot root = Root(null);
