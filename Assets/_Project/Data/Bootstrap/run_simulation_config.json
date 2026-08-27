@@ -165,7 +165,8 @@
       "HeatPressure": 0,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.room.basic"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.room.basic",
+      "StructuralRemovalPolicy": 0
     },
     {
       "CategoryId": "placement.category.monster",
@@ -176,7 +177,8 @@
       "HeatPressure": 0,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.skeleton"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.skeleton",
+      "StructuralRemovalPolicy": 1
     },
     {
       "CategoryId": "placement.category.trap",
@@ -187,7 +189,8 @@
       "HeatPressure": 1,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.spike"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.spike",
+      "StructuralRemovalPolicy": 1
     },
     {
       "CategoryId": "placement.category.loot_node",
@@ -198,7 +201,8 @@
       "HeatPressure": 0,
       "LootBonus": 4,
       "Attraction": 2,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.basic"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.basic",
+      "StructuralRemovalPolicy": 0
     },
     {
       "CategoryId": "placement.category.room",
@@ -209,7 +213,8 @@
       "HeatPressure": 0,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.room.narrow_hall"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.room.narrow_hall",
+      "StructuralRemovalPolicy": 0
     },
     {
       "CategoryId": "placement.category.monster",
@@ -220,7 +225,8 @@
       "HeatPressure": 0,
       "LootBonus": 1,
       "Attraction": 1,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.goblin"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.goblin",
+      "StructuralRemovalPolicy": 1
     },
     {
       "CategoryId": "placement.category.trap",
@@ -231,7 +237,8 @@
       "HeatPressure": 0,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.snare"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.snare",
+      "StructuralRemovalPolicy": 1
     },
     {
       "CategoryId": "placement.category.trap",
@@ -242,7 +249,8 @@
       "HeatPressure": -1,
       "LootBonus": 0,
       "Attraction": 0,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.chilling_sigil"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.chilling_sigil",
+      "StructuralRemovalPolicy": 1
     },
     {
       "CategoryId": "placement.category.loot_node",
@@ -253,7 +261,8 @@
       "HeatPressure": 0,
       "LootBonus": 3,
       "Attraction": 1,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache",
+      "StructuralRemovalPolicy": 0
     },
     {
       "CategoryId": "placement.category.loot_node",
@@ -264,7 +273,8 @@
       "HeatPressure": 1,
       "LootBonus": 6,
       "Attraction": 4,
-      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard"
+      "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard",
+      "StructuralRemovalPolicy": 0
     }
   ],
   "MvpRoomSlotCapacities": [

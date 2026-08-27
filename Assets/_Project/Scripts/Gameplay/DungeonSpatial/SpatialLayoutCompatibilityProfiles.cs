@@ -242,6 +242,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             int legacyMaximum = SaveMigration.LegacyCompatibilitySchemaVersion;
             int targetSchemaVersion = SaveMigration.LatestSchemaVersion;
+            int migrationTarget = CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
             if (data == null || legacyMaximum < MinimumLegacySchemaVersion ||
                 targetSchemaVersion <= legacyMaximum) return false;
             SpatialMigrationCompatibilityProfile[] migrations = (data.MigrationProfiles ??
@@ -253,27 +254,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalLayoutContractSelection[] contracts = (data.ContractSelections ??
                 Array.Empty<CanonicalLayoutContractSelection>())
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
-            if (migrations.Length != 1 || starters.Length != 1 || contracts.Length != 1) return false;
+            if (migrations.Length != 1 || starters.Length != 2 || contracts.Length != 2) return false;
 
-            CanonicalLayoutContractSelection contract = contracts[0];
+            CanonicalLayoutContractSelection migrationContract = contracts.SingleOrDefault(value =>
+                value.TargetSchemaVersion == migrationTarget);
+            CanonicalLayoutContractSelection currentContract = contracts.SingleOrDefault(value =>
+                value.TargetSchemaVersion == targetSchemaVersion);
             SpatialMigrationCompatibilityProfile migration = migrations[0];
-            CanonicalStarterLayoutProfile starter = starters[0];
-            return contract.TargetSchemaVersion == targetSchemaVersion &&
-                   contract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
-                   migration.ProfileId == MigrationProfileId(targetSchemaVersion) &&
+            CanonicalStarterLayoutProfile migrationStarter = starters.SingleOrDefault(value =>
+                value.TargetSchemaVersion == migrationTarget);
+            CanonicalStarterLayoutProfile currentStarter = starters.SingleOrDefault(value =>
+                value.TargetSchemaVersion == targetSchemaVersion);
+            return migrationContract != null && currentContract != null && migrationStarter != null &&
+                   currentStarter != null && migrationContract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   currentContract.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   migration.ProfileId == MigrationProfileId(migrationTarget) &&
                    migration.ProfileVersion == InitialProfileVersion &&
                    migration.MinimumSourceSchemaVersion == MinimumLegacySchemaVersion &&
                    migration.MaximumSourceSchemaVersion == legacyMaximum &&
-                   migration.TargetSchemaVersion == contract.TargetSchemaVersion &&
-                   migration.TargetCanonicalLayoutContractVersion == contract.CanonicalLayoutContractVersion &&
-                   starter.ProfileId == StarterProfileId(targetSchemaVersion) &&
-                   starter.ProfileVersion == InitialProfileVersion &&
-                   starter.TargetSchemaVersion == contract.TargetSchemaVersion &&
-                   starter.CanonicalLayoutContractVersion == contract.CanonicalLayoutContractVersion &&
-                   string.Equals(migration.GeometryId, starter.GeometryId, StringComparison.Ordinal) &&
-                   migration.GeometryVersion == starter.GeometryVersion &&
-                   string.Equals(migration.GeometryCanonicalHash, starter.GeometryCanonicalHash,
-                       StringComparison.Ordinal);
+                   migration.TargetSchemaVersion == migrationTarget &&
+                   migration.TargetCanonicalLayoutContractVersion == migrationContract.CanonicalLayoutContractVersion &&
+                   migrationStarter.ProfileId == StarterProfileId(migrationTarget) &&
+                   currentStarter.ProfileId == StarterProfileId(targetSchemaVersion) &&
+                   migrationStarter.ProfileVersion == InitialProfileVersion && currentStarter.ProfileVersion == InitialProfileVersion &&
+                   migrationStarter.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   currentStarter.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                   string.Equals(migration.GeometryId, migrationStarter.GeometryId, StringComparison.Ordinal) &&
+                   string.Equals(migration.GeometryId, currentStarter.GeometryId, StringComparison.Ordinal) &&
+                   migration.GeometryVersion == migrationStarter.GeometryVersion &&
+                   migration.GeometryVersion == currentStarter.GeometryVersion &&
+                   string.Equals(migration.GeometryCanonicalHash, migrationStarter.GeometryCanonicalHash, StringComparison.Ordinal) &&
+                   string.Equals(migration.GeometryCanonicalHash, currentStarter.GeometryCanonicalHash, StringComparison.Ordinal);
         }
 
         private static string MigrationProfileId(int targetSchemaVersion) =>

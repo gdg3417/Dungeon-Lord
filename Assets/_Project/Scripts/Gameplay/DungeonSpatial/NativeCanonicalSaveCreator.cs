@@ -30,7 +30,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try
             {
                 CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                    compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
+                    compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
                 if (!selected.Success) return Failure(selected.Code);
                 var state = new DetachedCanonicalSpatialSaveState
                 {
@@ -41,7 +41,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         MigrationTransactionId = null,
                         MigrationDescriptorFingerprint = null
                     },
-                    Floors = Array.Empty<SavedSpatialFloor>()
+                    Floors = Array.Empty<SavedSpatialFloor>(),
+                    LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                        Array.Empty<SavedSpatialFloor>())
                 };
                 SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                     CanonicalSpatialSaveSerializer.SerializeMembers(state, limits.Canonical);

@@ -14,7 +14,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var limits = Limits();
 
             DetachedCompleteSaveValidationResult result =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, limits);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes, limits);
 
             Assert.That(result.IsValid, Is.True);
             Assert.That(result.GetBytes(), Is.EqualTo(bytes));
@@ -26,15 +26,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string text = Encoding.UTF8.GetString(CompleteSave()).Replace("\"spatialFloors\":[]",
                 "\"SpatialFloors\":[],\"spatialFloors\":[]");
 
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
                 Encoding.UTF8.GetBytes(text), Limits()).IsValid, Is.False);
         }
 
         [Test]
         public void CompleteSave_RejectsMarkerOwnershipMismatch()
         {
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(CompleteSave(), Limits(),
-                null, "gd66-" + new string('3', 64), new string('2', 64)).IsValid, Is.False);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                CompleteSave(), Limits(), "gd66-" + new string('3', 64),
+                new string('2', 64)).IsValid, Is.False);
         }
 
         [Test]
@@ -45,7 +46,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"primary\":{\"futureAudit\":{\"sequence\":2},");
 
             DetachedCompleteSaveValidationResult result =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
                     Encoding.UTF8.GetBytes(mutated), Limits());
 
             Assert.That(result.IsValid, Is.True);
@@ -59,8 +60,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string malformed = initial.Replace("\"primary\":{",
                 "\"primary\":{\"futureAudit\":{\"value\":1,\"Value\":2},");
 
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
                 Encoding.UTF8.GetBytes(malformed), Limits()).IsValid, Is.False);
+        }
+
+        [Test]
+        public void FrozenSchemaSevenUpgrade_IsDeterministicAndProducesStrictSchemaEight()
+        {
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(CompleteSave(), Limits(),
+                out byte[] first), Is.True);
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(CompleteSave(), Limits(),
+                out byte[] second), Is.True);
+            CollectionAssert.AreEqual(first, second);
+            Assert.That(Encoding.UTF8.GetString(first), Does.Contain("\"schemaVersion\":8"));
+            Assert.That(Encoding.UTF8.GetString(first), Does.Contain(
+                "\"structuralLifecycleAndOwnership\":{\"Floors\":[],\"ReturnedContents\":[]}"));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, Limits()).IsValid,
+                Is.True);
+        }
+
+        [Test]
+        public void FrozenSchemaSevenUpgrade_RejectsNoncanonicalSource()
+        {
+            byte[] malformed = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(CompleteSave()) + " ");
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(malformed, Limits(), out _), Is.False);
         }
 
         private static CanonicalSpatialSerializationLimits Limits() =>

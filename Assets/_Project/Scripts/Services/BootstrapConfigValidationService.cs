@@ -417,6 +417,7 @@ namespace DungeonBuilder.M0
                     effect.ManaPressure < 0 ||
                     effect.LootBonus < 0 ||
                     effect.Attraction < 0 ||
+                    !Enum.IsDefined(typeof(StructuralContentRemovalPolicy), effect.StructuralRemovalPolicy) ||
                     string.IsNullOrWhiteSpace(effect.ExplanationKey))
                 {
                     return false;

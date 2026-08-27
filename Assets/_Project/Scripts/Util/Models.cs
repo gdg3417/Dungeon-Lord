@@ -409,6 +409,14 @@ namespace DungeonBuilder.M0
     }
 
     [Serializable]
+    public enum StructuralContentRemovalPolicy
+    {
+        Unresolved = 0,
+        ReturnToPlayerCustody = 1,
+        DoesNotSurviveStructuralRemoval = 2
+    }
+
+    [Serializable]
     public sealed class MvpPlacementEffectConfig
     {
         public string CategoryId;
@@ -420,6 +428,7 @@ namespace DungeonBuilder.M0
         public int LootBonus;
         public int Attraction;
         public string ExplanationKey;
+        public StructuralContentRemovalPolicy StructuralRemovalPolicy;
     }
 
     [Serializable]

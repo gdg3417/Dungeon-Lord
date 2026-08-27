@@ -139,13 +139,13 @@
     ],
     "MigrationProfiles": [
         {
-            "ProfileId": "compat.profile.migration.schema_1_6_to_8.contract_1",
+            "ProfileId": "compat.profile.migration.schema_1_6_to_7.contract_1",
             "ProfileVersion": 1,
-            "CanonicalHash": "07b654209e78f57ba21bc478c8ceefa9c8ca44075274373896d4a376a989d481",
+            "CanonicalHash": "88d1548225b55533c023f9bc2216a3362b8cb2b9935d9d3d601710bf1077bbbf",
             "Lifecycle": 1,
             "MinimumSourceSchemaVersion": 1,
             "MaximumSourceSchemaVersion": 6,
-            "TargetSchemaVersion": 8,
+            "TargetSchemaVersion": 7,
             "TargetCanonicalLayoutContractVersion": 1,
             "GeometryId": "compat.geometry.r1-r2",
             "GeometryVersion": 1,
@@ -153,6 +153,17 @@
         }
     ],
     "StarterProfiles": [
+        {
+            "ProfileId": "compat.profile.starter.schema_7.contract_1",
+            "ProfileVersion": 1,
+            "CanonicalHash": "8ed993e71714e1466fff45445462baa1dc5f5eff9289f2f183a08742ed033007",
+            "Lifecycle": 1,
+            "TargetSchemaVersion": 7,
+            "CanonicalLayoutContractVersion": 1,
+            "GeometryId": "compat.geometry.r1-r2",
+            "GeometryVersion": 1,
+            "GeometryCanonicalHash": "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db"
+        },
         {
             "ProfileId": "compat.profile.starter.schema_8.contract_1",
             "ProfileVersion": 1,
@@ -166,6 +177,11 @@
         }
     ],
     "ContractSelections": [
+        {
+            "TargetSchemaVersion": 7,
+            "CanonicalLayoutContractVersion": 1,
+            "Lifecycle": 1
+        },
         {
             "TargetSchemaVersion": 8,
             "CanonicalLayoutContractVersion": 1,

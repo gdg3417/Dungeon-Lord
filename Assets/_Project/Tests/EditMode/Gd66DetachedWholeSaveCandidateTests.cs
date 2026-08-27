@@ -133,7 +133,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MigrationTransactionId = "gd66-" + new string('1', 64),
                 MigrationDescriptorFingerprint = new string('2', 64)
             },
-            Floors = Array.Empty<SavedSpatialFloor>()
+            Floors = Array.Empty<SavedSpatialFloor>(),
+            LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                Array.Empty<SavedSpatialFloor>())
         };
 
         private static RawSavePayloadClassification Classify(string json) => RawSavePayloadClassifier.Classify(

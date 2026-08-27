@@ -967,7 +967,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.RoomInstanceId == roomId).RoomDefinitionId, Is.EqualTo("spatial.room.rectangle"));
             AssertAssignmentEqual(replaced.State.Floors[0].RoomContents.Assignments.Single(),
                 replacedReopened.Value.Floors[0].RoomContents.Assignments.Single());
-            Assert.That(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion, Is.EqualTo(8));
+            Assert.That(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion, Is.EqualTo(7));
         }
 
         private static StructuralEditPreview Move(PreviewFixture fixture, string roomId, TileCoordinate anchor,

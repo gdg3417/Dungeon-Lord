@@ -144,7 +144,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             FloorStructuralIdentityLifecycle lifecycle = candidate.LifecycleAndOwnership.Floors
                 .Single(value => value.FloorInstanceId == floor.FloorInstanceId);
             lifecycle.NextNativeRoomOrdinal++;
-            lifecycle.NextNativeEdgeOrdinal += 2L;
             string roomId = identity.RoomInstanceId;
             if (OverlapsRooms(result.OccupiedTiles, floor.Layout.Rooms, catalog.Rooms, workload)) return Fail(result, RoomOverlapReason);
             if (OverlapsFixed(result.OccupiedTiles, floor.FixedStructures, catalog.FixedStructures, workload)) return Fail(result, FixedOverlapReason);

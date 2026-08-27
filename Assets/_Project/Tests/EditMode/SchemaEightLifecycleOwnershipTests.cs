@@ -34,15 +34,112 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             SavedSpatialFloor floor = Floor("floor.alpha", "compat.room.9000",
                 "floor.alpha.room.player.9", "floor.alpha.room.player.0004");
-            var source = new DetachedCanonicalSpatialSaveState { Floors = new[] { floor } };
-            var limits = new CanonicalSpatialSaveWorkloadLimits(128, 128);
-
-            Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(source, limits,
-                out DetachedCanonicalSpatialSaveState canonical), Is.True);
-            Assert.That(canonical.LifecycleAndOwnership.Floors[0].NextNativeRoomOrdinal,
+            StructuralLifecycleAndOwnershipState lifecycle =
+                NativeStructuralIdentity.CreateInitialLifecycle(new[] { floor });
+            Assert.That(lifecycle.Floors[0].NextNativeRoomOrdinal,
                 Is.EqualTo(5));
-            Assert.That(canonical.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+            Assert.That(lifecycle.ReturnedContents, Is.Empty);
         }
+
+        [Test]
+        public void MissingDuplicateExtraAndNegativeLifecycleReturnStableIssuesWithoutThrowing()
+        {
+            SavedSpatialFloor floor = Floor("floor.alpha", "floor.alpha.room.player.0002");
+            var limits = new CanonicalSpatialSaveWorkloadLimits(128, 128);
+            var missing = new DetachedCanonicalSpatialSaveState { Floors = new[] { floor }, LifecycleAndOwnership = null };
+            Assert.That(CanonicalSpatialSaveContracts.Validate(missing, limits).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.MissingLifecycleAndOwnership));
+
+            var duplicate = State(floor, new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.alpha", NextNativeRoomOrdinal = 3 },
+                new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.alpha", NextNativeRoomOrdinal = 3 });
+            Assert.DoesNotThrow(() => CanonicalSpatialSaveContracts.Validate(duplicate, limits));
+            Assert.That(CanonicalSpatialSaveContracts.Validate(duplicate, limits).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.DuplicateLifecycleFloor));
+
+            var extra = State(floor, new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.alpha", NextNativeRoomOrdinal = 3 },
+                new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.extra" });
+            Assert.That(CanonicalSpatialSaveContracts.Validate(extra, limits).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.InvalidIdentityLifecycle));
+
+            var negative = State(floor, new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.alpha",
+                NextNativeRoomOrdinal = -1, NextNativeEdgeOrdinal = -1 });
+            Assert.That(CanonicalSpatialSaveContracts.Validate(negative, limits).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.InvalidIdentityLifecycle));
+        }
+
+        [Test]
+        public void LifecycleCollectionsParticipateInOrderingAndRecordBudget()
+        {
+            SavedSpatialFloor a = Floor("floor.a"); SavedSpatialFloor b = Floor("floor.b"); b.FloorIndex = 1;
+            var state = new DetachedCanonicalSpatialSaveState { Floors = new[] { a, b },
+                LifecycleAndOwnership = new StructuralLifecycleAndOwnershipState { Floors = new[] {
+                    new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.b" },
+                    new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.a" } } } };
+            Assert.That(CanonicalSpatialSaveContracts.Validate(state,
+                new CanonicalSpatialSaveWorkloadLimits(128, 128), true).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering));
+            Assert.That(CanonicalSpatialSaveContracts.Validate(state,
+                new CanonicalSpatialSaveWorkloadLimits(3, 128)).Issues,
+                Does.Contain(CanonicalSpatialSaveValidationIssue.RecordLimitExceeded));
+        }
+
+        [Test]
+        public void FreshEdgeAllocationIsDeterministicFloorScopedMonotonicAndCollisionSafe()
+        {
+            SavedSpatialFloor floor = Floor("floor.alpha");
+            var state = State(floor, new FloorStructuralIdentityLifecycle { FloorInstanceId = "floor.alpha",
+                NextNativeEdgeOrdinal = 7 });
+            Assert.That(NativeStructuralIdentity.TryAllocateFreshEdgeIdentity(state, "floor.alpha",
+                out string first, out long next, out string reason), Is.True, reason);
+            Assert.That(first, Is.EqualTo("floor.alpha.edge.native.00000007"));
+            Assert.That(next, Is.EqualTo(8));
+            state.LifecycleAndOwnership.Floors[0].NextNativeEdgeOrdinal = next;
+            Assert.That(NativeStructuralIdentity.TryAllocateFreshEdgeIdentity(state, "floor.alpha",
+                out string second, out long afterSecond, out reason), Is.True, reason);
+            Assert.That(second, Is.EqualTo("floor.alpha.edge.native.00000008"));
+            Assert.That(afterSecond, Is.EqualTo(9));
+            Assert.That(second, Is.Not.EqualTo(first));
+
+            floor.Layout.Edges = new[] { new FloorRouteEdge { EdgeId = second } };
+            Assert.That(NativeStructuralIdentity.TryAllocateFreshEdgeIdentity(state, "floor.alpha",
+                out _, out _, out _), Is.False);
+        }
+
+        [Test]
+        public void AuthoredRemovalPolicyReturnsReusableDefinitionsAndFailsClosedForUnresolvedLoot()
+        {
+            var configuration = new RunSimulationConfig { MvpPlacementEffects = new[]
+            {
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId,
+                    OptionId = MvpDungeonPlacementIds.SkeletonOptionId,
+                    StructuralRemovalPolicy = StructuralContentRemovalPolicy.ReturnToPlayerCustody },
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.TrapCategoryId,
+                    OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId,
+                    StructuralRemovalPolicy = StructuralContentRemovalPolicy.ReturnToPlayerCustody },
+                new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId,
+                    OptionId = MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                    StructuralRemovalPolicy = StructuralContentRemovalPolicy.Unresolved }
+            }};
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(configuration,
+                MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId,
+                out StructuralContentRemovalPolicy monster, out _), Is.True);
+            Assert.That(monster, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(configuration,
+                MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId,
+                out StructuralContentRemovalPolicy trap, out _), Is.True);
+            Assert.That(trap, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(configuration,
+                MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                out _, out string reason), Is.False);
+            Assert.That(reason, Is.EqualTo(StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason));
+        }
+
+        private static DetachedCanonicalSpatialSaveState State(SavedSpatialFloor floor,
+            params FloorStructuralIdentityLifecycle[] lifecycle) => new DetachedCanonicalSpatialSaveState
+        {
+            Floors = new[] { floor },
+            LifecycleAndOwnership = new StructuralLifecycleAndOwnershipState { Floors = lifecycle }
+        };
 
         [Test]
         public void ReturnedIdentityCannotAlsoRemainAssigned()

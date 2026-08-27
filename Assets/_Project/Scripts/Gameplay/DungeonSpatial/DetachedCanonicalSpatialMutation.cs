@@ -186,7 +186,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     LegacyRoomOriginKind.CanonicalPlayerPlaced, out SavedSpatialFloor floor,
                     out string starterReason))
                     return starterReason;
-                state.Floors = new[] { floor }; roomEffect = true; return null;
+                state.Floors = new[] { floor };
+                state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
+                roomEffect = true; return null;
             }
             if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor existingFloor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics semantics))
@@ -237,6 +239,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     LegacyRoomOriginKind.ImplicitCompatibilityContainer, out SavedSpatialFloor starter,
                     out string reason)) return reason;
                 state.Floors = new[] { starter };
+                state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
             }
             if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics ignored))
@@ -285,7 +288,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             saved = null; reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected =
-                compatibility.SelectStarter(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
+                compatibility.SelectStarter(CanonicalSaveSchemaVersions.CurrentWritableTarget,
                     state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return false; }
             CanonicalStarterLayoutProfile profile = selected.Value;
@@ -390,7 +393,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected = compatibility.SelectStarter(
-                DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
+                CanonicalSaveSchemaVersions.CurrentWritableTarget,
                 state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return null; }
             CompatibilityLayoutGeometryRecord geometry = (compatibility.Value.GeometryRecords ??

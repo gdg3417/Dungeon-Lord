@@ -41,10 +41,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     }
 
     // This is deliberately not a SaveData serializer. It copies raw JSON values captured before
-    // current constructors/migrations run and adds the schema-8 canonical owner explicitly.
+    // current constructors/migrations run and adds the two schema-7 spatial owners explicitly.
     public static class DetachedWholeSaveCandidateSerializer
     {
-        public const int TargetSchemaVersion = 8;
+        public const int TargetSchemaVersion = CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
         public const string UnknownMemberUnpreservableReason = "gd66.payload.unknown_member_unpreservable";
         public const string WorkloadExceededReason = "gd66.payload.workload_exceeded";
         public const string CandidateInvalidReason = "gd66.transaction.candidate_invalid";
@@ -63,11 +63,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!serialized.IsValid) return Failure(CandidateInvalidReason);
             byte[] authority = serialized.Value.Authority;
             byte[] floors = serialized.Value.Floors;
-            byte[] lifecycle = serialized.Value.LifecycleAndOwnership;
             var output = new BoundedOutput(limits.MaximumCandidateBytes);
             try
             {
-                output.Ascii("{\"schema\":\"save_root\",\"schemaVersion\":8,\"primary\":{");
+                output.Ascii("{\"schema\":\"save_root\",\"schemaVersion\":7,\"primary\":{");
                 int copied = 0; int unknownBytes = 0; int unknownCount = 0; bool first = true;
                 for (int i = 0; i < RawSavePayloadClassifier.RecognizedSaveDataMemberNames.Count; i++)
                 {
@@ -94,7 +93,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 Member(output, ref first, "canonicalSpatialAuthority", authority);
                 Member(output, ref first, "spatialFloors", floors);
-                Member(output, ref first, "structuralLifecycleAndOwnership", lifecycle);
                 output.Ascii("}");
                 IReadOnlyList<RawUnknownMemberEvidence> rootUnknown = source.UnknownRootMembers;
                 for (int i = 0; i < rootUnknown.Count; i++)
@@ -112,7 +110,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 output.Ascii("}");
                 byte[] candidate = output.Finish();
                 DetachedCompleteSaveValidationResult validation =
-                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, spatialLimits);
+                    DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                        candidate, spatialLimits);
                 if (!validation.IsValid) return Failure(CandidateInvalidReason);
                 return new DetachedWholeSaveResult(
                     new DetachedWholeSaveCandidate(candidate, SpatialContractSha256.Compute(candidate),
@@ -123,8 +122,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(CandidateInvalidReason); }
         }
 
-        private static bool IsReserved(string name) => name == "canonicalSpatialAuthority" ||
-            name == "spatialFloors" || name == "structuralLifecycleAndOwnership";
+        private static bool IsReserved(string name) => name == "canonicalSpatialAuthority" || name == "spatialFloors";
         private static bool TryCanonicalizeCopiedValue(byte[] original, out byte[] candidate)
         {
             candidate = null;

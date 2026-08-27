@@ -21,6 +21,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string InvalidIdentityReason = "structural.edit.invalid_identity";
         private const string RoomSegment = ".room.player.";
         private const int MaximumOrdinal = 9999;
+        private const long MaximumEdgeOrdinal = 99999999L;
 
         public static bool TryAllocateRoomId(DetachedCanonicalSpatialSaveState state, string targetFloorId,
             out string roomInstanceId,
@@ -101,6 +102,58 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     maximum = Math.Max(maximum, ordinal);
             }
             return maximum + 1;
+        }
+
+        internal static StructuralLifecycleAndOwnershipState CreateInitialLifecycle(
+            SavedSpatialFloor[] floors) => new StructuralLifecycleAndOwnershipState
+        {
+            Floors = (floors ?? Array.Empty<SavedSpatialFloor>()).Where(value => value != null)
+                .Select(value => new FloorStructuralIdentityLifecycle
+                {
+                    FloorInstanceId = value.FloorInstanceId,
+                    NextNativeRoomOrdinal = DeriveNextNativeRoomOrdinal(value),
+                    NextNativeEdgeOrdinal = 0L
+                }).OrderBy(value => value.FloorInstanceId, StringComparer.Ordinal).ToArray(),
+            ReturnedContents = Array.Empty<ReturnedStructuralContent>()
+        };
+
+        /// <summary>
+        /// Allocates independently minted edges (including future terminal reconnections). Existing
+        /// room-derived construction edges do not consume this authority.
+        /// </summary>
+        public static bool TryAllocateFreshEdgeIdentity(DetachedCanonicalSpatialSaveState state,
+            string targetFloorId, out string edgeId, out long nextOrdinal, out string reason)
+        {
+            edgeId = null; nextOrdinal = -1L; reason = InvalidIdentityReason;
+            SavedSpatialFloor floor = state?.Floors?.SingleOrDefault(value => value != null &&
+                value.FloorInstanceId == targetFloorId);
+            FloorStructuralIdentityLifecycle lifecycle = state?.LifecycleAndOwnership?.Floors?
+                .SingleOrDefault(value => value != null && value.FloorInstanceId == targetFloorId);
+            if (floor == null || lifecycle == null || lifecycle.NextNativeEdgeOrdinal < 0L ||
+                lifecycle.NextNativeEdgeOrdinal > MaximumEdgeOrdinal) return false;
+            string candidate = targetFloorId + ".edge.native." + lifecycle.NextNativeEdgeOrdinal
+                .ToString("D8", CultureInfo.InvariantCulture);
+            var identities = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            foreach (SavedSpatialFloor value in state.Floors)
+            {
+                if (value == null || value.Layout == null || !Add(identities, value.FloorInstanceId)) return false;
+                foreach (RoomSpatialInstance room in value.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>())
+                    if (room == null || !Add(identities, room.RoomInstanceId)) return false;
+                foreach (FloorRouteNode node in value.Layout.Nodes ?? Array.Empty<FloorRouteNode>())
+                    if (node == null || !Add(identities, node.NodeId)) return false;
+                foreach (FloorRouteEdge edge in value.Layout.Edges ?? Array.Empty<FloorRouteEdge>())
+                    if (edge == null || !Add(identities, edge.EdgeId)) return false;
+                foreach (SavedFixedSpatialStructure fixedValue in value.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>())
+                    if (fixedValue == null || !Add(identities, fixedValue.FixedStructureInstanceId)) return false;
+                foreach (RoomContentAssignment assignment in value.RoomContents?.Assignments ?? Array.Empty<RoomContentAssignment>())
+                    if (assignment == null || !Add(identities, assignment.AssignmentId)) return false;
+            }
+            foreach (ReturnedStructuralContent returned in state.LifecycleAndOwnership.ReturnedContents ??
+                Array.Empty<ReturnedStructuralContent>())
+                if (returned == null || !Add(identities, returned.AssignmentId)) return false;
+            if (!Persistent(candidate) || identities.Contains(candidate)) return false;
+            edgeId = candidate; nextOrdinal = lifecycle.NextNativeEdgeOrdinal + 1L; reason = null;
+            return true;
         }
 
         private static bool Add(System.Collections.Generic.HashSet<string> identities, string value) =>

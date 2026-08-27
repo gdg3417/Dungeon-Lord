@@ -14,6 +14,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             out byte[] candidate)
         {
             candidate = null;
+            if (!DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                    source, limits).IsValid) return false;
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (source == null || !limits.IsValid ||
                 !ContractJson.TryParse(source, limits.Serialized, issues, out ContractJsonNode root) ||
@@ -29,6 +31,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Find(primary, "structuralLifecycleAndOwnership") != null) return false;
 
             var lifecycleWriter = new ContractJsonWriter(limits.Serialized);
+            if (!TryWriteInitialLifecycle(lifecycleWriter, floors)) return false;
+            ContractJsonNode lifecycle = Parse(lifecycleWriter.Finish(), limits);
+            if (lifecycle == null) return false;
+
+            var writer = new ContractJsonWriter(limits.Serialized);
+            writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":8,\"primary\":{");
+            bool first = true;
+            foreach (KeyValuePair<string, ContractJsonNode> field in primary.Fields)
+            {
+                if (field.Key == "canonicalSpatialAuthority" || field.Key == "spatialFloors") continue;
+                if (!first) writer.Token(","); first = false;
+                writer.String(field.Key); writer.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+            }
+            if (!first) writer.Token(",");
+            writer.String("canonicalSpatialAuthority"); writer.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, authority);
+            writer.Token(",\"spatialFloors\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, floors);
+            writer.Token(",\"structuralLifecycleAndOwnership\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycle);
+            writer.Token("}");
+            for (int index = 3; index < root.Fields.Count; index++)
+            {
+                writer.Token(","); writer.String(root.Fields[index].Key); writer.Token(":");
+                DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[index].Value);
+            }
+            writer.Token("}"); candidate = writer.Finish();
+            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits).IsValid;
+        }
+
+        internal static bool TryWriteInitialLifecycle(ContractJsonWriter lifecycleWriter,
+            ContractJsonNode floors)
+        {
+            if (lifecycleWriter == null || floors?.Kind != ContractJsonKind.Array) return false;
             lifecycleWriter.Node(); lifecycleWriter.Token("{\"Floors\":[");
             var values = new List<Tuple<string, int>>();
             foreach (ContractJsonNode floor in floors.Items)
@@ -58,30 +91,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 lifecycleWriter.Token(",\"NextNativeEdgeOrdinal\":0}");
             }
             lifecycleWriter.Token("],\"ReturnedContents\":[]}");
-            ContractJsonNode lifecycle = Parse(lifecycleWriter.Finish(), limits);
-            if (lifecycle == null) return false;
-
-            var writer = new ContractJsonWriter(limits.Serialized);
-            writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":8,\"primary\":{");
-            bool first = true;
-            foreach (KeyValuePair<string, ContractJsonNode> field in primary.Fields)
-            {
-                if (field.Key == "canonicalSpatialAuthority" || field.Key == "spatialFloors") continue;
-                if (!first) writer.Token(","); first = false;
-                writer.String(field.Key); writer.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
-            }
-            if (!first) writer.Token(",");
-            writer.String("canonicalSpatialAuthority"); writer.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, authority);
-            writer.Token(",\"spatialFloors\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, floors);
-            writer.Token(",\"structuralLifecycleAndOwnership\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycle);
-            writer.Token("}");
-            for (int index = 3; index < root.Fields.Count; index++)
-            {
-                writer.Token(","); writer.String(root.Fields[index].Key); writer.Token(":");
-                DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[index].Value);
-            }
-            writer.Token("}"); candidate = writer.Finish();
-            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits).IsValid;
+            return true;
         }
 
         private static ContractJsonNode Parse(byte[] bytes, CanonicalSpatialSerializationLimits limits)

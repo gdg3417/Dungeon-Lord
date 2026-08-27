@@ -164,7 +164,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (identity != journal.TransactionIdentitySha256 ||
                     SpatialMigrationTransactionIdentity.CreateTransactionId(identity) != journal.TransactionId)
                     return false;
-                return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, Limits, null,
+                return DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes, Limits,
                     journal.TransactionId, journal.DescriptorFingerprintSha256).IsValid;
             }
             catch (ArgumentException) { return false; }
@@ -1346,6 +1346,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out DetachedUnfinishedAttemptValidationContext unfinished) &&
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, unfinished).IsValid;
             }
+            DetachedCompleteSaveValidationResult frozen =
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes,
+                    completeLimits);
+            RunSimulationConfig configuration;
+            try { configuration = LegacyGameplayConfigurationContract.Parse(
+                recoveryContext.LegacyConfigurationBytes); }
+            catch { return false; }
+            if (frozen.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(frozen.State,
+                    productionContent, configuration, completeLimits.Spatial).IsValid) return true;
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits)).IsValid;

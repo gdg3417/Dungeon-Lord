@@ -98,7 +98,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public FloorRoomContentState RoomContents;
     }
 
-    // Canonicalization holder used by the strict serializer and the schema-7 SaveData owners.
+    // Canonicalization holder used by the strict schema-8 serializer.
     [Serializable]
     public sealed class DetachedCanonicalSpatialSaveState
     {
@@ -239,6 +239,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SavedSpatialFloor[] floors = source.Floors ?? Array.Empty<SavedSpatialFloor>();
             long records = 0L, tiles = 0L;
             if (!TryAdd(ref records, floors.LongLength, limits.MaximumRecords)) return CanonicalizationFailure.RecordLimit;
+            StructuralLifecycleAndOwnershipState lifecycle = source.LifecycleAndOwnership;
+            if (lifecycle != null &&
+                (!TryAdd(ref records, lifecycle.Floors?.LongLength ?? 0L, limits.MaximumRecords) ||
+                 !TryAdd(ref records, lifecycle.ReturnedContents?.LongLength ?? 0L, limits.MaximumRecords)))
+                return CanonicalizationFailure.RecordLimit;
             foreach (SavedSpatialFloor floor in floors)
             {
                 if (floor == null) continue;
@@ -262,33 +267,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Authority = CopyMarker(source.Authority),
                 Floors = copies.OrderBy(floor => floor?.FloorIndex ?? 0)
                     .ThenBy(floor => floor?.FloorInstanceId, StringComparer.Ordinal).ToArray(),
-                LifecycleAndOwnership = CopyLifecycle(source.LifecycleAndOwnership, copies)
+                LifecycleAndOwnership = CopyLifecycle(source.LifecycleAndOwnership)
             };
             return CanonicalizationFailure.None;
         }
 
         private static StructuralLifecycleAndOwnershipState CopyLifecycle(
-            StructuralLifecycleAndOwnershipState source, SavedSpatialFloor[] floors)
+            StructuralLifecycleAndOwnershipState source)
         {
-            source = source ?? new StructuralLifecycleAndOwnershipState();
-            var existing = (source.Floors ?? Array.Empty<FloorStructuralIdentityLifecycle>())
-                .Where(value => value != null).ToDictionary(value => value.FloorInstanceId,
-                    value => value, StringComparer.Ordinal);
-            var lifecycle = (floors ?? Array.Empty<SavedSpatialFloor>()).Where(value => value != null)
-                .Select(floor =>
-                {
-                    existing.TryGetValue(floor.FloorInstanceId, out FloorStructuralIdentityLifecycle value);
-                    int derived = NativeStructuralIdentity.DeriveNextNativeRoomOrdinal(floor);
-                    return new FloorStructuralIdentityLifecycle
-                    {
-                        FloorInstanceId = floor.FloorInstanceId,
-                        NextNativeRoomOrdinal = value == null ? derived : value.NextNativeRoomOrdinal,
-                        NextNativeEdgeOrdinal = value == null ? 0L : value.NextNativeEdgeOrdinal
-                    };
-                }).OrderBy(value => value.FloorInstanceId, StringComparer.Ordinal).ToArray();
+            if (source == null) return null;
             return new StructuralLifecycleAndOwnershipState
             {
-                Floors = lifecycle,
+                Floors = (source.Floors ?? Array.Empty<FloorStructuralIdentityLifecycle>())
+                    .Select(value => value == null ? null : new FloorStructuralIdentityLifecycle
+                    {
+                        FloorInstanceId = value.FloorInstanceId,
+                        NextNativeRoomOrdinal = value.NextNativeRoomOrdinal,
+                        NextNativeEdgeOrdinal = value.NextNativeEdgeOrdinal
+                    }).OrderBy(value => value?.FloorInstanceId, StringComparer.Ordinal).ToArray(),
                 ReturnedContents = (source.ReturnedContents ?? Array.Empty<ReturnedStructuralContent>())
                     .Select(value => value == null ? null : new ReturnedStructuralContent
                     {
@@ -329,7 +325,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     value.RemovalDisposition != StructuralContentRemovalDisposition.ReturnToPlayerCustody ||
                     !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.TryGetCategoryForOption(
                         value.OptionId, out string category) || category != value.CategoryId ||
-                    (category != MonsterCategoryId && category != TrapCategoryId))
+                    (category != MonsterCategoryId && category != TrapCategoryId &&
+                     category != LootNodeCategoryId))
                     issues.Add(CanonicalSpatialSaveValidationIssue.InvalidReturnedContent);
                 else if (assignedIdentities.Contains(value.AssignmentId))
                     issues.Add(CanonicalSpatialSaveValidationIssue.AssignedAndReturnedIdentity);
@@ -627,6 +624,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 foreach (FloorRouteEdge edge in floor.Layout.Edges.Where(value => value?.Footprint?.OccupiedTiles != null))
                     if (!Ordered(edge.Footprint.OccupiedTiles, (left, right) => left.CompareTo(right))) return false;
             }
+            FloorStructuralIdentityLifecycle[] lifecycle = state.LifecycleAndOwnership?.Floors ??
+                Array.Empty<FloorStructuralIdentityLifecycle>();
+            ReturnedStructuralContent[] returned = state.LifecycleAndOwnership?.ReturnedContents ??
+                Array.Empty<ReturnedStructuralContent>();
+            return IsOrdered(lifecycle, value => value?.FloorInstanceId) &&
+                IsOrdered(returned, value => value == null ? null :
+                    value.Sequence.ToString("D20", System.Globalization.CultureInfo.InvariantCulture) +
+                    "\u0000" + value.AssignmentId);
+        }
+
+        private static bool IsOrdered<T>(T[] values, Func<T, string> key)
+        {
+            for (int index = 1; index < values.Length; index++)
+                if (string.CompareOrdinal(key(values[index - 1]), key(values[index])) > 0) return false;
             return true;
         }
 
