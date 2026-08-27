@@ -348,10 +348,6 @@ namespace DungeonBuilder.Tests.EditMode
                 _overlay.SelectedMvpPlacementOptionId,
                 _overlay.SelectedMvpStructureId,
                 _overlay.GetSelectedMvpRunPostureNameKey());
-            Rect rect = _overlay.GetMinimalMvpActionPanelRect();
-
-            Assert.That(rect.width, Is.EqualTo(260f));
-            Assert.That(rect.height, Is.EqualTo(420f));
             Assert.That(labels.CategoryLabel, Is.EqualTo("Selected category: Room"));
             Assert.That(labels.SelectedStructureLabel, Is.EqualTo("Selected placement: Basic Room"));
             Assert.That(labels.PostureLabel, Is.EqualTo("Debug posture: Balanced"));
@@ -592,7 +588,9 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(rectTransform.pivot, Is.EqualTo(new Vector2(0f, 1f)));
             Assert.That(rectTransform.offsetMin.x, Is.EqualTo(24f));
             Assert.That(rectTransform.offsetMin.y, Is.EqualTo(10f));
-            Assert.That(rectTransform.offsetMax.x, Is.EqualTo(-304f));
+            Rect safeArea = BootstrapOverlay.CalculateOverlayTextSafeArea(
+                Screen.width, Screen.height, _overlay.MinimalMvpActionPanelCollapsed);
+            Assert.That(rectTransform.offsetMax.x, Is.EqualTo(-(Screen.width - safeArea.xMax)));
             Assert.That(rectTransform.offsetMax.y, Is.EqualTo(-14f));
             Assert.That(_overlay.overlayText.alignment, Is.EqualTo(TextAlignmentOptions.TopLeft));
         }
@@ -614,6 +612,55 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text.xMax, Is.LessThanOrEqualTo(panel.xMin - 10f));
             Assert.That(text.yMin, Is.EqualTo(14f));
             Assert.That(text.yMax, Is.LessThanOrEqualTo(height - 10f));
+        }
+
+        [Test]
+        public void ExpandedActionPanel_At1280By720IsResponsiveAndUsesAvailableHeight()
+        {
+            Rect panel = BootstrapOverlay.CalculateMinimalMvpActionPanelRect(1280f, 720f);
+
+            Assert.That(panel.width, Is.GreaterThanOrEqualTo(400f));
+            Assert.That(panel.width, Is.LessThanOrEqualTo(450f));
+            Assert.That(panel.height, Is.EqualTo(700f));
+            Assert.That(panel.xMin, Is.GreaterThanOrEqualTo(10f));
+            Assert.That(panel.xMax, Is.LessThanOrEqualTo(1280f));
+            Assert.That(panel.yMax, Is.LessThanOrEqualTo(720f));
+        }
+
+        [Test]
+        public void ExpandedActionPanel_At1920By1080IsBoundedAndDoesNotOverlapOverlayText()
+        {
+            Rect panel = BootstrapOverlay.CalculateMinimalMvpActionPanelRect(1920f, 1080f);
+            Rect text = BootstrapOverlay.CalculateOverlayTextSafeArea(1920f, 1080f, false);
+
+            Assert.That(panel.width, Is.EqualTo(500f));
+            Assert.That(panel.height, Is.EqualTo(1060f));
+            Assert.That(panel.xMax, Is.LessThanOrEqualTo(1920f));
+            Assert.That(text.xMax, Is.LessThanOrEqualTo(panel.xMin - 10f));
+        }
+
+        [Test]
+        public void ExpandedActionPanel_OnSmallViewportShrinksCompletelyOnScreen()
+        {
+            Rect panel = BootstrapOverlay.CalculateMinimalMvpActionPanelRect(280f, 240f);
+            Rect text = BootstrapOverlay.CalculateOverlayTextSafeArea(280f, 240f, false);
+
+            Assert.That(panel.xMin, Is.GreaterThanOrEqualTo(10f));
+            Assert.That(panel.xMax, Is.LessThanOrEqualTo(280f));
+            Assert.That(panel.yMin, Is.GreaterThanOrEqualTo(10f));
+            Assert.That(panel.yMax, Is.LessThanOrEqualTo(240f));
+            Assert.That(text.width, Is.GreaterThanOrEqualTo(1f));
+            Assert.That(text.xMax, Is.LessThanOrEqualTo(panel.xMin));
+        }
+
+        [Test]
+        public void CollapsedActionPanelSafeAreaRetainsSeparateReserve()
+        {
+            Rect expanded = BootstrapOverlay.CalculateOverlayTextSafeArea(1280f, 720f, false);
+            Rect collapsed = BootstrapOverlay.CalculateOverlayTextSafeArea(1280f, 720f, true);
+
+            Assert.That(collapsed.xMax, Is.GreaterThan(expanded.xMax));
+            Assert.That(collapsed.xMax, Is.EqualTo(1280f - 96f));
         }
 
         [Test]

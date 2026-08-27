@@ -3022,6 +3022,110 @@
     {
       "key": "ui.structural.direction.3",
       "text": "West"
+    },
+    {
+      "key": "ui.structural.renovation.heading",
+      "text": "Renovation"
+    },
+    {
+      "key": "ui.structural.renovation.target.format",
+      "text": "Required-route room {0}"
+    },
+    {
+      "key": "ui.structural.renovation.target.next",
+      "text": "Next renovation room"
+    },
+    {
+      "key": "ui.structural.renovation.move.preview.action",
+      "text": "Preview Move"
+    },
+    {
+      "key": "ui.structural.renovation.replace.preview.action",
+      "text": "Preview Replace"
+    },
+    {
+      "key": "ui.structural.renovation.commit.action",
+      "text": "Commit Renovation"
+    },
+    {
+      "key": "ui.structural.renovation.replacement.format",
+      "text": "Replacement: {0}"
+    },
+    {
+      "key": "ui.structural.renovation.commit.success",
+      "text": "Renovation saved."
+    },
+    {
+      "key": "ui.structural.renovation.move.preview.format",
+      "text": "Move preview: {0} rooms moved; {1} connections affected; {2} contents preserved; floor space {3} used, {4} remaining."
+    },
+    {
+      "key": "ui.structural.renovation.replace.preview.format",
+      "text": "Replacement preview: {0} downstream rooms moved; {1} connections affected; {2} contents preserved; floor space {3} used, {4} remaining."
+    },
+    {
+      "key": "structural.edit.target_room_not_found",
+      "text": "The selected room is no longer available."
+    },
+    {
+      "key": "structural.edit.target_room_not_buildable",
+      "text": "Only player-built rooms can be renovated."
+    },
+    {
+      "key": "structural.edit.required_route_ambiguous",
+      "text": "The required route does not identify one deterministic downstream group."
+    },
+    {
+      "key": "structural.edit.content_capacity_exceeded",
+      "text": "The replacement room cannot hold the room's existing contents."
+    },
+    {
+      "key": "structural.edit.replacement_same_definition",
+      "text": "The selected room already uses that room type."
+    },
+    {
+      "key": "ui.structural.renovation.move.detail.format",
+      "text": "Move Room {0}: ({1},{2}) -> ({3},{4})"
+    },
+    {
+      "key": "ui.structural.renovation.replace.detail.format",
+      "text": "Replace Room {0}: {1} -> {2}"
+    },
+    {
+      "key": "ui.structural.renovation.downstream.format",
+      "text": "Downstream rooms moved: {0}"
+    },
+    {
+      "key": "ui.structural.renovation.terminal_moved",
+      "text": "Completion Terminal moves with the downstream group."
+    },
+    {
+      "key": "ui.structural.renovation.connection.format",
+      "text": "{0} connection: {1} -> {2}"
+    },
+    {
+      "key": "ui.structural.renovation.connection.incoming",
+      "text": "Incoming"
+    },
+    {
+      "key": "ui.structural.renovation.connection.outgoing",
+      "text": "Outgoing"
+    },
+    {
+      "key": "ui.structural.renovation.connection.affected",
+      "text": "Affected"
+    },
+    {
+      "key": "ui.structural.renovation.corridor.format",
+      "text": "{0}: {1} tiles {2}"
+    },
+    {
+      "key": "ui.structural.renovation.contents.format",
+      "text": "Contents preserved: {0}"
+    },
+    {
+      "key": "ui.structural.renovation.floor_space.format",
+      "text": "Floor space used: {0} -> {1}; remaining: {2}"
     }
   ]
 }

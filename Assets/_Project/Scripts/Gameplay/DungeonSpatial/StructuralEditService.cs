@@ -15,9 +15,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class StructuralEditPreview
     {
         internal DetachedCanonicalSpatialSaveState DetachedCandidate { get; set; }
-        internal StructuralConstructionRequest Intent { get; set; }
+        internal object Intent { get; set; }
         internal string BaselineFingerprint { get; set; }
         public string RoomDefinitionId { get; internal set; }
+        public string TargetRoomInstanceId { get; internal set; }
+        public string PreviousRoomDefinitionId { get; internal set; }
+        public TileCoordinate PreviousAnchor { get; internal set; }
+        public CardinalOrientation PreviousOrientation { get; internal set; }
+        public StructuralEditOperation Operation { get; internal set; }
+        public int PreviousUsedFloorSpace { get; internal set; }
+        public string[] PreservedAssignmentIds { get; internal set; } = Array.Empty<string>();
         public TileCoordinate Anchor { get; internal set; }
         public CardinalOrientation Orientation { get; internal set; }
         public TileCoordinate[] OccupiedTiles { get; internal set; } = Array.Empty<TileCoordinate>();
@@ -32,13 +39,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsValid => DetachedCandidate != null && ReasonCodes.Length == 0;
     }
 
-    public enum StructuralChangeKind { RoomAdded = 1, FixedStructureMoved = 2, EdgeAdded = 3, EdgeRemoved = 4 }
+    public enum StructuralEditOperation { Construction = 1, Movement = 2, Replacement = 3 }
+    public enum StructuralChangeKind { RoomAdded = 1, FixedStructureMoved = 2, EdgeAdded = 3, EdgeRemoved = 4,
+        RoomMoved = 5, RoomReplaced = 6, EdgeReconnected = 7, CorridorMoved = 8, ContentPreserved = 9 }
     public sealed class StructuralChange
     {
         public StructuralChangeKind Kind { get; internal set; }
         public string StableId { get; internal set; }
         public TileCoordinate From { get; internal set; }
         public TileCoordinate To { get; internal set; }
+        public string PreviousDefinitionId { get; internal set; }
+        public string ProposedDefinitionId { get; internal set; }
+        public FloorRouteConnectionKind PreviousConnectionKind { get; internal set; }
+        public FloorRouteConnectionKind ProposedConnectionKind { get; internal set; }
+        public TileCoordinate[] PreviousFootprint { get; internal set; } = Array.Empty<TileCoordinate>();
+        public TileCoordinate[] ProposedFootprint { get; internal set; } = Array.Empty<TileCoordinate>();
     }
 
     public static class StructuralEditService
@@ -48,6 +63,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string LayoutInvalidReason = "structural.edit.layout_invalid";
         public const string StalePreviewReason = "structural.edit.stale_preview";
         public const string RoomDefinitionInvalidReason = "structural.edit.room_definition_invalid";
+        public const string ReplacementSameDefinitionReason = "structural.edit.replacement_same_definition";
         public const string RoomNotAllowedReason = "structural.edit.room_not_allowed";
         public const string OrientationInvalidReason = "structural.edit.orientation_invalid";
         public const string OutOfBoundsReason = "structural.edit.out_of_bounds";
@@ -65,6 +81,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string WorkloadReason = "structural.edit.workload_exceeded";
         public const string CorridorDefinitionReason = "structural.edit.corridor_definition_invalid";
         public const string CorridorLengthReason = "structural.edit.corridor_length_invalid";
+        public const string TargetRoomNotFoundReason = "structural.edit.target_room_not_found";
+        public const string TargetRoomNotBuildableReason = "structural.edit.target_room_not_buildable";
+        public const string RequiredRouteAmbiguousReason = "structural.edit.required_route_ambiguous";
+        public const string ContentCapacityReason = "structural.edit.content_capacity_exceeded";
 
         public static StructuralEditPreview InvalidPreview(string reason,
             StructuralConstructionRequest request)
@@ -85,7 +105,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalSpatialSerializationLimits limits)
         {
             var result = new StructuralEditPreview { RoomDefinitionId = request?.RoomDefinitionId,
-                Anchor = request?.Anchor ?? default, Orientation = request?.Orientation ?? default };
+                Anchor = request?.Anchor ?? default, Orientation = request?.Orientation ?? default,
+                Operation = StructuralEditOperation.Construction };
             if (current?.Authority == null || request == null || production == null || compatibility == null ||
                 configuration == null || !limits.IsValid || current.Floors?.Length != 1)
                 return Fail(result, InvalidContextReason);

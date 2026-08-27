@@ -49,6 +49,7 @@ namespace DungeonBuilder.M0
         public IKpiService Kpi { get; private set; }
         public SaveData Save { get; private set; }
         public StructuralEditPreview StructuralConstructionPreview { get; private set; }
+        public StructuralEditPreview StructuralRenovationPreview { get; private set; }
         public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
@@ -507,6 +508,7 @@ namespace DungeonBuilder.M0
             if (published == null || _explicitSaveDeleteQuiesced) return;
             Save = published;
             StructuralConstructionPreview = null;
+            StructuralRenovationPreview = null;
             StructuralConstructionReasonKey = string.Empty;
             overlay?.SynchronizeStructuralConstructionPublication();
             TimeService?.AttachSave(Save);
@@ -556,6 +558,55 @@ namespace DungeonBuilder.M0
         {
             StructuralConstructionPreview = null;
             StructuralConstructionReasonKey = string.Empty;
+        }
+
+        public StructuralEditPreview PreviewStructuralMovement(StructuralMovementRequest request)
+        {
+            StructuralRenovationPreview = CanPreviewStructuralRenovation()
+                ? SaveService.PreviewStructuralMovement(request)
+                : StructuralRenovationService.InvalidMovement(StructuralEditService.InvalidContextReason, request);
+            StructuralConstructionReasonKey = StructuralRenovationPreview.IsValid ? string.Empty :
+                StructuralRenovationPreview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.InvalidContextReason;
+            return StructuralRenovationPreview;
+        }
+
+        public StructuralEditPreview PreviewStructuralReplacement(StructuralReplacementRequest request)
+        {
+            StructuralRenovationPreview = CanPreviewStructuralRenovation()
+                ? SaveService.PreviewStructuralReplacement(request)
+                : StructuralRenovationService.InvalidReplacement(StructuralEditService.InvalidContextReason, request);
+            StructuralConstructionReasonKey = StructuralRenovationPreview.IsValid ? string.Empty :
+                StructuralRenovationPreview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.InvalidContextReason;
+            return StructuralRenovationPreview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralRenovation()
+        {
+            if (StructuralRenovationPreview == null || !StructuralRenovationPreview.IsValid ||
+                !CanPreviewStructuralRenovation())
+                return StructuralCommitFailure(StructuralRenovationPreview?.ReasonCodes?.FirstOrDefault() ??
+                    StructuralEditService.InvalidContextReason);
+            DetachedCanonicalMutationRequest request = StructuralRenovationPreview.Operation == StructuralEditOperation.Movement
+                ? DetachedCanonicalMutationRequest.Move(StructuralRenovationPreview)
+                : DetachedCanonicalMutationRequest.Replace(StructuralRenovationPreview);
+            DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save, request);
+            if (!result.IsSuccess) StructuralConstructionReasonKey = string.IsNullOrEmpty(result.Reason)
+                ? StructuralEditService.InvalidContextReason : result.Reason;
+            return result;
+        }
+
+        public void InvalidateStructuralRenovationPreview()
+        {
+            StructuralRenovationPreview = null;
+            StructuralConstructionReasonKey = string.Empty;
+        }
+
+        private bool CanPreviewStructuralRenovation()
+        {
+            CanonicalMvpRouteProjectionResult route = Save == null ? null :
+                CanonicalMvpRouteProjection.InspectWithProductionContent(Save, Content?.ProductionSpatialContent);
+            return !_explicitSaveDeleteQuiesced && SaveService != null && Save != null &&
+                route?.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical;
         }
 
         private DetachedCanonicalWriteResult StructuralCommitFailure(string reason)
