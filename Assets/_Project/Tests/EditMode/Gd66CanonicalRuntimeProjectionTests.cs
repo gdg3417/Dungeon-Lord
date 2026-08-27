@@ -294,7 +294,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     "runtime-projection", 6, members);
             DetachedCompleteSaveValidationResult validated =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                    fixture.Attempt.Candidate.GetBytes(), fixture.CurrentContext);
+                    CurrentBytes(fixture.Attempt.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext);
             Assert.That(validated.IsValid, Is.True);
             Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 out SaveData save, out string reason), Is.True, reason);
@@ -311,12 +311,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Production, fixture.LegacyBytes, fixture.Limits);
             DetachedCompleteSaveValidationResult validated =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                    fixture.Result.Attempt.Candidate.GetBytes(), context);
+                    CurrentBytes(fixture.Result.Attempt.Candidate.GetBytes(), fixture.Limits), context);
             Assert.That(validated.IsValid, Is.True);
             Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated,
                 out SaveData save, out string reason), Is.True, reason);
             config = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             return save;
+        }
+
+        private static byte[] CurrentBytes(byte[] frozen, CanonicalSpatialSerializationLimits limits)
+        {
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(frozen, limits, out byte[] current), Is.True);
+            return current;
         }
 
         private static void SetRootField(GameRoot root, string fieldName, object value) =>

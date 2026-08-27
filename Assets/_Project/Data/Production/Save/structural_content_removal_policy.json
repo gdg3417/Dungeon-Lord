@@ -1,0 +1,46 @@
+{
+    "Schema": "structural_content_removal_policy",
+    "SchemaVersion": 1,
+    "Records": [
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.basic",
+            "Policy": 0
+        },
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.glittering_hoard",
+            "Policy": 0
+        },
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.hidden_cache",
+            "Policy": 0
+        },
+        {
+            "CategoryId": "placement.category.monster",
+            "OptionId": "placement.option.monster.goblin",
+            "Policy": 1
+        },
+        {
+            "CategoryId": "placement.category.monster",
+            "OptionId": "placement.option.monster.skeleton",
+            "Policy": 1
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.chilling_sigil",
+            "Policy": 1
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.snare",
+            "Policy": 1
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.spike",
+            "Policy": 1
+        }
+    ]
+}

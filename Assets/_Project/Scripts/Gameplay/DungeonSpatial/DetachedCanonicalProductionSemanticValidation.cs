@@ -8,7 +8,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal enum DetachedCanonicalProductionSemanticIssue
     {
         InvalidContext, FloorConfiguration, FloorLayout, RoomDefinition, CorridorDefinition,
-        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity, ReturnedContentPolicy
+        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity
     }
 
     internal sealed class DetachedCanonicalProductionSemanticValidationResult
@@ -66,14 +66,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         layoutValidation, floor.FixedStructures))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateAssignments(floor, roomByInstance, configured, issues);
-            }
-            foreach (ReturnedStructuralContent returned in state.LifecycleAndOwnership?.ReturnedContents ??
-                Array.Empty<ReturnedStructuralContent>())
-            {
-                if (returned == null || !StructuralContentRemovalPolicyAuthority.TryResolve(configuration,
-                        returned.CategoryId, returned.OptionId, out StructuralContentRemovalPolicy policy,
-                        out string ignored) || policy != StructuralContentRemovalPolicy.ReturnToPlayerCustody)
-                    issues.Add(DetachedCanonicalProductionSemanticIssue.ReturnedContentPolicy);
             }
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
         }

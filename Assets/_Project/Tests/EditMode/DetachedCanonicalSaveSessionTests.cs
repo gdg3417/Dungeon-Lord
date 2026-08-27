@@ -246,6 +246,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Encoding.UTF8.GetBytes(json), profile.Raw, profile.Whole, profile.Canonical);
             Assert.That(prepared.Result.IsSuccess, Is.True, prepared.Result.Reason);
             byte[] bytes = prepared.Result.Attempt.Candidate.GetBytes();
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(bytes, profile.Canonical,
+                out bytes), Is.True);
             var context = new DetachedCurrentTargetValidationContext(prepared.Compatibility,
                 prepared.Production, prepared.LegacyBytes, profile.Canonical);
             DetachedCompleteSaveValidationResult validated =
@@ -264,7 +266,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MigrationTransactionId = authority.MigrationTransactionId,
                 MigrationDescriptorFingerprint = authority.MigrationDescriptorFingerprint
             },
-            Floors = floors
+            Floors = floors,
+            LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors)
         };
 
         private static void AssertSpatialOnlyEvidence(byte[] bytes)

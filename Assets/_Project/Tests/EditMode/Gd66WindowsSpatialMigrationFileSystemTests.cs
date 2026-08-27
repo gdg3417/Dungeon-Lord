@@ -186,7 +186,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(migrated, Is.Not.Null, migrationBanner);
                 Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(migratedService.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
-                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":7"));
+                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":8"));
 
                 SaveService reopenedService = WindowsService(fixture, filename);
                 SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string reopenBanner);

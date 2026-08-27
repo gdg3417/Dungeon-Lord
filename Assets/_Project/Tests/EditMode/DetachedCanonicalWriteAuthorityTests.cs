@@ -595,7 +595,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void NativeCreationPersistsContextuallyValidatedEmptySchema7WithoutLegacySpatialMembers()
+        public void NativeCreationPersistsContextuallyValidatedEmptySchema8WithLifecycleOwnership()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false);
@@ -618,7 +618,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":7"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":8"));
+            Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
+            Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
+            Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
             Assert.That(json, Does.Not.Contain("\"mvpDungeonPlacements\""));
             Assert.That(json, Does.Not.Contain("\"mvpDungeonFloorLayout\""));
             Assert.That(json, Does.Not.Contain("\"mvpRoomSlotAssignments\""));
@@ -1108,6 +1111,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                     Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
+                Assert.That(SchemaSevenToEightUpgrade.TryPrepare(candidate, source.Limits,
+                    out candidate), Is.True);
                 var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
                     source.Production, source.LegacyBytes, source.Limits);
                 var profile = new SaveSpatialMigrationLimitsProfile(
@@ -1120,7 +1125,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (primaryUnknown != null && primaryUnknown.Contains("mvpDungeonPlacements"))
                 {
                     var empty = new DetachedCanonicalSpatialSaveState
-                    { Authority = validation.State.Authority, Floors = Array.Empty<SavedSpatialFloor>() };
+                    { Authority = validation.State.Authority, Floors = Array.Empty<SavedSpatialFloor>(),
+                      LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                          Array.Empty<SavedSpatialFloor>()) };
                     DetachedCanonicalSaveSessionResult emptied =
                         opened.Session.PrepareSpatialOnlyReplacement(empty);
                     candidate = emptied.Update.GetBytes();

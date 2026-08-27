@@ -187,7 +187,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static DetachedCanonicalSpatialSaveState State(params SavedSpatialFloor[] floors)
         {
-            var state = new DetachedCanonicalSpatialSaveState { Floors = floors };
+            var state = new DetachedCanonicalSpatialSaveState { Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors) };
             Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(state,
                 new CanonicalSpatialSaveWorkloadLimits(256, 256), out state), Is.True);
             return state;

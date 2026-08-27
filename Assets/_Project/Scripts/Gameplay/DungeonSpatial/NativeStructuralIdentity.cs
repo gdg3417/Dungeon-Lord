@@ -71,8 +71,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (assignment == null || !Add(identities, assignment.AssignmentId)) return false;
             }
 
-            FloorStructuralIdentityLifecycle lifecycle = state.LifecycleAndOwnership?.Floors?
-                .SingleOrDefault(value => value?.FloorInstanceId == targetFloorId);
+            FloorStructuralIdentityLifecycle[] lifecycleMatches = (state.LifecycleAndOwnership?.Floors ??
+                Array.Empty<FloorStructuralIdentityLifecycle>()).Where(value => value != null &&
+                value.FloorInstanceId == targetFloorId).ToArray();
+            FloorStructuralIdentityLifecycle lifecycle = lifecycleMatches.Length == 1 ? lifecycleMatches[0] : null;
             if (target == null || lifecycle == null || lifecycle.NextNativeRoomOrdinal < 0 ||
                 lifecycle.NextNativeRoomOrdinal < maximum + 1 || lifecycle.NextNativeRoomOrdinal > MaximumOrdinal)
                 return false;
@@ -125,10 +127,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string targetFloorId, out string edgeId, out long nextOrdinal, out string reason)
         {
             edgeId = null; nextOrdinal = -1L; reason = InvalidIdentityReason;
-            SavedSpatialFloor floor = state?.Floors?.SingleOrDefault(value => value != null &&
-                value.FloorInstanceId == targetFloorId);
-            FloorStructuralIdentityLifecycle lifecycle = state?.LifecycleAndOwnership?.Floors?
-                .SingleOrDefault(value => value != null && value.FloorInstanceId == targetFloorId);
+            SavedSpatialFloor[] floorMatches = (state?.Floors ?? Array.Empty<SavedSpatialFloor>())
+                .Where(value => value != null && value.FloorInstanceId == targetFloorId).ToArray();
+            FloorStructuralIdentityLifecycle[] lifecycleMatches = (state?.LifecycleAndOwnership?.Floors ??
+                Array.Empty<FloorStructuralIdentityLifecycle>()).Where(value => value != null &&
+                value.FloorInstanceId == targetFloorId).ToArray();
+            SavedSpatialFloor floor = floorMatches.Length == 1 ? floorMatches[0] : null;
+            FloorStructuralIdentityLifecycle lifecycle = lifecycleMatches.Length == 1 ? lifecycleMatches[0] : null;
             if (floor == null || lifecycle == null || lifecycle.NextNativeEdgeOrdinal < 0L ||
                 lifecycle.NextNativeEdgeOrdinal > MaximumEdgeOrdinal) return false;
             string candidate = targetFloorId + ".edge.native." + lifecycle.NextNativeEdgeOrdinal

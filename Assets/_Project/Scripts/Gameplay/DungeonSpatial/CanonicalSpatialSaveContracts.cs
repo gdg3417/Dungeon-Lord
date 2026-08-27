@@ -321,7 +321,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 issues.Add(CanonicalSpatialSaveValidationIssue.DuplicateReturnedIdentity);
             foreach (ReturnedStructuralContent value in returned)
             {
-                if (value == null || string.IsNullOrWhiteSpace(value.AssignmentId) || value.Sequence < 0 ||
+                if (value == null || !IsPersistentId(value.AssignmentId) || value.Sequence < 0 ||
                     value.RemovalDisposition != StructuralContentRemovalDisposition.ReturnToPlayerCustody ||
                     !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.TryGetCategoryForOption(
                         value.OptionId, out string category) || category != value.CategoryId ||

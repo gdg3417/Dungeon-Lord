@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Text;
+using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 
@@ -84,6 +85,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             byte[] malformed = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(CompleteSave()) + " ");
             Assert.That(SchemaSevenToEightUpgrade.TryPrepare(malformed, Limits(), out _), Is.False);
+        }
+
+        [Test]
+        public void FrozenSchemaSevenUpgrade_PreservesPopulatedCanonicalSpatialMembersAndAssignments()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            byte[] schemaSeven = fixture.Result.Attempt.Candidate.GetBytes();
+            DetachedCompleteSaveValidationResult before =
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(schemaSeven,
+                    fixture.Limits);
+            Assert.That(before.IsValid, Is.True);
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(schemaSeven, fixture.Limits,
+                out byte[] schemaEight), Is.True);
+            DetachedCompleteSaveValidationResult after =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.Limits);
+            Assert.That(after.IsValid, Is.True);
+
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> beforeMembers =
+                CanonicalSpatialSaveSerializer.SerializeMembers(before.State, fixture.Limits);
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> afterMembers =
+                CanonicalSpatialSaveSerializer.SerializeMembers(after.State, fixture.Limits);
+            CollectionAssert.AreEqual(beforeMembers.Value.Authority, afterMembers.Value.Authority);
+            CollectionAssert.AreEqual(beforeMembers.Value.Floors, afterMembers.Value.Floors);
+            Assert.That(after.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+            Assert.That(after.State.LifecycleAndOwnership.Floors.All(value =>
+                value.NextNativeEdgeOrdinal == 0), Is.True);
+            CollectionAssert.AreEqual(before.State.Floors.SelectMany(value =>
+                value.RoomContents.Assignments).Select(value => value.AssignmentId).ToArray(),
+                after.State.Floors.SelectMany(value => value.RoomContents.Assignments)
+                    .Select(value => value.AssignmentId).ToArray());
         }
 
         private static CanonicalSpatialSerializationLimits Limits() =>

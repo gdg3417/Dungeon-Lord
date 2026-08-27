@@ -245,7 +245,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -283,7 +283,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -363,7 +363,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -391,7 +391,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             Assert.That(parsed.IsValid, Is.True);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
@@ -463,7 +463,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             CompatibilityLayoutGeometryRecord geometry = fixture.Compatibility.Value.GeometryRecords.Single();
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
@@ -1072,11 +1072,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal CanonicalSpatialSerializationLimits Limits;
         }
 
+        private static byte[] CurrentBytes(
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source)
+        {
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(
+                source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
+            return current;
+        }
+
         private static PreviewFixture CreateR1()
         {
             var source = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                source.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(source), new DetachedCurrentTargetValidationContext(
                     source.Compatibility, source.Production, source.LegacyBytes, source.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
