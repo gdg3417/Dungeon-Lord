@@ -183,7 +183,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                for (int index = 0; index < primary.Fields.Count - 2; index++)
+                for (int index = 0; index < primary.Fields.Count - 3; index++)
                 {
                     KeyValuePair<string, ContractJsonNode> field = primary.Fields[index];
                     if (Contains(recognizedNames, field.Key)) continue;
@@ -195,6 +195,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 WriteRawField(writer, "canonicalSpatialAuthority", spatial.Value.Authority, first);
                 WriteRawField(writer, "spatialFloors", spatial.Value.Floors, false);
+                WriteRawField(writer, "structuralLifecycleAndOwnership",
+                    spatial.Value.LifecycleAndOwnership, false);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)

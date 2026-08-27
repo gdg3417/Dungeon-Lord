@@ -8,7 +8,7 @@ namespace DungeonBuilder.M0
     public static class SaveMigration
     {
         // Schema 7 is reached live only through the GD66 raw-before-legacy boundary.
-        public const int LatestSchemaVersion = 7;
+        public const int LatestSchemaVersion = 8;
         public const int LegacyCompatibilitySchemaVersion = 6;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;

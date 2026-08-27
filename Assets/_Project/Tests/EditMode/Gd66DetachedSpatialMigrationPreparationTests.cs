@@ -86,7 +86,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string reason = DetachedRequiredValidationInputSpecification.Current.Validate(values, pins);
 
             Assert.That(reason, Is.EqualTo("gd66.transaction.pinned_input_hash_mismatch"));
-            Assert.That(DetachedRequiredValidationInputSpecification.Current.TargetSchemaVersion, Is.EqualTo(7));
+            Assert.That(DetachedRequiredValidationInputSpecification.Current.TargetSchemaVersion, Is.EqualTo(8));
         }
 
         [TestCase("assignments")]

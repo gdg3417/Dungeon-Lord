@@ -139,13 +139,13 @@
     ],
     "MigrationProfiles": [
         {
-            "ProfileId": "compat.profile.migration.schema_1_6_to_7.contract_1",
+            "ProfileId": "compat.profile.migration.schema_1_6_to_8.contract_1",
             "ProfileVersion": 1,
-            "CanonicalHash": "88d1548225b55533c023f9bc2216a3362b8cb2b9935d9d3d601710bf1077bbbf",
+            "CanonicalHash": "07b654209e78f57ba21bc478c8ceefa9c8ca44075274373896d4a376a989d481",
             "Lifecycle": 1,
             "MinimumSourceSchemaVersion": 1,
             "MaximumSourceSchemaVersion": 6,
-            "TargetSchemaVersion": 7,
+            "TargetSchemaVersion": 8,
             "TargetCanonicalLayoutContractVersion": 1,
             "GeometryId": "compat.geometry.r1-r2",
             "GeometryVersion": 1,
@@ -154,11 +154,11 @@
     ],
     "StarterProfiles": [
         {
-            "ProfileId": "compat.profile.starter.schema_7.contract_1",
+            "ProfileId": "compat.profile.starter.schema_8.contract_1",
             "ProfileVersion": 1,
-            "CanonicalHash": "8ed993e71714e1466fff45445462baa1dc5f5eff9289f2f183a08742ed033007",
+            "CanonicalHash": "3193aab078d3727047a8c17264b8309167db03128da47deba3e421e896a1fb98",
             "Lifecycle": 1,
-            "TargetSchemaVersion": 7,
+            "TargetSchemaVersion": 8,
             "CanonicalLayoutContractVersion": 1,
             "GeometryId": "compat.geometry.r1-r2",
             "GeometryVersion": 1,
@@ -167,7 +167,7 @@
     ],
     "ContractSelections": [
         {
-            "TargetSchemaVersion": 7,
+            "TargetSchemaVersion": 8,
             "CanonicalLayoutContractVersion": 1,
             "Lifecycle": 1
         }

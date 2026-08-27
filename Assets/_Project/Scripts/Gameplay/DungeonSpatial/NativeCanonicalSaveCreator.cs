@@ -16,7 +16,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsSuccess => Session != null && RuntimeProjection != null;
     }
 
-    /// <summary>Creates the first complete schema-7 payload without a legacy whole-save writer.</summary>
+    /// <summary>Creates the first complete schema-8 payload without a legacy whole-save writer.</summary>
     public static class NativeCanonicalSaveCreator
     {
         public static NativeCanonicalSaveResult Create(string activePath,
@@ -52,7 +52,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode source) || source.Kind != ContractJsonKind.Object)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":7,\"primary\":{");
+                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":8,\"primary\":{");
                 bool first = true;
                 foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
                 {
@@ -68,12 +68,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!first) writer.Token(",");
                 ContractJsonNode authorityNode = Parse(spatial.Value.Authority, limits);
                 ContractJsonNode floorsNode = Parse(spatial.Value.Floors, limits);
-                if (authorityNode == null || floorsNode == null)
+                ContractJsonNode lifecycleNode = Parse(spatial.Value.LifecycleAndOwnership, limits);
+                if (authorityNode == null || floorsNode == null || lifecycleNode == null)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 writer.String("canonicalSpatialAuthority"); writer.Token(":");
                 DetachedCompleteSaveContract.WriteCanonicalNode(writer, authorityNode);
                 writer.Token(","); writer.String("spatialFloors"); writer.Token(":");
-                DetachedCompleteSaveContract.WriteCanonicalNode(writer, floorsNode); writer.Token("}}");
+                DetachedCompleteSaveContract.WriteCanonicalNode(writer, floorsNode);
+                writer.Token(","); writer.String("structuralLifecycleAndOwnership"); writer.Token(":");
+                DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycleNode); writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical);

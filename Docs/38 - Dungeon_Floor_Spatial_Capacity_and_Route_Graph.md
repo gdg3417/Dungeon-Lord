@@ -183,6 +183,10 @@ Validation is deterministic, side-effect-free before commit, and produces stable
 
 Edits occur in non-authoritative draft transactions. Preview must disclose affected/downstream structures, content returns/removals, connection and floor-space changes, mana cost/refund, and failures. Invalid drafts cannot commit; mana is spent only after complete validation; failure changes no layout, inventory, mana, or save.
 
+Phase 3B2 lifecycle lock: stable structural identities are permanently retired after issue. Schema 8 persists monotonic per-floor native room and edge allocation state and a canonically ordered returned reusable-content custody collection. One reusable content identity is either assigned to exactly one room or returned, never both. Missing removal-disposition authority fails closed. Floor 1 retains at least one buildable required-route room during Phase 3.
+
+Future leaf deletion is the deterministic inverse of tail construction: graph identity selects the final removable player room and predecessor; Completion Terminal and Completion node identity survive; authored outgoing geometry must yield exactly one Direct Doorway or approved Straight Stone Corridor reconnection. The new logical terminal edge receives a fresh identity. Zero or multiple results fail without nearest search, A*, topology repair, or unrelated movement. Phase 3B2A establishes these persistence contracts but does not expose deletion.
+
 Movement is renovation: preserve content and stable identities, and move any downstream descendant subtree that would disconnect while preserving relative placement where valid. The whole group must fit and validate. Deletion is leaf-first: remove downstream structures before a structure whose deletion would disconnect them. Successful deletion restores full physical space. Reusable monsters/traps and authored reusable owned bait return to their owner; spent/generated/resolved resources do not. A final consequence summary always discloses removals and refunds.
 
 # 9. Progression and economy relationship

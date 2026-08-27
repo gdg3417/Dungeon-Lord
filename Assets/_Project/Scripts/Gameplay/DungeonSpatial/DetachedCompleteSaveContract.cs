@@ -178,21 +178,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!ContractJson.TryParse(bytes, limits.Serialized, issues, out ContractJsonNode root) ||
                     root.Kind != ContractJsonKind.Object || root.Fields.Count < 3 ||
                     !Field(root, 0, "schema", ContractJsonKind.String) || root.Fields[0].Value.Text != "save_root" ||
-                    !Field(root, 1, "schemaVersion", ContractJsonKind.Number) || root.Fields[1].Value.Text != "7" ||
+                    !Field(root, 1, "schemaVersion", ContractJsonKind.Number) || root.Fields[1].Value.Text != "8" ||
                     !Field(root, 2, "primary", ContractJsonKind.Object)) return Failure();
                 if (HasCaseAmbiguousSibling(root) || CaseAmbiguous(root,
                     new[] { "schema", "schemaVersion", "primary" })) return Failure();
                 ContractJsonNode primary = root.Fields[2].Value;
-                if (primary.Fields.Count < 2 ||
-                    primary.Fields[primary.Fields.Count - 2].Key != "canonicalSpatialAuthority" ||
-                    primary.Fields[primary.Fields.Count - 1].Key != "spatialFloors" ||
-                    CaseAmbiguous(primary, new[] { "canonicalSpatialAuthority", "spatialFloors" })) return Failure();
+                if (primary.Fields.Count < 3 ||
+                    primary.Fields[primary.Fields.Count - 3].Key != "canonicalSpatialAuthority" ||
+                    primary.Fields[primary.Fields.Count - 2].Key != "spatialFloors" ||
+                    primary.Fields[primary.Fields.Count - 1].Key != "structuralLifecycleAndOwnership" ||
+                    CaseAmbiguous(primary, new[] { "canonicalSpatialAuthority", "spatialFloors",
+                        "structuralLifecycleAndOwnership" })) return Failure();
                 if (!PrimaryOrderIsCanonical(primary)) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
-                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 2].Value);
+                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 3].Value);
                 spatialWriter.Token(","); spatialWriter.String("Floors"); spatialWriter.Token(":");
+                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 2].Value);
+                spatialWriter.Token(","); spatialWriter.String("LifecycleAndOwnership"); spatialWriter.Token(":");
                 WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value); spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
@@ -315,7 +319,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             IReadOnlyList<string> recognized = RawSavePayloadClassifier.RecognizedSaveDataMemberNames;
             int previous = -1; bool unknownSeen = false;
-            for (int index = 0; index < primary.Fields.Count - 2; index++)
+            for (int index = 0; index < primary.Fields.Count - 3; index++)
             {
                 string name = primary.Fields[index].Key;
                 int recognizedIndex = -1;

@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string TerminalRequiredEdgeId { get; }
     }
 
-    /// <summary>Phase 3A structural-only room identity allocation. Deletion is not supported.</summary>
+    /// <summary>Schema-8 monotonic structural identity allocation. Deletion is not supported here.</summary>
     public static class NativeStructuralIdentity
     {
         public const string InvalidIdentityReason = "structural.edit.invalid_identity";
@@ -70,8 +70,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (assignment == null || !Add(identities, assignment.AssignmentId)) return false;
             }
 
-            if (target == null || maximum >= MaximumOrdinal) return false;
-            string candidateRoomId = prefix + (maximum + 1).ToString("D4", CultureInfo.InvariantCulture);
+            FloorStructuralIdentityLifecycle lifecycle = state.LifecycleAndOwnership?.Floors?
+                .SingleOrDefault(value => value?.FloorInstanceId == targetFloorId);
+            if (target == null || lifecycle == null || lifecycle.NextNativeRoomOrdinal < 0 ||
+                lifecycle.NextNativeRoomOrdinal < maximum + 1 || lifecycle.NextNativeRoomOrdinal > MaximumOrdinal)
+                return false;
+            string candidateRoomId = prefix + lifecycle.NextNativeRoomOrdinal.ToString("D4", CultureInfo.InvariantCulture);
             var proposed = new[] { candidateRoomId, candidateRoomId + ".node",
                 candidateRoomId + ".edge.incoming", candidateRoomId + ".edge.terminal" };
             if (proposed.Any(value => !Persistent(value)) ||
@@ -80,6 +84,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             identity = new NativeRoomConstructionIdentity(proposed[0], proposed[1], proposed[2], proposed[3]);
             reason = null;
             return true;
+        }
+
+        internal static int DeriveNextNativeRoomOrdinal(SavedSpatialFloor floor)
+        {
+            if (floor?.Layout?.Rooms == null || string.IsNullOrEmpty(floor.FloorInstanceId)) return 0;
+            string prefix = floor.FloorInstanceId + RoomSegment;
+            int maximum = -1;
+            foreach (RoomSpatialInstance room in floor.Layout.Rooms)
+            {
+                string id = room?.RoomInstanceId;
+                if (id == null || !id.StartsWith(prefix, StringComparison.Ordinal)) continue;
+                string suffix = id.Substring(prefix.Length);
+                if (suffix.Length == 4 && int.TryParse(suffix, NumberStyles.None,
+                        CultureInfo.InvariantCulture, out int ordinal) && ordinal <= MaximumOrdinal)
+                    maximum = Math.Max(maximum, ordinal);
+            }
+            return maximum + 1;
         }
 
         private static bool Add(System.Collections.Generic.HashSet<string> identities, string value) =>

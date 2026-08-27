@@ -147,6 +147,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                     recovered.TrustedPayload, recovered);
 
+            // Schema 7 is the proven canonical predecessor, not a legacy Unity payload. Upgrade it
+            // before the schemas 1-6 classifier so it is never reinterpreted by legacy projection.
+            if (SchemaSevenToEightUpgrade.TryPrepare(trusted, limits.Canonical, out byte[] schemaEight))
+            {
+                string upgradePersistence = ExactCompleteSaveAtomicPersistence.Persist(activePath,
+                    preflight.FileSystem, trusted, schemaEight,
+                    limits.Canonical.Serialized.MaximumCollectionRecords);
+                if (upgradePersistence != null)
+                    return Failure(upgradePersistence, recovered.TrustedPayload, recovered);
+                byte[] durableUpgrade = preflight.FileSystem.ReadAllBytes(activePath);
+                return PublishValidated(durableUpgrade, currentContext,
+                    DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
+            }
+
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
                 trusted, limits.Raw, rawVersions, blankFloor);
             if (!classification.IsSuccess)

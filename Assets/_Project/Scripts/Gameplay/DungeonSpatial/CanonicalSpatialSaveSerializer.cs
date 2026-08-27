@@ -23,14 +23,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         internal sealed class SerializedMembers
         {
-            internal SerializedMembers(byte[] authority, byte[] floors)
-            { Authority = authority; Floors = floors; }
+            internal SerializedMembers(byte[] authority, byte[] floors, byte[] lifecycleAndOwnership)
+            { Authority = authority; Floors = floors; LifecycleAndOwnership = lifecycleAndOwnership; }
             internal byte[] Authority { get; }
             internal byte[] Floors { get; }
+            internal byte[] LifecycleAndOwnership { get; }
         }
         private static readonly Dictionary<Type, string[]> Fields = new Dictionary<Type, string[]>
         {
-            { typeof(DetachedCanonicalSpatialSaveState), new[] { "Authority", "Floors" } },
+            { typeof(DetachedCanonicalSpatialSaveState), new[] { "Authority", "Floors", "LifecycleAndOwnership" } },
             { typeof(CanonicalSpatialAuthorityMarker), new[] { "CanonicalLayoutContractVersion", "CreationKind", "MigrationTransactionId", "MigrationDescriptorFingerprint" } },
             { typeof(SavedSpatialFloor), new[] { "FloorInstanceId", "FloorDefinitionId", "FloorIndex", "Layout", "FixedStructures", "RoomContents" } },
             { typeof(FloorSpatialLayout), new[] { "FloorId", "Rooms", "Nodes", "Edges" } },
@@ -42,7 +43,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { typeof(SavedFixedSpatialStructure), new[] { "FixedStructureInstanceId", "FixedStructureDefinitionId", "FloorInstanceId", "Anchor", "Orientation", "Kind" } },
             { typeof(FloorRoomContentState), new[] { "Assignments", "RoomSemantics", "NextSequence" } },
             { typeof(RoomContentAssignment), new[] { "AssignmentId", "RoomInstanceId", "CategoryId", "OptionId", "Sequence" } },
-            { typeof(CanonicalRoomSemantics), new[] { "RoomInstanceId", "LegacyRoomOriginKind" } }
+            { typeof(CanonicalRoomSemantics), new[] { "RoomInstanceId", "LegacyRoomOriginKind" } },
+            { typeof(StructuralLifecycleAndOwnershipState), new[] { "Floors", "ReturnedContents" } },
+            { typeof(FloorStructuralIdentityLifecycle), new[] { "FloorInstanceId", "NextNativeRoomOrdinal", "NextNativeEdgeOrdinal" } },
+            { typeof(ReturnedStructuralContent), new[] { "AssignmentId", "CategoryId", "OptionId", "Sequence", "RemovalDisposition" } }
         };
 
         public static SpatialContractResult<byte[]> Serialize(DetachedCanonicalSpatialSaveState source,
@@ -91,8 +95,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
                 var floorsWriter = new ContractJsonWriter(limits.Serialized);
                 Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]));
+                var lifecycleWriter = new ContractJsonWriter(limits.Serialized);
+                Write(lifecycleWriter, canonical.LifecycleAndOwnership,
+                    typeof(StructuralLifecycleAndOwnershipState));
                 return new SpatialContractResult<SerializedMembers>(
-                    new SerializedMembers(authorityWriter.Finish(), floorsWriter.Finish()),
+                    new SerializedMembers(authorityWriter.Finish(), floorsWriter.Finish(),
+                        lifecycleWriter.Finish()),
                     Array.Empty<SpatialContractIssue>());
             }
             catch (ContractJsonBudgetException failure)

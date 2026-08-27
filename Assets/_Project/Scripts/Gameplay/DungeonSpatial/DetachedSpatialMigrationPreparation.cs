@@ -225,6 +225,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 FrozenLegacyRouteProjectionResult projection = FrozenLegacyRouteProjection.Project(inputs);
                 if (!projection.IsSuccess) return Failure(projection.Reason, projection.Diagnostics);
                 var spatial = new DetachedCanonicalSpatialSaveState { Authority = marker, Floors = projection.Floors };
+                CanonicalSpatialSaveContracts.TryCanonicalize(spatial, inputs.SpatialLimits.Spatial, out spatial);
                 DetachedWholeSaveResult candidate = DetachedWholeSaveCandidateSerializer.BuildPrepared(
                     inputs.Classification, spatial, inputs.SpatialLimits, inputs.WholeSaveLimits);
                 if (!candidate.IsSuccess) return Failure(candidate.Reason, projection.Diagnostics);

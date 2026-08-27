@@ -47,7 +47,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(migration.Lifecycle,Is.EqualTo(CompatibilityProfileLifecycle.Active));
             Assert.That(migration.MinimumSourceSchemaVersion,Is.EqualTo(1));
             Assert.That(migration.MaximumSourceSchemaVersion,Is.EqualTo(6));
-            Assert.That(migration.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(migration.TargetSchemaVersion,Is.EqualTo(8));
             Assert.That(migration.TargetCanonicalLayoutContractVersion,Is.EqualTo(1));
             Assert.That(migration.GeometryId,Is.EqualTo("compat.geometry.r1-r2"));
             Assert.That(migration.GeometryVersion,Is.EqualTo(1));
@@ -57,14 +57,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(starter.ProfileId,Is.EqualTo("compat.profile.starter.schema_7.contract_1"));
             Assert.That(starter.ProfileVersion,Is.EqualTo(1));
             Assert.That(starter.Lifecycle,Is.EqualTo(CompatibilityProfileLifecycle.Active));
-            Assert.That(starter.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(starter.TargetSchemaVersion,Is.EqualTo(8));
             Assert.That(starter.CanonicalLayoutContractVersion,Is.EqualTo(1));
             Assert.That(starter.GeometryId,Is.EqualTo("compat.geometry.r1-r2"));
             Assert.That(starter.GeometryVersion,Is.EqualTo(1));
             Assert.That(starter.GeometryCanonicalHash,Is.EqualTo("7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db"));
             Assert.That(SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(starter),Is.EqualTo(starter.CanonicalHash));
             Assert.That(starter.CanonicalHash,Is.EqualTo("8ed993e71714e1466fff45445462baa1dc5f5eff9289f2f183a08742ed033007"));
-            Assert.That(contract.TargetSchemaVersion,Is.EqualTo(7));
+            Assert.That(contract.TargetSchemaVersion,Is.EqualTo(8));
             Assert.That(contract.CanonicalLayoutContractVersion,Is.EqualTo(1));
             Assert.That(contract.Lifecycle,Is.EqualTo(CompatibilityProfileLifecycle.Active));
             Assert.That(result.Value.SelectContract(7).Value.CanonicalLayoutContractVersion,Is.EqualTo(1));
@@ -78,7 +78,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(8,1).Code,Is.EqualTo("gd66.starter_profile.missing"));
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(7));
+            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(8));
             Assert.That(SaveMigration.LegacyCompatibilitySchemaVersion,Is.EqualTo(6));
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data),Is.True);
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
