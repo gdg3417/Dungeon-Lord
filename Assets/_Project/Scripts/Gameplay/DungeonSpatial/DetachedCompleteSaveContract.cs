@@ -226,8 +226,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     requireLifecycle ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
                     CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(spatialWriter.Finish(), limits);
-                if (!parsedSpatial.IsValid || !CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
-                        limits.Spatial, true).IsValid ||
+                CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
+                    requireLifecycle ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
+                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                        parsedSpatial.Value, limits.Spatial, true);
+                if (!parsedSpatial.IsValid || structuralValidation == null || !structuralValidation.IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&
                         parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();

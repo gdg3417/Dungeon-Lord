@@ -24,7 +24,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
     }
 
     /// <summary>
-    /// The single MVP compatibility projection from validated schema-7 graph/content authority.
+    /// The single MVP compatibility projection from validated current schema-8 graph/content authority.
     /// Serialized marker/floor fields alone never publish runtime authority.
     /// </summary>
     public static class CanonicalMvpRouteProjection
@@ -57,7 +57,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 SaveRoot root = JsonUtility.FromJson<SaveRoot>(
                     System.Text.Encoding.UTF8.GetString(validation.GetBytes()));
                 if (root?.primary == null || root.schemaVersion !=
-                    DetachedWholeSaveCandidateSerializer.TargetSchemaVersion) return false;
+                    CanonicalSaveSchemaVersions.CurrentWritableTarget) return false;
                 save = root.primary;
                 if (validation.ResearchPendingExplicitNull) save.researchPending = null;
                 if (validation.ResearchProgressExplicitNull) save.researchProgress = null;
@@ -223,8 +223,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                         if (!roomById.TryGetValue(current.RoomInstanceId ?? string.Empty,
                             out RoomSpatialInstance room) || !visitedRooms.Add(room.RoomInstanceId) ||
                             !semantics.TryGetValue(room.RoomInstanceId, out LegacyRoomOriginKind origin) ||
-                            !string.Equals(room.RoomDefinitionId, "spatial.room.basic",
-                                StringComparison.Ordinal)) return Contradictory();
+                            !RoomDefinitionIsAllowed(floor, room, production)) return Contradictory();
                         RoomContentAssignment[] owned = assignments.Where(value => value != null &&
                             string.Equals(value.RoomInstanceId, room.RoomInstanceId,
                                 StringComparison.Ordinal)).OrderBy(value => CategoryRank(value.CategoryId))
@@ -280,6 +279,21 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             // Inactive compatibility overload only. Final live cutover injects production content.
             return MvpRoomSlotLayoutResolver.ResolveCapacity(
                 MvpDungeonPlacementIds.BasicRoomOptionId, legacyConfig);
+        }
+
+        private static bool RoomDefinitionIsAllowed(SavedSpatialFloor floor,
+            RoomSpatialInstance room, ProductionSpatialContentSnapshot production)
+        {
+            if (production == null)
+                return string.Equals(room.RoomDefinitionId, "spatial.room.basic", StringComparison.Ordinal);
+            RoomSpatialDefinition[] rooms = (production.Catalog.Rooms ?? Array.Empty<RoomSpatialDefinition>())
+                .Where(value => value != null && value.RoomDefinitionId == room.RoomDefinitionId).ToArray();
+            FloorSpatialConfiguration[] floors = (production.Catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
+                .Where(value => value != null && value.FloorDefinitionId == floor.FloorDefinitionId &&
+                    value.FloorIndex == floor.FloorIndex).ToArray();
+            return rooms.Length == 1 && floors.Length == 1 &&
+                (floors[0].AllowedRoomDefinitionIds ?? Array.Empty<string>()).Contains(
+                    room.RoomDefinitionId);
         }
 
         private static CanonicalMvpRouteProjectionResult Valid(MvpOrderedRouteRoom[] rooms) =>

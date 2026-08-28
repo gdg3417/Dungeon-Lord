@@ -543,6 +543,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(node.NodeId));
             Assert.That(proposed.RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(assignment.AssignmentId));
             Assert.That(proposed.RoomContents.Assignments.Single().Sequence, Is.EqualTo(assignment.Sequence));
+            var save = new SaveData { validatedCanonicalSpatialState = preview.DetachedCandidate };
+            DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
+                    .InspectWithProductionContent(save, fixture.Production);
+            Assert.That(route.AuthorityState, Is.EqualTo(
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(route.Rooms.Single(value => value.RoomInstanceId == target.RoomInstanceId)
+                .Capacity.MonsterCapacity, Is.EqualTo(fixture.Production.Catalog.Rooms.Single(value =>
+                    value.RoomDefinitionId == "spatial.room.rectangle").MonsterCapacity));
+        }
+
+        [TestCase("spatial.room.basic")]
+        [TestCase("spatial.room.rectangle")]
+        [TestCase("spatial.room.large_chamber")]
+        public void CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(string definitionId)
+        {
+            PreviewFixture fixture = CreateR2(definitionId,
+                definitionId == "spatial.room.large_chamber" ? new TileCoordinate(4, 1) :
+                new TileCoordinate(0, 6));
+            RoomSpatialInstance room = fixture.State.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == "compat.floor.00.room.player.0000");
+            var save = new SaveData { validatedCanonicalSpatialState = fixture.State };
+
+            DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
+                    .InspectWithProductionContent(save, fixture.Production);
+
+            Assert.That(route.AuthorityState, Is.EqualTo(
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(room.RoomDefinitionId, Is.EqualTo(definitionId));
+            Assert.That(route.Rooms.Single(value => value.RoomInstanceId == room.RoomInstanceId)
+                .Capacity.MonsterCapacity, Is.EqualTo(fixture.Production.Catalog.Rooms.Single(value =>
+                    value.RoomDefinitionId == definitionId).MonsterCapacity));
         }
 
         [Test]

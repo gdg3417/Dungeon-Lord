@@ -19,6 +19,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(result.IsValid, Is.True);
             Assert.That(result.GetBytes(), Is.EqualTo(bytes));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, limits).IsValid,
+                Is.False);
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(bytes, limits, out byte[] schemaEight),
+                Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, limits).IsValid,
+                Is.True);
         }
 
         [Test]
@@ -125,6 +131,57 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.RoomContents.Assignments).Select(value => value.AssignmentId).ToArray(),
                 after.State.Floors.SelectMany(value => value.RoomContents.Assignments)
                     .Select(value => value.AssignmentId).ToArray());
+        }
+
+        [Test]
+        public void FrozenSchemaSevenUpgrade_PreservesIssuedNativeRoomIdentityAndAdvancesHighWater()
+        {
+            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}," +
+                "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
+                "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
+                "\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}";
+            Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution fixture =
+                Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
+                    "schema-8-native-identity", 6, members);
+            DetachedCanonicalSpatialSaveState state = fixture.State;
+            SavedSpatialFloor floor = state.Floors[0];
+            RoomSpatialInstance room = floor.Layout.Rooms.Last();
+            string oldRoom = room.RoomInstanceId;
+            string nativeRoom = "compat.floor.00.room.player.0000";
+            FloorRouteNode node = floor.Layout.Nodes.Single(value => value.RoomInstanceId == oldRoom);
+            string oldNode = node.NodeId;
+            room.RoomInstanceId = nativeRoom;
+            node.RoomInstanceId = nativeRoom; node.NodeId = nativeRoom + ".node";
+            FloorRouteEdge incoming = floor.Layout.Edges.Single(value => value.DestinationNodeId == oldNode);
+            FloorRouteEdge terminal = floor.Layout.Edges.Single(value => value.SourceNodeId == oldNode);
+            incoming.DestinationNodeId = node.NodeId; incoming.EdgeId = nativeRoom + ".edge.incoming";
+            terminal.SourceNodeId = node.NodeId; terminal.EdgeId = nativeRoom + ".edge.terminal";
+            foreach (RoomContentAssignment assignment in floor.RoomContents.Assignments.Where(value =>
+                value.RoomInstanceId == oldRoom)) assignment.RoomInstanceId = nativeRoom;
+            floor.RoomContents.RoomSemantics.Single(value => value.RoomInstanceId == oldRoom)
+                .RoomInstanceId = nativeRoom;
+            state.LifecycleAndOwnership = null;
+            DetachedWholeSaveResult rebuilt = DetachedWholeSaveCandidateSerializer.BuildPrepared(
+                fixture.Classification, state, fixture.Limits, fixture.WholeLimits);
+            Assert.That(rebuilt.IsSuccess, Is.True, rebuilt.Reason);
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(rebuilt.Candidate.GetBytes(), fixture.Limits,
+                out byte[] schemaEight), Is.True);
+            DetachedCompleteSaveValidationResult upgraded =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.Limits);
+            Assert.That(upgraded.IsValid, Is.True);
+            Assert.That(upgraded.State.Floors[0].Layout.Rooms.Any(value =>
+                value.RoomInstanceId == nativeRoom), Is.True);
+            Assert.That(upgraded.State.Floors[0].Layout.Nodes.Any(value =>
+                value.NodeId == nativeRoom + ".node"), Is.True);
+            Assert.That(upgraded.State.Floors[0].Layout.Edges.Select(value => value.EdgeId),
+                Does.Contain(nativeRoom + ".edge.incoming").And.Contain(nativeRoom + ".edge.terminal"));
+            Assert.That(upgraded.State.LifecycleAndOwnership.Floors[0].NextNativeRoomOrdinal,
+                Is.EqualTo(1));
+            Assert.That(upgraded.State.LifecycleAndOwnership.Floors[0].NextNativeEdgeOrdinal,
+                Is.EqualTo(0));
+            Assert.That(upgraded.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
         }
 
         private static CanonicalSpatialSerializationLimits Limits() =>
