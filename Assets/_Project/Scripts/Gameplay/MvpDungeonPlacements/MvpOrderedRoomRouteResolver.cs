@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
@@ -38,8 +39,12 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
     public static class MvpOrderedRoomRouteResolver
     {
         public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config)
+            => Resolve(save, config, null);
+
+        public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
-            MvpOrderedRouteRoom[] canonical = CanonicalMvpRouteProjection.Resolve(save, config);
+            MvpOrderedRouteRoom[] canonical = CanonicalMvpRouteProjection.Resolve(save, config, production);
             if (canonical != null) return canonical;
 
             List<MvpRoomSlotAssignmentState> persistedRooms = save?.mvpRoomSlotAssignments?.Rooms;
@@ -54,7 +59,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             if (!persisted)
             {
                 MvpDungeonRoomInstance displayRoom = layout.Rooms.FirstOrDefault(r => r != null);
-                MvpDungeonPlacementEntry[] active = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);
+                MvpDungeonPlacementEntry[] active = MvpRoomSlotLayoutResolver.ResolveActivePlacements(
+                    save, config, production);
                 return new[] { new MvpOrderedRouteRoom { FloorIndex = 0, RoomIndex = 0, RoomOptionId = displayRoom?.RoomOptionId,
                     IncludeRoomPlacement = explicitRoom, Capacity = displayRoom?.Capacity,
                     AssignedMonsterOptionIds = Options(active, MvpDungeonPlacementIds.MonsterCategoryId),

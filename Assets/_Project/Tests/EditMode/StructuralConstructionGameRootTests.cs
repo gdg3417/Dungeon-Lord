@@ -261,7 +261,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } } } } }
             };
             state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
-            return new SaveData { validatedCanonicalSpatialState = state };
+            return new SaveData
+            {
+                canonicalSpatialAuthority = state.Authority,
+                spatialFloors = state.Floors,
+                validatedCanonicalSpatialState = state
+            };
         }
 
         private static StructuralConstructionRequest Request() =>

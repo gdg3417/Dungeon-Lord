@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -543,7 +544,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(node.NodeId));
             Assert.That(proposed.RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(assignment.AssignmentId));
             Assert.That(proposed.RoomContents.Assignments.Single().Sequence, Is.EqualTo(assignment.Sequence));
-            var save = new SaveData { validatedCanonicalSpatialState = preview.DetachedCandidate };
+            var save = new SaveData
+            {
+                canonicalSpatialAuthority = preview.DetachedCandidate.Authority,
+                spatialFloors = preview.DetachedCandidate.Floors,
+                validatedCanonicalSpatialState = preview.DetachedCandidate
+            };
             DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
                 DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
                     .InspectWithProductionContent(save, fixture.Production);
@@ -564,7 +570,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new TileCoordinate(0, 6));
             RoomSpatialInstance room = fixture.State.Floors[0].Layout.Rooms.Single(value =>
                 value.RoomInstanceId == "compat.floor.00.room.player.0000");
-            var save = new SaveData { validatedCanonicalSpatialState = fixture.State };
+            var save = new SaveData
+            {
+                canonicalSpatialAuthority = fixture.State.Authority,
+                spatialFloors = fixture.State.Floors,
+                validatedCanonicalSpatialState = fixture.State
+            };
 
             DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
                 DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
@@ -576,6 +587,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(route.Rooms.Single(value => value.RoomInstanceId == room.RoomInstanceId)
                 .Capacity.MonsterCapacity, Is.EqualTo(fixture.Production.Catalog.Rooms.Single(value =>
                     value.RoomDefinitionId == definitionId).MonsterCapacity));
+            Assert.That(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save,
+                fixture.Configuration, fixture.Production), Is.Not.Empty);
+            Assert.That(MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save,
+                fixture.Configuration, fixture.Production).RuleResolved, Is.True);
+            Assert.That(MvpPlayerLoopSummaryPresenter.Resolve(save, fixture.Configuration,
+                production: fixture.Production).DungeonPlacements, Is.Not.Empty);
+            Assert.That(MvpDungeonLayoutPresenter.BuildLayoutText(save, fixture.Configuration,
+                fixture.Production, string.Empty, (key, fallback) => fallback ?? key), Is.Not.Empty);
+            MvpFirstSessionObjectiveSummary objective = MvpFirstSessionObjectivePresenter.Resolve(
+                save, fixture.Configuration, fixture.Production);
+            if (objective.RuleResolved) Assert.That(objective.CurrentPathPlacementCount,
+                Is.GreaterThan(0));
         }
 
         [Test]

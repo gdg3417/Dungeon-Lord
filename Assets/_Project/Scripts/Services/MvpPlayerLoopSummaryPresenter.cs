@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
@@ -30,7 +31,8 @@ namespace DungeonBuilder.M0
             ResearchCompletionEligibilityScaffoldConfig researchEligibilityConfig = null,
             ResearchVerificationScaffoldConfig researchVerificationConfig = null,
             ResearchUnlockBridgeConfig researchUnlockConfig = null,
-            PlayerResearchAuthoritySummary playerResearchAuthority = null)
+            PlayerResearchAuthoritySummary playerResearchAuthority = null,
+            ProductionSpatialContentSnapshot production = null)
         {
             if (save == null)
             {
@@ -40,8 +42,10 @@ namespace DungeonBuilder.M0
             StructureRuntimeState runtime = save.structureRuntime;
             RunOutcomeRecord latestRun = GetLatestRun(save.runHistory);
             DungeonSlot? selectedSlot = GetSelectedSlot(save.dungeonLayout);
-            MvpDungeonPlacementEntry[] dungeonPlacements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, runConfig);
-            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save, runConfig);
+            MvpDungeonPlacementEntry[] dungeonPlacements = MvpRoomSlotLayoutResolver.ResolveActivePlacements(
+                save, runConfig, production);
+            MvpPlacementEffectsSummary placementEffects = MvpPlacementEffectsResolver
+                .ResolveConfiguredRouteForSave(save, runConfig, production);
             double currentMana = runtime?.ManaReserve ?? 0d;
             double currentHeat = runtime?.Heat ?? 0d;
 

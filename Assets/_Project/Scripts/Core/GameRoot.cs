@@ -132,7 +132,8 @@ namespace DungeonBuilder.M0
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
                 GetResearchUnlockBridgeConfig(),
-                CreatePlayerResearchActionHandler().ResolveAuthority());
+                CreatePlayerResearchActionHandler().ResolveAuthority(),
+                Content?.ProductionSpatialContent);
         }
 
         public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)

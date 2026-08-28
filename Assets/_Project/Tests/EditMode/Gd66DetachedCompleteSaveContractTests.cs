@@ -2,6 +2,7 @@
 using System.Text;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -148,6 +149,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSpatialSaveState state = fixture.State;
             SavedSpatialFloor floor = state.Floors[0];
             RoomSpatialInstance room = floor.Layout.Rooms.Last();
+            TileCoordinate originalAnchor = room.Anchor;
+            CardinalOrientation originalOrientation = room.Orientation;
             string oldRoom = room.RoomInstanceId;
             string nativeRoom = "compat.floor.00.room.player.0000";
             FloorRouteNode node = floor.Layout.Nodes.Single(value => value.RoomInstanceId == oldRoom);
@@ -160,6 +163,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             terminal.SourceNodeId = node.NodeId; terminal.EdgeId = nativeRoom + ".edge.terminal";
             foreach (RoomContentAssignment assignment in floor.RoomContents.Assignments.Where(value =>
                 value.RoomInstanceId == oldRoom)) assignment.RoomInstanceId = nativeRoom;
+            string[] assignmentEvidence = floor.RoomContents.Assignments.Where(value =>
+                value.RoomInstanceId == nativeRoom).Select(value => value.AssignmentId + ":" + value.Sequence)
+                .ToArray();
             floor.RoomContents.RoomSemantics.Single(value => value.RoomInstanceId == oldRoom)
                 .RoomInstanceId = nativeRoom;
             state.LifecycleAndOwnership = null;
@@ -173,6 +179,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(upgraded.IsValid, Is.True);
             Assert.That(upgraded.State.Floors[0].Layout.Rooms.Any(value =>
                 value.RoomInstanceId == nativeRoom), Is.True);
+            RoomSpatialInstance upgradedRoom = upgraded.State.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == nativeRoom);
+            Assert.That(upgradedRoom.Anchor, Is.EqualTo(originalAnchor));
+            Assert.That(upgradedRoom.Orientation, Is.EqualTo(originalOrientation));
             Assert.That(upgraded.State.Floors[0].Layout.Nodes.Any(value =>
                 value.NodeId == nativeRoom + ".node"), Is.True);
             Assert.That(upgraded.State.Floors[0].Layout.Edges.Select(value => value.EdgeId),
@@ -182,6 +192,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(upgraded.State.LifecycleAndOwnership.Floors[0].NextNativeEdgeOrdinal,
                 Is.EqualTo(0));
             Assert.That(upgraded.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+            CollectionAssert.AreEqual(assignmentEvidence, upgraded.State.Floors[0].RoomContents.Assignments
+                .Where(value => value.RoomInstanceId == nativeRoom)
+                .Select(value => value.AssignmentId + ":" + value.Sequence).ToArray());
+            DetachedCompleteSaveValidationResult contextual =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
+            Assert.That(contextual.IsValid, Is.True, contextual.Reason);
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
+                fixture.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
+            Assert.That(selected.Success, Is.True, selected.Code);
+            DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(schemaEight,
+                fixture.CurrentContext, selected.Value);
+            Assert.That(opened.IsSuccess, Is.True, opened.Reason);
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(contextual, fixture.Production,
+                out SaveData published, out string reason), Is.True, reason);
+            Assert.That(published.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Any(value =>
+                value.RoomInstanceId == nativeRoom), Is.True);
         }
 
         private static CanonicalSpatialSerializationLimits Limits() =>

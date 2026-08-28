@@ -110,15 +110,24 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         }
 
         public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config)
+            => Resolve(save, config, null);
+
+        public static MvpOrderedRouteRoom[] Resolve(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
-            CanonicalMvpRouteProjectionResult result = Inspect(save, config);
+            CanonicalMvpRouteProjectionResult result = production == null
+                ? Inspect(save, config) : InspectWithProductionContent(save, production);
             return result.AuthorityState == CanonicalMvpRuntimeAuthorityState.Legacy ? null : result.Rooms;
         }
 
         public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save,
             RunSimulationConfig config)
+            => ResolveActivePlacements(save, config, null);
+
+        public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save,
+            RunSimulationConfig config, ProductionSpatialContentSnapshot production)
         {
-            MvpOrderedRouteRoom[] route = Resolve(save, config);
+            MvpOrderedRouteRoom[] route = Resolve(save, config, production);
             if (route == null) return null;
             var result = new List<MvpDungeonPlacementEntry>();
             foreach (MvpOrderedRouteRoom room in route)

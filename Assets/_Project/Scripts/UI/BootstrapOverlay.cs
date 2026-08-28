@@ -1018,7 +1018,8 @@ namespace DungeonBuilder.M0
             ClearStaleRoomSlotPlacementFailureFeedback();
             MvpPlayerLoopSummary summary = _root.ResolveMvpPlayerLoopSummary();
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
-            MvpFirstSessionObjectiveSummary firstSessionObjective = MvpFirstSessionObjectivePresenter.Resolve(_root.Save, _root.RunSimulationConfig);
+            MvpFirstSessionObjectiveSummary firstSessionObjective = MvpFirstSessionObjectivePresenter.Resolve(
+                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
             MvpPostContractGreedTrialSummary greedTrial = MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _root.RunSimulationConfig, firstSessionObjective);
             return new BootstrapSmokeTextComposer.Context(
                 summary,
