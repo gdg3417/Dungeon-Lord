@@ -568,8 +568,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PreviewFixture fixture = CreateR2(definitionId,
                 definitionId == "spatial.room.large_chamber" ? new TileCoordinate(4, 1) :
                 new TileCoordinate(0, 6));
+            const string nativeRoomId = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, nativeRoomId);
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.TrapCategoryId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId, nativeRoomId);
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId, nativeRoomId);
             RoomSpatialInstance room = fixture.State.Floors[0].Layout.Rooms.Single(value =>
-                value.RoomInstanceId == "compat.floor.00.room.player.0000");
+                value.RoomInstanceId == nativeRoomId);
             var save = new SaveData
             {
                 canonicalSpatialAuthority = fixture.State.Authority,
@@ -591,6 +598,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Configuration, fixture.Production), Is.Not.Empty);
             Assert.That(MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save,
                 fixture.Configuration, fixture.Production).RuleResolved, Is.True);
+            MvpPostContractGreedTrialSummary greed = MvpPostContractGreedTrialPresenter.Resolve(save,
+                fixture.Configuration, new MvpFirstSessionObjectiveSummary
+                    { RuleResolved = true, IsComplete = true }, fixture.Production);
+            Assert.That(greed.IsActive, Is.True);
+            Assert.That(greed.PlacementEffects.RuleResolved, Is.True);
             Assert.That(MvpPlayerLoopSummaryPresenter.Resolve(save, fixture.Configuration,
                 production: fixture.Production).DungeonPlacements, Is.Not.Empty);
             Assert.That(MvpDungeonLayoutPresenter.BuildLayoutText(save, fixture.Configuration,
@@ -599,6 +611,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 save, fixture.Configuration, fixture.Production);
             if (objective.RuleResolved) Assert.That(objective.CurrentPathPlacementCount,
                 Is.GreaterThan(0));
+            MvpFirstSessionObjectiveConfig objectiveConfig = fixture.Configuration.MvpFirstSessionObjective;
+            save.runHistory = new RunHistoryState { RecentOutcomes = new[] { new RunOutcomeRecord
+                { LootExtractionSummary = new RunLootExtractionSummary
+                    { TotalExtractedWorldValue = objectiveConfig.RequiredRecoveredLootValue } } } };
+            save.completedResearch = new CompletedResearchState
+                { ProjectIds = new[] { objectiveConfig.AnalysisResearchProjectId } };
+            save.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save,
+                fixture.Configuration, fixture.Production), Is.True);
+            Assert.That(save.completedObjectives.ObjectiveIds, Does.Contain(objectiveConfig.ObjectiveId));
         }
 
         [Test]

@@ -201,8 +201,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 fixture.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             Assert.That(selected.Success, Is.True, selected.Code);
+            var profile = new SaveSpatialMigrationLimitsProfile(
+                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
+                fixture.Limits, fixture.WholeLimits);
             DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(schemaEight,
-                fixture.CurrentContext, selected.Value);
+                fixture.CurrentContext, profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
             Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(contextual, fixture.Production,
                 out SaveData published, out string reason), Is.True, reason);

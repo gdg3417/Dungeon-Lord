@@ -1020,7 +1020,9 @@ namespace DungeonBuilder.M0
             GuidedMvpActionPathSummary guidedPath = _root.ResolveGuidedMvpActionPath(summary);
             MvpFirstSessionObjectiveSummary firstSessionObjective = MvpFirstSessionObjectivePresenter.Resolve(
                 _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
-            MvpPostContractGreedTrialSummary greedTrial = MvpPostContractGreedTrialPresenter.Resolve(_root.Save, _root.RunSimulationConfig, firstSessionObjective);
+            MvpPostContractGreedTrialSummary greedTrial = MvpPostContractGreedTrialPresenter.Resolve(
+                _root.Save, _root.RunSimulationConfig, firstSessionObjective,
+                _root.ProductionSpatialContent);
             return new BootstrapSmokeTextComposer.Context(
                 summary,
                 guidedPath,

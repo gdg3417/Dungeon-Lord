@@ -1317,7 +1317,8 @@ namespace DungeonBuilder.M0
 
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, config);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, config, Content?.ProductionSpatialContent);
             SelectLatestRunOutcome();
             RefreshRunLine();
             SaveService.Save(Save, SaveReason.ManualDev);
@@ -1495,7 +1496,8 @@ namespace DungeonBuilder.M0
             completed.LastCompletedProjectId = summary.ProjectId;
             completed.LastCompletionRuleSourceId = summary.RuleSourceIdUsed;
             Save.completedResearch = completed;
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, RunSimulationConfig, Content?.ProductionSpatialContent);
             Save.researchPending = null;
             Save.researchProgress = null;
             SaveService?.Save(Save, SaveReason.ManualDev);
@@ -1869,7 +1871,8 @@ namespace DungeonBuilder.M0
 
         private void SavePlayerResearchTransition()
         {
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, RunSimulationConfig, Content?.ProductionSpatialContent);
             SaveService?.Save(Save, SaveReason.StateChange);
         }
 

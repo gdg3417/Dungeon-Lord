@@ -18,8 +18,12 @@ namespace DungeonBuilder.M0
         }
 
         public static MvpPlacementEffectsSummary ResolveForSave(SaveData save, RunSimulationConfig config)
+            => ResolveForSave(save, config, null);
+
+        public static MvpPlacementEffectsSummary ResolveForSave(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
-            return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config), config);
+            return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config, production), config);
         }
 
         public static MvpPlacementEffectsSummary ResolveConfiguredRouteForSave(SaveData save, RunSimulationConfig config)
