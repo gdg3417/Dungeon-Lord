@@ -521,12 +521,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void StrictCompatibilityWorkloadDimensionsHonorExactAndOneOverBoundaries()
         {
             SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
-            int authoredNestedRecords = 1 + data.MigrationProfiles.Length + data.StarterProfiles.Length +
-                data.ContractSelections.Length + data.GeometryRecords.Length +
-                data.GeometryRecords.Sum(value => (value.Layouts?.Length ?? 0) +
-                    (value.Layouts ?? Array.Empty<CompatibilityLayoutVariant>()).Sum(layout =>
-                        layout.Placements?.Length ?? 0));
-            AssertWorkloadBoundary(profiles,4,authoredNestedRecords,AuthoredCharacters(data));
+            int authoredTopLevelRecords = CountAuthoredTopLevelRecords(data);
+            int authoredNestedRecords = CountAuthoredNestedRecords(data);
+            AssertWorkloadBoundary(profiles,authoredTopLevelRecords,authoredNestedRecords,
+                AuthoredCharacters(data));
 
             CompatibilityLayoutGeometryRecord copy=JsonUtility.FromJson<CompatibilityLayoutGeometryRecord>(
                 JsonUtility.ToJson(data.GeometryRecords[0]));
@@ -563,17 +561,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void AllResolversPreserveMissingAndWorkloadDiagnostics()
         {
+            SpatialLayoutCompatibilityProfilesData data =
+                JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
+            int exactTop = CountAuthoredTopLevelRecords(data);
+            int exactNested = CountAuthoredNestedRecords(data);
+            int exactCharacters = AuthoredCharacters(data);
             AssertResolverFailure(null,limits,SpatialLayoutCompatibilityDiagnostic.MissingInput);
             AssertResolverFailure(new byte[0],limits,SpatialLayoutCompatibilityDiagnostic.EmptyInput);
             AssertResolverFailure(RepeatedInvalidGeometryAsset(2).bytes,Limits(1,limits.MaximumNestedRecords,
                 limits.MaximumMaterializedTiles,limits.MaximumStringCharacters),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(4,13,limits.MaximumMaterializedTiles,
+            AssertResolverFailure(profiles.bytes,Limits(exactTop,exactNested-1,limits.MaximumMaterializedTiles,
                 limits.MaximumStringCharacters),SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(4,14,limits.MaximumMaterializedTiles,
-                AuthoredCharacters(JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text))-1),
+            AssertResolverFailure(profiles.bytes,Limits(exactTop,exactNested,limits.MaximumMaterializedTiles,
+                exactCharacters-1),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
-            AssertResolverFailure(profiles.bytes,Limits(4,14,41,limits.MaximumStringCharacters),
+            AssertResolverFailure(profiles.bytes,Limits(exactTop,exactNested,41,limits.MaximumStringCharacters),
                 SpatialLayoutCompatibilityDiagnostic.WorkloadExceeded);
             var oneIssue=new SpatialContentValidationWorkloadLimits(limits.MaximumTopLevelRecords,
                 limits.MaximumNestedRecords,limits.MaximumMaterializedTiles,1,limits.MaximumStringCharacters);
@@ -762,6 +765,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private SpatialContentValidationWorkloadLimits Limits(int top,int nested,int tiles,int characters)
         { return new SpatialContentValidationWorkloadLimits(top,nested,tiles,limits.MaximumIssues,characters); }
+        private static int CountAuthoredTopLevelRecords(SpatialLayoutCompatibilityProfilesData data) =>
+            (data.GeometryRecords?.Length ?? 0) + (data.MigrationProfiles?.Length ?? 0) +
+            (data.StarterProfiles?.Length ?? 0) + (data.ContractSelections?.Length ?? 0);
+        private static int CountAuthoredNestedRecords(SpatialLayoutCompatibilityProfilesData data) =>
+            (data.GeometryRecords ?? Array.Empty<CompatibilityLayoutGeometryRecord>()).Sum(geometry =>
+                (geometry.Layouts?.Length ?? 0) +
+                (geometry.Layouts ?? Array.Empty<CompatibilityLayoutVariant>()).Sum(layout =>
+                    (layout.Placements?.Length ?? 0) + (layout.Connections?.Length ?? 0)));
         private static int AuthoredCharacters(SpatialLayoutCompatibilityProfilesData data)
         {
             CompatibilityLayoutGeometryRecord geometry=data.GeometryRecords[0];
