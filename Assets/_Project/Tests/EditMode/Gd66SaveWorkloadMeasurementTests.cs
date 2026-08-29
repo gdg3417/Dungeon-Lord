@@ -514,7 +514,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Encoding.UTF8.GetString(members.Value.Authority) + ",\"spatialFloors\":" +
                 Encoding.UTF8.GetString(members.Value.Floors) + "}}");
             DetachedCompleteSaveValidationResult validated =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, fixture.Limits);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(candidate, fixture.Limits);
             Assert.That(validated.IsValid, Is.True, validated.Reason);
             rows.Add("native-canonical-empty:raw=not-applicable,candidateBytes=" + candidate.Length +
                 ",strictNodes=" + MinimumStrict(candidate, validated.State, 0) +
@@ -593,7 +593,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         });
 
         private static int MinimumStrict(byte[] bytes, DetachedCanonicalSpatialSaveState state, int dimension) =>
-            Minimum(limit => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
+            Minimum(limit => DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes,
                 new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(bytes.Length,
                     dimension == 0 ? limit : High, dimension == 1 ? limit : High,
                     dimension == 2 ? limit : High, 64),

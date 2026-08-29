@@ -641,7 +641,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             Authority = new CanonicalSpatialAuthorityMarker
             { CanonicalLayoutContractVersion = 1, CreationKind = CanonicalSpatialCreationKind.NativeCanonical },
-            Floors = Array.Empty<SavedSpatialFloor>()
+            Floors = Array.Empty<SavedSpatialFloor>(),
+            LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                Array.Empty<SavedSpatialFloor>())
         };
 
         private static SpatialMigrationInputDescriptor Descriptor() => new SpatialMigrationInputDescriptor(
@@ -715,12 +717,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CategoryId = CanonicalSpatialSaveContracts.MonsterCategoryId,
                 OptionId = "placement.option.monster.goblin", Sequence = index == 0 ? long.MaxValue - 2 : index + 1
             }).ToArray();
-            return new DetachedCanonicalSpatialSaveState
+            SavedSpatialFloor[] floors = new[] { new SavedSpatialFloor
             {
-                Authority = new CanonicalSpatialAuthorityMarker
-                { CanonicalLayoutContractVersion = 1, CreationKind = CanonicalSpatialCreationKind.NativeCanonical },
-                Floors = new[] { new SavedSpatialFloor
-                {
                     FloorInstanceId = floor, FloorDefinitionId = "spatial.floor.01", FloorIndex = 0,
                     Layout = new FloorSpatialLayout { FloorId = floor, Rooms = rooms,
                         Nodes = nodes.ToArray(), Edges = edges },
@@ -736,7 +734,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         { RoomInstanceId = room.RoomInstanceId,
                             LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced }).ToArray(),
                         NextSequence = long.MaxValue - 1 }
-                } }
+                } };
+            return new DetachedCanonicalSpatialSaveState
+            {
+                Authority = new CanonicalSpatialAuthorityMarker
+                { CanonicalLayoutContractVersion = 1, CreationKind = CanonicalSpatialCreationKind.NativeCanonical },
+                Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors)
             };
         }
     }

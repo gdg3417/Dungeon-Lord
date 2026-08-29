@@ -379,11 +379,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-" + targetIndex, 6, members);
-            string target = run.State.Floors[0].Layout.Rooms[targetIndex].RoomInstanceId;
-            byte[] otherBefore = CanonicalSpatialSaveSerializer.Serialize(run.State, run.Limits).Value;
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+                out byte[] currentBytes), Is.True);
+            DetachedCompleteSaveValidationResult current =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
+            Assert.That(current.IsValid, Is.True, current.Reason);
+            DetachedCanonicalSpatialSaveState currentState = current.State;
+            string target = currentState.Floors[0].Layout.Rooms[targetIndex].RoomInstanceId;
+            byte[] otherBefore = CanonicalSpatialSaveSerializer.Serialize(currentState, run.Limits).Value;
             RunSimulationConfig config = LegacyGameplayConfigurationContract.Parse(run.LegacyBytes);
 
-            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(run.State,
+            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(currentState,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId, target), run.Production,
                 run.Compatibility, config, run.Limits);
@@ -391,10 +397,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.State.Floors[0].RoomContents.Assignments.Single().RoomInstanceId,
                 Is.EqualTo(target));
-            string other = run.State.Floors[0].Layout.Rooms[1 - targetIndex].RoomInstanceId;
+            string other = currentState.Floors[0].Layout.Rooms[1 - targetIndex].RoomInstanceId;
             Assert.That(result.State.Floors[0].RoomContents.Assignments.Any(value =>
                 value.RoomInstanceId == other), Is.False);
-            Assert.That(CanonicalSpatialSaveSerializer.Serialize(run.State, run.Limits).Value,
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(currentState, run.Limits).Value,
                 Is.EqualTo(otherBefore));
         }
 
@@ -435,7 +441,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-capacity", 6, members);
-            SavedSpatialFloor floor = run.State.Floors[0];
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+                out byte[] currentBytes), Is.True);
+            DetachedCompleteSaveValidationResult current =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
+            Assert.That(current.IsValid, Is.True, current.Reason);
+            SavedSpatialFloor floor = current.State.Floors[0];
             string target = floor.Layout.Rooms[0].RoomInstanceId;
             string other = floor.Layout.Rooms[1].RoomInstanceId;
             RoomContentAssignment template = floor.RoomContents.Assignments.Single();
@@ -445,7 +456,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floor.Layout.Rooms[0].RoomDefinitionId = "spatial.room.large_chamber";
             RunSimulationConfig config = LegacyGameplayConfigurationContract.Parse(run.LegacyBytes);
 
-            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(run.State,
+            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(current.State,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                     MvpDungeonPlacementIds.BasicRoomOptionId, target), run.Production,
                 run.Compatibility, config, run.Limits);

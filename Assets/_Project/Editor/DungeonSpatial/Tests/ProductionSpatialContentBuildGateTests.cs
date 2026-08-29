@@ -262,22 +262,18 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 ["retired starter"] = data => data.StarterProfiles[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
                 ["retired contract"] = data => data.ContractSelections[0].Lifecycle = CompatibilityProfileLifecycle.Retired,
                 ["additional active migration"] = AddActiveMigration,
-                ["additional active starter"] = AddActiveStarter,
-                ["additional active contract"] = data => data.ContractSelections = data.ContractSelections.Concat(new[] {
-                    new CanonicalLayoutContractSelection { TargetSchemaVersion = 8,
-                        CanonicalLayoutContractVersion = 1, Lifecycle = CompatibilityProfileLifecycle.Active }}).ToArray(),
                 ["migration minimum"] = data => data.MigrationProfiles[0].MinimumSourceSchemaVersion = 2,
                 ["migration maximum"] = data => data.MigrationProfiles[0].MaximumSourceSchemaVersion = 5,
                 ["migration target"] = data => data.MigrationProfiles[0].TargetSchemaVersion = 8,
-                ["migration contract"] = data => data.MigrationProfiles[0].TargetCanonicalLayoutContractVersion = 2,
+                ["migration contract"] = data => SetFrozenContractVersion(data, 2),
                 ["migration id"] = data => data.MigrationProfiles[0].ProfileId = "compat.profile.migration.unauthorized",
                 ["migration version"] = data => data.MigrationProfiles[0].ProfileVersion = 2,
-                ["starter target"] = data => data.StarterProfiles[0].TargetSchemaVersion = 8,
-                ["starter contract"] = data => data.StarterProfiles[0].CanonicalLayoutContractVersion = 2,
+                ["starter target"] = data => SetCurrentTarget(data, 9),
+                ["starter contract"] = data => SetFrozenContractVersion(data, 2),
                 ["starter id"] = data => data.StarterProfiles[0].ProfileId = "compat.profile.starter.unauthorized",
                 ["starter version"] = data => data.StarterProfiles[0].ProfileVersion = 2,
-                ["contract target"] = data => data.ContractSelections[0].TargetSchemaVersion = 8,
-                ["contract version"] = data => data.ContractSelections[0].CanonicalLayoutContractVersion = 2,
+                ["contract target"] = data => SetCurrentTarget(data, 9),
+                ["contract version"] = data => SetFrozenContractVersion(data, 2),
                 ["geometry id"] = data => PointStarterAtAdditionalGeometry(data,
                     "compat.geometry.alternate", 1),
                 ["geometry version"] = data => PointStarterAtAdditionalGeometry(data,
@@ -361,9 +357,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 SpatialLayoutCompatibilityProfiles.SerializeCanonical(
                     SpatialLayoutCompatibilityProfiles.Canonicalize(data)), ProductionSnapshot(), ParsedLimits());
             Assert.That(parsed.Value.SelectMigration(8, 7, 1).Code, Is.EqualTo("gd66.profile.missing"));
-            Assert.That(parsed.Value.SelectStarter(8, 1).Code, Is.EqualTo("gd66.starter_profile.missing"));
-            Assert.That(parsed.Value.SelectContract(8).Code,
-                Is.EqualTo("gd66.layout_contract.selection_missing"));
+            CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selectedStarter =
+                parsed.Value.SelectStarter(8, 1);
+            Assert.That(selectedStarter.Success, Is.True);
+            Assert.That(selectedStarter.Value.ProfileId, Is.Not.EqualTo(retiredStarter.ProfileId));
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> selectedContract =
+                parsed.Value.SelectContract(8);
+            Assert.That(selectedContract.Success, Is.True);
+            Assert.That(selectedContract.Value.Lifecycle, Is.EqualTo(CompatibilityProfileLifecycle.Active));
         }
 
         [TestCase(false)]
@@ -639,6 +640,24 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             profile.ProfileId = "compat.profile.starter.additional";
             profile.TargetSchemaVersion = 8;
             data.StarterProfiles = data.StarterProfiles.Concat(new[] { profile }).ToArray();
+        }
+
+        private static void SetFrozenContractVersion(SpatialLayoutCompatibilityProfilesData data,
+            int version)
+        {
+            data.MigrationProfiles[0].TargetCanonicalLayoutContractVersion = version;
+            data.StarterProfiles.Single(value => value.TargetSchemaVersion == 7)
+                .CanonicalLayoutContractVersion = version;
+            data.ContractSelections.Single(value => value.TargetSchemaVersion == 7)
+                .CanonicalLayoutContractVersion = version;
+        }
+
+        private static void SetCurrentTarget(SpatialLayoutCompatibilityProfilesData data, int target)
+        {
+            data.StarterProfiles.Single(value => value.TargetSchemaVersion == 8)
+                .TargetSchemaVersion = target;
+            data.ContractSelections.Single(value => value.TargetSchemaVersion == 8)
+                .TargetSchemaVersion = target;
         }
 
         private static void PointStarterAtAdditionalGeometry(SpatialLayoutCompatibilityProfilesData data,

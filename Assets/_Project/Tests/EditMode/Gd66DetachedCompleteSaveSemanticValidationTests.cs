@@ -384,8 +384,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static DetachedCanonicalSpatialSaveState Clone(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSerializationLimits limits)
         {
-            byte[] bytes = CanonicalSpatialSaveSerializer.Serialize(state, limits).Value;
-            return CanonicalSpatialSaveSerializer.Parse(bytes, limits).Value;
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> members =
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(state, limits);
+            Assert.That(members.IsValid, Is.True, string.Join(",", members.Issues));
+            byte[] bytes = Encoding.UTF8.GetBytes("{\"Authority\":" +
+                Encoding.UTF8.GetString(members.Value.Authority) + ",\"Floors\":" +
+                Encoding.UTF8.GetString(members.Value.Floors) + ",\"LifecycleAndOwnership\":null}");
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
+                CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(bytes, limits);
+            Assert.That(parsed.IsValid, Is.True, string.Join(",", parsed.Issues));
+            return parsed.Value;
         }
 
 

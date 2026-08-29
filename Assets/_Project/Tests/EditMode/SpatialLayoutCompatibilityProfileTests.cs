@@ -101,7 +101,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertPlacement(geometry.Layouts[1],CompatibilityRouteRole.Completion,1,10);
         }
 
-        [Test] public void ProductionReleasePolicyRejectsSchemaEightAndSchemaSevenSources()
+        [Test] public void ProductionReleasePolicyPreservesFrozenSevenAndCurrentEightBoundaries()
         {
             SpatialLayoutCompatibilityProfilesData production =
                 JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
@@ -109,17 +109,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(production.MigrationProfiles[0].MaximumSourceSchemaVersion,
                 Is.EqualTo(SaveMigration.LegacyCompatibilitySchemaVersion));
             Assert.That(production.MigrationProfiles[0].TargetSchemaVersion,
-                Is.EqualTo(SaveMigration.LatestSchemaVersion));
-            Assert.That(production.StarterProfiles[0].TargetSchemaVersion,
-                Is.EqualTo(SaveMigration.LatestSchemaVersion));
-            Assert.That(production.ContractSelections[0].TargetSchemaVersion,
-                Is.EqualTo(SaveMigration.LatestSchemaVersion));
+                Is.EqualTo(CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 7)
+                .TargetSchemaVersion, Is.EqualTo(7));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 7)
+                .TargetSchemaVersion, Is.EqualTo(7));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 8)
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 8)
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
 
             SpatialLayoutCompatibilityProfilesData schemaEight =
                 JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
             schemaEight.MigrationProfiles[0].TargetSchemaVersion = 8;
-            schemaEight.StarterProfiles[0].TargetSchemaVersion = 8;
-            schemaEight.ContractSelections[0].TargetSchemaVersion = 8;
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(schemaEight), Is.False);
 
             SpatialLayoutCompatibilityProfilesData schemaSevenSource =
@@ -518,7 +520,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void StrictCompatibilityWorkloadDimensionsHonorExactAndOneOverBoundaries()
         {
             SpatialLayoutCompatibilityProfilesData data=JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
-            AssertWorkloadBoundary(profiles,4,14,AuthoredCharacters(data));
+            int authoredNestedRecords = 1 + data.MigrationProfiles.Length + data.StarterProfiles.Length +
+                data.ContractSelections.Length + data.GeometryRecords.Length +
+                data.GeometryRecords.Sum(value => (value.Layouts?.Length ?? 0) +
+                    (value.Layouts ?? Array.Empty<CompatibilityLayoutVariant>()).Sum(layout =>
+                        layout.Placements?.Length ?? 0));
+            AssertWorkloadBoundary(profiles,4,authoredNestedRecords,AuthoredCharacters(data));
 
             CompatibilityLayoutGeometryRecord copy=JsonUtility.FromJson<CompatibilityLayoutGeometryRecord>(
                 JsonUtility.ToJson(data.GeometryRecords[0]));

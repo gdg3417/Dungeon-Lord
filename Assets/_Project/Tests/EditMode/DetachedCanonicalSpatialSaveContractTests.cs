@@ -18,7 +18,9 @@ namespace DungeonBuilder.M0.Tests
         {
             var source = new DetachedCanonicalSpatialSaveState
             {
-                Authority = NativeMarker(), Floors = null
+                Authority = NativeMarker(), Floors = null,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                    Array.Empty<SavedSpatialFloor>())
             };
             DetachedCanonicalSpatialSaveState canonical = Canonicalize(source);
             Assert.That(source.Floors, Is.Null);
@@ -483,7 +485,8 @@ namespace DungeonBuilder.M0.Tests
         private static CanonicalSpatialAuthorityMarker NativeMarker() => new CanonicalSpatialAuthorityMarker
         { CanonicalLayoutContractVersion = 1, CreationKind = CanonicalSpatialCreationKind.NativeCanonical };
         private static DetachedCanonicalSpatialSaveState State(params SavedSpatialFloor[] floors) =>
-            new DetachedCanonicalSpatialSaveState { Authority = NativeMarker(), Floors = floors };
+            new DetachedCanonicalSpatialSaveState { Authority = NativeMarker(), Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors) };
 
         private static SavedSpatialFloor Floor(string floorId, int index, params string[] roomIds)
         {

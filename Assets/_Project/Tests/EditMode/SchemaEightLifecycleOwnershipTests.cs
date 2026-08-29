@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using NUnit.Framework;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
@@ -262,3 +263,4 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
     }
 }
+#endif

@@ -571,7 +571,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-current.json"));
-            fileSystem.Seed(activePath, fixture.Result.Attempt.Candidate.GetBytes());
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(fixture.Result.Attempt.Candidate.GetBytes(),
+                fixture.Limits, out byte[] currentBytes), Is.True);
+            fileSystem.Seed(activePath, currentBytes);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
                 Supported(fileSystem, activePath));

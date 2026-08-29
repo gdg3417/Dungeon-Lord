@@ -70,7 +70,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             for (int index = 0; index < rootUnknownBefore.Length; index++)
                 Assert.That(classification.UnknownRootMembers[index].GetRawValueBytes(),
                     Is.EqualTo(rootUnknownBefore[index]));
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
                 result.Candidate.GetBytes(), SpatialLimits).IsValid, Is.True);
         }
 

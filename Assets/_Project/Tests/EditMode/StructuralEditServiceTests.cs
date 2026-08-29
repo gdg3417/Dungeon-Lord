@@ -566,7 +566,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(string definitionId)
         {
             PreviewFixture fixture = CreateR2(definitionId,
-                definitionId == "spatial.room.large_chamber" ? new TileCoordinate(4, 1) :
+                definitionId != "spatial.room.basic" ? new TileCoordinate(4, 1) :
                 new TileCoordinate(0, 6));
             const string nativeRoomId = "compat.floor.00.room.player.0000";
             fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.MonsterCategoryId,
