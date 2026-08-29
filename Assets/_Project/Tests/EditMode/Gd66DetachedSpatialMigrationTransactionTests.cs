@@ -2424,6 +2424,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(recoveryContext.TryCreateUnfinishedValidationContext(fixture.Result.Attempt.Descriptor,
                 fixture.Result.Attempt.TransactionId, fixture.Result.Attempt.DescriptorFingerprint,
                 fixture.Result.Attempt.CandidateSha256, out DetachedUnfinishedAttemptValidationContext unfinished), Is.True);
+            var currentContext = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
+                fixture.Production, fixture.LegacyBytes, fixture.Limits);
             return new SemanticFixtureExecution { Classification = fixture.Classification,
                 Attempt = fixture.Result.Attempt, State = parsed.State, Execute = executed,
                 FirstRecovery = recovered, SecondRecovery = recoveredAgain,

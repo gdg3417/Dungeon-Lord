@@ -244,7 +244,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             for (int i = 0; i < roomIds.Length; i++)
             {
                 rooms[i] = new RoomSpatialInstance { RoomInstanceId = roomIds[i], RoomDefinitionId = "room.basic",
-                    FloorId = floorId, Orientation = CardinalOrientation.North };
+                    FloorId = floorId, Orientation = CardinalOrientation.Zero };
                 nodes[i] = new FloorRouteNode { NodeId = roomIds[i] + ".node", FloorId = floorId,
                     Kind = FloorRouteNodeKind.Room, RoomInstanceId = roomIds[i] };
                 semantics[i] = new CanonicalRoomSemantics { RoomInstanceId = roomIds[i],
