@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
