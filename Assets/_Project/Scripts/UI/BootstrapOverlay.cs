@@ -264,6 +264,47 @@ namespace DungeonBuilder.M0
             RefreshOverlayText(); return result;
         }
 
+        public StructuralEditPreview PreviewStructuralDeletion()
+        {
+            StructuralEditPreview preview = _root?.PreviewStructuralDeletion(new StructuralDeletionRequest
+                { TargetRoomInstanceId = _selectedRenovationRoomInstanceId });
+            _structuralFeedback = BuildDeletionPreviewPresentation(preview); return preview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralDeletion()
+        {
+            if (_root?.StructuralDeletionPreview?.IsValid != true)
+            { _structuralFeedback = LocalizeStructuralReason(_root?.StructuralConstructionReasonKey); return null; }
+            DetachedCanonicalWriteResult result = _root.CommitStructuralDeletion();
+            _structuralFeedback = result.IsSuccess ? GetLocalizedString("ui.structural.deletion.commit.success") :
+                LocalizeStructuralReason(_root.StructuralConstructionReasonKey);
+            RefreshOverlayText(); return result;
+        }
+
+        public string BuildDeletionPreviewPresentation(StructuralEditPreview preview)
+        {
+            if (preview == null || !preview.IsValid) return LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
+            Dictionary<string, int> numbers = ResolveRequiredRouteRoomNumbers();
+            int number = numbers.TryGetValue(preview.TargetRoomInstanceId, out int value) ? value : 0;
+            RoomSpatialDefinition definition = (_root?.ProductionSpatialContent?.Catalog?.Rooms ??
+                Array.Empty<RoomSpatialDefinition>()).SingleOrDefault(r => r?.RoomDefinitionId == preview.RoomDefinitionId);
+            var lines = new List<string> { string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.deletion.preview.format"), number,
+                ResolveStructuralRoomDisplayName(definition)), string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.deletion.connection.format"),
+                GetLocalizedString(preview.ConnectionKind == FloorRouteConnectionKind.DirectDoorway
+                    ? "ui.structural.connection.direct" : "ui.structural.connection.corridor"),
+                preview.IncomingConnectionTiles.Length), string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.renovation.floor_space.format"), preview.PreviousUsedFloorSpace,
+                preview.ResultingUsedFloorSpace, preview.ResultingRemainingFloorSpace) };
+            int returned = preview.Consequences.Count(c => c.Kind == StructuralChangeKind.ContentReturned);
+            if (returned != 0) lines.Add(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.deletion.returned.format"), returned));
+            if (preview.Consequences.Any(c => c.Kind == StructuralChangeKind.FixedStructureMoved && !c.From.Equals(c.To)))
+                lines.Add(GetLocalizedString("ui.structural.deletion.terminal_moved"));
+            return string.Join("\n", lines);
+        }
+
         public string BuildRenovationPreviewPresentation(StructuralEditPreview preview)
         {
             if (preview == null || !preview.IsValid) return LocalizeStructuralReason(
@@ -1879,6 +1920,12 @@ namespace DungeonBuilder.M0
             GUI.enabled = enabled && _root.StructuralRenovationPreview?.IsValid == true;
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.commit.action"), button, buttonHeight))
                 CommitStructuralRenovation();
+            GUI.enabled = enabled;
+            if (GUILayout.Button(GetLocalizedString("ui.structural.deletion.preview.action"), button, buttonHeight))
+                PreviewStructuralDeletion();
+            GUI.enabled = enabled && _root.StructuralDeletionPreview?.IsValid == true;
+            if (GUILayout.Button(GetLocalizedString("ui.structural.deletion.commit.action"), button, buttonHeight))
+                CommitStructuralDeletion();
             GUI.enabled = enabled;
         }
 

@@ -39,9 +39,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsValid => DetachedCandidate != null && ReasonCodes.Length == 0;
     }
 
-    public enum StructuralEditOperation { Construction = 1, Movement = 2, Replacement = 3 }
+    public enum StructuralEditOperation { Construction = 1, Movement = 2, Replacement = 3, Deletion = 4 }
     public enum StructuralChangeKind { RoomAdded = 1, FixedStructureMoved = 2, EdgeAdded = 3, EdgeRemoved = 4,
-        RoomMoved = 5, RoomReplaced = 6, EdgeReconnected = 7, CorridorMoved = 8, ContentPreserved = 9 }
+        RoomMoved = 5, RoomReplaced = 6, EdgeReconnected = 7, CorridorMoved = 8, ContentPreserved = 9,
+        RoomRemoved = 10, ContentReturned = 11 }
     public sealed class StructuralChange
     {
         public StructuralChangeKind Kind { get; internal set; }
