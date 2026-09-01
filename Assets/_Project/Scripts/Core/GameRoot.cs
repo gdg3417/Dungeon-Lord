@@ -799,7 +799,8 @@ namespace DungeonBuilder.M0
         public void CycleSelectedMvpRoomSlotTarget()
         {
             if (Save == null) return;
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                Save, _runSimulationService?.Config, Content?.ProductionSpatialContent);
             int count = layout?.Rooms == null ? 0 : layout.Rooms.Length;
             if (count <= 0)
             {

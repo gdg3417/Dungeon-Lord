@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
+using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -194,6 +196,83 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Object.DestroyImmediate(overlayObject);
                 Object.DestroyImmediate(rootObject);
             }
+        }
+
+        [Test]
+        public void CanonicalRoomTargetCyclesThroughLargeChamberAndTargetsItsStableIdentity()
+        {
+            var go = new GameObject("CanonicalLargeChamberRoomTargetRoot");
+            try
+            {
+                Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
+                    Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                Assert.That(SchemaSevenToEightUpgrade.TryPrepare(
+                    source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
+                DetachedCompleteSaveValidationResult parsed =
+                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current,
+                        new DetachedCurrentTargetValidationContext(source.Compatibility,
+                            source.Production, source.LegacyBytes, source.Limits));
+                Assert.That(parsed.IsValid, Is.True, parsed.Reason);
+                RunSimulationConfig configuration =
+                    LegacyGameplayConfigurationContract.Parse(source.LegacyBytes);
+                DetachedCanonicalMutationResult firstRoom = DetachedCanonicalSpatialMutation.Prepare(
+                    parsed.State, DetachedCanonicalMutationRequest.Place(
+                        MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId),
+                    source.Production, source.Compatibility, configuration, source.Limits);
+                Assert.That(firstRoom.IsSuccess, Is.True, firstRoom.Reason);
+                StructuralEditPreview secondRoom = StructuralEditService.Preview(firstRoom.State,
+                    new StructuralConstructionRequest
+                    {
+                        RoomDefinitionId = "spatial.room.large_chamber",
+                        Anchor = new TileCoordinate(4, 1),
+                        Orientation = CardinalOrientation.Zero,
+                        TerminalConnectionPointId = "north"
+                    }, source.Production, source.Compatibility, configuration, source.Limits);
+                Assert.That(secondRoom.IsValid, Is.True, string.Join(",", secondRoom.ReasonCodes));
+
+                DetachedCanonicalSpatialSaveState state = secondRoom.DetachedCandidate;
+                RoomSpatialInstance largeChamber = state.Floors[0].Layout.Rooms.Single(room =>
+                    room.RoomDefinitionId == "spatial.room.large_chamber");
+                var save = new SaveData
+                {
+                    canonicalSpatialAuthority = state.Authority,
+                    spatialFloors = state.Floors,
+                    validatedCanonicalSpatialState = state,
+                    mvpSelectedRoomSlotIndex = 0
+                };
+                var content = new ContentService();
+                SetProperty(content, "ProductionSpatialContent", source.Production);
+                GameRoot root = go.AddComponent<GameRoot>();
+                SetProperty(root, "Save", save);
+                SetProperty(root, "Content", content);
+                typeof(GameRoot).GetField("_runSimulationService",
+                    BindingFlags.Instance | BindingFlags.NonPublic).SetValue(root,
+                    new RunSimulationService(configuration));
+
+                root.CycleSelectedMvpRoomSlotTarget();
+                Assert.That(save.mvpSelectedRoomSlotIndex, Is.EqualTo(1));
+                root.CycleSelectedMvpRoomSlotTarget();
+                Assert.That(save.mvpSelectedRoomSlotIndex, Is.Zero);
+                root.CycleSelectedMvpRoomSlotTarget();
+
+                CanonicalMvpRouteProjectionResult route =
+                    CanonicalMvpRouteProjection.InspectWithProductionContent(save, source.Production);
+                Assert.That(route.AuthorityState,
+                    Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+                string targetRoomId = GameRoot.ResolveCanonicalMutationTargetRoomId(save,
+                    configuration, source.Production, route.Rooms);
+                Assert.That(targetRoomId, Is.EqualTo(largeChamber.RoomInstanceId));
+                DetachedCanonicalMutationResult placement = DetachedCanonicalSpatialMutation.Prepare(
+                    state, DetachedCanonicalMutationRequest.Place(
+                        MvpDungeonPlacementIds.MonsterCategoryId,
+                        "placement.option.monster.skeleton", targetRoomId), source.Production,
+                    source.Compatibility, configuration, source.Limits);
+                Assert.That(placement.IsSuccess, Is.True, placement.Reason);
+                Assert.That(placement.State.Floors[0].RoomContents.Assignments.Single(assignment =>
+                    assignment.OptionId == "placement.option.monster.skeleton").RoomInstanceId,
+                    Is.EqualTo(largeChamber.RoomInstanceId));
+            }
+            finally { Object.DestroyImmediate(go); }
         }
 
         [Test]
