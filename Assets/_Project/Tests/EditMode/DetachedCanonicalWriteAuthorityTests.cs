@@ -53,6 +53,49 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     value.FixedStructureDefinitionId == "spatial.fixed.completion_terminal").Anchor));
         }
 
+        [TestCase(6, FloorRouteConnectionKind.DirectDoorway, 0)]
+        [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, 1)]
+        public void StructuralDeletionCommitPersistsAndReopensInverseTail(int targetY,
+            FloorRouteConnectionKind expectedKind, int expectedCorridorTiles)
+        {
+            Fixture fixture = CreateR1();
+            DetachedCanonicalWriteResult construction = fixture.Execute(
+                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, "north")));
+            fixture.Accept(construction);
+            SavedSpatialFloor before = fixture.State.Floors[0];
+            RoomSpatialInstance target = before.Layout.Rooms.Single(room =>
+                room.RoomInstanceId == "compat.floor.00.room.player.0000");
+            FloorRouteNode targetNode = before.Layout.Nodes.Single(node => node.RoomInstanceId == target.RoomInstanceId);
+            FloorRouteNode completion = before.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Completion);
+            string terminalId = before.FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId;
+            string[] retiredEdges = before.Layout.Edges.Where(edge => edge.SourceNodeId == targetNode.NodeId ||
+                edge.DestinationNodeId == targetNode.NodeId).Select(edge => edge.EdgeId).ToArray();
+            StructuralEditPreview deletion = StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = target.RoomInstanceId }, fixture.RemovalPolicy,
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(deletion.IsValid, Is.True, string.Join(",", deletion.ReasonCodes));
+
+            DetachedCanonicalWriteResult result = fixture.Execute(DetachedCanonicalMutationRequest.Delete(deletion));
+
+            AssertCandidateSuccess(fixture, result);
+            SavedSpatialFloor reopened = result.Validation.State.Floors[0];
+            Assert.That(reopened.Layout.Rooms.Any(room => room.RoomInstanceId == target.RoomInstanceId), Is.False);
+            Assert.That(reopened.Layout.Nodes.Any(node => node.NodeId == targetNode.NodeId), Is.False);
+            Assert.That(reopened.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Completion).NodeId,
+                Is.EqualTo(completion.NodeId));
+            Assert.That(reopened.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId, Is.EqualTo(terminalId));
+            Assert.That(reopened.Layout.Edges.Any(edge => retiredEdges.Contains(edge.EdgeId)), Is.False);
+            FloorRouteEdge repaired = reopened.Layout.Edges.Single(edge => edge.DestinationNodeId == completion.NodeId);
+            Assert.That(repaired.EdgeId, Does.StartWith(reopened.FloorInstanceId + ".edge.native."));
+            Assert.That(repaired.ConnectionKind, Is.EqualTo(expectedKind));
+            Assert.That(repaired.Footprint?.OccupiedTiles?.Length ?? 0, Is.EqualTo(expectedCorridorTiles));
+            DetachedCanonicalSaveSessionResult durable = DetachedCanonicalSaveSession.Open(
+                fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context, fixture.Profile);
+            Assert.That(durable.IsSuccess, Is.True, durable.Reason);
+        }
+
         [Test]
         public void StructuralPhysicalCorridorCommitPersistsFootprint()
         {
@@ -1109,11 +1152,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedCurrentTargetValidationContext Context;
             internal DetachedCanonicalSaveSession Session;
             internal DetachedCanonicalSpatialSaveState State;
+            internal StructuralContentRemovalPolicySnapshot RemovalPolicy;
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
-                Production, Compatibility, Configuration, Context, Profile);
+                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null)
             {
@@ -1153,10 +1197,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 string path = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-canonical-write-" +
                     Guid.NewGuid().ToString("N") + ".json"));
                 fs.Seed(path, candidate);
+                Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(File.ReadAllBytes(
+                    StructuralContentRemovalPolicyAuthority.ProductionPath), out var removalPolicy), Is.True);
                 return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
                     Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
-                    Runtime = runtime, FileSystem = fs, ActivePath = path };
+                    Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>

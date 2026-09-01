@@ -1080,6 +1080,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void Deletion_PhysicalCorridorInverseTailPreservesExactAuthoredRelationship()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(0, 7));
+            SavedSpatialFloor before = fixture.State.Floors[0]; string target = "compat.floor.00.room.player.0000";
+            FloorRouteNode targetNode = before.Layout.Nodes.Single(n => n.RoomInstanceId == target);
+            FloorRouteNode completion = before.Layout.Nodes.Single(n => n.Kind == FloorRouteNodeKind.Completion);
+            string terminalId = before.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal)
+                .FixedStructureInstanceId;
+            string[] removedEdges = before.Layout.Edges.Where(e => e.SourceNodeId == targetNode.NodeId ||
+                e.DestinationNodeId == targetNode.NodeId).Select(e => e.EdgeId).ToArray();
+            StructuralEditPreview first = Delete(fixture, target), second = Delete(fixture, target);
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            Assert.That(first.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            FloorRouteEdge repaired = first.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
+                e.DestinationNodeId == completion.NodeId);
+            Assert.That(repaired.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone"));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 6) }, repaired.Footprint.OccupiedTiles);
+            Assert.That(first.DetachedCandidate.Floors[0].FixedStructures.Single(f =>
+                f.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId, Is.EqualTo(terminalId));
+            Assert.That(first.DetachedCandidate.Floors[0].Layout.Nodes.Single(n =>
+                n.Kind == FloorRouteNodeKind.Completion).NodeId, Is.EqualTo(completion.NodeId));
+            Assert.That(first.DetachedCandidate.Floors[0].Layout.Edges.Any(e => removedEdges.Contains(e.EdgeId)), Is.False);
+            Assert.That(repaired.EdgeId, Does.StartWith(before.FloorInstanceId + ".edge.native."));
+            Assert.That(first.ResultingUsedFloorSpace, Is.LessThan(first.PreviousUsedFloorSpace));
+            CollectionAssert.AreEqual(Bytes(first.DetachedCandidate, fixture.Limits),
+                Bytes(second.DetachedCandidate, fixture.Limits));
+            CollectionAssert.AreEqual(first.Consequences.Select(ConsequenceKey),
+                second.Consequences.Select(ConsequenceKey));
+        }
+
+        [Test]
         public void Deletion_ReturnsMonsterAndTrapWithStableIdentityAndRoundTrips()
         {
             PreviewFixture fixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
@@ -1099,6 +1130,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 reopened.Value.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId));
         }
 
+        [Test]
+        public void Deletion_TestOwnedDestructivePolicyProducesRemovedNotReturnedConsequence()
+        {
+            PreviewFixture fixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, "placement.category.monster",
+                "placement.option.monster.skeleton", target);
+            string json = File.ReadAllText(StructuralContentRemovalPolicyAuthority.ProductionPath)
+                .Replace("\"Policy\": 1", "\"Policy\": 2");
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(
+                System.Text.Encoding.UTF8.GetBytes(json), out var destructive), Is.True);
+            StructuralEditPreview preview = StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = target }, destructive,
+                fixture.Production, fixture.Configuration, fixture.Limits);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            Assert.That(preview.Consequences.Any(c => c.Kind == StructuralChangeKind.ContentRemoved &&
+                c.ProposedDefinitionId == "placement.option.monster.skeleton"), Is.True);
+            Assert.That(preview.Consequences.Any(c => c.Kind == StructuralChangeKind.ContentReturned), Is.False);
+            Assert.That(preview.DetachedCandidate.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+        }
+
         [TestCase("placement.option.loot_node.basic")]
         [TestCase("placement.option.loot_node.hidden_cache")]
         [TestCase("placement.option.loot_node.glittering_hoard")]
@@ -1110,6 +1161,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fixture.State = Place(fixture, fixture.State, "placement.category.loot_node", option, target);
             AssertDeleteInvalidUnchanged(fixture, target,
                 StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason);
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+        }
+
+        [Test]
+        public void Deletion_ReportsEveryUnresolvedAssignmentInCanonicalOrder()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            string target = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, "placement.category.loot_node",
+                "placement.option.loot_node.hidden_cache", target);
+            fixture.State = Place(fixture, fixture.State, "placement.category.loot_node",
+                "placement.option.loot_node.basic", target);
+            fixture.State = Place(fixture, fixture.State, "placement.category.loot_node",
+                "placement.option.loot_node.glittering_hoard", target);
+            byte[] before = Bytes(fixture.State, fixture.Limits);
+            StructuralEditPreview preview = Delete(fixture, target);
+            Assert.That(preview.IsValid, Is.False);
+            CollectionAssert.AreEqual(new[] { "placement.option.loot_node.basic",
+                "placement.option.loot_node.glittering_hoard", "placement.option.loot_node.hidden_cache" },
+                preview.BlockingContentOptionIds);
+            CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
             Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
         }
 
@@ -1154,6 +1226,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             catalog.Corridors.Single().CompatibleSocketTypeIds = System.Array.Empty<string>();
             AssertDeleteInvalidUnchanged(fixture, "compat.floor.00.room.player.0000",
                 StructuralEditService.ConnectionUnavailableReason, Snapshot(fixture, catalog));
+        }
+
+        [Test]
+        public void Deletion_ZeroAndMultipleDerivedRelationshipsFailWithoutMutation()
+        {
+            PreviewFixture zero = CreateR2(); SpatialContentCatalog zeroCatalog = zero.Production.Catalog;
+            RoomSpatialDefinition predecessor = zeroCatalog.Rooms.Single(room =>
+                room.RoomDefinitionId == "spatial.room.basic");
+            predecessor.ConnectionPoints = predecessor.ConnectionPoints.Where(point => point.ConnectionPointId != "north").ToArray();
+            AssertDeleteInvalidUnchanged(zero, "compat.floor.00.room.player.0000",
+                StructuralEditService.ConnectionUnavailableReason, Snapshot(zero, zeroCatalog));
+
+            PreviewFixture multiple = CreateR2(); SpatialContentCatalog multipleCatalog = multiple.Production.Catalog;
+            RoomSpatialDefinition multiplePredecessor = multipleCatalog.Rooms.Single(room =>
+                room.RoomDefinitionId == "spatial.room.basic");
+            SpatialConnectionPointDefinition north = multiplePredecessor.ConnectionPoints.Single(point =>
+                point.ConnectionPointId == "north");
+            multiplePredecessor.ConnectionPoints = multiplePredecessor.ConnectionPoints.Concat(new[] {
+                new SpatialConnectionPointDefinition { ConnectionPointId = "test.duplicate.north",
+                    Offset = north.Offset, Facing = north.Facing, SocketTypeId = north.SocketTypeId } }).ToArray();
+            AssertDeleteInvalidUnchanged(multiple, "compat.floor.00.room.player.0000",
+                StructuralEditService.ConnectionAmbiguousReason, Snapshot(multiple, multipleCatalog));
         }
 
         [Test]

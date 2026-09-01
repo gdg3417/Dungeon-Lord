@@ -310,6 +310,10 @@ namespace DungeonBuilder.M0
                 .Select(c => LocalizePlacementOption(c.ProposedDefinitionId)).ToArray();
             if (returned.Length != 0) lines.Add(string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.deletion.returned.format"), string.Join(", ", returned)));
+            string[] removed = preview.Consequences.Where(c => c.Kind == StructuralChangeKind.ContentRemoved)
+                .Select(c => LocalizePlacementOption(c.ProposedDefinitionId)).ToArray();
+            if (removed.Length != 0) lines.Add(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.structural.deletion.removed.format"), string.Join(", ", removed)));
             if (preview.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor)
                 lines.Add(string.Format(CultureInfo.InvariantCulture,
                     GetLocalizedString("ui.structural.corridor_tiles.format"), preview.IncomingConnectionTiles.Length,

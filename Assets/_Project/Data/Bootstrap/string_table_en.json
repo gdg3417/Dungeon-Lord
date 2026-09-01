@@ -3138,6 +3138,7 @@
     {"key": "ui.structural.deletion.connection.format", "text": "Reconnect to Completion: {0} ({1} corridor tiles)"},
     {"key": "ui.structural.deletion.returned.format", "text": "Contents returned to your custody: {0}"},
     {"key": "ui.structural.deletion.terminal_moved", "text": "Completion Terminal moves to the validated connection."},
-    {"key": "ui.structural.deletion.blocking.format", "text": "Blocking content: {0}"}
+    {"key": "ui.structural.deletion.blocking.format", "text": "Blocking content: {0}"},
+    {"key": "ui.structural.deletion.removed.format", "text": "Contents removed permanently: {0}"}
   ]
 }

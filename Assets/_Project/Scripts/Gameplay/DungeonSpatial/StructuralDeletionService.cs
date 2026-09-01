@@ -53,8 +53,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             FloorRouteNode predecessor = nodes.SingleOrDefault(n => n?.NodeId == incoming[0].SourceNodeId);
             RoomSpatialInstance predecessorRoom = rooms.SingleOrDefault(r => r?.RoomInstanceId == predecessor?.RoomInstanceId);
             if (predecessorRoom == null) return Fail(result, MinimumRoomReason);
-            var requiredRoomIds = new HashSet<string>(nodes.Where(n => n?.Kind == FloorRouteNodeKind.Room)
-                .Select(n => n.RoomInstanceId), StringComparer.Ordinal);
+            if (!TryRequiredPathRoomIds(floor, out HashSet<string> requiredRoomIds))
+                return Fail(result, StructuralEditService.RequiredRouteAmbiguousReason);
             if (semantics.Count(s => s != null && requiredRoomIds.Contains(s.RoomInstanceId) &&
                     s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer) <= 1)
                 return Fail(result, MinimumRoomReason);
@@ -62,15 +62,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomContentAssignment[] assigned = (floor.RoomContents?.Assignments ?? Array.Empty<RoomContentAssignment>())
                 .Where(a => a?.RoomInstanceId == target.RoomInstanceId).OrderBy(a => a.AssignmentId, StringComparer.Ordinal).ToArray();
             var dispositions = new List<Tuple<RoomContentAssignment, StructuralContentRemovalPolicy>>();
+            var blockers = new List<string>();
             foreach (RoomContentAssignment assignment in assigned)
             {
                 if (!StructuralContentRemovalPolicyAuthority.TryResolve(policy, assignment.CategoryId,
                         assignment.OptionId, out StructuralContentRemovalPolicy disposition, out string reason))
-                { result.BlockingContentOptionIds = new[] { assignment.OptionId };
-                    return Fail(result, reason);
-                }
+                { blockers.Add(assignment.OptionId); continue; }
                 dispositions.Add(Tuple.Create(assignment, disposition));
             }
+            if (blockers.Count != 0)
+            { result.BlockingContentOptionIds = blockers.OrderBy(value => value, StringComparer.Ordinal).ToArray();
+              return Fail(result, StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason); }
             RoomSpatialDefinition predecessorDefinition = catalog.Rooms.SingleOrDefault(r =>
                 r?.RoomDefinitionId == predecessorRoom.RoomDefinitionId);
             RoomSpatialDefinition targetDefinition = catalog.Rooms.SingleOrDefault(r =>
@@ -94,12 +96,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 catalog.FixedStructures);
             if (!sourceValidation.IsValid)
                 return Fail(result, StructuralRenovationService.Map(sourceValidation.Issues));
-            SpatialConnectionPointDefinition[] predecessorPoints = (predecessorDefinition.ConnectionPoints ??
-                Array.Empty<SpatialConnectionPointDefinition>()).Where(point => ExistingRelationshipUses(point,
-                    predecessorRoom, target, targetDefinition, incoming[0], catalog)).ToArray();
-            if (predecessorPoints.Length == 0) return Fail(result, StructuralEditService.ConnectionUnavailableReason);
-            if (predecessorPoints.Length != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
-            SpatialConnectionPointDefinition predecessorPoint = predecessorPoints[0];
+            ExistingConnection[] relationships = ExistingRelationships(predecessorRoom, predecessorDefinition,
+                target, targetDefinition, incoming[0], catalog).ToArray();
+            if (relationships.Length == 0) return Fail(result, StructuralEditService.ConnectionUnavailableReason);
+            if (relationships.Length != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
+            ExistingConnection relationship = relationships[0];
+            SpatialConnectionPointDefinition predecessorPoint = relationship.PredecessorPoint;
             CardinalOrientation direction = StructuralEditService.Rotate(predecessorPoint.Facing, predecessorRoom.Orientation);
             CardinalOrientation[] terminalOrientations = (terminalDefinition.AllowedOrientations ??
                 Array.Empty<CardinalOrientation>()).Where(orientation =>
@@ -110,9 +112,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!Clone(seed, limits, out DetachedCanonicalSpatialSaveState candidate)) return result;
             SavedSpatialFloor cf = candidate.Floors[0]; SavedFixedSpatialStructure ct = cf.FixedStructures.Single(f =>
                     f.FixedStructureInstanceId == terminal.FixedStructureInstanceId);
-            TileCoordinate source = World(predecessorPoint.Offset, predecessorRoom.Anchor,
-                predecessorRoom.Orientation, predecessorDefinition.GrossFootprint);
-            TileCoordinate terminalSocket = Step(source, direction);
+            TileCoordinate terminalSocket = relationship.TargetWorld;
             ct.Anchor = AnchorFor(terminalSocket, terminalPoint.Offset, terminalOrientations[0],
                 terminalDefinition.GrossFootprint); ct.Orientation = terminalOrientations[0];
                 cf.Layout.Rooms = cf.Layout.Rooms.Where(r => r.RoomInstanceId != target.RoomInstanceId).ToArray();
@@ -175,12 +175,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return preview;
         }
 
-        private static bool ExistingRelationshipUses(SpatialConnectionPointDefinition predecessorPoint,
-            RoomSpatialInstance predecessor, RoomSpatialInstance target, RoomSpatialDefinition targetDefinition,
-            FloorRouteEdge edge, SpatialContentCatalog catalog)
+        private sealed class ExistingConnection
+        { internal SpatialConnectionPointDefinition PredecessorPoint; internal TileCoordinate TargetWorld; }
+
+        private static IEnumerable<ExistingConnection> ExistingRelationships(RoomSpatialInstance predecessor,
+            RoomSpatialDefinition predecessorDefinition, RoomSpatialInstance target,
+            RoomSpatialDefinition targetDefinition, FloorRouteEdge edge, SpatialContentCatalog catalog)
         {
-            TileCoordinate source = World(predecessorPoint.Offset, predecessor.Anchor,
-                predecessor.Orientation, catalog.Rooms.Single(r => r.RoomDefinitionId == predecessor.RoomDefinitionId).GrossFootprint);
+            foreach (SpatialConnectionPointDefinition predecessorPoint in predecessorDefinition.ConnectionPoints ??
+                Array.Empty<SpatialConnectionPointDefinition>())
+            {
+            TileCoordinate source = World(predecessorPoint.Offset, predecessor.Anchor, predecessor.Orientation,
+                predecessorDefinition.GrossFootprint);
             CardinalOrientation facing = StructuralEditService.Rotate(predecessorPoint.Facing, predecessor.Orientation);
             foreach (SpatialConnectionPointDefinition targetPoint in targetDefinition.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
             {
@@ -188,7 +194,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     StructuralEditService.Rotate(targetPoint.Facing, target.Orientation) != Opposite(facing)) continue;
                 TileCoordinate destination = World(targetPoint.Offset, target.Anchor, target.Orientation, targetDefinition.GrossFootprint);
                 if (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
-                { if (Step(source, facing).Equals(destination)) return true; continue; }
+                { if (Step(source, facing).Equals(destination)) yield return new ExistingConnection
+                    { PredecessorPoint = predecessorPoint, TargetWorld = destination }; continue; }
                 TileCoordinate[] tiles = edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
                 CorridorSpatialDefinition corridor = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
                     .SingleOrDefault(value => value?.CorridorDefinitionId == edge.CorridorDefinitionId);
@@ -202,9 +209,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(predecessorPoint.SocketTypeId) &&
                     (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(targetPoint.SocketTypeId) &&
                     tiles.Contains(Step(source, facing)) &&
-                    tiles.Contains(Step(destination, Opposite(facing)))) return true;
+                    tiles.Contains(Step(destination, Opposite(facing)))) yield return new ExistingConnection
+                        { PredecessorPoint = predecessorPoint, TargetWorld = destination };
             }
-            return false;
+            }
+        }
+
+        private static bool TryRequiredPathRoomIds(SavedSpatialFloor floor, out HashSet<string> roomIds)
+        {
+            roomIds = new HashSet<string>(StringComparer.Ordinal);
+            FloorRouteNode[] nodes = floor.Layout?.Nodes ?? Array.Empty<FloorRouteNode>();
+            FloorRouteEdge[] required = (floor.Layout?.Edges ?? Array.Empty<FloorRouteEdge>()).Where(edge =>
+                edge?.Classification == RouteClassification.Required).ToArray();
+            FloorRouteNode current = nodes.SingleOrDefault(node => node?.Kind == FloorRouteNodeKind.Entrance);
+            FloorRouteNode completion = nodes.SingleOrDefault(node => node?.Kind == FloorRouteNodeKind.Completion);
+            if (current == null || completion == null) return false;
+            var visited = new HashSet<string>(StringComparer.Ordinal);
+            while (current.NodeId != completion.NodeId && visited.Add(current.NodeId))
+            {
+                FloorRouteEdge[] outgoing = required.Where(edge => edge.SourceNodeId == current.NodeId).ToArray();
+                if (outgoing.Length != 1) return false;
+                current = nodes.SingleOrDefault(node => node?.NodeId == outgoing[0].DestinationNodeId);
+                if (current == null) return false;
+                if (current.Kind == FloorRouteNodeKind.Room) roomIds.Add(current.RoomInstanceId);
+            }
+            return current.NodeId == completion.NodeId && required.Length == visited.Count;
         }
 
         private static StructuralEditPreview Fail(StructuralEditPreview value, string reason) { value.DetachedCandidate = null; value.ReasonCodes = new[] { reason }; return value; }
