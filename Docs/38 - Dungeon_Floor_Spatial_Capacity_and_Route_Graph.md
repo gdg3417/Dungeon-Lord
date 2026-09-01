@@ -1,11 +1,11 @@
 **System Spec 38: Dungeon Floor Spatial Capacity and Route Graph**
 
+
+**Current Phase 3B2B status (2026-09-01):** Leaf deletion implementation is present and under static review and required Unity validation. Phase 3 is not closed; Phase 4 remains unimplemented.
 **Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
 
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR **Current implementation status (2026-09-01):** Floor 1 supports deterministic construction, movement, replacement, and final required-route leaf deletion with localized preview, schema-8 identity retirement/returned custody, and atomic persistence. Phase 3 is implementation-complete pending external Unity validation; Phase 4 remains outside this implementation.
-
-#186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
 
 *Dungeon Builder, locked candidate specification for implementation planning*

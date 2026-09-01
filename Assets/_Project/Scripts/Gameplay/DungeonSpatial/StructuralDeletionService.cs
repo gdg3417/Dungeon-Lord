@@ -41,7 +41,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             FloorRouteNode targetNode = targetNodes[0]; RoomSpatialInstance target = targets[0];
             CanonicalRoomSemantics[] semantics = floor.RoomContents?.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>();
             CanonicalRoomSemantics[] targetSemantics = semantics.Where(s => s?.RoomInstanceId == target.RoomInstanceId &&
-                s.LegacyRoomOriginKind == LegacyRoomOriginKind.CanonicalPlayerPlaced).ToArray();
+                s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer).ToArray();
             if (targetSemantics.Length != 1) return Fail(result, StructuralEditService.TargetRoomNotBuildableReason);
             FloorRouteNode completion = nodes.SingleOrDefault(n => n?.Kind == FloorRouteNodeKind.Completion);
             FloorRouteEdge[] outgoing = edges.Where(e => e?.Classification == RouteClassification.Required &&
@@ -53,7 +53,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             FloorRouteNode predecessor = nodes.SingleOrDefault(n => n?.NodeId == incoming[0].SourceNodeId);
             RoomSpatialInstance predecessorRoom = rooms.SingleOrDefault(r => r?.RoomInstanceId == predecessor?.RoomInstanceId);
             if (predecessorRoom == null) return Fail(result, MinimumRoomReason);
-            if (semantics.Count(s => s?.LegacyRoomOriginKind == LegacyRoomOriginKind.CanonicalPlayerPlaced) <= 1)
+            var requiredRoomIds = new HashSet<string>(nodes.Where(n => n?.Kind == FloorRouteNodeKind.Room)
+                .Select(n => n.RoomInstanceId), StringComparer.Ordinal);
+            if (semantics.Count(s => s != null && requiredRoomIds.Contains(s.RoomInstanceId) &&
+                    s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer) <= 1)
                 return Fail(result, MinimumRoomReason);
 
             RoomContentAssignment[] assigned = (floor.RoomContents?.Assignments ?? Array.Empty<RoomContentAssignment>())
@@ -63,11 +66,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!StructuralContentRemovalPolicyAuthority.TryResolve(policy, assignment.CategoryId,
                         assignment.OptionId, out StructuralContentRemovalPolicy disposition, out string reason))
+                { result.BlockingContentOptionIds = new[] { assignment.OptionId };
                     return Fail(result, reason);
+                }
                 dispositions.Add(Tuple.Create(assignment, disposition));
             }
             RoomSpatialDefinition predecessorDefinition = catalog.Rooms.SingleOrDefault(r =>
                 r?.RoomDefinitionId == predecessorRoom.RoomDefinitionId);
+            RoomSpatialDefinition targetDefinition = catalog.Rooms.SingleOrDefault(r =>
+                r?.RoomDefinitionId == target.RoomDefinitionId);
             FixedSpatialStructureDefinition terminalDefinition = null;
             SavedFixedSpatialStructure terminal = floor.FixedStructures.SingleOrDefault(f =>
                 f?.Kind == FixedSpatialStructureKind.CompletionTerminal);
@@ -76,43 +83,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialConnectionPointDefinition terminalPoint = terminalDefinition?.ConnectionPoints?.SingleOrDefault();
             FloorSpatialConfiguration floorDefinition = catalog.Floors.SingleOrDefault(f =>
                 f?.FloorDefinitionId == floor.FloorDefinitionId && f.FloorIndex == floor.FloorIndex);
-            if (predecessorDefinition == null || terminal == null || terminalDefinition == null ||
+            if (predecessorDefinition == null || targetDefinition == null || terminal == null || terminalDefinition == null ||
                 terminalPoint == null || floorDefinition == null) return Fail(result, StructuralEditService.LayoutInvalidReason);
-
-            var candidates = new List<StructuralEditPreview>(); bool lengthInvalid = false;
-            CorridorSpatialDefinition[] corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
-                .Where(c => c != null && c.Category == CorridorSpatialCategory.Straight &&
-                    (floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>()).Contains(c.CorridorDefinitionId)).ToArray();
-            foreach (SpatialConnectionPointDefinition point in predecessorDefinition.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (CardinalOrientation orientation in terminalDefinition.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
-            {
-                CardinalOrientation facing = StructuralEditService.Rotate(point.Facing, predecessorRoom.Orientation);
-                if (StructuralEditService.Rotate(terminalPoint.Facing, orientation) != Opposite(facing) ||
-                    !Compatible(point.SocketTypeId, terminalPoint.SocketTypeId, catalog)) continue;
-                TryCandidate(0, null, point, orientation);
-                foreach (CorridorSpatialDefinition corridor in corridors)
-                    for (int length = corridor.MinimumLength; length <= corridor.MaximumLength; length++)
-                        TryCandidate(length, corridor, point, orientation);
-            }
-            if (candidates.Count == 0) return Fail(result, lengthInvalid ? StructuralEditService.CorridorLengthReason :
-                StructuralEditService.ConnectionUnavailableReason);
-            if (candidates.Count != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
-            return candidates[0];
-
-            void TryCandidate(int length, CorridorSpatialDefinition corridor, SpatialConnectionPointDefinition point,
-                CardinalOrientation terminalOrientation)
-            {
-                if (corridor != null && (corridor.Width != 1 || !(corridor.AllowedOrientations ??
-                    Array.Empty<CardinalOrientation>()).Contains(facingAxis(point, predecessorRoom)))) { lengthInvalid = true; return; }
-                if (!Clone(seed, limits, out DetachedCanonicalSpatialSaveState candidate)) return;
-                SavedSpatialFloor cf = candidate.Floors[0]; SavedFixedSpatialStructure ct = cf.FixedStructures.Single(f =>
+            var workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+            string sourceGeometryReason = StructuralRenovationService.InspectGeometry(floor, floorDefinition,
+                catalog, workload, true);
+            if (sourceGeometryReason != null) return Fail(result, sourceGeometryReason);
+            FloorLayoutValidationResult sourceValidation = FloorLayoutValidator.Validate(floor.Layout,
+                floorDefinition, catalog.Rooms, catalog.Corridors, workload, floor.FixedStructures,
+                catalog.FixedStructures);
+            if (!sourceValidation.IsValid)
+                return Fail(result, StructuralRenovationService.Map(sourceValidation.Issues));
+            SpatialConnectionPointDefinition[] predecessorPoints = (predecessorDefinition.ConnectionPoints ??
+                Array.Empty<SpatialConnectionPointDefinition>()).Where(point => ExistingRelationshipUses(point,
+                    predecessorRoom, target, targetDefinition, incoming[0], catalog)).ToArray();
+            if (predecessorPoints.Length == 0) return Fail(result, StructuralEditService.ConnectionUnavailableReason);
+            if (predecessorPoints.Length != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
+            SpatialConnectionPointDefinition predecessorPoint = predecessorPoints[0];
+            CardinalOrientation direction = StructuralEditService.Rotate(predecessorPoint.Facing, predecessorRoom.Orientation);
+            CardinalOrientation[] terminalOrientations = (terminalDefinition.AllowedOrientations ??
+                Array.Empty<CardinalOrientation>()).Where(orientation =>
+                    StructuralEditService.Rotate(terminalPoint.Facing, orientation) == Opposite(direction) &&
+                    Compatible(predecessorPoint.SocketTypeId, terminalPoint.SocketTypeId, catalog)).ToArray();
+            if (terminalOrientations.Length == 0) return Fail(result, StructuralEditService.ConnectionUnavailableReason);
+            if (terminalOrientations.Length != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
+            if (!Clone(seed, limits, out DetachedCanonicalSpatialSaveState candidate)) return result;
+            SavedSpatialFloor cf = candidate.Floors[0]; SavedFixedSpatialStructure ct = cf.FixedStructures.Single(f =>
                     f.FixedStructureInstanceId == terminal.FixedStructureInstanceId);
-                TileCoordinate source = World(point.Offset, predecessorRoom.Anchor, predecessorRoom.Orientation,
-                    predecessorDefinition.GrossFootprint); CardinalOrientation direction = StructuralEditService.Rotate(point.Facing, predecessorRoom.Orientation);
-                TileCoordinate socket = source; var tiles = new List<TileCoordinate>();
-                for (int i = 0; i < length; i++) { socket = Step(socket, direction); tiles.Add(socket); }
-                socket = Step(socket, direction); ct.Anchor = AnchorFor(socket, terminalPoint.Offset,
-                    terminalOrientation, terminalDefinition.GrossFootprint); ct.Orientation = terminalOrientation;
+            TileCoordinate source = World(predecessorPoint.Offset, predecessorRoom.Anchor,
+                predecessorRoom.Orientation, predecessorDefinition.GrossFootprint);
+            TileCoordinate terminalSocket = Step(source, direction);
+            ct.Anchor = AnchorFor(terminalSocket, terminalPoint.Offset, terminalOrientations[0],
+                terminalDefinition.GrossFootprint); ct.Orientation = terminalOrientations[0];
                 cf.Layout.Rooms = cf.Layout.Rooms.Where(r => r.RoomInstanceId != target.RoomInstanceId).ToArray();
                 cf.Layout.Nodes = cf.Layout.Nodes.Where(n => n.NodeId != targetNode.NodeId).ToArray();
                 cf.Layout.Edges = cf.Layout.Edges.Where(e => e.EdgeId != incoming[0].EdgeId && e.EdgeId != outgoing[0].EdgeId).ToArray();
@@ -124,40 +126,85 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             new ReturnedStructuralContent { AssignmentId = disposition.Item1.AssignmentId,
                                 CategoryId = disposition.Item1.CategoryId, OptionId = disposition.Item1.OptionId,
                                 Sequence = disposition.Item1.Sequence, RemovalDisposition = StructuralContentRemovalDisposition.ReturnToPlayerCustody }}).ToArray();
-                if (!NativeStructuralIdentity.TryAllocateFreshEdgeIdentity(candidate, cf.FloorInstanceId,
-                    out string edgeId, out long next, out _)) return;
+            if (!NativeStructuralIdentity.TryAllocateFreshEdgeIdentity(candidate, cf.FloorInstanceId,
+                    out string edgeId, out long next, out string identityReason)) return Fail(result, identityReason);
                 candidate.LifecycleAndOwnership.Floors.Single(l => l.FloorInstanceId == cf.FloorInstanceId).NextNativeEdgeOrdinal = next;
-                cf.Layout.Edges = cf.Layout.Edges.Concat(new[] { new FloorRouteEdge { EdgeId = edgeId,
+            var replacementEdge = new FloorRouteEdge { EdgeId = edgeId,
                     FloorId = cf.FloorInstanceId, SourceNodeId = predecessor.NodeId, DestinationNodeId = completion.NodeId,
-                    Classification = RouteClassification.Required, OptionalBranchId = string.Empty,
-                    ConnectionKind = corridor == null ? FloorRouteConnectionKind.DirectDoorway : FloorRouteConnectionKind.PhysicalCorridor,
-                    CorridorDefinitionId = corridor?.CorridorDefinitionId ?? string.Empty,
-                    Footprint = corridor == null ? null : new ResolvedTileFootprint(tiles.OrderBy(t => t).ToArray()) }}).ToArray();
-                if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate)) return;
-                var workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+                    Classification = RouteClassification.Required, OptionalBranchId = string.Empty };
+            cf.Layout.Edges = cf.Layout.Edges.Concat(new[] { replacementEdge }).ToArray();
+            if (!StructuralRenovationService.TryResolveConnection(cf, predecessor, completion, floorDefinition,
+                    catalog, out StructuralRenovationService.Connection connection, out string connectionReason))
+                return Fail(result, connectionReason);
+            replacementEdge.ConnectionKind = connection.Kind;
+            replacementEdge.CorridorDefinitionId = connection.CorridorDefinitionId;
+            replacementEdge.Footprint = connection.Kind == FloorRouteConnectionKind.PhysicalCorridor
+                ? new ResolvedTileFootprint(connection.Tiles) : null;
+            string geometryReason = StructuralRenovationService.InspectGeometry(cf, floorDefinition, catalog,
+                workload, true);
+            if (geometryReason != null) return Fail(result, geometryReason);
+            if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
+                return Fail(result, StructuralEditService.WorkloadReason);
+                replacementEdge = candidate.Floors[0].Layout.Edges.Single(e => e.EdgeId == edgeId);
                 FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
                     floorDefinition, catalog.Rooms, catalog.Corridors, workload, candidate.Floors[0].FixedStructures,
                     catalog.FixedStructures);
-                if (!validation.IsValid || !CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
-                    !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production, configuration, limits.Spatial).IsValid) return;
+            if (!validation.IsValid) return Fail(result, StructuralRenovationService.Map(validation.Issues));
+            if (!CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
+                !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production, configuration,
+                    limits.Spatial).IsValid) return Fail(result, StructuralEditService.LayoutInvalidReason);
                 var preview = new StructuralEditPreview { Operation = StructuralEditOperation.Deletion,
                     TargetRoomInstanceId = target.RoomInstanceId, RoomDefinitionId = target.RoomDefinitionId,
                     BaselineFingerprint = fingerprint, Intent = result.Intent, DetachedCandidate = candidate,
-                    PreviousUsedFloorSpace = Used(seed, floorDefinition, catalog, workload),
+                    PreviousUsedFloorSpace = sourceValidation.Capacity.UsedFloorSpaceCapacity,
                     ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity,
                     ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity,
-                    ConnectionKind = corridor == null ? FloorRouteConnectionKind.DirectDoorway : FloorRouteConnectionKind.PhysicalCorridor,
-                    IncomingConnectionTiles = tiles.ToArray(), ReasonCodes = Array.Empty<string>() };
+                    ConnectionKind = replacementEdge.ConnectionKind,
+                    IncomingConnectionTiles = replacementEdge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>(),
+                    ReasonCodes = Array.Empty<string>() };
                 preview.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomRemoved, StableId = target.RoomInstanceId,
                     PreviousDefinitionId = target.RoomDefinitionId }, new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = incoming[0].EdgeId },
                     new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = outgoing[0].EdgeId },
                     new StructuralChange { Kind = StructuralChangeKind.EdgeReconnected, StableId = edgeId, ProposedConnectionKind = preview.ConnectionKind,
-                        ProposedFootprint = tiles.ToArray() }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
+                        ProposedFootprint = replacementEdge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>() }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
                         StableId = terminal.FixedStructureInstanceId, From = terminal.Anchor, To = ct.Anchor } }.Concat(dispositions.Select(d =>
-                    new StructuralChange { Kind = StructuralChangeKind.ContentReturned, StableId = d.Item1.AssignmentId,
+                    new StructuralChange { Kind = d.Item2 == StructuralContentRemovalPolicy.ReturnToPlayerCustody
+                            ? StructuralChangeKind.ContentReturned : StructuralChangeKind.ContentRemoved,
+                        StableId = d.Item1.AssignmentId,
                         ProposedDefinitionId = d.Item1.OptionId })).OrderBy(c => c.Kind).ThenBy(c => c.StableId, StringComparer.Ordinal).ToArray();
-                candidates.Add(preview);
+            return preview;
+        }
+
+        private static bool ExistingRelationshipUses(SpatialConnectionPointDefinition predecessorPoint,
+            RoomSpatialInstance predecessor, RoomSpatialInstance target, RoomSpatialDefinition targetDefinition,
+            FloorRouteEdge edge, SpatialContentCatalog catalog)
+        {
+            TileCoordinate source = World(predecessorPoint.Offset, predecessor.Anchor,
+                predecessor.Orientation, catalog.Rooms.Single(r => r.RoomDefinitionId == predecessor.RoomDefinitionId).GrossFootprint);
+            CardinalOrientation facing = StructuralEditService.Rotate(predecessorPoint.Facing, predecessor.Orientation);
+            foreach (SpatialConnectionPointDefinition targetPoint in targetDefinition.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            {
+                if (!Compatible(predecessorPoint.SocketTypeId, targetPoint.SocketTypeId, catalog) ||
+                    StructuralEditService.Rotate(targetPoint.Facing, target.Orientation) != Opposite(facing)) continue;
+                TileCoordinate destination = World(targetPoint.Offset, target.Anchor, target.Orientation, targetDefinition.GrossFootprint);
+                if (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
+                { if (Step(source, facing).Equals(destination)) return true; continue; }
+                TileCoordinate[] tiles = edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
+                CorridorSpatialDefinition corridor = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
+                    .SingleOrDefault(value => value?.CorridorDefinitionId == edge.CorridorDefinitionId);
+                int length = Math.Abs(destination.X - source.X) + Math.Abs(destination.Y - source.Y) - 1;
+                bool horizontal = source.Y == destination.Y &&
+                    (facing == CardinalOrientation.Ninety || facing == CardinalOrientation.TwoSeventy);
+                CardinalOrientation axis = horizontal ? CardinalOrientation.Ninety : CardinalOrientation.Zero;
+                if (corridor != null && corridor.Width == 1 && length >= corridor.MinimumLength &&
+                    length <= corridor.MaximumLength && (corridor.AllowedOrientations ??
+                        Array.Empty<CardinalOrientation>()).Contains(axis) &&
+                    (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(predecessorPoint.SocketTypeId) &&
+                    (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(targetPoint.SocketTypeId) &&
+                    tiles.Contains(Step(source, facing)) &&
+                    tiles.Contains(Step(destination, Opposite(facing)))) return true;
             }
+            return false;
         }
 
         private static StructuralEditPreview Fail(StructuralEditPreview value, string reason) { value.DetachedCandidate = null; value.ReasonCodes = new[] { reason }; return value; }
@@ -169,7 +216,5 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static TileCoordinate Step(TileCoordinate v, CardinalOrientation f) => f == CardinalOrientation.Zero ? new TileCoordinate(v.X,v.Y+1) : f == CardinalOrientation.Ninety ? new TileCoordinate(v.X+1,v.Y) : f == CardinalOrientation.OneEighty ? new TileCoordinate(v.X,v.Y-1) : new TileCoordinate(v.X-1,v.Y);
         private static TileCoordinate World(TileCoordinate o, TileCoordinate a, CardinalOrientation r, RectangularFootprintDefinition f) { var t=StructuralEditService.TransformConnectionPointOffset(o,r,f); return new TileCoordinate(a.X+t.X,a.Y+t.Y); }
         private static TileCoordinate AnchorFor(TileCoordinate w, TileCoordinate o, CardinalOrientation r, RectangularFootprintDefinition f) { var t=StructuralEditService.TransformConnectionPointOffset(o,r,f); return new TileCoordinate(w.X-t.X,w.Y-t.Y); }
-        private static CardinalOrientation facingAxis(SpatialConnectionPointDefinition p, RoomSpatialInstance r) { var f=StructuralEditService.Rotate(p.Facing,r.Orientation); return f==CardinalOrientation.Ninety||f==CardinalOrientation.TwoSeventy?CardinalOrientation.Ninety:CardinalOrientation.Zero; }
-        private static int Used(DetachedCanonicalSpatialSaveState s, FloorSpatialConfiguration f, SpatialContentCatalog c, SpatialValidationWorkloadLimits w) => FloorLayoutValidator.Validate(s.Floors[0].Layout,f,c.Rooms,c.Corridors,w,s.Floors[0].FixedStructures,c.FixedStructures).Capacity.UsedFloorSpaceCapacity;
     }
 }

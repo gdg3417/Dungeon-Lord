@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 
@@ -31,6 +32,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(preview.IsValid, Is.False);
             Assert.That(preview.DetachedCandidate, Is.Null);
             Assert.That(preview.Operation, Is.EqualTo(StructuralEditOperation.Deletion));
+        }
+
+        [Test]
+        public void RuntimePolicy_MalformedBytesFailClosed()
+        {
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(
+                Encoding.UTF8.GetBytes("{\"Schema\":\"structural_content_removal_policy\"}"), out var policy),
+                Is.False);
+            Assert.That(policy, Is.Null);
         }
     }
 }

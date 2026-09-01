@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Linq;
+using System.IO;
 using NUnit.Framework;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -1046,6 +1047,166 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertAssignmentEqual(replaced.State.Floors[0].RoomContents.Assignments.Single(),
                 replacedReopened.Value.Floors[0].RoomContents.Assignments.Single());
             Assert.That(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void Deletion_ValidTwoRoomTailPreservesCompletionAndRetiresIdentitiesDeterministically()
+        {
+            PreviewFixture fixture = CreateR2(); SavedSpatialFloor before = fixture.State.Floors[0];
+            string targetId = "compat.floor.00.room.player.0000";
+            FloorRouteNode targetNode = before.Layout.Nodes.Single(n => n.RoomInstanceId == targetId);
+            FloorRouteNode completion = before.Layout.Nodes.Single(n => n.Kind == FloorRouteNodeKind.Completion);
+            string terminalId = before.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal)
+                .FixedStructureInstanceId;
+            string[] removedEdges = before.Layout.Edges.Where(e => e.SourceNodeId == targetNode.NodeId ||
+                e.DestinationNodeId == targetNode.NodeId).Select(e => e.EdgeId).ToArray();
+            long highWater = fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal;
+            StructuralEditPreview first = Delete(fixture, targetId), second = Delete(fixture, targetId);
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            SavedSpatialFloor after = first.DetachedCandidate.Floors[0];
+            Assert.That(after.Layout.Rooms.Any(r => r.RoomInstanceId == targetId), Is.False);
+            Assert.That(after.Layout.Nodes.Any(n => n.NodeId == targetNode.NodeId), Is.False);
+            Assert.That(after.Layout.Nodes.Single(n => n.Kind == FloorRouteNodeKind.Completion).NodeId,
+                Is.EqualTo(completion.NodeId));
+            Assert.That(after.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal)
+                .FixedStructureInstanceId, Is.EqualTo(terminalId));
+            Assert.That(after.Layout.Edges.Any(e => removedEdges.Contains(e.EdgeId)), Is.False);
+            Assert.That(after.Layout.Edges.Single(e => e.DestinationNodeId == completion.NodeId).EdgeId,
+                Does.StartWith(before.FloorInstanceId + ".edge.native."));
+            Assert.That(first.DetachedCandidate.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal,
+                Is.EqualTo(highWater + 1));
+            CollectionAssert.AreEqual(Bytes(first.DetachedCandidate, fixture.Limits),
+                Bytes(second.DetachedCandidate, fixture.Limits));
+        }
+
+        [Test]
+        public void Deletion_ReturnsMonsterAndTrapWithStableIdentityAndRoundTrips()
+        {
+            PreviewFixture fixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, "placement.category.monster",
+                "placement.option.monster.skeleton", target);
+            fixture.State = Place(fixture, fixture.State, "placement.category.trap",
+                "placement.option.trap.spike", target);
+            RoomContentAssignment[] assignments = fixture.State.Floors[0].RoomContents.Assignments.ToArray();
+            StructuralEditPreview preview = Delete(fixture, target);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            CollectionAssert.IsEmpty(preview.DetachedCandidate.Floors[0].RoomContents.Assignments);
+            CollectionAssert.AreEquivalent(assignments.Select(a => a.AssignmentId),
+                preview.DetachedCandidate.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId));
+            var reopened = CanonicalSpatialSaveSerializer.Parse(Bytes(preview.DetachedCandidate, fixture.Limits), fixture.Limits);
+            Assert.That(reopened.IsValid, Is.True);
+            CollectionAssert.AreEquivalent(assignments.Select(a => a.AssignmentId),
+                reopened.Value.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId));
+        }
+
+        [TestCase("placement.option.loot_node.basic")]
+        [TestCase("placement.option.loot_node.hidden_cache")]
+        [TestCase("placement.option.loot_node.glittering_hoard")]
+        public void Deletion_UnresolvedLootFailsWithoutPartialReturn(string option)
+        {
+            PreviewFixture fixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, "placement.category.monster",
+                "placement.option.monster.skeleton", target);
+            fixture.State = Place(fixture, fixture.State, "placement.category.loot_node", option, target);
+            AssertDeleteInvalidUnchanged(fixture, target,
+                StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason);
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+        }
+
+        [Test]
+        public void Deletion_MigratedExplicitRoomIsBuildableButImplicitContainerIsRejected()
+        {
+            PreviewFixture migrated = CreateR2(); string target = "compat.floor.00.room.player.0000";
+            migrated.State.Floors[0].RoomContents.RoomSemantics.Single(s => s.RoomInstanceId == target)
+                .LegacyRoomOriginKind = LegacyRoomOriginKind.MigratedExplicitLegacyRoom;
+            Assert.That(Delete(migrated, target).IsValid, Is.True);
+            PreviewFixture implicitFixture = CreateR2();
+            implicitFixture.State.Floors[0].RoomContents.RoomSemantics.Single(s => s.RoomInstanceId == target)
+                .LegacyRoomOriginKind = LegacyRoomOriginKind.ImplicitCompatibilityContainer;
+            AssertDeleteInvalidUnchanged(implicitFixture, target, StructuralEditService.TargetRoomNotBuildableReason);
+        }
+
+        [Test]
+        public void Deletion_LastRoomAndNonLeafTargetsFailWithoutMutation()
+        {
+            PreviewFixture one = CreateR1(); string only = one.State.Floors[0].Layout.Rooms.Single().RoomInstanceId;
+            AssertDeleteInvalidUnchanged(one, only, StructuralDeletionService.MinimumRoomReason);
+            PreviewFixture two = CreateR2(); string predecessor = two.State.Floors[0].Layout.Rooms
+                .Single(r => r.RoomInstanceId != "compat.floor.00.room.player.0000").RoomInstanceId;
+            AssertDeleteInvalidUnchanged(two, predecessor, StructuralDeletionService.NotLeafReason);
+        }
+
+        [Test]
+        public void Deletion_MissingAndDuplicateLifecycleFailClosedWithoutThrowing()
+        {
+            PreviewFixture missing = CreateR2(); missing.State.LifecycleAndOwnership = null;
+            Assert.DoesNotThrow(() => Assert.That(Delete(missing, "compat.floor.00.room.player.0000").IsValid, Is.False));
+            PreviewFixture duplicate = CreateR2(); var lifecycle = duplicate.State.LifecycleAndOwnership.Floors.Single();
+            duplicate.State.LifecycleAndOwnership.Floors = new[] { lifecycle, lifecycle };
+            Assert.DoesNotThrow(() => Assert.That(Delete(duplicate, "compat.floor.00.room.player.0000").IsValid, Is.False));
+        }
+
+        [Test]
+        public void Deletion_CorridorSocketAuthorityFailureLeavesSourceUnchanged()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(0, 7));
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Corridors.Single().CompatibleSocketTypeIds = System.Array.Empty<string>();
+            AssertDeleteInvalidUnchanged(fixture, "compat.floor.00.room.player.0000",
+                StructuralEditService.ConnectionUnavailableReason, Snapshot(fixture, catalog));
+        }
+
+        [Test]
+        public void DeletionPreview_IsStaleAfterContentOrStructuralMutation()
+        {
+            PreviewFixture contentFixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
+            StructuralEditPreview contentPreview = Delete(contentFixture, target);
+            DetachedCanonicalSpatialSaveState contentChanged = Place(contentFixture, contentFixture.State,
+                "placement.category.monster", "placement.option.monster.skeleton", target);
+            DetachedCanonicalMutationResult contentStale = DetachedCanonicalSpatialMutation.Prepare(contentChanged,
+                DetachedCanonicalMutationRequest.Delete(contentPreview), contentFixture.Production,
+                contentFixture.Compatibility, contentFixture.Configuration, contentFixture.Limits, Policy());
+            Assert.That(contentStale.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+
+            PreviewFixture structuralFixture = CreateR2();
+            StructuralEditPreview structuralPreview = Delete(structuralFixture, target);
+            string predecessor = structuralFixture.State.Floors[0].Layout.Rooms
+                .Single(r => r.RoomInstanceId != target).RoomInstanceId;
+            StructuralEditPreview movement = Move(structuralFixture, predecessor, new TileCoordinate(1, 2));
+            Assert.That(movement.IsValid, Is.True, string.Join(",", movement.ReasonCodes));
+            DetachedCanonicalMutationResult moved = DetachedCanonicalSpatialMutation.Prepare(structuralFixture.State,
+                DetachedCanonicalMutationRequest.Move(movement), structuralFixture.Production,
+                structuralFixture.Compatibility, structuralFixture.Configuration, structuralFixture.Limits);
+            DetachedCanonicalMutationResult structuralStale = DetachedCanonicalSpatialMutation.Prepare(moved.State,
+                DetachedCanonicalMutationRequest.Delete(structuralPreview), structuralFixture.Production,
+                structuralFixture.Compatibility, structuralFixture.Configuration, structuralFixture.Limits, Policy());
+            Assert.That(structuralStale.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+        }
+
+        private static StructuralEditPreview Delete(PreviewFixture fixture, string roomId,
+            ProductionSpatialContentSnapshot production = null)
+        {
+            StructuralContentRemovalPolicySnapshot policy = Policy();
+            return StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = roomId }, policy,
+                production ?? fixture.Production, fixture.Configuration, fixture.Limits);
+        }
+
+        private static StructuralContentRemovalPolicySnapshot Policy()
+        {
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(File.ReadAllBytes(
+                StructuralContentRemovalPolicyAuthority.ProductionPath), out var policy), Is.True);
+            return policy;
+        }
+
+        private static void AssertDeleteInvalidUnchanged(PreviewFixture fixture, string roomId,
+            string reason, ProductionSpatialContentSnapshot production = null)
+        {
+            byte[] before = Bytes(fixture.State, fixture.Limits);
+            StructuralEditPreview preview = Delete(fixture, roomId, production);
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.ReasonCodes, Is.EqualTo(new[] { reason }));
+            CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
         }
 
         private static StructuralEditPreview Move(PreviewFixture fixture, string roomId, TileCoordinate anchor,

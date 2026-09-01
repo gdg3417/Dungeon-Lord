@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             internal FloorRouteEdge[] Edges;
         }
 
-        private sealed class Connection
+        internal sealed class Connection
         {
             internal FloorRouteConnectionKind Kind;
             internal string CorridorDefinitionId;
@@ -294,7 +294,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        private static bool TryResolveConnection(SavedSpatialFloor floor, FloorRouteNode sourceNode,
+        internal static bool TryResolveConnection(SavedSpatialFloor floor, FloorRouteNode sourceNode,
             FloorRouteNode destinationNode, FloorSpatialConfiguration floorDefinition,
             SpatialContentCatalog catalog, out Connection result, out string reason)
         {
@@ -447,7 +447,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { Kind = kind, StableId = edge.EdgeId, PreviousConnectionKind = previousKind,
           ProposedConnectionKind = edge.ConnectionKind, PreviousFootprint = previousTiles,
           ProposedFootprint = edge.Footprint?.OccupiedTiles?.ToArray() ?? Array.Empty<TileCoordinate>() };
-        private static string InspectGeometry(SavedSpatialFloor floor, FloorSpatialConfiguration floorDefinition,
+        internal static string InspectGeometry(SavedSpatialFloor floor, FloorSpatialConfiguration floorDefinition,
             SpatialContentCatalog catalog, SpatialValidationWorkloadLimits workload, bool includeCorridors)
         {
             var rooms = new List<HashSet<TileCoordinate>>();
@@ -521,7 +521,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
               CanonicalSpatialSaveSerializer.Parse(bytes.Value, limits); clone = parsed.Value; return parsed.IsValid; }
         private static StructuralEditPreview Fail(StructuralEditPreview preview, string reason)
         { preview.DetachedCandidate = null; preview.ReasonCodes = new[] { reason }; return preview; }
-        private static string Map(IEnumerable<FloorLayoutValidationIssue> issues)
+        internal static string Map(IEnumerable<FloorLayoutValidationIssue> issues)
         {
             FloorLayoutValidationReason[] reasons = issues.Select(value => value.Reason).ToArray();
             if (reasons.Contains(FloorLayoutValidationReason.CapacityExceeded)) return StructuralEditService.CapacityReason;
