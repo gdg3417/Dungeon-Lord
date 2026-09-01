@@ -18,7 +18,9 @@ namespace DungeonBuilder.M0.Tests
         {
             var source = new DetachedCanonicalSpatialSaveState
             {
-                Authority = NativeMarker(), Floors = null
+                Authority = NativeMarker(), Floors = null,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                    Array.Empty<SavedSpatialFloor>())
             };
             DetachedCanonicalSpatialSaveState canonical = Canonicalize(source);
             Assert.That(source.Floors, Is.Null);
@@ -468,7 +470,7 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers()
         {
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(7));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(8));
             var ordinary = new SaveData
             {
                 canonicalSpatialAuthority = NativeMarker(),
@@ -483,7 +485,8 @@ namespace DungeonBuilder.M0.Tests
         private static CanonicalSpatialAuthorityMarker NativeMarker() => new CanonicalSpatialAuthorityMarker
         { CanonicalLayoutContractVersion = 1, CreationKind = CanonicalSpatialCreationKind.NativeCanonical };
         private static DetachedCanonicalSpatialSaveState State(params SavedSpatialFloor[] floors) =>
-            new DetachedCanonicalSpatialSaveState { Authority = NativeMarker(), Floors = floors };
+            new DetachedCanonicalSpatialSaveState { Authority = NativeMarker(), Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors) };
 
         private static SavedSpatialFloor Floor(string floorId, int index, params string[] roomIds)
         {
@@ -528,9 +531,14 @@ namespace DungeonBuilder.M0.Tests
             new RoomContentAssignment { AssignmentId = roomId + ".content." + suffix, RoomInstanceId = roomId,
                 CategoryId = category, OptionId = "option." + suffix, Sequence = sequence };
         private static string FloorId(SavedSpatialFloor floor) => floor.FloorInstanceId;
-        private static int CountRecords(DetachedCanonicalSpatialSaveState state) => state.Floors.Length + state.Floors.Sum(floor =>
-            floor.Layout.Rooms.Length + floor.Layout.Nodes.Length + floor.Layout.Edges.Length + floor.FixedStructures.Length +
-            floor.RoomContents.Assignments.Length + floor.RoomContents.RoomSemantics.Length);
+        private static int CountRecords(DetachedCanonicalSpatialSaveState state) =>
+            (state?.Floors?.Length ?? 0) + (state?.Floors ?? Array.Empty<SavedSpatialFloor>()).Sum(floor =>
+                (floor?.Layout?.Rooms?.Length ?? 0) + (floor?.Layout?.Nodes?.Length ?? 0) +
+                (floor?.Layout?.Edges?.Length ?? 0) + (floor?.FixedStructures?.Length ?? 0) +
+                (floor?.RoomContents?.Assignments?.Length ?? 0) +
+                (floor?.RoomContents?.RoomSemantics?.Length ?? 0)) +
+            (state?.LifecycleAndOwnership?.Floors?.Length ?? 0) +
+            (state?.LifecycleAndOwnership?.ReturnedContents?.Length ?? 0);
         private static CanonicalSpatialSaveValidationResult Validate(DetachedCanonicalSpatialSaveState state, bool canonical = false) =>
             CanonicalSpatialSaveContracts.Validate(state, Limits(), canonical);
         private static void AssertIssue(DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveValidationIssue issue) =>

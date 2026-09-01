@@ -163,11 +163,27 @@
             "GeometryId": "compat.geometry.r1-r2",
             "GeometryVersion": 1,
             "GeometryCanonicalHash": "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db"
+        },
+        {
+            "ProfileId": "compat.profile.starter.schema_8.contract_1",
+            "ProfileVersion": 1,
+            "CanonicalHash": "3193aab078d3727047a8c17264b8309167db03128da47deba3e421e896a1fb98",
+            "Lifecycle": 1,
+            "TargetSchemaVersion": 8,
+            "CanonicalLayoutContractVersion": 1,
+            "GeometryId": "compat.geometry.r1-r2",
+            "GeometryVersion": 1,
+            "GeometryCanonicalHash": "7de8d5f88e8517655f0d6595dc37da7382c5ee84d1e41776ccaac6be7beba6db"
         }
     ],
     "ContractSelections": [
         {
             "TargetSchemaVersion": 7,
+            "CanonicalLayoutContractVersion": 1,
+            "Lifecycle": 1
+        },
+        {
+            "TargetSchemaVersion": 8,
             "CanonicalLayoutContractVersion": 1,
             "Lifecycle": 1
         }

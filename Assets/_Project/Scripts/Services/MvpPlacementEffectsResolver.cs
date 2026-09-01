@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -17,13 +18,21 @@ namespace DungeonBuilder.M0
         }
 
         public static MvpPlacementEffectsSummary ResolveForSave(SaveData save, RunSimulationConfig config)
+            => ResolveForSave(save, config, null);
+
+        public static MvpPlacementEffectsSummary ResolveForSave(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
-            return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config), config);
+            return Resolve(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config, production), config);
         }
 
         public static MvpPlacementEffectsSummary ResolveConfiguredRouteForSave(SaveData save, RunSimulationConfig config)
+            => ResolveConfiguredRouteForSave(save, config, null);
+
+        public static MvpPlacementEffectsSummary ResolveConfiguredRouteForSave(SaveData save,
+            RunSimulationConfig config, ProductionSpatialContentSnapshot production)
         {
-            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, config);
+            MvpOrderedRouteRoom[] route = MvpOrderedRoomRouteResolver.Resolve(save, config, production);
             var placements = new List<MvpDungeonPlacementEntry>();
             for (int i = 0; i < route.Length; i++) placements.AddRange(route[i].ToOrderedPlacements());
             return Resolve(placements.ToArray(), config);

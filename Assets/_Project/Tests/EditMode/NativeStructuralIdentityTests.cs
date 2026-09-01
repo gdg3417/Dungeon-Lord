@@ -53,7 +53,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SavedSpatialFloor other = Floor("other.floor.legacy-room.00");
             other.FloorInstanceId = "compat.floor.00.room.player.0000.node";
             other.Layout.FloorId = other.FloorInstanceId;
-            var state = new DetachedCanonicalSpatialSaveState { Floors = new[] { target, other } };
+            var state = State(target, other);
             Assert.That(NativeStructuralIdentity.TryAllocateConstructionIdentity(state,
                 target.FloorInstanceId, out NativeRoomConstructionIdentity identity,
                 out string reason), Is.False);
@@ -152,7 +152,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             other.FloorInstanceId = "other.floor"; other.Layout.FloorId = "other.floor";
             other.Layout.Nodes = new[] { new FloorRouteNode
                 { NodeId = "compat.floor.00.room.player.0000" } };
-            var state = new DetachedCanonicalSpatialSaveState { Floors = new[] { target, other } };
+            var state = State(target, other);
             Assert.That(NativeStructuralIdentity.TryAllocateRoomId(state, target.FloorInstanceId,
                 out string allocated, out string reason), Is.False);
             Assert.That(allocated, Is.Null);
@@ -185,8 +185,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new RoomSpatialInstance { RoomInstanceId = identity } };
         }
 
-        private static DetachedCanonicalSpatialSaveState State(SavedSpatialFloor floor) =>
-            new DetachedCanonicalSpatialSaveState { Floors = new[] { floor } };
+        private static DetachedCanonicalSpatialSaveState State(params SavedSpatialFloor[] floors)
+        {
+            var state = new DetachedCanonicalSpatialSaveState { Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors) };
+            Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(state,
+                new CanonicalSpatialSaveWorkloadLimits(256, 256), out state), Is.True);
+            return state;
+        }
     }
 }
 #endif

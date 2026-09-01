@@ -142,7 +142,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
                 context.Configuration, context.Limits.Spatial).IsValid) return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                context.Compatibility.SelectContract(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion);
+                context.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
                 result.LayoutContractVersion.Value
                 ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
@@ -158,8 +158,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (context == null || !context.PinsAreValid() || bytes == null ||
                 !string.Equals(SpatialContractSha256.Compute(bytes), context.ExpectedCandidateSha256,
                     StringComparison.Ordinal)) return Failure();
-            DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTrip(bytes, context.Limits,
-                null, context.TransactionId, context.DescriptorFingerprint);
+            DetachedCompleteSaveValidationResult result = ParseValidateFrozenSchemaSevenAndRoundTrip(
+                bytes, context.Limits, context.TransactionId, context.DescriptorFingerprint);
             if (result.IsValid && !DetachedCanonicalProductionSemanticValidation.Validate(result.State,
                 context.Production, context.Configuration, context.Limits.Spatial).IsValid) return Failure();
             return result.IsValid && result.LayoutContractVersion ==
@@ -171,6 +171,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalSpatialSerializationLimits limits, ProductionSpatialContentSnapshot production = null,
             string expectedTransactionId = null, string expectedDescriptorFingerprint = null)
         {
+            return ParseValidateAndRoundTripCore(bytes, limits,
+                CanonicalSaveSchemaVersions.CurrentWritableTarget, true,
+                expectedTransactionId, expectedDescriptorFingerprint);
+        }
+
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaSevenAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits,
+            string expectedTransactionId = null, string expectedDescriptorFingerprint = null)
+        {
+            return ParseValidateAndRoundTripCore(bytes, limits,
+                CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget, false,
+                expectedTransactionId, expectedDescriptorFingerprint);
+        }
+
+        private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
+            CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
+            string expectedTransactionId, string expectedDescriptorFingerprint)
+        {
             if (bytes == null || !limits.IsValid) return Failure();
             try
             {
@@ -178,26 +196,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!ContractJson.TryParse(bytes, limits.Serialized, issues, out ContractJsonNode root) ||
                     root.Kind != ContractJsonKind.Object || root.Fields.Count < 3 ||
                     !Field(root, 0, "schema", ContractJsonKind.String) || root.Fields[0].Value.Text != "save_root" ||
-                    !Field(root, 1, "schemaVersion", ContractJsonKind.Number) || root.Fields[1].Value.Text != "7" ||
+                    !Field(root, 1, "schemaVersion", ContractJsonKind.Number) ||
+                    root.Fields[1].Value.Text != schemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture) ||
                     !Field(root, 2, "primary", ContractJsonKind.Object)) return Failure();
                 if (HasCaseAmbiguousSibling(root) || CaseAmbiguous(root,
                     new[] { "schema", "schemaVersion", "primary" })) return Failure();
                 ContractJsonNode primary = root.Fields[2].Value;
-                if (primary.Fields.Count < 2 ||
-                    primary.Fields[primary.Fields.Count - 2].Key != "canonicalSpatialAuthority" ||
-                    primary.Fields[primary.Fields.Count - 1].Key != "spatialFloors" ||
-                    CaseAmbiguous(primary, new[] { "canonicalSpatialAuthority", "spatialFloors" })) return Failure();
-                if (!PrimaryOrderIsCanonical(primary)) return Failure();
+                int canonicalMembers = requireLifecycle ? 3 : 2;
+                if (primary.Fields.Count < canonicalMembers ||
+                    primary.Fields[primary.Fields.Count - canonicalMembers].Key != "canonicalSpatialAuthority" ||
+                    primary.Fields[primary.Fields.Count - canonicalMembers + 1].Key != "spatialFloors" ||
+                    (requireLifecycle && primary.Fields[primary.Fields.Count - 1].Key !=
+                        "structuralLifecycleAndOwnership") || CaseAmbiguous(primary,
+                        requireLifecycle ? new[] { "canonicalSpatialAuthority", "spatialFloors",
+                            "structuralLifecycleAndOwnership" } :
+                            new[] { "canonicalSpatialAuthority", "spatialFloors" })) return Failure();
+                if (!PrimaryOrderIsCanonical(primary, canonicalMembers)) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
-                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 2].Value);
+                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - canonicalMembers].Value);
                 spatialWriter.Token(","); spatialWriter.String("Floors"); spatialWriter.Token(":");
-                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value); spatialWriter.Token("}");
+                ContractJsonNode floorsNode = primary.Fields[primary.Fields.Count - canonicalMembers + 1].Value;
+                WriteNode(spatialWriter, floorsNode);
+                spatialWriter.Token(","); spatialWriter.String("LifecycleAndOwnership"); spatialWriter.Token(":");
+                if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value);
+                else spatialWriter.Token("null");
+                spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
-                    CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits);
-                if (!parsedSpatial.IsValid || !CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
-                        limits.Spatial, true).IsValid ||
+                    requireLifecycle ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
+                    CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(spatialWriter.Finish(), limits);
+                CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
+                    requireLifecycle ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
+                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                        parsedSpatial.Value, limits.Spatial, true);
+                if (!parsedSpatial.IsValid || structuralValidation == null || !structuralValidation.IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&
                         parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();
@@ -311,11 +344,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (field.Key == name) return field.Value.Kind == ContractJsonKind.Null;
             return false;
         }
-        private static bool PrimaryOrderIsCanonical(ContractJsonNode primary)
+        private static bool PrimaryOrderIsCanonical(ContractJsonNode primary, int canonicalMemberCount = 3)
         {
             IReadOnlyList<string> recognized = RawSavePayloadClassifier.RecognizedSaveDataMemberNames;
             int previous = -1; bool unknownSeen = false;
-            for (int index = 0; index < primary.Fields.Count - 2; index++)
+            for (int index = 0; index < primary.Fields.Count - canonicalMemberCount; index++)
             {
                 string name = primary.Fields[index].Key;
                 int recognizedIndex = -1;

@@ -379,11 +379,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-" + targetIndex, 6, members);
-            string target = run.State.Floors[0].Layout.Rooms[targetIndex].RoomInstanceId;
-            byte[] otherBefore = CanonicalSpatialSaveSerializer.Serialize(run.State, run.Limits).Value;
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+                out byte[] currentBytes), Is.True);
+            DetachedCompleteSaveValidationResult current =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
+            Assert.That(current.IsValid, Is.True, current.Reason);
+            DetachedCanonicalSpatialSaveState currentState = current.State;
+            string target = currentState.Floors[0].Layout.Rooms[targetIndex].RoomInstanceId;
+            byte[] otherBefore = CanonicalSpatialSaveSerializer.Serialize(currentState, run.Limits).Value;
             RunSimulationConfig config = LegacyGameplayConfigurationContract.Parse(run.LegacyBytes);
 
-            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(run.State,
+            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(currentState,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId, target), run.Production,
                 run.Compatibility, config, run.Limits);
@@ -391,10 +397,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.State.Floors[0].RoomContents.Assignments.Single().RoomInstanceId,
                 Is.EqualTo(target));
-            string other = run.State.Floors[0].Layout.Rooms[1 - targetIndex].RoomInstanceId;
+            string other = currentState.Floors[0].Layout.Rooms[1 - targetIndex].RoomInstanceId;
             Assert.That(result.State.Floors[0].RoomContents.Assignments.Any(value =>
                 value.RoomInstanceId == other), Is.False);
-            Assert.That(CanonicalSpatialSaveSerializer.Serialize(run.State, run.Limits).Value,
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(currentState, run.Limits).Value,
                 Is.EqualTo(otherBefore));
         }
 
@@ -435,7 +441,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-capacity", 6, members);
-            SavedSpatialFloor floor = run.State.Floors[0];
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+                out byte[] currentBytes), Is.True);
+            DetachedCompleteSaveValidationResult current =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
+            Assert.That(current.IsValid, Is.True, current.Reason);
+            SavedSpatialFloor floor = current.State.Floors[0];
             string target = floor.Layout.Rooms[0].RoomInstanceId;
             string other = floor.Layout.Rooms[1].RoomInstanceId;
             RoomContentAssignment template = floor.RoomContents.Assignments.Single();
@@ -445,7 +456,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floor.Layout.Rooms[0].RoomDefinitionId = "spatial.room.large_chamber";
             RunSimulationConfig config = LegacyGameplayConfigurationContract.Parse(run.LegacyBytes);
 
-            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(run.State,
+            DetachedCanonicalMutationResult result = DetachedCanonicalSpatialMutation.Prepare(current.State,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                     MvpDungeonPlacementIds.BasicRoomOptionId, target), run.Production,
                 run.Compatibility, config, run.Limits);
@@ -528,7 +539,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(narrow.IsSuccess, Is.False);
             Assert.That(narrow.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.UnsupportedRoomReason));
             Assert.That(removed.IsSuccess, Is.False);
-            Assert.That(removed.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.RemovalHasContentsReason));
+            Assert.That(removed.Reason, Is.EqualTo(
+                DetachedCanonicalSpatialMutation.StructuralRemovalDeferredReason));
         }
 
         [Test]
@@ -595,7 +607,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void NativeCreationPersistsContextuallyValidatedEmptySchema7WithoutLegacySpatialMembers()
+        public void NativeCreationPersistsContextuallyValidatedEmptySchema8WithLifecycleOwnership()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false);
@@ -618,7 +630,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":7"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":8"));
+            Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
+            Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
+            Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
             Assert.That(json, Does.Not.Contain("\"mvpDungeonPlacements\""));
             Assert.That(json, Does.Not.Contain("\"mvpDungeonFloorLayout\""));
             Assert.That(json, Does.Not.Contain("\"mvpRoomSlotAssignments\""));
@@ -919,7 +934,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void RepeatedAtoBtoAtoBTransitionsDoNotCollideOrLeakEvidence()
+        public void PrototypeRemovalIsRejectedWithoutWriteOrPublication()
         {
             Fixture fixture = Create();
             DetachedCanonicalWriteResult first = fixture.Execute(
@@ -927,16 +942,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MvpDungeonPlacementIds.BasicRoomOptionId));
             fixture.Accept(first);
             string roomId = fixture.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            byte[] before = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
             DetachedCanonicalWriteResult second = fixture.Execute(
                 DetachedCanonicalMutationRequest.RemoveRoom(roomId));
-            fixture.Accept(second);
-            DetachedCanonicalWriteResult third = fixture.Execute(
-                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
-                    MvpDungeonPlacementIds.BasicRoomOptionId));
 
             Assert.That(first.IsSuccess, Is.True, first.Reason);
-            Assert.That(second.IsSuccess, Is.True, second.Reason);
-            Assert.That(third.IsSuccess, Is.True, third.Reason);
+            Assert.That(second.IsSuccess, Is.False);
+            Assert.That(second.Reason, Is.EqualTo(
+                DetachedCanonicalSpatialMutation.StructuralRemovalDeferredReason));
+            Assert.That(second.RuntimeProjection, Is.Null);
+            Assert.That(second.Session, Is.Null);
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
             Assert.That(fixture.FileSystem.Paths.Count(path =>
                 path.Contains(".canonical-write-")), Is.EqualTo(0));
         }
@@ -1108,6 +1124,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                     Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
+                Assert.That(SchemaSevenToEightUpgrade.TryPrepare(candidate, source.Limits,
+                    out candidate), Is.True);
                 var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
                     source.Production, source.LegacyBytes, source.Limits);
                 var profile = new SaveSpatialMigrationLimitsProfile(
@@ -1120,7 +1138,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (primaryUnknown != null && primaryUnknown.Contains("mvpDungeonPlacements"))
                 {
                     var empty = new DetachedCanonicalSpatialSaveState
-                    { Authority = validation.State.Authority, Floors = Array.Empty<SavedSpatialFloor>() };
+                    { Authority = validation.State.Authority, Floors = Array.Empty<SavedSpatialFloor>(),
+                      LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
+                          Array.Empty<SavedSpatialFloor>()) };
                     DetachedCanonicalSaveSessionResult emptied =
                         opened.Session.PrepareSpatialOnlyReplacement(empty);
                     candidate = emptied.Update.GetBytes();

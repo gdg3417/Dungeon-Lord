@@ -139,7 +139,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.True);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid, Is.True);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 changedCandidate.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid, Is.False);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
@@ -158,7 +158,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.True);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid, Is.True);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 changedCandidate.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid, Is.False);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
@@ -183,13 +183,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             target.Anchor = OutsideAnchor(floorDefinition.Bounds, definition.GrossFootprint, target.Orientation);
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.False);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, fixture.Production,
                 fixture.LegacyBytes, fixture.Limits);
             Assert.That(issues, Is.EquivalentTo(new[] { DetachedCanonicalProductionSemanticIssue.FixedStructure }));
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.False);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid, Is.False);
         }
 
         [Test]
@@ -204,7 +205,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(category, Is.EqualTo(MvpDungeonPlacementIds.MonsterCategoryId));
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(SemanticIssues(changed, fixture.Production, fixture.LegacyBytes, fixture.Limits), Is.Empty);
             byte[] reducedConfig = WithoutOption(fixture.LegacyBytes, MvpDungeonPlacementIds.GoblinOptionId);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, fixture.Production,
@@ -214,9 +216,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var reducedContext = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
                 fixture.Production, reducedConfig, fixture.Limits);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), reducedContext).IsValid, Is.False);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), reducedContext).IsValid, Is.False);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.True);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid, Is.True);
         }
 
         [Test]
@@ -232,7 +234,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             edge.Footprint = new ResolvedTileFootprint(new[] { FreeTile(changed.Floors[0], catalog, fixture.Limits) });
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(FloorLayoutValid(changed.Floors[0], catalog, fixture.Limits), Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, withCorridor,
                 fixture.LegacyBytes, fixture.Limits);
@@ -241,7 +244,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var rejectedContext = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
                 withCorridor, fixture.LegacyBytes, fixture.Limits);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), rejectedContext).IsValid, Is.False);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), rejectedContext).IsValid, Is.False);
             ProductionSpatialContentSnapshot allowed = CloneProductionWithTestCorridor(fixture.Production, true,
                 out _);
             Assert.That(SemanticIssues(changed, allowed, fixture.LegacyBytes, fixture.Limits), Is.Empty);
@@ -279,7 +282,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(AllFixedStructuresIndividuallyValid(floor, catalog, fixture.Limits), Is.True);
             DetachedWholeSaveResult changedCandidate = Build(fixture, changed);
             Assert.That(changedCandidate.IsSuccess, Is.True, changedCandidate.Reason);
-            Assert.That(CanonicalSpatialSaveContracts.Validate(changed, fixture.Limits.Spatial, true).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                changed, fixture.Limits.Spatial, true).IsValid, Is.True);
             Assert.That(FloorLayoutValid(floor, catalog, fixture.Limits), Is.True);
             DetachedCanonicalProductionSemanticIssue[] issues = SemanticIssues(changed, testProduction,
                 fixture.LegacyBytes, fixture.Limits);
@@ -287,7 +291,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
                 testProduction, fixture.LegacyBytes, fixture.Limits);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                changedCandidate.Candidate.GetBytes(), context).IsValid, Is.False);
+                CurrentBytes(changedCandidate.Candidate.GetBytes(), fixture.Limits), context).IsValid, Is.False);
         }
 
         [Test]
@@ -346,7 +350,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.Attempt.Candidate.GetBytes(), context).IsValid, Is.False);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Attempt.Candidate.GetBytes(), fixture.CurrentContext).IsValid, Is.True);
+                CurrentBytes(fixture.Attempt.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid, Is.True);
         }
 
         private static Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution Baseline(
@@ -378,14 +382,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return unfinished ? DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 built.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid :
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                    built.Candidate.GetBytes(), fixture.CurrentContext).IsValid;
+                    CurrentBytes(built.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid;
         }
 
         private static DetachedCanonicalSpatialSaveState Clone(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSerializationLimits limits)
         {
-            byte[] bytes = CanonicalSpatialSaveSerializer.Serialize(state, limits).Value;
-            return CanonicalSpatialSaveSerializer.Parse(bytes, limits).Value;
+            SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> members =
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(state, limits);
+            Assert.That(members.IsValid, Is.True, string.Join(",", members.Issues));
+            byte[] bytes = Encoding.UTF8.GetBytes("{\"Authority\":" +
+                Encoding.UTF8.GetString(members.Value.Authority) + ",\"Floors\":" +
+                Encoding.UTF8.GetString(members.Value.Floors) + ",\"LifecycleAndOwnership\":null}");
+            SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
+                CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(bytes, limits);
+            Assert.That(parsed.IsValid, Is.True, string.Join(",", parsed.Issues));
+            return parsed.Value;
         }
 
 
@@ -653,6 +665,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ",\"RoomOptionId\":\"placement.option.room.basic\",\"MonsterOptionIds\":" +
             (monster == null ? "[]" : "[\"" + monster + "\"]") +
             ",\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}";
+        private static byte[] CurrentBytes(byte[] frozen, CanonicalSpatialSerializationLimits limits)
+        {
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(frozen, limits, out byte[] current), Is.True);
+            return current;
+        }
+
     }
 }
 #endif

@@ -117,6 +117,14 @@ The graph uses stable entrance, room-instance, node, edge, and terminal identiti
 
 ### Content ownership
 
+Phase 3B2 approval adds a persistent schema-8 custody pool for reusable structural-content instances that are not assigned to a room. A reusable instance is authoritatively in exactly one location: one canonical room assignment or returned player custody. Monster and trap instances survive structural removal; bait or loot survives only where its authored definition explicitly approves that disposition. Missing or unknown policy fails closed, and migration does not move existing assignments. Stable assignment/content identity is preserved.
+
+Phase 3B2A structural-content removal policy is owned by the dedicated schema-8/current production authority at `Assets/_Project/Data/Production/Save/structural_content_removal_policy.json`. It is separate from `RunSimulationConfig` and is not an input to the frozen GD66 schemas 1 through 6 to schema 7 migration. Current monster and trap definitions return to custody. `placement.option.loot_node.basic`, `placement.option.loot_node.hidden_cache`, and `placement.option.loot_node.glittering_hoard` remain `Unresolved` and therefore fail closed. The policy governs the future transition into returned custody; after that transition is persisted, canonical custody remains save authority. Phase 3B2A implements no deletion. Phase 3B2B must load this authority through a standalone-safe production asset path rather than relying on an `Assets/...` filesystem path at runtime.
+
+Issued native structural identities are permanently retired. Per-floor room and edge allocators are persistent and monotonic; deletion cannot lower them. A removed logical edge is retired, while a future predecessor-to-Completion relationship receives a fresh edge identity. Phase 3B1 may still retain an edge identity when its endpoints survive and only its Direct Doorway/Straight Stone Corridor representation changes.
+
+Floor 1 must retain at least one buildable required-route room during Phase 3. Future deletion targets the graph-identified tail room and applies the deterministic inverse-tail Completion Terminal reconnection contract recorded in the active execution plan; no deletion behavior is introduced by Phase 3B2A.
+
 - Reusable monsters return to the roster or inventory; reusable traps return to inventory.
 - Reusable owned bait loot returns when its content definition says it remains owned.
 - Consumed, spent, generated, or already resolved run resources do not return.

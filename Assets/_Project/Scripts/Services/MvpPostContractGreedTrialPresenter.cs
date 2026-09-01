@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0
@@ -27,7 +28,18 @@ namespace DungeonBuilder.M0
             return Resolve(save, config, MvpFirstSessionObjectivePresenter.Resolve(save, config));
         }
 
+        public static MvpPostContractGreedTrialSummary Resolve(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
+        {
+            return Resolve(save, config, MvpFirstSessionObjectivePresenter.Resolve(save, config, production),
+                production);
+        }
+
         public static MvpPostContractGreedTrialSummary Resolve(SaveData save, RunSimulationConfig config, MvpFirstSessionObjectiveSummary firstContract)
+            => Resolve(save, config, firstContract, null);
+
+        public static MvpPostContractGreedTrialSummary Resolve(SaveData save, RunSimulationConfig config,
+            MvpFirstSessionObjectiveSummary firstContract, ProductionSpatialContentSnapshot production)
         {
             var summary = new MvpPostContractGreedTrialSummary
             {
@@ -44,7 +56,7 @@ namespace DungeonBuilder.M0
 
             summary.RuleResolved = true;
             summary.IsActive = true;
-            summary.PlacementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, config);
+            summary.PlacementEffects = MvpPlacementEffectsResolver.ResolveForSave(save, config, production);
             CurrentHeatTierSummary heat = CurrentHeatTierResolver.Resolve(config, save.structureRuntime?.Heat ?? 0d);
             summary.CurrentHeatTierId = heat.RuleResolved ? heat.TierId : string.Empty;
             summary.GreedSetupTestedComplete = HasGreedierLootSetup(summary.PlacementEffects, config);

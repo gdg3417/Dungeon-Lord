@@ -140,12 +140,33 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DetachedSpatialMigrationTransaction.AlreadyCommittedReason
                     ? DetachedSpatialSaveLoadDisposition.AlreadyCommitted
                     : DetachedSpatialSaveLoadDisposition.CurrentTarget;
-                return PublishValidated(trusted, currentContext, disposition, recovered, null);
+                DetachedCompleteSaveValidationResult current =
+                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(trusted, currentContext);
+                if (current.IsValid && current.CurrentTargetValidated)
+                    return PublishValidated(trusted, currentContext, disposition, recovered, null);
+                DetachedCompleteSaveValidationResult frozenCandidate =
+                    DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(trusted,
+                        limits.Canonical);
+                return frozenCandidate.IsValid
+                    ? UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, frozenCandidate,
+                        currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null)
+                    : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
+                        recovered.TrustedPayload, recovered);
             }
             if (recovered.TrustedPayload != SpatialTrustedPayload.Original &&
                 recovered.TrustedPayload != SpatialTrustedPayload.Backup)
                 return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                     recovered.TrustedPayload, recovered);
+
+            // Schema 7 is the proven canonical predecessor, not a legacy Unity payload. Upgrade it
+            // before the schemas 1-6 classifier so it is never reinterpreted by legacy projection.
+            DetachedCompleteSaveValidationResult frozenSchemaSeven =
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(trusted, limits.Canonical);
+            if (frozenSchemaSeven.IsValid)
+            {
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, frozenSchemaSeven,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
+            }
 
             RawSavePayloadClassification classification = RawSavePayloadClassifier.Classify(
                 trusted, limits.Raw, rawVersions, blankFloor);
@@ -153,7 +174,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(classification.FailureReason, recovered.TrustedPayload, recovered);
             int schema = classification.Envelope == RawSaveEnvelopeKind.UnwrappedSaveData
                 ? 1 : classification.SchemaVersion.GetValueOrDefault();
-            if (schema == DetachedWholeSaveCandidateSerializer.TargetSchemaVersion)
+            if (schema == CanonicalSaveSchemaVersions.CurrentWritableTarget)
                 return PublishValidated(trusted, currentContext,
                     DetachedSpatialSaveLoadDisposition.CurrentTarget, recovered, null);
 
@@ -180,7 +201,53 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedSpatialMigrationTransaction.NoJournalLegacyDiagnostic
                 ? DetachedSpatialSaveLoadDisposition.Migrated
                 : DetachedSpatialSaveLoadDisposition.RecoveredThenMigrated;
-            return PublishValidated(committed, currentContext, migratedDisposition, recovered, executed);
+            DetachedCompleteSaveValidationResult migratedSeven =
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(committed,
+                    limits.Canonical);
+            return migratedSeven.IsValid
+                ? UpgradeSchemaSeven(activePath, preflight.FileSystem, committed, migratedSeven,
+                    currentContext, migratedDisposition, recovered, executed)
+                : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
+                    executed.TrustedPayload, recovered, executed);
+        }
+
+        private DetachedSpatialSaveLoadResult UpgradeSchemaSeven(string activePath,
+            ISpatialMigrationFileSystem fileSystem, byte[] source,
+            DetachedCompleteSaveValidationResult frozenValidation,
+            DetachedCurrentTargetValidationContext currentContext,
+            DetachedSpatialSaveLoadDisposition disposition, DetachedSpatialMigrationOutcome recovery,
+            DetachedSpatialMigrationOutcome transaction)
+        {
+            CompatibilitySelectionResult<CanonicalLayoutContractSelection> frozenContract =
+                compatibility.SelectContract(CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget);
+            if (!frozenValidation.IsValid || !frozenContract.Success ||
+                frozenValidation.LayoutContractVersion != frozenContract.Value.CanonicalLayoutContractVersion ||
+                !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
+                    currentContext.Configuration, limits.Canonical.Spatial).IsValid ||
+                !SchemaSevenToEightUpgrade.TryPrepare(source, limits.Canonical, out byte[] candidate))
+                return Failure(SchemaSevenToEightUpgrade.InvalidReason,
+                    transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                    recovery, transaction);
+            DetachedCompleteSaveValidationResult candidateValidation =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, currentContext);
+            DetachedCanonicalSaveSessionResult candidateSession = candidateValidation.IsValid &&
+                candidateValidation.CurrentTargetValidated
+                ? DetachedCanonicalSaveSession.Open(candidate, currentContext, limits) : null;
+            if (candidateSession == null || !candidateSession.IsSuccess)
+                return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
+                    transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                    recovery, transaction);
+            string persistence = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem,
+                source, candidate, limits.Canonical.Serialized.MaximumCollectionRecords);
+            if (persistence != null) return Failure(persistence,
+                transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                recovery, transaction);
+            byte[] durable;
+            try { durable = fileSystem.ReadAllBytes(activePath); }
+            catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
+                transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                recovery, transaction); }
+            return PublishValidated(durable, currentContext, disposition, recovery, transaction);
         }
 
         private DetachedSpatialSaveLoadResult PublishValidated(byte[] bytes,

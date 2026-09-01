@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
 {
@@ -33,6 +34,10 @@ namespace DungeonBuilder.M0
         public const string NextObjectiveGreedierRewardSetupKey = "ui.mvp_first_contract.next_objective.greedier_reward_setup";
 
         public static MvpFirstSessionObjectiveSummary Resolve(SaveData save, RunSimulationConfig config)
+            => Resolve(save, config, null);
+
+        public static MvpFirstSessionObjectiveSummary Resolve(SaveData save, RunSimulationConfig config,
+            ProductionSpatialContentSnapshot production)
         {
             MvpFirstSessionObjectiveConfig objective = config?.MvpFirstSessionObjective;
             var summary = new MvpFirstSessionObjectiveSummary
@@ -57,7 +62,7 @@ namespace DungeonBuilder.M0
             summary.RuleResolved = true;
             bool canonical = CanonicalMvpRouteProjection.HasCanonicalLookingState(save);
             MvpDungeonPlacementEntry[] placements = canonical
-                ? MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config)
+                ? MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config, production)
                 : MvpDungeonLayoutResolver.ResolveOrderedPlacements(
                     save.mvpDungeonFloorLayout, save.mvpDungeonPlacements);
             summary.CurrentPathPlacementCount = canonical

@@ -132,7 +132,8 @@ namespace DungeonBuilder.M0
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
                 GetResearchUnlockBridgeConfig(),
-                CreatePlayerResearchActionHandler().ResolveAuthority());
+                CreatePlayerResearchActionHandler().ResolveAuthority(),
+                Content?.ProductionSpatialContent);
         }
 
         public GuidedMvpActionPathSummary ResolveGuidedMvpActionPath(MvpPlayerLoopSummary summary = null)
@@ -798,7 +799,8 @@ namespace DungeonBuilder.M0
         public void CycleSelectedMvpRoomSlotTarget()
         {
             if (Save == null) return;
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(Save, _runSimulationService?.Config);
+            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                Save, _runSimulationService?.Config, Content?.ProductionSpatialContent);
             int count = layout?.Rooms == null ? 0 : layout.Rooms.Length;
             if (count <= 0)
             {
@@ -1316,7 +1318,8 @@ namespace DungeonBuilder.M0
 
             Save.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
             Save.runHistory.NextRunSequence = sequence + 1;
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, config);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, config, Content?.ProductionSpatialContent);
             SelectLatestRunOutcome();
             RefreshRunLine();
             SaveService.Save(Save, SaveReason.ManualDev);
@@ -1494,7 +1497,8 @@ namespace DungeonBuilder.M0
             completed.LastCompletedProjectId = summary.ProjectId;
             completed.LastCompletionRuleSourceId = summary.RuleSourceIdUsed;
             Save.completedResearch = completed;
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, RunSimulationConfig, Content?.ProductionSpatialContent);
             Save.researchPending = null;
             Save.researchProgress = null;
             SaveService?.Save(Save, SaveReason.ManualDev);
@@ -1868,7 +1872,8 @@ namespace DungeonBuilder.M0
 
         private void SavePlayerResearchTransition()
         {
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(Save, RunSimulationConfig);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(
+                Save, RunSimulationConfig, Content?.ProductionSpatialContent);
             SaveService?.Save(Save, SaveReason.StateChange);
         }
 

@@ -136,9 +136,13 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         }
 
         public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save, RunSimulationConfig config)
+            => ResolveActivePlacements(save, config, null);
+
+        public static MvpDungeonPlacementEntry[] ResolveActivePlacements(SaveData save,
+            RunSimulationConfig config, ProductionSpatialContentSnapshot production)
         {
             MvpDungeonPlacementEntry[] canonical =
-                CanonicalMvpRouteProjection.ResolveActivePlacements(save, config);
+                CanonicalMvpRouteProjection.ResolveActivePlacements(save, config, production);
             if (canonical != null) return canonical;
 
             bool hasPersistedRooms = save?.mvpRoomSlotAssignments?.Rooms != null && save.mvpRoomSlotAssignments.Rooms.Count > 0;
@@ -147,7 +151,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 return MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);
             }
 
-            MvpDungeonFloorSlotLayout slotLayout = ResolveDefaultFloor(save, config);
+            MvpDungeonFloorSlotLayout slotLayout = ResolveDefaultFloor(save, config, production);
             if (slotLayout == null || slotLayout.Rooms == null || slotLayout.Rooms.Length == 0)
             {
                 return MvpDungeonLayoutResolver.ResolveOrderedPlacements(save?.mvpDungeonFloorLayout, save?.mvpDungeonPlacements);

@@ -222,7 +222,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":7"));
+                Does.Contain("\"schemaVersion\":8"));
         }
 
         [Test]
@@ -571,7 +571,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-current.json"));
-            fileSystem.Seed(activePath, fixture.Result.Attempt.Candidate.GetBytes());
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(fixture.Result.Attempt.Candidate.GetBytes(),
+                fixture.Limits, out byte[] currentBytes), Is.True);
+            fileSystem.Seed(activePath, currentBytes);
 
             DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
                 Supported(fileSystem, activePath));
@@ -871,7 +873,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MigrationTransactionId = string.Empty,
                     MigrationDescriptorFingerprint = string.Empty
                 },
-                Floors = floors
+                Floors = floors,
+                LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(floors)
             });
 
         [Test]

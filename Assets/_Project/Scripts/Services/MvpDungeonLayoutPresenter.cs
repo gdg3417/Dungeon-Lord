@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0
             MvpDungeonFloorLayoutState layout = canonical ? null : save?.mvpDungeonFloorLayout;
             MvpDungeonPlacementState legacyPlacements = canonical ? null : save?.mvpDungeonPlacements;
             MvpDungeonPlacementEntry[] resolvedPlacements = canonical
-                ? CanonicalMvpRouteProjection.ResolveActivePlacements(save, config)
+                ? CanonicalMvpRouteProjection.ResolveActivePlacements(save, config, production)
                 : config == null
                 ? MvpDungeonLayoutResolver.ResolveOrderedPlacements(layout, legacyPlacements)
                 : MvpRoomSlotLayoutResolver.ResolveActivePlacements(save, config);

@@ -105,6 +105,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public const string UnsupportedRoomReason = "gd66.write.unsupported_room_selection";
         public const string RemovalHasContentsReason = "gd66.write.room_removal_has_contents";
+        public const string StructuralRemovalDeferredReason = "structural.edit.removal_deferred_phase_3b2b";
         public const string CapacityReductionReason = "gd66.write.capacity_reduction_invalid";
         public const string NoOpReason = "gd66.diagnostic.canonical_write_noop";
         public const string ValidationFailedReason = "gd66.write.first_write_validation_failed";
@@ -186,7 +187,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     LegacyRoomOriginKind.CanonicalPlayerPlaced, out SavedSpatialFloor floor,
                     out string starterReason))
                     return starterReason;
-                state.Floors = new[] { floor }; roomEffect = true; return null;
+                state.Floors = new[] { floor };
+                state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
+                roomEffect = true; return null;
             }
             if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor existingFloor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics semantics))
@@ -237,6 +240,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     LegacyRoomOriginKind.ImplicitCompatibilityContainer, out SavedSpatialFloor starter,
                     out string reason)) return reason;
                 state.Floors = new[] { starter };
+                state.LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(state.Floors);
             }
             if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
                 out RoomSpatialInstance room, out CanonicalRoomSemantics ignored))
@@ -268,15 +272,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static string Remove(DetachedCanonicalSpatialSaveState state, string requestedRoomId)
         {
-            if (!TryTargetRoom(state, requestedRoomId, out SavedSpatialFloor floor,
-                out RoomSpatialInstance room, out CanonicalRoomSemantics ignored)) return ValidationFailedReason;
-            if ((floor.RoomContents.Assignments ?? Array.Empty<RoomContentAssignment>()).Any(value =>
-                value != null && value.RoomInstanceId == room.RoomInstanceId)) return RemovalHasContentsReason;
-            // Only the approved R1 -> canonical-empty transition is representable here. R2 removal
-            // needs a future explicit topology rule; never infer an array-position mapping.
-            if ((floor.Layout.Rooms ?? Array.Empty<RoomSpatialInstance>()).Length != 1)
-                return ValidationFailedReason;
-            state.Floors = Array.Empty<SavedSpatialFloor>(); return null;
+            return StructuralRemovalDeferredReason;
         }
 
         private static bool TryCreateStarter(DetachedCanonicalSpatialSaveState state,
@@ -285,7 +281,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             saved = null; reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected =
-                compatibility.SelectStarter(DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
+                compatibility.SelectStarter(CanonicalSaveSchemaVersions.CurrentWritableTarget,
                     state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return false; }
             CanonicalStarterLayoutProfile profile = selected.Value;
@@ -390,7 +386,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected = compatibility.SelectStarter(
-                DetachedWholeSaveCandidateSerializer.TargetSchemaVersion,
+                CanonicalSaveSchemaVersions.CurrentWritableTarget,
                 state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return null; }
             CompatibilityLayoutGeometryRecord geometry = (compatibility.Value.GeometryRecords ??

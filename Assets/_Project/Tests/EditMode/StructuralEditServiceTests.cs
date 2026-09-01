@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -245,7 +246,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -283,7 +284,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -363,7 +364,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -391,7 +392,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             Assert.That(parsed.IsValid, Is.True);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
@@ -463,7 +464,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                fixture.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
             CompatibilityLayoutGeometryRecord geometry = fixture.Compatibility.Value.GeometryRecords.Single();
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
@@ -543,6 +544,83 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(node.NodeId));
             Assert.That(proposed.RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(assignment.AssignmentId));
             Assert.That(proposed.RoomContents.Assignments.Single().Sequence, Is.EqualTo(assignment.Sequence));
+            var save = new SaveData
+            {
+                canonicalSpatialAuthority = preview.DetachedCandidate.Authority,
+                spatialFloors = preview.DetachedCandidate.Floors,
+                validatedCanonicalSpatialState = preview.DetachedCandidate
+            };
+            DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
+                    .InspectWithProductionContent(save, fixture.Production);
+            Assert.That(route.AuthorityState, Is.EqualTo(
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(route.Rooms.Single(value => value.RoomInstanceId == target.RoomInstanceId)
+                .Capacity.MonsterCapacity, Is.EqualTo(fixture.Production.Catalog.Rooms.Single(value =>
+                    value.RoomDefinitionId == "spatial.room.rectangle").MonsterCapacity));
+        }
+
+        [TestCase("spatial.room.basic")]
+        [TestCase("spatial.room.rectangle")]
+        [TestCase("spatial.room.large_chamber")]
+        public void CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(string definitionId)
+        {
+            PreviewFixture fixture = CreateR2(definitionId,
+                definitionId != "spatial.room.basic" ? new TileCoordinate(4, 1) :
+                new TileCoordinate(0, 6));
+            const string nativeRoomId = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, nativeRoomId);
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.TrapCategoryId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId, nativeRoomId);
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId, nativeRoomId);
+            RoomSpatialInstance room = fixture.State.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomInstanceId == nativeRoomId);
+            var save = new SaveData
+            {
+                canonicalSpatialAuthority = fixture.State.Authority,
+                spatialFloors = fixture.State.Floors,
+                validatedCanonicalSpatialState = fixture.State
+            };
+
+            DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjectionResult route =
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection
+                    .InspectWithProductionContent(save, fixture.Production);
+
+            Assert.That(route.AuthorityState, Is.EqualTo(
+                DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(room.RoomDefinitionId, Is.EqualTo(definitionId));
+            Assert.That(route.Rooms.Single(value => value.RoomInstanceId == room.RoomInstanceId)
+                .Capacity.MonsterCapacity, Is.EqualTo(fixture.Production.Catalog.Rooms.Single(value =>
+                    value.RoomDefinitionId == definitionId).MonsterCapacity));
+            Assert.That(MvpRoomSlotLayoutResolver.ResolveActivePlacements(save,
+                fixture.Configuration, fixture.Production), Is.Not.Empty);
+            Assert.That(MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(save,
+                fixture.Configuration, fixture.Production).RuleResolved, Is.True);
+            MvpPostContractGreedTrialSummary greed = MvpPostContractGreedTrialPresenter.Resolve(save,
+                fixture.Configuration, new MvpFirstSessionObjectiveSummary
+                    { RuleResolved = true, IsComplete = true }, fixture.Production);
+            Assert.That(greed.IsActive, Is.True);
+            Assert.That(greed.PlacementEffects.RuleResolved, Is.True);
+            Assert.That(MvpPlayerLoopSummaryPresenter.Resolve(save, fixture.Configuration,
+                production: fixture.Production).DungeonPlacements, Is.Not.Empty);
+            Assert.That(MvpDungeonLayoutPresenter.BuildLayoutText(save, fixture.Configuration,
+                fixture.Production, string.Empty, (key, fallback) => fallback ?? key), Is.Not.Empty);
+            MvpFirstSessionObjectiveSummary objective = MvpFirstSessionObjectivePresenter.Resolve(
+                save, fixture.Configuration, fixture.Production);
+            if (objective.RuleResolved) Assert.That(objective.CurrentPathPlacementCount,
+                Is.GreaterThan(0));
+            MvpFirstSessionObjectiveConfig objectiveConfig = fixture.Configuration.MvpFirstSessionObjective;
+            save.runHistory = new RunHistoryState { RecentOutcomes = new[] { new RunOutcomeRecord
+                { LootExtractionSummary = new RunLootExtractionSummary
+                    { TotalExtractedWorldValue = objectiveConfig.RequiredRecoveredLootValue } } } };
+            save.completedResearch = new CompletedResearchState
+                { ProjectIds = new[] { objectiveConfig.AnalysisResearchProjectId } };
+            save.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Assert.That(MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(save,
+                fixture.Configuration, fixture.Production), Is.True);
+            Assert.That(save.completedObjectives.ObjectiveIds, Does.Contain(objectiveConfig.ObjectiveId));
         }
 
         [Test]
@@ -1072,11 +1150,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal CanonicalSpatialSerializationLimits Limits;
         }
 
+        private static byte[] CurrentBytes(
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source)
+        {
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(
+                source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
+            return current;
+        }
+
         private static PreviewFixture CreateR1()
         {
             var source = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                source.Result.Attempt.Candidate.GetBytes(), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(source), new DetachedCurrentTargetValidationContext(
                     source.Compatibility, source.Production, source.LegacyBytes, source.Limits));
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,

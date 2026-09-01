@@ -44,7 +44,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     // current constructors/migrations run and adds the two schema-7 spatial owners explicitly.
     public static class DetachedWholeSaveCandidateSerializer
     {
-        public const int TargetSchemaVersion = 7;
+        public const int TargetSchemaVersion = CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
         public const string UnknownMemberUnpreservableReason = "gd66.payload.unknown_member_unpreservable";
         public const string WorkloadExceededReason = "gd66.payload.workload_exceeded";
         public const string CandidateInvalidReason = "gd66.transaction.candidate_invalid";
@@ -59,7 +59,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (source == null || !source.IsSuccess || sourceVersion < 1 || sourceVersion > 6)
                 return Failure(CandidateInvalidReason);
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> serialized =
-                CanonicalSpatialSaveSerializer.SerializeMembers(spatial, spatialLimits);
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(spatial, spatialLimits);
             if (!serialized.IsValid) return Failure(CandidateInvalidReason);
             byte[] authority = serialized.Value.Authority;
             byte[] floors = serialized.Value.Floors;
@@ -110,7 +110,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 output.Ascii("}");
                 byte[] candidate = output.Finish();
                 DetachedCompleteSaveValidationResult validation =
-                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, spatialLimits);
+                    DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                        candidate, spatialLimits);
                 if (!validation.IsValid) return Failure(CandidateInvalidReason);
                 return new DetachedWholeSaveResult(
                     new DetachedWholeSaveCandidate(candidate, SpatialContractSha256.Compute(candidate),
