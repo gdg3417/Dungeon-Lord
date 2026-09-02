@@ -3126,6 +3126,19 @@
     {
       "key": "ui.structural.renovation.floor_space.format",
       "text": "Floor space used: {0} -> {1}; remaining: {2}"
-    }
+    },
+    {"key": "structural.edit.deletion_target_not_leaf", "text": "Only the final room on the required route can be removed."},
+    {"key": "structural.edit.deletion_minimum_room", "text": "Floor 1 must keep at least one buildable room."},
+    {"key": "structural.edit.removal_policy_unavailable", "text": "Room removal policy is unavailable."},
+    {"key": "schema8.ownership.removal_policy_unresolved", "text": "This room contains content that cannot currently be removed."},
+    {"key": "ui.structural.deletion.preview.action", "text": "Preview Tail Deletion"},
+    {"key": "ui.structural.deletion.commit.action", "text": "Commit Tail Deletion"},
+    {"key": "ui.structural.deletion.commit.success", "text": "The final room was removed and saved."},
+    {"key": "ui.structural.deletion.preview.format", "text": "Remove Room {0}: {1}"},
+    {"key": "ui.structural.deletion.connection.format", "text": "Reconnect to Completion: {0} ({1} corridor tiles)"},
+    {"key": "ui.structural.deletion.returned.format", "text": "Contents returned to your custody: {0}"},
+    {"key": "ui.structural.deletion.terminal_moved", "text": "Completion Terminal moves to the validated connection."},
+    {"key": "ui.structural.deletion.blocking.format", "text": "Blocking content: {0}"},
+    {"key": "ui.structural.deletion.removed.format", "text": "Contents removed permanently: {0}"}
   ]
 }

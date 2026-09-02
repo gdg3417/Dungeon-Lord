@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         private readonly MigrationRunner _migrationRunner = new MigrationRunner();
         private SaveSpatialMigrationLimitsProfile _limits;
         private ProductionSpatialContentSnapshot _production;
+        private StructuralContentRemovalPolicySnapshot _removalPolicy;
         private SpatialLayoutCompatibilitySnapshot _compatibility;
         private byte[] _legacyConfiguration;
         private RunSimulationConfig _legacyGameplayConfiguration;
@@ -63,6 +64,9 @@ namespace DungeonBuilder.M0
                 legacyConfiguration == null ? null : new DetachedCurrentTargetValidationContext(
                     compatibility, production, legacyConfiguration, limits.Canonical);
         }
+
+        public void ConfigureStructuralRemovalPolicy(StructuralContentRemovalPolicySnapshot policy) =>
+            _removalPolicy = policy;
 
         public SaveService(SimpleLogger logger, SaveConfig saveConfig)
             : this(logger, saveConfig, Application.persistentDataPath)
@@ -319,6 +323,16 @@ namespace DungeonBuilder.M0
                 _compatibility, _legacyGameplayConfiguration, _limits.Canonical);
         }
 
+        public StructuralEditPreview PreviewStructuralDeletion(StructuralDeletionRequest request)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return StructuralDeletionService.Invalid(StructuralEditService.InvalidContextReason, request);
+            if (_removalPolicy == null) return StructuralDeletionService.Invalid(
+                StructuralDeletionService.PolicyUnavailableReason, request);
+            return StructuralDeletionService.Preview(state, request, _removalPolicy, _production,
+                _legacyGameplayConfiguration, _limits.Canonical);
+        }
+
         private bool TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state)
         {
             state = null;
@@ -334,7 +348,7 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
-                _validationContext, _limits);
+                _validationContext, _limits, _removalPolicy);
 
         private bool HasOwnedRecoveryEvidence()
         {

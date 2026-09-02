@@ -483,6 +483,7 @@ MonoBehaviour:
   productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6, type: 3}
   spatialLayoutCompatibilityProfilesJson: {fileID: 4900000, guid: 98e8c650c1ef4d1c916197dbb5d8f218, type: 3}
   saveSpatialMigrationLimitsJson: {fileID: 4900000, guid: 84c1765b61684bb29e3bd90c872b80ed, type: 3}
+  structuralContentRemovalPolicyJson: {fileID: 4900000, guid: 10669a8cb1ad44d0a6933aa69db12439, type: 3}
   overlay: {fileID: 1944002266}
 --- !u!4 &1479508743
 Transform:

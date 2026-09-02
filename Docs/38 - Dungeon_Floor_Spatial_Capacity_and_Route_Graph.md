@@ -1,5 +1,7 @@
 **System Spec 38: Dungeon Floor Spatial Capacity and Route Graph**
 
+
+**Current Phase 3B2B status (2026-09-01):** Leaf deletion implementation is present and under static review and required Unity validation. Phase 3 is not closed; Phase 4 remains unimplemented.
 **Current Phase 2B3 status (2026-08-02):** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
 
 
