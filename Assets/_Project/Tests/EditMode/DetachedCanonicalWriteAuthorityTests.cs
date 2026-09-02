@@ -207,7 +207,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.Not.EqualTo(retiredNode));
             Assert.That(after.Layout.Edges.Any(value => retiredEdges.Contains(value.EdgeId)), Is.False);
             Assert.That(after.Layout.Edges.Any(value => value.EdgeId == replacementEdge), Is.False);
-            Assert.That(after.Layout.Edges.Any(value => retiredEdges.Contains(value.EdgeId)), Is.False);
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal,
                 Is.GreaterThan(roomHighWater));
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal,

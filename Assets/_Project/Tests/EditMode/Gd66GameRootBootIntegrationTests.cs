@@ -47,6 +47,157 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.StateLine, Does.Contain("Home"));
         }
 
+        [TestCase(6, FloorRouteConnectionKind.DirectDoorway, "Direct Doorway", "")]
+        [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, "Straight Stone Corridor", "(1,6)")]
+        public void StructuralDeletionThroughRealRootPersistsPublishesAndPresents(int targetY,
+            FloorRouteConnectionKind kind, string connectionText, string footprintText)
+        {
+            RequireSynchronousEditModeFixture();
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = Service(fixture, fileSystem, "root-structural-deletion-" + targetY + ".json");
+            SaveData empty = service.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(empty, Is.Not.Null, banner);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(starter.IsSuccess, Is.True, starter.Reason);
+            StructuralEditPreview construction = service.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(0, targetY), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" });
+            DetachedCanonicalWriteResult r2 = service.ExecuteCanonicalMutation(starter.RuntimeProjection,
+                DetachedCanonicalMutationRequest.Construct(construction));
+            Assert.That(r2.IsSuccess, Is.True, r2.Reason);
+            GameRoot root = Root(service); LoadPlayerFacingContent(root);
+            var overlay = rootObject.AddComponent<BootstrapOverlay>(); root.overlay = overlay; overlay.Bind(root);
+            Assert.That(root.CompleteSuccessfulBootForTests(r2.RuntimeProjection, true), Is.True);
+            string target = "compat.floor.00.room.player.0000";
+            string completionId = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Completion).NodeId;
+            string terminalId = root.Save.validatedCanonicalSpatialState.Floors[0].FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId;
+
+            StructuralEditPreview preview = root.PreviewStructuralDeletion(
+                new StructuralDeletionRequest { TargetRoomInstanceId = target });
+
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            Assert.That(preview.ConnectionKind, Is.EqualTo(kind));
+            string presentation = overlay.BuildDeletionPreviewPresentation(preview);
+            Assert.That(presentation, Does.Contain("Basic Room"));
+            Assert.That(presentation, Does.Contain(connectionText));
+            Assert.That(presentation, Does.Contain(preview.PreviousUsedFloorSpace.ToString()));
+            Assert.That(presentation, Does.Contain(preview.ResultingUsedFloorSpace.ToString()));
+            Assert.That(presentation, Does.Contain(preview.ResultingRemainingFloorSpace.ToString()));
+            if (footprintText.Length != 0) Assert.That(presentation, Does.Contain(footprintText));
+            if (preview.Consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved &&
+                    !value.From.Equals(value.To)))
+                Assert.That(presentation, Does.Contain("Completion Terminal"));
+            Assert.That(presentation, Does.Not.Contain(target));
+            DetachedCanonicalWriteResult deletion = root.CommitStructuralDeletion();
+            Assert.That(deletion.IsSuccess, Is.True, deletion.Reason);
+            Assert.That(root.Save, Is.SameAs(deletion.RuntimeProjection));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Any(value =>
+                value.RoomInstanceId == target), Is.False);
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Completion).NodeId, Is.EqualTo(completionId));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId,
+                Is.EqualTo(terminalId));
+            Assert.That(root.StructuralDeletionPreview, Is.Null);
+            Assert.That(root.StructuralRenovationPreview, Is.Null);
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+        }
+
+        [Test]
+        public void StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot()
+        {
+            RequireSynchronousEditModeFixture();
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = Service(fixture, fileSystem, "root-deletion-policy-missing.json");
+            SaveData empty = service.LoadOrCreate("gd66-live", out _);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            StructuralEditPreview construction = service.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(0, 6), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" });
+            DetachedCanonicalWriteResult r2 = service.ExecuteCanonicalMutation(starter.RuntimeProjection,
+                DetachedCanonicalMutationRequest.Construct(construction));
+            service.ConfigureStructuralRemovalPolicy(null);
+            GameRoot root = Root(service); Assert.That(root.CompleteSuccessfulBootForTests(r2.RuntimeProjection, true), Is.True);
+            SaveData before = root.Save;
+            StructuralEditPreview preview = root.PreviewStructuralDeletion(new StructuralDeletionRequest
+                { TargetRoomInstanceId = "compat.floor.00.room.player.0000" });
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.ReasonCodes, Is.EqualTo(new[] { StructuralDeletionService.PolicyUnavailableReason }));
+            Assert.That(root.CommitStructuralDeletion().IsSuccess, Is.False);
+            Assert.That(root.Save, Is.SameAs(before));
+        }
+
+        [Test]
+        public void BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds()
+        {
+            RequireSynchronousEditModeFixture();
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            SaveService service = Service(fixture, fileSystem, "bootstrap-deletion-presentation.json");
+            SaveData empty = service.LoadOrCreate("gd66-live", out _);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            DetachedCanonicalWriteResult r2 = service.ExecuteCanonicalMutation(starter.RuntimeProjection,
+                DetachedCanonicalMutationRequest.Construct(service.PreviewStructuralConstruction(
+                    new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                        Anchor = new TileCoordinate(0, 6), Orientation = CardinalOrientation.Zero,
+                        TerminalConnectionPointId = "north" })));
+            const string target = "compat.floor.00.room.player.0000";
+            DetachedCanonicalWriteResult monster = service.ExecuteCanonicalMutation(r2.RuntimeProjection,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, target));
+            DetachedCanonicalWriteResult trap = service.ExecuteCanonicalMutation(monster.RuntimeProjection,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
+                    MvpDungeonPlacementIds.SpikeTrapOptionId, target));
+            GameRoot root = Root(service); LoadPlayerFacingContent(root);
+            var overlay = rootObject.AddComponent<BootstrapOverlay>(); root.overlay = overlay; overlay.Bind(root);
+            Assert.That(root.CompleteSuccessfulBootForTests(trap.RuntimeProjection, true), Is.True);
+            StructuralEditPreview returned = root.PreviewStructuralDeletion(
+                new StructuralDeletionRequest { TargetRoomInstanceId = target });
+            string returnedText = overlay.BuildDeletionPreviewPresentation(returned);
+            Assert.That(returnedText, Does.Contain("Skeleton")); Assert.That(returnedText, Does.Contain("Spike Trap"));
+            Assert.That(returnedText, Does.Contain("returned to your custody"));
+            foreach (StructuralChange consequence in returned.Consequences)
+                Assert.That(returnedText, Does.Not.Contain(consequence.StableId));
+
+            var removed = new StructuralEditPreview { Operation = StructuralEditOperation.Deletion,
+                TargetRoomInstanceId = target, RoomDefinitionId = "spatial.room.basic",
+                PreviousUsedFloorSpace = 42, ResultingUsedFloorSpace = 26,
+                ResultingRemainingFloorSpace = 74, ConnectionKind = FloorRouteConnectionKind.DirectDoorway,
+                ReasonCodes = System.Array.Empty<string>(), DetachedCandidate = returned.DetachedCandidate,
+                Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.ContentRemoved,
+                    StableId = "test.assignment.secret", ProposedDefinitionId = MvpDungeonPlacementIds.SkeletonOptionId } } };
+            string removedText = overlay.BuildDeletionPreviewPresentation(removed);
+            Assert.That(removedText, Does.Contain("removed permanently"));
+            Assert.That(removedText, Does.Not.Contain("returned to your custody"));
+            Assert.That(removedText, Does.Not.Contain("test.assignment.secret"));
+
+            StructuralEditPreview blocked = StructuralDeletionService.Invalid(
+                StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason,
+                new StructuralDeletionRequest { TargetRoomInstanceId = target });
+            blocked.BlockingContentOptionIds = new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                "placement.option.loot_node.glittering_hoard",
+                "placement.option.loot_node.hidden_cache" };
+            string blockedText = overlay.BuildDeletionPreviewPresentation(blocked);
+            Assert.That(blockedText, Does.Contain("Basic Loot Node"));
+            Assert.That(blockedText, Does.Contain("Glittering Hoard"));
+            Assert.That(blockedText, Does.Contain("Hidden Cache"));
+            Assert.That(blockedText.IndexOf("Basic Loot Node", System.StringComparison.Ordinal), Is.LessThan(
+                blockedText.IndexOf("Glittering Hoard", System.StringComparison.Ordinal)));
+            Assert.That(blockedText, Does.Not.Contain(target));
+        }
+
         [Test]
         public void StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview()
         {
@@ -931,6 +1082,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(RequiredAsset(
+                StructuralContentRemovalPolicyAuthority.ProductionPath).bytes, out var removalPolicy), Is.True);
+            service.ConfigureStructuralRemovalPolicy(removalPolicy);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
                 fileSystem, Path.GetFullPath(path)));
