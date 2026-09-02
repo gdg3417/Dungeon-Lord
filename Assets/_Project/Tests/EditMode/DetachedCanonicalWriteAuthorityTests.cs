@@ -97,6 +97,126 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void StructuralDeletionPersistenceFailurePublishesNothingAndPreservesOwnershipAndLifecycle()
+        {
+            Fixture fixture = CreateR2ForDeletion(6); string target = "compat.floor.00.room.player.0000";
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, target)));
+            StructuralEditPreview preview = DeletionPreview(fixture);
+            byte[] before = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+            DetachedCanonicalSaveSession sessionBefore = fixture.Session; SaveData runtimeBefore = fixture.Runtime;
+            SavedSpatialFloor floorBefore = fixture.State.Floors[0];
+            FloorRouteNode node = floorBefore.Layout.Nodes.Single(value => value.RoomInstanceId == target);
+            string[] edges = floorBefore.Layout.Edges.Where(value => value.SourceNodeId == node.NodeId ||
+                value.DestinationNodeId == node.NodeId).Select(value => value.EdgeId).ToArray();
+            long edgeHighWater = fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal;
+            fixture.FileSystem.EnableFailure(
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 2);
+
+            DetachedCanonicalWriteResult result = fixture.Execute(DetachedCanonicalMutationRequest.Delete(preview));
+
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.RuntimeProjection, Is.Null); Assert.That(result.Session, Is.Null);
+            Assert.That(fixture.Session, Is.SameAs(sessionBefore)); Assert.That(fixture.Runtime, Is.SameAs(runtimeBefore));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
+            Assert.That(durable.State.Floors[0].Layout.Rooms.Any(value => value.RoomInstanceId == target), Is.True);
+            Assert.That(durable.State.Floors[0].Layout.Nodes.Any(value => value.NodeId == node.NodeId), Is.True);
+            Assert.That(durable.State.Floors[0].Layout.Edges.Count(value => edges.Contains(value.EdgeId)), Is.EqualTo(2));
+            Assert.That(durable.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+            Assert.That(durable.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal,
+                Is.EqualTo(edgeHighWater));
+        }
+
+        [Test]
+        public void StructuralDeletionReturnedCustodySurvivesCompleteSaveReopen()
+        {
+            Fixture fixture = CreateR2ForDeletion(6); string target = "compat.floor.00.room.player.0000";
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, target)));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, target)));
+            RoomContentAssignment[] assigned = fixture.State.Floors[0].RoomContents.Assignments.ToArray();
+
+            DetachedCanonicalWriteResult result = fixture.Execute(
+                DetachedCanonicalMutationRequest.Delete(DeletionPreview(fixture)));
+
+            AssertCandidateSuccess(fixture, result);
+            DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(8));
+            Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
+                assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
+            foreach (RoomContentAssignment expected in assigned)
+            {
+                ReturnedStructuralContent returned = durable.State.LifecycleAndOwnership.ReturnedContents.Single(
+                    value => value.AssignmentId == expected.AssignmentId);
+                Assert.That(returned.CategoryId, Is.EqualTo(expected.CategoryId));
+                Assert.That(returned.OptionId, Is.EqualTo(expected.OptionId));
+                Assert.That(returned.Sequence, Is.EqualTo(expected.Sequence));
+                Assert.That(returned.RemovalDisposition,
+                    Is.EqualTo(StructuralContentRemovalDisposition.ReturnToPlayerCustody));
+            }
+            Assert.That(result.RuntimeProjection, Is.Not.Null);
+        }
+
+        [Test]
+        public void StructuralDeletionOldPreviewIsStaleAfterDurableContentWrite()
+        {
+            Fixture fixture = CreateR2ForDeletion(6); StructuralEditPreview preview = DeletionPreview(fixture);
+            string target = "compat.floor.00.room.player.0000";
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, target)));
+            byte[] intervening = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+
+            DetachedCanonicalWriteResult stale = fixture.Execute(DetachedCanonicalMutationRequest.Delete(preview));
+
+            Assert.That(stale.IsSuccess, Is.False);
+            Assert.That(stale.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+            Assert.That(stale.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(intervening, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Single().OptionId,
+                Is.EqualTo(MvpDungeonPlacementIds.SkeletonOptionId));
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+        }
+
+        [Test]
+        public void NativeConstructionAfterDeletionNeverReusesRetiredStructuralIdentities()
+        {
+            Fixture fixture = CreateR2ForDeletion(6); SavedSpatialFloor before = fixture.State.Floors[0];
+            string retiredRoom = "compat.floor.00.room.player.0000";
+            string retiredNode = before.Layout.Nodes.Single(value => value.RoomInstanceId == retiredRoom).NodeId;
+            string[] retiredEdges = before.Layout.Edges.Where(value => value.SourceNodeId == retiredNode ||
+                value.DestinationNodeId == retiredNode).Select(value => value.EdgeId).ToArray();
+            int roomHighWater = fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal;
+            DetachedCanonicalWriteResult deletion = fixture.Execute(
+                DetachedCanonicalMutationRequest.Delete(DeletionPreview(fixture)));
+            fixture.Accept(deletion);
+            string replacementEdge = fixture.State.Floors[0].Layout.Edges.Single(value =>
+                value.EdgeId.Contains(".edge.native.")).EdgeId;
+
+            DetachedCanonicalWriteResult construction = fixture.Execute(
+                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, 6, "north")));
+            fixture.Accept(construction);
+
+            SavedSpatialFloor after = fixture.State.Floors[0]; RoomSpatialInstance created = after.Layout.Rooms.Single(
+                value => value.RoomInstanceId != before.Layout.Rooms.Single(r => r.RoomInstanceId != retiredRoom).RoomInstanceId);
+            Assert.That(created.RoomInstanceId, Is.Not.EqualTo(retiredRoom));
+            Assert.That(after.Layout.Nodes.Single(value => value.RoomInstanceId == created.RoomInstanceId).NodeId,
+                Is.Not.EqualTo(retiredNode));
+            Assert.That(after.Layout.Edges.Any(value => retiredEdges.Contains(value.EdgeId)), Is.False);
+            Assert.That(after.Layout.Edges.Any(value => value.EdgeId == replacementEdge), Is.False);
+            Assert.That(after.Layout.Edges.Any(value => retiredEdges.Contains(value.EdgeId)), Is.False);
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal,
+                Is.GreaterThan(roomHighWater));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal,
+                Is.GreaterThanOrEqualTo(deletion.Validation.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal));
+            Assert.That(DetachedCanonicalSaveSession.Open(fixture.FileSystem.ReadAllBytes(fixture.ActivePath),
+                fixture.Context, fixture.Profile).IsSuccess, Is.True);
+        }
+
+        [Test]
         public void StructuralPhysicalCorridorCommitPersistsFootprint()
         {
             Fixture fixture = CreateR1();
@@ -1091,6 +1211,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fixture.Accept(room);
             return fixture;
         }
+
+        private static Fixture CreateR2ForDeletion(int targetY)
+        {
+            Fixture fixture = CreateR1();
+            DetachedCanonicalWriteResult construction = fixture.Execute(
+                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, "north")));
+            fixture.Accept(construction); return fixture;
+        }
+
+        private static StructuralEditPreview DeletionPreview(Fixture fixture) =>
+            StructuralDeletionService.Preview(fixture.State, new StructuralDeletionRequest
+                { TargetRoomInstanceId = "compat.floor.00.room.player.0000" }, fixture.RemovalPolicy,
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
 
         private static StructuralEditPreview Preview(Fixture fixture, int x, int y,
             string terminalPoint)
