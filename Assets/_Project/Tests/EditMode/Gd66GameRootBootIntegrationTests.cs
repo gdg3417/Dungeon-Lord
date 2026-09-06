@@ -47,10 +47,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.StateLine, Does.Contain("Home"));
         }
 
-        [TestCase(6, FloorRouteConnectionKind.DirectDoorway, "Direct Doorway", "")]
-        [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, "Straight Stone Corridor", "(1,6)")]
+        [TestCase(6, "north", FloorRouteConnectionKind.DirectDoorway, "Direct Doorway", "")]
+        [TestCase(7, "east", FloorRouteConnectionKind.PhysicalCorridor, "Straight Stone Corridor", "(1,6)")]
         public void StructuralDeletionThroughRealRootPersistsPublishesAndPresents(int targetY,
-            FloorRouteConnectionKind kind, string connectionText, string footprintText)
+            string terminalPoint, FloorRouteConnectionKind kind, string connectionText, string footprintText)
         {
             RequireSynchronousEditModeFixture();
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
@@ -65,7 +65,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             StructuralEditPreview construction = service.PreviewStructuralConstruction(
                 new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
                     Anchor = new TileCoordinate(0, targetY), Orientation = CardinalOrientation.Zero,
-                    TerminalConnectionPointId = "north" });
+                    TerminalConnectionPointId = terminalPoint });
             DetachedCanonicalWriteResult r2 = service.ExecuteCanonicalMutation(starter.RuntimeProjection,
                 DetachedCanonicalMutationRequest.Construct(construction));
             Assert.That(r2.IsSuccess, Is.True, r2.Reason);

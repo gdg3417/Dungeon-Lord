@@ -53,14 +53,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     value.FixedStructureDefinitionId == "spatial.fixed.completion_terminal").Anchor));
         }
 
-        [TestCase(6, FloorRouteConnectionKind.DirectDoorway, 0)]
-        [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, 1)]
+        [TestCase(6, "north", FloorRouteConnectionKind.DirectDoorway, 0)]
+        [TestCase(7, "east", FloorRouteConnectionKind.PhysicalCorridor, 1)]
         public void StructuralDeletionCommitPersistsAndReopensInverseTail(int targetY,
-            FloorRouteConnectionKind expectedKind, int expectedCorridorTiles)
+            string terminalPoint, FloorRouteConnectionKind expectedKind, int expectedCorridorTiles)
         {
             Fixture fixture = CreateR1();
             DetachedCanonicalWriteResult construction = fixture.Execute(
-                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, "north")));
+                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, terminalPoint)));
             fixture.Accept(construction);
             SavedSpatialFloor before = fixture.State.Floors[0];
             RoomSpatialInstance target = before.Layout.Rooms.Single(room =>
@@ -1211,11 +1211,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return fixture;
         }
 
-        private static Fixture CreateR2ForDeletion(int targetY)
+        private static Fixture CreateR2ForDeletion(int targetY, string terminalPoint = "north")
         {
             Fixture fixture = CreateR1();
             DetachedCanonicalWriteResult construction = fixture.Execute(
-                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, "north")));
+                DetachedCanonicalMutationRequest.Construct(Preview(fixture, 0, targetY, terminalPoint)));
             fixture.Accept(construction); return fixture;
         }
 
