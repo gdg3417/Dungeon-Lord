@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0
         public TextAsset productionSpatialValidationLimits;
         public TextAsset spatialLayoutCompatibilityProfilesJson;
         public TextAsset saveSpatialMigrationLimitsJson;
+        public TextAsset structuralContentRemovalPolicyJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -50,6 +51,7 @@ namespace DungeonBuilder.M0
         public SaveData Save { get; private set; }
         public StructuralEditPreview StructuralConstructionPreview { get; private set; }
         public StructuralEditPreview StructuralRenovationPreview { get; private set; }
+        public StructuralEditPreview StructuralDeletionPreview { get; private set; }
         public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
@@ -407,6 +409,11 @@ namespace DungeonBuilder.M0
             SaveService.ConfigureCanonical(SaveSpatialMigrationLimits, Content.ProductionSpatialContent,
                 Content.SpatialLayoutCompatibilityProfiles, parsedRunConfig,
                 canonicalLegacyConfiguration);
+            StructuralContentRemovalPolicySnapshot removalPolicy = null;
+            if (structuralContentRemovalPolicyJson != null)
+                StructuralContentRemovalPolicyAuthority.TryParse(structuralContentRemovalPolicyJson.bytes,
+                    out removalPolicy);
+            SaveService.ConfigureStructuralRemovalPolicy(removalPolicy);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
@@ -510,6 +517,7 @@ namespace DungeonBuilder.M0
             Save = published;
             StructuralConstructionPreview = null;
             StructuralRenovationPreview = null;
+            StructuralDeletionPreview = null;
             StructuralConstructionReasonKey = string.Empty;
             overlay?.SynchronizeStructuralConstructionPublication();
             TimeService?.AttachSave(Save);
@@ -601,6 +609,32 @@ namespace DungeonBuilder.M0
             StructuralRenovationPreview = null;
             StructuralConstructionReasonKey = string.Empty;
         }
+
+        public StructuralEditPreview PreviewStructuralDeletion(StructuralDeletionRequest request)
+        {
+            StructuralDeletionPreview = CanPreviewStructuralRenovation()
+                ? SaveService.PreviewStructuralDeletion(request)
+                : StructuralDeletionService.Invalid(StructuralEditService.InvalidContextReason, request);
+            StructuralConstructionReasonKey = StructuralDeletionPreview.IsValid ? string.Empty :
+                StructuralDeletionPreview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.InvalidContextReason;
+            return StructuralDeletionPreview;
+        }
+
+        public DetachedCanonicalWriteResult CommitStructuralDeletion()
+        {
+            if (StructuralDeletionPreview == null || !StructuralDeletionPreview.IsValid ||
+                !CanPreviewStructuralRenovation())
+                return StructuralCommitFailure(StructuralDeletionPreview?.ReasonCodes?.FirstOrDefault() ??
+                    StructuralEditService.InvalidContextReason);
+            DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
+                DetachedCanonicalMutationRequest.Delete(StructuralDeletionPreview));
+            if (!result.IsSuccess) StructuralConstructionReasonKey = result.Reason ??
+                StructuralEditService.InvalidContextReason;
+            return result;
+        }
+
+        public void InvalidateStructuralDeletionPreview()
+        { StructuralDeletionPreview = null; StructuralConstructionReasonKey = string.Empty; }
 
         private bool CanPreviewStructuralRenovation()
         {

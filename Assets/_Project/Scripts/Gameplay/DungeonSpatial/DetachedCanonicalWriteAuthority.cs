@@ -41,13 +41,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly RunSimulationConfig configuration;
         private readonly DetachedCurrentTargetValidationContext context;
         private readonly SaveSpatialMigrationLimitsProfile limits;
+        private readonly StructuralContentRemovalPolicySnapshot removalPolicy;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
-            DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits)
+            DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits,
+            StructuralContentRemovalPolicySnapshot removalPolicy = null)
         {
             this.production = production; this.compatibility = compatibility;
             this.configuration = configuration; this.context = context; this.limits = limits;
+            this.removalPolicy = removalPolicy;
         }
 
         public DetachedCanonicalWriteResult Execute(string activePath,
@@ -73,7 +76,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(owned.State,
-                request, production, compatibility, configuration, limits.Canonical);
+                request, production, compatibility, configuration, limits.Canonical, removalPolicy);
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
                 false, null, null, null, null);
             if (!mutation.IsSuccess) return Failure(mutation.Reason);

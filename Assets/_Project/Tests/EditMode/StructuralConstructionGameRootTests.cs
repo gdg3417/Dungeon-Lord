@@ -103,11 +103,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     StructuralEditService.OutOfBoundsReason, new StructuralMovementRequest
                     { RoomInstanceId = "test.room", Anchor = new TileCoordinate(1, 1) });
                 SetProperty(root, "StructuralRenovationPreview", retained);
+                SetProperty(root, "StructuralDeletionPreview", StructuralDeletionService.Invalid(
+                    StructuralEditService.OutOfBoundsReason,
+                    new StructuralDeletionRequest { TargetRoomInstanceId = "test.room" }));
                 typeof(GameRoot).GetMethod("PublishCanonicalRuntime",
                     BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { published });
 
                 Assert.That(root.Save, Is.SameAs(published));
                 Assert.That(root.StructuralRenovationPreview, Is.Null);
+                Assert.That(root.StructuralDeletionPreview, Is.Null);
                 Assert.That(root.StructuralConstructionPreview, Is.Null);
             }
             finally { Object.DestroyImmediate(go); }

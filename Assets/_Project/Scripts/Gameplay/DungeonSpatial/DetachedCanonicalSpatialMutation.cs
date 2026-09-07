@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         RemoveRoom = 2,
         StructuralConstruction = 3,
         StructuralMovement = 4,
-        StructuralReplacement = 5
+        StructuralReplacement = 5,
+        StructuralDeletion = 6
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -24,6 +25,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal StructuralConstructionRequest StructuralIntent { get; private set; }
         internal StructuralMovementRequest MovementIntent { get; private set; }
         internal StructuralReplacementRequest ReplacementIntent { get; private set; }
+        internal StructuralDeletionRequest DeletionIntent { get; private set; }
         internal string StructuralBaselineFingerprint { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
@@ -59,6 +61,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ReplacementIntent = preview != null && preview.IsValid ? preview.Intent as StructuralReplacementRequest : null,
                 StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null
             };
+
+        public static DetachedCanonicalMutationRequest Delete(StructuralEditPreview preview) =>
+            new DetachedCanonicalMutationRequest { Kind = DetachedCanonicalMutationKind.StructuralDeletion,
+                DeletionIntent = preview != null && preview.IsValid ? preview.Intent as StructuralDeletionRequest : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid ? preview.BaselineFingerprint : null };
     }
 
     public sealed class DetachedCanonicalMutationResult
@@ -113,7 +120,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCanonicalMutationResult Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
-            CanonicalSpatialSerializationLimits limits)
+            CanonicalSpatialSerializationLimits limits,
+            StructuralContentRemovalPolicySnapshot removalPolicy = null)
         {
             if (current?.Authority == null || current.Floors == null || request == null ||
                 production == null || compatibility == null || configuration == null || !limits.IsValid)
@@ -151,6 +159,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
                 proposed = refreshed.DetachedCandidate;
                 reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.StructuralDeletion)
+            {
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    request.DeletionIntent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(StructuralEditService.StalePreviewReason);
+                StructuralEditPreview refreshed = StructuralDeletionService.Preview(current, request.DeletionIntent,
+                    removalPolicy, production, configuration, limits);
+                if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate; reason = null;
             }
             else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
