@@ -13,6 +13,170 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public sealed class DetachedCanonicalWriteAuthorityTests
     {
+        [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, 43)]
+        [TestCase(6, FloorRouteConnectionKind.DirectDoorway, 42)]
+        public void PhysicalTailDeletion_ReopenAndReconstructRetiringGeometry(int reconstructY,
+            FloorRouteConnectionKind kind, int used)
+        {
+            Fixture fixture = CreateR2ForDeletion(7, "east");
+            SavedSpatialFloor original = fixture.State.Floors[0];
+            string completion = original.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion).NodeId;
+            string terminal = original.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId;
+            string[] retired = original.Layout.Edges.Where(value => value.EdgeId.Contains(".room.player."))
+                .Select(value => value.EdgeId).ToArray();
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Delete(DeletionPreview(fixture))));
+            FloorRouteEdge repaired = fixture.State.Floors[0].Layout.Edges.Single(value =>
+                value.DestinationNodeId == completion);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(1, 6) }, repaired.Footprint.OccupiedTiles);
+            fixture.Reopen();
+            byte[] before = fixture.Session.GetCurrentBytes();
+            SaveData runtimeBefore = fixture.Runtime;
+            StructuralEditPreview first = Preview(fixture, 0, reconstructY, "east");
+            StructuralEditPreview second = Preview(fixture, 0, reconstructY, "east");
+            Assert.That(first.IsValid, Is.True, string.Join(",", first.ReasonCodes));
+            CollectionAssert.AreEqual(CanonicalSpatialSaveSerializer.Serialize(first.DetachedCandidate,
+                fixture.Profile.Canonical).Value, CanonicalSpatialSaveSerializer.Serialize(second.DetachedCandidate,
+                fixture.Profile.Canonical).Value);
+            Assert.That(first.ConnectionKind, Is.EqualTo(kind));
+            Assert.That(first.ResultingUsedFloorSpace, Is.EqualTo(used));
+            Assert.That(first.ResultingRemainingFloorSpace, Is.EqualTo(60 - used));
+            if (reconstructY == 6) Assert.That(first.OccupiedTiles, Does.Contain(new TileCoordinate(1, 6)));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            Assert.That(fixture.Runtime, Is.SameAs(runtimeBefore));
+            DetachedCanonicalWriteResult result = fixture.Execute(DetachedCanonicalMutationRequest.Construct(first));
+            AssertCandidateSuccess(fixture, result);
+            fixture.Accept(result); fixture.Reopen();
+            SavedSpatialFloor after = fixture.State.Floors[0];
+            Assert.That(after.Layout.Rooms.Select(value => value.RoomInstanceId),
+                Does.Contain("compat.floor.00.room.player.0001").And.Not.Contain("compat.floor.00.room.player.0000"));
+            Assert.That(after.Layout.Nodes.Select(value => value.NodeId),
+                Does.Contain("compat.floor.00.room.player.0001.node").And.Not.Contain("compat.floor.00.room.player.0000.node"));
+            Assert.That(after.Layout.Edges.Any(value => retired.Contains(value.EdgeId) ||
+                value.EdgeId == repaired.EdgeId), Is.False);
+            Assert.That(after.Layout.Edges.Count(value => value.EdgeId.StartsWith("compat.floor.00.room.player.0001.edge.")), Is.EqualTo(2));
+            Assert.That(after.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion).NodeId, Is.EqualTo(completion));
+            Assert.That(after.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId, Is.EqualTo(terminal));
+            Assert.That(after.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).Anchor, Is.EqualTo(new TileCoordinate(4, reconstructY)));
+            Assert.That(after.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).Orientation, Is.EqualTo(CardinalOrientation.Ninety));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(2));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.EqualTo(1));
+            Assert.That(CanonicalSpatialSaveContracts.Validate(fixture.State, fixture.Profile.Canonical.Spatial, true).IsValid, Is.True);
+        }
+
+        [Test]
+        public void UnrelatedProductionCorridorOverlapPublishesAndPersistsNothing()
+        {
+            Fixture fixture = CreateR1();
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Construct(Preview(fixture, 8, 2, "north"))));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, "compat.floor.00.room.player.0000")));
+            fixture.Reopen();
+            SavedSpatialFloor floor = fixture.State.Floors[0];
+            Assert.That(FloorLayoutValidator.Validate(floor.Layout, fixture.Production.Catalog.Floors[0],
+                fixture.Production.Catalog.Rooms, fixture.Production.Catalog.Corridors,
+                new SpatialValidationWorkloadLimits(fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles),
+                floor.FixedStructures, fixture.Production.Catalog.FixedStructures).IsValid, Is.True);
+            string completion = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion).NodeId;
+            FloorRouteEdge surviving = floor.Layout.Edges.Single(value =>
+                value.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor);
+            Assert.That(surviving.DestinationNodeId, Is.Not.EqualTo(completion));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 3), new TileCoordinate(5, 3),
+                new TileCoordinate(6, 3), new TileCoordinate(7, 3) }, surviving.Footprint.OccupiedTiles);
+            byte[] before = fixture.Session.GetCurrentBytes();
+            byte[] canonicalBefore = CanonicalSpatialSaveSerializer.Serialize(fixture.State, fixture.Profile.Canonical).Value;
+            SaveData runtime = fixture.Runtime;
+            var session = fixture.Session;
+            var state = fixture.State;
+            var preview = StructuralEditService.Preview(fixture.State, new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.rectangle", Anchor = new TileCoordinate(4, 1),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.False);
+            Assert.That(preview.ReasonCodes, Does.Contain(StructuralEditService.CorridorOverlapReason));
+            Assert.That(preview.DetachedCandidate, Is.Null);
+            var refused = fixture.Execute(DetachedCanonicalMutationRequest.Construct(preview));
+            Assert.That(refused.IsSuccess, Is.False);
+            // Invalid previews carry no committable intent; the authority also fails closed.
+            Assert.That(refused.Reason, Is.EqualTo(StructuralEditService.StalePreviewReason));
+            Assert.That(refused.RuntimeProjection, Is.Null); Assert.That(refused.Session, Is.Null);
+            Assert.That(fixture.Runtime, Is.SameAs(runtime)); Assert.That(fixture.Session, Is.SameAs(session));
+            Assert.That(fixture.State, Is.SameAs(state));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(before, fixture.Session.GetCurrentBytes());
+            // The complete canonical snapshot includes ownership, topology, and both high waters.
+            CollectionAssert.AreEqual(canonicalBefore,
+                CanonicalSpatialSaveSerializer.Serialize(fixture.State, fixture.Profile.Canonical).Value);
+            CollectionAssert.AreEqual(canonicalBefore,
+                CanonicalSpatialSaveSerializer.Serialize(runtime.validatedCanonicalSpatialState, fixture.Profile.Canonical).Value);
+            fixture.Reopen();
+            CollectionAssert.AreEqual(canonicalBefore,
+                CanonicalSpatialSaveSerializer.Serialize(fixture.State, fixture.Profile.Canonical).Value);
+        }
+
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 2)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1)]
+        public void ReconstructionFailureRetainsRepairedEdgeAndPublishesNothing(
+            Gd66DetachedSpatialMigrationTransactionTests.OperationType operation, int occurrence)
+        {
+            Fixture fixture = CreateR2ForDeletion(7, "east");
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Delete(DeletionPreview(fixture))));
+            StructuralEditPreview preview = Preview(fixture, 0, 7, "east");
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            byte[] before = fixture.Session.GetCurrentBytes(); SaveData runtime = fixture.Runtime;
+            fixture.FileSystem.EnableFailure(operation, occurrence);
+            DetachedCanonicalWriteResult result = fixture.Execute(DetachedCanonicalMutationRequest.Construct(preview));
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.RuntimeProjection, Is.Null); Assert.That(result.Session, Is.Null);
+            Assert.That(fixture.Runtime, Is.SameAs(runtime));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(before, fixture.Session.GetCurrentBytes());
+            fixture.FileSystem.DisableFailure();
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Construct(preview)));
+            fixture.Reopen();
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(2));
+        }
+
+        [TestCase(4)]
+        [TestCase(5)]
+        public void ProductionBasicReplacementWithLargeDescendantPersistsExactRelationship(int x)
+        {
+            Fixture fixture = CreateR1();
+            StructuralEditPreview build = StructuralEditService.Preview(fixture.State,
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.large_chamber",
+                    Anchor = new TileCoordinate(x, 1), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "north" }, fixture.Production, fixture.Compatibility,
+                fixture.Configuration, fixture.Profile.Canonical);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Construct(build)));
+            string basic = fixture.State.Floors[0].Layout.Rooms.Single(value => value.RoomDefinitionId ==
+                "spatial.room.basic").RoomInstanceId;
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, basic)));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId, "compat.floor.00.room.player.0000")));
+            SavedSpatialFloor before = fixture.State.Floors[0];
+            var preview = StructuralRenovationService.PreviewReplacement(fixture.State,
+                new StructuralReplacementRequest { RoomInstanceId = basic, RoomDefinitionId = "spatial.room.rectangle" },
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            DetachedCanonicalWriteResult result = fixture.Execute(DetachedCanonicalMutationRequest.Replace(preview));
+            AssertCandidateSuccess(fixture, result);
+            fixture.Accept(result); fixture.Reopen();
+            SavedSpatialFloor after = fixture.State.Floors[0];
+            Assert.That(after.Layout.Rooms.Single(value => value.RoomDefinitionId == "spatial.room.large_chamber").Anchor,
+                Is.EqualTo(new TileCoordinate(x - 1, 2)));
+            CollectionAssert.AreEqual(before.RoomContents.Assignments.Select(value => value.AssignmentId),
+                after.RoomContents.Assignments.Select(value => value.AssignmentId));
+            CollectionAssert.AreEqual(before.Layout.Nodes.Select(value => value.NodeId), after.Layout.Nodes.Select(value => value.NodeId));
+            CollectionAssert.AreEqual(before.Layout.Edges.Select(value => value.EdgeId), after.Layout.Edges.Select(value => value.EdgeId));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(1));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.Zero);
+        }
+
         [Test]
         public void StructuralDirectDoorwayCommitPersistsPublishesAndReopens()
         {
@@ -1275,7 +1439,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Production).Rooms;
         }
 
-        private sealed class Fixture
+        internal sealed class Fixture
         {
             internal ProductionSpatialContentSnapshot Production;
             internal SpatialLayoutCompatibilitySnapshot Compatibility;
@@ -1291,20 +1455,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
                 Production, Compatibility, Configuration, Context, Profile, RemovalPolicy);
 
-            internal static Fixture Create(string primaryUnknown, string rootUnknown = null)
+            internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
+                SaveSpatialMigrationLimitsProfile workloadProfile = null)
             {
                 string primary = primaryUnknown == null ? string.Empty : primaryUnknown;
                 string root = rootUnknown == null ? string.Empty : "," + rootUnknown;
                 byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                     "\"primary\":{" + primary + "}" + root + "}");
                 Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
-                    Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+                    Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
+                        workloadProfile?.Raw, workloadProfile?.Whole, workloadProfile?.Canonical);
+                Assert.That(source.Result.IsSuccess, Is.True, source.Result.Reason);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
                 Assert.That(SchemaSevenToEightUpgrade.TryPrepare(candidate, source.Limits,
                     out candidate), Is.True);
                 var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
                     source.Production, source.LegacyBytes, source.Limits);
-                var profile = new SaveSpatialMigrationLimitsProfile(
+                var profile = workloadProfile ?? new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     source.Limits, source.WholeLimits);
                 DetachedCompleteSaveValidationResult validation =
@@ -1349,6 +1516,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(result.IsSuccess, Is.True, result.Reason);
                 Session = result.Session; State = result.Validation.State;
                 Runtime = result.RuntimeProjection;
+            }
+
+            internal void Reopen()
+            {
+                byte[] bytes = FileSystem.ReadAllBytes(ActivePath);
+                DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(bytes, Context, Profile);
+                Assert.That(opened.IsSuccess, Is.True, opened.Reason);
+                DetachedCompleteSaveValidationResult validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, Context);
+                Assert.That(validated.IsValid, Is.True, validated.Reason);
+                Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validated, Production,
+                    out SaveData runtime, out string reason), Is.True, reason);
+                Session = opened.Session; State = validated.State; Runtime = runtime;
+                CollectionAssert.AreEqual(bytes, Session.GetCurrentBytes());
             }
 
             internal Fixture Rebase(DetachedCanonicalSpatialSaveState state)

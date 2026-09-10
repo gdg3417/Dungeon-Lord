@@ -212,6 +212,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 byte[] candidate = writer.Finish();
                 if (candidate.Length > limits.Whole.MaximumCandidateBytes)
                     return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason);
+                if (!RawSavePayloadClassifier.TryValidateWorkload(candidate, limits.Raw, out string rawReason))
+                    return Failure(rawReason);
                 DetachedCompleteSaveValidationResult validated =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                 return validated.IsValid && validated.CurrentTargetValidated

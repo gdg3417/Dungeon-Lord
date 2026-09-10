@@ -215,6 +215,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ConstructionExcludesOnlyRetiringRequiredEdge_NotUnrelatedProductionCorridor()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.basic", new TileCoordinate(8, 2));
+            Assert.That(Validate(fixture).IsValid, Is.True);
+            // The required incoming corridor survives: (4,3) through (7,3). A Rectangle
+            // in the gap hits this corridor without overlapping either existing room.
+            FloorRouteEdge surviving = fixture.State.Floors[0].Layout.Edges.Single(value =>
+                value.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(4, 3), new TileCoordinate(5, 3),
+                new TileCoordinate(6, 3), new TileCoordinate(7, 3) }, surviving.Footprint.OccupiedTiles);
+            AssertInvalidUnchanged(fixture, new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.rectangle", Anchor = new TileCoordinate(4, 1),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
+                fixture.Production, fixture.Limits, StructuralEditService.CorridorOverlapReason);
+        }
+
+        [Test]
         public void DerivedIncomingCorridorCannotOverlapExistingPhysicalCorridor()
         {
             PreviewFixture fixture = CreateR1();
@@ -896,10 +913,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 value.AssignmentId == upstream.AssignmentId));
         }
 
-        [Test]
-        public void Replacement_TranslatedDownstreamRoomContentIsDisclosed()
+        [TestCase(4, 55)]
+        [TestCase(5, 56)]
+        public void Replacement_ProductionSavedOutgoingRelationshipTranslatesDescendants(int downstreamX, int used)
         {
-            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(downstreamX, 1));
             SavedSpatialFloor floor = fixture.State.Floors[0];
             string targetId = floor.Layout.Rooms.Single(value =>
                 value.RoomInstanceId != "compat.floor.00.room.player.0000").RoomInstanceId;
@@ -910,21 +928,64 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "placement.option.trap.spike", downstreamId);
             RoomSpatialInstance downstreamBefore = fixture.State.Floors[0].Layout.Rooms.Single(value =>
                 value.RoomInstanceId == downstreamId);
-            SpatialContentCatalog catalog = fixture.Production.Catalog;
-            RoomSpatialDefinition downstreamDefinition = catalog.Rooms.Single(value =>
-                value.RoomDefinitionId == "spatial.room.large_chamber");
-            downstreamDefinition.ConnectionPoints = downstreamDefinition.ConnectionPoints.Where(value =>
-                value.ConnectionPointId != "east").ToArray();
+            byte[] before = Bytes(fixture.State, fixture.Limits);
+            SavedFixedSpatialStructure terminalBefore = fixture.State.Floors[0].FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal);
 
-            StructuralEditPreview preview = Replace(fixture, targetId, "spatial.room.rectangle",
-                Snapshot(fixture, catalog));
+            StructuralEditPreview preview = Replace(fixture, targetId, "spatial.room.rectangle");
+            StructuralEditPreview repeated = Replace(fixture, targetId, "spatial.room.rectangle");
 
             Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
-            Assert.That(preview.DetachedCandidate.Floors[0].Layout.Rooms.Single(value =>
-                value.RoomInstanceId == downstreamId).Anchor, Is.Not.EqualTo(downstreamBefore.Anchor));
+            SavedSpatialFloor after = preview.DetachedCandidate.Floors[0];
+            Assert.That(after.Layout.Rooms.Single(value => value.RoomInstanceId == downstreamId).Anchor,
+                Is.EqualTo(Add(downstreamBefore.Anchor, new TileCoordinate(-1, 1))));
+            Assert.That(after.Layout.Rooms.Single(value => value.RoomInstanceId == targetId).Anchor,
+                Is.EqualTo(new TileCoordinate(0, 2)));
+            Assert.That(after.FixedStructures.Single(value => value.Kind ==
+                FixedSpatialStructureKind.CompletionTerminal).Anchor,
+                Is.EqualTo(Add(terminalBefore.Anchor, new TileCoordinate(-1, 1))));
+            Assert.That(preview.ResultingUsedFloorSpace, Is.EqualTo(used));
+            Assert.That(preview.ResultingRemainingFloorSpace, Is.EqualTo(60 - used));
+            CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
+            CollectionAssert.AreEqual(Bytes(preview.DetachedCandidate, fixture.Limits),
+                Bytes(repeated.DetachedCandidate, fixture.Limits));
+            CollectionAssert.AreEqual(preview.Consequences.Select(ConsequenceKey),
+                repeated.Consequences.Select(ConsequenceKey));
+            CollectionAssert.AreEqual(floor.Layout.Nodes.Select(value => value.NodeId),
+                after.Layout.Nodes.Select(value => value.NodeId));
+            CollectionAssert.AreEqual(floor.Layout.Edges.Select(value => value.EdgeId),
+                after.Layout.Edges.Select(value => value.EdgeId));
+            CollectionAssert.AreEqual(floor.FixedStructures.Select(value => value.FixedStructureInstanceId),
+                after.FixedStructures.Select(value => value.FixedStructureInstanceId));
+            foreach (RoomContentAssignment assignment in fixture.State.Floors[0].RoomContents.Assignments)
+                AssertAssignmentEqual(assignment, after.RoomContents.Assignments.Single(value =>
+                    value.AssignmentId == assignment.AssignmentId));
             CollectionAssert.AreEqual(fixture.State.Floors[0].RoomContents.Assignments
                 .Select(value => value.AssignmentId).OrderBy(value => value, System.StringComparer.Ordinal),
                 preview.PreservedAssignmentIds);
+            fixture.State = preview.DetachedCandidate;
+            Assert.That(Validate(fixture).IsValid, Is.True);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Replacement_GenuinelyAmbiguousSavedRelationshipOrMappingRejects(bool duplicateSource)
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            string targetId = fixture.State.Floors[0].Layout.Rooms.Single(value =>
+                value.RoomDefinitionId == "spatial.room.basic").RoomInstanceId;
+            // Isolated negative fixture: two authored identities describe the same active socket,
+            // or the replacement contains two mappings for that identity. Neither may be guessed.
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            RoomSpatialDefinition definition = catalog.Rooms.Single(value => value.RoomDefinitionId ==
+                (duplicateSource ? "spatial.room.basic" : "spatial.room.rectangle"));
+            SpatialConnectionPointDefinition point = definition.ConnectionPoints.Single(value =>
+                value.ConnectionPointId == "east");
+            definition.ConnectionPoints = definition.ConnectionPoints.Concat(new[] {
+                new SpatialConnectionPointDefinition { ConnectionPointId = duplicateSource ? "test.east" : "east",
+                    Offset = point.Offset, Facing = point.Facing, SocketTypeId = point.SocketTypeId } }).ToArray();
+            AssertReplaceInvalidUnchanged(fixture, targetId, "spatial.room.rectangle",
+                StructuralEditService.ConnectionAmbiguousReason, Snapshot(fixture, catalog));
         }
 
         [Test]

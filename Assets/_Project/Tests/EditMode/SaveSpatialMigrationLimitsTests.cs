@@ -32,7 +32,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Profile.Canonical.Serialized.MaximumCollectionRecords, Is.EqualTo(4096));
             Assert.That(result.Profile.Canonical.Serialized.MaximumStringCharacters, Is.EqualTo(262144));
             Assert.That(result.Profile.Canonical.Serialized.MaximumDiagnostics, Is.EqualTo(64));
-            Assert.That(result.Profile.Canonical.Spatial.MaximumRecords, Is.EqualTo(64));
+            Assert.That(result.Profile.Canonical.Spatial.MaximumRecords, Is.EqualTo(165));
             Assert.That(result.Profile.Canonical.Spatial.MaximumMaterializedTiles, Is.EqualTo(64));
             Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
             Assert.That(result.Profile.Whole.MaximumCopiedValueBytes, Is.EqualTo(524288));

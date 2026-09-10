@@ -1,5 +1,90 @@
 # GD66 save-spatial migration workload sizing evidence
 
+## Phase 3 retained-custody requalification (2026-09-09)
+
+**Local closeout proposal, measured in Unity 6000.3.2f1; not a new owner-approval claim.** The historical GD66 evidence below remains intact. Its 26-record R2 model excluded schema-8 floor lifecycle and returned custody. Deleting a room frees physical tiles but preserves reusable assignments as separate custody records; the record budget therefore grows across valid cycles. There is no custody-consumption path in Phase 3.
+
+The production profile change in this working tree is **`MaximumCanonicalSpatialRecords: 64 → 165` only**. The other sixteen fields remain at their previously approved values. This is a measured requirement for a bounded workload, with no additional record headroom. Schema 8, migrations, serialized field shapes, identity formats, and ownership semantics are unchanged.
+
+### Supported workload and derivation
+
+The horizon comes from the existing owner-approved **128-element raw array ceiling**, not an invented lifetime allowance. The harness executes 32 cycles with four reusable Basic Room contents per cycle (two distinct monsters and two distinct traps), accumulating 128 distinct returned assignments. It constructs Basic Room at `(0,7)`, orientation Zero, terminal east; deletes the tail; verifies the repaired `(1,6)` physical corridor; reopens the complete save; and reconstructs. Loot-bearing rooms are never deleted because shipped loot removal remains unresolved.
+
+After those cycles it constructs two more Basic Rooms at `(5,2)` and `(5,6)`, fills all three rooms to production 2/2/2 capacities, and retains the actual one-tile Straight Stone Corridor. This is a production-valid 59/60 floor-space layout. The structural/content count is **37** (`1 floor + 1 floor lifecycle + 3 rooms + 5 nodes + 4 edges + 2 fixed structures + 3 room semantics + 18 assignments`). Adding 128 custody records requires **165 canonical records**. Production floor capacity allows at most three current rooms: four minimum-size Rectangle Rooms plus fixed structures already require 70 units against 60. The three-Basic layout is the largest current record combination; current distinct content options also bound the larger rooms' usable assignment counts. This models the supported Phase 3 required route, without branching or corridor-content placement.
+
+The complete-save fixture reuses GD66's representative populated 5 × 6 economic layout, runtime counters/timestamps, offline summary, production loot/run assets, and research resolvers. It generates ten actual `RunOutcomeRecord`s from the current canonical route through `RunSimulationService` and retains the configured history count. Coherent active-research and completed-research/objective rows are separate. Unknown root `[1,true]` and primary `{"note":"preserve"}` values survive every write and reopen. Frozen legacy spatial evidence remains independently retained by the existing session.
+
+`Gd66SaveWorkloadMeasurementTests` extends the existing minimum-success binary searches rather than replacing the historical 30-row harness. Current rows use schema-8 parsing and include both lifecycle collections in the domain record counter. They measure raw scanner depth/member/array/string/work thresholds, complete-save strict node/record/string thresholds, candidate/copy/unknown limits through actual session replacement, and exact canonical record minima. Each minimum search verifies success at its threshold and refusal immediately below it. Raw accounting uses the same scanner as boot. Canonical owners are excluded from unknown-preservation totals; the frozen legacy classifier labels those current owners as unknown, so counting them as preservation would be incorrect.
+
+### Exact Phase 3 measurements
+
+These values were emitted by the Unity measurement fixture, not estimated from source JSON or a substitute serializer. The active-research row is the largest byte/node/string case; completed research uses 2,411 strict collection records versus 2,409 in the active row.
+
+| Limit/accounting | Measured Phase 3 high water | Production proposal | Evidence/policy distinction |
+|---|---:|---:|---|
+| Raw save bytes | 204,461 | 524,288 | Existing approved headroom; historical GD66 raw high water remains larger at 266,907 |
+| Raw nesting depth | 10 | 32 | Existing approved headroom |
+| Raw object members (per object) | 37 | 64 | Existing approved headroom |
+| Raw array elements (per array) | 128 | 128 | Exact retained-custody boundary; no added array headroom |
+| Raw string bytes (per token) | 69 | 4,096 | Existing approved headroom |
+| Raw scan work | 209,358 | 1,048,576 | Actual scanner minimum, independent of bytes; historical rows still peak at 270,356 |
+| Strict serialized input bytes | 204,461 | 262,144 | 57,683 bytes remaining for this fixture |
+| Strict parsed nodes | 6,381 | 8,192 | 1,811 nodes remaining |
+| Strict collection records | 2,411 | 4,096 | 1,685 records remaining |
+| Strict decoded string characters | 171,488 | 262,144 | 90,656 UTF-16 units remaining |
+| Retained diagnostics | 0 (valid inputs) | 64 | Existing bounded diagnostic policy and tests retained |
+| Canonical spatial records | 165 | **165 (was 64)** | Exact measured/model-derived requirement; no new policy headroom |
+| Canonical saved corridor tiles | 1 | 64 | Existing allowance; modeled maximum 8 for two rooms (two downstream edges × length 4); three rooms leave at most 5 floor-space units for corridors, and the entrance edge remains direct. Room/fixed tiles are different accounting |
+| Whole-save candidate bytes | 204,461 | 262,144 | Actual complete-session replacement threshold |
+| Copied recognized value bytes | 171,568 | 524,288 | Actual session copy threshold; historical GD66 source-copy high water remains 266,195 |
+| Unknown member count | 2 | 64 | Measured preservation fixture versus inherited extension policy |
+| Unknown value bytes | 27 | 131,072 | Measured preservation fixture versus inherited extension policy |
+
+| Measured row | Complete bytes | Canonical records | Returned records | Saved corridor tiles |
+|---|---:|---:|---:|---:|
+| Cycle 1 constructed | 128,999 | 25 | 0 | 1 |
+| Cycle 1 returned | 128,183 | 21 | 4 | 1 |
+| Cycle 32 constructed | 152,871 | 149 | 124 | 1 |
+| Cycle 32 returned | 152,056 | 145 | 128 | 1 |
+| R3, active research | 204,461 | 165 | 128 | 1 |
+| R3, completed research/objective | 204,416 | 165 | 128 | 1 |
+| Historical 64-record refusal fixture | 131,983 | 64 | 40 | 1 |
+
+This does **not** promise the Cartesian product of all independent ceilings. For example, adding the entire 131,072-byte unknown allowance to the largest measured current save exceeds the whole-save byte limit. Such combinations must refuse without mutation. Historical GD66 rows and their limits remain regression coverage alongside the new current-state rows.
+
+### Refusal and persistence
+
+Increasing only the record budget would expose another interaction within this workload: the previous complete-save session did not run the raw boot scanner on its emitted candidate. A 129th returned record could then be written under 165 canonical records yet refused on the next raw load. The closeout reuses `RawSavePayloadClassifier.Scanner` through a bounded validation entry point, called by `DetachedCanonicalSaveSession` before creating a replacement update. All six raw budgets now constrain complete-save candidates, with existing `gd66.payload.workload_exceeded` refusal. It changes neither the save contract nor migration behavior and performs no persistence itself.
+
+The production boundary regression performs 32 real construction/content/deletion cycles, reconstructs, assigns one reusable content, and attempts deletion yielding custody record 129. Commit refuses before durable bytes, runtime/session publication, lifecycle advancement, or ownership changes. The content stays assigned and the prior 128 custody records remain intact after reopen. The historical 64/65 case remains explicit: ten four-content cycles followed by reconstruction and three placements reach 64; the fourth placement refuses at 65. No custody is discarded, merged, recycled, or reused to meet a limit.
+
+The new record value provides the full existing array envelope with current geometry. Further lifetime growth still requires an explicit policy/content decision; this closeout does not provide an unbounded inventory. The extra raw scan is bounded by the existing profile and avoids cloning candidate bytes; on-device allocation/timing and filesystem qualification remain outside this Windows Editor measurement.
+
+### Local validation and remaining checks
+
+Unity 6000.3.2f1 executed the standard suites on 2026-09-09: **PlayMode 2,149 total / 2,139 passed / 0 failed / 10 skipped**, and **EditMode 224 / 224 passed / 0 failed / 0 skipped**. EditMode includes 55 production-content build-gate tests, 57 recovery tests, and 112 export tests; these are editor guards, not a player build. PlayMode skips comprise eight `gd66.test.synchronous_edit_mode_fixture` GameRoot cases, the non-Windows inverse case on this Windows host, and the Windows-player-only qualification case in Editor. The synchronous GameRoot cases are not discovered by this repository's standard EditMode assembly path and remain unexecuted; their behaviors require separate synchronous Editor validation. The installed framework's `runSynchronously` option only supports EditMode tests and does not change discovery. No test assembly restructuring was included. Production-content reconstruction/renovation, complete-save writing, durability/recovery, raw boundaries, and all 30 historical plus seven Phase 3 measurement rows executed successfully in the applicable suites.
+
+Local XML/log artifacts are under `Logs/phase3-full-playmode.*` and `Logs/phase3-full-editmode.*`; they are ignored validation artifacts. The test invocation is the installed Unity executable with `-batchmode -nographics -projectPath C:\Dev\Dungeon-Lord -runTests -testPlatform PlayMode` (or `EditMode`) plus explicit `-testResults` and `-logFile` paths. The established test sources require `PlayerSettings.playModeTestRunnerEnabled`; it was enabled only for validation and restored afterward from a backup verified against HEAD. `runPlayModeTestAsEditModeTest` remained off for the successful runs. Earlier attempts produced a compile failure without NUnit references, a licensing interruption, a zero-test mode-converted run, and one mis-targeted cleanup-flush injection (138 passed / 1 failed); none is counted as passing validation. The corrected focused suite passed 160/160 before the full suites. After adding explicit terminal-position/accounting assertions, the final focused run passed **147/147**; after strengthening the surviving-corridor negative to use a fully valid production starting layout, the geometry suite passed **76/76**. Both final reruns had zero failures or skips. Their artifacts are `Logs/phase3-final-focused.*` and `Logs/phase3-final-production-geometry.*`.
+
+On 2026-09-10, final persistence and boot-agreement assertions passed in **167/167 focused tests, zero failures or skips** (`Logs/phase3-closeout-final.xml` and `.log`). This includes 76 structural, 59 write-authority, 13 measurement, 11 profile, and eight session tests. The unrelated-corridor fixture starts from a reopened, production-validated two-room layout with an assigned monster and surviving corridor `(4,3)` through `(7,3)`, whose destination is not Completion. Rectangle construction in that gap refuses with corridor overlap; submitting the invalid preview also refuses. Disk/session bytes, runtime publication, and complete canonical ownership/topology/high-water snapshots remain unchanged, including after reopen. The custody-boundary test separately emits the 129-entry complete candidate under test-only measurement raw limits, without persisting it, and proves the production boot scanner refuses the same payload as the writer. Measurements reproduced the exact rows above. Only tests and documentation changed after the full suites, so those completed results remain applicable. After Unity exited, only the temporary runner flag and Unity's application-identifier ordering were restored to their exact baseline values; no ProjectSettings diff remains.
+
+Manual checks remain: the eight synchronous GameRoot cases (including both reconstruction shapes and upstream Basic-to-Rectangle replacement), player-visible preview/reason/terminal placement and reopen smoke in Bootstrap, and Windows Standalone player/build qualification. No standalone build, player qualification, mobile qualification, or usability approval is claimed. Re-run `Gd66SaveWorkloadMeasurementTests` whenever changing content, history, lifecycle, serialization, or any interacting profile field. No production sizing measurement remains deferred for lack of Unity access; player-facing smoke and platform qualification are separate from these deterministic measurements.
+
+The exact unexecuted synchronous cases in `DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests` are:
+
+- `BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds`
+- `BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences`
+- `StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview`
+- `StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot`
+- `StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,"north",DirectDoorway,"Direct Doorway","")`
+- `StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,"east",PhysicalCorridor,"Straight Stone Corridor","(1,6)")`
+- `StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)`
+- `StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)`
+
+The other two skips are `Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed` (`gd66.test.windows_only_inverse`, inapplicable on Windows) and `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` (`gd66.test.windows_player_only`, requires Windows Player). Skips are not executed passes. Manual player testing was not attempted during this closeout.
+
+## Historical GD66 qualification
+
 **Status (2026-08-21): OWNER APPROVED AND ACTIVE.** The Unity measurement harness executed all 30 rows. The final values below are the dedicated production-owned save-migration workload profile consumed by the live schema-7 load, migration, native-creation, validation, and write path. Their earlier approval did not by itself activate schema 7; PR #195 subsequently completed activation and required validation at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`. The values were not copied from or derived from `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`.
 
 ## Method and evidence boundary

@@ -11,6 +11,7 @@ using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using LifecycleFixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -18,6 +19,365 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public sealed class Gd66SaveWorkloadMeasurementTests
     {
         private const int High = 2000000;
+
+        // The retained-custody horizon is derived from the already approved raw-array bound,
+        // not a proposed unlimited lifetime or a new gameplay policy. Preparation is test-only.
+        [Test]
+        public void PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements()
+        {
+            SaveSpatialMigrationLimitsProfile production = ProductionSaveLimits();
+            var measurement = new SaveSpatialMigrationLimitsProfile(MeasurementPreparationRawLimits(),
+                MeasurementPreparationSerializationLimits(), MeasurementPreparationWholeLimits());
+            LifecycleFixture fixture = CreateLifecycle(measurement);
+            var rows = new List<string>();
+            int reusablePerCycle = ReusableOptions(fixture, "spatial.room.basic").Length;
+            int cycles = production.Raw.MaximumArrayElements / reusablePerCycle;
+            Assert.That(production.Raw.MaximumArrayElements % reusablePerCycle, Is.Zero);
+            for (int cycle = 1; cycle <= cycles; cycle++)
+            {
+                string room = Construct(fixture, 0, 7, "east");
+                FillContents(fixture, room, false);
+                if (cycle == 1 || cycle == cycles)
+                {
+                    PopulateCurrentRuns(fixture);
+                    rows.Add(MeasureCurrent("cycle-" + cycle + "-constructed", fixture));
+                }
+                DeleteTail(fixture, room);
+                if (cycle == 1 || cycle == cycles)
+                    rows.Add(MeasureCurrent("cycle-" + cycle + "-returned", fixture));
+            }
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Length,
+                Is.EqualTo(production.Raw.MaximumArrayElements));
+            // Three Basic Rooms, one corridor, 59/60 tiles. This is a real production-valid
+            // Phase 3 route, beyond GD66's historical R2 migration-only sizing model.
+            string second = Construct(fixture, 5, 2, "north");
+            string third = Construct(fixture, 5, 6, "east");
+            FillContents(fixture, second, true); FillContents(fixture, third, true);
+            SavedSpatialFloor full = fixture.State.Floors[0];
+            FloorLayoutValidationResult geometry = FloorLayoutValidator.Validate(full.Layout,
+                fixture.Production.Catalog.Floors.Single(), fixture.Production.Catalog.Rooms,
+                fixture.Production.Catalog.Corridors, new SpatialValidationWorkloadLimits(
+                    fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles), full.FixedStructures,
+                fixture.Production.Catalog.FixedStructures);
+            Assert.That(geometry.IsValid, Is.True);
+            Assert.That(geometry.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(59));
+            Assert.That(full.RoomContents.Assignments.Length, Is.EqualTo(18));
+            Assert.That(CountCanonicalRecords(fixture.State), Is.EqualTo(production.Raw.MaximumArrayElements + 37));
+            PopulateCurrentRuns(fixture);
+            ContentBootstrap bootstrap = ResearchBootstrap();
+            fixture.Runtime.researchPending = Pending(bootstrap);
+            fixture.Runtime.researchProgress = Progress(bootstrap,
+                bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / 2d, false);
+            Assert.That(ResearchProgressStateResolver.Resolve(fixture.Runtime.researchPending,
+                fixture.Runtime.researchProgress).RuleResolved, Is.True);
+            PersistRecognized(fixture);
+            rows.Add(MeasureCurrent("custody-array-envelope-r3-active-research", fixture));
+            AssertProductionEnvelope(fixture, production);
+            fixture.Runtime.researchPending = null; fixture.Runtime.researchProgress = null;
+            fixture.Runtime.completedResearch = new CompletedResearchState {
+                ProjectIds = new[] { bootstrap.researchPendingScaffold.projectId },
+                LastCompletedProjectId = bootstrap.researchPendingScaffold.projectId,
+                LastCompletionRuleSourceId = bootstrap.researchCompletionClaimScaffold.ruleSourceId };
+            fixture.Runtime.completedObjectives = CompletedObjective();
+            Assert.That(CompletedResearchStateResolver.Resolve(fixture.Runtime.completedResearch).RuleResolved, Is.True);
+            PersistRecognized(fixture);
+            rows.Add(MeasureCurrent("custody-array-envelope-r3-completed-research", fixture));
+            AssertProductionEnvelope(fixture, production);
+            foreach (string row in rows)
+            { Debug.Log("PHASE3_LIMIT_MEASUREMENT " + row); TestContext.Progress.WriteLine("PHASE3_LIMIT_MEASUREMENT " + row); }
+            Assert.That(rows.Count, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void Historical64RecordLifecycleBoundaryPreservesCustodyAndRejectsNextRecordAtomically()
+        {
+            SaveSpatialMigrationLimitsProfile production = ProductionSaveLimits();
+            // Retain the exact reported pre-closeout exhaustion case as historical regression.
+            var historical = new SaveSpatialMigrationLimitsProfile(production.Raw,
+                new CanonicalSpatialSerializationLimits(production.Canonical.Serialized,
+                    new CanonicalSpatialSaveWorkloadLimits(64, production.Canonical.Spatial.MaximumMaterializedTiles)), production.Whole);
+            LifecycleFixture fixture = CreateLifecycle(historical);
+            var issued = new HashSet<string>(StringComparer.Ordinal);
+            int returnedPerCycle = ReusableOptions(fixture, "spatial.room.basic").Length;
+            int cycles = 0;
+            // This reproduces the actual bound by performing writes, never by manufacturing
+            // returned records, collapsing identities, or bypassing the complete-save authority.
+            while (CountCanonicalRecords(fixture.State) + 4 + returnedPerCycle <=
+                fixture.Profile.Canonical.Spatial.MaximumRecords)
+            {
+                string room = Construct(fixture, 0, 7, "east");
+                Assert.That(issued.Add(room), Is.True);
+                FillContents(fixture, room, false);
+                DeleteTail(fixture, room); cycles++;
+            }
+            Assert.That(cycles, Is.GreaterThan(1));
+            string finalRoom = Construct(fixture, 0, 7, "east");
+            Assert.That(issued.Add(finalRoom), Is.True);
+            var options = ReusableOptions(fixture, "spatial.room.basic");
+            int index = 0;
+            while (CountCanonicalRecords(fixture.State) < fixture.Profile.Canonical.Spatial.MaximumRecords)
+                PlaceOption(fixture, finalRoom, options[index++]);
+            Assert.That(index, Is.LessThan(options.Length));
+            PopulateCurrentRuns(fixture);
+            fixture.Reopen();
+            byte[] before = fixture.Session.GetCurrentBytes(); SaveData runtime = fixture.Runtime;
+            var session = fixture.Session;
+            ReturnedStructuralContent[] custody = fixture.State.LifecycleAndOwnership.ReturnedContents;
+            Assert.That(custody.Length, Is.EqualTo(cycles * returnedPerCycle));
+            Assert.That(custody.Select(value => value.AssignmentId).Distinct().Count(), Is.EqualTo(custody.Length));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Any(value =>
+                custody.Any(item => item.AssignmentId == value.AssignmentId)), Is.False);
+            DetachedCanonicalWriteResult refused = fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                options[index].Item1, options[index].Item2, finalRoom));
+            Assert.That(refused.IsSuccess, Is.False);
+            Assert.That(refused.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.ValidationFailedReason));
+            Assert.That(refused.RuntimeProjection, Is.Null); Assert.That(refused.Session, Is.Null);
+            Assert.That(fixture.Runtime, Is.SameAs(runtime)); Assert.That(fixture.Session, Is.SameAs(session));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(before, fixture.Session.GetCurrentBytes());
+            fixture.Reopen();
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(cycles + 1));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.EqualTo(cycles));
+            Debug.Log("PHASE3_LIMIT_MEASUREMENT " + MeasureCurrent("historical-64-record-boundary", fixture));
+        }
+
+        [Test]
+        public void ProductionLifecycle_CustodyArrayBoundaryRejectsNextReturnBeforePersistence()
+        {
+            LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
+            int reusable = ReusableOptions(fixture, "spatial.room.basic").Length;
+            int cycles = fixture.Profile.Raw.MaximumArrayElements / reusable;
+            var issued = new HashSet<string>(StringComparer.Ordinal);
+            for (int cycle = 0; cycle < cycles; cycle++)
+            {
+                string room = Construct(fixture, 0, 7, "east");
+                Assert.That(issued.Add(room), Is.True);
+                FillContents(fixture, room, false); DeleteTail(fixture, room);
+            }
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Length,
+                Is.EqualTo(fixture.Profile.Raw.MaximumArrayElements));
+            string next = Construct(fixture, 0, 7, "east");
+            Assert.That(issued.Add(next), Is.True);
+            PlaceOption(fixture, next, ReusableOptions(fixture, "spatial.room.basic")[0]);
+            RoomContentAssignment retained = fixture.State.Floors[0].RoomContents.Assignments.Single(value => value.RoomInstanceId == next);
+            byte[] before = fixture.Session.GetCurrentBytes(); SaveData runtime = fixture.Runtime;
+            var session = fixture.Session;
+            var preview = StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = next }, fixture.RemovalPolicy,
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            Assert.That(preview.DetachedCandidate.LifecycleAndOwnership.ReturnedContents.Length,
+                Is.EqualTo(fixture.Profile.Raw.MaximumArrayElements + 1));
+            // Measure the refused complete candidate without writing it, then prove that the
+            // production boot scanner and writer agree on the same 129-entry payload.
+            var measurementProfile = new SaveSpatialMigrationLimitsProfile(MeasurementPreparationRawLimits(),
+                fixture.Profile.Canonical, fixture.Profile.Whole);
+            var measuredSession = DetachedCanonicalSaveSession.Open(before, fixture.Context, measurementProfile);
+            Assert.That(measuredSession.IsSuccess, Is.True, measuredSession.Reason);
+            var measuredCandidate = measuredSession.Session.PrepareSpatialOnlyReplacement(preview.DetachedCandidate);
+            Assert.That(measuredCandidate.IsSuccess, Is.True, measuredCandidate.Reason);
+            var bootRefusal = RawSavePayloadClassifier.Classify(measuredCandidate.Update.GetBytes(), fixture.Profile.Raw,
+                new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor());
+            Assert.That(bootRefusal.IsSuccess, Is.False);
+            Assert.That(bootRefusal.FailureReason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            var result = fixture.Execute(DetachedCanonicalMutationRequest.Delete(preview));
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+            Assert.That(result.RuntimeProjection, Is.Null); Assert.That(result.Session, Is.Null);
+            Assert.That(fixture.Runtime, Is.SameAs(runtime)); Assert.That(fixture.Session, Is.SameAs(session));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(before, fixture.Session.GetCurrentBytes());
+            fixture.Reopen();
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Single(value => value.RoomInstanceId == next).AssignmentId,
+                Is.EqualTo(retained.AssignmentId));
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Any(value => value.AssignmentId == retained.AssignmentId), Is.False);
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(cycles + 1));
+            Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.EqualTo(cycles));
+            AssertProductionEnvelope(fixture, fixture.Profile);
+        }
+
+        private static void AssertProductionEnvelope(LifecycleFixture fixture, SaveSpatialMigrationLimitsProfile profile)
+        {
+            byte[] bytes = fixture.Session.GetCurrentBytes();
+            Assert.That(RawSavePayloadClassifier.Classify(bytes, profile.Raw,
+                new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor()).IsSuccess, Is.True);
+            var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility, fixture.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical);
+            var opened = DetachedCanonicalSaveSession.Open(bytes, context, profile);
+            Assert.That(opened.IsSuccess, Is.True, opened.Reason);
+            var repeated = opened.Session.PrepareSpatialOnlyReplacement(fixture.State);
+            Assert.That(repeated.IsSuccess, Is.True, repeated.Reason);
+            CollectionAssert.AreEqual(bytes, repeated.Update.GetBytes());
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        public void PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(int dimension)
+        {
+            LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
+            byte[] before = fixture.Session.GetCurrentBytes();
+            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 8);
+            foreach (int bound in new[] { required, required - 1 })
+            {
+                var raw = new RawSavePayloadClassificationLimits(dimension == 0 ? bound : High,
+                    dimension == 1 ? bound : 256, dimension == 2 ? bound : High,
+                    dimension == 3 ? bound : High, dimension == 4 ? bound : High, dimension == 5 ? bound : High);
+                var profile = new SaveSpatialMigrationLimitsProfile(raw, fixture.Profile.Canonical, fixture.Profile.Whole);
+                var opened = DetachedCanonicalSaveSession.Open(before, fixture.Context, profile);
+                Assert.That(opened.IsSuccess, Is.True, opened.Reason);
+                var result = opened.Session.PrepareSpatialOnlyReplacement(fixture.State);
+                Assert.That(result.IsSuccess, Is.EqualTo(bound == required));
+                if (bound == required) CollectionAssert.AreEqual(before, result.Update.GetBytes());
+                else
+                {
+                    Assert.That(result.Reason, Is.EqualTo(RawSavePayloadClassifier.WorkloadExceededReason));
+                    Assert.That(result.Update, Is.Null);
+                }
+                CollectionAssert.AreEqual(before, opened.Session.GetCurrentBytes());
+                CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            }
+        }
+
+        private static SaveSpatialMigrationLimitsProfile ProductionSaveLimits()
+        {
+            var loaded = SaveSpatialMigrationLimitsLoader.Load(System.IO.File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath));
+            Assert.That(loaded.IsSuccess, Is.True, loaded.Reason); return loaded.Profile;
+        }
+
+        private static LifecycleFixture CreateLifecycle(SaveSpatialMigrationLimitsProfile profile)
+        {
+            LifecycleFixture fixture = LifecycleFixture.Create("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}",
+                "\"phase3UnknownRoot\":[1,true]", profile);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
+            fixture.Runtime = RepresentativeSave(); fixture.Runtime.saveVersion = SaveMigration.LatestSchemaVersion;
+            PersistRecognized(fixture);
+            FillContents(fixture, fixture.State.Floors[0].Layout.Rooms.Single().RoomInstanceId, true);
+            return fixture;
+        }
+
+        private static Tuple<string, string>[] ReusableOptions(LifecycleFixture fixture, string definitionId)
+        {
+            RoomSpatialDefinition definition = fixture.Production.Catalog.Rooms.Single(value => value.RoomDefinitionId == definitionId);
+            return new[] { Tuple.Create(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId),
+                Tuple.Create(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId) }
+                .Take(definition.MonsterCapacity).Concat(new[] {
+                    Tuple.Create(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId),
+                    Tuple.Create(MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId) }
+                .Take(definition.TrapCapacity)).ToArray();
+        }
+
+        private static void FillContents(LifecycleFixture fixture, string room, bool includeLoot)
+        {
+            string definition = fixture.State.Floors[0].Layout.Rooms.Single(value => value.RoomInstanceId == room).RoomDefinitionId;
+            foreach (var option in ReusableOptions(fixture, definition)) PlaceOption(fixture, room, option);
+            if (!includeLoot) return; // Shipped loot removal is unresolved; never delete a loot-bearing room.
+            RoomSpatialDefinition content = fixture.Production.Catalog.Rooms.Single(value => value.RoomDefinitionId == definition);
+            foreach (string option in new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId }.Take(content.LootCapacity))
+                PlaceOption(fixture, room, Tuple.Create(MvpDungeonPlacementIds.LootNodeCategoryId, option));
+        }
+
+        private static void PlaceOption(LifecycleFixture fixture, string room, Tuple<string, string> option) =>
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(option.Item1, option.Item2, room)));
+
+        private static string Construct(LifecycleFixture fixture, int x, int y, string terminalPoint)
+        {
+            var preview = StructuralEditService.Preview(fixture.State, new StructuralConstructionRequest {
+                RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(x, y),
+                Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = terminalPoint },
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Construct(preview)));
+            return preview.Consequences.Single(value => value.Kind == StructuralChangeKind.RoomAdded).StableId;
+        }
+
+        private static void DeleteTail(LifecycleFixture fixture, string room)
+        {
+            RoomContentAssignment[] assigned = fixture.State.Floors[0].RoomContents.Assignments
+                .Where(value => value.RoomInstanceId == room).ToArray();
+            var preview = StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = room }, fixture.RemovalPolicy,
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Delete(preview)));
+            fixture.Reopen();
+            foreach (RoomContentAssignment assignment in assigned)
+            {
+                ReturnedStructuralContent returned = fixture.State.LifecycleAndOwnership.ReturnedContents.Single(value =>
+                    value.AssignmentId == assignment.AssignmentId);
+                Assert.That(returned.Sequence, Is.EqualTo(assignment.Sequence));
+                Assert.That(returned.CategoryId, Is.EqualTo(assignment.CategoryId));
+                Assert.That(returned.OptionId, Is.EqualTo(assignment.OptionId));
+                Assert.That(returned.RemovalDisposition, Is.EqualTo(StructuralContentRemovalDisposition.ReturnToPlayerCustody));
+            }
+        }
+
+        private static void PopulateCurrentRuns(LifecycleFixture fixture)
+        {
+            MvpOrderedRouteRoom[] route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                fixture.Runtime, fixture.Production).Rooms;
+            PopulateTenRuns(fixture.Runtime, new RunSimulationService(fixture.Configuration, ProductionLootConfig()),
+                route, fixture.Configuration.MaxRunHistoryEntries);
+            PersistRecognized(fixture);
+        }
+
+        private static void PersistRecognized(LifecycleFixture fixture)
+        {
+            fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem,
+                fixture.Session, fixture.Runtime));
+            fixture.Reopen();
+        }
+
+        private static string MeasureCurrent(string name, LifecycleFixture fixture)
+        {
+            byte[] bytes = fixture.Session.GetCurrentBytes();
+            var classification = RawSavePayloadClassifier.Classify(bytes, MeasurementPreparationRawLimits(),
+                new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor());
+            Assert.That(classification.IsSuccess, Is.True, classification.FailureReason);
+            // Current canonical owners are not unknown preservation data, even though the
+            // frozen legacy raw classifier describes them as unknown primary members.
+            string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership" };
+            var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
+                !owners.Contains(value.Name))).ToArray();
+            int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent).Sum(value => value.ByteLength);
+            Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
+            Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));
+            Assert.That(MinimumWhole(fixture, 2), Is.EqualTo(unknown.Length));
+            Assert.That(MinimumWhole(fixture, 3), Is.EqualTo(unknown.Sum(value => value.ByteLength)));
+            int records = CountCanonicalRecords(fixture.State);
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(fixture.State,
+                new CanonicalSpatialSerializationLimits(fixture.Profile.Canonical.Serialized,
+                    new CanonicalSpatialSaveWorkloadLimits(records, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles))).IsValid, Is.True);
+            Assert.That(CanonicalSpatialSaveSerializer.Serialize(fixture.State,
+                new CanonicalSpatialSerializationLimits(fixture.Profile.Canonical.Serialized,
+                    new CanonicalSpatialSaveWorkloadLimits(records - 1, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles))).IsValid, Is.False);
+            Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}"));
+            Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownRoot\":[1,true]"));
+            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 8) +
+                ",rawMembers=" + MinimumRaw(bytes, 1, 8) + ",rawElements=" + MinimumRaw(bytes, 2, 8) +
+                ",rawStringBytes=" + MinimumRaw(bytes, 3, 8) + ",rawScanWork=" + MinimumRaw(bytes, 4, 8) +
+                ",candidateBytes=" + bytes.Length + ",strictInputBytes=" + bytes.Length +
+                ",strictNodes=" + MinimumStrict(bytes, fixture.State, 0, true) +
+                ",strictRecords=" + MinimumStrict(bytes, fixture.State, 1, true) +
+                ",strictStringChars=" + MinimumStrict(bytes, fixture.State, 2, true) +
+                ",diagnostics=0,canonicalRecords=" + records + ",canonicalTiles=" + CountCanonicalTiles(fixture.State) +
+                ",copiedBytes=" + copied + ",unknownCount=" + unknown.Length + ",unknownBytes=" + unknown.Sum(value => value.ByteLength);
+        }
+
+        private static int MinimumWhole(LifecycleFixture fixture, int dimension) => Minimum(limit =>
+        {
+            if (limit < 1) return false;
+            var profile = new SaveSpatialMigrationLimitsProfile(fixture.Profile.Raw, fixture.Profile.Canonical,
+                new DetachedWholeSaveLimits(dimension == 0 ? limit : High, dimension == 1 ? limit : High,
+                    dimension == 2 ? limit : High, dimension == 3 ? limit : High));
+            var opened = DetachedCanonicalSaveSession.Open(fixture.Session.GetCurrentBytes(), fixture.Context, profile);
+            return opened.IsSuccess && opened.Session.PrepareSpatialOnlyReplacement(fixture.State).IsSuccess;
+        });
 
         [Test]
         public void RepositoryOwnedMigrationFixtures_EmitExactWorkloadMeasurements()
@@ -579,7 +939,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 ",unknownBytes=" + unknownBytes;
         }
 
-        private static int MinimumRaw(byte[] bytes, int dimension) => Minimum(limit =>
+        private static int MinimumRaw(byte[] bytes, int dimension, int maximumSchema = 6) => Minimum(limit =>
         {
             if (limit < 1) return false;
             int depth = dimension == 0 ? limit : 256;
@@ -589,16 +949,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int work = dimension == 4 ? limit : High;
             return RawSavePayloadClassifier.Classify(bytes,
                 new RawSavePayloadClassificationLimits(bytes.Length, depth, members, elements, strings, work),
-                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor()).IsSuccess;
+                new RawSaveEnvelopeVersionContract(1, maximumSchema), BlankFloor()).IsSuccess;
         });
 
-        private static int MinimumStrict(byte[] bytes, DetachedCanonicalSpatialSaveState state, int dimension) =>
-            Minimum(limit => DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes,
-                new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(bytes.Length,
+        private static int MinimumStrict(byte[] bytes, DetachedCanonicalSpatialSaveState state, int dimension,
+            bool current = false) => Minimum(limit =>
+        {
+            var limits = new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(bytes.Length,
                     dimension == 0 ? limit : High, dimension == 1 ? limit : High,
                     dimension == 2 ? limit : High, 64),
                     new CanonicalSpatialSaveWorkloadLimits(Math.Max(1, CountCanonicalRecords(state)),
-                        Math.Max(1, CountCanonicalTiles(state))))).IsValid);
+                        Math.Max(1, CountCanonicalTiles(state))));
+            return (current ? DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, limits) :
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(bytes, limits)).IsValid;
+        });
 
         private static int Minimum(Func<int, bool> accepts)
         {
@@ -615,6 +979,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static int CountCanonicalRecords(DetachedCanonicalSpatialSaveState state) =>
+            (state?.LifecycleAndOwnership?.Floors?.Length ?? 0) +
+            (state?.LifecycleAndOwnership?.ReturnedContents?.Length ?? 0) +
             (state?.Floors ?? Array.Empty<SavedSpatialFloor>()).Sum(floor => floor == null ? 1 : 1 +
                 (floor.Layout?.Rooms?.Length ?? 0) + (floor.Layout?.Nodes?.Length ?? 0) +
                 (floor.Layout?.Edges?.Length ?? 0) + (floor.FixedStructures?.Length ?? 0) +
