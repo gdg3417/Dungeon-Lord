@@ -1,7 +1,7 @@
 # GD63 spatial and progression design decisions
 
 
-**Current Phase 3B2B status (2026-09-01):** Leaf-only inverse-tail deletion is present and under static review and required Unity validation. Phase 3 is not closed; Phase 4 remains unimplemented.
+**Current Phase 3 status (2026-09-09):** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The narrow local closeout fixes reconstruction against retiring geometry, maps renovation through the actual saved outgoing relationship, and [requalifies bounded retained custody](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). The historical decisions below remain historical. Closeout review/manual validation is still required; Phase 4 remains unimplemented.
 **Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 

@@ -193,6 +193,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             "runHistory", "researchPending", "researchProgress", "completedResearch", "completedObjectives",
             "lastOfflineSummary", "integrityFlags" };
 
+        // Current complete-save candidates must fit the same raw budgets as their next boot.
+        // Reuse the scanner's accounting without interpreting frozen legacy route authority.
+        internal static bool TryValidateWorkload(byte[] bytes, RawSavePayloadClassificationLimits limits,
+            out string reason)
+        {
+            reason = WorkloadExceededReason;
+            if (!limits.IsValid || bytes == null || bytes.Length > limits.MaximumInputBytes) return false;
+            return Scanner.TryParse(bytes, limits, out _, out reason, out _);
+        }
+
         public static IReadOnlyList<string> RecognizedSaveDataMemberNames =>
             new ReadOnlyCollection<string>((string[])SaveDataMembers.Clone());
 

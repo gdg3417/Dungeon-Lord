@@ -1,7 +1,7 @@
 # Post-GD60 MVP Execution Plan
 
 
-**Current Phase 3 status (2026-09-01):** Phase 3B2B leaf deletion is present and under static review and required Unity validation. Phase 3 is not closed, and Phase 4 remains blocked and unimplemented.
+**Current Phase 3 status (2026-09-09):** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The local Phase 3 closeout corrects reconstruction against retiring terminal geometry, renovation mapping from the saved outgoing relationship, and retained-custody workload sizing. See [the Phase 3 workload qualification](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). Phase 3 closeout review and remaining manual validation are still required; Phase 4 remains blocked and unimplemented.
 **Current Phase 3 status (2026-08-27):** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
@@ -9,9 +9,9 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 3A / PR #196 merged and complete; Phase 3B1 movement and replacement implemented in this PR** |
+| Status | **Phase 3B2B / PR #199 merged; narrow Phase 3 lifecycle closeout under local validation and review** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main at merged PR #196 `b6bd4a2dfa85a1b8899c617dd0d1982a91a879c1` |
+| Current implementation baseline | Main at merged PR #199 `adc066de2eac26e48e5a5058c18014a266871c4d` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-08-21 |
@@ -121,6 +121,8 @@ Phase 2 implementation and required validation passed at `c4ba1f68985c18c2a6a62b
 ### Phase 3 — Structural editing rules
 
 **Packet status:** Phase 3A construction and Phase 3B1 movement/replacement are complete. Phase 3B2A locks the prerequisite contracts; Phase 3B2B alone implements deletion. Issued structural IDs are permanently retired. Per-floor room and edge allocation use persistent monotonic state. Removed logical edges are never reused, and a new predecessor-to-Completion relationship receives a fresh edge identity. Reusable owned content cannot be silently destroyed. Floor 1 must retain at least one buildable required-route room during Phase 3.
+
+The closeout retains these contracts. Construction validates the resulting geometry after excluding exactly the retiring required terminal edge and the old location of the same moving Completion Terminal. Renovation resolves the active source/destination socket relationship from the saved edge kind and exact footprint before mapping the source connection ID to the replacement definition. No route search is introduced. The measured workload supports 128 returned records plus the current three-room content envelope; complete-save candidates must also pass the existing raw read budgets before persistence.
 
 Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It identifies the final removable player-built room and predecessor by graph identity, preserves the Completion Terminal and Completion node identities, and derives the terminal placement from the predecessor's authored outgoing connection geometry. Exactly one Direct Doorway or approved Straight Stone Corridor solution is required; zero or multiple solutions fail. There is no nearest repair, A*, arbitrary placement search, or unrelated movement, and validation/commit remain atomic.
 

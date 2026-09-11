@@ -33,6 +33,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             internal FloorRouteConnectionKind Kind;
             internal string CorridorDefinitionId;
+            internal SpatialConnectionPointDefinition SourcePoint;
+            internal SpatialConnectionPointDefinition DestinationPoint;
             internal TileCoordinate[] Tiles = Array.Empty<TileCoordinate>();
         }
 
@@ -99,7 +101,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TileCoordinate downstreamDelta = default;
             if (!TryEndpoint(floor, path.Nodes[targetIndex + 1], production.Catalog,
                     out TileEndpoint downstreamEndpoint) ||
-                !TryUniqueEndpointShift(target, oldDefinition, replacement, downstreamEndpoint,
+                !TryUniqueEndpointShift(target, oldDefinition, replacement, downstreamEndpoint, path.Edges[targetIndex],
                     production.Catalog, out downstreamDelta))
                 return Fail(preview, StructuralEditService.ConnectionAmbiguousReason);
             target.RoomDefinitionId = replacement.RoomDefinitionId;
@@ -361,7 +363,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!physical)
                 {
                     if (distance == 1 && Step(aw, af).Equals(bw)) yield return new Connection
-                    { Kind = FloorRouteConnectionKind.DirectDoorway, CorridorDefinitionId = string.Empty };
+                    { Kind = FloorRouteConnectionKind.DirectDoorway, CorridorDefinitionId = string.Empty,
+                        SourcePoint = ap, DestinationPoint = bp };
                     continue;
                 }
                 bool horizontal = aw.Y == bw.Y && (af == CardinalOrientation.Ninety || af == CardinalOrientation.TwoSeventy);
@@ -376,7 +379,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var tiles = new List<TileCoordinate>(); TileCoordinate tile = StepToward(aw, bw);
                 while (!tile.Equals(bw)) { tiles.Add(tile); tile = StepToward(tile, bw); }
                 yield return new Connection { Kind = FloorRouteConnectionKind.PhysicalCorridor,
-                    CorridorDefinitionId = corridor.CorridorDefinitionId, Tiles = tiles.OrderBy(value => value).ToArray() };
+                    CorridorDefinitionId = corridor.CorridorDefinitionId, SourcePoint = ap, DestinationPoint = bp,
+                    Tiles = tiles.OrderBy(value => value).ToArray() };
             }
         }
 
@@ -404,31 +408,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }));
 
         private static bool TryUniqueEndpointShift(RoomSpatialInstance room, RoomSpatialDefinition oldDefinition,
-            RoomSpatialDefinition replacement, TileEndpoint nextEndpoint, SpatialContentCatalog catalog,
+            RoomSpatialDefinition replacement, TileEndpoint nextEndpoint, FloorRouteEdge outgoing,
+            SpatialContentCatalog catalog,
             out TileCoordinate delta)
         {
             delta = default;
             var oldEndpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
                 Footprint = oldDefinition.GrossFootprint, Points = oldDefinition.ConnectionPoints };
-            var shifts = new List<TileCoordinate>();
-            foreach (SpatialConnectionPointDefinition oldPoint in oldEndpoint.Points ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (SpatialConnectionPointDefinition nextPoint in nextEndpoint.Points ?? Array.Empty<SpatialConnectionPointDefinition>())
-            {
-                CardinalOrientation oldFacing = StructuralEditService.Rotate(oldPoint.Facing, room.Orientation);
-                CardinalOrientation nextFacing = StructuralEditService.Rotate(nextPoint.Facing, nextEndpoint.Orientation);
-                if (nextFacing != Opposite(oldFacing) || !Compatible(oldPoint.SocketTypeId, nextPoint.SocketTypeId, catalog)) continue;
-                TileCoordinate oldWorld = World(oldPoint, oldEndpoint), nextWorld = World(nextPoint, nextEndpoint);
-                if (oldWorld.X != nextWorld.X && oldWorld.Y != nextWorld.Y) continue;
-                SpatialConnectionPointDefinition newPoint = (replacement.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-                    .SingleOrDefault(value => value?.ConnectionPointId == oldPoint.ConnectionPointId);
-                if (newPoint == null || StructuralEditService.Rotate(newPoint.Facing, room.Orientation) != oldFacing) continue;
-                var replacementEndpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
-                    Footprint = replacement.GrossFootprint, Points = replacement.ConnectionPoints };
-                TileCoordinate newWorld = World(newPoint, replacementEndpoint);
-                shifts.Add(Delta(oldWorld, newWorld));
-            }
-            TileCoordinate[] unique = shifts.Distinct().ToArray();
-            if (unique.Length != 1) return false; delta = unique[0]; return true;
+            bool physical = outgoing.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor;
+            if (!physical && outgoing.ConnectionKind != FloorRouteConnectionKind.DirectDoorway) return false;
+            CorridorSpatialDefinition corridor = physical ? (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
+                .SingleOrDefault(value => value?.CorridorDefinitionId == outgoing.CorridorDefinitionId) : null;
+            if (physical && corridor == null) return false;
+            // The saved edge's kind and exact footprint identify the active relationship.
+            // Merely aligned sockets (including sockets facing away from the route) are not alternatives.
+            Connection[] relationships = Pairs(oldEndpoint, nextEndpoint, catalog, corridor, physical)
+                .Where(value => !physical || value.Tiles.SequenceEqual((outgoing.Footprint?.OccupiedTiles ??
+                    Array.Empty<TileCoordinate>()).OrderBy(tile => tile))).ToArray();
+            if (relationships.Length != 1) return false;
+            Connection relationship = relationships[0];
+            SpatialConnectionPointDefinition oldPoint = relationship.SourcePoint;
+            SpatialConnectionPointDefinition[] mappings = (replacement.ConnectionPoints ??
+                Array.Empty<SpatialConnectionPointDefinition>()).Where(value => value != null &&
+                    value.ConnectionPointId == oldPoint.ConnectionPointId && value.Facing == oldPoint.Facing &&
+                    Compatible(value.SocketTypeId, relationship.DestinationPoint.SocketTypeId, catalog) &&
+                    (!physical || (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>())
+                        .Contains(value.SocketTypeId))).ToArray();
+            if (mappings.Length != 1) return false;
+            var replacementEndpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
+                Footprint = replacement.GrossFootprint, Points = replacement.ConnectionPoints };
+            delta = Delta(World(oldPoint, oldEndpoint), World(mappings[0], replacementEndpoint));
+            return true;
         }
 
         private static bool CapacityPermits(SavedSpatialFloor floor, string roomId, RoomSpatialDefinition definition)

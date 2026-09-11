@@ -147,10 +147,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 .Single(value => value.FloorInstanceId == floor.FloorInstanceId);
             lifecycle.NextNativeRoomOrdinal++;
             string roomId = identity.RoomInstanceId;
-            if (OverlapsRooms(result.OccupiedTiles, floor.Layout.Rooms, catalog.Rooms, workload)) return Fail(result, RoomOverlapReason);
-            if (OverlapsFixed(result.OccupiedTiles, floor.FixedStructures, catalog.FixedStructures, workload)) return Fail(result, FixedOverlapReason);
-            if (OverlapsCorridors(result.OccupiedTiles, floor.Layout.Edges)) return Fail(result, CorridorOverlapReason);
-
             FloorRouteNode completionNode = floor.Layout.Nodes.SingleOrDefault(value => value?.Kind == FloorRouteNodeKind.Completion);
             FloorRouteEdge oldTerminalEdge = floor.Layout.Edges.SingleOrDefault(value => value != null &&
                 value.Classification == RouteClassification.Required && value.DestinationNodeId == completionNode?.NodeId);
@@ -161,6 +157,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value?.RoomDefinitionId == previousRoom?.RoomDefinitionId);
             if (completionNode == null || oldTerminalEdge == null || previousRoom == null || previousDefinition == null)
                 return Fail(result, RequiredRouteReason);
+
+            // Validate the detached resulting topology: this edge retires, and the existing
+            // Completion Terminal moves below. All surviving geometry still participates.
+            SavedFixedSpatialStructure terminal = floor.FixedStructures.SingleOrDefault(value =>
+                value?.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            floor.Layout.Edges = floor.Layout.Edges.Where(value => value != oldTerminalEdge).ToArray();
+            if (OverlapsRooms(result.OccupiedTiles, floor.Layout.Rooms, catalog.Rooms, workload)) return Fail(result, RoomOverlapReason);
+            if (OverlapsFixed(result.OccupiedTiles, floor.FixedStructures.Where(value =>
+                    value != terminal), catalog.FixedStructures, workload))
+                return Fail(result, FixedOverlapReason);
+            if (OverlapsCorridors(result.OccupiedTiles, floor.Layout.Edges)) return Fail(result, CorridorOverlapReason);
 
             var newRoom = new RoomSpatialInstance { RoomInstanceId = roomId, RoomDefinitionId = roomDefinition.RoomDefinitionId,
                 FloorId = floor.FloorInstanceId, Anchor = request.Anchor, Orientation = request.Orientation };
@@ -185,8 +192,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Array.Empty<SpatialConnectionPointDefinition>()).SingleOrDefault(value =>
                     value != null && value.ConnectionPointId == request.TerminalConnectionPointId);
             if (outgoing == null) return Fail(result, ConnectionPointInvalidReason);
-            SavedFixedSpatialStructure terminal = floor.FixedStructures.SingleOrDefault(value =>
-                value?.Kind == FixedSpatialStructureKind.CompletionTerminal);
             FixedSpatialStructureDefinition terminalDefinition = catalog.FixedStructures.SingleOrDefault(value =>
                 value?.StructureDefinitionId == terminal?.FixedStructureDefinitionId);
             SpatialConnectionPointDefinition terminalPoint = (terminalDefinition?.ConnectionPoints ??
@@ -231,8 +236,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     newNode.NodeId, corridor.CorridorDefinitionId, incoming[0].Tiles);
             var outgoingEdge = Direct(identity.TerminalRequiredEdgeId, floor.FloorInstanceId,
                 newNode.NodeId, completionNode.NodeId);
-            floor.Layout.Edges = floor.Layout.Edges.Where(value => value?.EdgeId != oldTerminalEdge.EdgeId)
-                .Concat(new[] { incomingEdge, outgoingEdge }).ToArray();
+            floor.Layout.Edges = floor.Layout.Edges.Concat(new[] { incomingEdge, outgoingEdge }).ToArray();
             floor.RoomContents.RoomSemantics = (floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())
                 .Concat(new[] { new CanonicalRoomSemantics { RoomInstanceId = roomId,
                     LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced } }).ToArray();

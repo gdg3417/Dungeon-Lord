@@ -107,6 +107,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.StructuralDeletionPreview, Is.Null);
             Assert.That(root.StructuralRenovationPreview, Is.Null);
             Assert.That(root.StructuralConstructionPreview, Is.Null);
+            StructuralEditPreview reconstruction = root.PreviewStructuralConstruction(
+                new StructuralConstructionRequest { RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(0, targetY), Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = terminalPoint });
+            Assert.That(reconstruction.IsValid, Is.True, string.Join(",", reconstruction.ReasonCodes));
+            DetachedCanonicalWriteResult rebuilt = root.CommitStructuralConstruction();
+            Assert.That(rebuilt.IsSuccess, Is.True, rebuilt.Reason);
+            Assert.That(root.Save, Is.SameAs(rebuilt.RuntimeProjection));
+            Assert.That(root.StructuralConstructionPreview, Is.Null);
+            SaveService reopenedService = Service(fixture, fileSystem, "root-structural-deletion-" + targetY + ".json");
+            SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            Assert.That(reopened.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Select(value => value.RoomInstanceId),
+                Does.Contain("compat.floor.00.room.player.0001").And.Not.Contain(target));
+            Assert.That(reopened.validatedCanonicalSpatialState.Floors[0].Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Completion).NodeId, Is.EqualTo(completionId));
+            Assert.That(reopened.validatedCanonicalSpatialState.Floors[0].FixedStructures.Single(value =>
+                value.Kind == FixedSpatialStructureKind.CompletionTerminal).FixedStructureInstanceId, Is.EqualTo(terminalId));
         }
 
         [Test]
@@ -442,13 +460,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .RoomContents.Assignments.Single());
         }
 
-        [Test]
-        public void StructuralReplacementThroughRealRootPersistsPublishesAndReopens()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void StructuralReplacementThroughRealRootPersistsPublishesAndReopens(bool replaceUpstreamBasic)
         {
             RequireSynchronousEditModeFixture();
             RenovationHarness harness = Renovation("root-renovation-replace.json",
                 "spatial.room.large_chamber", new TileCoordinate(4, 1));
-            string roomId = "compat.floor.00.room.player.0000";
+            string roomId = replaceUpstreamBasic ? harness.Root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms
+                .Single(value => value.RoomDefinitionId == "spatial.room.basic").RoomInstanceId : "compat.floor.00.room.player.0000";
             DetachedCanonicalWriteResult content = harness.Service.ExecuteCanonicalMutation(harness.Root.Save,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId, roomId));
