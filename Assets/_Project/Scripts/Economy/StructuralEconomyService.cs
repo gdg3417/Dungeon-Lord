@@ -54,11 +54,12 @@ namespace DungeonBuilder.M0.Economy
                 var afterRooms = candidate.Floors.SelectMany(f => f.Layout.Rooms).ToArray();
                 var beforeEdges = current.Floors.SelectMany(f => f.Layout.Edges).ToArray();
                 var afterEdges = candidate.Floors.SelectMany(f => f.Layout.Edges).ToArray();
+                var carriedPhysicalTiles = new Dictionary<string, HashSet<TileCoordinate>>(StringComparer.Ordinal);
 
-                // A retired relationship's investment follows its unique surviving predecessor.
+                // A replaced relationship carries investment only for infrastructure that survives.
                 // Construction: old tail -> new incoming. Deletion: incoming -> new terminal.
-                // Renovation retains endpoint/edge IDs, including corridor/doorway representation changes.
-                var transferred = new HashSet<string>(StringComparer.Ordinal);
+                // Physical ownership follows the occupied tiles common to both relationships, rather
+                // than the fresh edge ID. Renovation retains endpoint/edge IDs directly.
                 foreach (var removed in beforeEdges.Where(e => !next.ContainsKey(e.EdgeId)))
                 {
                     var successors = afterEdges.Where(e => !old.ContainsKey(e.EdgeId) &&
@@ -66,19 +67,43 @@ namespace DungeonBuilder.M0.Economy
                     if (successors.Length > 1) return result;
                     if (successors.Length == 1)
                     {
-                        var record = next[successors[0].EdgeId];
-                        record.ConstructionMana += old[removed.EdgeId].ConstructionMana;
-                        record.RenovationMana += old[removed.EdgeId].RenovationMana;
-                        transferred.Add(removed.EdgeId);
+                        FloorRouteEdge successor = successors[0];
+                        if (removed.ConnectionKind == FloorRouteConnectionKind.DirectDoorway &&
+                            successor.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
+                        {
+                            Add(next[successor.EdgeId], old[removed.EdgeId]);
+                            old[removed.EdgeId].ConstructionMana = 0;
+                            old[removed.EdgeId].RenovationMana = 0;
+                        }
+                        else if (removed.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
+                            successor.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
+                            string.Equals(removed.CorridorDefinitionId, successor.CorridorDefinitionId,
+                                StringComparison.Ordinal))
+                        {
+                            var previousTiles = new HashSet<TileCoordinate>(
+                                removed.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>());
+                            var carried = new HashSet<TileCoordinate>(
+                                successor.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>());
+                            carried.IntersectWith(previousTiles);
+                            if (carried.Count != 0 && previousTiles.Count != 0)
+                            {
+                                StructuralInvestmentRecord retained = Share(old[removed.EdgeId],
+                                    carried.Count, previousTiles.Count);
+                                Add(next[successor.EdgeId], retained);
+                                old[removed.EdgeId].ConstructionMana -= retained.ConstructionMana;
+                                old[removed.EdgeId].RenovationMana -= retained.RenovationMana;
+                                carriedPhysicalTiles[successor.EdgeId] = carried;
+                            }
+                        }
                     }
                 }
+                result.RefundBasis = old.Values.Where(r => !next.ContainsKey(r.StructureId))
+                    .Sum(r => r.ConstructionMana + r.RenovationMana);
+                result.Refund = Math.Floor(result.RefundBasis * config.RefundPercentage);
+                if (!StructuralEconomySnapshot.Nonnegative(result.RefundBasis) ||
+                    !StructuralEconomySnapshot.Nonnegative(result.Refund)) return result;
                 if (operation == StructuralEditOperation.Deletion)
                 {
-                    result.RefundBasis = old.Values.Where(r => !next.ContainsKey(r.StructureId) &&
-                        !transferred.Contains(r.StructureId)).Sum(r => r.ConstructionMana + r.RenovationMana);
-                    result.Refund = Math.Floor(result.RefundBasis * config.RefundPercentage);
-                    if (!StructuralEconomySnapshot.Nonnegative(result.RefundBasis) ||
-                        !StructuralEconomySnapshot.Nonnegative(result.Refund)) return result;
                     result.ResultingMana = config.AddWithinCapacity(balance, result.Refund);
                     result.CreditedRefund = result.ResultingMana - balance;
                 }
@@ -95,7 +120,11 @@ namespace DungeonBuilder.M0.Economy
                             e.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor).OrderBy(e => e.EdgeId, StringComparer.Ordinal))
                         {
                             if (!config.TryCorridor(edge.CorridorDefinitionId, out double perTile)) return result;
-                            corridorBases.Add(edge.EdgeId, perTile * edge.Footprint.OccupiedTiles.Length);
+                            var newlyMaterialized = new HashSet<TileCoordinate>(
+                                edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>());
+                            if (carriedPhysicalTiles.TryGetValue(edge.EdgeId, out var carried))
+                                newlyMaterialized.ExceptWith(carried);
+                            corridorBases.Add(edge.EdgeId, perTile * newlyMaterialized.Count);
                         }
                         result.BaseCost = roomBase + corridorBases.Values.Sum();
                     }
@@ -130,6 +159,9 @@ namespace DungeonBuilder.M0.Economy
                         next[room.RoomInstanceId].ConstructionMana += result.Cost - assigned;
                     }
                     else next[room.RoomInstanceId].RenovationMana += result.Cost;
+                    double afterSpend = result.ResultingMana;
+                    result.ResultingMana = config.AddWithinCapacity(afterSpend, result.Refund);
+                    result.CreditedRefund = result.ResultingMana - afterSpend;
                 }
                 result.Investment = next.Values.OrderBy(r => r.StructureId, StringComparer.Ordinal).ToArray();
                 if (!StructuralEconomySnapshot.Nonnegative(result.ResultingMana) ||
@@ -137,6 +169,20 @@ namespace DungeonBuilder.M0.Economy
                 result.Reason = null; return result;
             }
             catch { return result; }
+        }
+
+        private static StructuralInvestmentRecord Share(StructuralInvestmentRecord source,
+            int carriedTiles, int previousTiles) => new StructuralInvestmentRecord
+        {
+            StructureId = source.StructureId,
+            ConstructionMana = Math.Floor(source.ConstructionMana * carriedTiles / previousTiles),
+            RenovationMana = Math.Floor(source.RenovationMana * carriedTiles / previousTiles)
+        };
+
+        private static void Add(StructuralInvestmentRecord destination, StructuralInvestmentRecord source)
+        {
+            destination.ConstructionMana += source.ConstructionMana;
+            destination.RenovationMana += source.RenovationMana;
         }
 
         internal static StructuralEditOperation Operation(DetachedCanonicalMutationRequest request) =>

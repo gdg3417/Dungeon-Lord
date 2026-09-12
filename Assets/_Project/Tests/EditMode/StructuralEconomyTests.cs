@@ -90,6 +90,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = R1(); var p = Price(f, Build(f, id, x, y, exit));
             Assert.That(p.IsAffordable, Is.True, p.Reason); Assert.That(p.Cost, Is.EqualTo(expected));
             Assert.That(p.Investment.Sum(r => r.ConstructionMana), Is.EqualTo(expected));
+            var existing = f.State.Floors[0].Layout.Edges.Select(e => e.EdgeId).ToArray();
+            string[] newEdges = p.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Where(e =>
+                !existing.Contains(e.EdgeId)).Select(e => e.EdgeId).ToArray();
+            Assert.That(p.Investment.Where(r => newEdges.Contains(r.StructureId))
+                .Sum(r => r.ConstructionMana), Is.EqualTo(expected - (id.EndsWith("large_chamber") ? 200 : 100)));
             Assert.That(p.ResultingMana, Is.EqualTo(1000 - expected));
         }
 
@@ -147,18 +152,105 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void HistoricalInvestmentSurvivesReopenCatalogChangeAndCorridorRetirement()
         {
             var f = R1(); f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: 5, y: 2))));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(895));
             f.Reopen(); Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(105));
             var c = Config(); foreach (var r in c.Rooms) r.Mana = 900;
             Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
             var deletion = Delete(f); var p = Price(f, deletion);
             Assert.That(p.RefundBasis, Is.EqualTo(100)); Assert.That(p.Refund, Is.EqualTo(75));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion))); f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(970));
             Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(5));
-            Assert.That(Ledger(f).Single(r => r.ConstructionMana == 5).StructureId, Does.Contain(".edge.native."));
+            FloorRouteEdge retained = f.State.Floors[0].Layout.Edges.Single(e =>
+                Ledger(f).Single(r => r.ConstructionMana == 5).StructureId == e.EdgeId);
+            Assert.That(retained.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
             f.Economy = PhaseFourTestSupport.Economy(f.Production, f.Profile.Canonical);
+            StructuralEconomyPreview rebuild = Price(f, Build(f, x: 5, y: 2));
+            FloorRouteEdge incoming = rebuild.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
+                e.EdgeId.EndsWith(".edge.incoming"));
+            CollectionAssert.AreEquivalent(retained.Footprint.OccupiedTiles, incoming.Footprint.OccupiedTiles);
+            Assert.That(rebuild.BaseCost, Is.EqualTo(100));
+            Assert.That(rebuild.Cost, Is.EqualTo(100));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(rebuild.Spatial)));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(870));
+            Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(105));
+            Assert.That(Ledger(f).Single(r => r.StructureId.EndsWith(".edge.incoming")).ConstructionMana, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void RebuildChargesOnlyNewPhysicalTilesAndKeepsCarriedInvestmentOnce()
+        {
+            var f = R1();
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: 5, y: 2))));
-            Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(110));
-            Assert.That(Ledger(f).Single(r => r.StructureId.EndsWith(".edge.incoming")).ConstructionMana, Is.EqualTo(10));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(Delete(f))));
+            FloorRouteEdge retained = f.State.Floors[0].Layout.Edges.Single(e =>
+                Ledger(f).Single(r => r.ConstructionMana == 5).StructureId == e.EdgeId);
+
+            StructuralEconomyPreview rebuild = Price(f, Build(f, x: 8, y: 2, exit: "north"));
+            Assert.That(rebuild.IsAffordable, Is.True, rebuild.Reason);
+            FloorRouteEdge incoming = rebuild.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
+                e.EdgeId.EndsWith(".edge.incoming"));
+            int carried = incoming.Footprint.OccupiedTiles.Intersect(
+                retained.Footprint.OccupiedTiles).Count();
+            int created = incoming.Footprint.OccupiedTiles.Length - carried;
+            Assert.That(carried, Is.EqualTo(retained.Footprint.OccupiedTiles.Length));
+            Assert.That(created, Is.GreaterThan(0));
+            Assert.That(rebuild.BaseCost, Is.EqualTo(100 + created * 5));
+            Assert.That(rebuild.Investment.Single(r => r.StructureId == incoming.EdgeId).ConstructionMana,
+                Is.EqualTo(5 + created * 5));
+            Assert.That(rebuild.Investment.Sum(r => r.ConstructionMana), Is.EqualTo(5 + rebuild.Cost));
+
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(rebuild.Spatial)));
+            Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(5 + rebuild.Cost));
+        }
+
+        [Test]
+        public void RebuildModifiersAllocateExactPaymentWithoutRepurchasingCarriedCorridor()
+        {
+            var f = R1();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: 5, y: 2))));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(Delete(f))));
+            var modifiers = new[] { new FormulaModifier("test.research", ModifierBucket.Research,
+                    ModifierType.AdditiveFlat, 1),
+                new FormulaModifier("test.heat", ModifierBucket.Heat,
+                    ModifierType.MultiplicativePercent, 0.5) };
+
+            StructuralEditPreview spatial = Build(f, x: 5, y: 2);
+            StructuralEconomyPreview rebuild = StructuralEconomyService.Preview(spatial, f.State,
+                Ledger(f), f.Runtime.structureRuntime.ManaReserve, f.Economy, modifiers);
+
+            Assert.That(rebuild.BaseCost, Is.EqualTo(100));
+            Assert.That(rebuild.Cost, Is.EqualTo(151));
+            Assert.That(rebuild.Investment.Single(r => r.StructureId.EndsWith(".edge.incoming"))
+                .ConstructionMana, Is.EqualTo(5));
+            Assert.That(rebuild.Investment.Sum(r => r.ConstructionMana), Is.EqualTo(156));
+        }
+
+        [Test]
+        public void RebuildWithDirectDoorwayRefundsActuallyRetiredPhysicalInfrastructure()
+        {
+            var f = R1();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: 5, y: 2))));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(Delete(f))));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(970));
+
+            StructuralEconomyPreview rebuild = Price(f, Build(f));
+            FloorRouteEdge incoming = rebuild.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
+                e.EdgeId.EndsWith(".edge.incoming"));
+            Assert.That(incoming.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(rebuild.BaseCost, Is.EqualTo(100));
+            Assert.That(rebuild.Cost, Is.EqualTo(100));
+            Assert.That(rebuild.RefundBasis, Is.EqualTo(5));
+            Assert.That(rebuild.Refund, Is.EqualTo(3));
+            Assert.That(rebuild.CreditedRefund, Is.EqualTo(3));
+            Assert.That(rebuild.ResultingMana, Is.EqualTo(873));
+            Assert.That(rebuild.Investment.Single(r => r.StructureId == incoming.EdgeId).ConstructionMana,
+                Is.Zero);
+            Assert.That(rebuild.Investment.Sum(r => r.ConstructionMana), Is.EqualTo(100));
+
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(rebuild.Spatial)));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(873));
+            Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(100));
         }
 
         [TestCase(800, 875)][TestCase(925, 1000)][TestCase(990, 1000)][TestCase(1200, 1200)]

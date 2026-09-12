@@ -15,6 +15,9 @@ namespace DungeonBuilder.M0
                 ? string.Format(CultureInfo.InvariantCulture, text("ui.structural.economy.refund"),
                     preview.RefundBasis, preview.Refund, preview.CreditedRefund)
                 : string.Format(CultureInfo.InvariantCulture, text("ui.structural.economy.cost"), preview.BaseCost, preview.Cost);
+            if (preview.Spatial?.Operation != StructuralEditOperation.Deletion && preview.RefundBasis > 0)
+                amount += "\n" + string.Format(CultureInfo.InvariantCulture, text("ui.structural.economy.refund"),
+                    preview.RefundBasis, preview.Refund, preview.CreditedRefund);
             return amount + "\n" + string.Format(CultureInfo.InvariantCulture,
                 text("ui.structural.economy.balance"), preview.CurrentMana, preview.ResultingMana) + "\n" +
                 text(preview.IsAffordable ? "ui.structural.economy.affordable" : StructuralEconomyService.InsufficientReason);

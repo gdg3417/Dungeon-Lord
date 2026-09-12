@@ -5,12 +5,68 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class StructuralConstructionGameRootTests
     {
+        [Test]
+        public void ProductionSpatialFailureWithEconomyResourceFailsClosedWithoutPartialActivation()
+        {
+            var go = new GameObject("StructuralEconomyMissingProductionSpatial");
+            var invalidCatalog = new TextAsset("{}");
+            try
+            {
+                GameRoot root = go.AddComponent<GameRoot>();
+                SetProperty(root, "Logger", new SimpleLogger(false));
+                SetProperty(root, "Content", new ContentService());
+                const string bootstrap = "Assets/_Project/Data/Bootstrap/";
+                const string spatial = "Assets/_Project/Data/Production/DungeonSpatial/";
+                root.contentBootstrapJson = RequiredAsset(bootstrap + "content_bootstrap.json");
+                root.buildConfigJson = RequiredAsset(bootstrap + "build_config.json");
+                root.schemaVersionsJson = RequiredAsset(bootstrap + "schema_versions.json");
+                root.contentManifestJson = RequiredAsset(bootstrap + "content_manifest.json");
+                root.devCommandsJson = RequiredAsset(bootstrap + "dev_commands.json");
+                root.stringTableJson = RequiredAsset(bootstrap + "string_table_en.json");
+                root.heatRuntimeJson = RequiredAsset(bootstrap + "heat_runtime.json");
+                root.structureSimulationConfigJson = RequiredAsset(
+                    bootstrap + "structure_simulation_config.json");
+                root.runSimulationConfigJson = RequiredAsset(bootstrap + "run_simulation_config.json");
+                root.lootConfigJson = RequiredAsset(bootstrap + "loot_config.json");
+                root.productionSpatialManifest = RequiredAsset(spatial + "content_manifest.json");
+                root.productionSpatialCatalog = invalidCatalog;
+                root.productionSpatialLanguageTables = new[] { RequiredAsset(spatial + "string_table_en.json") };
+                root.productionSpatialValidationLimits = RequiredAsset(spatial + "validation_limits.json");
+                root.spatialLayoutCompatibilityProfilesJson = RequiredAsset(
+                    spatial + "spatial_layout_compatibility_profiles.json");
+                const string save = "Assets/_Project/Data/Production/Save/";
+                root.saveSpatialMigrationLimitsJson = RequiredAsset(save + "save_spatial_migration_limits.json");
+                root.structuralContentRemovalPolicyJson = RequiredAsset(
+                    save + "structural_content_removal_policy.json");
+                Assert.That(Resources.Load<TextAsset>("structural_economy"), Is.Not.Null);
+
+                bool initialized = true;
+                Assert.DoesNotThrow(() => initialized = root.InitializeServicesAndData());
+
+                Assert.That(initialized, Is.False);
+                Assert.That(root.Content.ProductionSpatialContent, Is.Null);
+                Assert.That(root.Save, Is.Null);
+                Assert.That(root.SaveService, Is.Not.Null);
+                Assert.That(root.SaveService.CanonicalSession, Is.Null);
+                Assert.That(typeof(SaveService).GetField("_economy",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.SaveService), Is.Null);
+                string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey("gd66.profile.invalid");
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(key, key)));
+            }
+            finally
+            {
+                Object.DestroyImmediate(invalidCatalog);
+                Object.DestroyImmediate(go);
+            }
+        }
+
         [Test]
         public void PreviewWithoutCanonicalAuthorityFailsClosedAndCommitPreservesRuntime()
         {
@@ -365,6 +421,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static void SetProperty(object target, string name, object value) =>
             target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public |
                 BindingFlags.NonPublic).SetValue(target, value);
+
+        private static TextAsset RequiredAsset(string path)
+        {
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+            Assert.That(asset, Is.Not.Null, "Required test fixture asset is missing: " + path);
+            return asset;
+        }
     }
 }
 #endif

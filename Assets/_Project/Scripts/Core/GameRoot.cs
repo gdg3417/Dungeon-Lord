@@ -416,9 +416,11 @@ namespace DungeonBuilder.M0
             SaveService.ConfigureStructuralRemovalPolicy(removalPolicy);
             var economyAsset = Resources.Load<TextAsset>("structural_economy");
             DungeonBuilder.M0.Economy.StructuralEconomySnapshot economy = null;
-            if (economyAsset != null && SaveSpatialMigrationLimits != null)
+            ProductionSpatialContentSnapshot productionSpatialContent = Content?.ProductionSpatialContent;
+            if (economyAsset != null && SaveSpatialMigrationLimits != null &&
+                productionSpatialContent?.Catalog != null)
                 DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryParse(economyAsset.bytes,
-                    Content.ProductionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
+                    productionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
             SaveService.ConfigureStructuralEconomy(economy);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
