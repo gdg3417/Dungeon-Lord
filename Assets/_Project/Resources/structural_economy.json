@@ -1,0 +1,15 @@
+{
+    "Rooms": [
+        { "DefinitionId": "spatial.room.basic", "Mana": 100 },
+        { "DefinitionId": "spatial.room.large_chamber", "Mana": 200 },
+        { "DefinitionId": "spatial.room.rectangle", "Mana": 100 }
+    ],
+    "Corridors": [
+        { "DefinitionId": "spatial.corridor.straight_stone", "Mana": 5 }
+    ],
+    "MovementFactor": 0.1,
+    "ReplacementFactor": 0.1,
+    "RefundPercentage": 0.75,
+    "ManaCapacity": 1000,
+    "UndoSeconds": 30
+}

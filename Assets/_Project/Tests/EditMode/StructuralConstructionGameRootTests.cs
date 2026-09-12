@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class StructuralConstructionGameRootTests
+    public class StructuralConstructionGameRootTests
     {
         [Test]
         public void PreviewWithoutCanonicalAuthorityFailsClosedAndCommitPreservesRuntime()
@@ -211,7 +211,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                     Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
-                Assert.That(SchemaSevenToEightUpgrade.TryPrepare(
+                Assert.That(PhaseFourTestSupport.Upgrade(
                     source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
                 DetachedCompleteSaveValidationResult parsed =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current,

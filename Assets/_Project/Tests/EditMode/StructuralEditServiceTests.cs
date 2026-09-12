@@ -7,7 +7,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class StructuralEditServiceTests
+    public class StructuralEditServiceTests
     {
         [Test]
         public void StraightStoneCorridor_MaximumLengthUsesProductionLimit()
@@ -1470,7 +1470,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static byte[] CurrentBytes(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source)
         {
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(
+            Assert.That(PhaseFourTestSupport.Upgrade(
                 source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
             return current;
         }

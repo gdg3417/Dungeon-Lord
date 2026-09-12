@@ -16,7 +16,7 @@ using LifecycleFixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWrite
 namespace DungeonBuilder.M0.Tests.EditMode
 {
     // Measurement-only evidence. These values are never production configuration authority.
-    public sealed class Gd66SaveWorkloadMeasurementTests
+    public class Gd66SaveWorkloadMeasurementTests
     {
         private const int High = 2000000;
 
@@ -174,7 +174,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Profile.Canonical, fixture.Profile.Whole);
             var measuredSession = DetachedCanonicalSaveSession.Open(before, fixture.Context, measurementProfile);
             Assert.That(measuredSession.IsSuccess, Is.True, measuredSession.Reason);
-            var measuredCandidate = measuredSession.Session.PrepareSpatialOnlyReplacement(preview.DetachedCandidate);
+            var measuredCandidate = measuredSession.Session.PrepareSpatialOnlyReplacement(preview.DetachedCandidate,
+                StructuralInvestment.Zero(preview.DetachedCandidate)); // Detached test-only workload measurement.
             Assert.That(measuredCandidate.IsSuccess, Is.True, measuredCandidate.Reason);
             var bootRefusal = RawSavePayloadClassifier.Classify(measuredCandidate.Update.GetBytes(), fixture.Profile.Raw,
                 new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor());
@@ -220,7 +221,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
             byte[] before = fixture.Session.GetCurrentBytes();
-            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 8);
+            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 9);
             foreach (int bound in new[] { required, required - 1 })
             {
                 var raw = new RawSavePayloadClassificationLimits(dimension == 0 ? bound : High,
@@ -252,6 +253,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             LifecycleFixture fixture = LifecycleFixture.Create("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}",
                 "\"phase3UnknownRoot\":[1,true]", profile);
+            // Isolate the retained-custody workload from funding. Paid transactions have their own economy fixtures.
+            var economy = JsonUtility.FromJson<DungeonBuilder.M0.Economy.StructuralEconomyConfiguration>(
+                System.IO.File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
+            foreach (var price in economy.Rooms.Concat(economy.Corridors)) price.Mana = 0;
+            Assert.That(DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryCreate(economy,
+                fixture.Production.Catalog, out fixture.Economy), Is.True);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime = RepresentativeSave(); fixture.Runtime.saveVersion = SaveMigration.LatestSchemaVersion;
@@ -341,7 +348,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(classification.IsSuccess, Is.True, classification.FailureReason);
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
-            string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership" };
+            string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment" };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
             int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent).Sum(value => value.ByteLength);
@@ -358,9 +365,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     new CanonicalSpatialSaveWorkloadLimits(records - 1, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles))).IsValid, Is.False);
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}"));
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownRoot\":[1,true]"));
-            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 8) +
-                ",rawMembers=" + MinimumRaw(bytes, 1, 8) + ",rawElements=" + MinimumRaw(bytes, 2, 8) +
-                ",rawStringBytes=" + MinimumRaw(bytes, 3, 8) + ",rawScanWork=" + MinimumRaw(bytes, 4, 8) +
+            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 9) +
+                ",rawMembers=" + MinimumRaw(bytes, 1, 9) + ",rawElements=" + MinimumRaw(bytes, 2, 9) +
+                ",rawStringBytes=" + MinimumRaw(bytes, 3, 9) + ",rawScanWork=" + MinimumRaw(bytes, 4, 9) +
                 ",candidateBytes=" + bytes.Length + ",strictInputBytes=" + bytes.Length +
                 ",strictNodes=" + MinimumStrict(bytes, fixture.State, 0, true) +
                 ",strictRecords=" + MinimumStrict(bytes, fixture.State, 1, true) +

@@ -55,7 +55,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[index].Value);
             }
             writer.Token("}"); candidate = writer.Finish();
-            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits).IsValid;
+            return DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(candidate, limits).IsValid;
         }
 
         internal static bool TryWriteInitialLifecycle(ContractJsonWriter lifecycleWriter,

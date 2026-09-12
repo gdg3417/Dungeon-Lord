@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class SpatialLayoutCompatibilityProfileTests
+    public class SpatialLayoutCompatibilityProfileTests
     {
         private ProductionSpatialContentSnapshot spatial;
         private SpatialContentValidationWorkloadLimits limits;
@@ -34,8 +34,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(data.GeometryRecords,Has.Length.EqualTo(1));
             Assert.That(data.GeometryRecords[0].Layouts.Select(x=>x.ExpectedOccupiedTileTotal).ToArray(),Is.EqualTo(new[]{26,42}));
             Assert.That(data.MigrationProfiles,Has.Length.EqualTo(1));
-            Assert.That(data.StarterProfiles,Has.Length.EqualTo(2));
-            Assert.That(data.ContractSelections,Has.Length.EqualTo(2));
+            Assert.That(data.StarterProfiles,Has.Length.EqualTo(3));
+            Assert.That(data.ContractSelections,Has.Length.EqualTo(3));
             SpatialMigrationCompatibilityProfile migration=data.MigrationProfiles[0];
             CanonicalStarterLayoutProfile starter=data.StarterProfiles[0];
             CanonicalLayoutContractSelection contract=data.ContractSelections[0];
@@ -86,7 +86,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(8,1).Success,Is.True);
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(8));
+            Assert.That(SaveMigration.LatestSchemaVersion,Is.EqualTo(9));
             Assert.That(SaveMigration.LegacyCompatibilitySchemaVersion,Is.EqualTo(6));
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data),Is.True);
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
@@ -102,7 +102,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertPlacement(geometry.Layouts[1],CompatibilityRouteRole.Completion,1,10);
         }
 
-        [Test] public void ProductionReleasePolicyPreservesFrozenSevenAndCurrentEightBoundaries()
+        [Test] public void ProductionReleasePolicyPreservesFrozenSevenEightAndCurrentNineBoundaries()
         {
             SpatialLayoutCompatibilityProfilesData production =
                 JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);
@@ -116,8 +116,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 7)
                 .TargetSchemaVersion, Is.EqualTo(7));
             Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 8)
-                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+                .TargetSchemaVersion, Is.EqualTo(8));
             Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 8)
+                .TargetSchemaVersion, Is.EqualTo(8));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 9)
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 9)
                 .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
 
             SpatialLayoutCompatibilityProfilesData schemaEight =

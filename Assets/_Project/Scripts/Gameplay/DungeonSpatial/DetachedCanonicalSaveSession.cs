@@ -60,6 +60,36 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             value = (byte[])stored.Clone(); return true;
         }
 
+        internal static DetachedRecognizedSaveStateSnapshotResult CaptureWithMana(SaveData source,
+            double mana, SaveSpatialMigrationLimitsProfile limits)
+        {
+            var captured = Capture(source, limits);
+            if (!captured.IsSuccess || !DungeonBuilder.M0.Economy.StructuralEconomySnapshot.Nonnegative(mana))
+                return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            try
+            {
+                var values = captured.Snapshot.values;
+                var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+                if (!values.TryGetValue("structureRuntime", out byte[] bytes) ||
+                    !ContractJson.TryParse(bytes, limits.Canonical.Serialized, issues, out ContractJsonNode runtime) ||
+                    runtime.Kind != ContractJsonKind.Object) return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                var writer = new ContractJsonWriter(limits.Canonical.Serialized);
+                writer.Node(); writer.Token("{"); bool first = true, found = false;
+                foreach (var field in runtime.Fields)
+                {
+                    if (!first) writer.Token(","); first = false;
+                    writer.String(field.Key); writer.Token(":");
+                    if (field.Key == "ManaReserve")
+                    { writer.Token(mana.ToString("R", System.Globalization.CultureInfo.InvariantCulture)); found = true; }
+                    else DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+                }
+                writer.Token("}");
+                if (!found) return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                values["structureRuntime"] = writer.Finish(); return captured;
+            }
+            catch { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
+        }
+
         private static DetachedRecognizedSaveStateSnapshotResult Failure(string reason) =>
             new DetachedRecognizedSaveStateSnapshotResult(null, reason);
 
@@ -132,21 +162,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         public DetachedCanonicalSaveSessionResult PrepareSpatialOnlyReplacement(
-            DetachedCanonicalSpatialSaveState replacement) => PrepareReplacement(null, replacement);
+            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null) =>
+            PrepareReplacement(null, replacement, investment);
 
         public DetachedCanonicalSaveSessionResult PrepareLiveReplacement(
             DetachedRecognizedSaveStateSnapshotResult recognizedState,
-            DetachedCanonicalSpatialSaveState replacement)
+            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null)
         {
             if (recognizedState == null || !recognizedState.IsSuccess)
                 return Failure(recognizedState?.Reason ??
                     DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
-            return PrepareReplacement(recognizedState.Snapshot, replacement);
+            return PrepareReplacement(recognizedState.Snapshot, replacement, investment);
         }
 
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
-            DetachedCanonicalSpatialSaveState replacement)
+            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -183,7 +214,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                for (int index = 0; index < primary.Fields.Count - 3; index++)
+                for (int index = 0; index < primary.Fields.Count - 4; index++)
                 {
                     KeyValuePair<string, ContractJsonNode> field = primary.Fields[index];
                     if (Contains(recognizedNames, field.Key)) continue;
@@ -197,6 +228,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 WriteRawField(writer, "spatialFloors", spatial.Value.Floors, false);
                 WriteRawField(writer, "structuralLifecycleAndOwnership",
                     spatial.Value.LifecycleAndOwnership, false);
+                writer.Token(",\"structuralInvestment\":");
+                if (investment != null) StructuralInvestment.Write(writer, investment);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[primary.Fields.Count - 1].Value);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)

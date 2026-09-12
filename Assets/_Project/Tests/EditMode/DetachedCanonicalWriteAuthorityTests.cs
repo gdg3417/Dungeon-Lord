@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class DetachedCanonicalWriteAuthorityTests
+    public class DetachedCanonicalWriteAuthorityTests
     {
         [TestCase(7, FloorRouteConnectionKind.PhysicalCorridor, 43)]
         [TestCase(6, FloorRouteConnectionKind.DirectDoorway, 42)]
@@ -309,7 +309,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(8));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(9));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -705,7 +705,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-" + targetIndex, 6, members);
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+            Assert.That(PhaseFourTestSupport.Upgrade(run.Attempt.Candidate.GetBytes(), run.Limits,
                 out byte[] currentBytes), Is.True);
             DetachedCompleteSaveValidationResult current =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
@@ -767,7 +767,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.SemanticFixtureExecution run =
                 Gd66DetachedSpatialMigrationTransactionTests.RunPopulatedSemanticFixture(
                     "writer-r2-capacity", 6, members);
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(run.Attempt.Candidate.GetBytes(), run.Limits,
+            Assert.That(PhaseFourTestSupport.Upgrade(run.Attempt.Candidate.GetBytes(), run.Limits,
                 out byte[] currentBytes), Is.True);
             DetachedCompleteSaveValidationResult current =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, run.CurrentContext);
@@ -956,7 +956,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":8"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":9"));
             Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
             Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
             Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
@@ -1449,11 +1449,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedCanonicalSaveSession Session;
             internal DetachedCanonicalSpatialSaveState State;
             internal StructuralContentRemovalPolicySnapshot RemovalPolicy;
+            internal DungeonBuilder.M0.Economy.StructuralEconomySnapshot Economy;
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
-                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy);
+                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
                 SaveSpatialMigrationLimitsProfile workloadProfile = null)
@@ -1467,7 +1468,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         workloadProfile?.Raw, workloadProfile?.Whole, workloadProfile?.Canonical);
                 Assert.That(source.Result.IsSuccess, Is.True, source.Result.Reason);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
-                Assert.That(SchemaSevenToEightUpgrade.TryPrepare(candidate, source.Limits,
+                Assert.That(PhaseFourTestSupport.Upgrade(candidate, source.Limits,
                     out candidate), Is.True);
                 var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
                     source.Production, source.LegacyBytes, source.Limits);
@@ -1485,13 +1486,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                       LifecycleAndOwnership = NativeStructuralIdentity.CreateInitialLifecycle(
                           Array.Empty<SavedSpatialFloor>()) };
                     DetachedCanonicalSaveSessionResult emptied =
-                        opened.Session.PrepareSpatialOnlyReplacement(empty);
+                        opened.Session.PrepareSpatialOnlyReplacement(empty, StructuralInvestment.Zero(empty));
                     candidate = emptied.Update.GetBytes();
                     validation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                     opened = DetachedCanonicalSaveSession.Open(candidate, context, profile);
                 }
                 CanonicalMvpRouteProjection.TryPublishValidated(validation, source.Production,
                     out SaveData runtime, out string reason);
+                runtime.structureRuntime.ManaReserve = 1000; // Test-funded Phase 3 regression fixture.
                 var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
                 string path = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-canonical-write-" +
                     Guid.NewGuid().ToString("N") + ".json"));
@@ -1501,7 +1503,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
                     Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
-                    Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy };
+                    Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
+                    Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits) };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>
@@ -1535,7 +1538,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 DetachedRecognizedSaveStateSnapshotResult snapshot =
                     DetachedRecognizedSaveStateSnapshot.Capture(Runtime, Profile);
-                DetachedCanonicalSaveSessionResult update = Session.PrepareLiveReplacement(snapshot, state);
+                DetachedCanonicalSaveSessionResult update = Session.PrepareLiveReplacement(snapshot, state,
+                    StructuralInvestment.Zero(state)); // Test-only synthetic spatial fixture, no paid transaction.
                 byte[] bytes = update.Update.GetBytes();
                 DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(bytes, Context, Profile);
                 DetachedCompleteSaveValidationResult validation =
@@ -1549,7 +1553,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 return new Fixture { Production = Production, Compatibility = Compatibility,
                     Configuration = Configuration, Profile = Profile, Context = Context,
                     Session = opened.Session, State = validation.State, Runtime = runtime,
-                    FileSystem = fs, ActivePath = path };
+                    FileSystem = fs, ActivePath = path, Economy = Economy, RemovalPolicy = RemovalPolicy };
             }
         }
     }

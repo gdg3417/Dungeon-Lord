@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class DetachedCanonicalSaveSessionTests
+    public class DetachedCanonicalSaveSessionTests
     {
         [Test]
         public void Capture_InvalidNonWorkloadLimits_ReturnsCandidateInvalid()
@@ -40,7 +40,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Bytes, fixture.Context, fixture.Profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
             DetachedCanonicalSaveSessionResult first = opened.Session.PrepareSpatialOnlyReplacement(
-                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
+                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()), Array.Empty<StructuralInvestmentRecord>());
             Assert.That(first.IsSuccess, Is.True, first.Reason);
             AssertSpatialOnlyEvidence(first.Update.GetBytes());
             Assert.That(first.Update.State.Floors, Is.Empty);
@@ -48,11 +48,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSessionResult reopened = DetachedCanonicalSaveSession.Open(
                 first.Update.GetBytes(), fixture.Context, fixture.Profile);
             Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
-            DetachedCanonicalSaveSessionResult second = reopened.Session.PrepareSpatialOnlyReplacement(fixture.State);
+            DetachedCanonicalSaveSessionResult second = reopened.Session.PrepareSpatialOnlyReplacement(fixture.State, StructuralInvestment.Zero(fixture.State));
             Assert.That(second.IsSuccess, Is.True, second.Reason);
             AssertSpatialOnlyEvidence(second.Update.GetBytes());
             Assert.That(second.Update.State.Floors, Has.Length.EqualTo(1));
-            Assert.That(reopened.Session.PrepareSpatialOnlyReplacement(fixture.State).Update.GetBytes(),
+            Assert.That(reopened.Session.PrepareSpatialOnlyReplacement(fixture.State, StructuralInvestment.Zero(fixture.State)).Update.GetBytes(),
                 Is.EqualTo(second.Update.GetBytes()));
             Assert.That(opened.Session.GetCurrentBytes(), Is.EqualTo(fixture.Bytes));
         }
@@ -104,7 +104,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedRecognizedSaveStateSnapshotResult secondSnapshot =
                 DetachedRecognizedSaveStateSnapshot.Capture(secondLive, fixture.Profile);
             DetachedCanonicalSaveSessionResult second = reopened.PrepareLiveReplacement(secondSnapshot,
-                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()));
+                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()), Array.Empty<StructuralInvestmentRecord>());
 
             Assert.That(second.IsSuccess, Is.True, second.Reason);
             AssertLiveState(second.Update.GetBytes(), 300, 29, 47d, "research.second", "objective.second");
@@ -113,7 +113,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCanonicalSaveSession.Open(second.Update.GetBytes(), fixture.Context,
                 fixture.Profile).IsSuccess, Is.True);
             Assert.That(reopened.PrepareLiveReplacement(secondSnapshot,
-                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>())).Update.GetBytes(),
+                State(fixture.State.Authority, Array.Empty<SavedSpatialFloor>()), Array.Empty<StructuralInvestmentRecord>()).Update.GetBytes(),
                 Is.EqualTo(second.Update.GetBytes()));
         }
 
@@ -246,7 +246,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Encoding.UTF8.GetBytes(json), profile.Raw, profile.Whole, profile.Canonical);
             Assert.That(prepared.Result.IsSuccess, Is.True, prepared.Result.Reason);
             byte[] bytes = prepared.Result.Attempt.Candidate.GetBytes();
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(bytes, profile.Canonical,
+            Assert.That(PhaseFourTestSupport.Upgrade(bytes, profile.Canonical,
                 out bytes), Is.True);
             var context = new DetachedCurrentTargetValidationContext(prepared.Compatibility,
                 prepared.Production, prepared.LegacyBytes, profile.Canonical);

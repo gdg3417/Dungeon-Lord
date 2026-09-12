@@ -6,7 +6,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class SchemaEightLifecycleOwnershipTests
+    public class SchemaEightLifecycleOwnershipTests
     {
         [Test]
         public void NativeIdentityUsesPersistedHighWaterInsteadOfExistingMaximum()

@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode source) || source.Kind != ContractJsonKind.Object)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":8,\"primary\":{");
+                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":9,\"primary\":{");
                 bool first = true;
                 foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
                 {
@@ -78,7 +78,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 writer.Token(","); writer.String("spatialFloors"); writer.Token(":");
                 DetachedCompleteSaveContract.WriteCanonicalNode(writer, floorsNode);
                 writer.Token(","); writer.String("structuralLifecycleAndOwnership"); writer.Token(":");
-                DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycleNode); writer.Token("}}");
+                DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycleNode);
+                writer.Token(",\"structuralInvestment\":[]}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical);

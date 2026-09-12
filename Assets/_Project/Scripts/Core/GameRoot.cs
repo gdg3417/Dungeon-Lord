@@ -414,6 +414,12 @@ namespace DungeonBuilder.M0
                 StructuralContentRemovalPolicyAuthority.TryParse(structuralContentRemovalPolicyJson.bytes,
                     out removalPolicy);
             SaveService.ConfigureStructuralRemovalPolicy(removalPolicy);
+            var economyAsset = Resources.Load<TextAsset>("structural_economy");
+            DungeonBuilder.M0.Economy.StructuralEconomySnapshot economy = null;
+            if (economyAsset != null && SaveSpatialMigrationLimits != null)
+                DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryParse(economyAsset.bytes,
+                    Content.ProductionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
+            SaveService.ConfigureStructuralEconomy(economy);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
@@ -1332,6 +1338,7 @@ namespace DungeonBuilder.M0
 
         private bool SimulateResolvedRoute(string postureId, MvpOrderedRouteRoom[] route)
         {
+            SaveService?.InvalidateRenovationUndo();
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateRoute(Save.structureRuntime, tickStarted, sequence, postureId, route);

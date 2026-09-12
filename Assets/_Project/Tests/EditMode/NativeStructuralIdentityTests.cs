@@ -4,7 +4,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class NativeStructuralIdentityTests
+    public class NativeStructuralIdentityTests
     {
         [Test]
         public void ConstructionAllocation_ReturnsCompleteDeterministicBundle()

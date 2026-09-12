@@ -128,6 +128,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal bool ResearchPendingExplicitNull { get; }
         internal bool ResearchProgressExplicitNull { get; }
         internal bool LastOfflineSummaryExplicitNull { get; }
+        internal StructuralInvestmentRecord[] Investment { get; set; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -148,7 +149,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
                     result.LayoutContractVersion, result.State, true,
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
-                    result.LastOfflineSummaryExplicitNull)
+                    result.LastOfflineSummaryExplicitNull) { Investment = result.Investment }
                 : Failure();
         }
 
@@ -185,6 +186,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 expectedTransactionId, expectedDescriptorFingerprint);
         }
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaEightAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
+            ParseValidateAndRoundTripCore(bytes, limits, 8, true, null, null);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint)
@@ -202,12 +207,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (HasCaseAmbiguousSibling(root) || CaseAmbiguous(root,
                     new[] { "schema", "schemaVersion", "primary" })) return Failure();
                 ContractJsonNode primary = root.Fields[2].Value;
-                int canonicalMembers = requireLifecycle ? 3 : 2;
+                bool requireInvestment = schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget;
+                int canonicalMembers = requireInvestment ? 4 : requireLifecycle ? 3 : 2;
                 if (primary.Fields.Count < canonicalMembers ||
                     primary.Fields[primary.Fields.Count - canonicalMembers].Key != "canonicalSpatialAuthority" ||
                     primary.Fields[primary.Fields.Count - canonicalMembers + 1].Key != "spatialFloors" ||
-                    (requireLifecycle && primary.Fields[primary.Fields.Count - 1].Key !=
+                    (requireInvestment && primary.Fields[primary.Fields.Count - 1].Key != "structuralInvestment") ||
+                    (requireLifecycle && primary.Fields[primary.Fields.Count - canonicalMembers + 2].Key !=
                         "structuralLifecycleAndOwnership") || CaseAmbiguous(primary,
+                        requireInvestment ? new[] { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment" } :
                         requireLifecycle ? new[] { "canonicalSpatialAuthority", "spatialFloors",
                             "structuralLifecycleAndOwnership" } :
                             new[] { "canonicalSpatialAuthority", "spatialFloors" })) return Failure();
@@ -220,7 +228,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode floorsNode = primary.Fields[primary.Fields.Count - canonicalMembers + 1].Value;
                 WriteNode(spatialWriter, floorsNode);
                 spatialWriter.Token(","); spatialWriter.String("LifecycleAndOwnership"); spatialWriter.Token(":");
-                if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - 1].Value);
+                if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - canonicalMembers + 2].Value);
                 else spatialWriter.Token("null");
                 spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
@@ -235,6 +243,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     (expectedDescriptorFingerprint != null &&
                         parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();
 
+                StructuralInvestmentRecord[] investment = null;
+                if (requireInvestment && !StructuralInvestment.TryRead(primary.Fields.Last().Value,
+                    parsedSpatial.Value, limits.Spatial.MaximumRecords, out investment)) return Failure();
+                if (requireInvestment)
+                {
+                    var originalLedger = new ContractJsonWriter(limits.Serialized);
+                    WriteNode(originalLedger, primary.Fields.Last().Value);
+                    var canonicalLedger = new ContractJsonWriter(limits.Serialized);
+                    StructuralInvestment.Write(canonicalLedger, investment);
+                    if (!Same(originalLedger.Finish(), canonicalLedger.Finish())) return Failure();
+                }
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
@@ -242,7 +261,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value,
                     false, ExplicitNull(primary, "researchPending"),
                     ExplicitNull(primary, "researchProgress"),
-                    ExplicitNull(primary, "lastOfflineSummary"));
+                    ExplicitNull(primary, "lastOfflineSummary")) { Investment = investment };
             }
             catch { return Failure(); }
         }

@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class Gd66DetachedCompleteSaveContractTests
+    public class Gd66DetachedCompleteSaveContractTests
     {
         [Test]
         public void CompleteSave_ParsesAndRoundTripsByteIdentically()
@@ -24,7 +24,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.False);
             Assert.That(SchemaSevenToEightUpgrade.TryPrepare(bytes, limits, out byte[] schemaEight),
                 Is.True);
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, limits).IsValid,
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(schemaEight, limits).IsValid,
                 Is.True);
         }
 
@@ -83,7 +83,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Encoding.UTF8.GetString(first), Does.Contain("\"schemaVersion\":8"));
             Assert.That(Encoding.UTF8.GetString(first), Does.Contain(
                 "\"structuralLifecycleAndOwnership\":{\"Floors\":[],\"ReturnedContents\":[]}"));
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, Limits()).IsValid,
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(first, Limits()).IsValid,
                 Is.True);
         }
 
@@ -116,7 +116,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaSevenToEightUpgrade.TryPrepare(schemaSeven, fixture.Limits,
                 out byte[] schemaEight), Is.True);
             DetachedCompleteSaveValidationResult after =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.Limits);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(schemaEight, fixture.Limits);
             Assert.That(after.IsValid, Is.True);
 
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> beforeMembers =
@@ -175,7 +175,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaSevenToEightUpgrade.TryPrepare(rebuilt.Candidate.GetBytes(), fixture.Limits,
                 out byte[] schemaEight), Is.True);
             DetachedCompleteSaveValidationResult upgraded =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.Limits);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(schemaEight, fixture.Limits);
             Assert.That(upgraded.IsValid, Is.True);
             Assert.That(upgraded.State.Floors[0].Layout.Rooms.Any(value =>
                 value.RoomInstanceId == nativeRoom), Is.True);
@@ -195,6 +195,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(assignmentEvidence, upgraded.State.Floors[0].RoomContents.Assignments
                 .Where(value => value.RoomInstanceId == nativeRoom)
                 .Select(value => value.AssignmentId + ":" + value.Sequence).ToArray());
+            Assert.That(SchemaEightToNineUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);
