@@ -268,11 +268,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 ["migration contract"] = data => SetFrozenContractVersion(data, 2),
                 ["migration id"] = data => data.MigrationProfiles[0].ProfileId = "compat.profile.migration.unauthorized",
                 ["migration version"] = data => data.MigrationProfiles[0].ProfileVersion = 2,
-                ["starter target"] = data => SetCurrentTarget(data, 9),
+                ["starter target"] = data => SetCurrentTarget(data,
+                    CanonicalSaveSchemaVersions.CurrentWritableTarget + 1),
                 ["starter contract"] = data => SetFrozenContractVersion(data, 2),
                 ["starter id"] = data => data.StarterProfiles[0].ProfileId = "compat.profile.starter.unauthorized",
                 ["starter version"] = data => data.StarterProfiles[0].ProfileVersion = 2,
-                ["contract target"] = data => SetCurrentTarget(data, 9),
+                ["contract target"] = data => SetCurrentTarget(data,
+                    CanonicalSaveSchemaVersions.CurrentWritableTarget + 1),
                 ["contract version"] = data => SetFrozenContractVersion(data, 2),
                 ["geometry id"] = data => PointStarterAtAdditionalGeometry(data,
                     "compat.geometry.alternate", 1),
@@ -654,9 +656,11 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
 
         private static void SetCurrentTarget(SpatialLayoutCompatibilityProfilesData data, int target)
         {
-            data.StarterProfiles.Single(value => value.TargetSchemaVersion == 8)
+            data.StarterProfiles.Single(value =>
+                    value.TargetSchemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget)
                 .TargetSchemaVersion = target;
-            data.ContractSelections.Single(value => value.TargetSchemaVersion == 8)
+            data.ContractSelections.Single(value =>
+                    value.TargetSchemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget)
                 .TargetSchemaVersion = target;
         }
 
