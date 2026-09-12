@@ -8,6 +8,7 @@ using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
 using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
@@ -493,6 +494,241 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(service.UndoStructuralRenovation(root.Save).IsSuccess, Is.False);
             }
             finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void QaWalletFreshNativeSaveFillsClearsAndReopensWithoutLegacyPlacement()
+        {
+            var f = QaNative(); var service = Service(f, () => 0);
+            var go = new GameObject("QaWalletNative");
+            try
+            {
+                var root = QaRoot(go, f, service);
+                Assert.That(f.State.Authority.CreationKind, Is.EqualTo(CanonicalSpatialCreationKind.NativeCanonical));
+                Assert.That(root.Save.dungeonLayout.Slots, Is.Empty);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.Zero);
+                byte[] before = service.CanonicalSession.GetCurrentBytes();
+                root.SelectNextSlot();
+                Assert.That(root.TryPlaceSelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out _), Is.False);
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+
+                SaveData original = root.Save;
+                Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+                Assert.That(original.structureRuntime.ManaReserve, Is.Zero);
+                Assert.That(root.Save, Is.Not.SameAs(original));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(f.Economy.ManaCapacity));
+                Assert.That(root.ManaLine, Does.Contain(f.Economy.ManaCapacity.ToString("0.00")));
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.banner.qa_mana_filled", "")));
+                AssertOnlyQaManaChanged(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(f.Economy.ManaCapacity));
+
+                Assert.That(root.TrySetQaManaFromDevPanel(false), Is.True);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.Zero);
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.banner.qa_mana_cleared", "")));
+                AssertOnlyQaManaChanged(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+                Assert.That(f.FileSystem.Paths.Any(p => p.Contains(".canonical-write-")), Is.False);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [TestCase(0, 321)][TestCase(17, 321)][TestCase(444, 444)]
+        public void QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap(double initial, double expected)
+        {
+            var f = QaNative(initial); var c = Config(); c.ManaCapacity = 321;
+            Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
+            var service = Service(f, () => 0); byte[] before = f.Session.GetCurrentBytes();
+            var result = service.SetQaMana(f.Runtime, true);
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(initial));
+            Assert.That(result.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(expected));
+            AssertOnlyQaManaChanged(before, result.GetPersistedBytes());
+            f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(expected));
+        }
+
+        [TestCase(false)][TestCase(true)]
+        public void QaWalletFailurePreservesLiveDiskPublicationAndUndoThenSuccessfulRetryInvalidatesUndo(bool fill)
+        {
+            var f = R1(); var service = Service(f, () => 0);
+            f.Accept(service.ExecuteCanonicalMutation(f.Runtime, DetachedCanonicalMutationRequest.Move(Move(f))));
+            Assert.That(service.RenovationUndoRemainingSeconds, Is.EqualTo(f.Economy.UndoSeconds));
+            var go = new GameObject("QaWalletFailure");
+            try
+            {
+                var root = QaRoot(go, f, service); SaveData live = root.Save;
+                var session = service.CanonicalSession; byte[] before = session.GetCurrentBytes();
+                int publications = 0;
+                service.CanonicalRuntimePublished += _ => publications++;
+                f.FileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1);
+                Assert.That(root.TrySetQaManaFromDevPanel(fill), Is.False);
+                Assert.That(root.Save, Is.SameAs(live));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(990));
+                Assert.That(publications, Is.Zero);
+                Assert.That(service.CanonicalSession, Is.SameAs(session));
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                Assert.That(service.RenovationUndoRemainingSeconds, Is.EqualTo(f.Economy.UndoSeconds));
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason), "")));
+                Assert.That(root.BannerMessage, Does.Not.Contain("gd66.").And.Not.Contain("qa_mana"));
+
+                f.FileSystem.DisableFailure();
+                Assert.That(root.TrySetQaManaFromDevPanel(fill), Is.True);
+                Assert.That(publications, Is.EqualTo(1));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(fill ? f.Economy.ManaCapacity : 0));
+                Assert.That(service.RenovationUndoRemainingSeconds, Is.Zero);
+                Assert.That(service.UndoStructuralRenovation(root.Save).IsSuccess, Is.False);
+                AssertOnlyQaManaChanged(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(fill ? f.Economy.ManaCapacity : 0));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [TestCase(false)][TestCase(true)]
+        public void QaWalletKeepsPaidGeometryInvestmentContentsCustodyCountersHistoryAndExtensions(bool fill)
+        {
+            var f = Fixture.Create("\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
+                "\"OptionId\":\"placement.option.room.basic\",\"Revision\":1}],\"NextRevision\":2}," +
+                "\"qaExtension\":{\"evidence\":7}", "\"qaRootExtension\":[3,2,1]");
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            var construction = Build(f, x: 5, y: 2);
+            Assert.That(construction.IsValid, Is.True, string.Join(",", construction.ReasonCodes));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(construction)));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, f.State.Floors[0].Layout.Rooms.Single(r =>
+                    r.RoomInstanceId.Contains(".room.player.")).RoomInstanceId)));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId, f.State.Floors[0].Layout.Rooms.Single(r =>
+                    !r.RoomInstanceId.Contains(".room.player.")).RoomInstanceId)));
+            f.Runtime.totalTicks = 42; f.Runtime.runHistory.NextRunSequence = 7;
+            f.Runtime.runHistory.AppendOutcome(new RunSimulationService(f.Configuration).SimulateOnce(
+                f.Runtime.structureRuntime, 2, 6), 2);
+            var deletion = Delete(f);
+            Assert.That(deletion.IsValid, Is.True, string.Join(",", deletion.ReasonCodes));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion)));
+            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents, Is.Not.Empty);
+            Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.GreaterThan(0));
+            byte[] before = f.Session.GetCurrentBytes();
+            var service = Service(f, () => 0); var result = service.SetQaMana(f.Runtime, fill);
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            AssertOnlyQaManaChanged(before, result.GetPersistedBytes());
+            f.Reopen(); Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(7));
+            Assert.That(f.Runtime.runHistory.RecentOutcomes, Is.Not.Empty);
+            Assert.That(f.Runtime.totalTicks, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void QaWalletClearDoesNotChangeSpatialFingerprintAndRetainedCommitRechecksAffordability()
+        {
+            var f = R1(); var service = Service(f, () => 0); var preview = Build(f);
+            Assert.That(Price(f, preview).IsAffordable, Is.True);
+            f.Accept(service.SetQaMana(f.Runtime, false));
+            byte[] before = f.Session.GetCurrentBytes();
+            var result = service.ExecuteCanonicalMutation(f.Runtime, DetachedCanonicalMutationRequest.Construct(preview));
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason));
+            Assert.That(result.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
+        [TestCase("diagnostics")][TestCase("legacy")][TestCase("content")][TestCase("economy")]
+        public void QaWalletUnavailableAuthorityFailsClosedWithoutPublication(string missing)
+        {
+            var f = QaNative(); var service = Service(f, () => 0);
+            var go = new GameObject("QaWalletUnavailable");
+            try
+            {
+                var root = QaRoot(go, f, service); SaveData live = root.Save;
+                byte[] before = f.Session.GetCurrentBytes(); int publications = 0;
+                service.CanonicalRuntimePublished += _ => publications++;
+                if (missing == "diagnostics") typeof(GameRoot).GetProperty("DevPanelEnabled").SetValue(root, false);
+                if (missing == "legacy") typeof(GameRoot).GetProperty("Save").SetValue(root, new SaveData());
+                if (missing == "content") typeof(ContentService).GetProperty("ProductionSpatialContent").SetValue(root.Content, null);
+                if (missing == "economy") service.ConfigureStructuralEconomy(null);
+                Assert.That(root.TrySetQaManaFromDevPanel(true), Is.False);
+                Assert.That(live.structureRuntime.ManaReserve, Is.Zero);
+                Assert.That(publications, Is.Zero);
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                string reason = missing == "economy" ? StructuralEconomyService.InvalidReason : StructuralEditService.InvalidContextReason;
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(reason, "")));
+                Assert.That(root.BannerMessage, Does.Not.Contain(reason));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void QaWalletLocalizationResolvesAndExistingKpiAndLegacyPlacementRemainUnchanged()
+        {
+            var f = QaNative(); var service = Service(f, () => 0);
+            var go = new GameObject("QaWalletDiagnostics");
+            try
+            {
+                var root = QaRoot(go, f, service);
+                foreach (string key in new[] { "ui.dev.button.qa_mana_clear", "ui.dev.button.qa_mana_fill",
+                    "ui.banner.qa_mana_cleared", "ui.banner.qa_mana_filled" })
+                {
+                    string value = root.Content.GetString(key, "");
+                    Assert.That(value, Is.Not.Empty); Assert.That(value, Does.Not.Contain("qa_mana"));
+                }
+                byte[] before = f.Session.GetCurrentBytes();
+                typeof(GameRoot).GetProperty("Kpi").SetValue(root, new KpiService());
+                root.TrackManaGenerated(10);
+                Assert.That(root.Kpi.Snapshot().AverageManaPerTick, Is.EqualTo(10));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.Zero);
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+
+                var legacy = new SaveData { dungeonLayout = DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState.CreateEmpty(1, 1) };
+                typeof(GameRoot).GetProperty("Save").SetValue(root, legacy);
+                // Keep this legacy regression isolated from a canonical disk/session.
+                root.AttachSaveServiceForTests(null);
+                Assert.That(root.TryPlaceSelectedStructure(StructureSimulationPass.ManaGeneratorBasicId, out string placementKey), Is.True);
+                Assert.That(placementKey, Is.EqualTo("ui.banner.place_success"));
+                Assert.That(root.GetSelectedSlotStructureId(), Is.EqualTo(StructureSimulationPass.ManaGeneratorBasicId));
+                Assert.That(root.TryPlaceSelectedStructure(StructureSimulationPass.HeatScrubberBasicId, out placementKey), Is.False);
+                Assert.That(placementKey, Is.EqualTo("ui.banner.place_failed"));
+                Assert.That(legacy.structureRuntime.ManaReserve, Is.Zero);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        private static Fixture QaNative(double mana = 0)
+        {
+            var f = Fixture.Create(null);
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var native = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem,
+                new SaveData { createdUtcUnix = 1, lastSavedUtcUnix = 1,
+                    dungeonLayout = new DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState(),
+                    structureRuntime = new StructureRuntimeState { ManaReserve = mana } },
+                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile);
+            Assert.That(native.IsSuccess, Is.True, native.Reason);
+            f.Session = native.Session; f.State = native.Validation.State; f.Runtime = native.RuntimeProjection;
+            f.Reopen(); return f;
+        }
+
+        private static GameRoot QaRoot(GameObject go, Fixture f, SaveService service)
+        {
+            var root = go.AddComponent<GameRoot>(); var content = new ContentService();
+            const string dir = "Assets/_Project/Data/Bootstrap/";
+            var assets = new[] { "content_bootstrap", "build_config", "schema_versions", "content_manifest",
+                "dev_commands", "string_table_en", "heat_runtime" }.Select(name =>
+                UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(dir + name + ".json")).ToArray();
+            content.LoadAll(assets[0], assets[1], assets[2], assets[3], assets[4], assets[5], assets[6],
+                new SimpleLogger(false), out string warning);
+            Assert.That(warning, Is.Empty);
+            typeof(ContentService).GetProperty("ProductionSpatialContent").SetValue(content, f.Production);
+            typeof(GameRoot).GetProperty("Content").SetValue(root, content);
+            typeof(GameRoot).GetProperty("Save").SetValue(root, f.Runtime);
+            typeof(GameRoot).GetProperty("DevPanelEnabled").SetValue(root, true);
+            root.AttachSaveServiceForTests(service); return root;
+        }
+
+        private static void AssertOnlyQaManaChanged(byte[] before, byte[] after)
+        {
+            var wallet = new System.Text.RegularExpressions.Regex("\"ManaReserve\":[^,}]+");
+            string a = Encoding.UTF8.GetString(before), b = Encoding.UTF8.GetString(after);
+            Assert.That(wallet.Matches(a).Count, Is.EqualTo(1));
+            Assert.That(wallet.Matches(b).Count, Is.EqualTo(1));
+            Assert.That(wallet.Replace(b, "<wallet>"), Is.EqualTo(wallet.Replace(a, "<wallet>")));
         }
 
         private static SaveService Service(Fixture f, Func<double> clock)

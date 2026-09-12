@@ -3179,6 +3179,22 @@
     {
       "key": "ui.structural.economy.undo.success",
       "text": "Renovation undone. Its exact mana cost has been returned."
+    },
+    {
+      "key": "ui.dev.button.qa_mana_clear",
+      "text": "QA Mana: Clear"
+    },
+    {
+      "key": "ui.dev.button.qa_mana_fill",
+      "text": "QA Mana: Fill to Capacity"
+    },
+    {
+      "key": "ui.banner.qa_mana_cleared",
+      "text": "QA mana cleared and saved."
+    },
+    {
+      "key": "ui.banner.qa_mana_filled",
+      "text": "QA mana filled to capacity and saved. Any existing balance above capacity was preserved."
     }
   ]
 }

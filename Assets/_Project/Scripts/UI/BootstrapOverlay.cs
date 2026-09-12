@@ -1533,6 +1533,16 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(_root.Content.GetString("ui.banner.simulated_mana_kpi", "ui.banner.simulated_mana_kpi"));
             }
 
+            if (GUILayout.Button(GetLocalizedString("ui.dev.button.qa_mana_clear", string.Empty)))
+            {
+                _root.TrySetQaManaFromDevPanel(false);
+            }
+
+            if (GUILayout.Button(GetLocalizedString("ui.dev.button.qa_mana_fill", string.Empty)))
+            {
+                _root.TrySetQaManaFromDevPanel(true);
+            }
+
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_heat", "ui.dev.button.sim_heat")))
             {
                 _root.ApplyHeatDelta(5d);

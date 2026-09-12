@@ -36,6 +36,22 @@ namespace DungeonBuilder.M0
             if (monotonicSeconds != null) _monotonicSeconds = monotonicSeconds; _undo = null;
         }
         public void InvalidateRenovationUndo() => _undo = null;
+        internal DetachedCanonicalWriteResult SetQaMana(SaveData current, bool fillToCapacity)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false,
+                    DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
+                    null, null, null, null);
+            var result = CreateWriteAuthority().SaveQaMana(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, fillToCapacity);
+            if (result.IsSuccess)
+            {
+                _undo = null;
+                _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
         public double RenovationUndoRemainingSeconds
         {
             get

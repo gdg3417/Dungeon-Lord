@@ -166,6 +166,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
         }
 
+        internal DetachedCanonicalWriteResult SaveQaMana(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, bool fillToCapacity)
+        {
+            if (economy == null) return Failure(StructuralEconomyService.InvalidReason);
+            if (fileSystem == null || context == null || limits == null || production == null ||
+                compatibility == null || configuration == null || currentRuntime?.structureRuntime == null)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            var owned = ValidateSession(session);
+            if (owned?.IsValid != true || !owned.CurrentTargetValidated ||
+                !StructuralEconomySnapshot.Nonnegative(currentRuntime.structureRuntime.ManaReserve))
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            double mana = fillToCapacity
+                ? Math.Max(currentRuntime.structureRuntime.ManaReserve, economy.ManaCapacity) : 0;
+            var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, mana, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            return PrepareAndPersist(activePath, fileSystem, session,
+                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false);
+        }
+
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             DetachedCanonicalSaveSessionResult prepared, bool roomEffect)
