@@ -1021,6 +1021,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveService service = Service(fixture, fileSystem, filename);
             SaveData empty = service.LoadOrCreate("gd66-live", out string banner);
             Assert.That(empty, Is.Not.Null, banner);
+            empty.structureRuntime.ManaReserve = 1000; // Test-funded Phase 3 GameRoot regression fixture.
             DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(empty,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                     MvpDungeonPlacementIds.BasicRoomOptionId));
@@ -1105,6 +1106,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(RequiredAsset(
                 StructuralContentRemovalPolicyAuthority.ProductionPath).bytes, out var removalPolicy), Is.True);
             service.ConfigureStructuralRemovalPolicy(removalPolicy);
+            service.ConfigureStructuralEconomy(PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits));
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
                 fileSystem, Path.GetFullPath(path)));
