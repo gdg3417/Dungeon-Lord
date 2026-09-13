@@ -1784,6 +1784,14 @@ namespace DungeonBuilder.M0
                     labelHeight, buttonHeight);
             if (!string.IsNullOrEmpty(_structuralFeedback))
                 GUILayout.Label(_structuralFeedback, wrappedLabel);
+            if (CanonicalMvpRouteProjection.IsCanonical(_root.Save))
+            {
+                GUILayout.Label(ReturnedContentSelectionText, wrappedLabel);
+                if (GUILayout.Button(GetLocalizedString("ui.returned_content.next"), compactButton, buttonHeight))
+                    CycleReturnedContent();
+                if (GUILayout.Button(GetLocalizedString("ui.returned_content.redeploy"), compactButton, buttonHeight))
+                    RedeploySelectedReturnedContent();
+            }
             if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
@@ -1881,6 +1889,17 @@ namespace DungeonBuilder.M0
             }
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        public string ReturnedContentSelectionText => _root?.ReturnedContentSelectionText ?? string.Empty;
+
+        public void CycleReturnedContent() => _root?.CycleReturnedContent();
+
+        public bool RedeploySelectedReturnedContent()
+        {
+            bool success = _root != null && _root.TryRedeploySelectedReturnedContent();
+            _structuralFeedback = _root?.BannerMessage ?? string.Empty;
+            return success;
         }
 
         private void DrawStructuralConstructionControls(GUIStyle label, GUIStyle button,
