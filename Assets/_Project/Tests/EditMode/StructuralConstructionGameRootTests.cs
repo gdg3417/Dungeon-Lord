@@ -56,7 +56,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
                 if (online && !pending)
                 {
-                    Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.banner.place_success", "")));
+                    string feedback = overlay.MvpStructurePlacementFeedback;
+                    Assert.That(feedback, Is.Not.Empty);
+                    Assert.That(feedback, Is.EqualTo(MvpStructurePlacementFeedbackPresenter.BuildPlacementFeedbackText(
+                        null, new MvpDungeonPlacementEntry(categoryId, optionId, 0),
+                        (key, fallback) => root.Content.GetString(key, fallback))));
+                    Assert.That(root.BannerMessage, Is.EqualTo(feedback));
+                    Assert.That(root.BannerMessage, Is.Not.EqualTo(root.Content.GetString("gate.error.offline_required", "")));
+                    Assert.That(root.BannerMessage, Is.Not.EqualTo(root.Content.GetString("gate.error.verification_pending", "")));
+                    Assert.That(feedback, Does.Not.Contain("placement."));
+                    Assert.That(feedback, Does.Not.Contain("ui."));
                     Assert.That(fixture.Acquisition.TryPrice(categoryId, optionId, out double price), Is.True);
                     Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana - price));
                     var assignment = root.Save.spatialFloors[0].RoomContents.Assignments.Single();
