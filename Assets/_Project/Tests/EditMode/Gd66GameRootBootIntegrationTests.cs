@@ -1107,6 +1107,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 StructuralContentRemovalPolicyAuthority.ProductionPath).bytes, out var removalPolicy), Is.True);
             service.ConfigureStructuralRemovalPolicy(removalPolicy);
             service.ConfigureStructuralEconomy(PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits));
+            service.ConfigureContentAcquisitionEconomy(PhaseFourTestSupport.Acquisition(
+                PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits), fixture.Limits, 1000)); // Test-funded structural regression fixture.
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
                 fileSystem, Path.GetFullPath(path)));

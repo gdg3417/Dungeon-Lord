@@ -1,0 +1,13 @@
+{
+    "StartingMana": 40,
+    "Prices": [
+        { "OptionId": "placement.option.loot_node.basic", "CategoryId": "placement.category.loot_node", "Mana": 15 },
+        { "OptionId": "placement.option.loot_node.glittering_hoard", "CategoryId": "placement.category.loot_node", "Mana": 25 },
+        { "OptionId": "placement.option.loot_node.hidden_cache", "CategoryId": "placement.category.loot_node", "Mana": 10 },
+        { "OptionId": "placement.option.monster.goblin", "CategoryId": "placement.category.monster", "Mana": 20 },
+        { "OptionId": "placement.option.monster.skeleton", "CategoryId": "placement.category.monster", "Mana": 25 },
+        { "OptionId": "placement.option.trap.chilling_sigil", "CategoryId": "placement.category.trap", "Mana": 20 },
+        { "OptionId": "placement.option.trap.snare", "CategoryId": "placement.category.trap", "Mana": 15 },
+        { "OptionId": "placement.option.trap.spike", "CategoryId": "placement.category.trap", "Mana": 20 }
+    ]
+}

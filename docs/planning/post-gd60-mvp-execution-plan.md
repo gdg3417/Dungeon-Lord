@@ -1,7 +1,7 @@
 # Post-GD60 MVP Execution Plan
 
 
-**Current status (2026-09-12):** Phase 3 is closed at merged PR #200. Phase 4A mana-backed structural editing is merged and qualified through PR #201 / `eca6db1ec984fd476d86c4e9af1a55ecd6df3d20`. Explicit returned-content redeployment is the immediate prerequisite being implemented before acquisition pricing. The [economy/save contract](phase-4a-structural-economy.md) records provisional structural tuning, schema 9 investment accounting and deferred work. Acquisition prices and starting mana await approved exact tuning; canonical online mana earning is a later dependency. Offline mana remains deferred until a meaningful canonical applicable production-rate authority exists. Earlier status blockers below are historical and superseded.
+**Current status (2026-09-13):** Phase 3 is closed through merged PR #200. Phase 4A structural economy (PR #201) and returned-content redeployment (PR #202 / `c1c7b2ceb8dcc628d6e0030b9996ffc28498c3fb`) are merged and qualified. This packet adds configuration-owned tunable MVP acquisition prices and fresh-save starting mana; schema remains 9. Unity qualification of this packet is pending. Structural prices remain unchanged. Canonical online mana earning remains later; offline mana follows a meaningful canonical online production authority. Earlier status blockers below are historical and superseded.
 **Historical Phase 3 status (2026-08-27), superseded by PR #200:** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
@@ -9,12 +9,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 4A structural economy merged and qualified at PR #201; returned-content redeployment is the immediate prerequisite** |
+| Status | **PRs #201 and #202 merged/qualified; acquisition prices and starting mana are the current packet, pending Unity qualification** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main at merged PR #201 `eca6db1ec984fd476d86c4e9af1a55ecd6df3d20` |
+| Current implementation baseline | Main at merged PR #202 `c1c7b2ceb8dcc628d6e0030b9996ffc28498c3fb` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-09-12 |
+| Last reconciled | 2026-09-13 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -44,13 +44,13 @@ Merged history establishes the following at prototype scope:
 - **Layout:** The canonical spatial graph owns footprints, physical corridors/direct doorways, fixed endpoints, occupied-tile capacity, and route/content state. Phase 3 construction, movement, replacement and leaf deletion closed at PR #200. Additional floors and branches remain deferred.
 - **Construction:** Phase 3 spatial editing and Phase 4A configured mana prices, affordability, atomic spend/refund, historical investment and session renovation undo are merged and qualified through PR #201.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
-- **Economy/offline:** structural spending/refunds are merged; owned returned-content redeployment is the immediate prerequisite. Acquisition prices and starting mana await approved exact tuning. Canonical online mana earning is a later dependency; offline mana awaits a meaningful canonical applicable production-rate authority. Floor expansion remains deferred.
+- **Economy/offline:** structural spending/refunds and free owned-content redeployment are merged/qualified through PRs #201 and #202. This packet adds approved tunable acquisition prices and StartingMana 40 through `Assets/_Project/Resources/content_acquisition_economy.json`; Unity qualification is pending. Canonical online mana earning is a later dependency; offline mana awaits a meaningful canonical applicable production-rate authority. Floor expansion remains deferred.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** The PR #201 baseline writes schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Returned-content redeployment needs no schema change or migration. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
+- **Saves:** The PR #202 baseline writes schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Returned-content redeployment needs no schema change or migration. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
 
 ### Missing MVP capabilities
 
-After merged and qualified Phase 4A, remaining MVP capabilities include returned-content redeployment and subsequent acquisition tuning; canonical online mana earning and then offline mana; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
+After merged and qualified Phase 4A, remaining MVP capabilities include acquisition qualification and subsequent balance review; canonical online mana earning and then offline mana; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
 
 ### Deferred capabilities
 
@@ -136,7 +136,7 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 
 **Merged and qualified: Phase 4A structural economy through PR #201.** The [Phase 4A contract](phase-4a-structural-economy.md) owns implementation details and the exact provisional values: Basic/Rectangle 100 mana, Large Chamber 200, physical corridor 5 per tile, Direct Doorway zero additional cost, movement/replacement fee factor 10%, historical refund 75% rounded down, capacity 1000 and session undo 30 seconds. These are tuning seeds, not final balance approval. Basic Room targets 5–10 minutes of productive early progression, initially 7.5 minutes; runtime prices are authored mana amounts.
 
-**Immediate prerequisite:** explicit redeployment moves owned returned custody into the selected compatible canonical room while preserving AssignmentId; ordinary placement remains a separate acquisition intent. **Approved but deferred:** either basic monster + basic loot or basic trap + basic loot should cost 25%–40% of a Basic Room; a future starting grant covers either package without also funding an immediate second room. Acquisition prices and starting mana await approved exact tuning. Canonical online mana earning is a later dependency. Offline mana is deferred until a meaningful canonical applicable production-rate authority exists. Active Architecture/floor/theme modifiers and active expansion pricing remain deferred. The combined Phase 4 exit criteria below apply after those separately scoped packets, not to Phase 4A alone.
+**Merged and qualified PR #202:** explicit redeployment reuses owned returned custody while preserving identity at zero mana cost. **Current acquisition packet:** configuration-owned prices are Skeleton 25, Goblin 20, Spike 20, Snare 15, Chilling Sigil 20, Basic Loot 15, Hidden Cache 10 and Glittering Hoard 25 mana; fresh native StartingMana is 40. Ordinary NEW acquisition atomically spends mana with fresh ownership and retains returned custody. Existing saves receive no grant, structural investment/prices are unchanged, and schema remains 9. Exact authored data and transaction semantics are recorded in the [Phase 4A contract](phase-4a-structural-economy.md). Canonical online mana earning remains later; offline mana follows meaningful canonical online production authority. Active Architecture/floor/theme modifiers and expansion pricing remain deferred. Combined Phase 4 exit criteria still require later packets.
 
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
@@ -237,7 +237,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | GD65B production records, pipeline implementation, tests, and evidence | GD65B before GD66 | Implement the fully approved GD65B0 contract; QA/Data/Engineering/primary-developer evidence at `docs/testing/evidence/gd65b/`; never use runtime constants or test defaults as production values |
 | Buildable/unavailable-tile unlock model, expansion/modifier behavior, costs and modifiers | Later spatial progression/construction packets | Design/Data; reviewed configured content and formulas, never runtime constants |
 | Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
-| Content acquisition prices and starting mana grant | After explicit returned-content redeployment | Design/Data; approved exact tuning; structural investment/refund contract is merged through PR #201 |
+| Content acquisition prices and starting mana | Current packet after merged/qualified PR #202 | Approved tunable config: eight prices and StartingMana 40; Unity qualification pending; structural prices unchanged |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
 | Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
@@ -246,7 +246,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 ## 9. Current dependency packet
 
-Phase 4A structural economy is merged and qualified through PR #201 at `eca6db1ec984fd476d86c4e9af1a55ecd6df3d20`; schema 9 is writable. The immediate packet implements explicit owned returned-content redeployment without acquisition pricing, starting mana, mana earning or offline accumulation. Acquisition and starting-grant tuning remain approval gates. Canonical online mana earning comes later; offline mana waits for a meaningful canonical applicable production-rate authority.
+Phase 3 is closed through merged PR #200. Phase 4A structural economy (PR #201) and returned-content redeployment (PR #202 / `c1c7b2ceb8dcc628d6e0030b9996ffc28498c3fb`) are merged and qualified. This packet adds configuration-owned tunable MVP acquisition prices and fresh-save starting mana; schema remains 9. Unity qualification of this packet is pending. Structural prices remain unchanged. Canonical online mana earning remains later; offline mana follows a meaningful canonical online production authority.
 
 ### Historical GD66 closeout status, superseded by merged PRs #195–#201
 

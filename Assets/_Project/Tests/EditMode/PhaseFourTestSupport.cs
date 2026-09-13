@@ -21,6 +21,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "Assets/_Project/Resources/structural_economy.json"), production.Catalog, limits, out var config), Is.True);
             return config;
         }
+        internal static ContentAcquisitionEconomySnapshot Acquisition(StructuralEconomySnapshot economy,
+            CanonicalSpatialSerializationLimits limits, double? testStartingMana = null)
+        {
+            byte[] bytes = File.ReadAllBytes("Assets/_Project/Resources/content_acquisition_economy.json");
+            if (testStartingMana.HasValue)
+            {
+                // Explicit fake starting balance for existing QA-wallet fixtures; production is not overridden.
+                var fake = UnityEngine.JsonUtility.FromJson<ContentAcquisitionEconomyConfiguration>(System.Text.Encoding.UTF8.GetString(bytes));
+                fake.StartingMana = testStartingMana.Value;
+                Assert.That(ContentAcquisitionEconomySnapshot.TryCreate(fake, economy, limits, out var injected), Is.True);
+                return injected;
+            }
+            Assert.That(ContentAcquisitionEconomySnapshot.TryParse(bytes, economy, limits, out var config), Is.True);
+            return config;
+        }
     }
 }
 #endif

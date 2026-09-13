@@ -267,6 +267,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
                 service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
                     Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)));
+                service.ConfigureContentAcquisitionEconomy(f.Acquisition);
                 typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
                 foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
                     Tuple.Create("_validationContext", (object)f.Context) })

@@ -1762,6 +1762,10 @@ namespace DungeonBuilder.M0
             GUILayout.Label(labels.RunPlanPreviewText, wrappedLabel);
             GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), wrappedLabel);
             GUILayout.Label(GetSelectedMvpRoomCapacityText(), wrappedLabel);
+            if (CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                _selectedMvpPlacementCategoryId != MvpDungeonPlacementIds.RoomCategoryId)
+                GUILayout.Label(_root.SaveService.PresentContentAcquisition(_selectedMvpPlacementCategoryId,
+                    _selectedMvpPlacementOptionId, _root.Save, key => GetLocalizedString(key)), wrappedLabel);
             string selectedPlacementFitText = GetSelectedMvpPlacementFitText();
             if (!string.IsNullOrWhiteSpace(selectedPlacementFitText))
             {

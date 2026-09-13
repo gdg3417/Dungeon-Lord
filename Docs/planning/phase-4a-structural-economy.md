@@ -1,6 +1,6 @@
 # Phase 4A structural economy contract
 
-Phase 4A structural economy is merged and qualified through PR #201 at `eca6db1ec984fd476d86c4e9af1a55ecd6df3d20`. This is the exact baseline for the immediate returned-content redeployment prerequisite.
+Phase 3 is closed through merged PR #200. Phase 4A structural economy (PR #201) and returned-content redeployment (PR #202 / `c1c7b2ceb8dcc628d6e0030b9996ffc28498c3fb`) are merged and qualified. This packet adds configuration-owned tunable MVP acquisition prices and fresh-save starting mana; schema remains 9. Unity qualification of this packet is pending. Structural prices remain unchanged. Canonical online mana earning remains later; offline mana follows a meaningful canonical online production authority.
 
 ## Authoring and formulas
 
@@ -53,8 +53,22 @@ The F1 Dev Panel provides localized QA Mana Clear and Fill to Capacity actions o
 
 Bootstrap composes the economy preview around the existing pure spatial preview. Localized text shows base/final cost or removed historical basis/nominal and credited refund, current/resulting mana, affordability, insufficient mana and undo availability. Spatial capacity and consequence descriptions remain alongside this information. Raw IDs and internal reasons are not displayed as fallback copy.
 
-Approved follow-up: monster/trap/loot acquisition should be substantially cheaper than a Basic Room; a basic monster + basic loot or basic trap + basic loot starter package targets 25%–40% of Basic Room price. A future starting grant must cover either package without also funding an immediate second Basic Room. Implement only after distinguishing new acquisitions from redeployment of already-owned returned content; placement must not charge ownership twice. No content prices or starting grant are implemented here.
+The approved acquisition packet uses `Assets/_Project/Resources/content_acquisition_economy.json` as its sole production price/starting-mana authority, loaded by GameRoot into an immutable snapshot. Strict bounded validation requires exactly the eight non-room MVP option IDs with matching categories, finite nonnegative prices, and finite nonnegative StartingMana within the existing structural ManaCapacity. Missing/malformed data fails closed without a fallback price. Prices are tunable data, independent of structural investment.
 
-The immediate prerequisite adds explicit owned-content redeployment through the canonical writer: the request identifies returned custody by durable AssignmentId and the destination by RoomInstanceId. Category and option come from persisted custody. The identity survives; the stored sequence survives unless it collides in the destination room/category, in which case the floor's existing NextSequence is used. NextSequence advances past any inserted high sequence. Unrelated assignments are never renumbered. Ordinary placement remains a separate new-acquisition intent and does not consume custody. Bootstrap exposes canonical-order returned-item selection and redeployment into the selected room with localized feedback. Schema 9, mana and structural investment remain unchanged; current removal policy is not retroactive ownership authority.
+| Option ID | Mana |
+|---|---:|
+| placement.option.monster.skeleton | 25 |
+| placement.option.monster.goblin | 20 |
+| placement.option.trap.spike | 20 |
+| placement.option.trap.snare | 15 |
+| placement.option.trap.chilling_sigil | 20 |
+| placement.option.loot_node.basic | 15 |
+| placement.option.loot_node.hidden_cache | 10 |
+| placement.option.loot_node.glittering_hoard | 25 |
+| Fresh native StartingMana | 40 |
 
-Acquisition prices and starting mana remain deferred pending approved exact tuning. Canonical online mana earning is a later dependency. Offline mana remains deferred until a meaningful canonical applicable production-rate authority exists; Spec 29's no-time-cap and storage-clamp policy remains intact. Active Architecture/floor/theme/research modifiers, floor expansion pricing, upkeep, Floor 2, branches, additional content and a production editor remain outside this packet. Redeployment requires its own automated qualification and independent manual Unity review; no standalone build is claimed here.
+Ordinary player NEW placement validates its target/content/capacity, resolves the configured price, and rechecks the current authoritative ManaReserve before preparing a complete-save replacement containing both deduction and fresh assignment. Exact balance succeeds; insufficient mana, no-op, invalid placement, stale session or persistence failure charges nothing. The current-session check also rejects an old purchase whose candidate would match already-durable bytes. Atomic persistence/readback precede runtime/session publication. Compatibility/migration reconstruction remains outside this player purchase path. Native creation alone initializes StartingMana; existing schema-9 saves preserve their balance (including 0 and 37) with no grant or migration. Bootstrap shows localized acquisition price, balance, affordability and failure feedback. Focused tests are registered for both discovery routes; static review precedes Unity qualification.
+
+Merged and qualified PR #202 adds explicit owned-content redeployment through the canonical writer: the request identifies returned custody by durable AssignmentId and the destination by RoomInstanceId. Category and option come from persisted custody. The identity survives; the stored sequence survives unless it collides in the destination room/category, in which case the floor's existing NextSequence is used. NextSequence advances past any inserted high sequence. Unrelated assignments are never renumbered. Ordinary placement remains a separate new-acquisition intent and does not consume custody. Bootstrap exposes canonical-order returned-item selection and redeployment into the selected room with localized feedback. Schema 9, mana and structural investment remain unchanged; current removal policy is not retroactive ownership authority.
+
+Acquisition pricing and starting mana are implemented in this packet with the approved authored values above; qualification remains pending. Canonical online mana earning is a later dependency. Offline mana remains deferred until a meaningful canonical applicable production-rate authority exists; Spec 29's no-time-cap and storage-clamp policy remains intact. Active Architecture/floor/theme/research modifiers, floor expansion pricing, upkeep, Floor 2, branches, additional content and a production editor remain outside this packet. PR #202 automated, manual Editor and Windows Development Build qualification is complete; this acquisition packet claims no Unity test run or build.

@@ -4,6 +4,22 @@
   "language": "en",
   "entries": [
     {
+      "key": "content.acquisition.configuration_invalid",
+      "text": "Content acquisition prices are unavailable."
+    },
+    {
+      "key": "content.acquisition.insufficient_mana",
+      "text": "Not enough mana to acquire this content."
+    },
+    {
+      "key": "ui.content_acquisition.cost",
+      "text": "New acquisition: {0:0.##} mana. Current mana: {1:0.##}."
+    },
+    {
+      "key": "ui.content_acquisition.affordable",
+      "text": "Enough mana to acquire this content."
+    },
+    {
       "key": "content.redeployment.returned_item_missing",
       "text": "That item is no longer in returned custody."
     },
@@ -25,7 +41,7 @@
     },
     {
       "key": "ui.returned_content.redeploy",
-      "text": "Redeploy into selected room"
+      "text": "Reuse owned content in selected room (free)"
     },
     {
       "key": "ui.returned_content.success",

@@ -947,7 +947,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 lastSavedUtcUnix = 1 };
 
             NativeCanonicalSaveResult result = NativeCanonicalSaveCreator.Create(path, fileSystem,
-                recognized, source.Compatibility, source.Production, source.LegacyBytes, profile);
+                recognized, source.Compatibility, source.Production, source.LegacyBytes, profile,
+                PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Validation.State.Authority.CreationKind,
@@ -1450,11 +1451,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DetachedCanonicalSpatialSaveState State;
             internal StructuralContentRemovalPolicySnapshot RemovalPolicy;
             internal DungeonBuilder.M0.Economy.StructuralEconomySnapshot Economy;
+            internal DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot Acquisition;
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
-                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy);
+                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy, acquisition: Acquisition);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
                 SaveSpatialMigrationLimitsProfile workloadProfile = null)
@@ -1504,7 +1506,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
-                    Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits) };
+                    Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
+                    Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits) };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>
@@ -1553,7 +1556,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 return new Fixture { Production = Production, Compatibility = Compatibility,
                     Configuration = Configuration, Profile = Profile, Context = Context,
                     Session = opened.Session, State = validation.State, Runtime = runtime,
-                    FileSystem = fs, ActivePath = path, Economy = Economy, RemovalPolicy = RemovalPolicy };
+                    FileSystem = fs, ActivePath = path, Economy = Economy, RemovalPolicy = RemovalPolicy, Acquisition = Acquisition };
             }
         }
     }
