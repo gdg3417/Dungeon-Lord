@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using DungeonBuilder.M0.Economy;
 
 namespace DungeonBuilder.M0
 {
@@ -17,6 +18,67 @@ namespace DungeonBuilder.M0
         private SaveSpatialMigrationLimitsProfile _limits;
         private ProductionSpatialContentSnapshot _production;
         private StructuralContentRemovalPolicySnapshot _removalPolicy;
+        private StructuralEconomySnapshot _economy;
+        private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
+        private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
+        private RenovationUndo _undo;
+        private sealed class RenovationUndo
+        {
+            internal DetachedCanonicalSpatialSaveState Previous;
+            internal StructuralInvestmentRecord[] Investment;
+            internal string Fingerprint;
+            internal double Paid, Started;
+        }
+        public void ConfigureStructuralEconomy(StructuralEconomySnapshot economy, Func<double> monotonicSeconds = null,
+            IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            _economy = economy; _economyModifiers = modifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
+            if (monotonicSeconds != null) _monotonicSeconds = monotonicSeconds; _undo = null;
+        }
+        public void InvalidateRenovationUndo() => _undo = null;
+        internal DetachedCanonicalWriteResult SetQaMana(SaveData current, bool fillToCapacity)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false,
+                    DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
+                    null, null, null, null);
+            var result = CreateWriteAuthority().SaveQaMana(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, fillToCapacity);
+            if (result.IsSuccess)
+            {
+                _undo = null;
+                _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
+        public double RenovationUndoRemainingSeconds
+        {
+            get
+            {
+                if (_undo == null || _economy == null) return 0;
+                double elapsed = _monotonicSeconds() - _undo.Started;
+                return StructuralEconomySnapshot.Nonnegative(elapsed) ? Math.Max(0, _economy.UndoSeconds - elapsed) : 0;
+            }
+        }
+        public StructuralEconomyPreview PreviewStructuralEconomy(StructuralEditPreview spatial, SaveData current)
+        {
+            var owned = _canonicalSession == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                _canonicalSession.GetCurrentBytes(), _validationContext);
+            return StructuralEconomyService.Preview(spatial, owned?.State, owned?.Investment,
+                current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
+        }
+        public DetachedCanonicalWriteResult UndoStructuralRenovation(SaveData current)
+        {
+            if (RenovationUndoRemainingSeconds <= 0)
+            { _undo = null; return new DetachedCanonicalWriteResult(false, StructuralEconomyService.UndoUnavailableReason,
+                false, false, null, null, null, null); }
+            var result = CreateWriteAuthority().UndoRenovation(SavePath, _canonicalFileSystem, _canonicalSession,
+                current, _undo.Previous, _undo.Investment, _undo.Fingerprint, _undo.Paid);
+            if (result.IsSuccess)
+            { _undo = null; _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
+            return result;
+        }
         private SpatialLayoutCompatibilitySnapshot _compatibility;
         private byte[] _legacyConfiguration;
         private RunSimulationConfig _legacyGameplayConfiguration;
@@ -91,6 +153,7 @@ namespace DungeonBuilder.M0
 
         public SaveData LoadOrCreate(string contentVersion, out string banner)
         {
+            _undo = null;
             banner = string.Empty;
 
             // Unconfigured instances are retained only for schema<=6 test/repair compatibility.
@@ -282,10 +345,21 @@ namespace DungeonBuilder.M0
                 return new DetachedCanonicalWriteResult(false,
                     DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
                     null, null, null, null);
+            var previous = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
+            double beforeMana = current?.structureRuntime?.ManaReserve ?? double.NaN;
             DetachedCanonicalWriteResult result = CreateWriteAuthority().Execute(SavePath,
                 _canonicalFileSystem, _canonicalSession, current, request);
             if (result.IsSuccess)
-            { _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
+            {
+                _undo = null;
+                if (_economy != null && (request.Kind == DetachedCanonicalMutationKind.StructuralMovement ||
+                    request.Kind == DetachedCanonicalMutationKind.StructuralReplacement) &&
+                    StructuralEditService.TryFingerprint(result.Validation.State, _limits.Canonical, out string fingerprint))
+                    _undo = new RenovationUndo { Previous = previous.State, Investment = previous.Investment,
+                        Fingerprint = fingerprint, Paid = beforeMana - result.RuntimeProjection.structureRuntime.ManaReserve,
+                        Started = _monotonicSeconds() };
+                _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
             return result;
         }
 
@@ -348,7 +422,7 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
-                _validationContext, _limits, _removalPolicy);
+                _validationContext, _limits, _removalPolicy, _economy, _economyModifiers);
 
         private bool HasOwnedRecoveryEvidence()
         {

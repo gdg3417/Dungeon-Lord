@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class ProductionSpatialContentLoadingTests
+    public class ProductionSpatialContentLoadingTests
     {
         private const string Root = "Assets/_Project/Data/Production/DungeonSpatial/";
         private TextAsset manifest;
@@ -527,7 +527,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
                 Is.Not.EqualTo("mutated"));
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(8));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(9));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
                 .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
 

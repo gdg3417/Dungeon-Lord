@@ -321,7 +321,7 @@ namespace DungeonBuilder.M0
                         string.Format(CultureInfo.InvariantCulture, "({0},{1})", tile.X, tile.Y)))));
             if (preview.Consequences.Any(c => c.Kind == StructuralChangeKind.FixedStructureMoved && !c.From.Equals(c.To)))
                 lines.Add(GetLocalizedString("ui.structural.deletion.terminal_moved"));
-            return string.Join("\n", lines);
+            return string.Join("\n", lines) + "\n" + BuildEconomyPresentation(preview);
         }
 
         private string LocalizePlacementOption(string optionId) => GetLocalizedString(
@@ -388,7 +388,7 @@ namespace DungeonBuilder.M0
                 GetLocalizedString("ui.structural.renovation.floor_space.format"),
                 preview.PreviousUsedFloorSpace, preview.ResultingUsedFloorSpace,
                 preview.ResultingRemainingFloorSpace));
-            return string.Join("\n", lines);
+            return string.Join("\n", lines) + "\n" + BuildEconomyPresentation(preview);
         }
 
         private string ConnectionKindDisplay(FloorRouteConnectionKind kind) => GetLocalizedString(
@@ -479,8 +479,11 @@ namespace DungeonBuilder.M0
                     string.Join(" ", preview.IncomingConnectionTiles.OrderBy(value => value)
                         .Select(value => string.Format(CultureInfo.InvariantCulture,
                             "({0},{1})", value.X, value.Y))));
-            return summary;
+            return summary + "\n" + BuildEconomyPresentation(preview);
         }
+
+        private string BuildEconomyPresentation(StructuralEditPreview preview) => StructuralEconomyPresenter.Present(
+            _root?.SaveService?.PreviewStructuralEconomy(preview, _root.Save), key => GetLocalizedString(key));
 
         private string LocalizeStructuralReason(string reason) => GetLocalizedString(
             string.IsNullOrEmpty(reason) ? StructuralEditService.InvalidContextReason : reason,
@@ -1530,6 +1533,16 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(_root.Content.GetString("ui.banner.simulated_mana_kpi", "ui.banner.simulated_mana_kpi"));
             }
 
+            if (GUILayout.Button(GetLocalizedString("ui.dev.button.qa_mana_clear", string.Empty)))
+            {
+                _root.TrySetQaManaFromDevPanel(false);
+            }
+
+            if (GUILayout.Button(GetLocalizedString("ui.dev.button.qa_mana_fill", string.Empty)))
+            {
+                _root.TrySetQaManaFromDevPanel(true);
+            }
+
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_heat", "ui.dev.button.sim_heat")))
             {
                 _root.ApplyHeatDelta(5d);
@@ -1955,6 +1968,19 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(GetLocalizedString("ui.structural.deletion.commit.action"), button, buttonHeight))
                 CommitStructuralDeletion();
             GUI.enabled = enabled;
+            double remaining = _root.SaveService?.RenovationUndoRemainingSeconds ?? 0;
+            if (remaining > 0)
+            {
+                GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.structural.economy.undo.remaining"), Math.Ceiling(remaining)), label);
+                if (GUILayout.Button(GetLocalizedString("ui.structural.economy.undo.action"), button, buttonHeight))
+                {
+                    var undone = _root.SaveService.UndoStructuralRenovation(_root.Save);
+                    _structuralFeedback = LocalizeStructuralReason(undone.IsSuccess
+                        ? "ui.structural.economy.undo.success" : undone.Reason);
+                    RefreshOverlayText();
+                }
+            }
         }
 
         private string BuildSelectedMvpPlacementComparisonText()

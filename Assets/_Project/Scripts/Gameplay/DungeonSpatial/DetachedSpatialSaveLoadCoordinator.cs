@@ -134,6 +134,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            var schemaEight = DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(trusted, limits.Canonical);
+            if (schemaEight.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaEight,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
             if (recovered.TrustedPayload == SpatialTrustedPayload.Candidate)
             {
                 DetachedSpatialSaveLoadDisposition disposition = recovered.Reason ==
@@ -224,7 +228,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 frozenValidation.LayoutContractVersion != frozenContract.Value.CanonicalLayoutContractVersion ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
                     currentContext.Configuration, limits.Canonical.Spatial).IsValid ||
-                !SchemaSevenToEightUpgrade.TryPrepare(source, limits.Canonical, out byte[] candidate))
+                !TryUpgradeToCurrent(source, limits.Canonical, out byte[] candidate))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
@@ -248,6 +252,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                 recovery, transaction); }
             return PublishValidated(durable, currentContext, disposition, recovery, transaction);
+        }
+
+        private static bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] candidate)
+        {
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(source, limits).IsValid)
+                return SchemaEightToNineUpgrade.TryPrepare(source, limits, out candidate);
+            candidate = null;
+            return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
+                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out candidate);
         }
 
         private DetachedSpatialSaveLoadResult PublishValidated(byte[] bytes,

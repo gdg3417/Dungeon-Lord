@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class Gd66DetachedCompleteSaveSemanticValidationTests
+    public class Gd66DetachedCompleteSaveSemanticValidationTests
     {
         public sealed class Mutation
         { internal string Name; internal bool UseR2; internal Action<DetachedCanonicalSpatialSaveState> Apply; }
@@ -103,7 +103,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
-        [TestCaseSource(nameof(SharedMutations))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(SharedMutations))]
         public void SharedProductionMutation_IsRejectedByBothModes(Mutation mutation)
         {
             var fixture = Baseline("mutation-" + mutation.Name, false);
@@ -147,7 +147,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.False);
         }
 
-        [TestCaseSource(nameof(ExactContextMutations))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(ExactContextMutations))]
         public void ExactPinnedIdentity_CurrentTargetAccepts_UnfinishedRejects(Mutation mutation)
         {
             var fixture = Baseline("context-" + mutation.Name, true);
@@ -166,7 +166,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.False);
         }
 
-        [TestCaseSource(nameof(FixedStructureBoundsMutations))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(FixedStructureBoundsMutations))]
         public void FixedStructureFootprint_OutOfBounds_IsFixedStructureIssue(FixedSpatialStructureKind kind)
         {
             var fixture = Baseline("fixed-bounds-" + kind, false);
@@ -254,7 +254,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
 
 
-        [TestCaseSource(nameof(ExtraFixedStructureMutations))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(ExtraFixedStructureMutations))]
         public void ExtraFixedStructure_IndividuallyValid_IsFixedStructureCardinalityIssue(
             FixedSpatialStructureKind kind, string definitionId, string instanceId)
         {
@@ -321,7 +321,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
 
-        [TestCaseSource(nameof(ExactCandidateMutations))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(ExactCandidateMutations))]
         public void ExactPreparedCandidate_CurrentTargetAccepts_UnfinishedRejects(Mutation mutation)
         {
             var fixture = Baseline("exact-candidate-" + mutation.Name, mutation.UseR2);
@@ -338,7 +338,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Validate(fixture, fixture.State, true), Is.True);
         }
 
-        [TestCaseSource(nameof(ExpectedHashFailures))]
+        [TestCaseSource(typeof(Gd66DetachedCompleteSaveSemanticValidationTests), nameof(ExpectedHashFailures))]
         public void ExpectedCandidateHash_InvalidOrWrong_FailsClosed(string expectedHash)
         {
             var fixture = Baseline("expected-hash", false);
@@ -667,7 +667,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ",\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}";
         private static byte[] CurrentBytes(byte[] frozen, CanonicalSpatialSerializationLimits limits)
         {
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(frozen, limits, out byte[] current), Is.True);
+            Assert.That(PhaseFourTestSupport.Upgrade(frozen, limits, out byte[] current), Is.True);
             return current;
         }
 

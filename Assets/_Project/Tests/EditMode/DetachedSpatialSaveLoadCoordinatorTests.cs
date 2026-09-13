@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class DetachedSpatialSaveLoadCoordinatorTests
+    public class DetachedSpatialSaveLoadCoordinatorTests
     {
         [Test]
         public void NarrowHallRepairChangesOnlyRecognizedSpatialEvidenceAndPreservesUnknownBytes()
@@ -207,6 +207,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(fileSystem.ReadAllBytes(reopened.SavePath)));
         }
 
+        [TestCase(false)][TestCase(true)]
+        public void SchemaEightLoadUpgradesAtomicallyAndRecoversFailedWrite(bool failPersistence)
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var first = ConfiguredService(fixture, fileSystem, "service-eight.json");
+            Assert.That(first.LoadOrCreate("phase-four", out _), Is.Not.Null);
+            string current = Encoding.UTF8.GetString(first.CanonicalSession.GetCurrentBytes());
+            byte[] eight = Encoding.UTF8.GetBytes(current.Replace(",\"structuralInvestment\":[]", "")
+                .Replace("\"schemaVersion\":9", "\"schemaVersion\":8"));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(eight, fixture.Limits).IsValid, Is.True);
+            fileSystem.Seed(first.SavePath, eight);
+            if (failPersistence)
+            {
+                fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1);
+                var failed = ConfiguredService(fixture, fileSystem, "service-eight.json", new List<string>());
+                Assert.That(failed.LoadOrCreate("phase-four", out _), Is.Null);
+                Assert.That(failed.CanonicalSession, Is.Null);
+                CollectionAssert.AreEqual(eight, fileSystem.ReadAllBytes(first.SavePath));
+                fileSystem.DisableFailure();
+            }
+            var reopened = ConfiguredService(fixture, fileSystem, "service-eight.json");
+            Assert.That(reopened.LoadOrCreate("phase-four", out string reason), Is.Not.Null, reason);
+            Assert.That(Encoding.UTF8.GetString(reopened.CanonicalSession.GetCurrentBytes()), Is.EqualTo(current));
+            var again = ConfiguredService(fixture, fileSystem, "service-eight.json");
+            Assert.That(again.LoadOrCreate("phase-four", out _), Is.Not.Null);
+            CollectionAssert.AreEqual(reopened.CanonicalSession.GetCurrentBytes(), again.CanonicalSession.GetCurrentBytes());
+        }
+
         [Test]
         public void SaveServiceSchemaSixUsesGd66MigrationAndRetainsCanonicalSession()
         {
@@ -222,7 +251,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":8"));
+                Does.Contain("\"schemaVersion\":9"));
         }
 
         [Test]
@@ -571,7 +600,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-current.json"));
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(fixture.Result.Attempt.Candidate.GetBytes(),
+            Assert.That(PhaseFourTestSupport.Upgrade(fixture.Result.Attempt.Candidate.GetBytes(),
                 fixture.Limits, out byte[] currentBytes), Is.True);
             fileSystem.Seed(activePath, currentBytes);
 

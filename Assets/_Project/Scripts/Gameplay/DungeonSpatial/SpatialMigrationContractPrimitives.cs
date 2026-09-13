@@ -270,7 +270,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         internal static bool TryParse(byte[] bytes, SpatialSerializedInputLimits limits,
-            SpatialIssueCollector issues, out ContractJsonNode node)
+            SpatialIssueCollector issues, out ContractJsonNode node, bool allowWhitespace = false)
         {
             node = null;
             if (!limits.IsValid) { issues.Add(SpatialContractIssue.InvalidLimits); return false; }
@@ -281,11 +281,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string text;
             try { text = Utf8.GetString(bytes); }
             catch (DecoderFallbackException) { issues.Add(SpatialContractIssue.InvalidUtf8); return false; }
-            if (text.Length == 0 || char.IsWhiteSpace(text[0]) || char.IsWhiteSpace(text[text.Length - 1]))
+            if (text.Length == 0 || (!allowWhitespace && (char.IsWhiteSpace(text[0]) || char.IsWhiteSpace(text[text.Length - 1]))))
             { issues.Add(SpatialContractIssue.LeadingOrTrailingWhitespace); return false; }
             try
             {
-                node = new Reader(text, new ContractJsonWorkloadBudget(limits)).Read();
+                node = new Reader(text, new ContractJsonWorkloadBudget(limits), allowWhitespace).Read();
                 return true;
             }
             catch (JsonFailure failure) { issues.Add(failure.Issue); }
@@ -352,10 +352,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             private readonly string source;
             private readonly ContractJsonWorkloadBudget budget;
+            private readonly bool allowWhitespace;
             private int position;
 
-            internal Reader(string source, ContractJsonWorkloadBudget budget)
-            { this.source = source; this.budget = budget; }
+            internal Reader(string source, ContractJsonWorkloadBudget budget, bool allowWhitespace)
+            { this.source = source; this.budget = budget; this.allowWhitespace = allowWhitespace; }
+
+            // Authored configuration may be formatted; canonical saves retain strict default parsing.
+            private void Space()
+            {
+                if (!allowWhitespace) return;
+                while (position < source.Length && (source[position] == ' ' || source[position] == '\t' ||
+                    source[position] == '\r' || source[position] == '\n')) position++;
+            }
 
             internal ContractJsonNode Read()
             {
@@ -369,12 +378,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         StepObject(stack, frame);
                     else StepArray(stack, frame);
                 }
+                Space();
                 if (position != source.Length) Fail(SpatialContractIssue.MalformedJson);
                 return root;
             }
 
             private void StepObject(Stack<Frame> stack, Frame frame)
             {
+                Space();
                 if (frame.State == 0)
                 {
                     if (Take('}'))
@@ -384,7 +395,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     }
                     string name = ReadString();
                     if (!frame.Names.Add(name)) Fail(SpatialContractIssue.DuplicateField);
-                    Need(':'); frame.PendingName = name; frame.State = 1;
+                    Space(); Need(':'); frame.PendingName = name; frame.State = 1;
                 }
                 else if (frame.State == 1)
                 {
@@ -402,6 +413,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             private void StepArray(Stack<Frame> stack, Frame frame)
             {
+                Space();
                 if (frame.State == 0)
                 {
                     if (Take(']'))
@@ -423,6 +435,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             private ContractJsonNode ReadValue()
             {
+                Space();
                 if (!budget.TryNode()) Fail(SpatialContractIssue.WorkloadExceeded);
                 if (position >= source.Length) Fail(SpatialContractIssue.MalformedJson);
                 char current = source[position];

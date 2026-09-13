@@ -1355,6 +1355,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return false; }
             if (frozen.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(frozen.State,
                     productionContent, configuration, completeLimits.Spatial).IsValid) return true;
+            var eight = DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(bytes, completeLimits);
+            if (eight.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(eight.State,
+                    productionContent, configuration, completeLimits.Spatial).IsValid) return true;
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits)).IsValid;

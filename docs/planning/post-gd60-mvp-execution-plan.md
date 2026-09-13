@@ -1,20 +1,20 @@
 # Post-GD60 MVP Execution Plan
 
 
-**Current Phase 3 status (2026-09-09):** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The local Phase 3 closeout corrects reconstruction against retiring terminal geometry, renovation mapping from the saved outgoing relationship, and retained-custody workload sizing. See [the Phase 3 workload qualification](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). Phase 3 closeout review and remaining manual validation are still required; Phase 4 remains blocked and unimplemented.
-**Current Phase 3 status (2026-08-27):** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
+**Current status (2026-09-11):** Phase 3 is closed at merged PR #200 / `8093f2f886b8f5c40de67867c85623b875f7a550`. Phase 4A mana-backed structural editing is the active implementation packet. Its [economy/save contract](phase-4a-structural-economy.md) records provisional tuning, schema 9 investment accounting and deferred work. Earlier Phase 3 testing blockers below are superseded; they are historical, not current gates. External review and later gameplay qualification of Phase 4A remain outstanding.
+**Historical Phase 3 status (2026-08-27), superseded by PR #200:** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
 
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 3B2B / PR #199 merged; narrow Phase 3 lifecycle closeout under local validation and review** |
+| Status | **Phase 3 closed at PR #200; Phase 4A structural economy active** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main at merged PR #199 `adc066de2eac26e48e5a5058c18014a266871c4d` |
+| Current implementation baseline | Main at merged PR #200 `8093f2f886b8f5c40de67867c85623b875f7a550` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-08-21 |
+| Last reconciled | 2026-09-11 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -22,7 +22,7 @@
 
 This is the single active dependency order from the GD60 prototype to a fun MVP, a usable graphical editor, and external testing. Older sprint plans, closeouts, evidence records, and vertical-slice plans remain historical traceability: they retain useful acceptance criteria, but are **not** the authoritative execution sequence. A planned status is not implementation evidence. The merged repository and committed tests/evidence are authoritative; uncertain closure is marked **requires confirmation**.
 
-Historically, GD64 completed the inactive spatial contract and layout-validator alignment, and GD65A completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Later GD65B packets supplied production records and composition, and GD66/PR #195 activated schema 7. Validated canonical spatial state now owns writable route topology/content; the older ordered-room models remain frozen migration evidence rather than writable authority. Additional floors and native R1→R2 structural construction remain later-phase work.
+Historically, GD64 completed the inactive spatial contract and layout-validator alignment, and GD65A completed the inactive serializable spatial content schema plus bounded deterministic export validation and canonicalization. Later GD65B packets supplied production records and composition, and GD66/PR #195 activated schema 7. Validated canonical spatial state now owns writable route topology/content; the older ordered-room models remain frozen migration evidence rather than writable authority. Native structural construction closed with Phase 3; additional floors remain later-phase work.
 
 **Historical GD65B0C7 approval scope:** Merged PRs #168–#176 progressively approved the GD65B0 register, and PR #177 / GD65B0C6 completed pipeline-ownership rows 59–65 at baseline `e1bae81649e73452c76946689b93ba48eaebcb7d`. GD65B0C7 approves rows 66–70 and 72: exact configuration-owned workload envelopes, future-scale protection, and complete production-pipeline test/evidence ownership. All 72 rows are now approved. This documentation adds no file, code, test, record, or activation and preserves abstract MVP placement selections, ordered-room layout, and room-slot assignments as runtime/save authority. GD65B1 is complete and remaining GD65B implementation is unblocked.
 
@@ -41,16 +41,16 @@ Merged history establishes the following at prototype scope:
 
 ### Partially implemented capabilities
 
-- **Layout:** GD64 established rectangular floor-bound, occupied-tile capacity, direct-doorway, physical-corridor, bounded canonicalization, and deterministic validation contracts. GD66 now projects the validated canonical R1/R2 graph as live route authority. Native structural editing, corridor construction, and R1→R2 construction remain deferred to Phase 3.
-- **Construction:** choices and replacement exist, but spatial placement, corridors, structural removal/renovation, and mana-backed costs do not.
+- **Layout:** The canonical spatial graph owns footprints, physical corridors/direct doorways, fixed endpoints, occupied-tile capacity, and route/content state. Phase 3 construction, movement, replacement and leaf deletion closed at PR #200. Additional floors and branches remain deferred.
+- **Construction:** Phase 3 spatial editing is complete. Phase 4A adds configured mana prices, affordability, atomic spend/refund, historical investment and session renovation undo; external review and later gameplay qualification remain required.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** prototype mana/heat flows exist; construction spending, floor expansion, and production-grade offline behavior remain incomplete or require confirmation.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** schema 7 is live. Schemas 1–6 migrate through the production compatibility profile and raw-before-legacy transaction/recovery path; native canonical creation, exact-byte canonical writes, reopen, duplicate no-op, Narrow Hall repair, and Delete Save quiescence are validated. Windows activation remains fail-closed outside the qualified platform/filesystem boundary.
+- **Saves:** The PR #200 baseline is schema 8. Phase 4A implements schema 9 with an explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
 
 ### Missing MVP capabilities
 
-Active physical footprints and overlap enforcement; authoritative runtime floor capacity; corridor structures; entrance/exit nodes; saved same-floor route graphs; reachability validation; structural editing and containment resolution; construction economy; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
+After Phase 4A review/qualification, remaining MVP capabilities include one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
 
 ### Deferred capabilities
 
@@ -118,7 +118,7 @@ Phase 2 implementation and required validation passed at `c4ba1f68985c18c2a6a62b
 
 **Exit:** old saves load without losing assignments; current saves round-trip; identical legacy inputs preserve deterministic route behavior; no dual writable authority remains. **Technical gate:** migration matrix, journey, route and save tests. **Fantasy gate:** existing build/run/inspect flow shows no regression.
 
-### Phase 3 — Structural editing rules
+### Phase 3 — Structural editing rules (closed at PR #200)
 
 **Packet status:** Phase 3A construction and Phase 3B1 movement/replacement are complete. Phase 3B2A locks the prerequisite contracts; Phase 3B2B alone implements deletion. Issued structural IDs are permanently retired. Per-floor room and edge allocation use persistent monotonic state. Removed logical edges are never reused, and a new predecessor-to-Completion relationship receives a fresh edge identity. Reusable owned content cannot be silently destroyed. Floor 1 must retain at least one buildable required-route room during Phase 3.
 
@@ -133,6 +133,10 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 **Exit:** Floor 1 supports Entrance Hall, Basic Room, Rectangle Room, Large Chamber, the Narrow Hall / Straight Stone Corridor category, a required route, and Completion Terminal; valid edits persist and invalid edits are atomic. **Technical gate:** boundary, overlap, reachability, connection, containment and ordering tests. **Fantasy gate:** players can predict fit failures and compare compact versus spreading layouts in a low-fidelity test.
 
 ### Phase 4 — Mana-backed construction and offline mana completion
+
+**Active packet: Phase 4A structural economy.** The [Phase 4A contract](phase-4a-structural-economy.md) owns implementation details and the exact provisional values: Basic/Rectangle 100 mana, Large Chamber 200, physical corridor 5 per tile, Direct Doorway zero additional cost, movement/replacement fee factor 10%, historical refund 75% rounded down, capacity 1000 and session undo 30 seconds. These are tuning seeds, not final balance approval. Basic Room targets 5–10 minutes of productive early progression, initially 7.5 minutes; runtime prices are authored mana amounts.
+
+**Approved but deferred:** acquisition must distinguish buying new content from redeploying owned returned contents. Either basic monster + basic loot or basic trap + basic loot should cost 25%–40% of a Basic Room; a future starting grant covers either package without also funding an immediate second room. No content acquisition costs or starting mana grant are implemented in Phase 4A. Offline mana is the next independent packet. Active Architecture/floor/theme modifiers and active expansion pricing remain deferred. The combined Phase 4 exit criteria below apply after those separately scoped packets, not to Phase 4A alone.
 
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.

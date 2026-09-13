@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Economy;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -42,15 +43,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly DetachedCurrentTargetValidationContext context;
         private readonly SaveSpatialMigrationLimitsProfile limits;
         private readonly StructuralContentRemovalPolicySnapshot removalPolicy;
+        private readonly StructuralEconomySnapshot economy;
+        private readonly FormulaModifier[] economyModifiers;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits,
-            StructuralContentRemovalPolicySnapshot removalPolicy = null)
+            StructuralContentRemovalPolicySnapshot removalPolicy = null, StructuralEconomySnapshot economy = null,
+            IReadOnlyList<FormulaModifier> economyModifiers = null)
         {
             this.production = production; this.compatibility = compatibility;
             this.configuration = configuration; this.context = context; this.limits = limits;
             this.removalPolicy = removalPolicy;
+            this.economy = economy;
+            this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
         }
 
         public DetachedCanonicalWriteResult Execute(string activePath,
@@ -80,11 +86,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
                 false, null, null, null, null);
             if (!mutation.IsSuccess) return Failure(mutation.Reason);
-            DetachedRecognizedSaveStateSnapshotResult snapshot =
-                DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
+            StructuralInvestmentRecord[] investment = owned.Investment;
+            DetachedRecognizedSaveStateSnapshotResult snapshot;
+            if (StructuralEconomyService.IsStructural(request))
+            {
+                var priced = StructuralEconomyService.Prepare(owned.State, mutation.State, owned.Investment,
+                    currentRuntime.structureRuntime?.ManaReserve ?? double.NaN, economy,
+                    StructuralEconomyService.Operation(request), StructuralEconomyService.Target(request), economyModifiers);
+                if (!priced.IsAffordable) return Failure(priced.Reason);
+                investment = priced.Investment;
+                snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
+            }
+            else
+            {
+                // The existing free implicit starter/content flow remains outside acquisition pricing.
+                // Only previously absent identities gain explicit zero records.
+                var prior = investment.ToDictionary(r => r.StructureId, StringComparer.Ordinal);
+                if (prior.Keys.Except(StructuralInvestment.Ids(mutation.State), StringComparer.Ordinal).Any())
+                    return Failure(StructuralEconomyService.InvalidReason);
+                investment = StructuralInvestment.Zero(mutation.State).Select(r =>
+                    prior.TryGetValue(r.StructureId, out var retained) ? retained.Copy() : r).ToArray();
+                snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
+            }
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             DetachedCanonicalSaveSessionResult prepared =
-                session.PrepareLiveReplacement(snapshot, mutation.State);
+                session.PrepareLiveReplacement(snapshot, mutation.State, investment);
             if (!prepared.IsSuccess || prepared.Update == null) return Failure(prepared.Reason ??
                 DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
@@ -106,6 +132,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 mutation.ApplyExplicitRoomEffect, candidate, reopened.Session, validated, runtime);
         }
 
+        internal DetachedCanonicalWriteResult UndoRenovation(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session, SaveData currentRuntime,
+            DetachedCanonicalSpatialSaveState previous, StructuralInvestmentRecord[] investment,
+            string expectedFingerprint, double paid)
+        {
+            var owned = ValidateSession(session);
+            if (owned?.IsValid != true || !StructuralEditService.TryFingerprint(owned.State, limits.Canonical,
+                out string actual) || actual != expectedFingerprint || currentRuntime?.structureRuntime == null)
+                return Failure(StructuralEconomyService.UndoUnavailableReason);
+            var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime,
+                currentRuntime.structureRuntime.ManaReserve + paid, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            return PrepareAndPersist(activePath, fileSystem, session,
+                session.PrepareLiveReplacement(snapshot, previous, investment), false);
+        }
+
         public DetachedCanonicalWriteResult SaveRecognizedState(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             SaveData currentRuntime)
@@ -122,6 +164,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult prepared =
                 session.PrepareLiveReplacement(snapshot, owned.State);
             return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
+        }
+
+        internal DetachedCanonicalWriteResult SaveQaMana(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, bool fillToCapacity)
+        {
+            if (economy == null) return Failure(StructuralEconomyService.InvalidReason);
+            if (fileSystem == null || context == null || limits == null || production == null ||
+                compatibility == null || configuration == null || currentRuntime?.structureRuntime == null)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            var owned = ValidateSession(session);
+            if (owned?.IsValid != true || !owned.CurrentTargetValidated ||
+                !StructuralEconomySnapshot.Nonnegative(currentRuntime.structureRuntime.ManaReserve))
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            double mana = fillToCapacity
+                ? Math.Max(currentRuntime.structureRuntime.ManaReserve, economy.ManaCapacity) : 0;
+            var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, mana, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            return PrepareAndPersist(activePath, fileSystem, session,
+                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false);
         }
 
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,

@@ -414,6 +414,14 @@ namespace DungeonBuilder.M0
                 StructuralContentRemovalPolicyAuthority.TryParse(structuralContentRemovalPolicyJson.bytes,
                     out removalPolicy);
             SaveService.ConfigureStructuralRemovalPolicy(removalPolicy);
+            var economyAsset = Resources.Load<TextAsset>("structural_economy");
+            DungeonBuilder.M0.Economy.StructuralEconomySnapshot economy = null;
+            ProductionSpatialContentSnapshot productionSpatialContent = Content?.ProductionSpatialContent;
+            if (economyAsset != null && SaveSpatialMigrationLimits != null &&
+                productionSpatialContent?.Catalog != null)
+                DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryParse(economyAsset.bytes,
+                    productionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
+            SaveService.ConfigureStructuralEconomy(economy);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
@@ -786,6 +794,25 @@ namespace DungeonBuilder.M0
             Telemetry?.Track("mana_generated", $"{{\"amount\":{generatedMana:0.###}}}");
             KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
             KpiLine = $"KPI: avgMana/tick={snap.AverageManaPerTick:0.00}, blockedGates={snap.BlockedGateCount}/{snap.TotalGateEvaluations}";
+        }
+
+        public bool TrySetQaManaFromDevPanel(bool fillToCapacity)
+        {
+            string key = StructuralEditService.InvalidContextReason;
+            bool success = false;
+            if (DevPanelEnabled && ProductionSpatialContent != null && CanPreviewStructuralRenovation())
+            {
+                var result = SaveService.SetQaMana(Save, fillToCapacity);
+                success = result.IsSuccess;
+                key = success
+                    ? (fillToCapacity ? "ui.banner.qa_mana_filled" : "ui.banner.qa_mana_cleared")
+                    : Gd66MigrationReasonRegistry.RequiresPlayerMessage(result.Reason)
+                        ? Gd66MigrationReasonRegistry.PlayerLocalizationKey(result.Reason) : result.Reason;
+            }
+            string fallback = Content?.GetString(StructuralEditService.InvalidContextReason, string.Empty) ?? string.Empty;
+            SetBanner(Content?.GetString(key, fallback) ?? fallback);
+            overlay?.RefreshOverlayText();
+            return success;
         }
 
         public void ApplyHeatDelta(double delta)
@@ -1332,6 +1359,7 @@ namespace DungeonBuilder.M0
 
         private bool SimulateResolvedRoute(string postureId, MvpOrderedRouteRoom[] route)
         {
+            SaveService?.InvalidateRenovationUndo();
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
             RunOutcomeRecord outcome = _runSimulationService.SimulateRoute(Save.structureRuntime, tickStarted, sequence, postureId, route);

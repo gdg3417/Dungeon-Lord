@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class StructuralDeletionServiceTests
+    public class StructuralDeletionServiceTests
     {
         [Test]
         public void ProductionRemovalPolicy_ReturnsReusableContent_AndLeavesLootUnresolved()

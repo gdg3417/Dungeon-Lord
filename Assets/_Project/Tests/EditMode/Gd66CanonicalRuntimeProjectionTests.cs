@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public sealed class Gd66CanonicalRuntimeProjectionTests
+    public class Gd66CanonicalRuntimeProjectionTests
     {
         [Test]
         public void ContextValidatedProductionFixturePublishesCanonicalGraphAuthority()
@@ -321,7 +321,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static byte[] CurrentBytes(byte[] frozen, CanonicalSpatialSerializationLimits limits)
         {
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(frozen, limits, out byte[] current), Is.True);
+            Assert.That(PhaseFourTestSupport.Upgrade(frozen, limits, out byte[] current), Is.True);
             return current;
         }
 
