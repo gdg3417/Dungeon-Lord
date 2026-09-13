@@ -957,6 +957,16 @@ namespace DungeonBuilder.M0
 
             if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
             {
+                if (!string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+                {
+                    GateEvaluationResult purchaseGate = _restrictedActionGate.Evaluate(
+                        new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+                    if (!purchaseGate.Allowed)
+                    {
+                        bannerKey = purchaseGate.MessageKey;
+                        return false;
+                    }
+                }
                 CanonicalMvpRouteProjectionResult route =
                     CanonicalMvpRouteProjection.InspectWithProductionContent(
                         Save, Content?.ProductionSpatialContent);

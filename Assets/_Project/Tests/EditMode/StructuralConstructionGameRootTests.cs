@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -12,6 +14,144 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class StructuralConstructionGameRootTests
     {
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, true, false)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, false, false)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, true, true)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, false, true)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId, true, false)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId, false, false)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId, true, true)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId, false, true)]
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId, true, false)]
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId, false, false)]
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId, true, true)]
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId, false, true)]
+        public void BootstrapNewAcquisitionRequiresCurrentPurchaseVerification(
+            string optionId, bool online, bool pending)
+        {
+            var fixture = ReturnedContentRedeploymentTests.Owned();
+            var go = new GameObject("PurchaseGateBootstrapIntegration");
+            try
+            {
+                GameRoot root = PurchaseRoot(go, fixture);
+                var overlay = go.AddComponent<BootstrapOverlay>();
+                overlay.Bind(root);
+                root.SetOnline(online);
+                root.SetVerificationPending(pending);
+                Assert.That(MvpDungeonPlacementIds.TryGetCategoryForOption(optionId, out string categoryId), Is.True);
+                Assert.That(overlay.SelectMvpPlacementCategory(categoryId), Is.True);
+                Assert.That(overlay.SelectMvpPlacementOption(optionId), Is.True);
+                SaveData beforeSave = root.Save;
+                var beforeSession = root.SaveService.CanonicalSession;
+                var beforeState = root.Save.validatedCanonicalSpatialState;
+                string beforeRuntime = JsonUtility.ToJson(root.Save);
+                string beforeSpatial = JsonUtility.ToJson(beforeState);
+                string beforeCustody = JsonUtility.ToJson(beforeState.LifecycleAndOwnership);
+                byte[] beforeBytes = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+                int beforeOperations = fixture.FileSystem.Operations.Count();
+                double beforeMana = root.Save.structureRuntime.ManaReserve;
+                long beforeSequence = beforeState.Floors[0].RoomContents.NextSequence;
+
+                overlay.PlaceSelectedMvpStructure();
+
+                if (online && !pending)
+                {
+                    Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.banner.place_success", "")));
+                    Assert.That(fixture.Acquisition.TryPrice(categoryId, optionId, out double price), Is.True);
+                    Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana - price));
+                    var assignment = root.Save.spatialFloors[0].RoomContents.Assignments.Single();
+                    Assert.That(assignment.OptionId, Is.EqualTo(optionId));
+                    Assert.That(assignment.Sequence, Is.EqualTo(beforeSequence));
+                    Assert.That(root.Save.spatialFloors[0].RoomContents.NextSequence, Is.EqualTo(beforeSequence + 1));
+                    Assert.That(beforeState.LifecycleAndOwnership.ReturnedContents.Any(
+                        item => item.AssignmentId == assignment.AssignmentId), Is.False);
+                    Assert.That(fixture.FileSystem.ReadAllBytes(fixture.ActivePath),
+                        Is.EqualTo(root.SaveService.CanonicalSession.GetCurrentBytes()));
+                }
+                else
+                {
+                    string key = online ? "gate.error.verification_pending" : "gate.error.offline_required";
+                    Assert.That(root.Content.GetString(key, ""), Is.Not.Empty);
+                    Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(key, "")));
+                    Assert.That(overlay.MvpStructurePlacementFeedback, Is.Empty);
+                    Assert.That(root.Save, Is.SameAs(beforeSave));
+                    Assert.That(root.SaveService.CanonicalSession, Is.SameAs(beforeSession));
+                    Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana));
+                    Assert.That(root.Save.spatialFloors[0].RoomContents.Assignments, Is.Empty);
+                    Assert.That(root.Save.spatialFloors[0].RoomContents.NextSequence, Is.EqualTo(beforeSequence));
+                    Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(beforeRuntime));
+                    Assert.That(JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState), Is.EqualTo(beforeSpatial));
+                    // Even reads by the canonical mutation authority would appear in this operation trace.
+                    Assert.That(fixture.FileSystem.Operations.Count(), Is.EqualTo(beforeOperations));
+                    CollectionAssert.AreEqual(beforeBytes, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+                    CollectionAssert.AreEqual(beforeBytes, beforeSession.GetCurrentBytes());
+                }
+                Assert.That(JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership),
+                    Is.EqualTo(beforeCustody));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [TestCase(false, false)]
+        [TestCase(true, true)]
+        public void BootstrapOwnedRedeploymentRemainsAvailableWhenPurchaseGateIsBlocked(bool online, bool pending)
+        {
+            var fixture = ReturnedContentRedeploymentTests.Owned();
+            var go = new GameObject("OwnedRedeploymentPurchaseGateIntegration");
+            try
+            {
+                GameRoot root = PurchaseRoot(go, fixture);
+                var overlay = go.AddComponent<BootstrapOverlay>();
+                overlay.Bind(root);
+                root.SetOnline(online);
+                root.SetVerificationPending(pending);
+                var owned = root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents
+                    .Single(item => item.AssignmentId == root.SelectedReturnedAssignmentId);
+                double beforeMana = root.Save.structureRuntime.ManaReserve;
+                Assert.That(overlay.RedeploySelectedReturnedContent(), Is.True);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana));
+                var assignment = root.Save.spatialFloors[0].RoomContents.Assignments.Single();
+                Assert.That(assignment.AssignmentId, Is.EqualTo(owned.AssignmentId));
+                Assert.That(assignment.CategoryId, Is.EqualTo(owned.CategoryId));
+                Assert.That(assignment.OptionId, Is.EqualTo(owned.OptionId));
+                Assert.That(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents
+                    .Any(item => item.AssignmentId == owned.AssignmentId), Is.False);
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.returned_content.success", "")));
+                CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),
+                    fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        private static GameRoot PurchaseRoot(GameObject go, DetachedCanonicalWriteAuthorityTests.Fixture fixture)
+        {
+            var service = new SaveService(new SimpleLogger(false),
+                new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true },
+                Path.GetDirectoryName(fixture.ActivePath));
+            service.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility,
+                fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)));
+            service.ConfigureStructuralEconomy(fixture.Economy);
+            service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
+            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
+                fixture.FileSystem, Path.GetFullPath(path)));
+            SaveData save = service.LoadOrCreate("purchase-gate-integration", out string reason);
+            Assert.That(save, Is.Not.Null, reason);
+            var content = new ContentService();
+            const string directory = "Assets/_Project/Data/Bootstrap/";
+            var assets = new[] { "content_bootstrap", "build_config", "schema_versions", "content_manifest",
+                "dev_commands", "string_table_en", "heat_runtime" }
+                .Select(name => RequiredAsset(directory + name + ".json")).ToArray();
+            content.LoadAll(assets[0], assets[1], assets[2], assets[3], assets[4], assets[5], assets[6],
+                new SimpleLogger(false), out _);
+            SetProperty(content, "ProductionSpatialContent", fixture.Production);
+            var root = go.AddComponent<GameRoot>();
+            SetProperty(root, "Content", content);
+            SetProperty(root, "Save", save);
+            root.AttachSaveServiceForTests(service);
+            return root;
+        }
+
         [Test]
         public void ProductionSpatialFailureWithEconomyResourceFailsClosedWithoutPartialActivation()
         {
