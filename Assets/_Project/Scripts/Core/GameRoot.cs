@@ -6,6 +6,7 @@ using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -1092,6 +1093,79 @@ namespace DungeonBuilder.M0
             SaveService?.Save(Save, SaveReason.ManualDev);
             return true;
         }
+
+        private string _selectedReturnedAssignmentId;
+
+        private ReturnedStructuralContent[] ReturnedContentForPlayer()
+        {
+            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                Save, Content?.ProductionSpatialContent);
+            return route.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
+                ? Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents
+                : Array.Empty<ReturnedStructuralContent>();
+        }
+
+        public string SelectedReturnedAssignmentId
+        {
+            get
+            {
+                ReturnedStructuralContent[] returned = ReturnedContentForPlayer();
+                if (!returned.Any(value => value.AssignmentId == _selectedReturnedAssignmentId))
+                    _selectedReturnedAssignmentId = returned.FirstOrDefault()?.AssignmentId;
+                return _selectedReturnedAssignmentId;
+            }
+        }
+
+        public void CycleReturnedContent()
+        {
+            string selected = SelectedReturnedAssignmentId;
+            ReturnedStructuralContent[] returned = ReturnedContentForPlayer();
+            if (returned.Length == 0) return;
+            int index = Array.FindIndex(returned, value => value.AssignmentId == selected);
+            _selectedReturnedAssignmentId = returned[(index + 1) % returned.Length].AssignmentId;
+        }
+
+        public string ReturnedContentSelectionText
+        {
+            get
+            {
+                string selected = SelectedReturnedAssignmentId;
+                ReturnedStructuralContent[] returned = ReturnedContentForPlayer();
+                ReturnedStructuralContent item = returned.FirstOrDefault(value => value.AssignmentId == selected);
+                if (item == null) return LocalizeReturnedContent("ui.returned_content.empty");
+                string name = MvpDungeonPlacementPresenter.ResolveOptionName(item.OptionId,
+                    (key, fallback) => LocalizeReturnedContent(key));
+                return string.Format(CultureInfo.InvariantCulture, LocalizeReturnedContent("ui.returned_content.selection"),
+                    Array.IndexOf(returned, item) + 1, returned.Length, name);
+            }
+        }
+
+        public bool TryRedeploySelectedReturnedContent()
+        {
+            string reason;
+            bool success = false;
+            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                Save, Content?.ProductionSpatialContent);
+            if (SaveService == null || route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                reason = DetachedCanonicalSpatialMutation.ValidationFailedReason;
+            else if (Save.structureRuntime?.PlacementLocked == true)
+                reason = "ui.banner.place_blocked_heat_crisis";
+            else
+            {
+                string target = ResolveCanonicalMutationTargetRoomId(Save, RunSimulationConfig,
+                    Content?.ProductionSpatialContent, route.Rooms);
+                DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
+                    DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target));
+                success = result.IsSuccess;
+                reason = success ? "ui.returned_content.success" : result.IsNoOp
+                    ? "ui.returned_content.same_option" : result.Reason;
+            }
+            string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
+            SetBanner(LocalizeReturnedContent(string.IsNullOrEmpty(playerKey) ? reason : playerKey));
+            return success;
+        }
+
+        private string LocalizeReturnedContent(string key) => Content != null ? Content.GetString(key, key) : key;
 
         internal static string ResolveCanonicalMutationTargetRoomId(SaveData save,
             RunSimulationConfig legacyConfig, ProductionSpatialContentSnapshot production,

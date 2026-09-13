@@ -81,6 +81,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult owned = ValidateSession(session);
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (request?.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
+            {
+                // An owned-content move requires current custody, even when an old request would
+                // reproduce already-durable candidate bytes accepted by the general retry path.
+                try
+                {
+                    if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
+                        return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                }
+                catch (Exception)
+                { return Failure(AtomicSaveFailedReason); }
+            }
             DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(owned.State,
                 request, production, compatibility, configuration, limits.Canonical, removalPolicy);
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
@@ -96,6 +108,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!priced.IsAffordable) return Failure(priced.Reason);
                 investment = priced.Investment;
                 snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
+            {
+                // Moving owned content changes neither the wallet nor the structural ledger.
+                snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
             }
             else
             {

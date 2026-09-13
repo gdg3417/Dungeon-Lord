@@ -4,6 +4,38 @@
   "language": "en",
   "entries": [
     {
+      "key": "content.redeployment.returned_item_missing",
+      "text": "That item is no longer in returned custody."
+    },
+    {
+      "key": "content.redeployment.target_room_missing",
+      "text": "Select a compatible room before redeploying this item."
+    },
+    {
+      "key": "ui.returned_content.empty",
+      "text": "Returned content: none."
+    },
+    {
+      "key": "ui.returned_content.selection",
+      "text": "Returned content {0}/{1}: {2}"
+    },
+    {
+      "key": "ui.returned_content.next",
+      "text": "Next returned item"
+    },
+    {
+      "key": "ui.returned_content.redeploy",
+      "text": "Redeploy into selected room"
+    },
+    {
+      "key": "ui.returned_content.success",
+      "text": "Owned content redeployed into the selected room."
+    },
+    {
+      "key": "ui.returned_content.same_option",
+      "text": "This room already contains that content. The returned item remains in custody."
+    },
+    {
       "key": "ui.loading.boot",
       "text": "Waking the dungeon core. Restoring your last known state."
     },

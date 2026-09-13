@@ -13,7 +13,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         StructuralConstruction = 3,
         StructuralMovement = 4,
         StructuralReplacement = 5,
-        StructuralDeletion = 6
+        StructuralDeletion = 6,
+        RedeployReturnedContent = 7
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -22,6 +23,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string CategoryId { get; private set; }
         public string OptionId { get; private set; }
         public string RoomInstanceId { get; private set; }
+        public string AssignmentId { get; private set; }
         internal StructuralConstructionRequest StructuralIntent { get; private set; }
         internal StructuralMovementRequest MovementIntent { get; private set; }
         internal StructuralReplacementRequest ReplacementIntent { get; private set; }
@@ -36,6 +38,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCanonicalMutationRequest RemoveRoom(string roomInstanceId) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RemoveRoom, RoomInstanceId = roomInstanceId };
+
+        public static DetachedCanonicalMutationRequest Redeploy(string assignmentId, string roomInstanceId) =>
+            new DetachedCanonicalMutationRequest
+            { Kind = DetachedCanonicalMutationKind.RedeployReturnedContent,
+              AssignmentId = assignmentId, RoomInstanceId = roomInstanceId };
 
         public static DetachedCanonicalMutationRequest Construct(StructuralEditPreview preview) =>
             new DetachedCanonicalMutationRequest
@@ -116,6 +123,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string CapacityReductionReason = "gd66.write.capacity_reduction_invalid";
         public const string NoOpReason = "gd66.diagnostic.canonical_write_noop";
         public const string ValidationFailedReason = "gd66.write.first_write_validation_failed";
+        public const string ReturnedItemMissingReason = "content.redeployment.returned_item_missing";
+        public const string TargetRoomMissingReason = "content.redeployment.target_room_missing";
 
         public static DetachedCanonicalMutationResult Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
@@ -127,6 +136,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 production == null || compatibility == null || configuration == null || !limits.IsValid)
                 return Failure(ValidationFailedReason);
             if (!TryClone(current, limits, out DetachedCanonicalSpatialSaveState proposed))
+                return Failure(ValidationFailedReason);
+            // Custody is persisted ownership, never a repair input or a current removal-policy decision.
+            if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent &&
+                (!CanonicalSpatialSaveContracts.Validate(current, limits.Spatial, true).IsValid ||
+                 !DetachedCanonicalProductionSemanticValidation.Validate(current, production,
+                     configuration, limits.Spatial).IsValid))
                 return Failure(ValidationFailedReason);
             bool roomEffect = false;
             string reason;
@@ -171,6 +186,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
                 proposed = refreshed.DetachedCandidate; reason = null;
             }
+            else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
+                reason = RedeployContent(proposed, request.AssignmentId, request.RoomInstanceId, production, configuration);
             else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
@@ -292,6 +309,46 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static string Remove(DetachedCanonicalSpatialSaveState state, string requestedRoomId)
         {
             return StructuralRemovalDeferredReason;
+        }
+
+        private static string RedeployContent(DetachedCanonicalSpatialSaveState state, string assignmentId,
+            string requestedRoomId, ProductionSpatialContentSnapshot production, RunSimulationConfig configuration)
+        {
+            ReturnedStructuralContent[] returned = state.LifecycleAndOwnership.ReturnedContents;
+            ReturnedStructuralContent[] matches = returned.Where(value =>
+                string.Equals(value.AssignmentId, assignmentId, StringComparison.Ordinal)).ToArray();
+            if (string.IsNullOrWhiteSpace(assignmentId) || matches.Length == 0)
+                return ReturnedItemMissingReason;
+            if (matches.Length != 1) return ValidationFailedReason;
+            if (string.IsNullOrWhiteSpace(requestedRoomId) || !TryTargetRoom(state, requestedRoomId,
+                    out SavedSpatialFloor floor, out RoomSpatialInstance room, out CanonicalRoomSemantics ignored))
+                return TargetRoomMissingReason;
+            ReturnedStructuralContent owned = matches[0];
+            if (!(configuration.MvpPlacementEffects ?? Array.Empty<MvpPlacementEffectConfig>()).Any(value =>
+                    value != null && value.OptionId == owned.OptionId))
+                return DetachedSpatialMigrationPreparer.InvalidOptionReason;
+            RoomContentAssignment[] assignments = floor.RoomContents.Assignments;
+            RoomContentAssignment[] matching = assignments.Where(value =>
+                value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == owned.CategoryId).ToArray();
+            if (matching.Any(value => value.OptionId == owned.OptionId)) return NoOpReason;
+            if (!CanonicalRoomCapacityResolver.TryResolve(production, room.RoomDefinitionId,
+                    out MvpRoomSlotCapacity capacity, out string reason)) return reason;
+            int maximum = owned.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId ? capacity.MonsterCapacity :
+                owned.CategoryId == MvpDungeonPlacementIds.TrapCategoryId ? capacity.TrapCapacity : capacity.LootCapacity;
+            if (matching.Length >= maximum) return DetachedSpatialMigrationPreparer.CapacityReason;
+            long sequence = matching.Any(value => value.Sequence == owned.Sequence)
+                ? floor.RoomContents.NextSequence : owned.Sequence;
+            // No valid NextSequence can follow Int64.MaxValue. Fail before changing the candidate.
+            if (sequence == long.MaxValue) return ValidationFailedReason;
+            floor.RoomContents.NextSequence = Math.Max(floor.RoomContents.NextSequence, sequence + 1);
+            floor.RoomContents.Assignments = assignments.Concat(new[] { new RoomContentAssignment
+            {
+                AssignmentId = owned.AssignmentId, RoomInstanceId = room.RoomInstanceId,
+                CategoryId = owned.CategoryId, OptionId = owned.OptionId, Sequence = sequence
+            } }).ToArray();
+            state.LifecycleAndOwnership.ReturnedContents = returned.Where(value =>
+                value.AssignmentId != owned.AssignmentId).ToArray();
+            return null;
         }
 
         private static bool TryCreateStarter(DetachedCanonicalSpatialSaveState state,

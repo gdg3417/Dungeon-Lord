@@ -1,6 +1,6 @@
 # Phase 4A structural economy contract
 
-Implementation baseline: PR #200, `8093f2f886b8f5c40de67867c85623b875f7a550`. This packet is subject to external review and later PlayMode/manual qualification.
+Phase 4A structural economy is merged and qualified through PR #201 at `eca6db1ec984fd476d86c4e9af1a55ecd6df3d20`. This is the exact baseline for the immediate returned-content redeployment prerequisite.
 
 ## Authoring and formulas
 
@@ -55,4 +55,6 @@ Bootstrap composes the economy preview around the existing pure spatial preview.
 
 Approved follow-up: monster/trap/loot acquisition should be substantially cheaper than a Basic Room; a basic monster + basic loot or basic trap + basic loot starter package targets 25%–40% of Basic Room price. A future starting grant must cover either package without also funding an immediate second Basic Room. Implement only after distinguishing new acquisitions from redeployment of already-owned returned content; placement must not charge ownership twice. No content prices or starting grant are implemented here.
 
-Offline mana remains the next independent Phase 4 packet. Active Architecture/floor/theme/research modifiers, floor expansion pricing, upkeep, Floor 2, branches, additional content and a production editor are outside this packet. PlayMode, manual gameplay and standalone build qualification are deliberately deferred until external architecture review.
+The immediate prerequisite adds explicit owned-content redeployment through the canonical writer: the request identifies returned custody by durable AssignmentId and the destination by RoomInstanceId. Category and option come from persisted custody. The identity survives; the stored sequence survives unless it collides in the destination room/category, in which case the floor's existing NextSequence is used. NextSequence advances past any inserted high sequence. Unrelated assignments are never renumbered. Ordinary placement remains a separate new-acquisition intent and does not consume custody. Bootstrap exposes canonical-order returned-item selection and redeployment into the selected room with localized feedback. Schema 9, mana and structural investment remain unchanged; current removal policy is not retroactive ownership authority.
+
+Acquisition prices and starting mana remain deferred pending approved exact tuning. Canonical online mana earning is a later dependency. Offline mana remains deferred until a meaningful canonical applicable production-rate authority exists; Spec 29's no-time-cap and storage-clamp policy remains intact. Active Architecture/floor/theme/research modifiers, floor expansion pricing, upkeep, Floor 2, branches, additional content and a production editor remain outside this packet. Redeployment requires its own automated qualification and independent manual Unity review; no standalone build is claimed here.
