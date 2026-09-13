@@ -139,6 +139,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(cycles + 1));
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.EqualTo(cycles));
             Debug.Log("PHASE3_LIMIT_MEASUREMENT " + MeasureCurrent("historical-64-record-boundary", fixture));
+            ReturnedStructuralContent selected = fixture.State.LifecycleAndOwnership.ReturnedContents
+                .First(item => item.CategoryId == options[index].Item1 && item.OptionId == options[index].Item2);
+            var redeployed = fixture.Execute(DetachedCanonicalMutationRequest.Redeploy(selected.AssignmentId, finalRoom));
+            Assert.That(redeployed.IsSuccess, Is.True, redeployed.Reason);
+            fixture.Accept(redeployed); fixture.Reopen();
+            Assert.That(CountCanonicalRecords(fixture.State), Is.EqualTo(64));
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(custody.Length - 1));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Single(a => a.AssignmentId == selected.AssignmentId).OptionId,
+                Is.EqualTo(selected.OptionId));
+            var tooSmall = new CanonicalSpatialSerializationLimits(fixture.Profile.Canonical.Serialized,
+                new CanonicalSpatialSaveWorkloadLimits(63, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles));
+            byte[] unchanged = fixture.Session.GetCurrentBytes();
+            var refusedRedeployment = DetachedCanonicalSpatialMutation.Prepare(fixture.State,
+                DetachedCanonicalMutationRequest.Redeploy(fixture.State.LifecycleAndOwnership.ReturnedContents[0].AssignmentId, finalRoom),
+                fixture.Production, fixture.Compatibility, fixture.Configuration, tooSmall);
+            Assert.That(refusedRedeployment.IsSuccess, Is.False);
+            CollectionAssert.AreEqual(unchanged, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            string row = MeasureCurrent("historical-64-record-redeployed", fixture);
+            Debug.Log("REDEPLOYMENT_LIMIT_MEASUREMENT " + row);
+            TestContext.Progress.WriteLine("REDEPLOYMENT_LIMIT_MEASUREMENT " + row);
         }
 
         [Test]
@@ -195,6 +215,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeRoomOrdinal, Is.EqualTo(cycles + 1));
             Assert.That(fixture.State.LifecycleAndOwnership.Floors.Single().NextNativeEdgeOrdinal, Is.EqualTo(cycles));
             AssertProductionEnvelope(fixture, fixture.Profile);
+        }
+
+        [Test]
+        public void ProductionCustodyArrayBoundaryRedeploysWithoutInflatingRecords()
+        {
+            LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
+            int reusable = ReusableOptions(fixture, "spatial.room.basic").Length;
+            int cycles = fixture.Profile.Raw.MaximumArrayElements / reusable;
+            for (int cycle = 0; cycle < cycles; cycle++)
+            {
+                string room = Construct(fixture, 0, 7, "east");
+                FillContents(fixture, room, false); DeleteTail(fixture, room);
+            }
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Length,
+                Is.EqualTo(fixture.Profile.Raw.MaximumArrayElements));
+            string target = Construct(fixture, 0, 7, "east");
+            int count = CountCanonicalRecords(fixture.State);
+            var priorAssignments = fixture.State.Floors[0].RoomContents.Assignments
+                .ToDictionary(a => a.AssignmentId, a => JsonUtility.ToJson(a), StringComparer.Ordinal);
+            var selected = fixture.State.LifecycleAndOwnership.ReturnedContents[0];
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Redeploy(selected.AssignmentId, target)));
+            fixture.Reopen();
+            Assert.That(CountCanonicalRecords(fixture.State), Is.EqualTo(count));
+            Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Length,
+                Is.EqualTo(fixture.Profile.Raw.MaximumArrayElements - 1));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Single(a =>
+                a.AssignmentId == selected.AssignmentId).RoomInstanceId, Is.EqualTo(target));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(priorAssignments.Count + 1));
+            foreach (var prior in priorAssignments)
+                Assert.That(JsonUtility.ToJson(fixture.State.Floors[0].RoomContents.Assignments.Single(a =>
+                    a.AssignmentId == prior.Key)), Is.EqualTo(prior.Value));
+            AssertProductionEnvelope(fixture, fixture.Profile);
+            string row = MeasureCurrent("production-custody-array-boundary-redeployed", fixture);
+            Debug.Log("REDEPLOYMENT_LIMIT_MEASUREMENT " + row);
+            TestContext.Progress.WriteLine("REDEPLOYMENT_LIMIT_MEASUREMENT " + row);
         }
 
         private static void AssertProductionEnvelope(LifecycleFixture fixture, SaveSpatialMigrationLimitsProfile profile)

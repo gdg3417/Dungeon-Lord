@@ -6,6 +6,7 @@ using NUnit.Framework;
 namespace DungeonBuilder.M0.Editor.Tests
 {
     [TestFixture] public sealed class PhaseFourEconomy : StructuralEconomyTests { }
+    [TestFixture] public sealed class PhaseFourRedeployment : ReturnedContentRedeploymentTests { }
     [TestFixture] public sealed class PhaseFourWrites : DetachedCanonicalWriteAuthorityTests { }
     [TestFixture] public sealed class PhaseFourSpatial : StructuralEditServiceTests { }
     [TestFixture] public sealed class PhaseFourBootstrap : StructuralConstructionGameRootTests { }
