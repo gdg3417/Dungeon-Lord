@@ -132,11 +132,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)));
             service.ConfigureStructuralEconomy(fixture.Economy);
             service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
-            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
-                fixture.FileSystem, Path.GetFullPath(path)));
-            SaveData save = service.LoadOrCreate("purchase-gate-integration", out string reason);
-            Assert.That(save, Is.Not.Null, reason);
+            SetProperty(service, "SavePath", fixture.ActivePath);
+            typeof(SaveService).GetField("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(service, fixture.Session);
+            typeof(SaveService).GetField("_canonicalFileSystem", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(service, fixture.FileSystem);
+            typeof(SaveService).GetField("_validationContext", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(service, fixture.Context);
             var content = new ContentService();
             const string directory = "Assets/_Project/Data/Bootstrap/";
             var assets = new[] { "content_bootstrap", "build_config", "schema_versions", "content_manifest",
@@ -147,7 +149,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SetProperty(content, "ProductionSpatialContent", fixture.Production);
             var root = go.AddComponent<GameRoot>();
             SetProperty(root, "Content", content);
-            SetProperty(root, "Save", save);
+            SetProperty(root, "Save", fixture.Runtime);
             root.AttachSaveServiceForTests(service);
             return root;
         }
