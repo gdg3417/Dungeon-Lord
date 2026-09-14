@@ -5,17 +5,17 @@
         {
             "CategoryId": "placement.category.loot_node",
             "OptionId": "placement.option.loot_node.basic",
-            "Policy": 0
+            "Policy": 1
         },
         {
             "CategoryId": "placement.category.loot_node",
             "OptionId": "placement.option.loot_node.glittering_hoard",
-            "Policy": 0
+            "Policy": 1
         },
         {
             "CategoryId": "placement.category.loot_node",
             "OptionId": "placement.option.loot_node.hidden_cache",
-            "Policy": 0
+            "Policy": 1
         },
         {
             "CategoryId": "placement.category.monster",

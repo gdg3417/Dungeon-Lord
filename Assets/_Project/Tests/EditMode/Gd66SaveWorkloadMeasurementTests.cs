@@ -342,7 +342,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             string definition = fixture.State.Floors[0].Layout.Rooms.Single(value => value.RoomInstanceId == room).RoomDefinitionId;
             foreach (var option in ReusableOptions(fixture, definition)) PlaceOption(fixture, room, option);
-            if (!includeLoot) return; // Shipped loot removal is unresolved; never delete a loot-bearing room.
+            if (!includeLoot) return; // Preserve the historical monster/trap workload fixture; loot return has separate coverage.
             RoomSpatialDefinition content = fixture.Production.Catalog.Rooms.Single(value => value.RoomDefinitionId == definition);
             foreach (string option in new[] { MvpDungeonPlacementIds.BasicLootNodeOptionId,
                 MvpDungeonPlacementIds.HiddenCacheOptionId }.Take(content.LootCapacity))

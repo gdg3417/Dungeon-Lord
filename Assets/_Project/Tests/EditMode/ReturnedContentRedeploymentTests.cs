@@ -215,9 +215,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             owned.CategoryId = MvpDungeonPlacementIds.LootNodeCategoryId;
             owned.OptionId = MvpDungeonPlacementIds.HiddenCacheOptionId;
             Canonicalize(f);
+            // Deliberately unresolved fixture: production loot nodes now authorize return.
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(Encoding.UTF8.GetBytes(
+                File.ReadAllText(StructuralContentRemovalPolicyAuthority.ProductionPath)
+                    .Replace("\"Policy\": 1", "\"Policy\": 0")), out f.RemovalPolicy), Is.True);
             Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(f.RemovalPolicy,
                 owned.CategoryId, owned.OptionId, out _, out _), Is.False);
-            var result = f.Prepare(Request(f));
+            var result = DetachedCanonicalSpatialMutation.Prepare(f.State, Request(f), f.Production,
+                f.Compatibility, f.Configuration, f.Profile.Canonical, f.RemovalPolicy);
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(owned.AssignmentId));
         }

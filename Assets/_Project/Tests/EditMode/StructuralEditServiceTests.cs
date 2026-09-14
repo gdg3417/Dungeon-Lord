@@ -1214,14 +1214,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("placement.option.loot_node.basic")]
         [TestCase("placement.option.loot_node.hidden_cache")]
         [TestCase("placement.option.loot_node.glittering_hoard")]
-        public void Deletion_UnresolvedLootFailsWithoutPartialReturn(string option)
+        public void Deletion_ApprovedLootReturnsAlongsideMonsterWithoutChangingSource(string option)
         {
             PreviewFixture fixture = CreateR2(); string target = "compat.floor.00.room.player.0000";
             fixture.State = Place(fixture, fixture.State, "placement.category.monster",
                 "placement.option.monster.skeleton", target);
             fixture.State = Place(fixture, fixture.State, "placement.category.loot_node", option, target);
-            AssertDeleteInvalidUnchanged(fixture, target,
-                StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason);
+            byte[] before = Bytes(fixture.State, fixture.Limits);
+            StructuralEditPreview preview = Delete(fixture, target);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            CollectionAssert.AreEquivalent(fixture.State.Floors[0].RoomContents.Assignments.Select(a => a.AssignmentId),
+                preview.DetachedCandidate.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId));
+            CollectionAssert.AreEqual(before, Bytes(fixture.State, fixture.Limits));
             Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
         }
 
@@ -1237,7 +1241,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             fixture.State = Place(fixture, fixture.State, "placement.category.loot_node",
                 "placement.option.loot_node.glittering_hoard", target);
             byte[] before = Bytes(fixture.State, fixture.Limits);
-            StructuralEditPreview preview = Delete(fixture, target);
+            // Explicit unresolved fixture retains fail-closed coverage after production loot approval.
+            Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(System.Text.Encoding.UTF8.GetBytes(
+                File.ReadAllText(StructuralContentRemovalPolicyAuthority.ProductionPath)
+                    .Replace("\"Policy\": 1", "\"Policy\": 0")), out var unresolved), Is.True);
+            StructuralEditPreview preview = StructuralDeletionService.Preview(fixture.State,
+                new StructuralDeletionRequest { TargetRoomInstanceId = target }, unresolved,
+                fixture.Production, fixture.Configuration, fixture.Limits);
             Assert.That(preview.IsValid, Is.False);
             CollectionAssert.AreEqual(new[] { "placement.option.loot_node.basic",
                 "placement.option.loot_node.glittering_hoard", "placement.option.loot_node.hidden_cache" },

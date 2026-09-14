@@ -9,7 +9,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class StructuralDeletionServiceTests
     {
         [Test]
-        public void ProductionRemovalPolicy_ReturnsReusableContent_AndLeavesLootUnresolved()
+        public void ProductionRemovalPolicy_ReturnsReusableMonstersTrapsAndLootNodes()
         {
             byte[] bytes = File.ReadAllBytes(StructuralContentRemovalPolicyAuthority.ProductionPath);
             Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(bytes, out var policy), Is.True);
@@ -20,8 +20,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "placement.category.trap", "placement.option.trap.snare", out var trap, out _), Is.True);
             Assert.That(trap, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
             Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(policy,
-                "placement.category.loot_node", "placement.option.loot_node.basic", out _, out string reason), Is.False);
-            Assert.That(reason, Is.EqualTo(StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason));
+                "placement.category.loot_node", "placement.option.loot_node.basic", out var loot, out _), Is.True);
+            Assert.That(loot, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
         }
 
         [Test]
