@@ -101,11 +101,63 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally { Object.DestroyImmediate(go); }
         }
 
-        [TestCase(false, false)]
-        [TestCase(true, true)]
-        public void BootstrapOwnedRedeploymentRemainsAvailableWhenPurchaseGateIsBlocked(bool online, bool pending)
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId)]
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId)]
+        public void BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(string optionId)
         {
             var fixture = ReturnedContentRedeploymentTests.Owned();
+            var go = new GameObject("MonsterMultiplicityBootstrapIntegration");
+            try
+            {
+                GameRoot root = PurchaseRoot(go, fixture);
+                var overlay = go.AddComponent<BootstrapOverlay>(); overlay.Bind(root);
+                Assert.That(overlay.SelectMvpPlacementCategory(MvpDungeonPlacementIds.MonsterCategoryId), Is.True);
+                Assert.That(overlay.SelectMvpPlacementOption(optionId), Is.True);
+                Assert.That(fixture.Acquisition.TryPrice(MvpDungeonPlacementIds.MonsterCategoryId, optionId, out double price), Is.True);
+                double mana = root.Save.structureRuntime.ManaReserve;
+                string custody = JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership);
+                overlay.PlaceSelectedMvpStructure(); overlay.PlaceSelectedMvpStructure();
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - 2 * price));
+                var assignments = root.Save.spatialFloors[0].RoomContents.Assignments;
+                Assert.That(assignments.Length, Is.EqualTo(2));
+                Assert.That(assignments.All(a => a.OptionId == optionId), Is.True);
+                Assert.That(assignments.Select(a => a.AssignmentId).Distinct().Count(), Is.EqualTo(2));
+                Assert.That(overlay.GetSelectedMvpRoomCapacityText(), Does.Contain("2/2"));
+                var localize = new System.Func<string, string, string>((key, fallback) => root.Content.GetString(key, fallback));
+                string name = MvpDungeonPlacementPresenter.ResolveOptionName(optionId, localize);
+                Assert.That(name, Is.Not.Empty);
+                string composition = MvpDungeonPlacementPresenter.BuildCompositionText(
+                    root.ResolveMvpPlayerLoopSummary().DungeonPlacements, localize);
+                Assert.That(composition.Split(new[] { name }, System.StringSplitOptions.None).Length - 1, Is.EqualTo(2));
+                Assert.That(composition, Does.Not.Contain("placement."));
+                Assert.That(composition, Does.Not.Contain("ui."));
+                foreach (var assignment in assignments) Assert.That(composition, Does.Not.Contain(assignment.AssignmentId));
+                Assert.That(JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership), Is.EqualTo(custody));
+                byte[] bytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+                long next = root.Save.spatialFloors[0].RoomContents.NextSequence;
+                overlay.PlaceSelectedMvpStructure();
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString("ui.banner.place_room_capacity_full", "")));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - 2 * price));
+                Assert.That(root.Save.spatialFloors[0].RoomContents.NextSequence, Is.EqualTo(next));
+                CollectionAssert.AreEqual(bytes, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+                CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
+        [TestCase(false, false, false)]
+        [TestCase(true, true, false)]
+        [TestCase(false, false, true)]
+        [TestCase(true, true, true)]
+        public void BootstrapOwnedRedeploymentRemainsAvailableWhenPurchaseGateIsBlocked(bool online, bool pending, bool sameMonsterActive)
+        {
+            var fixture = ReturnedContentRedeploymentTests.Owned();
+            if (sameMonsterActive)
+            {
+                var owned = fixture.State.LifecycleAndOwnership.ReturnedContents.First();
+                fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId,
+                    fixture.State.Floors[0].Layout.Rooms.Single().RoomInstanceId)));
+            }
             var go = new GameObject("OwnedRedeploymentPurchaseGateIntegration");
             try
             {
@@ -119,7 +171,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 double beforeMana = root.Save.structureRuntime.ManaReserve;
                 Assert.That(overlay.RedeploySelectedReturnedContent(), Is.True);
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana));
-                var assignment = root.Save.spatialFloors[0].RoomContents.Assignments.Single();
+                Assert.That(root.Save.spatialFloors[0].RoomContents.Assignments.Length, Is.EqualTo(sameMonsterActive ? 2 : 1));
+                var assignment = root.Save.spatialFloors[0].RoomContents.Assignments.Single(a => a.AssignmentId == owned.AssignmentId);
                 Assert.That(assignment.AssignmentId, Is.EqualTo(owned.AssignmentId));
                 Assert.That(assignment.CategoryId, Is.EqualTo(owned.CategoryId));
                 Assert.That(assignment.OptionId, Is.EqualTo(owned.OptionId));

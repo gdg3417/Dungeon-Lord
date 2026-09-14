@@ -85,7 +85,75 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var stale = f.Authority.Execute(f.ActivePath, f.FileSystem, oldSession, oldState, oldRuntime, request);
             Assert.That(stale.IsSuccess, Is.False); Assert.That(stale.RuntimeProjection, Is.Null);
             CollectionAssert.AreEqual(durable, f.FileSystem.ReadAllBytes(f.ActivePath));
-            Unchanged(f, request, DetachedCanonicalSpatialMutation.NoOpReason);
+            if (Category(option) == MvpDungeonPlacementIds.MonsterCategoryId)
+            {
+                f.Accept(f.Execute(request));
+                Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(before - 2 * price));
+                Assert.That(f.State.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(2));
+                Unchanged(f, request, DetachedSpatialMigrationPreparer.CapacityReason);
+            }
+            else Unchanged(f, request, DetachedCanonicalSpatialMutation.NoOpReason);
+        }
+
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.SkeletonOptionId)]
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId, MvpDungeonPlacementIds.GoblinOptionId)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.GoblinOptionId)]
+        public void BasicRoomMonsterInstancesPurchaseToCapacityAndReopenInCanonicalOrder(string firstOption, string secondOption)
+        {
+            var f = Room();
+            f.Runtime.structureRuntime.ManaReserve = 100; // Explicit test wallet; production prices remain configured.
+            long next = f.State.Floors[0].RoomContents.NextSequence;
+            string[] investment = Investment(f);
+            string custody = JsonUtility.ToJson(f.State.LifecycleAndOwnership);
+            var oldSession = f.Session; var oldState = f.State; var oldRuntime = f.Runtime;
+            var first = DetachedCanonicalMutationRequest.Place(Category(firstOption), firstOption, Target(f));
+            f.Accept(f.Execute(first));
+            Assert.That(f.Acquisition.TryPrice(Category(firstOption), firstOption, out double firstPrice), Is.True);
+            Assert.That(firstPrice, Is.EqualTo(firstOption == MvpDungeonPlacementIds.SkeletonOptionId ? 25 : 20));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(100 - firstPrice));
+            Assert.That(f.State.Floors[0].RoomContents.NextSequence, Is.EqualTo(next + 1));
+            var firstAssignment = f.State.Floors[0].RoomContents.Assignments.Single();
+            byte[] afterFirst = f.Session.GetCurrentBytes();
+            string afterRuntime = JsonUtility.ToJson(f.Runtime), afterState = JsonUtility.ToJson(f.State);
+            var stale = f.Authority.Execute(f.ActivePath, f.FileSystem, oldSession, oldState, oldRuntime, first);
+            Assert.That(stale.IsSuccess, Is.False); Assert.That(stale.RuntimeProjection, Is.Null); Assert.That(stale.Session, Is.Null);
+            Assert.That(oldRuntime.structureRuntime.ManaReserve, Is.EqualTo(100));
+            Assert.That(oldState.Floors[0].RoomContents.Assignments, Is.Empty);
+            Assert.That(oldState.Floors[0].RoomContents.NextSequence, Is.EqualTo(next));
+            Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(afterRuntime));
+            Assert.That(JsonUtility.ToJson(f.State), Is.EqualTo(afterState));
+            CollectionAssert.AreEqual(afterFirst, f.FileSystem.ReadAllBytes(f.ActivePath));
+            CollectionAssert.AreEqual(afterFirst, f.Session.GetCurrentBytes());
+
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption, Target(f))));
+            Assert.That(f.Acquisition.TryPrice(Category(secondOption), secondOption, out double secondPrice), Is.True);
+            Assert.That(secondPrice, Is.EqualTo(secondOption == MvpDungeonPlacementIds.SkeletonOptionId ? 25 : 20));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(100 - firstPrice - secondPrice));
+            Assert.That(f.State.Floors[0].RoomContents.NextSequence, Is.EqualTo(next + 2));
+            byte[] durable = f.Session.GetCurrentBytes();
+            string[] ids = f.State.Floors[0].RoomContents.Assignments.Select(a => a.AssignmentId).ToArray();
+            Assert.That(ids.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(2));
+            Assert.That(ids[0], Is.EqualTo(firstAssignment.AssignmentId));
+            f.Reopen();
+            var assignments = f.State.Floors[0].RoomContents.Assignments;
+            CollectionAssert.AreEqual(ids, assignments.Select(a => a.AssignmentId).ToArray());
+            CollectionAssert.AreEqual(new[] { firstOption, secondOption }, assignments.Select(a => a.OptionId).ToArray());
+            CollectionAssert.AreEqual(new[] { next, next + 1 }, assignments.Select(a => a.Sequence).ToArray());
+            CollectionAssert.AreEqual(durable, f.Session.GetCurrentBytes());
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(100 - firstPrice - secondPrice));
+            var route = CanonicalMvpRouteProjection.InspectWithProductionContent(f.Runtime, f.Production);
+            CollectionAssert.AreEqual(new[] { firstOption, secondOption }, route.Rooms.Single().AssignedMonsterOptionIds);
+            var runInputs = route.Rooms.Single().ToOrderedPlacements();
+            CollectionAssert.AreEqual(new[] { firstOption, secondOption }, runInputs.Where(p =>
+                p.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).Select(p => p.OptionId).ToArray());
+            var effects = MvpPlacementEffectsResolver.ResolvePlacements(runInputs, f.Configuration);
+            CollectionAssert.AreEqual(new[] { firstOption, secondOption }, effects.ContributingOptionIds.Where(id =>
+                Category(id) == MvpDungeonPlacementIds.MonsterCategoryId).ToArray());
+            CollectionAssert.AreEqual(investment, Investment(f));
+            Assert.That(JsonUtility.ToJson(f.State.LifecycleAndOwnership), Is.EqualTo(custody));
+            Unchanged(f, first, DetachedSpatialMigrationPreparer.CapacityReason);
+            Unchanged(f, DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption, Target(f)),
+                DetachedSpatialMigrationPreparer.CapacityReason);
         }
 
         [TestCase("missing")] [TestCase("duplicate")] [TestCase("unknown")] [TestCase("extra")]
@@ -254,14 +322,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.Not.EqualTo(owned.AssignmentId));
             CollectionAssert.AreEqual(ledger, Investment(f));
-            Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f)), DetachedCanonicalSpatialMutation.NoOpReason);
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f))));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.State.Floors[0].RoomContents.Assignments.Count(a => a.OptionId == owned.OptionId), Is.EqualTo(2));
+            Assert.That(f.State.Floors[0].RoomContents.Assignments.Any(a => a.AssignmentId == owned.AssignmentId), Is.True);
+            Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f)),
+                DetachedCanonicalSpatialMutation.ReturnedItemMissingReason);
             var trap = f.State.LifecycleAndOwnership.ReturnedContents.Single(i => i.CategoryId == MvpDungeonPlacementIds.TrapCategoryId);
             Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, "test.missing.room"));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, Target(f)))); f.Reopen();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
             var assigned = f.State.Floors[0].RoomContents.Assignments.Single(a => a.AssignmentId == trap.AssignmentId);
             Assert.That(assigned.CategoryId, Is.EqualTo(trap.CategoryId)); Assert.That(assigned.OptionId, Is.EqualTo(trap.OptionId));
-            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count - 1));
+            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count - 2));
             CollectionAssert.AreEqual(ledger, Investment(f));
             Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, Target(f)), DetachedCanonicalSpatialMutation.ReturnedItemMissingReason);
         }

@@ -132,7 +132,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void AcquisitionDoesNotConsumeCustodyAndSameOptionRedeploymentIsNoOp()
+        public void AcquisitionKeepsCustodyAndSameMonsterRedeploymentUsesRemainingCapacity()
         {
             var f = Owned(); var request = Request(f); var owned = Item(f);
             Assert.That(request.Kind, Is.Not.EqualTo(DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId).Kind));
@@ -140,11 +140,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f))));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(2));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.Not.EqualTo(owned.AssignmentId));
+            double mana = f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(f.Execute(request)); f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            var assignments = f.State.Floors[0].RoomContents.Assignments;
+            Assert.That(assignments.Length, Is.EqualTo(2));
+            Assert.That(assignments.All(a => a.OptionId == owned.OptionId), Is.True);
+            Assert.That(assignments.Any(a => a.AssignmentId == owned.AssignmentId && a.CategoryId == owned.CategoryId), Is.True);
+            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Any(a => a.AssignmentId == owned.AssignmentId), Is.False);
             byte[] before = f.Session.GetCurrentBytes(); var runtime = f.Runtime;
-            var result = f.Execute(request);
-            Assert.That(result.IsNoOp, Is.True); Assert.That(result.RuntimeProjection, Is.Null);
-            Assert.That(f.Runtime, Is.SameAs(runtime));
+            var retry = f.Execute(request);
+            Assert.That(retry.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.ReturnedItemMissingReason));
+            Assert.That(retry.RuntimeProjection, Is.Null); Assert.That(f.Runtime, Is.SameAs(runtime));
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
+        [Test]
+        public void FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes()
+        {
+            var f = Owned(); var owned = Item(f);
+            var acquire = DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f));
+            f.Accept(f.Execute(acquire)); f.Accept(f.Execute(acquire));
+            Assert.That(f.State.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(2));
+            Assert.That(f.State.Floors[0].RoomContents.Assignments.All(a => a.OptionId == owned.OptionId), Is.True);
+            byte[] before = f.Session.GetCurrentBytes();
+            string runtime = JsonUtility.ToJson(f.Runtime), state = JsonUtility.ToJson(f.State);
+            var session = f.Session;
+            var rejected = f.Execute(DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f)));
+            Assert.That(rejected.IsSuccess, Is.False); Assert.That(rejected.IsNoOp, Is.False);
+            Assert.That(rejected.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
+            Assert.That(rejected.RuntimeProjection, Is.Null); Assert.That(rejected.Session, Is.Null);
+            Assert.That(f.Session, Is.SameAs(session));
+            Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(runtime));
+            Assert.That(JsonUtility.ToJson(f.State), Is.EqualTo(state));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
         }
 
         [TestCase("category")] [TestCase("option")] [TestCase("duplicate")]

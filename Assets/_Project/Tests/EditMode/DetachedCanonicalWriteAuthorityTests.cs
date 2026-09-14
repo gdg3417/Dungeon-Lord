@@ -503,7 +503,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void SameCategoryContentsAppendDeterministicallyAndDuplicateIsByteExactNoOp()
+        public void SameCategoryContentsAppendDeterministicallyAndFullCapacityRejectsWithoutMutation()
         {
             Fixture fixture = Create();
             DetachedCanonicalMutationResult room = fixture.Prepare(
@@ -551,8 +551,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MvpDungeonPlacementIds.SkeletonOptionId, roomId), fixture.Production,
                 fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
 
-            Assert.That(duplicate.IsNoOp, Is.True);
-            Assert.That(duplicate.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(duplicate.IsNoOp, Is.False);
+            Assert.That(duplicate.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
             Assert.That(CanonicalSpatialSaveSerializer.Serialize(goblin.State,
                 fixture.Profile.Canonical).Value, Is.EqualTo(beforeDuplicate));
         }
@@ -598,7 +598,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void WriteAuthorityPersistsTwoMonstersAndRejectsDuplicateWithoutTouchingDisk()
+        public void WriteAuthorityPersistsTwoMonstersAndRejectsFullCapacityWithoutTouchingDisk()
         {
             Fixture fixture = Create();
             DetachedCanonicalWriteResult room = fixture.Execute(
@@ -639,8 +639,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId, roomId));
 
-            Assert.That(duplicate.IsNoOp, Is.True);
-            Assert.That(duplicate.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(duplicate.IsNoOp, Is.False);
+            Assert.That(duplicate.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
             Assert.That(duplicate.Session, Is.Null);
             Assert.That(fixture.Session, Is.SameAs(committedSession));
             Assert.That(fixture.FileSystem.ReadAllBytes(fixture.ActivePath), Is.EqualTo(committed));

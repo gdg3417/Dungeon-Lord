@@ -285,7 +285,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Array.Empty<RoomContentAssignment>();
             RoomContentAssignment[] matching = assignments.Where(value => value != null &&
                 value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == categoryId).ToArray();
-            if (matching.Any(value => value.OptionId == optionId)) return NoOpReason;
+            if (categoryId != MvpDungeonPlacementIds.MonsterCategoryId &&
+                matching.Any(value => value.OptionId == optionId)) return NoOpReason;
             if (!CanonicalRoomCapacityResolver.TryResolve(production, room.RoomDefinitionId,
                 out MvpRoomSlotCapacity capacity, out string capacityReason)) return capacityReason;
             int maximum = categoryId == MvpDungeonPlacementIds.MonsterCategoryId ? capacity.MonsterCapacity :
@@ -330,7 +331,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomContentAssignment[] assignments = floor.RoomContents.Assignments;
             RoomContentAssignment[] matching = assignments.Where(value =>
                 value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == owned.CategoryId).ToArray();
-            if (matching.Any(value => value.OptionId == owned.OptionId)) return NoOpReason;
+            if (owned.CategoryId != MvpDungeonPlacementIds.MonsterCategoryId &&
+                matching.Any(value => value.OptionId == owned.OptionId)) return NoOpReason;
             if (!CanonicalRoomCapacityResolver.TryResolve(production, room.RoomDefinitionId,
                     out MvpRoomSlotCapacity capacity, out string reason)) return reason;
             int maximum = owned.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId ? capacity.MonsterCapacity :

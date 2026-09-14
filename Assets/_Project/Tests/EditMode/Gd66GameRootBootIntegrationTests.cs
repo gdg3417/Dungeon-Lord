@@ -919,7 +919,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(overlay.MvpStructurePlacementFeedback, Is.Empty);
             Assert.That(root.BannerMessage,
-                Is.EqualTo(root.Content.GetString("ui.banner.place_failed", "ui.banner.place_failed")));
+                Is.EqualTo(root.Content.GetString("ui.banner.place_room_capacity_full", "ui.banner.place_room_capacity_full")));
             Assert.That(root.BannerMessage, Does.Not.Contain("gd66."));
             Assert.That(root.BannerMessage, Does.Not.Contain("Unknown category"));
             Assert.That(CaptureLegacySpatialEvidence(root.Save), Is.EqualTo(frozenLegacyEvidence));
