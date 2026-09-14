@@ -19,6 +19,7 @@ namespace DungeonBuilder.M0
         private ProductionSpatialContentSnapshot _production;
         private StructuralContentRemovalPolicySnapshot _removalPolicy;
         private StructuralEconomySnapshot _economy;
+        private ContentAcquisitionEconomySnapshot _acquisition;
         private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
         private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
         private RenovationUndo _undo;
@@ -36,6 +37,10 @@ namespace DungeonBuilder.M0
             if (monotonicSeconds != null) _monotonicSeconds = monotonicSeconds; _undo = null;
         }
         public void InvalidateRenovationUndo() => _undo = null;
+        public void ConfigureContentAcquisitionEconomy(ContentAcquisitionEconomySnapshot acquisition) => _acquisition = acquisition;
+        public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text) =>
+            ContentAcquisitionEconomyPresenter.Present(_acquisition, categoryId, optionId,
+                current?.structureRuntime?.ManaReserve ?? double.NaN, text);
         internal DetachedCanonicalWriteResult SetQaMana(SaveData current, bool fillToCapacity)
         {
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
@@ -175,9 +180,10 @@ namespace DungeonBuilder.M0
             {
                 SaveData initial = CreateNew(contentVersion);
                 NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
-                    _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration, _limits);
+                    _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration, _limits, _acquisition);
                 if (!created.IsSuccess)
-                { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
+                { banner = created.Reason == ContentAcquisitionEconomySnapshot.InvalidReason ? created.Reason :
+                    Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
                 _canonicalSession = created.Session;
                 return created.RuntimeProjection;
             }
@@ -422,7 +428,7 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
-                _validationContext, _limits, _removalPolicy, _economy, _economyModifiers);
+                _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition);
 
         private bool HasOwnedRecoveryEvidence()
         {

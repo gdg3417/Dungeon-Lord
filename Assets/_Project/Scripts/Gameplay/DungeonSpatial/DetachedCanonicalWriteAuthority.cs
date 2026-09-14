@@ -44,18 +44,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly SaveSpatialMigrationLimitsProfile limits;
         private readonly StructuralContentRemovalPolicySnapshot removalPolicy;
         private readonly StructuralEconomySnapshot economy;
+        private readonly ContentAcquisitionEconomySnapshot acquisition;
         private readonly FormulaModifier[] economyModifiers;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits,
             StructuralContentRemovalPolicySnapshot removalPolicy = null, StructuralEconomySnapshot economy = null,
-            IReadOnlyList<FormulaModifier> economyModifiers = null)
+            IReadOnlyList<FormulaModifier> economyModifiers = null, ContentAcquisitionEconomySnapshot acquisition = null)
         {
             this.production = production; this.compatibility = compatibility;
             this.configuration = configuration; this.context = context; this.limits = limits;
             this.removalPolicy = removalPolicy;
             this.economy = economy;
+            this.acquisition = acquisition;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
         }
 
@@ -81,10 +83,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult owned = ValidateSession(session);
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            if (request?.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
+            if (request?.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                ContentAcquisitionEconomySnapshot.IsAcquisition(request))
             {
-                // An owned-content move requires current custody, even when an old request would
-                // reproduce already-durable candidate bytes accepted by the general retry path.
+                // Ownership moves and purchases require a current session even when an old
+                // request would reproduce candidate bytes accepted by the general retry path.
                 try
                 {
                     if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
@@ -116,14 +119,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             else
             {
-                // The existing free implicit starter/content flow remains outside acquisition pricing.
-                // Only previously absent identities gain explicit zero records.
+                // Implicit compatibility geometry gains zero structural basis; content spending
+                // never becomes structural investment. Migration reconstruction uses other paths.
                 var prior = investment.ToDictionary(r => r.StructureId, StringComparer.Ordinal);
                 if (prior.Keys.Except(StructuralInvestment.Ids(mutation.State), StringComparer.Ordinal).Any())
                     return Failure(StructuralEconomyService.InvalidReason);
                 investment = StructuralInvestment.Zero(mutation.State).Select(r =>
                     prior.TryGetValue(r.StructureId, out var retained) ? retained.Copy() : r).ToArray();
-                snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
+                if (ContentAcquisitionEconomySnapshot.IsAcquisition(request))
+                {
+                    if (acquisition == null || !acquisition.TryPrice(request.CategoryId, request.OptionId, out double price))
+                        return Failure(ContentAcquisitionEconomySnapshot.InvalidReason);
+                    double mana = currentRuntime.structureRuntime?.ManaReserve ?? double.NaN;
+                    if (!StructuralEconomySnapshot.Nonnegative(mana))
+                        return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                    if (mana < price) return Failure(ContentAcquisitionEconomySnapshot.InsufficientReason);
+                    snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, mana - price, limits);
+                }
+                else snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
             }
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             DetachedCanonicalSaveSessionResult prepared =

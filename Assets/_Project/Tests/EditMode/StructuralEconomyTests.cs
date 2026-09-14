@@ -699,7 +699,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new SaveData { createdUtcUnix = 1, lastSavedUtcUnix = 1,
                     dungeonLayout = new DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState(),
                     structureRuntime = new StructureRuntimeState { ManaReserve = mana } },
-                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile);
+                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
+                PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, mana));
             Assert.That(native.IsSuccess, Is.True, native.Reason);
             f.Session = native.Session; f.State = native.Validation.State; f.Runtime = native.RuntimeProjection;
             f.Reopen(); return f;
@@ -737,6 +738,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
                 Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)));
             service.ConfigureStructuralEconomy(f.Economy, clock); service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
+            service.ConfigureContentAcquisitionEconomy(f.Acquisition);
             typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
             foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
                 Tuple.Create("_validationContext", (object)f.Context) })

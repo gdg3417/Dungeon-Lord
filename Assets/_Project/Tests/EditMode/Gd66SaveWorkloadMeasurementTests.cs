@@ -314,6 +314,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             foreach (var price in economy.Rooms.Concat(economy.Corridors)) price.Mana = 0;
             Assert.That(DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryCreate(economy,
                 fixture.Production.Catalog, out fixture.Economy), Is.True);
+            var acquisition = JsonUtility.FromJson<DungeonBuilder.M0.Economy.ContentAcquisitionEconomyConfiguration>(
+                System.IO.File.ReadAllText("Assets/_Project/Resources/content_acquisition_economy.json"));
+            foreach (var price in acquisition.Prices) price.Mana = 0; // Explicit test-only workload isolation.
+            Assert.That(DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.TryCreate(acquisition,
+                fixture.Economy, fixture.Profile.Canonical, out fixture.Acquisition), Is.True);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime = RepresentativeSave(); fixture.Runtime.saveVersion = SaveMigration.LatestSchemaVersion;

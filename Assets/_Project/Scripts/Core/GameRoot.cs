@@ -423,6 +423,12 @@ namespace DungeonBuilder.M0
                 DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryParse(economyAsset.bytes,
                     productionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
             SaveService.ConfigureStructuralEconomy(economy);
+            var acquisitionAsset = Resources.Load<TextAsset>("content_acquisition_economy");
+            DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot acquisition = null;
+            if (acquisitionAsset != null && SaveSpatialMigrationLimits != null)
+                DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.TryParse(acquisitionAsset.bytes,
+                    economy, SaveSpatialMigrationLimits.Canonical, out acquisition);
+            SaveService.ConfigureContentAcquisitionEconomy(acquisition);
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
@@ -951,6 +957,16 @@ namespace DungeonBuilder.M0
 
             if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save))
             {
+                if (!string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId, StringComparison.Ordinal))
+                {
+                    GateEvaluationResult purchaseGate = _restrictedActionGate.Evaluate(
+                        new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+                    if (!purchaseGate.Allowed)
+                    {
+                        bannerKey = purchaseGate.MessageKey;
+                        return false;
+                    }
+                }
                 CanonicalMvpRouteProjectionResult route =
                     CanonicalMvpRouteProjection.InspectWithProductionContent(
                         Save, Content?.ProductionSpatialContent);
@@ -977,7 +993,9 @@ namespace DungeonBuilder.M0
                         DetachedSpatialMigrationPreparer.CapacityReason, StringComparison.Ordinal))
                         bannerKey = "ui.banner.place_room_capacity_full";
                     else
-                        bannerKey = string.IsNullOrEmpty(playerKey) ? "ui.banner.place_failed" : playerKey;
+                        bannerKey = written.Reason == DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.InsufficientReason ||
+                            written.Reason == DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.InvalidReason
+                            ? written.Reason : string.IsNullOrEmpty(playerKey) ? "ui.banner.place_failed" : playerKey;
                     return false;
                 }
                 // Canonical state remains the sole spatial authority. This detached entry exists

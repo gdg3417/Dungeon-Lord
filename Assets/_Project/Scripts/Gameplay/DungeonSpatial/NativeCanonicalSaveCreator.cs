@@ -1,6 +1,8 @@
 using System;
 using System.Text;
 using UnityEngine;
+using DungeonBuilder.M0.Economy;
+using DungeonBuilder.M0.Gameplay.Structures;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -16,19 +18,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsSuccess => Session != null && RuntimeProjection != null;
     }
 
-    /// <summary>Creates the first complete schema-8 payload without a legacy whole-save writer.</summary>
+    /// <summary>Creates a fresh complete canonical payload with configured starting mana.</summary>
     public static class NativeCanonicalSaveCreator
     {
         public static NativeCanonicalSaveResult Create(string activePath,
             ISpatialMigrationFileSystem fileSystem, SaveData recognizedState,
             SpatialLayoutCompatibilitySnapshot compatibility, ProductionSpatialContentSnapshot production,
-            byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits)
+            byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits, ContentAcquisitionEconomySnapshot acquisition)
         {
             if (fileSystem == null || recognizedState == null || compatibility == null || production == null ||
                 legacyConfiguration == null || limits == null || fileSystem.Exists(activePath))
                 return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            if (acquisition == null) return Failure(ContentAcquisitionEconomySnapshot.InvalidReason);
             try
             {
+                // Detached initialization only: loading or migrating existing saves never enters here.
+                recognizedState = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(recognizedState));
+                if (recognizedState.structureRuntime == null) recognizedState.structureRuntime = new StructureRuntimeState();
+                recognizedState.structureRuntime.ManaReserve = acquisition.StartingMana;
                 CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                     compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
                 if (!selected.Success) return Failure(selected.Code);

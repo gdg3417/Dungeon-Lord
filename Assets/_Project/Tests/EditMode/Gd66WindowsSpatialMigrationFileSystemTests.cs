@@ -682,6 +682,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+            var economy = PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits);
+            service.ConfigureStructuralEconomy(economy);
+            service.ConfigureContentAcquisitionEconomy(
+                PhaseFourTestSupport.Acquisition(economy, fixture.Limits));
             return service;
         }
 
