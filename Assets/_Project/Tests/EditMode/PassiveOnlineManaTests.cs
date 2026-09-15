@@ -298,6 +298,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Fixture fixture = OneFloorFixture();
             fixture.Runtime.structureRuntime.ManaReserve = 0d;
             fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            double initialHeat = fixture.Runtime.structureRuntime.Heat;
             CanonicalPassiveManaService passive = Service(fixture);
             ContentBootstrap bootstrap = Bootstrap();
             var time = new TimeService(new SimpleLogger(false), bootstrap.tickSeconds,
@@ -313,14 +314,98 @@ namespace DungeonBuilder.M0.Tests.EditMode
             time.Update(bootstrap.tickSeconds);
             Assert.That(callbacks, Is.EqualTo(1));
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(0.5d));
+            Assert.That(fixture.Runtime.structureRuntime.Heat, Is.EqualTo(initialHeat));
             time.OnPause();
             time.Update(bootstrap.tickSeconds * 3);
             Assert.That(callbacks, Is.EqualTo(1));
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(0.5d));
+            Assert.That(fixture.Runtime.structureRuntime.Heat, Is.EqualTo(initialHeat));
             time.OnResume();
             time.Update(bootstrap.tickSeconds);
             Assert.That(callbacks, Is.EqualTo(2));
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(1d));
+            Assert.That(fixture.Runtime.structureRuntime.Heat, Is.EqualTo(initialHeat));
+        }
+
+        [Test]
+        public void CanonicalActiveTickAtConcernMinimumPreservesHeatAndUsesConcernEfficiency()
+        {
+            Fixture fixture = OneFloorFixture();
+            ContentBootstrap bootstrap = Bootstrap();
+            fixture.Runtime.structureRuntime.ManaReserve = 0d;
+            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatConcernMinimum;
+            PassiveManaRateSummary expectedRate = Service(fixture).ResolveRate(
+                fixture.Runtime, fixture.Configuration);
+            Assert.That(expectedRate.RuleResolved, Is.True, expectedRate.Error.ToString());
+            Assert.That(expectedRate.HeatTierId, Is.EqualTo(CurrentHeatTierResolver.ConcernTierId));
+            Assert.That(Configuration(fixture).TryGetHeatEfficiency(
+                CurrentHeatTierResolver.ConcernTierId, out double concernEfficiency), Is.True);
+            Assert.That(expectedRate.HeatEfficiencyMultiplier, Is.EqualTo(concernEfficiency));
+
+            GameObject go = new GameObject("Canonical active tick Concern boundary");
+            try
+            {
+                GameRoot root = ConfigureTickRoot(go, fixture, bootstrap);
+
+                InvokeSimulationTick(root, 1);
+
+                Assert.That(root.CurrentHeat, Is.EqualTo(fixture.Configuration.HeatConcernMinimum));
+                Assert.That(root.Save.structureRuntime.Heat,
+                    Is.EqualTo(fixture.Configuration.HeatConcernMinimum));
+                Assert.That(root.Save.structureRuntime.ManaReserve,
+                    Is.EqualTo(expectedRate.ManaPerHour * bootstrap.tickSeconds / 3600d)
+                        .Within(0.000000001d));
+                Assert.That(CurrentHeatTierResolver.Resolve(fixture.Configuration,
+                    root.Save.structureRuntime.Heat).TierId,
+                    Is.EqualTo(CurrentHeatTierResolver.ConcernTierId));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void MultipleCanonicalActiveTicksAtNoticeMinimumPreserveHeatAndTier()
+        {
+            Fixture fixture = OneFloorFixture();
+            ContentBootstrap bootstrap = Bootstrap();
+            fixture.Runtime.structureRuntime.ManaReserve = 0d;
+            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatNoticeMinimum;
+            PassiveManaRateSummary expectedRate = Service(fixture).ResolveRate(
+                fixture.Runtime, fixture.Configuration);
+            Assert.That(expectedRate.RuleResolved, Is.True, expectedRate.Error.ToString());
+            Assert.That(expectedRate.HeatTierId, Is.EqualTo(CurrentHeatTierResolver.NoticeTierId));
+            Assert.That(Configuration(fixture).TryGetHeatEfficiency(
+                CurrentHeatTierResolver.NoticeTierId, out double noticeEfficiency), Is.True);
+            Assert.That(expectedRate.HeatEfficiencyMultiplier, Is.EqualTo(noticeEfficiency));
+
+            GameObject go = new GameObject("Canonical active ticks Notice boundary");
+            try
+            {
+                GameRoot root = ConfigureTickRoot(go, fixture, bootstrap);
+                const int tickCount = 4;
+
+                for (int tick = 1; tick <= tickCount; tick++)
+                {
+                    InvokeSimulationTick(root, tick);
+                    Assert.That(root.CurrentHeat,
+                        Is.EqualTo(fixture.Configuration.HeatNoticeMinimum));
+                    Assert.That(root.Save.structureRuntime.Heat,
+                        Is.EqualTo(fixture.Configuration.HeatNoticeMinimum));
+                }
+
+                Assert.That(root.Save.structureRuntime.ManaReserve,
+                    Is.EqualTo(expectedRate.ManaPerHour * bootstrap.tickSeconds * tickCount / 3600d)
+                        .Within(0.000000001d));
+                Assert.That(CurrentHeatTierResolver.Resolve(fixture.Configuration,
+                    root.Save.structureRuntime.Heat).TierId,
+                    Is.EqualTo(CurrentHeatTierResolver.NoticeTierId));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
         }
 
         [Test]
@@ -540,6 +625,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(field, Is.Not.Null, name);
             field.SetValue(target, value);
+        }
+
+        private static GameRoot ConfigureTickRoot(GameObject go, Fixture fixture,
+            ContentBootstrap bootstrap)
+        {
+            GameRoot root = go.AddComponent<GameRoot>();
+            SetField(root, "<Save>k__BackingField", fixture.Runtime);
+            SetField(root, "<CurrentHeat>k__BackingField", fixture.Runtime.structureRuntime.Heat);
+            SetField(root, "_runSimulationService", new RunSimulationService(fixture.Configuration));
+            Assert.That(root.ConfigureCanonicalPassiveManaForTests(Configuration(fixture),
+                fixture.Economy, fixture.Profile.Canonical.Spatial, bootstrap.tickSeconds,
+                bootstrap.timeRules.activeSaveIntervalSeconds), Is.True);
+            return root;
+        }
+
+        private static void InvokeSimulationTick(GameRoot root, long tickIndex)
+        {
+            MethodInfo method = typeof(GameRoot).GetMethod("HandleSimulationTick",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            method.Invoke(root, new object[] { tickIndex });
         }
     }
 }

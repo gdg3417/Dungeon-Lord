@@ -2648,19 +2648,6 @@ namespace DungeonBuilder.M0
             ApplyConfiguredPlayerResearchActiveTick(researchTickSeconds,
                 persistTransition: false);
             RefreshOfflineSummaryLines();
-            HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
-                tickIndex,
-                CurrentHeat,
-                HeatDecayPerTick,
-                1
-            ));
-
-            CurrentHeat = decayResult.NewHeat;
-            HeatLine = $"Heat: {CurrentHeat:0.00}";
-            if (Save?.structureRuntime != null)
-            {
-                Save.structureRuntime.Heat = CurrentHeat;
-            }
             _passiveManaService?.ApplyTick(Save, RunSimulationConfig, tickIndex);
             TickLine = $"Tick: {tickIndex}";
             ManaLine = Save?.structureRuntime != null
