@@ -36,6 +36,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(ContentAcquisitionEconomySnapshot.TryParse(bytes, economy, limits, out var config), Is.True);
             return config;
         }
+
+        internal static PassiveOnlineManaConfigurationSnapshot PassiveMana(
+            CanonicalSpatialSerializationLimits limits)
+        {
+            PassiveOnlineManaConfigurationLoadResult loaded =
+                PassiveOnlineManaConfigurationSnapshot.Load(File.ReadAllBytes(
+                    "Assets/_Project/Resources/passive_online_mana.json"), limits);
+            Assert.That(loaded.IsSuccess, Is.True, loaded.Error.ToString());
+            return loaded.Value;
+        }
     }
 }
 #endif

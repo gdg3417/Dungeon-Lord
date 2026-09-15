@@ -38,6 +38,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.AreEqual(405, result.PauseDeltaSeconds);
             Assert.IsTrue(result.SkewDetected);
         }
+
+        [Test]
+        public void TimeService_PauseStopsConfiguredTicksAndResumeKeepsSingleSubscription()
+        {
+            var source = new FakeTimeSource { Now = 1000 };
+            var save = new SaveData();
+            var service = new TimeService(new SimpleLogger(false), 10, 300, source);
+            int observed = 0;
+            service.AttachSave(save);
+            service.OnTick += _ => observed++;
+
+            service.Update(10f);
+            service.OnPause();
+            service.Update(30f);
+            source.Now = 1010;
+            service.OnResume();
+            service.Update(10f);
+
+            Assert.That(observed, Is.EqualTo(2));
+            Assert.That(save.totalTicks, Is.EqualTo(2));
+            Assert.That(service.IsPausedForTests, Is.False);
+        }
     }
 }
 #endif

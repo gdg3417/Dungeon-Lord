@@ -66,6 +66,7 @@ namespace DungeonBuilder.M0
         public string HeatLine { get; private set; } = "Heat: 0.00";
         public string TickLine { get; private set; } = "Tick: 0";
         public string ManaLine { get; private set; } = "Mana: 0.00";
+        public string PassiveManaLine { get; private set; } = string.Empty;
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
         public string RunLine { get; private set; } = "ui.run.none";
@@ -107,6 +108,11 @@ namespace DungeonBuilder.M0
         private readonly IHeatSystem _heatSystem = new HeatSystem();
         private readonly PlacementService _placementService = new PlacementService();
         private StructureSimulationPass _structureSimulationPass;
+        private StructuralEconomySnapshot _structuralEconomy;
+        private PassiveOnlineManaConfigurationSnapshot _passiveManaConfiguration;
+        private CanonicalPassiveManaService _passiveManaService;
+        private ActivePlaySaveScheduler _activePlaySaveScheduler;
+        private int _configuredSimulationTickSeconds;
         private RunSimulationService _runSimulationService;
         private bool _explicitSaveDeleteQuiesced;
         private OfflineSummaryResolver _offlineSummaryResolver;
@@ -165,9 +171,18 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult ApplyConfiguredPlayerResearchActiveTick(long elapsedSeconds)
         {
-            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().ApplyActiveTick(elapsedSeconds);
+            PlayerResearchActionResult result = ApplyConfiguredPlayerResearchActiveTick(
+                elapsedSeconds, persistTransition: true);
             RefreshOfflineSummaryLines();
             return result;
+        }
+
+        private PlayerResearchActionResult ApplyConfiguredPlayerResearchActiveTick(
+            long elapsedSeconds, bool persistTransition)
+        {
+            return CreatePlayerResearchActionHandler(
+                persistTransition ? (Action)SavePlayerResearchTransition : null)
+                .ApplyActiveTick(elapsedSeconds);
         }
 
         private void Awake()
@@ -422,6 +437,7 @@ namespace DungeonBuilder.M0
                 productionSpatialContent?.Catalog != null)
                 DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryParse(economyAsset.bytes,
                     productionSpatialContent.Catalog, SaveSpatialMigrationLimits.Canonical, out economy);
+            _structuralEconomy = economy;
             SaveService.ConfigureStructuralEconomy(economy);
             var acquisitionAsset = Resources.Load<TextAsset>("content_acquisition_economy");
             DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot acquisition = null;
@@ -429,6 +445,15 @@ namespace DungeonBuilder.M0
                 DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.TryParse(acquisitionAsset.bytes,
                     economy, SaveSpatialMigrationLimits.Canonical, out acquisition);
             SaveService.ConfigureContentAcquisitionEconomy(acquisition);
+            if (Content.ProductionSpatialContent == null)
+            {
+                SaveService.LoadOrCreate(contentVersion, out string invalidSpatialSaveBanner);
+                if (!string.IsNullOrEmpty(invalidSpatialSaveBanner))
+                    SetBanner(Content.GetString(invalidSpatialSaveBanner, invalidSpatialSaveBanner));
+                return false;
+            }
+            if (!TryConfigureCanonicalPassiveMana())
+                return false;
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
             if (Save == null)
@@ -442,7 +467,9 @@ namespace DungeonBuilder.M0
         private bool CompleteSuccessfulBoot(SaveData validatedSave, string saveBanner)
         {
             if (_explicitSaveDeleteQuiesced || validatedSave == null ||
-                !CanonicalMvpRouteProjection.IsCanonical(validatedSave))
+                !CanonicalMvpRouteProjection.IsCanonical(validatedSave) ||
+                _passiveManaService == null || _activePlaySaveScheduler == null ||
+                _configuredSimulationTickSeconds <= 0)
                 return false;
             Save = validatedSave;
             _offlineSummaryResolver = new OfflineSummaryResolver(new SystemTimeSource());
@@ -454,7 +481,7 @@ namespace DungeonBuilder.M0
                 SetBanner(Content.GetString(saveBanner, saveBanner));
             }
 
-            int tickSeconds = Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 10;
+            int tickSeconds = _configuredSimulationTickSeconds;
             int skewSeconds = (Content.Bootstrap != null && Content.Bootstrap.timeRules != null)
                 ? Content.Bootstrap.timeRules.detectClockSkewSeconds
                 : 300;
@@ -506,9 +533,73 @@ namespace DungeonBuilder.M0
         }
 
         internal bool GameplayServicesInitializedForTests => TimeService != null &&
-            _structureSimulationPass != null && _runSimulationService != null;
+            _structureSimulationPass != null && _runSimulationService != null &&
+            _passiveManaService != null && _activePlaySaveScheduler != null;
         internal bool ExplicitSaveDeleteQuiescedForTests => _explicitSaveDeleteQuiesced;
+
+        internal bool ConfigureCanonicalPassiveManaForTests(
+            PassiveOnlineManaConfigurationSnapshot passiveMana,
+            StructuralEconomySnapshot structuralEconomy,
+            CanonicalSpatialSaveWorkloadLimits spatialLimits,
+            int tickSeconds,
+            int activeSaveIntervalSeconds)
+        {
+            try
+            {
+                ConfigureCanonicalPassiveMana(passiveMana, structuralEconomy, spatialLimits,
+                    tickSeconds, activeSaveIntervalSeconds);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 #endif
+
+        private bool TryConfigureCanonicalPassiveMana()
+        {
+            TextAsset asset = Resources.Load<TextAsset>(
+                PassiveOnlineManaConfigurationSnapshot.ProductionResourcePath);
+            ContentBootstrap bootstrap = Content?.Bootstrap;
+            TimeRules timeRules = bootstrap?.timeRules;
+            PassiveOnlineManaConfigurationLoadResult loaded =
+                PassiveOnlineManaConfigurationSnapshot.Load(asset != null ? asset.bytes : null,
+                    SaveSpatialMigrationLimits != null
+                        ? SaveSpatialMigrationLimits.Canonical
+                        : default(CanonicalSpatialSerializationLimits));
+            if (!loaded.IsSuccess || _structuralEconomy == null ||
+                bootstrap == null || bootstrap.tickSeconds <= 0 ||
+                timeRules == null || timeRules.activeSaveIntervalSeconds <= 0)
+            {
+                string key = PassiveOnlineManaConfigurationSnapshot.ConfigurationUnavailableKey;
+                SetBanner(Content != null ? Content.GetString(key, string.Empty) : string.Empty);
+                return false;
+            }
+
+            ConfigureCanonicalPassiveMana(loaded.Value, _structuralEconomy,
+                SaveSpatialMigrationLimits.Canonical.Spatial, bootstrap.tickSeconds,
+                timeRules.activeSaveIntervalSeconds);
+            return true;
+        }
+
+        private void ConfigureCanonicalPassiveMana(
+            PassiveOnlineManaConfigurationSnapshot passiveMana,
+            StructuralEconomySnapshot structuralEconomy,
+            CanonicalSpatialSaveWorkloadLimits spatialLimits,
+            int tickSeconds,
+            int activeSaveIntervalSeconds)
+        {
+            _passiveManaConfiguration = passiveMana ??
+                throw new ArgumentNullException(nameof(passiveMana));
+            _structuralEconomy = structuralEconomy ??
+                throw new ArgumentNullException(nameof(structuralEconomy));
+            _configuredSimulationTickSeconds = tickSeconds;
+            _passiveManaService = new CanonicalPassiveManaService(_passiveManaConfiguration,
+                _structuralEconomy, new FormulaEngine(), spatialLimits, tickSeconds);
+            _activePlaySaveScheduler = new ActivePlaySaveScheduler(tickSeconds,
+                activeSaveIntervalSeconds);
+        }
 
         private void InitializeStructureSimulationPass()
         {
@@ -1373,7 +1464,11 @@ namespace DungeonBuilder.M0
             }
 
             long tick = Save.totalTicks + 1;
-            _structureSimulationPass.SimulateTick(Save.dungeonLayout, Save.structureRuntime, tick);
+            StructureManaAuthorityMode manaMode = CanonicalMvpRouteProjection.IsCanonical(Save)
+                ? StructureManaAuthorityMode.CanonicalPassive
+                : StructureManaAuthorityMode.LegacyPrototype;
+            _structureSimulationPass.SimulateTick(Save.dungeonLayout, Save.structureRuntime,
+                tick, manaMode);
             Save.totalTicks = tick;
             CurrentHeat = Save.structureRuntime.Heat;
             RefreshStructureRuntimeLines();
@@ -1458,7 +1553,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
 
-            if (_structureSimulationPass != null && Save.dungeonLayout != null)
+            if (!CanonicalMvpRouteProjection.IsCanonical(Save) &&
+                _structureSimulationPass != null && Save.dungeonLayout != null)
             {
                 didApplyStructureTick = SimulateStructureTick();
             }
@@ -2073,7 +2169,11 @@ namespace DungeonBuilder.M0
             return Content != null && Content.Bootstrap != null ? Content.Bootstrap.researchUnlockBridge : null;
         }
 
-        private PlayerResearchActionHandler CreatePlayerResearchActionHandler()
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler() =>
+            CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
+
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(
+            Action saveTransition)
         {
             return new PlayerResearchActionHandler(
                 Save,
@@ -2087,7 +2187,7 @@ namespace DungeonBuilder.M0
                 HasValidAdventurerRun,
                 () => IsOnline,
                 () => VerificationPending,
-                SavePlayerResearchTransition);
+                saveTransition);
         }
 
         private bool HasValidAdventurerRun()
@@ -2135,6 +2235,9 @@ namespace DungeonBuilder.M0
         {
             if (Save?.structureRuntime == null)
             {
+                PassiveManaLine = Content != null
+                    ? Content.GetString(PassiveManaPresenter.UnavailableKey, string.Empty)
+                    : string.Empty;
                 return;
             }
 
@@ -2142,6 +2245,21 @@ namespace DungeonBuilder.M0
             ManaLine = $"Mana: {Save.structureRuntime.ManaReserve:0.00}";
             TickLine = $"Tick: {Save.totalTicks}";
             RefreshCurrentHeatTierLine();
+            RefreshPassiveManaLine();
+        }
+
+        private void RefreshPassiveManaLine()
+        {
+            Func<string, string> localize = key => Content != null
+                ? Content.GetString(key, key)
+                : key;
+            PassiveManaRateSummary summary = _passiveManaService != null
+                ? _passiveManaService.ResolveRate(Save, RunSimulationConfig)
+                : null;
+            PassiveManaLine = PassiveManaPresenter.Build(summary,
+                Save?.structureRuntime?.ManaReserve ?? double.NaN,
+                _passiveManaService != null ? _passiveManaService.ManaCapacity : double.NaN,
+                localize);
         }
 
         public void RefreshRunLine()
@@ -2526,8 +2644,9 @@ namespace DungeonBuilder.M0
             {
                 _activeSessionTickCount += 1;
             }
-            long researchTickSeconds = Content != null && Content.Bootstrap != null ? Content.Bootstrap.tickSeconds : 0;
-            ApplyConfiguredPlayerResearchActiveTick(researchTickSeconds);
+            long researchTickSeconds = _configuredSimulationTickSeconds;
+            ApplyConfiguredPlayerResearchActiveTick(researchTickSeconds,
+                persistTransition: false);
             RefreshOfflineSummaryLines();
             HeatResult decayResult = _heatSystem.Decay(new HeatDecayInput(
                 tickIndex,
@@ -2542,9 +2661,21 @@ namespace DungeonBuilder.M0
             {
                 Save.structureRuntime.Heat = CurrentHeat;
             }
+            _passiveManaService?.ApplyTick(Save, RunSimulationConfig, tickIndex);
             TickLine = $"Tick: {tickIndex}";
-            KpiSnapshot snap = Kpi != null ? Kpi.Snapshot() : new KpiSnapshot(0, 0, 0);
-            ManaLine = $"Mana: {snap.AverageManaPerTick:0.00}";
+            ManaLine = Save?.structureRuntime != null
+                ? $"Mana: {Save.structureRuntime.ManaReserve:0.00}"
+                : "Mana: 0.00";
+            RefreshPassiveManaLine();
+            if (_activePlaySaveScheduler != null && _activePlaySaveScheduler.AdvanceTick() &&
+                SaveService != null && Save != null)
+            {
+                SaveService.Save(Save, SaveReason.Periodic);
+                const string periodicSaveKey = "ui.dev.save.periodic";
+                SaveLine = Content != null
+                    ? Content.GetString(periodicSaveKey, string.Empty)
+                    : string.Empty;
+            }
         }
 
         private void HandleTickTelemetry(long tickIndex)

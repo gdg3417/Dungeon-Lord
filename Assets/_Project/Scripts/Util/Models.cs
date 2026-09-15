@@ -1266,6 +1266,7 @@ namespace DungeonBuilder.M0
         public bool allowOfflineProgression;
         public int maxOfflineSeconds;
         public int detectClockSkewSeconds;
+        public int activeSaveIntervalSeconds;
         public string offlineSummaryRuleSourceId;
     }
 
