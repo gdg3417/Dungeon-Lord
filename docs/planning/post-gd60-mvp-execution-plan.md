@@ -240,7 +240,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | Buildable/unavailable-tile unlock model, expansion/modifier behavior, costs and modifiers | Later spatial progression/construction packets | Design/Data; reviewed configured content and formulas, never runtime constants |
 | Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
 | Content acquisition prices and starting mana | Merged/qualified PR #203 | Approved tunable config: eight prices and StartingMana 40; structural prices unchanged |
-| Direct individual content unassignment | Current packet after #203 | Existing identities of monsters, traps and reusable loot nodes return to custody; schema 9 and zero mana; qualification pending |
+| Direct individual content unassignment | PR #204 qualified, pending merge after #203 | Existing identities of monsters, traps and reusable loot nodes return to custody; schema 9 and zero mana; automated, build, Editor and standalone qualification passed |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
 | Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |

@@ -50,7 +50,7 @@ These are static C# compiles against installed references, not Unity import, exe
 & "C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\NetCoreRuntime\dotnet.exe" "C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\DotNetSdkRoslyn\csc.dll" "@$env:TEMP\unassignment-static-editor.rsp"
 ```
 
-## Qualification status
+## Historical provisional qualification status
 
 Complete EditMode passed on 2026-09-14: **844 passed, 0 failed, 0 ignored/skipped, 0 inconclusive**, duration **115.6336255 seconds**. The registered `PhaseFourUnassignment` fixture passed **31/31** and the new renovation-undo integration case passed. CLI exit status: **0**. The owner explicitly approved the exact command once, outside the sandbox with normal user permissions; branch, HEAD, working tree and absence of Unity processes were rechecked immediately before launch. The first Unity invocation for this change was:
 
@@ -86,11 +86,11 @@ Manual Editor UAT at 1920x1080 and 1280x720, Windows Development Build, standalo
 
 Unit and SIT apply to ownership, atomic save, lifecycle and redeployment integration. UAT applies to the Bootstrap individual-selection flow. The implementation is available for static review but is not qualified for promotion or external review readiness under the build-promotion policy until required checks pass.
 
-## Manual qualification checklist
+## Historical provisional manual qualification checklist
 
 At both requested resolutions, establish two rooms; acquire duplicate monsters, a trap and each practical loot node. Cycle individual selections and return one duplicate, proving the other remains and mana/geometry/investment stay unchanged. Return the trap and loot node without rewards/refunds. Redeploy the same identities to the other room; reject full/incompatible destinations while retaining custody. Run the dungeon, close/reopen and inspect committed ownership. Repeat the core flow in the Windows Development Build, reopen it, and review Player.log for errors, exceptions, assertions, canonical/save/ownership/localization failures. Historical shutdown-only ComputeBuffer warnings remain a separate known concern unless new evidence ties them to this change.
 
-## Draft PR
+## Historical draft PR
 
 Title: **Phase 4: Add identity-preserving direct content unassignment**
 
