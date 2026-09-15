@@ -4,6 +4,34 @@
   "language": "en",
   "entries": [
     {
+      "key": "content.unassignment.active_assignment_missing",
+      "text": "That content is no longer assigned to a room."
+    },
+    {
+      "key": "content.unassignment.return_not_permitted",
+      "text": "This content cannot be returned to your custody."
+    },
+    {
+      "key": "ui.active_content.empty",
+      "text": "No active content in the selected room."
+    },
+    {
+      "key": "ui.active_content.selection",
+      "text": "Room content {0} of {1}: {2}"
+    },
+    {
+      "key": "ui.active_content.next",
+      "text": "Next room content"
+    },
+    {
+      "key": "ui.active_content.unassign",
+      "text": "Return selected content to custody"
+    },
+    {
+      "key": "ui.active_content.success",
+      "text": "Content returned to your custody. Mana unchanged."
+    },
+    {
       "key": "content.acquisition.configuration_invalid",
       "text": "Content acquisition prices are unavailable."
     },

@@ -1790,6 +1790,11 @@ namespace DungeonBuilder.M0
                 GUILayout.Label(_structuralFeedback, wrappedLabel);
             if (CanonicalMvpRouteProjection.IsCanonical(_root.Save))
             {
+                GUILayout.Label(ActiveContentSelectionText, wrappedLabel);
+                if (GUILayout.Button(GetLocalizedString("ui.active_content.next"), compactButton, buttonHeight))
+                    CycleActiveContent();
+                if (GUILayout.Button(GetLocalizedString("ui.active_content.unassign"), compactButton, buttonHeight))
+                    UnassignSelectedActiveContent();
                 GUILayout.Label(ReturnedContentSelectionText, wrappedLabel);
                 if (GUILayout.Button(GetLocalizedString("ui.returned_content.next"), compactButton, buttonHeight))
                     CycleReturnedContent();
@@ -1893,6 +1898,17 @@ namespace DungeonBuilder.M0
             }
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        public string ActiveContentSelectionText => _root?.ActiveContentSelectionText ?? string.Empty;
+
+        public void CycleActiveContent() => _root?.CycleActiveContent();
+
+        public bool UnassignSelectedActiveContent()
+        {
+            bool success = _root != null && _root.TryUnassignSelectedActiveContent();
+            _structuralFeedback = _root?.BannerMessage ?? string.Empty;
+            return success;
         }
 
         public string ReturnedContentSelectionText => _root?.ReturnedContentSelectionText ?? string.Empty;

@@ -84,6 +84,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             if (request?.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                request?.Kind == DetachedCanonicalMutationKind.UnassignContent ||
                 ContentAcquisitionEconomySnapshot.IsAcquisition(request))
             {
                 // Ownership moves and purchases require a current session even when an old
@@ -112,7 +113,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 investment = priced.Investment;
                 snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             }
-            else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
+            else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                request.Kind == DetachedCanonicalMutationKind.UnassignContent)
             {
                 // Moving owned content changes neither the wallet nor the structural ledger.
                 snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);

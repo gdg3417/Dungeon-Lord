@@ -185,7 +185,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally { Object.DestroyImmediate(go); }
         }
 
-        private static GameRoot PurchaseRoot(GameObject go, DetachedCanonicalWriteAuthorityTests.Fixture fixture)
+        internal static GameRoot PurchaseRoot(GameObject go, DetachedCanonicalWriteAuthorityTests.Fixture fixture)
         {
             var service = new SaveService(new SimpleLogger(false),
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true },
@@ -194,6 +194,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)));
             service.ConfigureStructuralEconomy(fixture.Economy);
             service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
+            service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
             SetProperty(service, "SavePath", fixture.ActivePath);
             typeof(SaveService).GetField("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic)
                 .SetValue(service, fixture.Session);

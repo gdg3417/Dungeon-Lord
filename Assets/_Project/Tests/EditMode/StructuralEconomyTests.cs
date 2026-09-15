@@ -324,6 +324,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(service.UndoStructuralRenovation(undone.RuntimeProjection).IsSuccess, Is.False);
         }
 
+        [Test]
+        public void ContentUnassignmentFailureRetainsUndoAndSuccessInvalidatesIt()
+        {
+            var f = R1();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.GoblinOptionId, f.State.Floors[0].Layout.Rooms[0].RoomInstanceId)));
+            string id = f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId;
+            var service = Service(f, () => 0);
+            var moved = service.ExecuteCanonicalMutation(f.Runtime, DetachedCanonicalMutationRequest.Move(Move(f)));
+            Assert.That(moved.IsSuccess, Is.True, moved.Reason);
+            Assert.That(service.RenovationUndoRemainingSeconds, Is.GreaterThan(0));
+            byte[] before = service.CanonicalSession.GetCurrentBytes();
+            f.FileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1);
+            var failed = service.ExecuteCanonicalMutation(moved.RuntimeProjection, DetachedCanonicalMutationRequest.Unassign(id));
+            Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+            Assert.That(service.RenovationUndoRemainingSeconds, Is.GreaterThan(0));
+            CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
+            f.FileSystem.DisableFailure();
+            var returned = service.ExecuteCanonicalMutation(moved.RuntimeProjection, DetachedCanonicalMutationRequest.Unassign(id));
+            Assert.That(returned.IsSuccess, Is.True, returned.Reason);
+            Assert.That(service.RenovationUndoRemainingSeconds, Is.Zero);
+            var undo = service.UndoStructuralRenovation(returned.RuntimeProjection);
+            Assert.That(undo.IsSuccess, Is.False);
+            CollectionAssert.AreEqual(returned.GetPersistedBytes(), f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
         [TestCase("expired")][TestCase("run")][TestCase("commit")][TestCase("reopen")]
         public void UndoInvalidation(string cause)
         {

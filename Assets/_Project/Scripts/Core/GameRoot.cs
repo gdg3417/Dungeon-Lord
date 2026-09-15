@@ -1112,6 +1112,78 @@ namespace DungeonBuilder.M0
             return true;
         }
 
+        private string _selectedActiveAssignmentId;
+
+        private RoomContentAssignment[] ActiveContentForPlayer()
+        {
+            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                Save, Content?.ProductionSpatialContent);
+            if (route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                return Array.Empty<RoomContentAssignment>();
+            string roomId = ResolveCanonicalMutationTargetRoomId(Save, RunSimulationConfig,
+                Content?.ProductionSpatialContent, route.Rooms);
+            // Canonical floors and assignments already have an ordinal, validated ordering.
+            return Save.validatedCanonicalSpatialState.Floors.SelectMany(floor => floor.RoomContents.Assignments)
+                .Where(value => string.Equals(value.RoomInstanceId, roomId, StringComparison.Ordinal)).ToArray();
+        }
+
+        public string SelectedActiveAssignmentId
+        {
+            get
+            {
+                RoomContentAssignment[] active = ActiveContentForPlayer();
+                if (!active.Any(value => value.AssignmentId == _selectedActiveAssignmentId))
+                    _selectedActiveAssignmentId = active.FirstOrDefault()?.AssignmentId;
+                return _selectedActiveAssignmentId;
+            }
+        }
+
+        public void CycleActiveContent()
+        {
+            string selected = SelectedActiveAssignmentId;
+            RoomContentAssignment[] active = ActiveContentForPlayer();
+            if (active.Length == 0) return;
+            int index = Array.FindIndex(active, value => value.AssignmentId == selected);
+            _selectedActiveAssignmentId = active[(index + 1) % active.Length].AssignmentId;
+        }
+
+        public string ActiveContentSelectionText
+        {
+            get
+            {
+                string selected = SelectedActiveAssignmentId;
+                RoomContentAssignment[] active = ActiveContentForPlayer();
+                RoomContentAssignment item = active.FirstOrDefault(value => value.AssignmentId == selected);
+                if (item == null) return LocalizeReturnedContent("ui.active_content.empty");
+                string name = MvpDungeonPlacementPresenter.ResolveOptionName(item.OptionId,
+                    (key, fallback) => LocalizeReturnedContent(key));
+                return string.Format(CultureInfo.InvariantCulture, LocalizeReturnedContent("ui.active_content.selection"),
+                    Array.IndexOf(active, item) + 1, active.Length, name);
+            }
+        }
+
+        public bool TryUnassignSelectedActiveContent()
+        {
+            string reason;
+            bool success = false;
+            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
+                Save, Content?.ProductionSpatialContent);
+            if (SaveService == null || route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                reason = DetachedCanonicalSpatialMutation.ValidationFailedReason;
+            else if (Save.structureRuntime?.PlacementLocked == true)
+                reason = "ui.banner.place_blocked_heat_crisis";
+            else
+            {
+                DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
+                    DetachedCanonicalMutationRequest.Unassign(SelectedActiveAssignmentId));
+                success = result.IsSuccess;
+                reason = success ? "ui.active_content.success" : result.Reason;
+            }
+            string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
+            SetBanner(LocalizeReturnedContent(string.IsNullOrEmpty(playerKey) ? reason : playerKey));
+            return success;
+        }
+
         private string _selectedReturnedAssignmentId;
 
         private ReturnedStructuralContent[] ReturnedContentForPlayer()

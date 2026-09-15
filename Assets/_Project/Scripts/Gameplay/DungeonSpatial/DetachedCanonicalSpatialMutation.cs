@@ -14,7 +14,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         StructuralMovement = 4,
         StructuralReplacement = 5,
         StructuralDeletion = 6,
-        RedeployReturnedContent = 7
+        RedeployReturnedContent = 7,
+        UnassignContent = 8
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -43,6 +44,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RedeployReturnedContent,
               AssignmentId = assignmentId, RoomInstanceId = roomInstanceId };
+
+        public static DetachedCanonicalMutationRequest Unassign(string assignmentId) =>
+            new DetachedCanonicalMutationRequest
+            { Kind = DetachedCanonicalMutationKind.UnassignContent, AssignmentId = assignmentId };
 
         public static DetachedCanonicalMutationRequest Construct(StructuralEditPreview preview) =>
             new DetachedCanonicalMutationRequest
@@ -125,6 +130,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string ValidationFailedReason = "gd66.write.first_write_validation_failed";
         public const string ReturnedItemMissingReason = "content.redeployment.returned_item_missing";
         public const string TargetRoomMissingReason = "content.redeployment.target_room_missing";
+        public const string ActiveAssignmentMissingReason = "content.unassignment.active_assignment_missing";
+        public const string ReturnNotPermittedReason = "content.unassignment.return_not_permitted";
 
         public static DetachedCanonicalMutationResult Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
@@ -137,8 +144,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(ValidationFailedReason);
             if (!TryClone(current, limits, out DetachedCanonicalSpatialSaveState proposed))
                 return Failure(ValidationFailedReason);
-            // Custody is persisted ownership, never a repair input or a current removal-policy decision.
-            if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent &&
+            // Ownership transitions must not repair an invalid source by removing its bad record.
+            if ((request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                 request.Kind == DetachedCanonicalMutationKind.UnassignContent) &&
                 (!CanonicalSpatialSaveContracts.Validate(current, limits.Spatial, true).IsValid ||
                  !DetachedCanonicalProductionSemanticValidation.Validate(current, production,
                      configuration, limits.Spatial).IsValid))
@@ -188,6 +196,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
                 reason = RedeployContent(proposed, request.AssignmentId, request.RoomInstanceId, production, configuration);
+            else if (request.Kind == DetachedCanonicalMutationKind.UnassignContent)
+                reason = UnassignContent(proposed, request.AssignmentId, removalPolicy);
             else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
@@ -205,6 +215,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !DetachedCanonicalProductionSemanticValidation.Validate(canonical, production,
                     configuration, limits.Spatial).IsValid) return Failure(ValidationFailedReason);
             return new DetachedCanonicalMutationResult(canonical, null, roomEffect);
+        }
+
+        private static string UnassignContent(DetachedCanonicalSpatialSaveState state, string assignmentId,
+            StructuralContentRemovalPolicySnapshot removalPolicy)
+        {
+            if (string.IsNullOrWhiteSpace(assignmentId)) return ActiveAssignmentMissingReason;
+            var matches = state.Floors.SelectMany(floor => floor.RoomContents.Assignments
+                .Where(value => string.Equals(value.AssignmentId, assignmentId, StringComparison.Ordinal))
+                .Select(value => new { Floor = floor, Assignment = value })).ToArray();
+            if (matches.Length == 0) return ActiveAssignmentMissingReason;
+            if (matches.Length != 1 || state.LifecycleAndOwnership.ReturnedContents.Any(value =>
+                    string.Equals(value.AssignmentId, assignmentId, StringComparison.Ordinal)))
+                return ValidationFailedReason;
+            var match = matches[0];
+            RoomContentAssignment assignment = match.Assignment;
+            if (!StructuralContentRemovalPolicyAuthority.TryResolve(removalPolicy, assignment.CategoryId,
+                    assignment.OptionId, out StructuralContentRemovalPolicy policy, out string reason))
+                return reason;
+            if (policy != StructuralContentRemovalPolicy.ReturnToPlayerCustody) return ReturnNotPermittedReason;
+            match.Floor.RoomContents.Assignments = match.Floor.RoomContents.Assignments
+                .Where(value => !string.Equals(value.AssignmentId, assignmentId, StringComparison.Ordinal)).ToArray();
+            state.LifecycleAndOwnership.ReturnedContents = state.LifecycleAndOwnership.ReturnedContents.Concat(new[] {
+                new ReturnedStructuralContent { AssignmentId = assignment.AssignmentId,
+                    CategoryId = assignment.CategoryId, OptionId = assignment.OptionId, Sequence = assignment.Sequence,
+                    RemovalDisposition = StructuralContentRemovalDisposition.ReturnToPlayerCustody } }).ToArray();
+            return null;
         }
 
         private static string PlaceRoom(DetachedCanonicalSpatialSaveState state, string optionId,

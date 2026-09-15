@@ -135,7 +135,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void AuthoredRemovalPolicyReturnsReusableDefinitionsAndFailsClosedForUnresolvedLoot()
+        public void AuthoredRemovalPolicyReturnsReusableDefinitionsIncludingLootNodes()
         {
             Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(System.IO.File.ReadAllBytes(
                 StructuralContentRemovalPolicyAuthority.ProductionPath), out
@@ -150,8 +150,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(trap, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
             Assert.That(StructuralContentRemovalPolicyAuthority.TryResolve(configuration,
                 MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId,
-                out _, out string reason), Is.False);
-            Assert.That(reason, Is.EqualTo(StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason));
+                out var loot, out _), Is.True);
+            Assert.That(loot, Is.EqualTo(StructuralContentRemovalPolicy.ReturnToPlayerCustody));
         }
 
         [TestCase("")]
