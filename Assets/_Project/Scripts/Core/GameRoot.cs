@@ -2256,10 +2256,12 @@ namespace DungeonBuilder.M0
             PassiveManaRateSummary summary = _passiveManaService != null
                 ? _passiveManaService.ResolveRate(Save, RunSimulationConfig)
                 : null;
+            IFormatProvider formatProvider = PassiveManaPresenter.ResolveFormatProvider(
+                Content?.Strings?.language);
             PassiveManaLine = PassiveManaPresenter.Build(summary,
                 Save?.structureRuntime?.ManaReserve ?? double.NaN,
                 _passiveManaService != null ? _passiveManaService.ManaCapacity : double.NaN,
-                localize);
+                formatProvider, localize);
         }
 
         public void RefreshRunLine()

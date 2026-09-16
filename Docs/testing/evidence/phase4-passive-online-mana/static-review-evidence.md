@@ -4,11 +4,23 @@ Branch: `codex/phase-4-canonical-passive-online-mana`.
 Starting HEAD/main: `aac3af2a5836d22d62f9a4be5c2c27e9cf26c3ea` (merged PR #204).
 GitHub main was fetched and matched this exact baseline before implementation. The only pre-existing worktree change was the intentionally preserved local-only `ProjectSettings/UnityConnectSettings.asset` change (`m_Enabled: 0` to `m_Enabled: 1`). No Unity or Unity Hub process was running.
 
+## External-review correction: locale-aware passive-mana formatting
+
+Review of PR #205 identified that `PassiveManaPresenter` forced invariant numeric formatting inside localized output. `GameRoot` now resolves an `IFormatProvider` from the language identifier on the actively loaded `ContentService.Strings` table and passes it explicitly to the presenter. Valid culture identifiers use their own decimal and percentage conventions without language-specific switches. Missing or invalid identifiers use the existing English-safe policy (`en-US`) and do not throw during refresh. Localization-key and unknown-Heat-label fail-closed behavior remains unchanged.
+
+Locale-corrected-head qualification:
+
+- Focused passive-online-mana EditMode fixture: **50/50 passed**, including selected-English formatting under a non-English machine culture, `de-DE` decimal/percentage formatting, generic `ja` resolution to a valid Japanese provider, blank/invalid identifier fallback, raw-key/raw-Heat-ID suppression, and all accepted passive-mana/Heat/tick regressions. Wrapper exit **0**; duration **1.1457691 seconds**. XML: `C:\Users\gdg34\AppData\Local\Temp\phase4_passive_online_mana_locale_focused_editmode.xml` (SHA-256 `D4FBFE346765279AE0F7586DCDAB00439A30DF6B76A21F11326F178B4849943E`).
+- Full EditMode: **894 passed, 0 failed, 0 skipped/ignored, 0 inconclusive**; wrapper exit **0**; duration **118.0919782 seconds**. XML: `C:\Users\gdg34\AppData\Local\Temp\phase4_passive_online_mana_locale_correction_editmode.xml` (SHA-256 `F09EEDBC17FF624289B2E471413BE469320B18BD01558EB0E7190EBBF92FDA42`).
+- Full PlayMode: **2,397 passed, 0 failed, 10 expected skipped/ignored, 0 inconclusive**; wrapper exit **0**; duration **112.1474223 seconds**. The passive-online-mana fixture passed **50/50** in full PlayMode discovery. The expected skip set remains eight synchronous EditMode-only fixtures, one inverse non-Windows fixture, and one Windows Player-only fixture. XML: `C:\Users\gdg34\AppData\Local\Temp\phase4_passive_online_mana_locale_correction_playmode.xml` (SHA-256 `4C94DAC5324BDF20E8789E3A0C6F69EACA0DDC590D64AE058F134EA1C587C9BD`).
+- Windows x86_64 Development Build: **PASS**, wrapper exit **0**. Unity **6000.3.2f1**, target `StandaloneWindows64`, Development Build true, Bootstrap-only scene, result Succeeded, 0 errors, 1 warning. Output: `Builds/Development/Windows/Dungeon Lord.exe`; report: `Builds/Development/Windows/build-report.json` (SHA-256 `1AA7346BE8ED005B8F7CAF5BAB9412C03A751B859F72BB1C41E4B5F564B555F6`); provenance: `Builds/Development/Windows/build-provenance.json` (SHA-256 `634E7E9B29593FCA283CC31C006757F447A9D9D6C75918C3937593A82C3C0219`); log: `C:\Users\gdg34\AppData\Local\Temp\phase4_passive_online_mana_locale_correction_windows_development_build.log` (SHA-256 `4A3D24D1E7163322249F957A686E32349D1BE4F567F7ABF3D84A8DFB20A7886E`). The sole warning remains the established missing Unity Cloud credentials for native-symbol upload; the local build succeeded.
+- Manual Editor/standalone UAT remains pending. No manual-pass claim is made.
+
 ## External-review correction: event-driven Heat boundary
 
 Review of PR #205 identified that `GameRoot.HandleSimulationTick` still applied the pre-existing `HeatSystem.Decay` before resolving passive mana. That automatic active-time mutation has been removed from the canonical TimeService tick path. An eligible active tick now reads the existing authoritative `StructureRuntimeState.Heat`, awards passive mana using the heat tier for that unchanged value, and does not write Heat. No replacement passive cooling rule or tuning was introduced.
 
-Heat mutation remains event-driven through the existing authorities. `ApplyHeatDelta` continues to own explicit Heat events, including run-result and loot-related application. The explicit developer/legacy `SimulateStructureTick` path and StructureSimulation Heat compatibility behavior remain intact; only the canonical active TimeService path stopped applying time-based decay.
+Heat mutation remains event-driven through the existing authorities. `RunSimulationService.SimulateOnce` applies the resolved run Heat result to runtime Heat; `GameRoot.SimulateRunOnce` synchronizes `CurrentHeat` and performs the existing active-run loot Heat cooling behavior. `GameRoot.ApplyHeatDelta` remains an explicit developer/simulation Heat mutation path. The explicit legacy `SimulateStructureTick` path and StructureSimulation Heat compatibility behavior remain separate and intact; only the canonical active TimeService path stopped applying time-based decay.
 
 Corrected-head qualification:
 
@@ -49,7 +61,7 @@ The correction compiled through both authoritative Unity test suites and the Win
 
 ## Coverage added and reconciled
 
-`PassiveOnlineManaTests` covers production-config loading and values; fail-closed validation; authored enabled/disabled soft caps; Peace/Notice/Concern rates and stage order; neutral future modifier stages; multiple canonical floors; invalid canonical state; fractional and repeated-timeline determinism; capacity boundaries and ownership; active/pause/resume lifecycle; configured periodic save cadence; canonical legacy-generator suppression; adventure/offline non-award; schema-9 fractional save/reopen without Core/rate persistence; localized presentation; and the corrected event-driven Heat boundary at the configured Concern and Notice minima across one and multiple canonical active ticks.
+`PassiveOnlineManaTests` covers production-config loading and values; fail-closed validation; authored enabled/disabled soft caps; Peace/Notice/Concern rates and stage order; neutral future modifier stages; multiple canonical floors; invalid canonical state; fractional and repeated-timeline determinism; capacity boundaries and ownership; active/pause/resume lifecycle; configured periodic save cadence; canonical legacy-generator suppression; adventure/offline non-award; schema-9 fractional save/reopen without Core/rate persistence; localization-key safety and selected-locale numeric formatting; and the corrected event-driven Heat boundary at the configured Concern and Notice minima across one and multiple canonical active ticks.
 
 Existing formula, clock, structure-simulation, and GameRoot boot integration tests now assert exposed formula stages, paused tick suppression, canonical legacy separation, and periodic fractional persistence. `PhaseFourPassiveOnlineMana` registers the focused suite for Unity discovery.
 
@@ -83,6 +95,15 @@ The external-review correction was qualified with:
 & "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" test "C:\Dev\Dungeon-Lord" --mode EditMode --output "$env:TEMP\phase4_passive_online_mana_heat_correction_editmode.xml"
 & "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" test "C:\Dev\Dungeon-Lord" --mode PlayMode --output "$env:TEMP\phase4_passive_online_mana_heat_correction_playmode.xml"
 & "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" build "C:\Dev\Dungeon-Lord" --target StandaloneWindows64 --execute-method DungeonBuilder.M0.EditorTools.DevelopmentBuildUtility.BuildWindowsDevelopment --log-file "$env:TEMP\phase4_passive_online_mana_heat_correction_windows_development_build.log" --provenance-path "C:\Dev\Dungeon-Lord\Builds\Development\Windows\build-provenance.json" --allow-dirty-build --no-tail
+```
+
+The locale-formatting correction was qualified with:
+
+```powershell
+& "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" test "C:\Dev\Dungeon-Lord" --mode EditMode --filter "PhaseFourPassiveOnlineMana" --output "$env:TEMP\phase4_passive_online_mana_locale_focused_editmode.xml"
+& "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" test "C:\Dev\Dungeon-Lord" --mode EditMode --output "$env:TEMP\phase4_passive_online_mana_locale_correction_editmode.xml"
+& "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" test "C:\Dev\Dungeon-Lord" --mode PlayMode --output "$env:TEMP\phase4_passive_online_mana_locale_correction_playmode.xml"
+& "C:\Users\gdg34\AppData\Local\Unity\bin\unity.exe" build "C:\Dev\Dungeon-Lord" --target StandaloneWindows64 --execute-method DungeonBuilder.M0.EditorTools.DevelopmentBuildUtility.BuildWindowsDevelopment --log-file "$env:TEMP\phase4_passive_online_mana_locale_correction_windows_development_build.log" --provenance-path "C:\Dev\Dungeon-Lord\Builds\Development\Windows\build-provenance.json" --allow-dirty-build --no-tail
 ```
 
 Unity test/build imports reordered identical application identifiers, and the build additionally materialized URP prefilter/runtime settings and Standalone batching defaults. Each generated diff was inspected and reversed after its run. Final content hashes for `ProjectSettings/ProjectSettings.asset`, `Assets/Settings/UniversalRP.asset`, and `Assets/UniversalRenderPipelineGlobalSettings.asset` match `HEAD`. The pre-existing local-only UnityConnect change remains untouched.

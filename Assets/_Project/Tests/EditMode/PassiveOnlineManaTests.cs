@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -542,7 +543,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             };
 
             string text = PassiveManaPresenter.Build(rate, fixture.Economy.ManaCapacity,
-                fixture.Economy.ManaCapacity, key => strings.TryGetValue(key, out string value) ? value : key);
+                fixture.Economy.ManaCapacity,
+                PassiveManaPresenter.ResolveFormatProvider("en"),
+                key => strings.TryGetValue(key, out string value) ? value : key);
 
             Assert.That(text, Does.Contain(rate.ManaPerHour.ToString()));
             Assert.That(text, Does.Contain(rate.CoreContributionManaPerHour.ToString()));
@@ -582,14 +585,96 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Runtime, fixture.Configuration);
 
             string unavailable = PassiveManaPresenter.Build(null, 0d,
-                fixture.Economy.ManaCapacity, key => key);
+                fixture.Economy.ManaCapacity,
+                PassiveManaPresenter.ResolveFormatProvider("en"), key => key);
             string resolved = PassiveManaPresenter.Build(rate, 0d,
-                fixture.Economy.ManaCapacity, key => key);
+                fixture.Economy.ManaCapacity,
+                PassiveManaPresenter.ResolveFormatProvider("en"), key => key);
 
             Assert.That(unavailable, Is.Empty);
             Assert.That(resolved, Does.Not.Contain("ui.passive_mana"));
             Assert.That(resolved, Does.Not.Contain("heat_tier."));
         }
+
+        [Test]
+        public void PassiveManaPresentationUsesSelectedEnglishLocaleNotMachineLocale()
+        {
+            Fixture fixture = OneFloorFixture();
+            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatNoticeMinimum;
+            PassiveManaRateSummary rate = Service(fixture).ResolveRate(
+                fixture.Runtime, fixture.Configuration);
+            Dictionary<string, string> strings = PresentationStrings();
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+                IFormatProvider provider = PassiveManaPresenter.ResolveFormatProvider("en");
+                string text = PassiveManaPresenter.Build(rate, 12.5d,
+                    fixture.Economy.ManaCapacity, provider,
+                    key => strings.TryGetValue(key, out string value) ? value : key);
+
+                Assert.That(text, Does.Contain("12.5"));
+                Assert.That(text, Does.Contain(rate.HeatEfficiencyMultiplier.ToString("P0", provider)));
+                Assert.That(text, Does.Not.Contain("12,5"));
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
+        }
+
+        [Test]
+        public void PassiveManaPresentationUsesSelectedCommaDecimalLocale()
+        {
+            Fixture fixture = OneFloorFixture();
+            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatNoticeMinimum;
+            PassiveManaRateSummary rate = Service(fixture).ResolveRate(
+                fixture.Runtime, fixture.Configuration);
+            Dictionary<string, string> strings = PresentationStrings();
+            IFormatProvider provider = PassiveManaPresenter.ResolveFormatProvider("de-DE");
+
+            string text = PassiveManaPresenter.Build(rate, 12.5d,
+                fixture.Economy.ManaCapacity, provider,
+                key => strings.TryGetValue(key, out string value) ? value : key);
+
+            Assert.That(text, Does.Contain("12,5"));
+            Assert.That(text, Does.Contain(rate.HeatEfficiencyMultiplier.ToString("P0", provider)));
+        }
+
+        [Test]
+        public void JapaneseLanguageResolvesFormatProviderWithoutPresenterSpecialCase()
+        {
+            CultureInfo provider = PassiveManaPresenter.ResolveFormatProvider("ja") as CultureInfo;
+
+            Assert.That(provider, Is.Not.Null);
+            Assert.That(provider.Name, Is.EqualTo("ja-JP"));
+            Assert.DoesNotThrow(() => 12.5d.ToString("0.###", provider));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("not-a-valid-language")]
+        public void MissingOrInvalidLanguageUsesEnglishSafeFormatProvider(string language)
+        {
+            CultureInfo provider = PassiveManaPresenter.ResolveFormatProvider(language) as CultureInfo;
+
+            Assert.That(provider, Is.Not.Null);
+            Assert.That(provider.Name, Is.EqualTo("en-US"));
+            Assert.That(12.5d.ToString("0.###", provider), Is.EqualTo("12.5"));
+        }
+
+        private static Dictionary<string, string> PresentationStrings() =>
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [PassiveManaPresenter.BalanceAndRateFormatKey] = "Balance {0:0.###}/{1:0.###}; rate {2:0.###}",
+                [PassiveManaPresenter.ContributionsFormatKey] = "Core {0:0.###}; floors {1} give {2:0.###}",
+                [PassiveManaPresenter.HeatFormatKey] = "Heat {0}; efficiency {1:P0}",
+                [PassiveManaPresenter.StorageFullKey] = "Full",
+                [PassiveManaPresenter.UnavailableKey] = "Unavailable",
+                [PassiveManaPresenter.UnknownHeatKey] = "Unknown",
+                [CurrentHeatTierResolver.NoticeTierId] = "Notice"
+            };
 
         private static SaveData Runtime(DetachedCanonicalSpatialSaveState state,
             double mana, double heat) => new SaveData
