@@ -1,6 +1,6 @@
 # Phase 4A structural economy contract
 
-Phase 3 is closed through merged PR #200. Phase 4A structural economy (#201), returned-content redeployment (#202), acquisition/StartingMana (#203), direct content unassignment (#204), and canonical passive online mana (#205) are merged and qualified. Current main baseline is PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`. The current packet adds canonical offline passive mana grants using the merged online-rate authority. Schema remains 9. Run-event mana remains later work. Prior qualification evidence applies to its recorded commits, not this change.
+Phase 3 is closed through merged PR #200. Phase 4A structural economy (#201), returned-content redeployment (#202), acquisition/StartingMana (#203), direct content unassignment (#204), and canonical passive online mana (#205) are merged and qualified. Latest repository main is PR #206 at `f32b3ee94cf72cade159c2b5bfeba0a7ed4ee3a6`; the latest gameplay-capability baseline remains PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`, while PR #206 adds passive-mana test portability only. The current unmerged packet adds canonical offline passive mana grants using the merged online-rate authority. Schema remains 9. Run-event mana remains later work. Prior qualification evidence applies to its recorded commits, not this change.
 
 ## Authoring and formulas
 

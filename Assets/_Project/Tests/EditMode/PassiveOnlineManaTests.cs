@@ -95,7 +95,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void InvalidConfigurationFailsClosed(string scenario)
         {
             Fixture fixture = Fixture.Create(null);
-            string json = Encoding.UTF8.GetString(ProductionBytes());
+            string json = NormalizeLineEndings(Encoding.UTF8.GetString(ProductionBytes()));
             switch (scenario)
             {
                 case "missing":
@@ -112,16 +112,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 case "coefficient_negative": json = json.Replace("\"ManaPerCoreLevelPerMinute\": 2", "\"ManaPerCoreLevelPerMinute\": -2"); break;
                 case "coefficient_infinite": json = json.Replace("\"ManaPerCoreLevelPerMinute\": 2", "\"ManaPerCoreLevelPerMinute\": 1e999"); break;
                 case "floor_nan": json = json.Replace("\"ManaPerActiveFloorPerMinute\": 1", "\"ManaPerActiveFloorPerMinute\": NaN"); break;
-                case "offline_missing": json = json.Replace("  \"BaseOfflineEfficiency\": 0.15,", string.Empty); break;
-                case "offline_zero": json = json.Replace("\"BaseOfflineEfficiency\": 0.15", "\"BaseOfflineEfficiency\": 0"); break;
-                case "offline_over_one": json = json.Replace("\"BaseOfflineEfficiency\": 0.15", "\"BaseOfflineEfficiency\": 1.01"); break;
-                case "offline_infinite": json = json.Replace("\"BaseOfflineEfficiency\": 0.15", "\"BaseOfflineEfficiency\": 1e999"); break;
-                case "heat_missing": json = json.Replace("    { \"HeatTierId\": \"heat_tier.notice\", \"Multiplier\": 0.95 },", string.Empty); break;
+                case "offline_missing":
+                    json = ReplaceFixtureFragment(json,
+                        "  \"BaseOfflineEfficiency\": 0.15,\n",
+                        string.Empty);
+                    break;
+                case "offline_zero":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 0");
+                    break;
+                case "offline_over_one":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 1.01");
+                    break;
+                case "offline_infinite":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 1e999");
+                    break;
+                case "heat_missing":
+                    json = ReplaceFixtureFragment(json,
+                        "    { \"HeatTierId\": \"heat_tier.notice\", \"Multiplier\": 0.95 },\n",
+                        string.Empty);
+                    break;
                 case "heat_duplicate": json = json.Replace("heat_tier.notice", "heat_tier.concern"); break;
                 case "heat_order":
-                    json = json.Replace("heat_tier.concern", "heat_tier.swap")
-                        .Replace("heat_tier.notice", "heat_tier.concern")
-                        .Replace("heat_tier.swap", "heat_tier.notice");
+                    json = ReplaceFixtureFragment(json,
+                        "    { \"HeatTierId\": \"heat_tier.concern\", \"Multiplier\": 0.85 },\n    { \"HeatTierId\": \"heat_tier.notice\", \"Multiplier\": 0.95 },",
+                        "    { \"HeatTierId\": \"heat_tier.notice\", \"Multiplier\": 0.95 },\n    { \"HeatTierId\": \"heat_tier.concern\", \"Multiplier\": 0.85 },");
                     break;
                 case "heat_negative": json = json.Replace("\"Multiplier\": 0.85", "\"Multiplier\": -0.85"); break;
                 case "heat_infinite": json = json.Replace("\"Multiplier\": 0.85", "\"Multiplier\": 1e999"); break;
@@ -140,6 +160,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.Error, Is.EqualTo(scenario == "version"
                 ? PassiveOnlineManaConfigurationError.UnsupportedVersion
                 : PassiveOnlineManaConfigurationError.Malformed));
+        }
+
+        private static string NormalizeLineEndings(string value) =>
+            value.Replace("\r\n", "\n").Replace("\r", "\n");
+
+        private static string ReplaceFixtureFragment(string value, string oldValue, string newValue)
+        {
+            Assert.That(value, Does.Contain(oldValue), "Fixture mutation source was not found.");
+            string mutated = value.Replace(oldValue, newValue);
+            Assert.That(mutated, Is.Not.EqualTo(value), "Fixture mutation did not change the source.");
+            return mutated;
         }
 
         [Test]
