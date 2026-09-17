@@ -56,10 +56,21 @@ namespace DungeonBuilder.M0.Economy
     public readonly struct FormulaResult
     {
         public double Value { get; }
+        public double AfterBase { get; }
+        public double AfterHeat { get; }
+        public double AfterResearch { get; }
+        public double AfterEventOrSeason { get; }
+        public double AfterClampAndSoftCap { get; }
 
-        public FormulaResult(double value)
+        public FormulaResult(double value, double afterBase, double afterHeat,
+            double afterResearch, double afterEventOrSeason, double afterClampAndSoftCap)
         {
             Value = value;
+            AfterBase = afterBase;
+            AfterHeat = afterHeat;
+            AfterResearch = afterResearch;
+            AfterEventOrSeason = afterEventOrSeason;
+            AfterClampAndSoftCap = afterClampAndSoftCap;
         }
     }
 }

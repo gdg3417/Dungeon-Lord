@@ -103,6 +103,10 @@ namespace DungeonBuilder.M0
 
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
+#if UNITY_EDITOR
+        internal SaveSpatialMigrationLimitsProfile CanonicalLimitsForTests => _limits;
+        internal StructuralEconomySnapshot StructuralEconomyForTests => _economy;
+#endif
         public bool NarrowHallRepairAvailable => _narrowHallRepairAvailable;
         public IReadOnlyList<int> NarrowHallRepairTargets => _narrowHallRepairTargets;
         public int NarrowHallRepairTargetRoomIndex => _narrowHallRepairTargets.Length == 0 ? 0 :

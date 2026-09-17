@@ -53,6 +53,12 @@ namespace DungeonBuilder.M0.Gameplay.Structures
         }
     }
 
+    public enum StructureManaAuthorityMode
+    {
+        LegacyPrototype = 0,
+        CanonicalPassive = 1
+    }
+
     public sealed class StructureSimulationPass
     {
         public const string ManaGeneratorBasicId = "structure.mana_generator.basic";
@@ -95,7 +101,8 @@ namespace DungeonBuilder.M0.Gameplay.Structures
             _tuningByStructureId = BuildTuningMap(config.Structures);
         }
 
-        public StructureTickResult SimulateTick(DungeonLayoutState layout, StructureRuntimeState runtime, long tickIndex)
+        public StructureTickResult SimulateTick(DungeonLayoutState layout, StructureRuntimeState runtime,
+            long tickIndex, StructureManaAuthorityMode manaAuthorityMode = StructureManaAuthorityMode.LegacyPrototype)
         {
             if (layout == null) throw new ArgumentNullException(nameof(layout));
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
@@ -117,7 +124,10 @@ namespace DungeonBuilder.M0.Gameplay.Structures
                     continue;
                 }
 
-                manaDelta += tuning.ManaDeltaPerTick;
+                if (manaAuthorityMode == StructureManaAuthorityMode.LegacyPrototype)
+                {
+                    manaDelta += tuning.ManaDeltaPerTick;
+                }
                 heatDelta += tuning.HeatDeltaPerTick;
             }
 

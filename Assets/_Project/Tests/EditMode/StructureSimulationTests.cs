@@ -378,6 +378,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void CanonicalPassiveManaMode_DoesNotApplyLegacyGeneratorMana()
+        {
+            var layout = DungeonLayoutState.CreateEmpty(1, 1);
+            new PlacementService().PlaceStructure(layout, 0, 0,
+                StructureSimulationPass.ManaGeneratorBasicId);
+            StructureSimulationConfig config = BuildTestConfig();
+            var runtime = new StructureRuntimeState { ManaReserve = 4d };
+
+            new StructureSimulationPass(new HeatSystem(), config).SimulateTick(layout,
+                runtime, 1, StructureManaAuthorityMode.CanonicalPassive);
+
+            Assert.That(runtime.ManaReserve, Is.EqualTo(4d));
+            Assert.That(runtime.Heat, Is.EqualTo(Find(config,
+                StructureSimulationPass.ManaGeneratorBasicId).HeatDeltaPerTick));
+        }
+
+        [Test]
         public void SimulateStructureTick_ReturnsFalse_When_Runtime_Dependencies_Are_Unavailable()
         {
             var go = new GameObject("GameRoot_Test");

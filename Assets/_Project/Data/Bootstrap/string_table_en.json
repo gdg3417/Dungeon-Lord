@@ -4,6 +4,38 @@
   "language": "en",
   "entries": [
     {
+      "key": "mana.passive_online.configuration_invalid",
+      "text": "Passive mana production is unavailable because its configuration could not be validated."
+    },
+    {
+      "key": "ui.passive_mana.unavailable",
+      "text": "Passive mana production is unavailable."
+    },
+    {
+      "key": "ui.passive_mana.balance_rate_format",
+      "text": "Mana: {0:0.###} / {1:0.###}. Passive rate: {2:0.###} mana/hour."
+    },
+    {
+      "key": "ui.passive_mana.contributions_format",
+      "text": "Core contribution: {0:0.###} mana/hour. Active floors ({1}): {2:0.###} mana/hour."
+    },
+    {
+      "key": "ui.passive_mana.heat_format",
+      "text": "Heat efficiency: {0} at {1:P0}."
+    },
+    {
+      "key": "ui.passive_mana.storage_full",
+      "text": "Mana storage is full."
+    },
+    {
+      "key": "ui.passive_mana.heat_unknown",
+      "text": "Unknown heat state"
+    },
+    {
+      "key": "ui.dev.save.periodic",
+      "text": "Save: Periodic"
+    },
+    {
       "key": "content.unassignment.active_assignment_missing",
       "text": "That content is no longer assigned to a room."
     },

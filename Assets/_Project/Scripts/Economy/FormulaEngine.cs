@@ -19,14 +19,38 @@ namespace DungeonBuilder.M0.Economy
 
             double running = input.BaseValue;
             IReadOnlyList<FormulaModifier> modifiers = input.Modifiers;
+            double afterBase = running;
+            double afterHeat = running;
+            double afterResearch = running;
+            double afterEventOrSeason = running;
+            double afterClampAndSoftCap = running;
 
             for (int bucketIndex = 0; bucketIndex <= (int)ModifierBucket.Rounding; bucketIndex++)
             {
                 ModifierBucket bucket = (ModifierBucket)bucketIndex;
                 ApplyBucket(ref running, modifiers, bucket);
+                switch (bucket)
+                {
+                    case ModifierBucket.Base:
+                        afterBase = running;
+                        break;
+                    case ModifierBucket.Heat:
+                        afterHeat = running;
+                        break;
+                    case ModifierBucket.Research:
+                        afterResearch = running;
+                        break;
+                    case ModifierBucket.EventOrSeason:
+                        afterEventOrSeason = running;
+                        break;
+                    case ModifierBucket.ClampAndSoftCap:
+                        afterClampAndSoftCap = running;
+                        break;
+                }
             }
 
-            return new FormulaResult(running);
+            return new FormulaResult(running, afterBase, afterHeat, afterResearch,
+                afterEventOrSeason, afterClampAndSoftCap);
         }
 
         private static void ApplyBucket(ref double running, IReadOnlyList<FormulaModifier> modifiers, ModifierBucket bucket)

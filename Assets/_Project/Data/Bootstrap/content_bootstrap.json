@@ -8,6 +8,7 @@
     "allowOfflineProgression": true,
     "maxOfflineSeconds": 86400,
     "detectClockSkewSeconds": 300,
+    "activeSaveIntervalSeconds": 30,
     "offlineSummaryRuleSourceId": "offline.summary.rule.m7_a0_scaffold"
   },
   "featureFlags": {

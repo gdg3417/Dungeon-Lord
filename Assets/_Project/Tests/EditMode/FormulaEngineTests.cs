@@ -23,6 +23,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             FormulaResult result = engine.Evaluate(new FormulaInput(100, modifiers));
 
             Assert.AreEqual(198, result.Value);
+            Assert.AreEqual(100, result.AfterBase);
+            Assert.AreEqual(110, result.AfterHeat);
+            Assert.AreEqual(165, result.AfterResearch);
+            Assert.AreEqual(198, result.AfterEventOrSeason);
+            Assert.AreEqual(198, result.AfterClampAndSoftCap);
         }
 
         [Test]

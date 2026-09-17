@@ -7,8 +7,10 @@ namespace DungeonBuilder.M0
         private readonly SimpleLogger _logger;
         private readonly SimulationClock _clock;
         private SaveData _save;
+        private bool _isPaused;
 #if UNITY_EDITOR
         internal SaveData AttachedSaveForTests => _save;
+        internal bool IsPausedForTests => _isPaused;
 #endif
 
         public event Action<long> OnTick;
@@ -31,7 +33,7 @@ namespace DungeonBuilder.M0
 
         public void Update(float deltaTime)
         {
-            if (_save == null)
+            if (_save == null || _isPaused)
             {
                 return;
             }
@@ -47,11 +49,12 @@ namespace DungeonBuilder.M0
 
         public void OnPause()
         {
-            if (_save == null)
+            if (_save == null || _isPaused)
             {
                 return;
             }
 
+            _isPaused = true;
             _save.lastPausedUtcUnix = _clock.MarkPaused();
         }
 
@@ -63,6 +66,7 @@ namespace DungeonBuilder.M0
             }
 
             ClockResumeResult result = _clock.ResumeAndDetectSkew();
+            _isPaused = false;
             _save.lastResumedUtcUnix = result.ResumedAtUtc;
             if (result.SkewDetected)
             {

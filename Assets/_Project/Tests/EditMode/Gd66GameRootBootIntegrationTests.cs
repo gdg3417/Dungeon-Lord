@@ -47,6 +47,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.StateLine, Does.Contain("Home"));
         }
 
+        [Test]
+        public void PassiveManaUsesConfiguredPeriodicSaveAndReopensFractionalBalance()
+        {
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture();
+            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            const string fileName = "root-passive-mana-periodic.json";
+            SaveService service = Service(fixture, fileSystem, fileName);
+            SaveData canonical = service.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(canonical, Is.Not.Null, banner);
+            DetachedCanonicalWriteResult starter = service.ExecuteCanonicalMutation(canonical,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(starter.IsSuccess, Is.True, starter.Reason);
+            DetachedCanonicalWriteResult cleared = service.SetQaMana(starter.RuntimeProjection, false);
+            Assert.That(cleared.IsSuccess, Is.True, cleared.Reason);
+            GameRoot root = Root(service);
+            Assert.That(root.CompleteSuccessfulBootForTests(cleared.RuntimeProjection, true), Is.True);
+            byte[] bootBytes = fileSystem.ReadAllBytes(service.SavePath);
+            ContentBootstrap bootstrap = JsonUtility.FromJson<ContentBootstrap>(RequiredAsset(
+                "Assets/_Project/Data/Bootstrap/content_bootstrap.json").text);
+
+            root.TimeService.Update(bootstrap.tickSeconds);
+            CollectionAssert.AreEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
+            root.TimeService.Update(bootstrap.tickSeconds);
+            CollectionAssert.AreEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
+            root.TimeService.Update(bootstrap.tickSeconds);
+            CollectionAssert.AreNotEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
+
+            SaveService reopenedService = Service(fixture, fileSystem, fileName);
+            SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            Assert.That(reopened.totalTicks, Is.EqualTo(3));
+            Assert.That(reopened.structureRuntime.ManaReserve, Is.EqualTo(1.5d));
+        }
+
         [TestCase(6, "north", FloorRouteConnectionKind.DirectDoorway, "Direct Doorway", "")]
         [TestCase(7, "east", FloorRouteConnectionKind.PhysicalCorridor, "Straight Stone Corridor", "(1,6)")]
         public void StructuralDeletionThroughRealRootPersistsPublishesAndPresents(int targetY,
@@ -1084,6 +1119,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             root.runSimulationConfigJson = Asset("Assets/_Project/Data/Bootstrap/run_simulation_config.json");
             root.lootConfigJson = Asset("Assets/_Project/Data/Bootstrap/loot_config.json");
             root.AttachSaveServiceForTests(service);
+            if (service != null)
+            {
+                ContentBootstrap bootstrap = JsonUtility.FromJson<ContentBootstrap>(RequiredAsset(
+                    "Assets/_Project/Data/Bootstrap/content_bootstrap.json").text);
+                Assert.That(root.ConfigureCanonicalPassiveManaForTests(
+                    PhaseFourTestSupport.PassiveMana(service.CanonicalLimitsForTests.Canonical),
+                    service.StructuralEconomyForTests,
+                    service.CanonicalLimitsForTests.Canonical.Spatial,
+                    bootstrap.tickSeconds,
+                    bootstrap.timeRules.activeSaveIntervalSeconds), Is.True);
+            }
             return root;
         }
 

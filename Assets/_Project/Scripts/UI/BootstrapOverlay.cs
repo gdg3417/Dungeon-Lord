@@ -1340,6 +1340,7 @@ namespace DungeonBuilder.M0
                 _root.SelectedSlotIndex,
                 _root.GetSelectedSlotStructureId(),
                 _root.Save != null && _root.Save.structureRuntime != null && _root.Save.structureRuntime.IsHeatCrisisActive));
+            AppendLine(builder, _root.PassiveManaLine);
             AppendLine(builder, _root.OfflineSummaryLine);
         }
 
