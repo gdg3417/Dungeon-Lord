@@ -1,12 +1,28 @@
 # Phase 4 canonical offline passive mana — qualification evidence
 
-Status: initial and external-review correction automated qualification are complete; external manual UAT remains outstanding.
+Status: initial, external-review correction, and PR #206 integration automated qualification are complete; external manual UAT remains outstanding.
 
-Baseline: merged PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`.
+Latest repository-main baseline: merged PR #206 at `f32b3ee94cf72cade159c2b5bfeba0a7ed4ee3a6`.
+
+Latest gameplay-capability baseline: merged PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`.
 
 Reviewed implementation commit: `061b556b0c5f544000bc6bd46d4ee2da7e504971`.
 
 External-review correction implementation commit: `69395bf8b8c318d3f5e2bdf03bf4e2bcd67785e1`.
+
+PR #206 integration qualification commit: `e8f6dd3ade4f6cb1820706b5a87ae9e507492927`.
+
+## PR #206 integration qualification
+
+The current main branch was integrated with a no-fast-forward merge. The merge preserves the complete reviewed offline implementation and incorporates PR #206's line-ending-independent passive-mana fixture mutation. `PassiveOnlineManaTests` retains schema-version-2 and `BaseOfflineEfficiency` validation, normalizes CRLF/CR input to LF, uses guarded fixture-fragment replacement for offline and Heat mutations, and fails explicitly when an expected mutation source is absent.
+
+- Focused passive-online/config EditMode fixture: 54/54 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 1.1436466 seconds. Results: `%TEMP%/phase4_offline_pr206_passive_online.xml`.
+- Focused offline-passive-mana EditMode fixture: 32/32 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 1.2482175 seconds. Results: `%TEMP%/phase4_offline_pr206_focused.xml`.
+- Full EditMode: 945/945 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 120.2920423 seconds. Results: `%TEMP%/phase4_offline_pr206_editmode.xml`.
+- Full PlayMode: 2,435 passed, 0 failed, 10 expected platform/mode skips, 0 inconclusive from 2,445 discovered tests; wrapper exit 0; 111.5849675 seconds. Results: `%TEMP%/phase4_offline_pr206_playmode.xml`.
+- The first sandboxed focused invocation could not access the user-profile Unity Licensing configuration and produced no test verdict or result file. It was stopped and rerun through the approved wrapper with normal user permissions; all reported qualification results above are from completed runs.
+- A new Windows Development Build was not run. Relative to the already build-qualified external-review correction, this integration changes only an EditMode test and active Markdown planning/evidence; no runtime source, player asset, content, schema, localization data, or build configuration changed.
+- Unity rewrote only the ordering of two `applicationIdentifier` entries in `ProjectSettings.asset` during qualification; that generated no-content change was discarded. The owner's local `UnityConnectSettings.asset` `m_Enabled: 1` change remained unstaged and untouched.
 
 ## External-review correction
 
@@ -50,4 +66,4 @@ The original results below remain the evidence for reviewed commit `061b556`; co
 
 ## Manual evidence
 
-External manual UAT is not claimed. Use [the committed manual UAT plan](manual-uat.md).
+External manual UAT is not claimed. Automated integration qualification is complete and the branch is ready for external manual UAT using [the committed manual UAT plan](manual-uat.md).
