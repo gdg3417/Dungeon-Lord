@@ -146,12 +146,32 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(text, Does.Contain("Loop Summary (1/1)"));
         }
 
+        [Test]
+        public void NormalPlayerFacingCompositionsIncludeLocalizedOfflineResult()
+        {
+            const string offline =
+                "Away for 3,600 seconds. Offline rate: 27 mana/hour. Earned: 27 mana. Current mana: 39.5 / 1,000.";
+            BootstrapSmokeTextComposer.Context context = CreateContext(
+                offlinePassiveManaText: offline);
+
+            string playable = BootstrapSmokeTextComposer.BuildPlayableMvpScreenText(
+                context, Localize);
+            string full = BootstrapSmokeTextComposer.BuildFullPlayerFacingSmokeText(
+                context, Localize);
+
+            Assert.That(playable, Does.Contain(offline));
+            Assert.That(full, Does.Contain(offline));
+            Assert.That(playable, Does.Not.Contain("ui.offline_mana"));
+            Assert.That(full, Does.Not.Contain("ui.offline_mana"));
+        }
+
 
         private static BootstrapSmokeTextComposer.Context CreateContext(
             GuidedMvpActionPathSummary guidedPath = null,
             MvpFirstSessionObjectiveSummary firstSessionObjective = null,
             MvpPostContractGreedTrialSummary greedTrial = null,
-            MvpRecentSpoilsLedgerSummary recentSpoilsLedger = null)
+            MvpRecentSpoilsLedgerSummary recentSpoilsLedger = null,
+            string offlinePassiveManaText = "")
         {
             return new BootstrapSmokeTextComposer.Context(
                 AnalysisSummary(),
@@ -170,6 +190,7 @@ namespace DungeonBuilder.Tests.EditMode
                 string.Empty,
                 string.Empty,
                 string.Empty,
+                offlinePassiveManaText,
                 null,
                 string.Empty,
                 string.Empty,

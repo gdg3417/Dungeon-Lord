@@ -4,6 +4,7 @@ namespace DungeonBuilder.M0
 {
     public class TimeService
     {
+        public const string ClockAnomalyMessageKey = "ui.time.clock_anomaly_detected";
         private readonly SimpleLogger _logger;
         private readonly SimulationClock _clock;
         private SaveData _save;
@@ -72,7 +73,7 @@ namespace DungeonBuilder.M0
             if (result.SkewDetected)
             {
                 _logger.Warn($"Time delta looks large: {result.PauseDeltaSeconds} seconds.");
-                return "Time change detected. Some offline results may be limited.";
+                return ClockAnomalyMessageKey;
             }
 
             return string.Empty;

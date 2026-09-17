@@ -72,6 +72,10 @@
       "text": "the applicable offline generation rate produced no mana"
     },
     {
+      "key": "ui.time.clock_anomaly_detected",
+      "text": "A large local clock change was detected. Offline mana follows saved-time validation without a duration limit."
+    },
+    {
       "key": "ui.dev.save.periodic",
       "text": "Save: Periodic"
     },

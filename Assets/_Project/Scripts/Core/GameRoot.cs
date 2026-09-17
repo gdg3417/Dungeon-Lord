@@ -307,10 +307,15 @@ namespace DungeonBuilder.M0
                 _resumeOfflineBoundaryPersisted = false;
                 if (TimeService != null)
                 {
-                    string banner = TimeService.OnResume();
-                    if (!string.IsNullOrEmpty(banner))
+                    string bannerKey = TimeService.OnResume();
+                    if (!string.IsNullOrEmpty(bannerKey))
                     {
-                        SetBanner(banner);
+                        string message = Content != null
+                            ? Content.GetString(bannerKey, string.Empty)
+                            : string.Empty;
+                        if (!string.IsNullOrWhiteSpace(message) &&
+                            !string.Equals(message, bannerKey, StringComparison.Ordinal))
+                            SetBanner(message);
                     }
                 }
             }

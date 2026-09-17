@@ -1114,6 +1114,7 @@ namespace DungeonBuilder.M0
                 _mvpStructurePlacementFeedback,
                 _mvpRunResultFeedback,
                 _root.BannerMessage,
+                _root.OfflinePassiveManaLine,
                 _lastRunIntentSummary,
                 _lastRunPostureUsedId,
                 _lastRunDebugPostureId,

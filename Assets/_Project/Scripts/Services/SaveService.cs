@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0
         private ContentAcquisitionEconomySnapshot _acquisition;
         private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
         private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
+        private ITimeSource _timeSource = new SystemTimeSource();
         private RenovationUndo _undo;
         private sealed class RenovationUndo
         {
@@ -138,6 +139,8 @@ namespace DungeonBuilder.M0
 #if UNITY_EDITOR
         internal SaveSpatialMigrationLimitsProfile CanonicalLimitsForTests => _limits;
         internal StructuralEconomySnapshot StructuralEconomyForTests => _economy;
+        internal void SetTimeSourceForTests(ITimeSource timeSource) =>
+            _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
 #endif
         public bool NarrowHallRepairAvailable => _narrowHallRepairAvailable;
         public IReadOnlyList<int> NarrowHallRepairTargets => _narrowHallRepairTargets;
@@ -333,7 +336,7 @@ namespace DungeonBuilder.M0
                 if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 { _logger.Error("Canonical save authority is unavailable."); return false; }
                 long previous = data.lastSavedUtcUnix;
-                data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+                data.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(previous);
                 DetachedCanonicalWriteResult result = CreateWriteAuthority().SaveRecognizedState(
                     SavePath, _canonicalFileSystem, _canonicalSession, data);
                 if (!result.IsSuccess)
@@ -344,7 +347,7 @@ namespace DungeonBuilder.M0
                 return true;
             }
 
-            data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+            data.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(data.lastSavedUtcUnix);
 
             string json = JsonUtility.ToJson(data, true);
             SaveRoot root = new SaveRoot
@@ -549,7 +552,7 @@ namespace DungeonBuilder.M0
 
         private SaveData CreateNew(string contentVersion)
         {
-            long now = TimeUtil.UtcNowUnixSeconds();
+            long now = _timeSource.UtcNowUnixSeconds();
 
             SaveData data = new SaveData
             {
@@ -565,6 +568,18 @@ namespace DungeonBuilder.M0
             };
 
             return data;
+        }
+
+        private long CaptureMonotonicSaveBoundary(long durableBoundary)
+        {
+            long observed = _timeSource.UtcNowUnixSeconds();
+            if (observed <= 0 || observed < durableBoundary)
+            {
+                _logger.Warn("Observed save time did not advance; preserving durable save boundary.");
+                return durableBoundary;
+            }
+
+            return observed;
         }
 
         private bool AdoptQualifiedPreflight(SpatialMigrationActivationPreflight preflight)

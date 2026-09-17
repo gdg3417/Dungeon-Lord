@@ -9,12 +9,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **PRs #201 through #204 merged/qualified; canonical passive online mana in this packet** |
+| Status | **PRs #201 through #205 merged/qualified; canonical offline passive mana is the current unmerged packet** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Main at merged PR #204 `aac3af2a5836d22d62f9a4be5c2c27e9cf26c3ea` |
+| Current implementation baseline | Main at merged PR #205 `f15504729716cc4ac22b0eb7070d91a92d3cd20d` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-09-15 |
+| Last reconciled | 2026-09-17 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -50,9 +50,9 @@ Merged history establishes the following at prototype scope:
 
 ### Missing MVP capabilities
 
-After merged and qualified Phase 4A, remaining MVP capabilities include subsequent acquisition balance review; offline mana using the canonical online rate; run-event mana after its required authorities exist; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence.
+After merged and qualified Phase 4A, remaining MVP capabilities include subsequent acquisition balance review; run-event mana after its required authorities exist; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence. Canonical offline passive mana is implemented by the current unmerged packet and remains subject to review, qualification, and external manual UAT rather than being listed as missing implementation.
 
-Merged PR #204 adds direct individual content unassignment after PR #203. The current packet adds canonical passive online mana earning. Configuration owns the temporary MVP Core Level 1 input, base/floor coefficients, complete heat-efficiency map, and disabled soft-cap state. The resolver derives floors and heat from existing canonical state, preserves neutral Research and Event/Season stages, and rounds mana/hour before converting it to fractional tick awards. It updates only `structureRuntime.ManaReserve`, clamps against structural economy capacity, suppresses legacy generator double-awards in canonical mode, and periodically saves through the existing authority. It does not add persisted Core Level, run-event mana, offline mana, research effects, or active soft-cap tuning.
+Merged PR #205 adds canonical passive online mana earning after PR #204. The current unmerged packet adds canonical offline passive mana by consuming that online resolver at the configured 15% base efficiency, retaining fractional precision, applying no duration cap, clamping to structural capacity, and atomically committing wallet plus the existing save timestamp. It does not add persisted Core Level, run-event mana, research effects, or active soft-cap tuning.
 
 ### Deferred capabilities
 
@@ -145,7 +145,7 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
 3. Add localized cost, remaining-capacity, consequence and affordability previews before commit.
-4. Complete and evidence idle offline mana using the configured percentage in Spec 29’s locked single-grant calculation: no offline time cap, with mana storage capacity as the output clamp. Research may improve efficiency percentage, storage capacity, or Mana Farm production, not eligible duration. Explain elapsed time, effective rate, storage-cap clamp, and awarded mana; retain the overnight-one-edit statement only as a non-authoritative balance hypothesis.
+4. Review, qualify and externally validate the current unmerged idle-offline-mana packet using Spec 29’s locked single-grant calculation: no offline time cap, with mana storage capacity as the output clamp. Research may improve efficiency percentage, storage capacity, or Mana Farm production, not eligible duration. The player-facing result explains elapsed time, effective rate, storage-cap clamp and awarded mana; the overnight-one-edit statement remains only a non-authoritative balance hypothesis.
 
 **Exit:** every structural edit previews and atomically applies the configured cost/policy; insufficient mana cannot partially mutate layout. **Technical gate:** formula order, affordability, rollback, migration and localization tests. **Fantasy gate:** observe whether spatial growth competes meaningfully with monsters, traps, loot and research.
 
@@ -243,18 +243,18 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | Stable textual ID derivation, default migration coordinates/orientations, exact legacy fixtures, fallback IDs and missing-content policy | GD66 migration design gate | Engineering/Data; deterministic fixture and recovery review |
 | Content acquisition prices and starting mana | Merged/qualified PR #203 | Approved tunable config: eight prices and StartingMana 40; structural prices unchanged |
 | Direct individual content unassignment | Merged/qualified PR #204 | Existing identities of monsters, traps and reusable loot nodes return to custody; schema 9 and zero mana; automated, build, Editor and standalone qualification passed |
-| Canonical passive online mana | Current Phase 4 packet | Config-owned temporary MVP Core baseline and formula tuning; canonical floors/heat/wallet/capacity; deterministic fractional active ticks; periodic save; no legacy double-award |
+| Canonical passive online mana | Merged/qualified PR #205 | Config-owned temporary MVP Core baseline and formula tuning; canonical floors/heat/wallet/capacity; deterministic fractional active ticks; periodic save; no legacy double-award |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and tie-break | Phase 5 | Design/Data; deterministic test cases |
 | Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
-| Offline efficiency percentage, timestamp/clock-manipulation safeguards and rounding; storage-cap tuning where otherwise authorized | Phase 4 | Design/Data/Save; preserve Spec 29 no-time-cap and storage-clamp policy |
+| Offline efficiency percentage, timestamp/clock-manipulation safeguards and rounding; storage-cap tuning where otherwise authorized | Current unmerged Phase 4 offline packet | Base 15% config, monotonic durable save boundary, fractional wallet, no-time-cap and storage-clamp policy; security monitoring remains pre-MVP follow-up |
 | Exact active-floor/content/device workload limits within the maximum five floors | Phases 6/8/9 | Design/QA data decision and device profiling |
 
 ## 9. Current dependency packet
 
-Current results and accepted limitations: [passive-online-mana qualification evidence](../testing/evidence/phase4-passive-online-mana/static-review-evidence.md).
+Current results and accepted limitations: [offline-passive-mana qualification evidence](../testing/evidence/phase4-offline-passive-mana/static-review-evidence.md).
 
-Phase 3 is closed through merged PR #200, and Phase 4 packets #201 through #204 are merged and qualified. Current main baseline is PR #204 at `aac3af2a5836d22d62f9a4be5c2c27e9cf26c3ea`. This dependency packet establishes canonical passive online mana earning with configuration-owned rates and temporary MVP Core input, canonical spatial/heat/wallet authorities, deterministic fractional ticks, capacity clamping, periodic active saves, and localized Bootstrap diagnostics. Schema remains 9. Run-event mana, offline mana, durable Core Level progression, research mana effects, and active soft-cap tuning remain explicitly deferred. Prior qualification evidence applies to its recorded commits, not this change.
+Phase 3 is closed through merged PR #200, and Phase 4 packets #201 through #205 are merged and qualified. Current main baseline is PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`. The current unmerged dependency packet adds canonical offline passive mana using the #205 online resolver, configuration-owned 15% base efficiency, exact elapsed seconds without a duration cap, fractional wallet precision, structural-capacity clamping, monotonic/atomic timestamp consumption, localized player-facing Bootstrap presentation, and structured security evidence. Schema remains 9. Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain explicitly deferred. Prior qualification evidence applies to its recorded commits, not this correction.
 
 ### Historical GD66 closeout status, superseded by merged PRs #195–#201
 

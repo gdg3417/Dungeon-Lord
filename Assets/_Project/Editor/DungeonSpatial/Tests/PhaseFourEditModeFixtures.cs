@@ -1,6 +1,7 @@
 // Core fixtures live in Assembly-CSharp, which Unity does not discover as an EditMode assembly.
 // Editor subclasses inherit NUnit cases and lifecycle attributes without reimplementing a test runner.
 using DungeonBuilder.M0.Tests.EditMode;
+using DungeonBuilder.Tests.EditMode;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Editor.Tests
@@ -11,6 +12,9 @@ namespace DungeonBuilder.M0.Editor.Tests
     [TestFixture] public sealed class PhaseFourUnassignment : DirectContentUnassignmentTests { }
     [TestFixture] public sealed class PhaseFourPassiveOnlineMana : PassiveOnlineManaTests { }
     [TestFixture] public sealed class PhaseFourOfflinePassiveMana : OfflinePassiveManaTests { }
+    [TestFixture] public sealed class PhaseFourOfflineClock : SimulationClockTests { }
+    [TestFixture] public sealed class PhaseFourOfflineSmoke : BootstrapSmokeTextComposerTests { }
+    [TestFixture] public sealed class PhaseFourOfflineSaveLifecycle : MvpSaveLifecycleIntegrityTests { }
     [TestFixture] public sealed class PhaseFourWrites : DetachedCanonicalWriteAuthorityTests { }
     [TestFixture] public sealed class PhaseFourSpatial : StructuralEditServiceTests { }
     [TestFixture] public sealed class PhaseFourBootstrap : StructuralConstructionGameRootTests { }
