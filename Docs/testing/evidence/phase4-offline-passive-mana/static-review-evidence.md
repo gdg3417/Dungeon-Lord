@@ -1,8 +1,35 @@
 # Phase 4 canonical offline passive mana — qualification evidence
 
-Status: automated qualification complete; external manual UAT remains outstanding.
+Status: initial and external-review correction automated qualification are complete; external manual UAT remains outstanding.
 
 Baseline: merged PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`.
+
+Reviewed implementation commit: `061b556b0c5f544000bc6bd46d4ee2da7e504971`.
+
+External-review correction implementation commit: `69395bf8b8c318d3f5e2bdf03bf4e2bcd67785e1`.
+
+## External-review correction
+
+The focused follow-up addresses five review findings without changing schema or gameplay tuning:
+
+- rejected backward/invalid wall-clock observations cannot move the durable `lastSavedUtcUnix` boundary backward during later Boot, periodic, manual, pause or quit saves;
+- the localized offline result is composed into the normal player-facing Bootstrap smoke surface, while remaining available in diagnostics;
+- the long-pause clock-anomaly signal is localization-backed and no longer claims that a valid forward offline award was duration-limited;
+- cold-start coverage now discards the first runtime/service, reopens durable bytes through a new canonical session/service and proves the interval cannot replay;
+- active Phase 4 planning text is reconciled to merged PR #205 and the current unmerged offline packet.
+
+The original results below remain the evidence for reviewed commit `061b556`; correction results are recorded separately rather than replacing them.
+
+## Correction automated evidence for `69395bf`
+
+- Focused offline EditMode fixture: 32/32 passed, 0 failed, 0 skipped; wrapper exit 0; 1.2585096 seconds. This includes durable backward-clock rejection, all five canonical save reasons, a fresh durable reopen, fractional persistence and long-forward resume behavior. Results: `%TEMP%/phase4_offline_external_review_focused.xml`.
+- Affected passive-online and canonical-session fixtures: 62/62 passed, 0 failed, 0 skipped; wrapper exit 0; 1.3164736 seconds (54 passive-online/config and 8 save-session cases). Results: `%TEMP%/phase4_offline_external_review_affected.xml`.
+- Affected clock, player-facing smoke composer and save-lifecycle fixtures: 15/15 passed, 0 failed, 0 skipped; wrapper exit 0; 0.2859369 seconds (4 clock, 7 smoke-composer and 4 lifecycle cases). Results: `%TEMP%/phase4_offline_external_review_ui_clock_lifecycle.xml`.
+- Full EditMode: 945/945 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 118.3657275 seconds. Results: `%TEMP%/phase4_offline_external_review_editmode.xml`.
+- Full PlayMode: 2,435 passed, 0 failed, 10 expected platform/mode skips, 0 inconclusive from 2,445 discovered tests; wrapper exit 0; 111.9588627 seconds. Results: `%TEMP%/phase4_offline_external_review_playmode.xml`.
+- Windows Development Build: succeeded for `StandaloneWindows64`; wrapper exit 0; 0 errors, 1 warning; 170,453,594 bytes. Output: `Builds/Development/Windows/Dungeon Lord.exe`. Reports: `Builds/Development/Windows/build-report.json` and `Builds/Development/Windows/build-provenance.json`.
+- The single counted build warning remains the established missing Unity Cloud credentials/native-symbol upload warning. Shutdown-only `abort_threads` messages followed the successful build and return code 0; no new `ComputeBuffer`/MemoryLeaks regression was observed.
+- Qualification ran against the exact correction content subsequently committed as `69395bf`. Because the commit was created after qualification, build provenance records parent revision `061b556` with `dirty: true`; the staged source diff used by the run is the content of `69395bf`.
 
 ## Contract
 
@@ -12,7 +39,7 @@ Baseline: merged PR #205 at `f15504729716cc4ac22b0eb7070d91a92d3cd20d`.
 - The complete-save writer atomically persists only the resulting wallet and consumed `lastSavedUtcUnix` before runtime publication.
 - Structured result evidence is available for pre-MVP security monitoring but is not authoritative clock-cheat proof.
 
-## Automated evidence
+## Initial automated evidence for `061b556`
 
 - Focused offline EditMode fixture: 26/26 passed, 0 failed, 0 skipped; wrapper exit 0; 1.1281893 seconds. Results: `%TEMP%/phase4_offline_passive_mana_focused.xml`.
 - Affected passive-online/config fixture: 54/54 passed, 0 failed, 0 skipped; wrapper exit 0. Results: `%TEMP%/phase4_passive_online_affected.xml`.
