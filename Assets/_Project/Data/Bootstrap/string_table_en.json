@@ -32,6 +32,46 @@
       "text": "Unknown heat state"
     },
     {
+      "key": "ui.offline_mana.applied_format",
+      "text": "Away for {0:N0} seconds. Offline rate: {1:0.###} mana/hour. Earned: {2:0.###} mana. Current mana: {3:0.###} / {4:0.###}."
+    },
+    {
+      "key": "ui.offline_mana.capacity_limited",
+      "text": "Mana storage capacity limited this award."
+    },
+    {
+      "key": "ui.offline_mana.no_award_format",
+      "text": "No offline mana was awarded: {0}."
+    },
+    {
+      "key": "ui.offline_mana.reason.applied",
+      "text": "offline mana applied"
+    },
+    {
+      "key": "ui.offline_mana.reason.zero_elapsed",
+      "text": "no offline time elapsed"
+    },
+    {
+      "key": "ui.offline_mana.reason.at_capacity",
+      "text": "mana storage was already full"
+    },
+    {
+      "key": "ui.offline_mana.reason.invalid_time",
+      "text": "the saved time could not be safely used"
+    },
+    {
+      "key": "ui.offline_mana.reason.unavailable",
+      "text": "offline mana is temporarily unavailable"
+    },
+    {
+      "key": "ui.offline_mana.reason.persistence_failure",
+      "text": "the award could not be saved safely"
+    },
+    {
+      "key": "ui.offline_mana.reason.no_generation",
+      "text": "the applicable offline generation rate produced no mana"
+    },
+    {
       "key": "ui.dev.save.periodic",
       "text": "Save: Periodic"
     },

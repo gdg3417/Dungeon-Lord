@@ -38,13 +38,13 @@ namespace DungeonBuilder.M0.Economy
         public const string ProductionResourcePath = "passive_online_mana";
         public const string ConfigurationUnavailableKey = "mana.passive_online.configuration_invalid";
         private const string ExpectedSchema = "passive_online_mana";
-        private const int ExpectedSchemaVersion = 1;
+        private const int ExpectedSchemaVersion = 2;
 
         private static readonly string[] RootFields =
         {
             "Schema", "SchemaVersion", "RuleSourceId", "MvpBaselineCoreLevel",
             "ManaPerCoreLevelPerMinute", "ManaPerActiveFloorPerMinute",
-            "HeatEfficiencies", "SoftCap"
+            "BaseOfflineEfficiency", "HeatEfficiencies", "SoftCap"
         };
 
         private static readonly string[] RequiredHeatTierIds =
@@ -61,6 +61,7 @@ namespace DungeonBuilder.M0.Economy
             int mvpBaselineCoreLevel,
             double manaPerCoreLevelPerMinute,
             double manaPerActiveFloorPerMinute,
+            double baseOfflineEfficiency,
             Dictionary<string, double> efficiencies,
             bool softCapEnabled,
             double? softCapStartManaPerHour,
@@ -70,6 +71,7 @@ namespace DungeonBuilder.M0.Economy
             MvpBaselineCoreLevel = mvpBaselineCoreLevel;
             ManaPerCoreLevelPerMinute = manaPerCoreLevelPerMinute;
             ManaPerActiveFloorPerMinute = manaPerActiveFloorPerMinute;
+            BaseOfflineEfficiency = baseOfflineEfficiency;
             heatEfficiencies = efficiencies;
             SoftCapEnabled = softCapEnabled;
             SoftCapStartManaPerHour = softCapStartManaPerHour;
@@ -80,6 +82,7 @@ namespace DungeonBuilder.M0.Economy
         public int MvpBaselineCoreLevel { get; }
         public double ManaPerCoreLevelPerMinute { get; }
         public double ManaPerActiveFloorPerMinute { get; }
+        public double BaseOfflineEfficiency { get; }
         public bool SoftCapEnabled { get; }
         public double? SoftCapStartManaPerHour { get; }
         public double? SoftCapSlopeManaPerHour { get; }
@@ -114,16 +117,18 @@ namespace DungeonBuilder.M0.Economy
                     string.IsNullOrWhiteSpace(ruleSourceId) ||
                     !ContractJson.Int(root.Fields[3].Value, out int coreLevel) || coreLevel <= 0 ||
                     !TryFiniteNonnegative(root.Fields[4].Value, out double perCore) ||
-                    !TryFiniteNonnegative(root.Fields[5].Value, out double perFloor))
+                    !TryFiniteNonnegative(root.Fields[5].Value, out double perFloor) ||
+                    !TryFinitePositive(root.Fields[6].Value, out double offlineEfficiency) ||
+                    offlineEfficiency > 1d)
                     return Failure(PassiveOnlineManaConfigurationError.Malformed);
 
-                if (!TryHeatEfficiencies(root.Fields[6].Value, out Dictionary<string, double> efficiencies) ||
-                    !TrySoftCap(root.Fields[7].Value, out bool enabled, out double? start, out double? slope))
+                if (!TryHeatEfficiencies(root.Fields[7].Value, out Dictionary<string, double> efficiencies) ||
+                    !TrySoftCap(root.Fields[8].Value, out bool enabled, out double? start, out double? slope))
                     return Failure(PassiveOnlineManaConfigurationError.Malformed);
 
                 return new PassiveOnlineManaConfigurationLoadResult(
                     new PassiveOnlineManaConfigurationSnapshot(ruleSourceId, coreLevel, perCore, perFloor,
-                        efficiencies, enabled, start, slope),
+                        offlineEfficiency, efficiencies, enabled, start, slope),
                     PassiveOnlineManaConfigurationError.None);
             }
             catch

@@ -57,6 +57,38 @@ namespace DungeonBuilder.M0
             }
             return result;
         }
+
+        public OfflinePassiveManaResult CommitOfflinePassiveMana(SaveData current,
+            OfflinePassiveManaResult calculated)
+        {
+            if (calculated == null || !calculated.PersistenceRequired ||
+                !calculated.CalculationAccepted || current == null)
+                return calculated;
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return calculated.WithPersistence(
+                    OfflinePassiveManaReason.StaleSession, false);
+
+            DetachedCanonicalWriteResult write = CreateWriteAuthority().SaveOfflinePassiveMana(
+                SavePath, _canonicalFileSystem, _canonicalSession, current,
+                calculated.WalletAfter, calculated.SourceSavedUtcUnix,
+                calculated.ObservedCurrentUtcUnix);
+            if (!write.IsSuccess)
+            {
+                OfflinePassiveManaReason reason = string.Equals(write.Reason,
+                    DetachedCanonicalWriteAuthority.OfflineStaleSessionReason,
+                    StringComparison.Ordinal)
+                    ? OfflinePassiveManaReason.StaleSession
+                    : OfflinePassiveManaReason.PersistenceFailure;
+                _logger.Error("Offline passive mana save failed: " + write.Reason);
+                return calculated.WithPersistence(reason, false);
+            }
+
+            _undo = null;
+            _canonicalSession = write.Session;
+            CanonicalRuntimePublished?.Invoke(write.RuntimeProjection);
+            _logger.Info("Offline passive mana grant persisted.");
+            return calculated.WithPersistence(calculated.Reason, true);
+        }
         public double RenovationUndoRemainingSeconds
         {
             get
@@ -288,28 +320,28 @@ namespace DungeonBuilder.M0
             { banner = "Save load failed. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
         }
 
-        public void Save(SaveData data, SaveReason reason)
+        public bool Save(SaveData data, SaveReason reason)
         {
             if (data == null)
             {
                 _logger.Error("Save called with null data.");
-                return;
+                return false;
             }
 
             if (CanonicalMvpRouteProjection.HasCanonicalLookingState(data))
             {
                 if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
-                { _logger.Error("Canonical save authority is unavailable."); return; }
+                { _logger.Error("Canonical save authority is unavailable."); return false; }
                 long previous = data.lastSavedUtcUnix;
                 data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
                 DetachedCanonicalWriteResult result = CreateWriteAuthority().SaveRecognizedState(
                     SavePath, _canonicalFileSystem, _canonicalSession, data);
                 if (!result.IsSuccess)
-                { data.lastSavedUtcUnix = previous; _logger.Error("GD66 save failed: " + result.Reason); return; }
+                { data.lastSavedUtcUnix = previous; _logger.Error("GD66 save failed: " + result.Reason); return false; }
                 _canonicalSession = result.Session;
                 CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
                 _logger.Info($"Saved canonical complete save. Reason: {reason}");
-                return;
+                return true;
             }
 
             data.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
@@ -341,10 +373,12 @@ namespace DungeonBuilder.M0
 
                 _logger.Info($"Saved. Reason: {reason}");
                 MaintainBackups();
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.Error($"Save write failed. Exception: {ex.Message}");
+                return false;
             }
         }
 

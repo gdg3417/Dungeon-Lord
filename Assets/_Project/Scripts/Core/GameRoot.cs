@@ -67,6 +67,7 @@ namespace DungeonBuilder.M0
         public string TickLine { get; private set; } = "Tick: 0";
         public string ManaLine { get; private set; } = "Mana: 0.00";
         public string PassiveManaLine { get; private set; } = string.Empty;
+        public string OfflinePassiveManaLine { get; private set; } = string.Empty;
         public string SaveLine { get; private set; } = "Save: n/a";
         public string PauseLine { get; private set; } = "Pause: Running";
         public string RunLine { get; private set; } = "ui.run.none";
@@ -111,6 +112,11 @@ namespace DungeonBuilder.M0
         private StructuralEconomySnapshot _structuralEconomy;
         private PassiveOnlineManaConfigurationSnapshot _passiveManaConfiguration;
         private CanonicalPassiveManaService _passiveManaService;
+        private CanonicalOfflinePassiveManaService _offlinePassiveManaService;
+        private RunSimulationConfig _offlineHeatConfiguration;
+        private ITimeSource _offlineTimeSource = new SystemTimeSource();
+        private OfflinePassiveManaResult _latestOfflinePassiveManaResult;
+        private bool _resumeOfflineBoundaryPersisted;
         private ActivePlaySaveScheduler _activePlaySaveScheduler;
         private int _configuredSimulationTickSeconds;
         private RunSimulationService _runSimulationService;
@@ -277,20 +283,28 @@ namespace DungeonBuilder.M0
             if (pause)
             {
                 PauseLine = "Pause: Paused";
-                if (TimeService != null)
+                bool wasPaused = TimeService != null && TimeService.IsPaused;
+                if (TimeService != null && !wasPaused)
                 {
                     TimeService.OnPause();
                 }
 
-                if (SaveService != null && Save != null)
+                if (!wasPaused && SaveService != null && Save != null)
                 {
-                    SaveService.Save(Save, SaveReason.AppPause);
+                    _resumeOfflineBoundaryPersisted = SaveService.Save(Save, SaveReason.AppPause);
                     SaveLine = "Save: AppPause";
                 }
             }
             else
             {
+                if (TimeService == null || !TimeService.IsPaused) return;
+                if (_resumeOfflineBoundaryPersisted && !TryApplyOfflinePassiveMana())
+                {
+                    PauseLine = "Pause: Paused";
+                    return;
+                }
                 PauseLine = "Pause: Running";
+                _resumeOfflineBoundaryPersisted = false;
                 if (TimeService != null)
                 {
                     string banner = TimeService.OnResume();
@@ -419,6 +433,7 @@ namespace DungeonBuilder.M0
                 SetBanner(Content.GetString(Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason), reason));
                 return false;
             }
+            _offlineHeatConfiguration = parsedRunConfig;
             byte[] canonicalLegacyConfiguration =
                 LegacyGameplayConfigurationContract.SerializeCanonical(parsedRunConfig);
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
@@ -459,6 +474,12 @@ namespace DungeonBuilder.M0
             if (Save == null)
             {
                 if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
+                return false;
+            }
+            if (!TryApplyOfflinePassiveMana())
+            {
+                string key = OfflinePassiveManaPresenter.PersistenceFailureReasonKey;
+                SetBanner(Content.GetString(key, key));
                 return false;
             }
             return CompleteSuccessfulBoot(Save, saveBanner);
@@ -597,8 +618,41 @@ namespace DungeonBuilder.M0
             _configuredSimulationTickSeconds = tickSeconds;
             _passiveManaService = new CanonicalPassiveManaService(_passiveManaConfiguration,
                 _structuralEconomy, new FormulaEngine(), spatialLimits, tickSeconds);
+            _offlinePassiveManaService = new CanonicalOfflinePassiveManaService(
+                _passiveManaConfiguration, _passiveManaService);
             _activePlaySaveScheduler = new ActivePlaySaveScheduler(tickSeconds,
                 activeSaveIntervalSeconds);
+        }
+
+#if UNITY_EDITOR
+        internal void SetOfflineTimeSourceForTests(ITimeSource timeSource) =>
+            _offlineTimeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
+
+        internal void SetOfflineHeatConfigurationForTests(RunSimulationConfig configuration) =>
+            _offlineHeatConfiguration = configuration;
+
+        internal OfflinePassiveManaResult LatestOfflinePassiveManaResultForTests =>
+            _latestOfflinePassiveManaResult;
+
+        internal bool TryApplyOfflinePassiveManaForTests() => TryApplyOfflinePassiveMana();
+#endif
+
+        private bool TryApplyOfflinePassiveMana()
+        {
+            if (Save != null && !CanonicalMvpRouteProjection.IsCanonical(Save))
+                return true;
+            if (Save == null || _offlinePassiveManaService == null ||
+                _offlineHeatConfiguration == null || SaveService == null)
+                return false;
+            long observedNow = _offlineTimeSource.UtcNowUnixSeconds();
+            OfflinePassiveManaResult calculated = _offlinePassiveManaService.Resolve(
+                Save, _offlineHeatConfiguration, observedNow);
+            _latestOfflinePassiveManaResult = calculated.PersistenceRequired
+                ? SaveService.CommitOfflinePassiveMana(Save, calculated)
+                : calculated;
+            RefreshOfflinePassiveManaLine();
+            return !_latestOfflinePassiveManaResult.PersistenceRequired ||
+                _latestOfflinePassiveManaResult.Persisted;
         }
 
         private void InitializeStructureSimulationPass()
@@ -629,6 +683,7 @@ namespace DungeonBuilder.M0
             TimeService?.AttachSave(Save);
             RefreshDashboardState();
             RefreshStructureRuntimeLines();
+            RefreshOfflinePassiveManaLine();
             RefreshRunLine();
         }
 
@@ -2262,6 +2317,17 @@ namespace DungeonBuilder.M0
                 Save?.structureRuntime?.ManaReserve ?? double.NaN,
                 _passiveManaService != null ? _passiveManaService.ManaCapacity : double.NaN,
                 formatProvider, localize);
+        }
+
+        private void RefreshOfflinePassiveManaLine()
+        {
+            Func<string, string> localize = key => Content != null
+                ? Content.GetString(key, key)
+                : key;
+            OfflinePassiveManaLine = OfflinePassiveManaPresenter.Build(
+                _latestOfflinePassiveManaResult,
+                PassiveManaPresenter.ResolveFormatProvider(Content?.Strings?.language),
+                localize);
         }
 
         public void RefreshRunLine()

@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public const string AtomicSaveFailedReason = "gd66.write.atomic_save_failed";
         public const string RecoveryRequiredReason = "gd66.transaction.recovery_failed";
+        public const string OfflineStaleSessionReason = "mana.passive_offline.stale_session";
         private readonly ProductionSpatialContentSnapshot production;
         private readonly SpatialLayoutCompatibilitySnapshot compatibility;
         private readonly RunSimulationConfig configuration;
@@ -213,6 +214,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             double mana = fillToCapacity
                 ? Math.Max(currentRuntime.structureRuntime.ManaReserve, economy.ManaCapacity) : 0;
             var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, mana, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            return PrepareAndPersist(activePath, fileSystem, session,
+                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false);
+        }
+
+        internal DetachedCanonicalWriteResult SaveOfflinePassiveMana(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, double resultingMana, long sourceSavedUtcUnix,
+            long observedCurrentUtcUnix)
+        {
+            if (economy == null || fileSystem == null || session == null || context == null ||
+                limits == null || production == null || compatibility == null ||
+                configuration == null || currentRuntime?.structureRuntime == null ||
+                currentRuntime.lastSavedUtcUnix != sourceSavedUtcUnix ||
+                observedCurrentUtcUnix < sourceSavedUtcUnix ||
+                !StructuralEconomySnapshot.Nonnegative(resultingMana) ||
+                resultingMana > economy.ManaCapacity)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+
+            DetachedCompleteSaveValidationResult owned = ValidateSession(session);
+            if (owned?.IsValid != true || !owned.CurrentTargetValidated)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            try
+            {
+                if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
+                    return Failure(OfflineStaleSessionReason);
+            }
+            catch (Exception)
+            {
+                return Failure(AtomicSaveFailedReason);
+            }
+
+            DetachedRecognizedSaveStateSnapshotResult snapshot =
+                DetachedRecognizedSaveStateSnapshot.CaptureWithManaAndTimestamp(
+                    currentRuntime, resultingMana, observedCurrentUtcUnix, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             return PrepareAndPersist(activePath, fileSystem, session,
                 session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false);

@@ -90,6 +90,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
         }
 
+        internal static DetachedRecognizedSaveStateSnapshotResult CaptureWithManaAndTimestamp(
+            SaveData source, double mana, long lastSavedUtcUnix,
+            SaveSpatialMigrationLimitsProfile limits)
+        {
+            var captured = CaptureWithMana(source, mana, limits);
+            if (!captured.IsSuccess || lastSavedUtcUnix <= 0)
+                return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            try
+            {
+                captured.Snapshot.values["lastSavedUtcUnix"] = Encoding.UTF8.GetBytes(
+                    lastSavedUtcUnix.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                return captured;
+            }
+            catch { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
+        }
+
         private static DetachedRecognizedSaveStateSnapshotResult Failure(string reason) =>
             new DetachedRecognizedSaveStateSnapshotResult(null, reason);
 

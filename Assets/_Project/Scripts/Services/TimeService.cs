@@ -14,6 +14,7 @@ namespace DungeonBuilder.M0
 #endif
 
         public event Action<long> OnTick;
+        public bool IsPaused => _isPaused;
 
         public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds)
             : this(logger, tickSeconds, detectClockSkewSeconds, new SystemTimeSource())
@@ -60,7 +61,7 @@ namespace DungeonBuilder.M0
 
         public string OnResume()
         {
-            if (_save == null)
+            if (_save == null || !_isPaused)
             {
                 return string.Empty;
             }

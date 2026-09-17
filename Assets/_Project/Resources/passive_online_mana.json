@@ -1,10 +1,11 @@
 {
   "Schema": "passive_online_mana",
-  "SchemaVersion": 1,
+  "SchemaVersion": 2,
   "RuleSourceId": "mana.passive_online.rule.phase4.v1",
   "MvpBaselineCoreLevel": 1,
   "ManaPerCoreLevelPerMinute": 2,
   "ManaPerActiveFloorPerMinute": 1,
+  "BaseOfflineEfficiency": 0.15,
   "HeatEfficiencies": [
     { "HeatTierId": "heat_tier.concern", "Multiplier": 0.85 },
     { "HeatTierId": "heat_tier.notice", "Multiplier": 0.95 },
