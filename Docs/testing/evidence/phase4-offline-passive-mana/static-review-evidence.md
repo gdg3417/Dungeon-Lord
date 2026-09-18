@@ -1,6 +1,6 @@
 # Phase 4 canonical offline passive mana — qualification evidence
 
-Status: initial, external-review correction, PR #206 integration, and false-capacity correction automated qualification are complete; external manual UAT rerun remains outstanding.
+Status: initial, external-review correction, PR #206 integration, false-capacity correction automated qualification, and the focused external manual UAT rerun are complete.
 
 Latest repository-main baseline: merged PR #206 at `f32b3ee94cf72cade159c2b5bfeba0a7ed4ee3a6`.
 
@@ -29,6 +29,19 @@ The correction computes the unclamped candidate wallet once, sets `CapacityLimit
 - Qualification ran against the exact runtime/test content committed as `d8226e9`. Because qualification preceded the commit, provenance records parent `c94c575` with `dirty: true`. The worktree also retained the owner's unstaged UnityConnect setting and an unrelated TextMesh Pro fallback-asset serialization change; neither is part of the correction commit.
 
 Temporary Bootstrap remains usable for validating the offline result, but UAT found its offline-result discoverability and at-once readability weak. Production UI must eventually present return/offline rewards more clearly. This is accepted non-blocking Bootstrap paging/scrolling/layout debt outside this packet; the false capacity message itself was a blocker and is corrected, not accepted debt.
+
+## Focused external manual UAT rerun
+
+The owner completed the focused external rerun after the false-capacity correction:
+
+- Editor below-capacity offline return showed no false capacity-limited message.
+- Editor genuine full/capacity-limited return showed the appropriate capacity message.
+- 1920×1080 and 1280×720 remained usable for validation, with the accepted temporary Bootstrap discoverability/readability debt.
+- Fresh Windows Development Build below-capacity and genuine-capacity paths passed.
+- Normal active mana resumed afterward.
+- No new blocking Console or Player errors were reported.
+
+Bootstrap offline-result discoverability/readability remains weak temporary validation-UI debt; production return/offline rewards still need clearer presentation in future work.
 
 ## PR #206 integration qualification
 
@@ -84,4 +97,4 @@ The original results below remain the evidence for reviewed commit `061b556`; co
 
 ## Manual evidence
 
-External manual UAT is not claimed. Automated integration qualification is complete and the branch is ready for external manual UAT using [the committed manual UAT plan](manual-uat.md).
+The focused external manual UAT rerun is complete and passed. The committed [manual UAT plan](manual-uat.md) remains the record of the exercised validation paths and accepted temporary Bootstrap UI debt.
