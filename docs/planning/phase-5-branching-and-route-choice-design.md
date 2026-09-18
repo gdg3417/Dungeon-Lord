@@ -23,7 +23,7 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 ### 1.1 Current repository baseline and sequencing
 
-This decision lock was rechecked after merged PR #207, `Phase 4: Add canonical offline passive mana grants`.
+This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
 At the verified preparation baseline:
 
@@ -33,10 +33,9 @@ At the verified preparation baseline:
 - Save schema remains 9.
 - PR #207 added no migration or new persisted gameplay authority.
 - Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred.
-- The repository does not yet contain this Phase 5 design-lock file.
 - Phase 5 runtime branching is not yet implemented.
 
-Repository documentation that still describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale current-status text and should be reconciled in the documentation-lock PR where touched.
+Repository documentation that describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale and conflicts with this recorded baseline.
 
 This baseline statement is status context only. It does not change the behavioral decisions below.
 
@@ -51,7 +50,7 @@ For MVP:
 - The optional branch is a dead-end detour from the required route.
 - MVP optional branches are corridor routes containing traps and potentially loot.
 - MVP optional branches do not contain branch-room monster encounters.
-- The party makes one branch choice per run for that floor.
+- A continuing party makes at most one optional-branch decision per floor per run.
 - Completing the optional dead end automatically returns the party to the required route.
 - Automatic return is not another branch decision.
 - Already resolved traps, loot, or other encounters do not retrigger on return.
@@ -289,7 +288,7 @@ For ordinary adventurers, Phase 5 interprets that lifecycle persistence as popul
 
 Named characters or heroes are the intended future path for durable individual persistence.
 
-The repository documentation-lock PR must reconcile Spec 16 and its duplicated locked-summary wording in `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` so that the two authorities do not remain contradictory. That reconciliation is documentation-only and does not implement the future named-character system.
+Spec 16 and its duplicated locked-summary wording in `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` must remain reconciled with this clarification so that the two authorities do not contradict each other. This clarification is documentation-only and does not implement the future named-character system.
 
 ### Decision 10: Current party condition affects branch danger
 
@@ -844,7 +843,10 @@ A Phase 5 implementation should not be considered complete until automated and m
 18. Repeating the same full inputs and stable decision identity produces the same route decision.
 19. Adding or reordering unrelated parties does not change an existing party's branch decision.
 20. Global RNG state does not control route selection.
-21. A specialist can improve relevant interpretation without revealing undiscovered knowledge.
+21. Specialist knowledge behavior preserves the pre-run/in-run boundary:
+    - During pre-run/shared-intelligence interpretation, a specialist may improve interpretation of information the shared world actually contains but may not manufacture specific missing facts.
+    - During in-run perception, an applicable specialist may detect, verify, or otherwise observe information that was not previously present in shared knowledge under the applicable gameplay mechanics.
+    - Newly observed specific information propagates into shared knowledge only under the approved survivor and actual-observation rules.
 22. Survivor knowledge updates require actual observation.
 23. A full wipe increases only coarse danger knowledge in the normal Phase 5 path.
 24. Content changes can leave stale information without automatically rewriting world knowledge.
@@ -911,20 +913,18 @@ The following are explicitly supported as future extensions but are not Phase 5 
 - discretionary backtracking
 - advanced path planning
 
-## 12. Repository update intent
+## 12. Repository consistency requirements
 
-When this document is committed, repository planning/spec documentation should be reconciled so that:
+Repository planning/spec documentation must remain reconciled with this design lock so that:
 
-- `docs/planning/post-gd60-mvp-execution-plan.md` is refreshed to merged PR #207 where its current-status text still calls offline passive mana unmerged, and it no longer describes the Phase 5 branch formula and tie-break as unresolved owner design.
+- `docs/planning/post-gd60-mvp-execution-plan.md` reflects merged PR #207, does not call offline passive mana unmerged, and does not describe the Phase 5 branch formula and tie-break as unresolved owner design.
 - The Phase 5 roadmap section links to this design lock.
-- `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md` receives current-status reconciliation where necessary and Section 7 receives a concise addendum pointing to this document as the approved Phase 5 route-selection policy.
-- `docs/planning/gd63-spatial-and-progression-design-decisions.md` is updated only where needed to remove or qualify obsolete current-status language and obsolete language saying the Phase 5 formula/tie-break is still unresolved.
-- `Docs/planning/phase-4a-structural-economy.md` is inspected for active current-status wording that still describes offline mana as future/unmerged and is updated only where needed for factual status consistency.
-- `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md` is refreshed where its current Phase 4 status is stale. Existing invariants are changed only if clarification is actually required; do not invent a new invariant unnecessarily.
-- `Docs/16 - Adventurer_Economy_and_External_World_Simulation.md` and the corresponding Spec 16 text in `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` are reconciled with Decision 9: ordinary adventurer lifecycle persistence may be represented at pooled/cohort level without requiring durable individual identity for every ordinary adventurer, while named characters/heroes remain the future individually persistent path.
-- Because `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` is already touched for the Spec 16 reconciliation, its top current-status addendum is refreshed or explicitly marked historical so it does not present the old Phase 2/schema-6 state as current.
-- `README.md` is inspected because it currently presents a dated Phase 2/schema-6 state as current and still says physical spatial gameplay is inactive. If that wording is still presented as current at implementation time, minimally reconcile it to the verified current baseline or clearly relabel the old statements as historical; do not broadly rewrite the README.
-- Historical evidence/status text is not rewritten merely for age when it is clearly historical.
-- No runtime code is changed in the documentation-lock PR.
-- No save schema is changed in the documentation-lock PR.
-- No tuning values are invented in the documentation-lock PR.
+- Section 7 of `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md` points to this document as the approved Phase 5 route-selection policy and uses the same per-floor/per-run branch-decision boundary.
+- `docs/planning/gd63-spatial-and-progression-design-decisions.md` does not preserve obsolete current-status language or describe the Phase 5 formula/tie-break as unresolved.
+- `Docs/planning/phase-4a-structural-economy.md` does not describe canonical offline mana as future or unmerged.
+- `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md` reflects the current Phase 4 status. Existing invariants change only when a concrete cross-spec clarification requires it; a new feature alone does not require a new invariant.
+- `Docs/16 - Adventurer_Economy_and_External_World_Simulation.md` and the corresponding Spec 16 text in `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` reflect Decision 9: ordinary adventurer lifecycle persistence may be represented at pooled/cohort level without requiring durable individual identity for every ordinary adventurer, while named characters/heroes remain the future individually persistent path.
+- The current-status addendum in `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md` does not present the old Phase 2/schema-6 state as current.
+- `README.md` does not present the dated Phase 2/schema-6 and inactive-spatial state as current.
+- Clearly historical evidence/status text remains historical traceability rather than current authority.
+- This design lock changes no runtime code, save schema, migration, tuning value, or gameplay behavior.

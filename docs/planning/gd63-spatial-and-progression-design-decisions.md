@@ -157,7 +157,7 @@ Corridors trade compactness for defensive opportunities. Direct-door layouts cos
 - One required route and at most one optional detour per floor.
 - The optional detour splits from the required route and is a dead-end corridor containing traps and potentially loot, with no branch-room monster encounter.
 - No loops, nested branches, alternate entrance, or alternate descent/floor-completion terminal.
-- Adventurers, not the player, make one branch choice per run.
+- A continuing party makes at most one optional-branch decision per floor per run; adventurers, not the player, make that choice.
 - Automatic return from a completed dead end is allowed and is not a second branch decision. Resolved traps, monsters, and loot do not trigger again on return.
 - No discretionary backtracking and no floor-to-floor backtracking.
 
