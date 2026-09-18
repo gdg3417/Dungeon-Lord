@@ -1,6 +1,8 @@
 # GD62 spatial save migration proposal
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Historical proposal status:** This proposal predates the completed Phase 2 activation/migration packets and is retained for design traceability. Current main is merged PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`, canonical spatial state is active writable route/content authority, and save schema is 9. All status statements below that describe schema 6, inactive spatial authority, or a future migration are historical.
+
+**Historical GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 
 ## Status and authority

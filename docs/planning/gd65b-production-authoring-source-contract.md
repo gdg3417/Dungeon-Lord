@@ -1,15 +1,17 @@
 # GD65B production authoring source contract
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Historical contract status:** This GD65B authoring-source contract is retained as authority for its authoring decisions, while its implementation-status snapshots predate the completed activation/migration packets. Current main is merged PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`, canonical spatial state is active writable route/content authority, and save schema is 9.
+
+**Historical GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Historical GD65B5 final status, superseded by later activation and migration packets:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. At that recorded point, the production spatial catalog remained inactive, existing runtime/save authority was unchanged, and save schema remained 6.
 
 
 | Field | Decision |
 |---|---|
 | Historical packet status | **GD65B2A approved the architecture contract only; implementation followed in later packets** |
-| Current implementation | **GD65B2B package implemented; PR #182 deterministic construction; PR #183 recovery; PR #184 invocation/committed outputs; PR #185 inactive loading/composition pending review, Unity validation, and merge** |
+| Historical implementation snapshot | **GD65B2B package implemented; PR #182 deterministic construction; PR #183 recovery; PR #184 invocation/committed outputs; PR #185 inactive loading/composition pending review, Unity validation, and merge** |
 | Packet | GD65B2A — version-controlled production authoring source approval |
 | Baseline | Main through merged PR #179 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Approved future path | `ContentAuthoring/DungeonSpatial/` |

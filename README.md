@@ -1,15 +1,17 @@
 # Dungeon-Lord
 
-**Current Phase 2 status (2026-07-31):** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
+**Current repository status (2026-09-18):** Phase 3 is closed through merged PR #200. Phase 4 structural economy, returned-content redeployment, content acquisition, direct content unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201 through #207. Current main is PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`; canonical spatial state is active writable route/content authority, and save schema is 9. PR #207 adds no migration or new persisted gameplay authority. Phase 5 branching runtime behavior remains unimplemented; its route-choice owner policy is documented in the [Phase 5 branching and route-choice design lock](docs/planning/phase-5-branching-and-route-choice-design.md).
+
+**Historical Phase 2 status (2026-07-31), superseded by later Phase 2–4 packets:** PR #187 is merged and GD66 is approved. Phase 2 is active, and PR #188 is the current Phase 2A inactive compatibility-profile configuration implementation packet. Save schema remains 6; no future target save schema is selected; no migration or writable-authority transition is active; production spatial gameplay remains inactive.
 
 
 Dungeon-Lord is a Unity dungeon-management MVP project focused on deterministic, config-owned simulation systems and legacy-safe iteration.
 
 ## Current status
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Historical GD65B5 final status, superseded by later activation and migration packets:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. At that recorded point, the production spatial catalog remained inactive, existing runtime/save authority was unchanged, and save schema remained 6.
 
-The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; an ordered, persistent two-room route; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet activate physical tile footprints, corridors, a saved route graph, spatial capacity, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
+The current prototype supports a deterministic, player-completable first-session loop; configurable room/monster/trap/loot choices; canonical physical footprints, corridors, spatial capacity and saved route/content state; Phase 3 construction, movement, replacement and leaf deletion; Phase 4 structural/content economy; canonical online and offline passive mana; run analysis and route outcomes; research progress; heat, mana, and spoils feedback; and development-build validation. It does **not** yet implement Phase 5 optional-branch gameplay, multiple floors, or production dungeon-building UI. Floor 2 is only the first multi-floor foundation; the locked MVP remains one main dungeon with up to five floors.
 
 Normal play still depends on the temporary Bootstrap overlay and simple MVP screen. These are validation surfaces, not the intended production editor, and will be replaced only after spatial contracts and editing behavior stabilize.
 
@@ -31,7 +33,7 @@ VS4 first-session MVP smoke documentation:
 - [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
 - [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
 
-## Active GD65B implementation gate
+## Historical GD65B implementation gate
 
 The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
 
