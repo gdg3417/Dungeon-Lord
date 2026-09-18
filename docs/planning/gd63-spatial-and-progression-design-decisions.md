@@ -161,7 +161,7 @@ Corridors trade compactness for defensive opportunities. Direct-door layouts cos
 - Automatic return from a completed dead end is allowed and is not a second branch decision. Resolved traps, monsters, and loot do not trigger again on return.
 - No discretionary backtracking and no floor-to-floor backtracking.
 
-The Phase 5 selection policy and deterministic tie-break are approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). Exact numeric tuning, implementation, automated validation, manual gameplay validation, and merge qualification remain outstanding.
+The Phase 5 selection policy and deterministic tie-break are approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). The detailed authority locks the formula structure, confidence-boundary behavior, linear marginal mapping, and deterministic identity/hash/roll contract. Production numeric tuning, implementation, automated validation, save/persistence review, manual gameplay validation, and merge qualification remain outstanding.
 
 ### Post-MVP extensibility
 

@@ -655,21 +655,160 @@ The approved resolver order is:
    Combine perceived danger and uncertainty with current health, surviving members, and relevant capability interpretation. Do not produce a fake exact probability.
 
 6. **Apply the hard survivability gate.**  
-   If survivability is below the party's configured minimum acceptable threshold, skip the optional branch. If survivability equals the threshold, continue to normal branch evaluation.
+   Apply this rule before the normal branch-appeal formula:
 
-7. **Calculate branch appeal.**  
-   Use a small configuration-owned formula that consumes normalized dimensions. It should account for perceived incentive, risk burden, uncertainty tolerance, required-route commitment, initial inclination, and the need to preserve capability for known mandatory danger still ahead.
+   ```text
+   if ExpectedSurvivability < PartyMinimumSurvivability:
+       SKIP
+   ```
 
-8. **Apply confidence bands.**  
-   At or below the configured skip boundary, skip. At or above the configured enter boundary, enter. Values strictly between those boundaries are marginal.
+   Equality is not refusal. If `ExpectedSurvivability == PartyMinimumSurvivability`, continue to normal branch evaluation. Reward cannot override a below-threshold refusal.
 
-9. **Resolve only the marginal band with deterministic seeded variation.**  
-   Entry likelihood must increase monotonically across the marginal band. Compare against a deterministic decision-specific roll. The seed must use stable identities sufficient to make the decision independent of global RNG state, iteration order, unrelated parties, and unrelated simulation-call order. Likely identity inputs include the run or party identity, floor identity, optional branch identity, and a stable branch-decision identity. Exact seed composition must be reconciled with current repository identity contracts before implementation rather than invented blindly.
+7. **Calculate branch appeal with the locked normalized formula.**
+   The normal decision consumes these bounded inputs:
+
+   - `I` = perceived incentive, `[0, 1]`
+   - `D` = perceived branch danger, `[0, 1]`
+   - `U` = uncertainty, `[0, 1]`
+   - `RA` = Reward Appetite, `[0, 1]`
+   - `RT` = Risk Tolerance, `[0, 1]`
+   - `UT` = Uncertainty Tolerance, `[0, 1]`
+   - `RC` = Required-Route Commitment, `[0, 1]`
+   - `Q` = remaining required-route reserve pressure, `[0, 1]`
+   - `J` = initial branch inclination, `[-1, 1]`, where negative predisposes the party to skip, zero is neutral, and positive predisposes it to enter
+
+   Current health and surviving-party count participate in the coarse survivability calculation and hard gate. They do not receive another direct branch-appeal term because that would double-count current condition.
+
+   The formula uses exactly five nonnegative configuration-owned weights: `wReward`, `wDanger`, `wUncertainty`, `wReserve`, and `wIntent`. No production numeric values are approved here. Configuration validation requires:
+
+   ```text
+   WeightTotal =
+       wReward +
+       wDanger +
+       wUncertainty +
+       wReserve +
+       wIntent
+   ```
+
+   `WeightTotal <= 0` is invalid configuration and must fail closed.
+
+   The exact derived terms are:
+
+   ```text
+   RewardTerm      = I * RA
+   DangerTerm      = D * (1 - RT)
+   UncertaintyTerm = U * (1 - UT)
+   ReserveTerm     = Q * RC
+   IntentTerm      = J
+   ```
+
+   After the survivability hard gate passes, calculate:
+
+   ```text
+   BranchAppeal =
+       clamp(
+           (
+               + wReward      * RewardTerm
+               - wDanger      * DangerTerm
+               - wUncertainty * UncertaintyTerm
+               - wReserve     * ReserveTerm
+               + wIntent      * IntentTerm
+           )
+           / WeightTotal,
+           -1,
+           +1
+       )
+   ```
+
+   `BranchAppeal` therefore has the exact bounded range `[-1, 1]`. The formula contains no additional hidden term. Raw loot value, raw trap damage, branch length, consumables, carried loot, monster threat, and other future dimensions are not inserted directly into the Phase 5 formula. A later approved system may affect an existing normalized input only where specifically authorized.
+
+8. **Apply the locked confidence bands.**
+   `SkipThreshold` and `EnterThreshold` are configuration-owned numeric values. Configuration validation requires:
+
+   ```text
+   -1 <= SkipThreshold < EnterThreshold <= +1
+   ```
+
+   Resolution is exactly:
+
+   ```text
+   if BranchAppeal <= SkipThreshold:
+       SKIP deterministically
+
+   else if BranchAppeal >= EnterThreshold:
+       ENTER deterministically
+
+   else:
+       resolve as a marginal decision
+   ```
+
+   Boundary equality is deterministic, not marginal.
+
+9. **Resolve only the marginal band with the locked deterministic tie-break.**
+   Only when `SkipThreshold < BranchAppeal < EnterThreshold`, calculate the fixed linear mapping:
+
+   ```text
+   EntryLikelihood =
+       (BranchAppeal - SkipThreshold)
+       / (EnterThreshold - SkipThreshold)
+   ```
+
+   This mapping increases linearly and monotonically from the skip boundary toward the enter boundary. Its curve is not configuration-selectable in Phase 5.
+
+   The deterministic marginal decision identity is exactly this ordered tuple:
+
+   1. `BranchDecisionRuleSourceId`
+   2. `RunId`
+   3. `FloorInstanceId`
+   4. `OptionalBranchId`
+
+   No new durable `PartyId` is required solely for Phase 5 branch selection because the MVP party is associated with its run identity. Implementation must reconcile with the repository's existing stable `RunId`, canonical `FloorInstanceId`, and persisted `OptionalBranchId` contracts rather than create parallel identity authorities.
+
+   Derive the stable signed 32-bit hash using the repository's explicit convention:
+
+   ```text
+   hash = 17
+
+   for each decision-identity field in the exact order above:
+       hash = unchecked(hash * 31 + StableStringHash(field))
+   ```
+
+   `StableStringHash` is exactly:
+
+   ```text
+   if value is null or empty:
+       return 0
+
+   hash = 23
+
+   for each character in ordinal string order:
+       hash = unchecked(hash * 31 + character)
+
+   return hash
+   ```
+
+   Convert the final signed 32-bit hash to an unsigned 32-bit value and derive:
+
+   ```text
+   DecisionRoll =
+       ((uint)hash) / 4294967296.0
+   ```
+
+   The roll domain is `0 <= DecisionRoll < 1`. Resolve the marginal choice exactly as:
+
+   ```text
+   if DecisionRoll < EntryLikelihood:
+       ENTER
+   else:
+       SKIP
+   ```
+
+   Exact equality between `DecisionRoll` and `EntryLikelihood` resolves to `SKIP`. The same decision identity and decision inputs must always reproduce the same result. The seed and roll must not consume Unity global RNG state, runtime `GetHashCode`, wall-clock time, mutable shared PRNG state, call order, iteration position, unrelated party or floor state, dictionary enumeration order, or room enumeration order.
 
 10. **Commit one route choice.**  
     Enter or skip. Phase 5 adds no discretionary mid-branch reversal. Completing the optional dead end automatically returns the party to the required route without a second branch decision.
 
-All weights, thresholds, bands, normalization curves, and modifiers are configuration-owned.
+Numeric weight values, threshold values, input normalization curves, survivability bands, and modifiers are configuration-owned. The formula structure, term signs, normalized input domains, confidence-boundary semantics, linear marginal mapping, decision-identity fields and order, stable hash algorithm, roll conversion, and equality behavior are locked design.
 
 ### Decision 31: Player-facing reporting
 
@@ -760,6 +899,10 @@ Phase 5 implementation must preserve:
 - stable IDs
 - canonical ordering
 - decision-specific deterministic seeded variation only where approved
+- the exact ordered decision identity `BranchDecisionRuleSourceId`, `RunId`, `FloorInstanceId`, `OptionalBranchId`
+- the explicit stable-string hash and ordered tuple-fold algorithm in Decision 30
+- the unsigned 32-bit `[0, 1)` roll conversion and strict-less-than marginal comparison in Decision 30
+- no use of runtime `GetHashCode` as deterministic seed authority
 - no dependence on global RNG state
 - no dependence on unrelated iteration order
 - no dependence on unrelated party scheduling
@@ -801,7 +944,6 @@ Any save change must be reviewed separately against current repository state.
 The following remain configuration-owned and are not fixed by this design lock:
 
 - normalization curves
-- dimension ranges
 - trait modifiers
 - profile aggregation weights
 - specialist interpretation modifiers
@@ -809,15 +951,16 @@ The following remain configuration-owned and are not fixed by this design lock:
 - Poor, Standard, and Good intelligence numeric values
 - survivability bands
 - party-specific minimum survivability thresholds
-- branch-appeal coefficients
+- the five nonnegative branch-appeal weight values
 - confidence-band boundaries
-- marginal-band probability mapping
-- risk and reward scaling
-- remaining-route reserve-pressure coefficients
+- perceived-incentive and perceived-danger input normalization/scaling
+- remaining-required-route reserve-pressure input derivation
 - knowledge confidence thresholds
 - stale-information trust modifiers
 
 Runtime code must consume approved configuration.
+
+The normalized input domains, exact formula structure and signs, hard-gate ordering, threshold equality behavior, fixed linear marginal mapping, decision-identity tuple and ordering, stable hash algorithm, roll conversion, and strict comparison are not configuration choices.
 
 ## 9. Phase 5 implementation acceptance criteria
 
@@ -865,6 +1008,27 @@ A Phase 5 implementation should not be considered complete until automated and m
 37. Localization ownership is preserved for player-facing text.
 38. Work remains bounded for future many-party, many-floor simulation.
 39. Ordinary adventurer route choice does not require durable per-adventurer save identity; existing ordinary lifecycle persistence remains representable through the external-world pooled/cohort model, while named/hero individual persistence remains deferred.
+
+### 9.1 Formula and deterministic tie-break test obligations
+
+Future implementation evidence must additionally demonstrate that:
+
+1. Inputs outside their approved normalized ranges fail validation or are handled by the approved bounded-input authority rather than silently changing formula semantics.
+2. `WeightTotal <= 0` fails configuration validation.
+3. `SkipThreshold >= EnterThreshold` fails configuration validation; threshold validation also enforces the locked `[-1, 1]` bounds.
+4. `BranchAppeal <= SkipThreshold` always skips without marginal variation.
+5. `BranchAppeal >= EnterThreshold` always enters without marginal variation.
+6. Only values strictly between the thresholds invoke marginal resolution.
+7. Marginal `EntryLikelihood` uses the exact linear formula in Decision 30.
+8. Increasing `BranchAppeal` within an otherwise identical marginal decision never lowers `EntryLikelihood`.
+9. The same rule source ID, run ID, floor instance ID, optional branch ID, and gameplay inputs reproduce the same result.
+10. Changing unrelated party ordering does not alter an existing decision.
+11. Changing Unity global RNG state does not alter the decision.
+12. Runtime `GetHashCode` is not an authority for the deterministic seed.
+13. Decision-identity fields are hashed in the exact approved order.
+14. Exact `DecisionRoll == EntryLikelihood` resolves to `SKIP`.
+15. Current health and surviving members influence the survivability path and are not also directly added as a second branch-appeal term.
+16. Reward cannot override the hard survivability refusal gate.
 
 ## 10. Manual gameplay questions for Phase 5 qualification
 
