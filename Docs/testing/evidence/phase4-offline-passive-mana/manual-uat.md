@@ -14,10 +14,19 @@ Automated qualification does not constitute manual gameplay qualification. Run t
 8. Repeat at existing Peace, Notice and Concern states using supported gameplay or QA routes. Verify the offline rate tracks the canonical displayed online rate and Heat itself does not change offline.
 9. Check the Bootstrap summary at 1920×1080 and 1280×720 for unusable clipping, unreadable content, or raw keys. Existing accepted Bootstrap scrolling debt is not part of this packet.
 
+### False-capacity correction rerun
+
+1. Reproduce a below-capacity fractional return with a wallet near `0.423`, no active floor placement, and a measured interval near 63 seconds. Confirm the effective offline rate is 18 mana/hour for that canonical state, the award is approximately `0.315`, and the resulting wallet is approximately `0.738 / 1000`.
+2. Confirm that below-capacity result does **not** show the localized capacity-limited message.
+3. Repeat with a near-capacity wallet where the candidate exceeds capacity. Confirm the wallet clamps to capacity and the localized capacity-limited message appears.
+4. Repeat while already at capacity with otherwise positive generation. Confirm no mana is added and the appropriate at-capacity/capacity-limited presentation remains.
+5. Confirm the offline result can still be found and read well enough for validation at 1920×1080 and 1280×720. Record discoverability/readability problems as temporary Bootstrap debt; do not treat a false clamp message as accepted debt.
+
 ## Windows Development Build
 
 1. Repeat the core clean close, real-time wait, reopen, single award, immediate reopen and no-replay path.
 2. Repeat one background or resume path and one near-capacity clamp path.
 3. Confirm the summary remains readable and ordinary active passive ticks resume afterward.
+4. Repeat the below-capacity fractional and genuine near-capacity clamp checks above, confirming the capacity-limited message appears only for the genuine clamp.
 
 Record the exact build commit, save setup, observed timestamps and duration, before and after wallet, displayed rate, Heat tier, screenshots at both resolutions, and any discrepancy.

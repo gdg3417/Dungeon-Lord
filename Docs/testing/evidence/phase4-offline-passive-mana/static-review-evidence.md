@@ -1,6 +1,6 @@
 # Phase 4 canonical offline passive mana — qualification evidence
 
-Status: initial, external-review correction, and PR #206 integration automated qualification are complete; external manual UAT remains outstanding.
+Status: initial, external-review correction, PR #206 integration, and false-capacity correction automated qualification are complete; external manual UAT rerun remains outstanding.
 
 Latest repository-main baseline: merged PR #206 at `f32b3ee94cf72cade159c2b5bfeba0a7ed4ee3a6`.
 
@@ -11,6 +11,24 @@ Reviewed implementation commit: `061b556b0c5f544000bc6bd46d4ee2da7e504971`.
 External-review correction implementation commit: `69395bf8b8c318d3f5e2bdf03bf4e2bcd67785e1`.
 
 PR #206 integration qualification commit: `e8f6dd3ade4f6cb1820706b5a87ae9e507492927`.
+
+False-capacity correction implementation commit: `d8226e91b611e5e273c898fae2ae4b71da9366b7`.
+
+## External UAT false-capacity correction
+
+External Editor UAT observed a correct 63-second fractional award at an effective 18 mana/hour (`0.315` mana, moving the wallet from approximately `0.423` to `0.738` of `1000`) accompanied by the false localized capacity-limited message. The cause was `CapacityLimited` comparing the calculated award with an award reconstructed through floating-point subtraction (`WalletAfter - WalletBefore`). Representation differences could make the reconstructed value slightly smaller even when structural capacity did not clamp the wallet.
+
+The correction computes the unclamped candidate wallet once, sets `CapacityLimited` only when that candidate is greater than the authoritative structural `ManaCapacity`, and then clamps the wallet with `Math.Min`. It introduces no epsilon or tuning value and does not change elapsed-time calculation, fractional precision, configuration-owned 15% efficiency, canonical online-rate reuse, Heat, duration eligibility, persistence, reason codes, localization, or schema 9.
+
+- Focused offline-passive-mana EditMode fixture: 33/33 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 1.2406238 seconds. The added UAT-shaped regression proves zero active floors, 18 mana/hour effective offline rate, 63 elapsed seconds, `0.315` award, approximately `0.423 -> 0.738`, `CapacityLimited == false`, and no capacity-limited localized text. The existing fractional test now also asserts no clamp; near-capacity, exceeding-capacity and already-full cases remain true-clamp coverage. Results: `%TEMP%/phase4_offline_capacity_correction_focused.xml`.
+- Affected player-facing Bootstrap composer fixture: 7/7 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 0.0875062 seconds. Results: `%TEMP%/phase4_offline_capacity_correction_presenter.xml`.
+- Full EditMode: 946/946 passed, 0 failed, 0 skipped, 0 inconclusive; wrapper exit 0; 118.0266686 seconds. Results: `%TEMP%/phase4_offline_capacity_correction_editmode.xml`.
+- Full PlayMode: 2,436 passed, 0 failed, 10 expected platform/mode skips, 0 inconclusive from 2,446 discovered tests; wrapper exit 0; 111.7505353 seconds. Results: `%TEMP%/phase4_offline_capacity_correction_playmode.xml`.
+- Fresh Windows Development Build: succeeded for `StandaloneWindows64`; wrapper exit 0; Unity 6000.3.2f1; Development Build true; Bootstrap-only scene; 0 build errors, 1 warning; 170,453,625 bytes. Output: `Builds/Development/Windows/Dungeon Lord.exe`; report: `Builds/Development/Windows/build-report.json`; provenance: `Builds/Development/Windows/build-provenance.json`; log: `%TEMP%/phase4_offline_capacity_correction_windows_development_build.log`.
+- The counted warning remains the established unavailable Unity Cloud credentials/native-symbol upload warning. The external uploader also logs its credential failure at error level, but the authoritative build report records 0 errors and a succeeded build. Shutdown-only `abort_threads` messages followed exit 0; no new `ComputeBuffer` or MemoryLeaks regression was observed.
+- Qualification ran against the exact runtime/test content committed as `d8226e9`. Because qualification preceded the commit, provenance records parent `c94c575` with `dirty: true`. The worktree also retained the owner's unstaged UnityConnect setting and an unrelated TextMesh Pro fallback-asset serialization change; neither is part of the correction commit.
+
+Temporary Bootstrap remains usable for validating the offline result, but UAT found its offline-result discoverability and at-once readability weak. Production UI must eventually present return/offline rewards more clearly. This is accepted non-blocking Bootstrap paging/scrolling/layout debt outside this packet; the false capacity message itself was a blocker and is corrected, not accepted debt.
 
 ## PR #206 integration qualification
 
