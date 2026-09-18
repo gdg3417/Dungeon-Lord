@@ -66,6 +66,12 @@ Detect impossible currency deltas, impossible reserve states, and impossible run
 
 Use save versioning and checksums to detect tampering. Maintain a monotonic save sequence to reduce rollback abuse.
 
+6.4 Offline grant evidence and pre-MVP monitoring requirement
+
+Before MVP completion, the security and anti-cheat system must consume and monitor structured offline-grant and clock-anomaly evidence. The client result boundary must include the source saved timestamp, observed timestamp and elapsed seconds; applicable canonical online mana/hour; configured base and effective offline efficiency; calculated pre-cap and actual award; wallet before and after; capacity and clamp state; and a stable result or rejection reason.
+
+Long valid forward elapsed time remains eligible for mana and is not, by duration alone, proof of cheating. Invalid or backward timestamps fail closed. Client evidence is monitorable input, not trusted proof: authoritative clock-cheat detection, enforcement, sanctions, server time and backend verification remain separate work. Monitoring must consume the offline result rather than reimplementing its economy formula.
+
 7\. Response Policy
 
 7.1 MVP response

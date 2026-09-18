@@ -53,6 +53,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.Value.MvpBaselineCoreLevel, Is.EqualTo(1));
             Assert.That(loaded.Value.ManaPerCoreLevelPerMinute, Is.EqualTo(2d));
             Assert.That(loaded.Value.ManaPerActiveFloorPerMinute, Is.EqualTo(1d));
+            Assert.That(loaded.Value.BaseOfflineEfficiency, Is.EqualTo(0.15d));
             Assert.That(loaded.Value.TryGetHeatEfficiency(CurrentHeatTierResolver.PeaceTierId,
                 out double peace), Is.True);
             Assert.That(loaded.Value.TryGetHeatEfficiency(CurrentHeatTierResolver.NoticeTierId,
@@ -77,6 +78,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("coefficient_negative")]
         [TestCase("coefficient_infinite")]
         [TestCase("floor_nan")]
+        [TestCase("offline_missing")]
+        [TestCase("offline_zero")]
+        [TestCase("offline_over_one")]
+        [TestCase("offline_infinite")]
         [TestCase("heat_missing")]
         [TestCase("heat_duplicate")]
         [TestCase("heat_order")]
@@ -100,13 +105,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     return;
                 case "malformed": json = "{broken"; break;
                 case "schema": json = json.Replace("passive_online_mana\"", "wrong\""); break;
-                case "version": json = json.Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": 2"); break;
+                case "version": json = json.Replace("\"SchemaVersion\": 2", "\"SchemaVersion\": 3"); break;
                 case "core_zero": json = json.Replace("\"MvpBaselineCoreLevel\": 1", "\"MvpBaselineCoreLevel\": 0"); break;
                 case "core_negative": json = json.Replace("\"MvpBaselineCoreLevel\": 1", "\"MvpBaselineCoreLevel\": -1"); break;
                 case "core_fractional": json = json.Replace("\"MvpBaselineCoreLevel\": 1", "\"MvpBaselineCoreLevel\": 1.5"); break;
                 case "coefficient_negative": json = json.Replace("\"ManaPerCoreLevelPerMinute\": 2", "\"ManaPerCoreLevelPerMinute\": -2"); break;
                 case "coefficient_infinite": json = json.Replace("\"ManaPerCoreLevelPerMinute\": 2", "\"ManaPerCoreLevelPerMinute\": 1e999"); break;
                 case "floor_nan": json = json.Replace("\"ManaPerActiveFloorPerMinute\": 1", "\"ManaPerActiveFloorPerMinute\": NaN"); break;
+                case "offline_missing":
+                    json = ReplaceFixtureFragment(json,
+                        "  \"BaseOfflineEfficiency\": 0.15,\n",
+                        string.Empty);
+                    break;
+                case "offline_zero":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 0");
+                    break;
+                case "offline_over_one":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 1.01");
+                    break;
+                case "offline_infinite":
+                    json = ReplaceFixtureFragment(json,
+                        "\"BaseOfflineEfficiency\": 0.15",
+                        "\"BaseOfflineEfficiency\": 1e999");
+                    break;
                 case "heat_missing":
                     json = ReplaceFixtureFragment(json,
                         "    { \"HeatTierId\": \"heat_tier.notice\", \"Multiplier\": 0.95 },\n",

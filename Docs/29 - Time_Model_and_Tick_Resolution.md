@@ -51,6 +51,12 @@ Define a unified time model for simulation and progression. This spec sets tick 
 
 - There is no offline time cap for mana credit, since the clamp limits output.
 
+- The initial base offline efficiency is validated tuning at 15 percent. Future approved Research effects may modify the effective efficiency without changing eligible duration.
+
+- Fractional mana is retained. A long valid forward interval remains eligible even when it exceeds a diagnostic clock-skew threshold; invalid or backward timestamps award zero.
+
+- Grant evidence and the consumed timestamp are persisted atomically before runtime publication. Offline elapsed time never replays as active ticks.
+
 ## 4.2 Heat offline behavior
 
 - Heat is frozen while offline.

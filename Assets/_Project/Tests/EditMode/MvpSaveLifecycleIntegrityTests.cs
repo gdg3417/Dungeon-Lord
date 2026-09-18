@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
 {
-    public sealed class MvpSaveLifecycleIntegrityTests
+    public class MvpSaveLifecycleIntegrityTests
     {
         private string _tempDir;
         private RunSimulationConfig _config;
@@ -155,7 +155,10 @@ namespace DungeonBuilder.Tests.EditMode
             harness.Root.ApplyPauseState(true);
             clock.Now = 2000;
             harness.Root.ApplyPauseState(false);
-            Assert.That(harness.Root.BannerMessage, Does.Contain("Time change detected"));
+            Assert.That(harness.Root.BannerMessage, Does.Contain("clock change"));
+            Assert.That(harness.Root.BannerMessage, Does.Not.Contain("may be limited"));
+            Assert.That(harness.Root.BannerMessage,
+                Does.Not.Contain(TimeService.ClockAnomalyMessageKey));
             AssertGameplayUnchanged(beforePause, Snapshot.Capture(harness.Root, _config), "skew resume");
 
             harness.Root.ApplyApplicationQuit();
@@ -289,6 +292,11 @@ namespace DungeonBuilder.Tests.EditMode
                 researchVerificationScaffold = new ResearchVerificationScaffoldConfig { enabled = true, verificationMode = ResearchVerificationBoundaryResolver.LocalDevPlaceholderVerificationMode, ruleSourceId = "research.verification.gd56" },
                 researchUnlockBridge = new ResearchUnlockBridgeConfig { enabled = true, ruleSourceId = "research.unlock.gd56", unlocks = new[] { new ResearchUnlockDefinitionConfig { researchProjectId = _config.MvpFirstSessionObjective.AnalysisResearchProjectId, unlockId = MvpPlayerLoopSummaryPresenter.BasicRunAnalysisUnlockId, summaryKey = "ui.research.unlock.basic_run_analysis.summary" } } }
             });
+            var strings = (System.Collections.Generic.Dictionary<string, string>)
+                typeof(ContentService).GetField("_stringMap",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(content);
+            strings[TimeService.ClockAnomalyMessageKey] =
+                "A large local clock change was detected. Offline mana follows saved-time validation without a duration limit.";
             return content;
         }
 

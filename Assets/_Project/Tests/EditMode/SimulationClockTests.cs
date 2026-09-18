@@ -60,6 +60,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(save.totalTicks, Is.EqualTo(2));
             Assert.That(service.IsPausedForTests, Is.False);
         }
+
+        [Test]
+        public void TimeService_LongResumeReturnsStableLocalizationKeyNotEnglishClaim()
+        {
+            var source = new FakeTimeSource { Now = 1000 };
+            var service = new TimeService(new SimpleLogger(false), 10, 300, source);
+            service.AttachSave(new SaveData());
+            service.OnPause();
+            source.Now = 91000;
+
+            string result = service.OnResume();
+
+            Assert.That(result, Is.EqualTo(TimeService.ClockAnomalyMessageKey));
+            Assert.That(result, Does.Not.Contain("limited"));
+            Assert.That(result, Does.Not.Contain("Time change detected"));
+        }
     }
 }
 #endif

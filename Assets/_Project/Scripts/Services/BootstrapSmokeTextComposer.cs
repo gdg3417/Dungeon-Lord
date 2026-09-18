@@ -26,6 +26,7 @@ namespace DungeonBuilder.M0
                 string placementFeedback,
                 string runFeedback,
                 string bannerMessage,
+                string offlinePassiveManaText,
                 AdventurerRunIntentSummary lastRunIntentSummary,
                 string lastRunPostureUsedId,
                 string lastRunDebugPostureId,
@@ -50,6 +51,7 @@ namespace DungeonBuilder.M0
                 PlacementFeedback = placementFeedback;
                 RunFeedback = runFeedback;
                 BannerMessage = bannerMessage;
+                OfflinePassiveManaText = offlinePassiveManaText;
                 LastRunIntentSummary = lastRunIntentSummary;
                 LastRunPostureUsedId = lastRunPostureUsedId;
                 LastRunDebugPostureId = lastRunDebugPostureId;
@@ -75,6 +77,7 @@ namespace DungeonBuilder.M0
             public string PlacementFeedback { get; }
             public string RunFeedback { get; }
             public string BannerMessage { get; }
+            public string OfflinePassiveManaText { get; }
             public AdventurerRunIntentSummary LastRunIntentSummary { get; }
             public string LastRunPostureUsedId { get; }
             public string LastRunDebugPostureId { get; }
@@ -88,6 +91,7 @@ namespace DungeonBuilder.M0
         {
             var builder = new StringBuilder();
             AppendMvpLoopSummaryPanel(builder, context, localize);
+            AppendOfflinePassiveManaResult(builder, context);
             AppendLine(builder, AdventurerRunIntentPresenter.BuildScoreSummaryLine(context.Summary?.AdventurerRunIntent, localize));
             AppendLatestRunIntentEvidence(builder, context, localize);
             AppendLine(builder, AdventurerArrivalPressurePresenter.BuildDetailLine(context.Summary?.AdventurerArrivalPressure, localize));
@@ -101,6 +105,7 @@ namespace DungeonBuilder.M0
         {
             var builder = new StringBuilder();
             AppendMvpLoopSummaryPanel(builder, context, localize);
+            AppendOfflinePassiveManaResult(builder, context);
             return builder.ToString();
         }
 
@@ -124,6 +129,7 @@ namespace DungeonBuilder.M0
                 context.GreedTrial,
                 context.RecentSpoilsLedger,
                 localize));
+            AppendOfflinePassiveManaResult(builder, context);
             return builder.ToString();
         }
 
@@ -242,8 +248,15 @@ namespace DungeonBuilder.M0
             var builder = new StringBuilder();
             AppendLine(builder, string.Format(localize("ui.mvp_smoke.section.status_format", "ui.mvp_smoke.section.status_format"), localize(sectionNameKey, sectionNameKey), context.PlayerFacingSectionIndex + 1, context.PlayerFacingSectionCount));
             if (!string.IsNullOrEmpty(context.SmokeViewportStatusMessage)) AppendLine(builder, context.SmokeViewportStatusMessage);
+            AppendOfflinePassiveManaResult(builder, context);
             if (!string.IsNullOrEmpty(body)) AppendLine(builder, body);
             return builder.ToString();
+        }
+
+        private static void AppendOfflinePassiveManaResult(StringBuilder builder, Context context)
+        {
+            if (!string.IsNullOrWhiteSpace(context.OfflinePassiveManaText))
+                AppendLine(builder, context.OfflinePassiveManaText);
         }
 
         private static void AppendMvpDungeonLayoutText(StringBuilder builder, Context context)
