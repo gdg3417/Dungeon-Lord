@@ -1,9 +1,11 @@
 # GD65B production spatial content approval record
 
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Historical approval-record status:** This GD65B approval register remains authority for its approved content/pipeline decisions, while its implementation-status snapshots predate the completed activation/migration packets. Current main is merged PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`, canonical spatial state is active writable route/content authority, and save schema is 9.
+
+**Historical GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 
-**GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
+**Historical GD65B5 final status, superseded by later activation and migration packets:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. At that recorded point, the production spatial catalog remained inactive, existing runtime/save authority was unchanged, and save schema remained 6.
 
 
 | Field | Decision |
@@ -324,7 +326,7 @@ Later work must preserve deterministic validation; stable IDs; ordinal canonical
 
 **GD65B0 approval is complete.** The register contains exactly 72 rows: 72 `APPROVED`, 0 `UNAPPROVED`, 0 `INFERRED_NOT_APPROVED`, 0 `CONFLICTING`, and 0 `DEFERRED`. No approval row is unresolved. The dependency gate for GD65B implementation is open, and GD65B implementation is the next dependency-correct packet.
 
-**Current reconciliation:** Production records, the limits asset, generated files, exporter, recovery service, inactive loading/scene assignment, and pre-build enforcement now exist through PRs #181–#186. Required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`. PR #186 is merged; GD65B is closed and GD66 is a candidate for approval in PR #187. The catalog remains inactive; save schema remains 6; existing abstract placement selections, ordered two-room layout, and room-slot assignments remain runtime/save authority. GD65B is closed; GD66 is a candidate for approval in PR #187, and Phase 2 alone may later migrate or switch authority after GD66 merges.
+**Historical reconciliation, superseded by later activation and migration packets:** Production records, the limits asset, generated files, exporter, recovery service, inactive loading/scene assignment, and pre-build enforcement existed through PRs #181–#186. Required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`. At that recorded point, the catalog remained inactive; save schema remained 6; existing abstract placement selections, ordered two-room layout, and room-slot assignments remained runtime/save authority; and Phase 2 had not yet migrated or switched authority.
 
 ## 12. Non-goals
 

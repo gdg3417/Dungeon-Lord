@@ -1,8 +1,9 @@
 # GD63 spatial and progression design decisions
 
 
-**Current Phase 3 status (2026-09-09):** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The narrow local closeout fixes reconstruction against retiring geometry, maps renovation through the actual saved outgoing relationship, and [requalifies bounded retained custody](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). The historical decisions below remain historical. Closeout review/manual validation is still required; Phase 4 remains unimplemented.
-**Current GD66 status (2026-07-31):** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
+**Current repository status (2026-09-18):** Phase 3 is closed through merged PR #200. Phase 4 packets #201 through #207 are merged, including canonical offline passive mana in PR #207. Canonical spatial state is active writable route/content authority, and save schema is 9. The Phase 5 route-choice owner policy is approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md); implementation and tuning remain outstanding. The historical GD63 decisions below remain historical context.
+**Historical Phase 3 status (2026-09-09), superseded by PR #200:** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The narrow local closeout fixes reconstruction against retiring geometry, maps renovation through the actual saved outgoing relationship, and [requalifies bounded retained custody](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). Closeout review/manual validation was still required, and Phase 4 remained unimplemented at that recorded point.
+**Historical GD66 status (2026-07-31), superseded by later Phase 2 packets:** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
 
 | Field | Decision |
@@ -154,17 +155,17 @@ Corridors trade compactness for defensive opportunities. Direct-door layouts cos
 ### MVP restriction
 
 - One required route and at most one optional detour per floor.
-- The optional detour splits from the required route and may end with traps and loot.
+- The optional detour splits from the required route and is a dead-end corridor containing traps and potentially loot, with no branch-room monster encounter.
 - No loops, nested branches, alternate entrance, or alternate descent/floor-completion terminal.
-- Adventurers, not the player, make one branch choice per run.
+- A continuing party makes at most one optional-branch decision per floor per run; adventurers, not the player, make that choice.
 - Automatic return from a completed dead end is allowed and is not a second branch decision. Resolved traps, monsters, and loot do not trigger again on return.
 - No discretionary backtracking and no floor-to-floor backtracking.
 
-The exact selection formula and tie-break remain the Phase 5 data gate.
+The Phase 5 selection policy and deterministic tie-break are approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). The detailed authority locks the formula structure, confidence-boundary behavior, linear marginal mapping, and deterministic identity/hash/roll contract. Production numeric tuning, implementation, automated validation, save/persistence review, manual gameplay validation, and merge qualification remain outstanding.
 
 ### Post-MVP extensibility
 
-The domain may later support multiple optional detours, side bosses/special rewards, multiple branch visits, general backtracking, and increased cumulative danger. There remains no alternate entrance to the next floor unless a future approved specification changes that rule.
+The domain may later expand optional branches into multi-room routes with monsters, traps, loot, bosses, broader objectives, multiple optional detours, multiple branch visits, general backtracking, and increased cumulative danger. This is forward-compatible direction, not Phase 5 implementation scope. There remains no alternate entrance to the next floor unless a future approved specification changes that rule.
 
 ## 10. Exit, descent, and floor progression
 
@@ -194,8 +195,7 @@ Each required MVP family budgets one base unit, two basic specialty units, one s
 - There is no offline time cap for mana credit. Mana storage capacity clamps the output.
 - Research may improve offline efficiency percentage, mana storage capacity, or Mana Farm production. Under the current locked specification it does not extend eligible offline duration.
 - Offline accumulation should support continued expansion without replacing active play. A normal overnight absence funding roughly one meaningful construction or renovation decision rather than a whole floor is a **non-authoritative Phase 4 balance hypothesis to test**, not locked tuning or an approved target.
-- Percentage, timestamp/clock-manipulation safeguards, and rounding remain authored implementation gates; GD63 does not authorize changing the no-time-cap rule.
-- Future results must explain elapsed offline time, effective generation rate, the storage-cap clamp, and mana awarded through localization-backed presentation.
+- Merged PR #207 implements the configuration-owned base efficiency, exact elapsed-time and fractional calculation, durable timestamp boundary, no-duration-cap rule, storage-cap clamp, and localization-backed result presentation. Authoritative clock-cheat enforcement remains deferred.
 
 ## 13. Known inactive GD62 implementation delta
 
@@ -220,8 +220,8 @@ Later implementation must preserve deterministic simulation; stable IDs; ordinal
 - **GD66:** final migration mapping, stable textual ID rules, coordinates/orientations, fixtures, fallback/content-missing policy, backup/recovery UX, and atomic recovery design.
 - **Phase 2 only:** separately reviewed schema migration, legacy-state migration, runtime-reader switch, writable-authority transition, rollback, and migration evidence; no version is approved by GD63.
 - Exact floor/room dimensions and capacities; content IDs; connection points; socket/content capacities; construction/renovation/corridor costs; refund percentage, rounding and clamping; environmental modifiers; and workload/device limits.
-- Doorway geometry/validation, invested-mana save representation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 branch formula/tie-break, and Phase 6 transfer/save details.
-- Offline efficiency percentage, timestamp/clock safeguards, rounding, and result presentation; Spec 29 retains no time cap and the storage-cap clamp.
+- Doorway geometry/validation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 route-choice implementation and configuration-owned tuning, and Phase 6 transfer/save details. The Phase 5 owner-design formula/tie-break gate is approved in the linked design lock.
+- Authoritative clock-cheat enforcement for offline mana remains deferred; merged PR #207 implements the approved base efficiency, timestamp boundary, rounding behavior, no-time-cap rule, storage clamp, and result presentation.
 
 These gates must not be guessed in runtime code. Phase 3, 5, 7, and 9 observation gates remain responsible for testing whether the spatial fantasy is understandable and fun.
 
