@@ -62,6 +62,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.CalculatedPreCapacityAward, Is.EqualTo(0.0075d).Within(1e-12));
             Assert.That(result.WalletAfter, Is.EqualTo(12.5075d).Within(1e-12));
             Assert.That(result.ActualAwardedMana, Is.EqualTo(0.0075d).Within(1e-12));
+            Assert.That(result.CapacityLimited, Is.False);
+        }
+
+        [Test]
+        public void UatFractionalAwardBelowCapacityDoesNotReportCapacityLimit()
+        {
+            Fixture fixture = Fixture.Create(null);
+            fixture.Runtime.lastSavedUtcUnix = 1000;
+            fixture.Runtime.structureRuntime.ManaReserve = 0.423d;
+            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+
+            OfflinePassiveManaResult result = Offline(fixture).Resolve(
+                fixture.Runtime, fixture.Configuration, 1063);
+
+            Assert.That(result.CanonicalRate.ActiveFloorCount, Is.Zero);
+            Assert.That(result.EffectiveOfflineManaPerHour, Is.EqualTo(18d).Within(1e-12));
+            Assert.That(result.ObservedElapsedSeconds, Is.EqualTo(63));
+            Assert.That(result.CalculatedPreCapacityAward, Is.EqualTo(0.315d).Within(1e-12));
+            Assert.That(result.ActualAwardedMana, Is.EqualTo(0.315d).Within(1e-12));
+            Assert.That(result.WalletAfter, Is.EqualTo(0.738d).Within(1e-12));
+            Assert.That(result.CapacityLimited, Is.False);
+
+            var strings = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [OfflinePassiveManaPresenter.AppliedFormatKey] =
+                    "Away {0:N0}; rate {1:0.###}; earned {2:0.###}; mana {3:0.###}/{4:0.###}",
+                [OfflinePassiveManaPresenter.CapacityLimitedKey] = "Capacity limited"
+            };
+            string text = OfflinePassiveManaPresenter.Build(result.WithPersistence(
+                    OfflinePassiveManaReason.Applied, true), CultureInfo.InvariantCulture,
+                key => strings.TryGetValue(key, out string value) ? value : key);
+
+            Assert.That(text, Does.Contain("Away 63; rate 18; earned 0.315; mana 0.738/1000"));
+            Assert.That(text, Does.Not.Contain("Capacity limited"));
         }
 
         [Test]

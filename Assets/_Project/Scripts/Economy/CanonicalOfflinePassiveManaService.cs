@@ -138,11 +138,10 @@ namespace DungeonBuilder.M0.Economy
                 !FiniteNonnegative(result.CalculatedPreCapacityAward))
                 return result;
 
-            result.WalletAfter = Math.Min(result.Capacity,
-                wallet + result.CalculatedPreCapacityAward);
+            double candidateWallet = wallet + result.CalculatedPreCapacityAward;
+            result.CapacityLimited = candidateWallet > result.Capacity;
+            result.WalletAfter = Math.Min(result.Capacity, candidateWallet);
             result.ActualAwardedMana = result.WalletAfter - wallet;
-            result.CapacityLimited = result.CalculatedPreCapacityAward >
-                result.ActualAwardedMana;
             result.PersistenceRequired = true;
             result.Reason = result.ActualAwardedMana > 0d
                 ? OfflinePassiveManaReason.Applied
