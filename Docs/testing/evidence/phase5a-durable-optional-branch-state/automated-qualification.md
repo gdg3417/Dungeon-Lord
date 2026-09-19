@@ -32,4 +32,71 @@ The Phase 5A fixture covers schema 9 → 10, research allowance resolution, cons
 
 ## Final qualification
 
-Final full EditMode, full PlayMode, and Windows x86_64 Development Build results will be appended after the implementation source is frozen. Manual UAT is tracked separately and remains outstanding.
+The final authoritative qualification was run against implementation HEAD
+`6d400c359970c09a002533eeeefdcc74414637a3` under Unity `6000.3.2f1`.
+
+| Qualification | Result | Duration / output |
+|---|---:|---|
+| Full EditMode | 952 total; 952 passed; 0 failed; 0 skipped | 120.412 seconds |
+| Full PlayMode | 2,452 total; 2,442 passed; 0 failed; 10 intentionally skipped | 115.118 seconds |
+| Windows x86_64 Development Build | Success; exit code 0 | `Builds/Phase5A/DungeonLord.exe` |
+
+### PlayMode discovery correction
+
+The first full PlayMode invocation discovered two stale test-only reason-range assertions:
+
+- `FloorLayoutValidatorTests.ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortySix`
+- `SpatialContentValidationTests.ExactContentAndGd64ReasonMapsArePreserved`
+
+Both still expected the pre-Phase-5 append range `1..46`, while Phase 5A correctly
+appends stable reasons `47..55`. Commit
+`6d400c359970c09a002533eeeefdcc74414637a3` updated those assertions without
+changing production behavior. Each corrected assertion passed in isolation, the
+full EditMode suite then passed 952/952, and the full PlayMode rerun passed with
+zero failures.
+
+The ten final PlayMode skips are expected existing fixture/platform boundaries:
+
+| Skipped test | Existing reason |
+|---|---|
+| `Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,"north",DirectDoorway,"Direct Doorway","")` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,"east",PhysicalCorridor,"Straight Stone Corridor","(1,6)")` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)` | `gd66.test.synchronous_edit_mode_fixture` |
+| `Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed` | `gd66.test.windows_only_inverse` |
+| `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` | `gd66.test.windows_player_only` |
+
+### Windows Development Build
+
+- Editor: Unity `6000.3.2f1`, x86_64.
+- Target: `StandaloneWindows64`.
+- Build option: `-development`.
+- Result: `Success`, exit code `0`.
+- Output: `Builds/Phase5A/DungeonLord.exe`.
+- Complete build size: 99.7 MB.
+- Output inventory: 217 files, 104,807,832 bytes.
+- Provenance: `Builds/Phase5A/DungeonLord.provenance.json`.
+- Provenance source revision: `6d400c359970c09a002533eeeefdcc74414637a3`.
+- Provenance reports `dirty: true` only because excluded local/generated Unity and
+  editor files were present in the working tree; none is part of the Phase 5A
+  committed diff.
+
+Observed nonfatal diagnostics were unavailable Unity Cloud credentials for
+symbol upload, a player-connection multicast permission warning, an empty test
+asmdef notice, and shutdown thread/debugger cleanup messages. The build reported
+no compile failure, build failure, ComputeBuffer failure, or new player runtime
+error.
+
+## Evidence ownership and outstanding validation
+
+This committed document records the qualification conclusions. The source XML
+and build log under untracked `TestResults/` remain raw local artifacts and are
+not committed. The player and provenance under ignored `Builds/Phase5A/` remain
+local build output and are not committed.
+
+Manual UAT remains outstanding and is tracked in `manual-uat.md`. No manual UAT
+pass is claimed by Phase 5A automated evidence.
