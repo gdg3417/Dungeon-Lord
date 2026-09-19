@@ -84,6 +84,11 @@ namespace DungeonBuilder.M0
         private string _selectedStructuralTerminalConnectionPointId;
         private string _structuralFeedback = string.Empty;
         private string _selectedRenovationRoomInstanceId;
+        private string _selectedBranchOriginNodeId;
+        private string _selectedBranchConnectionPointId;
+        private int _selectedBranchCorridorLength = 1;
+        private int _selectedBranchTileIndex;
+        private string _selectedCorridorAssignmentId;
 
         public int FullDiagnosticsPageNumber => _fullDiagnosticsPage + 1;
         public int FullDiagnosticsScrollOffset => _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage];
@@ -115,6 +120,7 @@ namespace DungeonBuilder.M0
         public string StructuralFeedback => _structuralFeedback;
         public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
         public bool StructuralRenovationControlsAvailable => ResolveRenovationRoomIds().Length != 0;
+        public bool OptionalBranchControlsAvailable => ResolveBranchOriginNodeIds().Length != 0;
         public string SelectedRenovationRoomInstanceId => _selectedRenovationRoomInstanceId;
 
         public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
@@ -491,7 +497,7 @@ namespace DungeonBuilder.M0
 
         private void InvalidateStructuralPreview()
         { _root?.InvalidateStructuralConstructionPreview(); _root?.InvalidateStructuralRenovationPreview();
-          _root?.InvalidateStructuralDeletionPreview();
+          _root?.InvalidateStructuralDeletionPreview(); _root?.InvalidateOptionalBranchPreview();
           _structuralFeedback = string.Empty; }
 
         private void ReconcileRenovationSelection()
@@ -1789,6 +1795,9 @@ namespace DungeonBuilder.M0
             if (StructuralRenovationControlsAvailable)
                 DrawStructuralRenovationControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
+            if (DiagnosticsAllowed && OptionalBranchControlsAvailable)
+                DrawOptionalBranchControls(compactLabel, compactButton, groupHeaderLabel,
+                    labelHeight, buttonHeight);
             if (!string.IsNullOrEmpty(_structuralFeedback))
                 GUILayout.Label(_structuralFeedback, wrappedLabel);
             if (CanonicalMvpRouteProjection.IsCanonical(_root.Save))
@@ -1923,6 +1932,260 @@ namespace DungeonBuilder.M0
             bool success = _root != null && _root.TryRedeploySelectedReturnedContent();
             _structuralFeedback = _root?.BannerMessage ?? string.Empty;
             return success;
+        }
+
+        public bool CycleBranchOrigin()
+        {
+            string[] values = ResolveBranchOriginNodeIds();
+            if (values.Length == 0) return false;
+            int index = Array.IndexOf(values, _selectedBranchOriginNodeId);
+            _selectedBranchOriginNodeId = values[(index + 1 + values.Length) % values.Length];
+            _selectedBranchConnectionPointId = ResolveBranchConnectionPointIds().FirstOrDefault();
+            _root?.InvalidateOptionalBranchPreview(); _structuralFeedback = string.Empty;
+            return true;
+        }
+
+        public bool CycleBranchConnectionPoint()
+        {
+            string[] values = ResolveBranchConnectionPointIds();
+            if (values.Length == 0) return false;
+            int index = Array.IndexOf(values, _selectedBranchConnectionPointId);
+            _selectedBranchConnectionPointId = values[(index + 1 + values.Length) % values.Length];
+            _root?.InvalidateOptionalBranchPreview(); _structuralFeedback = string.Empty;
+            return true;
+        }
+
+        public void CycleBranchCorridorLength()
+        {
+            CorridorSpatialDefinition definition = ResolveBranchCorridorDefinition();
+            if (definition == null) return;
+            _selectedBranchCorridorLength = _selectedBranchCorridorLength < definition.MinimumLength ||
+                _selectedBranchCorridorLength >= definition.MaximumLength
+                ? definition.MinimumLength : _selectedBranchCorridorLength + 1;
+            _root?.InvalidateOptionalBranchPreview(); _structuralFeedback = string.Empty;
+        }
+
+        public OptionalBranchEditPreview PreviewOptionalBranchConstruction()
+        {
+            ReconcileBranchSelection();
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            OptionalBranchEditPreview preview = _root?.PreviewOptionalBranchConstruction(
+                new OptionalBranchConstructionRequest
+                {
+                    FloorInstanceId = floor?.FloorInstanceId,
+                    OriginNodeId = _selectedBranchOriginNodeId,
+                    OriginConnectionPointId = _selectedBranchConnectionPointId,
+                    CorridorLength = _selectedBranchCorridorLength
+                });
+            _structuralFeedback = preview?.IsValid == true
+                ? string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.branch.preview.success"), preview.OccupiedTiles.Length,
+                    preview.TrapCapacity, preview.LootCapacity, preview.ResultingRemainingFloorSpace)
+                : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
+            return preview;
+        }
+
+        public OptionalBranchEditPreview PreviewOptionalBranchRemoval()
+        {
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            FloorRouteEdge edge = ResolveActiveOptionalBranchEdge();
+            OptionalBranchEditPreview preview = _root?.PreviewOptionalBranchRemoval(
+                new OptionalBranchRemovalRequest
+                { FloorInstanceId = floor?.FloorInstanceId, OptionalBranchId = edge?.OptionalBranchId });
+            _structuralFeedback = preview?.IsValid == true
+                ? GetLocalizedString("ui.branch.removal.preview.success")
+                : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
+            return preview;
+        }
+
+        public DetachedCanonicalWriteResult CommitOptionalBranchEdit()
+        {
+            DetachedCanonicalWriteResult result = _root?.CommitOptionalBranchEdit();
+            _structuralFeedback = result?.IsSuccess == true
+                ? GetLocalizedString("ui.branch.commit.success")
+                : LocalizeStructuralReason(result?.Reason);
+            ReconcileBranchSelection();
+            return result;
+        }
+
+        public void CycleBranchTile()
+        {
+            TileCoordinate[] tiles = ResolveActiveOptionalBranchEdge()?.Footprint?.OccupiedTiles ??
+                Array.Empty<TileCoordinate>();
+            if (tiles.Length != 0) _selectedBranchTileIndex = (_selectedBranchTileIndex + 1) % tiles.Length;
+        }
+
+        public bool AcquireSelectedCorridorContent()
+        {
+            FloorRouteEdge edge = ResolveActiveOptionalBranchEdge();
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            TileCoordinate[] tiles = edge?.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
+            DetachedCanonicalWriteResult result = edge == null || tiles.Length == 0 ? null :
+                _root?.AcquireCorridorContent(_selectedMvpPlacementCategoryId,
+                    _selectedMvpPlacementOptionId, floor.FloorInstanceId, edge.OptionalBranchId,
+                    tiles[Math.Min(_selectedBranchTileIndex, tiles.Length - 1)]);
+            return PresentBranchMutation(result, "ui.branch.content.acquire.success");
+        }
+
+        public bool RedeploySelectedReturnedContentToCorridor()
+        {
+            FloorRouteEdge edge = ResolveActiveOptionalBranchEdge();
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            TileCoordinate[] tiles = edge?.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
+            DetachedCanonicalWriteResult result = edge == null || tiles.Length == 0 ? null :
+                _root?.RedeployCorridorContent(_root.SelectedReturnedAssignmentId,
+                    floor.FloorInstanceId, edge.OptionalBranchId,
+                    tiles[Math.Min(_selectedBranchTileIndex, tiles.Length - 1)]);
+            return PresentBranchMutation(result, "ui.branch.content.redeploy.success");
+        }
+
+        public bool CycleCorridorAssignment()
+        {
+            CorridorContentAssignment[] values = ResolveCorridorAssignments();
+            if (values.Length == 0) return false;
+            int index = Array.FindIndex(values, value => value.AssignmentId == _selectedCorridorAssignmentId);
+            _selectedCorridorAssignmentId = values[(index + 1 + values.Length) % values.Length].AssignmentId;
+            return true;
+        }
+
+        public bool UnassignSelectedCorridorContent()
+        {
+            CorridorContentAssignment[] values = ResolveCorridorAssignments();
+            if (!values.Any(value => value.AssignmentId == _selectedCorridorAssignmentId))
+                _selectedCorridorAssignmentId = values.FirstOrDefault()?.AssignmentId;
+            return PresentBranchMutation(_root?.UnassignCorridorContent(_selectedCorridorAssignmentId),
+                "ui.branch.content.unassign.success");
+        }
+
+        public bool SetBasicBranchingCompletionForQa(bool completed)
+        {
+            bool success = _root != null && _root.SetBasicBranchingCompletionForQa(completed);
+            _structuralFeedback = GetLocalizedString(success
+                ? completed ? "ui.branch.qa.research.set.success" : "ui.branch.qa.research.clear.success"
+                : "branch.edit.invalid_context");
+            return success;
+        }
+
+        private bool PresentBranchMutation(DetachedCanonicalWriteResult result, string successKey)
+        {
+            bool success = result?.IsSuccess == true;
+            _structuralFeedback = success ? GetLocalizedString(successKey) :
+                LocalizeStructuralReason(result?.Reason);
+            return success;
+        }
+
+        private void DrawOptionalBranchControls(GUIStyle label, GUIStyle button,
+            GUIStyle heading, GUILayoutOption labelHeight, GUILayoutOption buttonHeight)
+        {
+            ReconcileBranchSelection();
+            GUILayout.Label(GetLocalizedString("ui.branch.heading"), heading, labelHeight);
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.branch.origin.format"), _selectedBranchOriginNodeId ?? string.Empty),
+                label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.branch.origin.next"), button, buttonHeight))
+                CycleBranchOrigin();
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.branch.connection.format"),
+                _selectedBranchConnectionPointId ?? string.Empty), label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.branch.connection.next"), button, buttonHeight))
+                CycleBranchConnectionPoint();
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                GetLocalizedString("ui.branch.length.format"), _selectedBranchCorridorLength),
+                label, labelHeight);
+            if (GUILayout.Button(GetLocalizedString("ui.branch.length.next"), button, buttonHeight))
+                CycleBranchCorridorLength();
+            if (GUILayout.Button(GetLocalizedString("ui.branch.preview.action"), button, buttonHeight))
+                PreviewOptionalBranchConstruction();
+            bool enabled = GUI.enabled;
+            GUI.enabled = enabled && _root.OptionalBranchPreview?.IsValid == true;
+            if (GUILayout.Button(GetLocalizedString("ui.branch.commit.action"), button, buttonHeight))
+                CommitOptionalBranchEdit();
+            GUI.enabled = enabled;
+            if (ResolveActiveOptionalBranchEdge() != null)
+            {
+                if (GUILayout.Button(GetLocalizedString("ui.branch.tile.next"), button, buttonHeight))
+                    CycleBranchTile();
+                if (GUILayout.Button(GetLocalizedString("ui.branch.content.acquire"), button, buttonHeight))
+                    AcquireSelectedCorridorContent();
+                if (GUILayout.Button(GetLocalizedString("ui.branch.content.redeploy"), button, buttonHeight))
+                    RedeploySelectedReturnedContentToCorridor();
+                if (GUILayout.Button(GetLocalizedString("ui.branch.content.next"), button, buttonHeight))
+                    CycleCorridorAssignment();
+                if (GUILayout.Button(GetLocalizedString("ui.branch.content.unassign"), button, buttonHeight))
+                    UnassignSelectedCorridorContent();
+                if (GUILayout.Button(GetLocalizedString("ui.branch.removal.preview.action"), button, buttonHeight))
+                    PreviewOptionalBranchRemoval();
+            }
+            if (GUILayout.Button(GetLocalizedString("ui.branch.qa.research.set"), button, buttonHeight))
+                SetBasicBranchingCompletionForQa(true);
+            if (GUILayout.Button(GetLocalizedString("ui.branch.qa.research.clear"), button, buttonHeight))
+                SetBasicBranchingCompletionForQa(false);
+        }
+
+        private SavedSpatialFloor ResolveActiveSpatialFloor() =>
+            _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault();
+
+        private string[] ResolveBranchOriginNodeIds()
+        {
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            if (floor?.Layout == null) return Array.Empty<string>();
+            return (floor.Layout.Nodes ?? Array.Empty<FloorRouteNode>()).Where(value => value != null &&
+                    value.Kind == FloorRouteNodeKind.Room && !string.IsNullOrEmpty(value.RoomInstanceId))
+                .Select(value => value.NodeId).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        }
+
+        private string[] ResolveBranchConnectionPointIds()
+        {
+            SavedSpatialFloor floor = ResolveActiveSpatialFloor();
+            FloorRouteNode node = (floor?.Layout?.Nodes ?? Array.Empty<FloorRouteNode>()).SingleOrDefault(
+                value => value?.NodeId == _selectedBranchOriginNodeId);
+            RoomSpatialInstance room = (floor?.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>()).SingleOrDefault(
+                value => value?.RoomInstanceId == node?.RoomInstanceId);
+            RoomSpatialDefinition definition = (_root?.ProductionSpatialContent?.Catalog?.Rooms ??
+                Array.Empty<RoomSpatialDefinition>()).SingleOrDefault(value => value != null &&
+                value.RoomDefinitionId == room?.RoomDefinitionId);
+            return (definition?.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+                .Where(value => value != null).Select(value => value.ConnectionPointId)
+                .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        }
+
+        private CorridorSpatialDefinition ResolveBranchCorridorDefinition() =>
+            (_root?.ProductionSpatialContent?.Catalog?.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
+                .SingleOrDefault(value => value != null && value.CorridorDefinitionId ==
+                    OptionalBranchStructuralEditService.CorridorDefinitionId);
+
+        private FloorRouteEdge ResolveActiveOptionalBranchEdge() =>
+            (ResolveActiveSpatialFloor()?.Layout?.Edges ?? Array.Empty<FloorRouteEdge>())
+                .Where(value => value?.Classification == RouteClassification.Optional)
+                .OrderBy(value => value.EdgeId, StringComparer.Ordinal).FirstOrDefault();
+
+        private CorridorContentAssignment[] ResolveCorridorAssignments()
+        {
+            FloorRouteEdge edge = ResolveActiveOptionalBranchEdge();
+            return (_root?.Save?.corridorContent?.Assignments ?? Array.Empty<CorridorContentAssignment>())
+                .Where(value => value != null && value.EdgeId == edge?.EdgeId)
+                .OrderBy(value => value.AssignmentId, StringComparer.Ordinal).ToArray();
+        }
+
+        private void ReconcileBranchSelection()
+        {
+            string[] origins = ResolveBranchOriginNodeIds();
+            if (!origins.Contains(_selectedBranchOriginNodeId))
+                _selectedBranchOriginNodeId = origins.FirstOrDefault();
+            string[] points = ResolveBranchConnectionPointIds();
+            if (!points.Contains(_selectedBranchConnectionPointId))
+                _selectedBranchConnectionPointId = points.FirstOrDefault();
+            CorridorSpatialDefinition corridor = ResolveBranchCorridorDefinition();
+            if (corridor != null && (_selectedBranchCorridorLength < corridor.MinimumLength ||
+                    _selectedBranchCorridorLength > corridor.MaximumLength))
+                _selectedBranchCorridorLength = corridor.MinimumLength;
+            TileCoordinate[] tiles = ResolveActiveOptionalBranchEdge()?.Footprint?.OccupiedTiles ??
+                Array.Empty<TileCoordinate>();
+            _selectedBranchTileIndex = tiles.Length == 0 ? 0 :
+                Math.Min(_selectedBranchTileIndex, tiles.Length - 1);
+            CorridorContentAssignment[] assignments = ResolveCorridorAssignments();
+            if (!assignments.Any(value => value.AssignmentId == _selectedCorridorAssignmentId))
+                _selectedCorridorAssignmentId = assignments.FirstOrDefault()?.AssignmentId;
         }
 
         private void DrawStructuralConstructionControls(GUIStyle label, GUIStyle button,

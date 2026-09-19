@@ -134,6 +134,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            var schemaNine = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
+                trusted, limits.Canonical);
+            if (schemaNine.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaNine,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
             var schemaEight = DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(trusted, limits.Canonical);
             if (schemaEight.IsValid)
                 return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaEight,
@@ -256,11 +261,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] candidate)
         {
-            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(source, limits).IsValid)
-                return SchemaEightToNineUpgrade.TryPrepare(source, limits, out candidate);
             candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(source, limits).IsValid)
+                return SchemaNineToTenUpgrade.TryPrepare(source, limits, out candidate);
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(source, limits).IsValid)
+                return SchemaEightToNineUpgrade.TryPrepare(source, limits, out byte[] nine) &&
+                    SchemaNineToTenUpgrade.TryPrepare(nine, limits, out candidate);
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
-                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out candidate);
+                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] upgradedNine) &&
+                SchemaNineToTenUpgrade.TryPrepare(upgradedNine, limits, out candidate);
         }
 
         private DetachedSpatialSaveLoadResult PublishValidated(byte[] bytes,

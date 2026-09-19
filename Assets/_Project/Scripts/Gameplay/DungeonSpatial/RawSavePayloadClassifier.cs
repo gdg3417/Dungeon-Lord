@@ -191,7 +191,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             "lastResumedUtcUnix", "totalTicks", "lastKnownAppState", "dungeonLayout", "mvpDungeonPlacements",
             "mvpDungeonFloorLayout", "mvpRoomSlotAssignments", "mvpSelectedRoomSlotIndex", "structureRuntime",
             "runHistory", "researchPending", "researchProgress", "completedResearch", "completedObjectives",
-            "lastOfflineSummary", "integrityFlags" };
+            "lastOfflineSummary", "integrityFlags", "corridorContent", "sharedBranchKnowledge" };
 
         // Current complete-save candidates must fit the same raw budgets as their next boot.
         // Reuse the scanner's accounting without interpreting frozen legacy route authority.

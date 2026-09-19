@@ -46,19 +46,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly StructuralContentRemovalPolicySnapshot removalPolicy;
         private readonly StructuralEconomySnapshot economy;
         private readonly ContentAcquisitionEconomySnapshot acquisition;
+        private readonly BasicBranchingResearchSnapshot branchingResearch;
         private readonly FormulaModifier[] economyModifiers;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits,
             StructuralContentRemovalPolicySnapshot removalPolicy = null, StructuralEconomySnapshot economy = null,
-            IReadOnlyList<FormulaModifier> economyModifiers = null, ContentAcquisitionEconomySnapshot acquisition = null)
+            IReadOnlyList<FormulaModifier> economyModifiers = null, ContentAcquisitionEconomySnapshot acquisition = null,
+            BasicBranchingResearchSnapshot branchingResearch = null)
         {
             this.production = production; this.compatibility = compatibility;
             this.configuration = configuration; this.context = context; this.limits = limits;
             this.removalPolicy = removalPolicy;
             this.economy = economy;
             this.acquisition = acquisition;
+            this.branchingResearch = branchingResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
         }
 
@@ -85,7 +88,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (owned == null || !owned.IsValid || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             if (request?.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                request?.Kind == DetachedCanonicalMutationKind.CorridorContentRedeployment ||
                 request?.Kind == DetachedCanonicalMutationKind.UnassignContent ||
+                request?.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval ||
                 ContentAcquisitionEconomySnapshot.IsAcquisition(request))
             {
                 // Ownership moves and purchases require a current session even when an old
@@ -99,7 +104,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 { return Failure(AtomicSaveFailedReason); }
             }
             DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(owned.State,
-                request, production, compatibility, configuration, limits.Canonical, removalPolicy);
+                request, production, compatibility, configuration, limits.Canonical, removalPolicy,
+                owned.CorridorContent, owned.BranchKnowledge, currentRuntime.completedResearch,
+                branchingResearch);
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
                 false, null, null, null, null);
             if (!mutation.IsSuccess) return Failure(mutation.Reason);
@@ -115,6 +122,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             }
             else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
+                request.Kind == DetachedCanonicalMutationKind.CorridorContentRedeployment ||
                 request.Kind == DetachedCanonicalMutationKind.UnassignContent)
             {
                 // Moving owned content changes neither the wallet nor the structural ledger.
@@ -143,7 +151,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             DetachedCanonicalSaveSessionResult prepared =
-                session.PrepareLiveReplacement(snapshot, mutation.State, investment);
+                session.PrepareLiveReplacement(snapshot, mutation.State, investment,
+                    mutation.CorridorContent, mutation.BranchKnowledge);
             if (!prepared.IsSuccess || prepared.Update == null) return Failure(prepared.Reason ??
                 DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();

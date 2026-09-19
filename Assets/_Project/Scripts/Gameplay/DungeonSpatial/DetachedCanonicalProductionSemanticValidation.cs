@@ -8,7 +8,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal enum DetachedCanonicalProductionSemanticIssue
     {
         InvalidContext, FloorConfiguration, FloorLayout, RoomDefinition, CorridorDefinition,
-        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity
+        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity, BranchGeometry
     }
 
     internal sealed class DetachedCanonicalProductionSemanticValidationResult
@@ -58,9 +58,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     roomByInstance[room.RoomInstanceId] = matches[0];
                 }
                 foreach (FloorRouteEdge edge in floor.Layout?.Edges ?? Array.Empty<FloorRouteEdge>())
+                {
                     if (edge != null && edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
                         !allowedCorridors.Contains(edge.CorridorDefinitionId))
                         issues.Add(DetachedCanonicalProductionSemanticIssue.CorridorDefinition);
+                    if (edge != null && edge.Classification == RouteClassification.Optional &&
+                        !OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog))
+                        issues.Add(DetachedCanonicalProductionSemanticIssue.BranchGeometry);
+                }
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
                 if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
                         layoutValidation, floor.FixedStructures))

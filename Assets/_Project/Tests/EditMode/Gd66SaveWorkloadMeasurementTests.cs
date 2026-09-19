@@ -276,7 +276,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
             byte[] before = fixture.Session.GetCurrentBytes();
-            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 9);
+            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 10);
             foreach (int bound in new[] { required, required - 1 })
             {
                 var raw = new RawSavePayloadClassificationLimits(dimension == 0 ? bound : High,
@@ -408,10 +408,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(classification.IsSuccess, Is.True, classification.FailureReason);
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
-            string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment" };
+            string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership",
+                "structuralInvestment", "corridorContent", "sharedBranchKnowledge" };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
-            int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent).Sum(value => value.ByteLength);
+            int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent &&
+                value.Name != "corridorContent" && value.Name != "sharedBranchKnowledge")
+                .Sum(value => value.ByteLength);
             Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
             Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));
             Assert.That(MinimumWhole(fixture, 2), Is.EqualTo(unknown.Length));
@@ -425,9 +428,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     new CanonicalSpatialSaveWorkloadLimits(records - 1, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles))).IsValid, Is.False);
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}"));
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownRoot\":[1,true]"));
-            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 9) +
-                ",rawMembers=" + MinimumRaw(bytes, 1, 9) + ",rawElements=" + MinimumRaw(bytes, 2, 9) +
-                ",rawStringBytes=" + MinimumRaw(bytes, 3, 9) + ",rawScanWork=" + MinimumRaw(bytes, 4, 9) +
+            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 10) +
+                ",rawMembers=" + MinimumRaw(bytes, 1, 10) + ",rawElements=" + MinimumRaw(bytes, 2, 10) +
+                ",rawStringBytes=" + MinimumRaw(bytes, 3, 10) + ",rawScanWork=" + MinimumRaw(bytes, 4, 10) +
                 ",candidateBytes=" + bytes.Length + ",strictInputBytes=" + bytes.Length +
                 ",strictNodes=" + MinimumStrict(bytes, fixture.State, 0, true) +
                 ",strictRecords=" + MinimumStrict(bytes, fixture.State, 1, true) +

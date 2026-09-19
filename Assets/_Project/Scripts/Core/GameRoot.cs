@@ -7,6 +7,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -53,6 +54,7 @@ namespace DungeonBuilder.M0
         public StructuralEditPreview StructuralConstructionPreview { get; private set; }
         public StructuralEditPreview StructuralRenovationPreview { get; private set; }
         public StructuralEditPreview StructuralDeletionPreview { get; private set; }
+        public OptionalBranchEditPreview OptionalBranchPreview { get; private set; }
         public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
@@ -465,6 +467,21 @@ namespace DungeonBuilder.M0
                 DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.TryParse(acquisitionAsset.bytes,
                     economy, SaveSpatialMigrationLimits.Canonical, out acquisition);
             SaveService.ConfigureContentAcquisitionEconomy(acquisition);
+            BasicBranchingResearchSnapshot branchingResearch = null;
+            try
+            {
+                string researchRoot = Path.Combine(Application.streamingAssetsPath,
+                    "DungeonBuilder", "Research", "Dungeon_Builder_Research_Export_Bundle", "architecture");
+                BasicBranchingResearchAuthority.TryParse(
+                    File.ReadAllText(Path.Combine(researchRoot, "research_nodes.json")),
+                    File.ReadAllText(Path.Combine(researchRoot, "tables.json")),
+                    out branchingResearch);
+            }
+            catch (Exception)
+            {
+                branchingResearch = null;
+            }
+            SaveService.ConfigureBasicBranchingResearch(branchingResearch);
             if (Content.ProductionSpatialContent == null)
             {
                 SaveService.LoadOrCreate(contentVersion, out string invalidSpatialSaveBanner);
@@ -683,6 +700,7 @@ namespace DungeonBuilder.M0
             StructuralConstructionPreview = null;
             StructuralRenovationPreview = null;
             StructuralDeletionPreview = null;
+            OptionalBranchPreview = null;
             StructuralConstructionReasonKey = string.Empty;
             overlay?.SynchronizeStructuralConstructionPublication();
             TimeService?.AttachSave(Save);
@@ -801,6 +819,111 @@ namespace DungeonBuilder.M0
 
         public void InvalidateStructuralDeletionPreview()
         { StructuralDeletionPreview = null; StructuralConstructionReasonKey = string.Empty; }
+
+        public OptionalBranchEditPreview PreviewOptionalBranchConstruction(
+            OptionalBranchConstructionRequest request)
+        {
+            OptionalBranchPreview = CanPreviewStructuralRenovation()
+                ? SaveService.PreviewOptionalBranchConstruction(request, Save.completedResearch)
+                : OptionalBranchStructuralEditService.InvalidConstruction(
+                    OptionalBranchStructuralEditService.InvalidContextReason, request);
+            StructuralConstructionReasonKey = OptionalBranchPreview.IsValid ? string.Empty :
+                OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
+                    OptionalBranchStructuralEditService.InvalidContextReason;
+            return OptionalBranchPreview;
+        }
+
+        public OptionalBranchEditPreview PreviewOptionalBranchRemoval(OptionalBranchRemovalRequest request)
+        {
+            OptionalBranchPreview = CanPreviewStructuralRenovation()
+                ? SaveService.PreviewOptionalBranchRemoval(request)
+                : OptionalBranchStructuralEditService.InvalidRemoval(
+                    OptionalBranchStructuralEditService.InvalidContextReason, request);
+            StructuralConstructionReasonKey = OptionalBranchPreview.IsValid ? string.Empty :
+                OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
+                    OptionalBranchStructuralEditService.InvalidContextReason;
+            return OptionalBranchPreview;
+        }
+
+        public DetachedCanonicalWriteResult CommitOptionalBranchEdit()
+        {
+            if (OptionalBranchPreview == null || !OptionalBranchPreview.IsValid ||
+                !CanPreviewStructuralRenovation())
+                return StructuralCommitFailure(OptionalBranchPreview?.ReasonCodes?.FirstOrDefault() ??
+                    OptionalBranchStructuralEditService.InvalidContextReason);
+            DetachedCanonicalMutationRequest request = OptionalBranchPreview.Operation ==
+                OptionalBranchEditOperation.Construction
+                ? DetachedCanonicalMutationRequest.ConstructBranch(OptionalBranchPreview)
+                : DetachedCanonicalMutationRequest.RemoveBranch(OptionalBranchPreview);
+            DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save, request);
+            if (!result.IsSuccess) StructuralConstructionReasonKey = result.Reason ??
+                OptionalBranchStructuralEditService.InvalidContextReason;
+            return result;
+        }
+
+        public void InvalidateOptionalBranchPreview()
+        { OptionalBranchPreview = null; StructuralConstructionReasonKey = string.Empty; }
+
+        public DetachedCanonicalWriteResult AcquireCorridorContent(string categoryId, string optionId,
+            string floorInstanceId, string optionalBranchId, TileCoordinate tile)
+        {
+            if (SaveService == null || Save == null)
+                return StructuralCommitFailure(OptionalBranchStructuralEditService.InvalidContextReason);
+            if (Save.structureRuntime?.PlacementLocked == true)
+                return StructuralCommitFailure("ui.banner.place_blocked_heat_crisis");
+            GateEvaluationResult gate = _restrictedActionGate.Evaluate(
+                new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+            if (!gate.Allowed) return StructuralCommitFailure(gate.MessageKey);
+            return SaveService.ExecuteCanonicalMutation(Save, DetachedCanonicalMutationRequest.PlaceCorridor(
+                categoryId, optionId, floorInstanceId, optionalBranchId, tile));
+        }
+
+        public DetachedCanonicalWriteResult RedeployCorridorContent(string assignmentId,
+            string floorInstanceId, string optionalBranchId, TileCoordinate tile)
+        {
+            if (SaveService == null || Save == null)
+                return StructuralCommitFailure(OptionalBranchStructuralEditService.InvalidContextReason);
+            if (Save.structureRuntime?.PlacementLocked == true)
+                return StructuralCommitFailure("ui.banner.place_blocked_heat_crisis");
+            return SaveService.ExecuteCanonicalMutation(Save, DetachedCanonicalMutationRequest.RedeployCorridor(
+                assignmentId, floorInstanceId, optionalBranchId, tile));
+        }
+
+        public DetachedCanonicalWriteResult UnassignCorridorContent(string assignmentId)
+        {
+            if (SaveService == null || Save == null)
+                return StructuralCommitFailure(OptionalBranchStructuralEditService.InvalidContextReason);
+            if (Save.structureRuntime?.PlacementLocked == true)
+                return StructuralCommitFailure("ui.banner.place_blocked_heat_crisis");
+            return SaveService.ExecuteCanonicalMutation(Save,
+                DetachedCanonicalMutationRequest.Unassign(assignmentId));
+        }
+
+        public bool SetBasicBranchingCompletionForQa(bool completed)
+        {
+            if (Save == null || SaveService == null || !CanonicalMvpRouteProjection.IsCanonical(Save))
+                return false;
+            CompletedResearchState previous = Save.completedResearch;
+            string[] current = previous?.ProjectIds ?? Array.Empty<string>();
+            string[] updated = completed
+                ? current.Concat(new[] { BasicBranchingResearchAuthority.ResearchId })
+                    .Distinct(StringComparer.Ordinal).OrderBy(value => value, StringComparer.Ordinal).ToArray()
+                : current.Where(value => !string.Equals(value,
+                    BasicBranchingResearchAuthority.ResearchId, StringComparison.Ordinal)).ToArray();
+            Save.completedResearch = new CompletedResearchState
+            {
+                ProjectIds = updated,
+                LastCompletedProjectId = completed ? BasicBranchingResearchAuthority.ResearchId :
+                    (previous?.LastCompletedProjectId == BasicBranchingResearchAuthority.ResearchId
+                        ? updated.LastOrDefault() : previous?.LastCompletedProjectId),
+                LastCompletionRuleSourceId = completed ? "qa.phase5a.basic_branching" :
+                    (previous?.LastCompletedProjectId == BasicBranchingResearchAuthority.ResearchId
+                        ? null : previous?.LastCompletionRuleSourceId)
+            };
+            if (SaveService.Save(Save, SaveReason.ManualDev)) return true;
+            Save.completedResearch = previous;
+            return false;
+        }
 
         private bool CanPreviewStructuralRenovation()
         {

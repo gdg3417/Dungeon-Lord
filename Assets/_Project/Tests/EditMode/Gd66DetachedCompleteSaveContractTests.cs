@@ -195,7 +195,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(assignmentEvidence, upgraded.State.Floors[0].RoomContents.Assignments
                 .Where(value => value.RoomInstanceId == nativeRoom)
                 .Select(value => value.AssignmentId + ":" + value.Sequence).ToArray());
-            Assert.That(SchemaEightToNineUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
+            Assert.That(SchemaEightToNineUpgrade.TryPrepare(schemaEight, fixture.Limits, out byte[] schemaNine), Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
+                schemaNine, fixture.Limits).IsValid, Is.True);
+            Assert.That(SchemaNineToTenUpgrade.TryPrepare(schemaNine, fixture.Limits, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

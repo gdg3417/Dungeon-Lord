@@ -444,8 +444,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             string current = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
             int start = current.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
-            int end = current.IndexOf(']', start) + 1;
-            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(start, end - start).Replace("\"schemaVersion\":9", "\"schemaVersion\":8"));
+            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(start, current.Length - 2 - start)
+                .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, f.Profile.Canonical, out byte[] nine), Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, f.Profile.Canonical, out byte[] again), Is.True);
             CollectionAssert.AreEqual(nine, again);
@@ -454,12 +454,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int investmentEnd = upgraded.IndexOf(']', investmentStart) + 1;
             Assert.That(upgraded.Remove(investmentStart, investmentEnd - investmentStart)
                 .Replace("\"schemaVersion\":9", "\"schemaVersion\":8"), Is.EqualTo(Encoding.UTF8.GetString(eight)));
-            var restored = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(nine, f.Context);
+            var restored = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
+                nine, f.Profile.Canonical);
             Assert.That(restored.IsValid, Is.True); Assert.That(restored.Investment.All(r => r.ConstructionMana == 0 && r.RenovationMana == 0), Is.True);
             CollectionAssert.AreEqual(CanonicalSpatialSaveSerializer.Serialize(f.State, f.Profile.Canonical).Value,
                 CanonicalSpatialSaveSerializer.Serialize(restored.State, f.Profile.Canonical).Value);
             Assert.That(Encoding.UTF8.GetString(nine), Does.Contain("\"ManaReserve\":123.5"));
-            Assert.That(DetachedCanonicalSaveSession.Open(nine, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, f.Profile.Canonical, out byte[] ten), Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(ten, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }

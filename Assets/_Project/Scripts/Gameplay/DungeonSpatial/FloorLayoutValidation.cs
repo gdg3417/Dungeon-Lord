@@ -19,7 +19,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         InvalidRoomFootprint = 38, InvalidCorridorFootprint = 39,
         InvalidFloorBounds = 40, StructureTileOutsideFloorBounds = 41, FinalCapacityExceedsFloorBounds = 42,
         InvalidConnectionKind = 43, DirectDoorwayHasCorridorDefinition = 44, DirectDoorwayHasFootprint = 45,
-        CorridorDefinitionGeometryMismatch = 46
+        CorridorDefinitionGeometryMismatch = 46,
+        OptionalDirectDoorway = 47,
+        OptionalBranchDestinationNotDeadEnd = 48,
+        DeadEndHasRoomReference = 49,
+        DeadEndDegreeInvalid = 50,
+        DeadEndOnRequiredRoute = 51,
+        OptionalBranchSourceNotOnRequiredRoute = 52,
+        OptionalBranchEdgeCountInvalid = 53,
+        OptionalBranchSourceIsDeadEnd = 54,
+        DeadEndUnreachable = 55
     }
 
     [Serializable]
@@ -177,6 +186,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 bool classificationValid = Enum.IsDefined(typeof(RouteClassification), edge.Classification);
                 if (!classificationValid) Add(issues, FloorLayoutValidationReason.InvalidRouteClassification, edge.EdgeId);
                 bool branchValid = ValidateBranch(edge, classificationValid, issues);
+                if (classificationValid && edge.Classification == RouteClassification.Optional &&
+                    edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
+                {
+                    Add(issues, FloorLayoutValidationReason.OptionalDirectDoorway, edge.EdgeId);
+                    branchValid = false;
+                }
                 if (uniqueEdgeIds.Contains(edge.EdgeId) && kindValid && kindContractValid && sourceResolved && destinationResolved && !self &&
                     edgeFloorValid && endpointsOnFloor && classificationValid && branchValid) validEdges.Add(edge);
             }
@@ -217,6 +232,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!Enum.IsDefined(typeof(FloorRouteNodeKind), node.Kind)) Add(issues, FloorLayoutValidationReason.InvalidNodeKind, node.NodeId);
                 if (!string.Equals(node.FloorId, layout.FloorId, StringComparison.Ordinal)) Add(issues, FloorLayoutValidationReason.NodeFloorMismatch, node.NodeId, node.FloorId);
                 if (node.Kind == FloorRouteNodeKind.Room) CheckId(node.RoomInstanceId, node.NodeId, issues);
+                if (node.Kind == FloorRouteNodeKind.DeadEnd && !string.IsNullOrEmpty(node.RoomInstanceId))
+                    Add(issues, FloorLayoutValidationReason.DeadEndHasRoomReference, node.NodeId,
+                        node.RoomInstanceId);
             }
             foreach (FloorRouteEdge edge in edges.Where(x => x != null))
             {
@@ -363,7 +381,50 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var terminals = new HashSet<string>(validNodes.Where(x => x.Kind == FloorRouteNodeKind.Exit || x.Kind == FloorRouteNodeKind.Descent || x.Kind == FloorRouteNodeKind.Completion).Select(x => x.NodeId), StringComparer.Ordinal);
             foreach (string nodeId in requiredReachable.OrderBy(x => x, StringComparer.Ordinal))
                 if (!Reachable(nodeId, validEdges, RouteClassification.Required).Overlaps(terminals)) Add(issues, FloorLayoutValidationReason.RequiredRouteWithoutTerminal, nodeId);
-            int branchCount = validEdges.Where(x => x.Classification == RouteClassification.Optional).Select(x => x.OptionalBranchId).Distinct(StringComparer.Ordinal).Count();
+            FloorRouteEdge[] optionalEdges = validEdges.Where(x =>
+                x.Classification == RouteClassification.Optional).ToArray();
+            foreach (IGrouping<string, FloorRouteEdge> branch in optionalEdges.GroupBy(
+                edge => edge.OptionalBranchId, StringComparer.Ordinal))
+                if (branch.Count() != 1)
+                    Add(issues, FloorLayoutValidationReason.OptionalBranchEdgeCountInvalid,
+                        branch.Key);
+            foreach (FloorRouteEdge edge in optionalEdges)
+            {
+                validNodeById.TryGetValue(edge.SourceNodeId, out FloorRouteNode source);
+                if (source == null || !requiredReachable.Contains(edge.SourceNodeId))
+                    Add(issues, FloorLayoutValidationReason.OptionalBranchSourceNotOnRequiredRoute,
+                        edge.EdgeId, edge.SourceNodeId);
+                if (source?.Kind == FloorRouteNodeKind.DeadEnd)
+                    Add(issues, FloorLayoutValidationReason.OptionalBranchSourceIsDeadEnd,
+                        edge.EdgeId, edge.SourceNodeId);
+                if (!validNodeById.TryGetValue(edge.DestinationNodeId,
+                        out FloorRouteNode destination) ||
+                    destination.Kind != FloorRouteNodeKind.DeadEnd)
+                    Add(issues, FloorLayoutValidationReason.OptionalBranchDestinationNotDeadEnd,
+                        edge.EdgeId, edge.DestinationNodeId);
+            }
+            foreach (FloorRouteNode deadEnd in validNodes.Where(node =>
+                node.Kind == FloorRouteNodeKind.DeadEnd))
+            {
+                FloorRouteEdge[] incoming = validEdges.Where(edge =>
+                    edge.DestinationNodeId == deadEnd.NodeId).ToArray();
+                FloorRouteEdge[] outgoing = validEdges.Where(edge =>
+                    edge.SourceNodeId == deadEnd.NodeId).ToArray();
+                if (incoming.Length != 1 || outgoing.Length != 0 ||
+                    incoming.Length == 1 &&
+                    (incoming[0].Classification != RouteClassification.Optional ||
+                     incoming[0].ConnectionKind != FloorRouteConnectionKind.PhysicalCorridor))
+                    Add(issues, FloorLayoutValidationReason.DeadEndDegreeInvalid,
+                        deadEnd.NodeId);
+                if (requiredReachable.Contains(deadEnd.NodeId))
+                    Add(issues, FloorLayoutValidationReason.DeadEndOnRequiredRoute,
+                        deadEnd.NodeId);
+                if (!reachable.Contains(deadEnd.NodeId))
+                    Add(issues, FloorLayoutValidationReason.DeadEndUnreachable,
+                        deadEnd.NodeId);
+            }
+            int branchCount = optionalEdges.Select(x => x.OptionalBranchId)
+                .Distinct(StringComparer.Ordinal).Count();
             if (floor != null && branchCount > floor.OptionalBranchAllowance) Add(issues, FloorLayoutValidationReason.OptionalBranchAllowanceExceeded, layout.FloorId);
         }
 

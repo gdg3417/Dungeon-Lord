@@ -61,7 +61,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode source) || source.Kind != ContractJsonKind.Object)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":9,\"primary\":{");
+                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":10,\"primary\":{");
                 bool first = true;
                 foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
                 {
@@ -86,7 +86,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveContract.WriteCanonicalNode(writer, floorsNode);
                 writer.Token(","); writer.String("structuralLifecycleAndOwnership"); writer.Token(":");
                 DetachedCompleteSaveContract.WriteCanonicalNode(writer, lifecycleNode);
-                writer.Token(",\"structuralInvestment\":[]}}");
+                writer.Token(",\"structuralInvestment\":[]");
+                writer.Token(","); writer.String(PhaseFiveSaveContracts.CorridorOwnerName); writer.Token(":");
+                PhaseFiveSaveContracts.Write(writer, PhaseFiveSaveContracts.EmptyCorridor());
+                writer.Token(","); writer.String(PhaseFiveSaveContracts.KnowledgeOwnerName); writer.Token(":");
+                PhaseFiveSaveContracts.Write(writer, PhaseFiveSaveContracts.EmptyKnowledge());
+                writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical);

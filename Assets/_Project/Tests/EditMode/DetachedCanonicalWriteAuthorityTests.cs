@@ -309,7 +309,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(9));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(10));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -957,7 +957,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":9"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":10"));
             Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
             Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
             Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
@@ -1452,11 +1452,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal StructuralContentRemovalPolicySnapshot RemovalPolicy;
             internal DungeonBuilder.M0.Economy.StructuralEconomySnapshot Economy;
             internal DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot Acquisition;
+            internal BasicBranchingResearchSnapshot BranchingResearch;
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
-                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy, acquisition: Acquisition);
+                Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy,
+                acquisition: Acquisition, branchingResearch: BranchingResearch);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
                 SaveSpatialMigrationLimitsProfile workloadProfile = null)
@@ -1502,12 +1504,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fs.Seed(path, candidate);
                 Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(File.ReadAllBytes(
                     StructuralContentRemovalPolicyAuthority.ProductionPath), out var removalPolicy), Is.True);
+                Assert.That(BasicBranchingResearchAuthority.TryParse(
+                    File.ReadAllText("Assets/StreamingAssets/DungeonBuilder/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json"),
+                    File.ReadAllText("Assets/StreamingAssets/DungeonBuilder/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
+                    out var branchingResearch), Is.True);
                 return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
                     Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
                     Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
-                    Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits) };
+                    Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
+                    BranchingResearch = branchingResearch };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>

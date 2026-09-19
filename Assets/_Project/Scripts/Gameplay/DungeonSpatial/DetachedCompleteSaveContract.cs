@@ -111,13 +111,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DetachedCompleteSaveValidationResult(byte[] bytes, string reason,
             int? layoutContractVersion = null, DetachedCanonicalSpatialSaveState state = null,
             bool currentTargetValidated = false, bool researchPendingExplicitNull = false,
-            bool researchProgressExplicitNull = false, bool lastOfflineSummaryExplicitNull = false)
+            bool researchProgressExplicitNull = false, bool lastOfflineSummaryExplicitNull = false,
+            CorridorContentAuthority corridorContent = null,
+            SharedBranchKnowledgeAuthority branchKnowledge = null)
         { Bytes = bytes == null ? null : (byte[])bytes.Clone(); Reason = reason;
           LayoutContractVersion = layoutContractVersion; State = state;
           CurrentTargetValidated = currentTargetValidated;
           ResearchPendingExplicitNull = researchPendingExplicitNull;
           ResearchProgressExplicitNull = researchProgressExplicitNull;
-          LastOfflineSummaryExplicitNull = lastOfflineSummaryExplicitNull; }
+          LastOfflineSummaryExplicitNull = lastOfflineSummaryExplicitNull;
+          CorridorContent = corridorContent; BranchKnowledge = branchKnowledge; }
         public bool IsValid => Bytes != null;
         public byte[] GetBytes() => Bytes == null ? null : (byte[])Bytes.Clone();
         public string Reason { get; }
@@ -128,6 +131,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal bool ResearchPendingExplicitNull { get; }
         internal bool ResearchProgressExplicitNull { get; }
         internal bool LastOfflineSummaryExplicitNull { get; }
+        internal CorridorContentAuthority CorridorContent { get; }
+        internal SharedBranchKnowledgeAuthority BranchKnowledge { get; }
         internal StructuralInvestmentRecord[] Investment { get; set; }
     }
 
@@ -142,6 +147,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
                 context.Configuration, context.Limits.Spatial).IsValid) return Failure();
+            if (!PhaseFiveSaveContracts.Validate(result.CorridorContent, result.BranchKnowledge,
+                    result.State, context.Production, context.Configuration, context.Limits.Spatial))
+                return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 context.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
@@ -149,7 +157,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
                     result.LayoutContractVersion, result.State, true,
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
-                    result.LastOfflineSummaryExplicitNull) { Investment = result.Investment }
+                    result.LastOfflineSummaryExplicitNull, result.CorridorContent,
+                    result.BranchKnowledge) { Investment = result.Investment }
                 : Failure();
         }
 
@@ -190,6 +199,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
             ParseValidateAndRoundTripCore(bytes, limits, 8, true, null, null);
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaNineAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
+            ParseValidateAndRoundTripCore(bytes, limits, 9, true, null, null);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint)
@@ -207,14 +220,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (HasCaseAmbiguousSibling(root) || CaseAmbiguous(root,
                     new[] { "schema", "schemaVersion", "primary" })) return Failure();
                 ContractJsonNode primary = root.Fields[2].Value;
-                bool requireInvestment = schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget;
-                int canonicalMembers = requireInvestment ? 4 : requireLifecycle ? 3 : 2;
+                bool requireInvestment = schemaVersion >= 9;
+                bool requirePhaseFive = schemaVersion >= 10;
+                int canonicalMembers = requirePhaseFive ? 6 : requireInvestment ? 4 : requireLifecycle ? 3 : 2;
+                int canonicalStart = primary.Fields.Count - canonicalMembers;
                 if (primary.Fields.Count < canonicalMembers ||
-                    primary.Fields[primary.Fields.Count - canonicalMembers].Key != "canonicalSpatialAuthority" ||
-                    primary.Fields[primary.Fields.Count - canonicalMembers + 1].Key != "spatialFloors" ||
-                    (requireInvestment && primary.Fields[primary.Fields.Count - 1].Key != "structuralInvestment") ||
-                    (requireLifecycle && primary.Fields[primary.Fields.Count - canonicalMembers + 2].Key !=
+                    primary.Fields[canonicalStart].Key != "canonicalSpatialAuthority" ||
+                    primary.Fields[canonicalStart + 1].Key != "spatialFloors" ||
+                    (requireInvestment && primary.Fields[canonicalStart + 3].Key != "structuralInvestment") ||
+                    (requirePhaseFive && (primary.Fields[canonicalStart + 4].Key != PhaseFiveSaveContracts.CorridorOwnerName ||
+                        primary.Fields[canonicalStart + 5].Key != PhaseFiveSaveContracts.KnowledgeOwnerName)) ||
+                    (requireLifecycle && primary.Fields[canonicalStart + 2].Key !=
                         "structuralLifecycleAndOwnership") || CaseAmbiguous(primary,
+                        requirePhaseFive ? new[] { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment", PhaseFiveSaveContracts.CorridorOwnerName, PhaseFiveSaveContracts.KnowledgeOwnerName } :
                         requireInvestment ? new[] { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment" } :
                         requireLifecycle ? new[] { "canonicalSpatialAuthority", "spatialFloors",
                             "structuralLifecycleAndOwnership" } :
@@ -223,12 +241,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
-                WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - canonicalMembers].Value);
+                WriteNode(spatialWriter, primary.Fields[canonicalStart].Value);
                 spatialWriter.Token(","); spatialWriter.String("Floors"); spatialWriter.Token(":");
-                ContractJsonNode floorsNode = primary.Fields[primary.Fields.Count - canonicalMembers + 1].Value;
+                ContractJsonNode floorsNode = primary.Fields[canonicalStart + 1].Value;
                 WriteNode(spatialWriter, floorsNode);
                 spatialWriter.Token(","); spatialWriter.String("LifecycleAndOwnership"); spatialWriter.Token(":");
-                if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[primary.Fields.Count - canonicalMembers + 2].Value);
+                if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[canonicalStart + 2].Value);
                 else spatialWriter.Token("null");
                 spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
@@ -244,16 +262,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         parsedSpatial.Value.Authority.MigrationDescriptorFingerprint != expectedDescriptorFingerprint)) return Failure();
 
                 StructuralInvestmentRecord[] investment = null;
-                if (requireInvestment && !StructuralInvestment.TryRead(primary.Fields.Last().Value,
+                if (requireInvestment && !StructuralInvestment.TryRead(primary.Fields[canonicalStart + 3].Value,
                     parsedSpatial.Value, limits.Spatial.MaximumRecords, out investment)) return Failure();
                 if (requireInvestment)
                 {
                     var originalLedger = new ContractJsonWriter(limits.Serialized);
-                    WriteNode(originalLedger, primary.Fields.Last().Value);
+                    WriteNode(originalLedger, primary.Fields[canonicalStart + 3].Value);
                     var canonicalLedger = new ContractJsonWriter(limits.Serialized);
                     StructuralInvestment.Write(canonicalLedger, investment);
                     if (!Same(originalLedger.Finish(), canonicalLedger.Finish())) return Failure();
                 }
+                CorridorContentAuthority corridorContent = null;
+                SharedBranchKnowledgeAuthority branchKnowledge = null;
+                if (requirePhaseFive &&
+                    (!PhaseFiveSaveContracts.TryReadCorridor(primary.Fields[canonicalStart + 4].Value,
+                         out corridorContent) ||
+                     !PhaseFiveSaveContracts.TryReadKnowledge(primary.Fields[canonicalStart + 5].Value,
+                         out branchKnowledge))) return Failure();
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
                 if (!Same(bytes, again)) return Failure();
@@ -261,7 +286,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     parsedSpatial.Value.Authority.CanonicalLayoutContractVersion, parsedSpatial.Value,
                     false, ExplicitNull(primary, "researchPending"),
                     ExplicitNull(primary, "researchProgress"),
-                    ExplicitNull(primary, "lastOfflineSummary")) { Investment = investment };
+                    ExplicitNull(primary, "lastOfflineSummary"), corridorContent,
+                    branchKnowledge) { Investment = investment };
             }
             catch { return Failure(); }
         }

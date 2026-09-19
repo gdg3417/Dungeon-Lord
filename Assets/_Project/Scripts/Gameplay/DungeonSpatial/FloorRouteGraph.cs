@@ -3,7 +3,15 @@ using UnityEngine;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
-    public enum FloorRouteNodeKind { Entrance = 1, Room = 2, Exit = 3, Descent = 4, Completion = 5 }
+    public enum FloorRouteNodeKind
+    {
+        Entrance = 1,
+        Room = 2,
+        Exit = 3,
+        Descent = 4,
+        Completion = 5,
+        DeadEnd = 6
+    }
     public enum RouteClassification { Required = 1, Optional = 2 }
     public enum FloorRouteConnectionKind { DirectDoorway = 1, PhysicalCorridor = 2 }
 
