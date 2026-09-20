@@ -100,3 +100,92 @@ local build output and are not committed.
 
 Manual UAT remains outstanding and is tracked in `manual-uat.md`. No manual UAT
 pass is claimed by Phase 5A automated evidence.
+
+## Post-review correction qualification
+
+External review corrections were qualified against the exact production, test,
+configuration, and asset state committed as
+`74f797320d2a21969050171e13422774fc90fc64`. No relevant source changed between
+the final focused pass, the full suites, the Windows build, and that commit.
+
+The correction set:
+
+- restores the frozen schema 7/8/9 node-kind domain to historical values 1–5
+  while schema 10 and later use the current runtime enum domain;
+- supplies the authoritative Architecture research exports to `GameRoot` as
+  serialized `TextAsset` dependencies from the single relocated production
+  asset tree, with no runtime filesystem lookup or duplicated research value;
+- attaches structural-economy consequences and affordability to optional-branch
+  construction and removal previews through `StructuralEconomyService`;
+- verifies that branch removal deletes its matching live-branch knowledge record
+  in the same detached atomic mutation.
+
+### Focused and affected suites
+
+| Suite | Result | Duration | Raw local evidence |
+|---|---:|---:|---|
+| Explicit authoritative research asset source | 1/1 passed | 0.063 seconds | `TestResults/phase5a-research-source.xml` |
+| Phase 5A review fixture | 10/10 passed | 0.903 seconds | `TestResults/phase5a-review-fixes.xml` |
+| Complete save and migration | 171/171 passed | 5.553 seconds | focused save/migration result set |
+| Structural economy | 70/70 passed | 3.686 seconds | focused economy result set |
+| GameRoot/bootstrap and production content | 65/65 passed | 2.755 seconds | focused bootstrap/content result set |
+| Workload, spatial, and compatibility | 149/149 passed | 86.588 seconds | focused workload/spatial result set |
+| Final Phase 5A plus save/migration rerun after the schema-boundary refinement | 181/181 passed | 6.340 seconds | `TestResults/phase5a-review-focused-save-final.xml` |
+
+The final 181-test pass directly covers rejection of `DeadEnd = 6` in schemas
+7, 8, and 9, rejection during migration of malformed frozen input carrying that
+value, and acceptance of valid schema-10 optional-branch topology. The economy
+coverage includes affordable, exact-balance, and insufficient-mana construction;
+side-effect-free failed preview; removal based on recorded investment rather
+than catalog repricing; configured refund flooring; and wallet-capacity-limited
+credit. Research bootstrap coverage loads the relocated canonical JSON assets as
+Unity `TextAsset` objects, parses `ac_300` and its authored effect, and confirms
+missing inputs fail closed.
+
+### Full suites after review corrections
+
+The full EditMode run launched before the Codex usage-window interruption did
+complete successfully. Its XML result was recovered afterward and accepted
+without rerunning because timestamps and the working-tree audit proved that no
+production, configuration, asset, or test source changed after the authoritative
+181/181 focused pass or before/after the full result was written.
+
+| Qualification | Result | Duration / output |
+|---|---:|---|
+| Full EditMode | 957 total; 957 passed; 0 failed; 0 skipped | 121.035 seconds; `TestResults/phase5a-review-final-editmode.xml` |
+| Full PlayMode | 2,457 total; 2,447 passed; 0 failed; 10 intentionally skipped | 121.269 seconds; `TestResults/phase5a-review-final-playmode.xml` |
+| Windows x86_64 Development Build | Success; exit code 0 | `Builds/Phase5A/DungeonLord.exe` |
+
+The ten PlayMode skips are the same expected existing fixture/platform boundaries
+listed above: eight synchronous EditMode-only `Gd66GameRootBootIntegrationTests`,
+the non-Windows inverse filesystem test, and the Windows-player-only standalone
+qualification test. No Phase 5A test was skipped.
+
+### Post-review Windows Development Build
+
+- Editor: Unity `6000.3.2f1`, x86_64.
+- Target: `StandaloneWindows64`.
+- Build option: `-development`.
+- Result: `Success`, exit code `0`.
+- Output: `Builds/Phase5A/DungeonLord.exe`.
+- Complete build size reported by Unity: 99.7 MB.
+- Build payload: 182 files, 104,739,983 bytes, excluding provenance.
+- Local output including provenance: 183 files, 104,743,643 bytes.
+- Provenance: `Builds/Phase5A/DungeonLord.provenance.json`.
+
+The build was intentionally produced from the final corrected but then-uncommitted
+working tree. Its provenance therefore names the prior reviewed revision
+`751355ed68625a6006af259f5b4d62acdfde9bf4` and reports `dirty: true`. The
+post-build audit established that the qualified corrections were committed
+unchanged as `74f797320d2a21969050171e13422774fc90fc64`; the remaining dirty files are
+excluded Unity/editor-generated state and raw local evidence.
+
+Observed nonfatal diagnostics were an unavailable Unity Cloud credential/symbol
+upload, an empty `Assets/_Project/Tests 1/Tests 1.asmdef` notice, and shutdown
+thread/debugger-agent cleanup messages. There was no compile failure, build
+failure, ComputeBuffer failure, or new player runtime error. A supplemental
+Android build was not run, at owner direction, and is not required for PR #209.
+
+The XML/log artifacts under untracked `TestResults/` and the ignored
+`Builds/Phase5A/` output remain local and are not committed. Manual UAT remains
+outstanding; this post-review automated qualification does not claim it passed.
