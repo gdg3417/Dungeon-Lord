@@ -3,6 +3,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class CanonicalSaveSchemaVersions
     {
         public const int FrozenLegacyCanonicalMigrationTarget = 7;
-        public const int CurrentWritableTarget = 10;
+        public const int PhaseFiveIntroduction = 10;
+        public const int CurrentWritableTarget = PhaseFiveIntroduction;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -37,6 +38,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void FrozenSchemasRejectDeadEndWhileSchemaTenAcceptsItAndMigrationCannotSmuggleIt()
+        {
+            var fixture = BranchFixture(2, out OptionalBranchEditPreview preview);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
+            byte[] ten = fixture.Session.GetCurrentBytes();
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(ten,
+                fixture.Context).IsValid, Is.True);
+            Assert.That(Encoding.UTF8.GetString(ten), Does.Contain("\"Kind\":6"));
+
+            byte[] nine = FrozenSchemaWithDeadEnd(ten, 9);
+            byte[] eight = FrozenSchemaWithDeadEnd(ten, 8);
+            byte[] seven = FrozenSchemaWithDeadEnd(ten, 7);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
+                nine, fixture.Profile.Canonical).IsValid, Is.False);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(
+                eight, fixture.Profile.Canonical).IsValid, Is.False);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                seven, fixture.Profile.Canonical).IsValid, Is.False);
+            Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, fixture.Profile.Canonical, out _), Is.False);
+            Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, fixture.Profile.Canonical, out _), Is.False);
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(seven, fixture.Profile.Canonical, out _), Is.False);
+        }
+
+        [Test]
         public void ResearchGateUsesAc300EffectAndFloorBound()
         {
             var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
@@ -53,6 +78,82 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(allowed.EffectiveAllowance, Is.EqualTo(Math.Min(
                 fixture.BranchingResearch.AllowanceContribution, floor.OptionalBranchAllowance)));
             Assert.That(BasicBranchingResearchAuthority.Resolve(completed, null, floor).IsResolved, Is.False);
+        }
+
+        [Test]
+        public void BranchConstructionEconomyPreviewCoversAffordabilityAndDoesNotMutateState()
+        {
+            var fixture = BranchFixture(2, out OptionalBranchEditPreview spatial);
+            string before = JsonUtility.ToJson(fixture.State);
+            double wallet = fixture.Runtime.structureRuntime.ManaReserve;
+            StructuralInvestmentRecord[] investment = Current(fixture).Investment;
+            Assert.That(fixture.Economy.TryCorridor(OptionalBranchStructuralEditService.CorridorDefinitionId,
+                out double perTile), Is.True);
+            double expected = perTile * spatial.OccupiedTiles.Length;
+
+            StructuralEconomyPreview affordable = StructuralEconomyService.Preview(spatial,
+                fixture.State, investment, expected + 1d, fixture.Economy);
+            Assert.That(affordable.BaseCost, Is.EqualTo(expected));
+            Assert.That(affordable.Cost, Is.EqualTo(expected));
+            Assert.That(affordable.CurrentMana, Is.EqualTo(expected + 1d));
+            Assert.That(affordable.ResultingMana, Is.EqualTo(1d));
+            Assert.That(affordable.IsAffordable, Is.True);
+
+            StructuralEconomyPreview exact = StructuralEconomyService.Preview(spatial,
+                fixture.State, investment, expected, fixture.Economy);
+            Assert.That(exact.IsAffordable, Is.True);
+            Assert.That(exact.ResultingMana, Is.Zero);
+
+            StructuralEconomyPreview insufficient = StructuralEconomyService.Preview(spatial,
+                fixture.State, investment, expected - 1d, fixture.Economy);
+            spatial.Economy = insufficient;
+            Assert.That(insufficient.IsAffordable, Is.False);
+            Assert.That(insufficient.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason));
+            Assert.That(spatial.IsSpatiallyValid, Is.True);
+            Assert.That(spatial.IsCommittable, Is.False);
+            Assert.That(JsonUtility.ToJson(fixture.State), Is.EqualTo(before));
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+
+            OptionalBranchEditPreview failed = OptionalBranchStructuralEditService.PreviewConstruction(
+                fixture.State, new OptionalBranchConstructionRequest { FloorInstanceId = "missing" },
+                fixture.Runtime.completedResearch, fixture.BranchingResearch, fixture.Production,
+                fixture.Configuration, fixture.Profile.Canonical);
+            StructuralEconomyPreview failedEconomy = StructuralEconomyService.Preview(failed,
+                fixture.State, investment, wallet, fixture.Economy);
+            Assert.That(failedEconomy.IsAffordable, Is.False);
+            Assert.That(JsonUtility.ToJson(fixture.State), Is.EqualTo(before));
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+        }
+
+        [Test]
+        public void BranchRemovalEconomyPreviewUsesHistoricalInvestmentFlooringAndCapacity()
+        {
+            var fixture = BranchFixture(2, out OptionalBranchEditPreview construction);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(construction)));
+            FloorRouteEdge edge = fixture.State.Floors[0].Layout.Edges.Single(value =>
+                value.Classification == RouteClassification.Optional);
+            OptionalBranchEditPreview removal = OptionalBranchStructuralEditService.PreviewRemoval(
+                fixture.State, fixture.Runtime.corridorContent, new OptionalBranchRemovalRequest
+                { FloorInstanceId = edge.FloorId, OptionalBranchId = edge.OptionalBranchId },
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
+            StructuralInvestmentRecord[] investment = Current(fixture).Investment
+                .Select(value => value.Copy()).ToArray();
+            investment.Single(value => value.StructureId == edge.EdgeId).ConstructionMana = 11d;
+
+            StructuralEconomyPreview ordinary = StructuralEconomyService.Preview(removal,
+                fixture.State, investment, 100d, fixture.Economy);
+            Assert.That(ordinary.Operation, Is.EqualTo(StructuralEditOperation.OptionalBranchRemoval));
+            Assert.That(ordinary.RefundBasis, Is.EqualTo(11d));
+            Assert.That(ordinary.Refund, Is.EqualTo(Math.Floor(11d * fixture.Economy.RefundPercentage)));
+            Assert.That(ordinary.CreditedRefund, Is.EqualTo(ordinary.Refund));
+            Assert.That(ordinary.ResultingMana, Is.EqualTo(100d + ordinary.Refund));
+
+            StructuralEconomyPreview capped = StructuralEconomyService.Preview(removal,
+                fixture.State, investment, fixture.Economy.ManaCapacity - 4d, fixture.Economy);
+            Assert.That(capped.RefundBasis, Is.EqualTo(11d));
+            Assert.That(capped.Refund, Is.EqualTo(ordinary.Refund));
+            Assert.That(capped.CreditedRefund, Is.EqualTo(4d));
+            Assert.That(capped.ResultingMana, Is.EqualTo(fixture.Economy.ManaCapacity));
         }
 
         [Test]
@@ -159,6 +260,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void BranchRemovalDeletesMatchingKnowledgeInTheSameAtomicMutation()
+        {
+            var fixture = BranchFixture(2, out OptionalBranchEditPreview construction);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(construction)));
+            FloorRouteEdge edge = fixture.State.Floors[0].Layout.Edges.Single(value =>
+                value.Classification == RouteClassification.Optional);
+            Assert.That(BranchTopologyFingerprint.TryCompute(fixture.State, edge.FloorId,
+                edge.OptionalBranchId, out string fingerprint), Is.True);
+            var knowledge = new SharedBranchKnowledgeAuthority { Records = new[]
+            {
+                new BranchKnowledgeRecord { FloorInstanceId = edge.FloorId,
+                    OptionalBranchId = edge.OptionalBranchId, EdgeId = edge.EdgeId,
+                    TopologyFingerprint = fingerprint, TopologyKnown = true }
+            }};
+            DetachedCompleteSaveValidationResult current = Current(fixture);
+            DetachedRecognizedSaveStateSnapshotResult snapshot =
+                DetachedRecognizedSaveStateSnapshot.Capture(fixture.Runtime, fixture.Profile);
+            DetachedCanonicalSaveSessionResult prepared = fixture.Session.PrepareLiveReplacement(
+                snapshot, fixture.State, current.Investment, current.CorridorContent, knowledge);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason);
+            byte[] withKnowledge = prepared.Update.GetBytes();
+            fixture.FileSystem.Seed(fixture.ActivePath, withKnowledge);
+            fixture.Session = DetachedCanonicalSaveSession.Open(withKnowledge,
+                fixture.Context, fixture.Profile).Session;
+            fixture.Reopen();
+            Assert.That(Current(fixture).BranchKnowledge.Records, Has.Length.EqualTo(1));
+
+            OptionalBranchEditPreview removal = OptionalBranchStructuralEditService.PreviewRemoval(
+                fixture.State, fixture.Runtime.corridorContent, new OptionalBranchRemovalRequest
+                { FloorInstanceId = edge.FloorId, OptionalBranchId = edge.OptionalBranchId },
+                fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.RemoveBranch(removal)));
+            Assert.That(fixture.State.Floors[0].Layout.Edges.Any(value =>
+                value.OptionalBranchId == edge.OptionalBranchId), Is.False);
+            Assert.That(Current(fixture).BranchKnowledge.Records, Is.Empty);
+            fixture.Reopen();
+            Assert.That(Current(fixture).BranchKnowledge.Records, Is.Empty);
+        }
+
+        [Test]
         public void OptionalBranchDoesNotChangeRequiredRouteOrRunOutcome()
         {
             var fixture = BranchFixture(2, out OptionalBranchEditPreview preview);
@@ -218,6 +359,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Configuration, fixture.Profile.Canonical);
             Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
             return fixture;
+        }
+
+        private static DetachedCompleteSaveValidationResult Current(
+            DetachedCanonicalWriteAuthorityTests.Fixture fixture) =>
+            DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                fixture.Session.GetCurrentBytes(), fixture.Context);
+
+        private static byte[] FrozenSchemaWithDeadEnd(byte[] schemaTen, int schemaVersion)
+        {
+            string text = Encoding.UTF8.GetString(schemaTen);
+            text = RemovePrimaryTail(text, PhaseFiveSaveContracts.CorridorOwnerName);
+            if (schemaVersion < 9) text = RemovePrimaryTail(text, "structuralInvestment");
+            if (schemaVersion < 8) text = RemovePrimaryTail(text, "structuralLifecycleAndOwnership");
+            return Encoding.UTF8.GetBytes(text.Replace("\"schemaVersion\":10",
+                "\"schemaVersion\":" + schemaVersion));
+        }
+
+        private static string RemovePrimaryTail(string text, string member)
+        {
+            int start = text.IndexOf(",\"" + member + "\":", StringComparison.Ordinal);
+            Assert.That(start, Is.GreaterThanOrEqualTo(0), member);
+            return text.Remove(start, text.Length - 2 - start);
         }
     }
 }

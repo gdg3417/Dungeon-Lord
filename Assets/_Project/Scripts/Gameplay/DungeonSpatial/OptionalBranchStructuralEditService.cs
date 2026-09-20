@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DungeonBuilder.M0.Economy;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -37,8 +38,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public int LootCapacity { get; internal set; }
         public int ResultingUsedFloorSpace { get; internal set; }
         public int ResultingRemainingFloorSpace { get; internal set; }
+        public StructuralEconomyPreview Economy { get; internal set; }
         public string[] ReasonCodes { get; internal set; } = Array.Empty<string>();
-        public bool IsValid => DetachedCandidate != null && ReasonCodes.Length == 0;
+        public bool IsSpatiallyValid => DetachedCandidate != null && ReasonCodes.Length == 0;
+        public bool IsValid => IsSpatiallyValid;
+        public bool IsCommittable => IsSpatiallyValid && Economy?.IsAffordable == true;
     }
 
     public static class OptionalBranchStructuralEditService

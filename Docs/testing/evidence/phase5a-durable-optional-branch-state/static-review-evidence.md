@@ -16,6 +16,7 @@
 - `SaveMigration.LatestSchemaVersion` and `CanonicalSaveSchemaVersions.CurrentWritableTarget` are 10.
 - Schema 10 adds explicit top-level complete-save owners `corridorContent` and `sharedBranchKnowledge`; it does not append fields to the frozen canonical spatial serializer.
 - The preserved chain is schemas 1–6 → 7 → 8 → 9 → 10. Schema 9 is parsed through its frozen exact owner shape and upgrades directly to 10.
+- Frozen schemas 7, 8, and 9 use an explicit pre-Phase-5 node-kind domain and reject `DeadEnd = 6`; only schema 10 accepts the appended kind. A malformed frozen payload therefore cannot introduce Phase 5 topology through migration.
 - The 9 → 10 preparer preserves the original primary/recognized/unknown state and canonical spatial owner, then appends empty Phase 5A owners. Current schema-10 input is rejected as a migration source.
 - Native schema-10 creation initializes both new authorities empty.
 - Both owners participate in recognized-member classification, complete-save parsing/writing, session replacement, current-target validation, canonical ordering, and save workload accounting.
@@ -33,8 +34,10 @@
 - Basic Branching resolves only from completed research ID `ac_300` and the existing authored architecture effect `max_optional_branch_rooms_per_floor_set` with integer unit.
 - Effective allowance is `min(authored effect contribution, FloorSpatialConfiguration.OptionalBranchAllowance)` after research completion; before completion it is zero.
 - Missing, duplicate, malformed, non-integral, or ambiguous research/effect content fails closed. No writable duplicate unlock flag exists.
+- The authoritative research export bundle is a single production asset tree under `Assets/_Project/Data/Production/Research/`; `GameRoot` receives the Architecture node/effect JSON through explicit serialized `TextAsset` references in the canonical Bootstrap scene. Runtime research resolution performs no `StreamingAssets` filesystem access, discovery, or duplicated-value fallback.
 - Construction charges only the existing configured physical-corridor per-tile price and records edge investment. No branch surcharge exists.
 - Removal uses the existing investment basis, refund percentage, floor rounding, and wallet capacity policy.
+- Construction and removal previews expose the existing structural-economy authority's current balance, base/final cost, affordability, historical refund basis, nominal/credited refund, and resulting balance while retaining geometry and capacity consequences. Commit still recalculates from current authoritative state.
 
 ### Corridor content and custody
 
@@ -50,7 +53,8 @@
 - Records are keyed and canonically ordered by stable floor/branch/edge identity.
 - Explicit known-state booleans distinguish unknown from real zero perceptions.
 - Confidence/incentive/danger values must be finite and within the normalized range when known; NaN and infinity are rejected.
-- Applicability is resolved without mutation from a deterministic SHA-256 fingerprint of current stable branch topology and geometry. Changed or removed topology cannot match old evidence.
+- Applicability is resolved without mutation from a deterministic SHA-256 fingerprint of current stable branch topology and geometry. Content/topology changes can leave evidence stale and inapplicable.
+- Explicit branch removal atomically deletes the matching live-branch knowledge record together with the branch topology; it does not retain a record for a branch that no longer exists.
 - Phase 5A initializes/migrates the authority empty and does not learn from runs.
 
 ### Run behavior and development validation

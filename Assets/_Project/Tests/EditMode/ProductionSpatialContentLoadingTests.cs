@@ -604,6 +604,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scene.Split(new[] { "productionSpatialLanguageTables:" }, StringSplitOptions.None),
                 Has.Length.EqualTo(2));
             StringAssert.Contains("productionSpatialValidationLimits: {fileID: 4900000, guid: 10fce78ef6ec499d93fdfc87c97030d6", scene);
+            StringAssert.Contains("architectureResearchNodesJson: {fileID: 4900000, guid: 90fa64b896933b647b6a3b14e3af21f0", scene);
+            StringAssert.Contains("architectureResearchTablesJson: {fileID: 4900000, guid: cf675348a1a02f847890956aad63bddb", scene);
             string source = System.IO.File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
             string fallback = source.Substring(source.IndexOf("private void EnsureContentAssetsAssigned", StringComparison.Ordinal),
                 source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal) -
@@ -615,6 +617,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 source.IndexOf("public bool InitializeServicesAndData", StringComparison.Ordinal));
             StringAssert.DoesNotContain("diagnostic.ToString", initialization);
             StringAssert.DoesNotContain("Logger?.Warn", initialization);
+            StringAssert.DoesNotContain("Application.streamingAssetsPath", initialization);
+            StringAssert.DoesNotContain("File.ReadAllText", initialization);
+        }
+
+        [Test]
+        public void BasicBranchingResearchLoadsFromExplicitProductionTextAssets()
+        {
+            const string researchRoot =
+                "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
+            TextAsset nodes = AssetDatabase.LoadAssetAtPath<TextAsset>(researchRoot + "research_nodes.json");
+            TextAsset tables = AssetDatabase.LoadAssetAtPath<TextAsset>(researchRoot + "tables.json");
+
+            Assert.That(nodes, Is.Not.Null);
+            Assert.That(tables, Is.Not.Null);
+            Assert.That(BasicBranchingResearchAuthority.TryParse(nodes, tables,
+                out BasicBranchingResearchSnapshot snapshot), Is.True);
+            Assert.That(snapshot, Is.Not.Null);
+            Assert.That(snapshot.AllowanceContribution, Is.EqualTo(1));
+            Assert.That(BasicBranchingResearchAuthority.TryParse(null, tables, out _), Is.False);
+            Assert.That(BasicBranchingResearchAuthority.TryParse(nodes, null, out _), Is.False);
         }
 
         private ProductionSpatialContentLoadResult Load(ContentService service) =>

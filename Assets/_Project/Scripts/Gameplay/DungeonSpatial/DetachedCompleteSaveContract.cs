@@ -250,12 +250,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 else spatialWriter.Token("null");
                 spatialWriter.Token("}");
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
-                    requireLifecycle ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
-                    CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(spatialWriter.Finish(), limits);
+                    !requireLifecycle ? CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(
+                        spatialWriter.Finish(), limits) :
+                    requirePhaseFive ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
+                    CanonicalSpatialSaveSerializer.ParseFrozenPrePhaseFive(
+                        spatialWriter.Finish(), limits, schemaVersion);
                 CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
-                    requireLifecycle ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
-                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
-                        parsedSpatial.Value, limits.Spatial, true);
+                    !requireLifecycle ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
+                        parsedSpatial.Value, limits.Spatial, true) :
+                    requirePhaseFive ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
+                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenPrePhaseFive(
+                        parsedSpatial.Value, limits.Spatial, schemaVersion, true);
                 if (!parsedSpatial.IsValid || structuralValidation == null || !structuralValidation.IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&

@@ -484,6 +484,8 @@ MonoBehaviour:
   spatialLayoutCompatibilityProfilesJson: {fileID: 4900000, guid: 98e8c650c1ef4d1c916197dbb5d8f218, type: 3}
   saveSpatialMigrationLimitsJson: {fileID: 4900000, guid: 84c1765b61684bb29e3bd90c872b80ed, type: 3}
   structuralContentRemovalPolicyJson: {fileID: 4900000, guid: 10669a8cb1ad44d0a6933aa69db12439, type: 3}
+  architectureResearchNodesJson: {fileID: 4900000, guid: 90fa64b896933b647b6a3b14e3af21f0, type: 3}
+  architectureResearchTablesJson: {fileID: 4900000, guid: cf675348a1a02f847890956aad63bddb, type: 3}
   overlay: {fileID: 1944002266}
 --- !u!4 &1479508743
 Transform:

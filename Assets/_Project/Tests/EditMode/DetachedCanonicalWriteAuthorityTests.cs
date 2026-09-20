@@ -8,6 +8,8 @@ using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -1505,8 +1507,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(File.ReadAllBytes(
                     StructuralContentRemovalPolicyAuthority.ProductionPath), out var removalPolicy), Is.True);
                 Assert.That(BasicBranchingResearchAuthority.TryParse(
-                    File.ReadAllText("Assets/StreamingAssets/DungeonBuilder/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json"),
-                    File.ReadAllText("Assets/StreamingAssets/DungeonBuilder/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json"),
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
                     out var branchingResearch), Is.True);
                 return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
                     Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),

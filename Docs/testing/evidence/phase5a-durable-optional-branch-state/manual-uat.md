@@ -52,8 +52,9 @@ Use a Windows x86_64 Development Build at 1920×1080 and 1280×720. Enable the e
 6. Explicitly unassign all branch content, preview removal, and commit it.
 7. Verify only the optional edge and DeadEnd disappear; required rooms, required edges, and Completion identities do not change.
 8. Verify the refund uses the existing structural investment/refund policy and never exceeds the wallet capacity policy.
-9. Construct another branch and verify the retired edge/branch/DeadEnd identities are not reused.
-10. Close/reopen and verify the removed branch stays removed, returned custody stays exact, and unrelated state remains intact.
+9. Verify removal invalidates the removed branch's live shared-knowledge record atomically; content changes may instead leave knowledge stale for later applicability checks.
+10. Construct another branch and verify the retired edge/branch/DeadEnd identities are not reused.
+11. Close/reopen and verify the removed branch stays removed, returned custody stays exact, and unrelated state remains intact.
 
 ## Required-route regression
 

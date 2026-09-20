@@ -8,6 +8,8 @@ namespace DungeonBuilder.M0.Economy
     public sealed class StructuralEconomyPreview
     {
         public StructuralEditPreview Spatial { get; internal set; }
+        public OptionalBranchEditPreview OptionalBranch { get; internal set; }
+        public StructuralEditOperation Operation { get; internal set; }
         public double CurrentMana { get; internal set; }
         public double BaseCost { get; internal set; }
         public double Cost { get; internal set; }
@@ -37,12 +39,33 @@ namespace DungeonBuilder.M0.Economy
             result.Spatial = spatial; return result;
         }
 
+        public static StructuralEconomyPreview Preview(OptionalBranchEditPreview spatial,
+            DetachedCanonicalSpatialSaveState current, StructuralInvestmentRecord[] investment,
+            double balance, StructuralEconomySnapshot config,
+            IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            StructuralEditOperation operation = spatial?.Operation == OptionalBranchEditOperation.Removal
+                ? StructuralEditOperation.OptionalBranchRemoval
+                : StructuralEditOperation.OptionalBranchConstruction;
+            if (spatial?.IsSpatiallyValid != true) return new StructuralEconomyPreview
+            {
+                OptionalBranch = spatial, Operation = operation, CurrentMana = balance,
+                ResultingMana = balance,
+                Reason = spatial?.ReasonCodes.FirstOrDefault() ?? InvalidReason
+            };
+            var result = Prepare(current, spatial.DetachedCandidate, investment, balance, config,
+                operation, null, modifiers);
+            result.OptionalBranch = spatial;
+            return result;
+        }
+
         internal static StructuralEconomyPreview Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
             double balance, StructuralEconomySnapshot config, StructuralEditOperation operation,
             string target, IReadOnlyList<FormulaModifier> modifiers = null)
         {
-            var result = new StructuralEconomyPreview { CurrentMana = balance, ResultingMana = balance, Reason = InvalidReason };
+            var result = new StructuralEconomyPreview { Operation = operation, CurrentMana = balance,
+                ResultingMana = balance, Reason = InvalidReason };
             if (config == null || current == null || candidate == null || !StructuralEconomySnapshot.Nonnegative(balance) ||
                 !StructuralInvestment.Valid(investment, current, int.MaxValue)) return result;
             try

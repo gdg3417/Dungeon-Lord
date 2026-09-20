@@ -1977,10 +1977,12 @@ namespace DungeonBuilder.M0
                     OriginConnectionPointId = _selectedBranchConnectionPointId,
                     CorridorLength = _selectedBranchCorridorLength
                 });
-            _structuralFeedback = preview?.IsValid == true
+            _structuralFeedback = preview?.IsSpatiallyValid == true
                 ? string.Format(CultureInfo.InvariantCulture,
                     GetLocalizedString("ui.branch.preview.success"), preview.OccupiedTiles.Length,
-                    preview.TrapCapacity, preview.LootCapacity, preview.ResultingRemainingFloorSpace)
+                    preview.TrapCapacity, preview.LootCapacity, preview.ResultingRemainingFloorSpace) +
+                    "\n" + StructuralEconomyPresenter.Present(preview.Economy,
+                        key => GetLocalizedString(key))
                 : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
             return preview;
         }
@@ -1992,8 +1994,10 @@ namespace DungeonBuilder.M0
             OptionalBranchEditPreview preview = _root?.PreviewOptionalBranchRemoval(
                 new OptionalBranchRemovalRequest
                 { FloorInstanceId = floor?.FloorInstanceId, OptionalBranchId = edge?.OptionalBranchId });
-            _structuralFeedback = preview?.IsValid == true
-                ? GetLocalizedString("ui.branch.removal.preview.success")
+            _structuralFeedback = preview?.IsSpatiallyValid == true
+                ? GetLocalizedString("ui.branch.removal.preview.success") + "\n" +
+                    StructuralEconomyPresenter.Present(preview.Economy,
+                        key => GetLocalizedString(key))
                 : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
             return preview;
         }
@@ -2097,7 +2101,7 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(GetLocalizedString("ui.branch.preview.action"), button, buttonHeight))
                 PreviewOptionalBranchConstruction();
             bool enabled = GUI.enabled;
-            GUI.enabled = enabled && _root.OptionalBranchPreview?.IsValid == true;
+            GUI.enabled = enabled && _root.OptionalBranchPreview?.IsCommittable == true;
             if (GUILayout.Button(GetLocalizedString("ui.branch.commit.action"), button, buttonHeight))
                 CommitOptionalBranchEdit();
             GUI.enabled = enabled;

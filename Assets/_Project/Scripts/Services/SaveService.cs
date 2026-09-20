@@ -458,17 +458,21 @@ namespace DungeonBuilder.M0
         }
 
         public OptionalBranchEditPreview PreviewOptionalBranchConstruction(
-            OptionalBranchConstructionRequest request, CompletedResearchState completedResearch)
+            OptionalBranchConstructionRequest request, CompletedResearchState completedResearch,
+            SaveData current)
         {
             if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
                 return OptionalBranchStructuralEditService.InvalidConstruction(
                     OptionalBranchStructuralEditService.InvalidContextReason, request);
-            return OptionalBranchStructuralEditService.PreviewConstruction(state, request,
+            OptionalBranchEditPreview preview = OptionalBranchStructuralEditService.PreviewConstruction(
+                state, request,
                 completedResearch, _branchingResearch, _production,
                 _legacyGameplayConfiguration, _limits.Canonical);
+            return AttachOptionalBranchEconomy(preview, current);
         }
 
-        public OptionalBranchEditPreview PreviewOptionalBranchRemoval(OptionalBranchRemovalRequest request)
+        public OptionalBranchEditPreview PreviewOptionalBranchRemoval(OptionalBranchRemovalRequest request,
+            SaveData current)
         {
             if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
                 return OptionalBranchStructuralEditService.InvalidRemoval(
@@ -477,8 +481,22 @@ namespace DungeonBuilder.M0
                 _canonicalSession.GetCurrentBytes(), _validationContext);
             if (!validated.IsValid) return OptionalBranchStructuralEditService.InvalidRemoval(
                 OptionalBranchStructuralEditService.InvalidContextReason, request);
-            return OptionalBranchStructuralEditService.PreviewRemoval(state, validated.CorridorContent,
+            OptionalBranchEditPreview preview = OptionalBranchStructuralEditService.PreviewRemoval(
+                state, validated.CorridorContent,
                 request, _production, _legacyGameplayConfiguration, _limits.Canonical);
+            return AttachOptionalBranchEconomy(preview, current, validated);
+        }
+
+        private OptionalBranchEditPreview AttachOptionalBranchEconomy(OptionalBranchEditPreview preview,
+            SaveData current, DetachedCompleteSaveValidationResult owned = null)
+        {
+            owned = owned ?? (_canonicalSession == null || _validationContext == null ? null :
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    _canonicalSession.GetCurrentBytes(), _validationContext));
+            preview.Economy = StructuralEconomyService.Preview(preview, owned?.State,
+                owned?.Investment, current?.structureRuntime?.ManaReserve ?? double.NaN,
+                _economy, _economyModifiers);
+            return preview;
         }
 
         private bool TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state)

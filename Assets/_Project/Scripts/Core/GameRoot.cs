@@ -7,7 +7,6 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -40,6 +39,10 @@ namespace DungeonBuilder.M0
         public TextAsset spatialLayoutCompatibilityProfilesJson;
         public TextAsset saveSpatialMigrationLimitsJson;
         public TextAsset structuralContentRemovalPolicyJson;
+
+        [Header("Production Research Content")]
+        public TextAsset architectureResearchNodesJson;
+        public TextAsset architectureResearchTablesJson;
 
         [Header("UI")]
         public BootstrapOverlay overlay;
@@ -467,20 +470,9 @@ namespace DungeonBuilder.M0
                 DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot.TryParse(acquisitionAsset.bytes,
                     economy, SaveSpatialMigrationLimits.Canonical, out acquisition);
             SaveService.ConfigureContentAcquisitionEconomy(acquisition);
-            BasicBranchingResearchSnapshot branchingResearch = null;
-            try
-            {
-                string researchRoot = Path.Combine(Application.streamingAssetsPath,
-                    "DungeonBuilder", "Research", "Dungeon_Builder_Research_Export_Bundle", "architecture");
-                BasicBranchingResearchAuthority.TryParse(
-                    File.ReadAllText(Path.Combine(researchRoot, "research_nodes.json")),
-                    File.ReadAllText(Path.Combine(researchRoot, "tables.json")),
-                    out branchingResearch);
-            }
-            catch (Exception)
-            {
-                branchingResearch = null;
-            }
+            BasicBranchingResearchAuthority.TryParse(
+                architectureResearchNodesJson, architectureResearchTablesJson,
+                out BasicBranchingResearchSnapshot branchingResearch);
             SaveService.ConfigureBasicBranchingResearch(branchingResearch);
             if (Content.ProductionSpatialContent == null)
             {
@@ -824,11 +816,11 @@ namespace DungeonBuilder.M0
             OptionalBranchConstructionRequest request)
         {
             OptionalBranchPreview = CanPreviewStructuralRenovation()
-                ? SaveService.PreviewOptionalBranchConstruction(request, Save.completedResearch)
+                ? SaveService.PreviewOptionalBranchConstruction(request, Save.completedResearch, Save)
                 : OptionalBranchStructuralEditService.InvalidConstruction(
                     OptionalBranchStructuralEditService.InvalidContextReason, request);
-            StructuralConstructionReasonKey = OptionalBranchPreview.IsValid ? string.Empty :
-                OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
+            StructuralConstructionReasonKey = OptionalBranchPreview.IsCommittable ? string.Empty :
+                OptionalBranchPreview.Economy?.Reason ?? OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
                     OptionalBranchStructuralEditService.InvalidContextReason;
             return OptionalBranchPreview;
         }
@@ -836,20 +828,21 @@ namespace DungeonBuilder.M0
         public OptionalBranchEditPreview PreviewOptionalBranchRemoval(OptionalBranchRemovalRequest request)
         {
             OptionalBranchPreview = CanPreviewStructuralRenovation()
-                ? SaveService.PreviewOptionalBranchRemoval(request)
+                ? SaveService.PreviewOptionalBranchRemoval(request, Save)
                 : OptionalBranchStructuralEditService.InvalidRemoval(
                     OptionalBranchStructuralEditService.InvalidContextReason, request);
-            StructuralConstructionReasonKey = OptionalBranchPreview.IsValid ? string.Empty :
-                OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
+            StructuralConstructionReasonKey = OptionalBranchPreview.IsCommittable ? string.Empty :
+                OptionalBranchPreview.Economy?.Reason ?? OptionalBranchPreview.ReasonCodes.FirstOrDefault() ??
                     OptionalBranchStructuralEditService.InvalidContextReason;
             return OptionalBranchPreview;
         }
 
         public DetachedCanonicalWriteResult CommitOptionalBranchEdit()
         {
-            if (OptionalBranchPreview == null || !OptionalBranchPreview.IsValid ||
+            if (OptionalBranchPreview == null || !OptionalBranchPreview.IsCommittable ||
                 !CanPreviewStructuralRenovation())
-                return StructuralCommitFailure(OptionalBranchPreview?.ReasonCodes?.FirstOrDefault() ??
+                return StructuralCommitFailure(OptionalBranchPreview?.Economy?.Reason ??
+                    OptionalBranchPreview?.ReasonCodes?.FirstOrDefault() ??
                     OptionalBranchStructuralEditService.InvalidContextReason);
             DetachedCanonicalMutationRequest request = OptionalBranchPreview.Operation ==
                 OptionalBranchEditOperation.Construction
