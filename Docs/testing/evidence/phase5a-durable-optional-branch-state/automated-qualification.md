@@ -230,3 +230,44 @@ player runtime error. Android qualification was not run and is not required.
 Raw XML/log artifacts remain untracked under `TestResults/`; build output and
 provenance remain ignored under `Builds/Phase5A/`. Owner manual UAT is partially
 recorded in `manual-uat.md` and remains outstanding.
+
+## Final player-facing mana presentation consistency correction
+
+The final presentation-only correction was qualified from the working tree based
+on `2e88dde6f8e110f758f167d10a914fac4ca1c6fb`. It changes no save, economy,
+passive-generation, research, or route-choice behavior. A shared
+`PlayerManaPresentationFormatter` now supplies locale-aware player-facing mana
+text: discrete values use at most one decimal with no trailing `.0`; a live
+wallet uses whole mana at an authoritative passive rate of 3,600 mana/hour or
+above and at most one decimal below that threshold. Structural-economy preview
+presentation continues to retain its approved fractional-transaction exception.
+
+| Focused qualification | Result | Duration | Raw local evidence |
+|---|---:|---:|---|
+| Passive online mana and localization | 55/55 passed | 1.207 seconds | `TestResults/phase5a-mana-presentation-passive.xml` |
+| Offline passive mana and localization | 33/33 passed | 1.407 seconds | `TestResults/phase5a-mana-presentation-offline.xml` |
+| Structural economy preview presentation | 77/77 passed | 3.891 seconds | `TestResults/phase5a-mana-presentation-structural.xml` |
+
+The focused fixtures cover below-threshold, exactly-3,600, and above-threshold
+live balances; rate, contribution, award, current, and capacity formatting;
+whole-value suppression of `.0`; locale-aware decimal separators; non-leakage
+of raw floating-point tails; and unchanged underlying authoritative values.
+
+### Final Windows Development Build
+
+- Editor: Unity `6000.3.2f1`, x86_64.
+- Target: `StandaloneWindows64`; option: `-development`.
+- Result: `Success`, exit code `0`.
+- Output: `Builds/Phase5A/DungeonLord.exe`.
+- Provenance: `Builds/Phase5A/DungeonLord.provenance.json` records source
+  revision `2e88dde6f8e110f758f167d10a914fac4ca1c6fb` and `dirty: true` because
+  this final correction and excluded local/generated Unity/editor files were
+  present before commit.
+
+The known nonfatal Unity Cloud credential, player-connection multicast,
+empty-test-asmdef, and shutdown/debugger cleanup diagnostics were observed. The
+build reported no compile failure, build failure, ComputeBuffer failure, or new
+player runtime error. Android was not run at owner direction and is not required
+for PR #209. Raw XML/log artifacts remain untracked under `TestResults/`, and
+build output/provenance remain ignored under `Builds/Phase5A/`. Manual UAT is
+still outstanding.

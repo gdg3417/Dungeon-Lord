@@ -7,17 +7,20 @@ namespace DungeonBuilder.M0
 {
     public static class StructuralEconomyPresenter
     {
-        public const double WholeBalancePassiveManaPerHourThreshold = 3600d;
+        public const double WholeBalancePassiveManaPerHourThreshold =
+            PlayerManaPresentationFormatter.WholeBalancePassiveManaPerHourThreshold;
 
         public static string FormatTransactionAmount(double value) =>
-            value.ToString("0.#", CultureInfo.InvariantCulture);
+            PlayerManaPresentationFormatter.FormatDiscreteAmount(value,
+                CultureInfo.InvariantCulture);
 
         public static string FormatBalance(double value, double passiveManaPerHour,
             bool hasFractionalTransaction)
         {
-            bool useWholeMana = !hasFractionalTransaction &&
-                passiveManaPerHour >= WholeBalancePassiveManaPerHourThreshold;
-            return value.ToString(useWholeMana ? "0" : "0.#", CultureInfo.InvariantCulture);
+            return hasFractionalTransaction
+                ? FormatTransactionAmount(value)
+                : PlayerManaPresentationFormatter.FormatLiveBalance(value, passiveManaPerHour,
+                    CultureInfo.InvariantCulture);
         }
 
         public static string Present(StructuralEconomyPreview preview, Func<string, string> text,

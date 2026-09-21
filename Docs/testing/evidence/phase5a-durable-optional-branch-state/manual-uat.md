@@ -10,11 +10,14 @@ optional-branch preview, successful branch construction, and second-branch
 allowance rejection. UAT then found presentation-only defects: raw double
 precision in the branch economy preview and the singular text `1 tiles`.
 
-The UAT presentation correction formats only displayed values (it does not
-change wallet/economy state) and uses localized singular/plural branch summary
-keys. Owner UAT must resume the research/preview/construction block after this
-correction, then continue corridor content, custody, removal, lifecycle, and
-Windows standalone validation. This is not a full UAT pass.
+The UAT presentation corrections format only displayed values (they do not
+change wallet/economy state). Branch previews retain localized singular/plural
+branch summary keys. Normal live passive mana now shows at most one decimal
+below 3,600 mana/hour and whole mana at or above that rate; offline mana and
+other discrete player-facing mana amounts show at most one decimal with no
+trailing `.0`. Owner UAT must resume the research/preview/construction block
+after these corrections, then continue corridor content, custody, removal,
+lifecycle, and Windows standalone validation. This is not a full UAT pass.
 
 This UAT validates Phase 5A persistence and construction only. Adventurer branch choice, optional traversal, branch encounter resolution, automatic return, and run-driven knowledge learning belong to Phase 5B and are **not expected** in this PR. Required-route runs must continue exactly as before.
 
@@ -80,8 +83,9 @@ Use a Windows x86_64 Development Build at 1920×1080 and 1280×720. Enable the e
 
 1. At 1920×1080 and 1280×720, verify all QA controls remain usable through scrolling and no control blocks core actions.
 2. Verify every success/failure label is readable localized English and no raw localization key or internal reason code appears.
-3. Repeat close/reopen, periodic save, state-change save, and pause/resume checks in the Windows Development Build.
-4. Record screenshots, save hashes/logs as appropriate, exact build identity, and any shutdown diagnostics.
+3. Verify live passive mana has no more than one decimal below 3,600 mana/hour, uses whole mana at or above that rate, and displays locale-appropriate decimal separators. Verify offline rate, award, current mana, and capacity likewise have no more than one decimal and no raw floating-point tails.
+4. Repeat close/reopen, periodic save, state-change save, and pause/resume checks in the Windows Development Build.
+5. Record screenshots, save hashes/logs as appropriate, exact build identity, and any shutdown diagnostics.
 
 ## Acceptance record
 

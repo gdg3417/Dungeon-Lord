@@ -13,11 +13,11 @@
     },
     {
       "key": "ui.passive_mana.balance_rate_format",
-      "text": "Mana: {0:0.###} / {1:0.###}. Passive rate: {2:0.###} mana/hour."
+      "text": "Mana: {0} / {1}. Passive rate: {2} mana/hour."
     },
     {
       "key": "ui.passive_mana.contributions_format",
-      "text": "Core contribution: {0:0.###} mana/hour. Active floors ({1}): {2:0.###} mana/hour."
+      "text": "Core contribution: {0} mana/hour. Active floors ({1}): {2} mana/hour."
     },
     {
       "key": "ui.passive_mana.heat_format",
@@ -33,7 +33,7 @@
     },
     {
       "key": "ui.offline_mana.applied_format",
-      "text": "Away for {0:N0} seconds. Offline rate: {1:0.###} mana/hour. Earned: {2:0.###} mana. Current mana: {3:0.###} / {4:0.###}."
+      "text": "Away for {0:N0} seconds. Offline rate: {1} mana/hour. Earned: {2} mana. Current mana: {3} / {4}."
     },
     {
       "key": "ui.offline_mana.capacity_limited",

@@ -683,6 +683,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void PassiveManaPresentationUsesApprovedPrecisionWithoutChangingRateValues()
+        {
+            var belowThreshold = new PassiveManaRateSummary
+            {
+                RuleResolved = true,
+                ManaPerHour = 180d,
+                CoreContributionManaPerHour = 5.527d,
+                ActiveFloorCount = 1,
+                ActiveFloorContributionManaPerHour = 2.444d,
+                HeatTierId = CurrentHeatTierResolver.NoticeTierId,
+                HeatEfficiencyMultiplier = 1d
+            };
+            Dictionary<string, string> strings = PresentationStrings();
+            Func<string, string> localize = key =>
+                strings.TryGetValue(key, out string value) ? value : key;
+
+            string below = PassiveManaPresenter.Build(belowThreshold, 47.86416666666667d,
+                1000d, CultureInfo.InvariantCulture, localize);
+            Assert.That(below, Does.Contain("Balance 47.9/1000; rate 180"));
+            Assert.That(below, Does.Contain("Core 5.5; floors 1 give 2.4"));
+            Assert.That(below, Does.Not.Contain("47.86416666666667").And.Not.Contain("5.527"));
+
+            belowThreshold.ManaPerHour = 3600d;
+            string atThreshold = PassiveManaPresenter.Build(belowThreshold, 47.86416666666667d,
+                1000d, CultureInfo.InvariantCulture, localize);
+            Assert.That(atThreshold, Does.Contain("Balance 48/1000; rate 3600"));
+
+            belowThreshold.ManaPerHour = 7200d;
+            string aboveThreshold = PassiveManaPresenter.Build(belowThreshold, 47.86416666666667d,
+                1000d, CultureInfo.InvariantCulture, localize);
+            Assert.That(aboveThreshold, Does.Contain("Balance 48/1000; rate 7200"));
+            Assert.That(belowThreshold.ManaPerHour, Is.EqualTo(7200d));
+            Assert.That(belowThreshold.CoreContributionManaPerHour, Is.EqualTo(5.527d));
+
+            string german = PassiveManaPresenter.Build(belowThreshold, 47.86416666666667d,
+                1000d, CultureInfo.GetCultureInfo("de-DE"), localize);
+            Assert.That(german, Does.Contain("48").And.Contain("5,5"));
+        }
+
+        [Test]
         public void JapaneseLanguageResolvesFormatProviderWithoutPresenterSpecialCase()
         {
             CultureInfo provider = PassiveManaPresenter.ResolveFormatProvider("ja") as CultureInfo;
@@ -707,8 +747,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static Dictionary<string, string> PresentationStrings() =>
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [PassiveManaPresenter.BalanceAndRateFormatKey] = "Balance {0:0.###}/{1:0.###}; rate {2:0.###}",
-                [PassiveManaPresenter.ContributionsFormatKey] = "Core {0:0.###}; floors {1} give {2:0.###}",
+                [PassiveManaPresenter.BalanceAndRateFormatKey] = "Balance {0}/{1}; rate {2}",
+                [PassiveManaPresenter.ContributionsFormatKey] = "Core {0}; floors {1} give {2}",
                 [PassiveManaPresenter.HeatFormatKey] = "Heat {0}; efficiency {1:P0}",
                 [PassiveManaPresenter.StorageFullKey] = "Full",
                 [PassiveManaPresenter.UnavailableKey] = "Unavailable",
