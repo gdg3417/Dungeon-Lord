@@ -500,6 +500,100 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(text, Is.EqualTo(StructuralEconomyPresenter.Present(Price(f, Build(f)), key => dictionary[key])));
         }
 
+        [TestCase(5d, "5")]
+        [TestCase(5.0d, "5")]
+        [TestCase(5.5d, "5.5")]
+        [TestCase(5.527d, "5.5")]
+        public void StructuralEconomyPresentationTransactionAmountsUseAtMostOneDecimal(double value,
+            string expected)
+        {
+            Assert.That(StructuralEconomyPresenter.FormatTransactionAmount(value), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void StructuralEconomyPresentationFormatsWalletByAuthoritativePassiveRateWithoutMutatingValues()
+        {
+            const double current = 47.86416666666667d;
+            const double fractionalResult = 42.36416666666667d;
+            var integral = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchConstruction,
+                CurrentMana = current, BaseCost = 5d, Cost = 5d, ResultingMana = current - 5d
+            };
+            var fractional = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchConstruction,
+                CurrentMana = current, BaseCost = 5.5d, Cost = 5.5d, ResultingMana = fractionalResult
+            };
+
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 1d, false), Is.EqualTo("47.9"));
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 3600d, false), Is.EqualTo("48"));
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 7200d, false), Is.EqualTo("48"));
+
+            string text = StructuralEconomyPresenter.Present(fractional, PresentationText, 3600d);
+            Assert.That(text, Does.Contain("Current mana: 47.9. Mana after committing: 42.4."));
+            Assert.That(text, Does.Contain("Base cost: 5.5 mana. Final build or renovation cost: 5.5 mana."));
+            Assert.That(text, Does.Not.Contain("47.86416666666667").And.Not.Contain("42.36416666666667")
+                .And.Not.Contain("ui.structural.economy").And.Not.Contain("structural.economy."));
+            Assert.That(fractional.CurrentMana, Is.EqualTo(current));
+            Assert.That(fractional.ResultingMana, Is.EqualTo(fractionalResult));
+            Assert.That(fractional.BaseCost, Is.EqualTo(5.5d));
+            Assert.That(fractional.Cost, Is.EqualTo(5.5d));
+            Assert.That(StructuralEconomyPresenter.Present(integral, PresentationText, 3600d),
+                Does.Contain("Current mana: 48. Mana after committing: 43."));
+        }
+
+        [Test]
+        public void StructuralEconomyPresentationFormatsRemovalRefundAmountsAndBranchTilesWithLocalizedGrammar()
+        {
+            var removal = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchRemoval,
+                CurrentMana = 47.86416666666667d, RefundBasis = 5.527d, Refund = 2.555d,
+                CreditedRefund = 2.444d, ResultingMana = 50.30816666666667d
+            };
+            string text = StructuralEconomyPresenter.Present(removal, PresentationText, 7200d);
+            Assert.That(text, Does.Contain("Historical investment removed: 5.5 mana. Refund: 2.6 mana; credited within storage capacity: 2.4 mana."));
+            Assert.That(text, Does.Contain("Current mana: 47.9. Mana after committing: 50.3."));
+            Assert.That(BootstrapOverlay.BuildOptionalBranchPreviewSummary(1, 2, 3, 4, PresentationText),
+                Is.EqualTo("Branch preview: 1 tile; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(BootstrapOverlay.BuildOptionalBranchPreviewSummary(2, 2, 3, 4, PresentationText),
+                Is.EqualTo("Branch preview: 2 tiles; trap capacity 2; loot capacity 3; floor space remaining 4."));
+        }
+
+        [Test]
+        public void BranchPreviewGrammarUsesProductionLocalizationWithoutLeakingKeys()
+        {
+            var table = JsonUtility.FromJson<StringTable>(
+                File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            var dictionary = table.entries.ToDictionary(entry => entry.key, entry => entry.text);
+            foreach (string key in new[] { "ui.branch.preview.success.singular", "ui.branch.preview.success.plural" })
+                Assert.That(dictionary.ContainsKey(key), Is.True, key);
+
+            string singular = BootstrapOverlay.BuildOptionalBranchPreviewSummary(1, 2, 3, 4,
+                key => dictionary[key]);
+            string plural = BootstrapOverlay.BuildOptionalBranchPreviewSummary(2, 2, 3, 4,
+                key => dictionary[key]);
+            Assert.That(singular, Is.EqualTo("Branch preview: 1 tile; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(plural, Is.EqualTo("Branch preview: 2 tiles; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(singular + plural, Does.Not.Contain("ui.branch.").And.Not.Contain("branch.edit."));
+        }
+
+        private static string PresentationText(string key)
+        {
+            switch (key)
+            {
+                case "ui.structural.economy.cost": return "Base cost: {0} mana. Final build or renovation cost: {1} mana.";
+                case "ui.structural.economy.refund": return "Historical investment removed: {0} mana. Refund: {1} mana; credited within storage capacity: {2} mana.";
+                case "ui.structural.economy.balance": return "Current mana: {0}. Mana after committing: {1}.";
+                case "ui.structural.economy.affordable": return "This edit is affordable.";
+                case "structural.economy.insufficient_mana": return "Insufficient mana.";
+                case "ui.branch.preview.success.singular": return "Branch preview: {0} tile; trap capacity {1}; loot capacity {2}; floor space remaining {3}.";
+                case "ui.branch.preview.success.plural": return "Branch preview: {0} tiles; trap capacity {1}; loot capacity {2}; floor space remaining {3}.";
+                default: return "Invalid preview.";
+            }
+        }
+
         [TestCase(false)][TestCase(true)]
         public void BothRunEntrypointsInvalidatePendingRenovation(bool activeLoop)
         {

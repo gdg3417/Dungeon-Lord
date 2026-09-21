@@ -189,3 +189,44 @@ Android build was not run, at owner direction, and is not required for PR #209.
 The XML/log artifacts under untracked `TestResults/` and the ignored
 `Builds/Phase5A/` output remain local and are not committed. Manual UAT remains
 outstanding; this post-review automated qualification does not claim it passed.
+
+## Owner-UAT presentation correction qualification
+
+Owner UAT found two presentation-only issues after the verified Phase 5A
+research/preview/construction checks: raw double-precision wallet text in the
+branch economy preview and singular `1 tiles` grammar. The correction does not
+modify save state, economy calculations, passive generation, research, branch
+rules, or Phase 5B behavior.
+
+`StructuralEconomyPresenter` now owns the reusable display policy. Transaction
+amounts use at most one decimal; balances use at most one decimal below 3,600
+authoritatively resolved mana/hour and whole mana at or above that rate, except
+when the preview contains a meaningful fractional transaction. `GameRoot`
+supplies that existing canonical passive-rate result directly to presentation;
+no passive-mana formula was duplicated. Bootstrap uses localized singular and
+plural branch-summary keys.
+
+| Qualification | Result | Duration / output |
+|---|---:|---|
+| Focused structural economy/presentation | 77 total; 77 passed; 0 failed; 0 skipped | 3.867 seconds; `TestResults/phase5a-mana-presentation-structural-economy.xml` |
+| Focused Phase 5A branch fixture | 10 total; 10 passed; 0 failed; 0 skipped | 0.948 seconds; `TestResults/phase5a-mana-presentation-branch.xml` |
+| Focused Bootstrap/production-localization | 37 total; 37 passed; 0 failed; 0 skipped | 0.382 seconds; `TestResults/phase5a-mana-presentation-bootstrap.xml` |
+| Full EditMode | 964 total; 964 passed; 0 failed; 0 skipped | 123.272 seconds; `TestResults/phase5a-mana-presentation-final-editmode.xml` |
+| Full PlayMode | 2,464 total; 2,454 passed; 0 failed; 10 intentionally skipped | 114.234 seconds; `TestResults/phase5a-mana-presentation-final-playmode.xml` |
+| Windows x86_64 Development Build | Success; exit code 0 | `Builds/Phase5A/DungeonLord.exe` |
+
+The ten PlayMode skips remain the established existing boundaries: eight
+`gd66.test.synchronous_edit_mode_fixture` tests, one
+`gd66.test.windows_only_inverse` test, and one
+`gd66.test.windows_player_only` test. No Phase 5A presentation test was
+skipped.
+
+The final Windows build used Unity `6000.3.2f1`, target
+`StandaloneWindows64`, and `-development`. The known nonfatal empty-test-asmdef,
+shutdown thread/debugger-agent, and player-connection diagnostics remained;
+there was no compile failure, build failure, ComputeBuffer failure, or new
+player runtime error. Android qualification was not run and is not required.
+
+Raw XML/log artifacts remain untracked under `TestResults/`; build output and
+provenance remain ignored under `Builds/Phase5A/`. Owner manual UAT is partially
+recorded in `manual-uat.md` and remains outstanding.

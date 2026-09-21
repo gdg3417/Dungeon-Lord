@@ -142,6 +142,8 @@ namespace DungeonBuilder.M0
         public string StateLine => "State: " + (_sm != null ? _sm.CurrentStateName : "None");
         public int SelectedFloorIndex => _selectedFloorIndex;
         public int SelectedSlotIndex => _selectedSlotIndex;
+        public double PassiveManaPerHourForPresentation => _passiveManaService?
+            .ResolveRate(Save, RunSimulationConfig)?.ManaPerHour ?? double.NaN;
 
         public MvpPlayerLoopSummary ResolveMvpPlayerLoopSummary()
         {

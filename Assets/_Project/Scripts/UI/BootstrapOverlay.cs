@@ -1978,11 +1978,11 @@ namespace DungeonBuilder.M0
                     CorridorLength = _selectedBranchCorridorLength
                 });
             _structuralFeedback = preview?.IsSpatiallyValid == true
-                ? string.Format(CultureInfo.InvariantCulture,
-                    GetLocalizedString("ui.branch.preview.success"), preview.OccupiedTiles.Length,
-                    preview.TrapCapacity, preview.LootCapacity, preview.ResultingRemainingFloorSpace) +
+                ? BuildOptionalBranchPreviewSummary(preview.OccupiedTiles.Length,
+                    preview.TrapCapacity, preview.LootCapacity, preview.ResultingRemainingFloorSpace,
+                    key => GetLocalizedString(key)) +
                     "\n" + StructuralEconomyPresenter.Present(preview.Economy,
-                        key => GetLocalizedString(key))
+                        key => GetLocalizedString(key), _root?.PassiveManaPerHourForPresentation ?? double.NaN)
                 : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
             return preview;
         }
@@ -1997,7 +1997,7 @@ namespace DungeonBuilder.M0
             _structuralFeedback = preview?.IsSpatiallyValid == true
                 ? GetLocalizedString("ui.branch.removal.preview.success") + "\n" +
                     StructuralEconomyPresenter.Present(preview.Economy,
-                        key => GetLocalizedString(key))
+                        key => GetLocalizedString(key), _root?.PassiveManaPerHourForPresentation ?? double.NaN)
                 : LocalizeStructuralReason(preview?.ReasonCodes?.FirstOrDefault());
             return preview;
         }
@@ -2077,6 +2077,13 @@ namespace DungeonBuilder.M0
                 LocalizeStructuralReason(result?.Reason);
             return success;
         }
+
+        internal static string BuildOptionalBranchPreviewSummary(int tileCount, int trapCapacity,
+            int lootCapacity, int remainingFloorSpace, Func<string, string> text) =>
+            string.Format(CultureInfo.InvariantCulture,
+                text(tileCount == 1 ? "ui.branch.preview.success.singular" :
+                    "ui.branch.preview.success.plural"),
+                tileCount, trapCapacity, lootCapacity, remainingFloorSpace);
 
         private void DrawOptionalBranchControls(GUIStyle label, GUIStyle button,
             GUIStyle heading, GUILayoutOption labelHeight, GUILayoutOption buttonHeight)

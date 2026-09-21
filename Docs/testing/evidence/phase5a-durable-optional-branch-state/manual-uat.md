@@ -2,7 +2,19 @@
 
 ## Status and boundary
 
-Status: **not run; owner evidence required**.
+Status: **partially run; owner continuation required**.
+
+Owner UAT confirmed a fresh Bootstrap start, Basic Branching disabled, localized
+research-required branch-preview rejection, Basic Branching enabled, valid
+optional-branch preview, successful branch construction, and second-branch
+allowance rejection. UAT then found presentation-only defects: raw double
+precision in the branch economy preview and the singular text `1 tiles`.
+
+The UAT presentation correction formats only displayed values (it does not
+change wallet/economy state) and uses localized singular/plural branch summary
+keys. Owner UAT must resume the research/preview/construction block after this
+correction, then continue corridor content, custody, removal, lifecycle, and
+Windows standalone validation. This is not a full UAT pass.
 
 This UAT validates Phase 5A persistence and construction only. Adventurer branch choice, optional traversal, branch encounter resolution, automatic return, and run-driven knowledge learning belong to Phase 5B and are **not expected** in this PR. Required-route runs must continue exactly as before.
 
