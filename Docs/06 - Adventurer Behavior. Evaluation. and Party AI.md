@@ -286,3 +286,11 @@ For MVP:
 - No elemental school synergy yet
 
 - AI uses rule based behavior
+
+------------------------------------------------------------------------
+
+**9. Phase 5B Authority Clarification**
+
+The owner-approved [Phase 5B production tuning and run-condition contract](../docs/planning/phase-5b-production-tuning-and-run-condition-contract.md) introduces one transient 3–5 member run roster for later Phase 5B implementation. Its per-run behavior profiles are assigned independently of class and are distinct from any future durable adventurer-trait identity. Member health uses configuration-owned integer HP; actual deaths derive only from member HP, and aggregate survivor-ratio rules cannot remain a parallel casualty authority once member HP is active.
+
+Phase 5B uses configurable class-based formation and content-owned targeting. The initial optional-corridor trap uses `LeadActive`, but formation is not a universal targeting rule: later monsters and attacks may flank, target rearline or roles, or affect multiple members under their own approved content policies. The long-term Cleric Support/healing direction remains valid, but Phase 5B adds no healing mechanic without a later approved contract.
