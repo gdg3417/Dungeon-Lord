@@ -6,9 +6,9 @@
 
 **Approved:** 2026-09-17
 
-**Repository reconciliation refreshed:** 2026-09-19
+**Repository reconciliation refreshed:** 2026-09-26
 
-**Verified repository baseline:** merged PR #208 at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`
+**Design-lock merge baseline:** merged PR #208 at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`
 
 **Intended repository path:** `docs/planning/phase-5-branching-and-route-choice-design.md`
 
@@ -30,17 +30,17 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
-PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is the current implementation packet: it owns schema 10, durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B remains the distinct route-choice and run-integration packet. Phase 5A does not implement `BranchAppeal`, production decision weights/thresholds, traversal, branch encounter resolution, or run-driven knowledge learning.
+PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is complete in merged PR #209. Schema 10 owns durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B is the next gameplay packet and remains responsible for route choice, traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production decision tuning. The unresolved authority is enumerated in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). PR #210 is also merged and makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
 
 At the verified preparation baseline:
 
 - `main` is `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 - Phase 3 is closed through PR #200.
 - Phase 4 structural economy, returned-content redeployment, content acquisition, direct unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201 through #207.
-- Save schema remains 9.
+- Save schema was 9 at that preparation baseline.
 - PR #207 added no migration or new persisted gameplay authority.
 - Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred.
-- Phase 5A implementation is in progress; Phase 5B runtime route choice remains unimplemented.
+- Phase 5A had not yet been implemented at that preparation baseline; Phase 5B runtime route choice remains unimplemented at the current PR #210 baseline.
 
 Repository documentation that describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale and conflicts with this recorded baseline.
 
@@ -930,7 +930,7 @@ This document approves behavior and information concepts.
 
 It does not pre-approve a new save schema.
 
-The current verified preparation baseline is schema 9 after merged PR #207. PR #207 itself added no migration or new persisted gameplay authority.
+The historical design-preparation baseline was schema 9 after merged PR #207. Merged PR #209 subsequently advanced the current writable target to schema 10 and added `corridorContent` and `sharedBranchKnowledge` without altering the locked route-choice formula. Schema 10 appears sufficient for Phase 5B unless concrete implementation evidence later proves an additional persisted-state requirement; schema 11 is not pre-authorized.
 
 Before implementation:
 
@@ -964,6 +964,8 @@ The following remain configuration-owned and are not fixed by this design lock:
 - remaining-required-route reserve-pressure input derivation
 - knowledge confidence thresholds
 - stale-information trust modifiers
+
+The current unresolved production values and semantic choices are tracked in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). That prerequisite is not Locked or Approved while any owner-approval row remains open.
 
 Runtime code must consume approved configuration.
 
