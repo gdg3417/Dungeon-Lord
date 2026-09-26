@@ -271,3 +271,39 @@ player runtime error. Android was not run at owner direction and is not required
 for PR #209. Raw XML/log artifacts remain untracked under `TestResults/`, and
 build output/provenance remain ignored under `Builds/Phase5A/`. Manual UAT is
 still outstanding.
+
+## Final owner-UAT and canonical Windows Development Build closeout
+
+The generic-wrapper artifact at `Builds/Phase5A-Final/DungeonLord.exe` is
+rejected for final UAT. It was created by a generic `-buildWindows64Player`
+workflow with a `-development` argument, not by the repository's
+`DevelopmentBuildUtility.BuildWindowsDevelopment` path. Its provenance recorded
+the source revision but could not establish use of `BuildOptions.Development`;
+the owner observed no F1 Dev Panel or Optional Branch QA controls. This is a
+build-procedure issue, not a Phase 5A gameplay defect.
+
+The authoritative accepted standalone player was rebuilt from
+`7f7dc2cbc040a3485fbcbf0067d6caeb1ac4660f` using
+`DungeonBuilder.M0.EditorTools.DevelopmentBuildUtility.BuildWindowsDevelopment`.
+The canonical output is `Builds/Development/Windows/Dungeon Lord.exe`.
+`Builds/Development/Windows/build-report.json` confirms
+`developmentBuild: true`, `targetPlatform: StandaloneWindows64`,
+`buildResult: Succeeded`, `errorCount: 0`, and Bootstrap as the included scene.
+Its provenance records the exact source SHA, canonical execute method, Unity
+`6000.3.2f1`, success, and exit code 0; `dirty: true` is limited to excluded
+local Unity/editor-generated files, not Phase 5A compiled/runtime source.
+
+No production, test, configuration, asset, or localization source changed after
+the final focused correction qualification. No additional automated suite was
+run for this documentation closeout. The latest valid
+automated results remain: focused final correction **165/165 passed**;
+preceding full EditMode **964/964 passed**; preceding full PlayMode **2,454/2,464
+passed, 0 failed, 10 expected skips**.
+
+Owner Editor UAT and owner canonical Windows standalone UAT both **PASSED** on
+the final production head. The owner verified the required Phase 5A gate,
+construction, content/custody/removal, persistence, lifecycle, required-route
+regression, and presentation behavior, including 1920×1080 and 1280×720
+usability. No Phase 5B behavior was expected or observed. The Systems
+Diagnostics readability remains cramped but usable and is accepted as
+non-blocking QA debt. Android was intentionally not run and is not required.

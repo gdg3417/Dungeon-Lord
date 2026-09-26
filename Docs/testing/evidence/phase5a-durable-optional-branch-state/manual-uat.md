@@ -1,92 +1,100 @@
-# Phase 5A owner manual UAT plan
+# Phase 5A owner manual UAT record
 
-## Status and boundary
+## Final status
 
-Status: **partially run; owner continuation required**.
+Status: **PASSED**.
 
-Owner UAT confirmed a fresh Bootstrap start, Basic Branching disabled, localized
-research-required branch-preview rejection, Basic Branching enabled, valid
-optional-branch preview, successful branch construction, and second-branch
-allowance rejection. UAT then found presentation-only defects: raw double
-precision in the branch economy preview and the singular text `1 tiles`.
+The owner completed this record against production HEAD
+`7f7dc2cbc040a3485fbcbf0067d6caeb1ac4660f`. This validates Phase 5A
+persistence and construction only. Phase 5B branch scoring, selection,
+traversal, encounters, rewards, automatic return, and knowledge learning were
+correctly absent and were not observed.
 
-The UAT presentation corrections format only displayed values (they do not
-change wallet/economy state). Branch previews retain localized singular/plural
-branch summary keys. Normal live passive mana now shows at most one decimal
-below 3,600 mana/hour and whole mana at or above that rate; offline mana and
-other discrete player-facing mana amounts show at most one decimal with no
-trailing `.0`. Owner UAT must resume the research/preview/construction block
-after these corrections, then continue corridor content, custody, removal,
-lifecycle, and Windows standalone validation. This is not a full UAT pass.
+## Editor UAT observed by the owner
 
-This UAT validates Phase 5A persistence and construction only. Adventurer branch choice, optional traversal, branch encounter resolution, automatic return, and run-driven knowledge learning belong to Phase 5B and are **not expected** in this PR. Required-route runs must continue exactly as before.
+- Fresh Bootstrap start passed. Final passive/offline player-facing mana text
+  showed no raw floating-point tails, no unnecessary `.0`, and no more than one
+  decimal where applicable.
+- With Basic Branching cleared, construction preview failed with localized
+  research-required feedback and without topology or mana mutation. Completing
+  `ac_300` enabled a valid preview with correct `1 tile` grammar and visible
+  geometry, capacity, floor-space, and economy consequences.
+- One valid branch constructed; a second was rejected by the floor allowance
+  without mutation. Close/reopen preserved branch, research, and mana state.
+- On a one-tile corridor, Spike Trap acquisition succeeded. Basic Loot Node on
+  the occupied tile was rejected without duplicate spend or state. Trap
+  unassignment returned the exact owned item to custody without cost or refund;
+  Basic Loot Node then succeeded on the empty terminal tile. Content and custody
+  persisted through reopen.
+- Removal was blocked while corridor content was assigned. Redeployment to an
+  occupied tile was safely rejected; free redeployment to an empty valid tile
+  succeeded; unassignment remained free. The one-tile removal preview reported
+  historical investment 5 mana, nominal refund 3 mana, credited refund 3 mana,
+  and a resulting balance matching the preview apart from ordinary passive
+  timing. Removal preserved the required route, and reopen preserved removed
+  topology, custody, mana, and the required route. A subsequent preview proved
+  the branch allowance was available again.
+- A two-tile branch preview reported `2 tiles`, cost 10 mana, accepted trap and
+  loot on distinct valid tiles, enforced terminal-tile loot placement, preserved
+  free custody redeployment and content through reopen, and remained blocked for
+  removal while content was assigned.
+- Ordinary runs remained required-route-only: no Phase 5B decision or branch
+  encounter occurred; DeadEnd was not a required room or terminal; assigned
+  branch content stayed assigned after the run.
+- Save Now, pause/resume, and normal close/reopen preserved Phase 5A state
+  without new errors. Editor checks at 1920×1080 and 1280×720 passed; the action
+  panel stayed scrollable and branch/content/removal/run controls remained
+  reachable. The Systems Diagnostics page is cramped/readability-imperfect but
+  usable for QA and accepted as non-blocking UI/QA debt for PR #209.
 
-Use a Windows x86_64 Development Build at 1920×1080 and 1280×720. Enable the existing development panel so the localized Phase 5A QA controls are visible.
+The owner did not inspect hidden stable branch/edge/DeadEnd identities after
+retirement, and did not manually reproduce byte-identical repeated-run inputs.
+Existing automated identity-non-reuse and deterministic-run coverage remains
+authoritative for those invariants.
 
-## Setup
+## Standalone build procedure correction
 
-1. Start from a fresh native save and record initial mana.
-2. Confirm the save is schema 10 and that the dungeon has no optional branch.
-3. Select an eligible Floor 1 required-route room, an authored compatible origin connection, and a valid Straight Stone Corridor length.
+The generic-wrapper player at `Builds/Phase5A-Final/DungeonLord.exe` was not
+accepted for final UAT. It was created through `unity.exe build ... --target
+StandaloneWindows64 --output-path Builds\\Phase5A-Final\\DungeonLord.exe --args
+'-development'`, not through the repository's canonical development-build
+method. Its provenance did not establish `BuildOptions.Development`; F1 did not
+expose the Dev Panel and Optional Branch (Phase 5A QA) was absent. This was a
+build-procedure issue, not a Phase 5A gameplay defect.
 
-## Research gate and preview
+The accepted player was built from the same production HEAD with
+`DungeonBuilder.M0.EditorTools.DevelopmentBuildUtility.BuildWindowsDevelopment`:
 
-1. Use **QA: Clear Basic Branching**.
-2. Preview branch construction.
-3. Verify the preview is rejected with localized Basic Branching feedback, not a raw key/code.
-4. Confirm topology, mana, structural investment, and save state did not change.
-5. Use **QA: Complete Basic Branching** to establish `ac_300` through the existing completed-research authority.
-6. Preview the same branch again.
-7. Verify the preview shows selected corridor geometry/length, trap and loot capacities, resulting floor-space capacity, and the existing structural-economy mana consequences.
+- Unity `6000.3.2f1`, target `StandaloneWindows64`, `BuildOptions.Development`.
+- Output: `Builds/Development/Windows/Dungeon Lord.exe`.
+- `build-report.json`: `developmentBuild: true`, `buildResult: Succeeded`,
+  `targetPlatform: StandaloneWindows64`, `errorCount: 0`, and Bootstrap scene
+  included.
+- `build-provenance.json`: exact source SHA
+  `7f7dc2cbc040a3485fbcbf0067d6caeb1ac4660f`, canonical execute method, Unity
+  version, success, and exit code 0. Its dirty flag is only for excluded local
+  Unity/editor-generated files, none of which is Phase 5A compiled/runtime
+  source.
 
-## Construction, allowance, and persistence
+## Canonical Windows Development Build UAT observed by the owner
 
-1. Commit the valid preview.
-2. Verify exactly one optional physical corridor and one DeadEnd are added.
-3. Verify mana decreases by the configured physical-corridor per-tile price with no extra branch fee.
-4. Attempt to preview/construct a second branch and verify localized rejection from the effective floor allowance.
-5. Close the game normally, reopen it, and verify the branch, mana balance, and required route persist unchanged.
-6. Exercise periodic save, an ordinary state-change save, and pause/resume; after each boundary reopen and verify the schema-10 branch owners remain intact and unrelated recognized state is preserved.
+- F1 opened the Dev Panel and Optional Branch (Phase 5A QA) appeared.
+- Delete Save followed by normal close/relaunch created a fresh native canonical
+  test state. The Basic Branching gate was localized; completion enabled a
+  one-tile preview showing `1 tile`, 5 mana cost, and approved one-decimal mana
+  presentation.
+- Construction, one-time Spike Trap charge, occupied-tile loot rejection,
+  zero-cost trap custody return, terminal-tile loot acquisition, and persistence
+  across relaunch all passed. Branch, loot, returned trap, `ac_300` completion,
+  and mana (apart from legitimate offline gain) were preserved.
+- Removal blocked with assigned content. After unassignment, the preview showed
+  investment 5, refund 3, credited refund 3; removal committed and persisted
+  across relaunch without damaging required structures or offline mana behavior.
+  A new branch with corridor content could be constructed afterward.
+- Required-route-only runs remained unchanged: no Phase 5B branch decision or
+  encounter resolution occurred and branch content stayed assigned. The
+  1280×720 standalone smoke check passed: the right panel scrolled, controls
+  remained reachable, and no blocking overlap occurred. No new
+  implementation-related runtime or shutdown error was observed.
 
-## Corridor trap and loot placement
-
-1. On a one-tile branch, acquire/place an eligible trap on its only tile.
-2. Attempt to place eligible loot on that occupied tile; verify deterministic localized rejection and no mana/content duplication.
-3. Unassign the trap and verify the exact AssignmentId/category/option/sequence moves to returned custody, costs zero mana, and gives no acquisition refund.
-4. Place loot on the terminal tile beside the DeadEnd; verify placement succeeds only on that terminal tile.
-5. On a branch of at least two tiles, place a trap and loot on distinct valid tiles; verify both persist after close/reopen.
-6. Verify a monster, a required-route corridor target, a Direct Doorway target, a tile outside the footprint, a duplicate occupied tile, and placement beyond authored category capacity are all rejected without partial spend or state mutation.
-
-## Custody and removal
-
-1. Select an exact trap or loot assignment and unassign it.
-2. Verify it appears in the existing returned-content custody with unchanged identity and sequence.
-3. Redeploy that returned item to a valid branch tile.
-4. Verify redeployment costs zero mana and removes the custody copy, leaving exactly one active identity.
-5. With any corridor content still assigned, preview branch removal and verify removal is blocked with localized feedback.
-6. Explicitly unassign all branch content, preview removal, and commit it.
-7. Verify only the optional edge and DeadEnd disappear; required rooms, required edges, and Completion identities do not change.
-8. Verify the refund uses the existing structural investment/refund policy and never exceeds the wallet capacity policy.
-9. Verify removal invalidates the removed branch's live shared-knowledge record atomically; content changes may instead leave knowledge stale for later applicability checks.
-10. Construct another branch and verify the retired edge/branch/DeadEnd identities are not reused.
-11. Close/reopen and verify the removed branch stays removed, returned custody stays exact, and unrelated state remains intact.
-
-## Required-route regression
-
-1. With an optional branch, trap, and loot present, run the dungeon repeatedly from identical inputs.
-2. Verify the party remains on the existing required route.
-3. Verify the DeadEnd is not presented as a required room or terminal.
-4. Verify branch trap/loot does not resolve and does not change required-route success, loot, Heat, or reported outcome.
-5. Verify repeated identical inputs remain identical.
-
-## Presentation and lifecycle
-
-1. At 1920×1080 and 1280×720, verify all QA controls remain usable through scrolling and no control blocks core actions.
-2. Verify every success/failure label is readable localized English and no raw localization key or internal reason code appears.
-3. Verify live passive mana has no more than one decimal below 3,600 mana/hour, uses whole mana at or above that rate, and displays locale-appropriate decimal separators. Verify offline rate, award, current mana, and capacity likewise have no more than one decimal and no raw floating-point tails.
-4. Repeat close/reopen, periodic save, state-change save, and pause/resume checks in the Windows Development Build.
-5. Record screenshots, save hashes/logs as appropriate, exact build identity, and any shutdown diagnostics.
-
-## Acceptance record
-
-Do not mark this plan passed until the owner records actual observed results. The known shutdown-only ComputeBuffer/PlayerConnection diagnostics may be accepted only if they are identical to the established baseline and no new runtime error appears.
+Android was intentionally not run and is not required for PR #209.
