@@ -1,82 +1,350 @@
 # Phase 5B Production Tuning and Run-Condition Contract
 
-**Status:** Draft prerequisite; owner decisions outstanding; not Locked or Approved
+**Status:** Owner-approved Phase 5B implementation prerequisite; pending final external review
 
 **Packet:** Phase 5B0 — lock route-choice tuning and live party-condition authority
 
 **Prepared against:** merged PR #210 at `75781a4cfb7a7e837c855608f9a0753139a1bf77`
 
+**Owner approval recorded:** 2026-09-26
+
 **Current writable save schema:** 10
 
-## 1. Purpose and merge gate
+## 1. Purpose and implementation gate
 
-This document is the repository-owned prerequisite for production Phase 5B gameplay implementation. It reconciles the approved formula and behavioral design with the state merged in PR #209, but it does not activate route choice, optional traversal, branch encounters, branch outcomes, or knowledge learning.
+This document closes the production semantics and initial tuning required before Phase 5B gameplay may be implemented. It reconciles the locked Phase 5 branch-decision contract with the Phase 5A state merged in PR #209. It does not activate route choice, optional traversal, corridor encounters, branch outcomes, member health, targeting, or knowledge learning.
 
-Every row marked **OWNER APPROVAL REQUIRED** is deliberately unresolved. This document must not be described as Locked, Approved, or merge-ready until the owner supplies the values or semantic rules and those decisions are incorporated into this same branch and PR. No production numeric Phase 5B value is authorized by an example, an existing unrelated coefficient, or a convenient implementation default.
+All values identified as initial tuning are owned by the single Phase 5B configuration authority. They are not universal game constants and must not be hardcoded in runtime logic. Stable IDs, formula structure, ordering contracts, deterministic hash rules, authority ownership, and semantic invariants are contracts rather than ordinary balance tuning.
+
+Phase 5B implementation remains blocked until this documentation packet receives final external review and is merged. Runtime implementation then requires its own review, tests, qualification, and atomicity evidence.
 
 Governing sources:
 
 - [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md)
 - [Post-GD60 MVP execution plan](post-gd60-mvp-execution-plan.md)
 - [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md)
+- [System Spec 6](../../Docs/06%20-%20Adventurer%20Behavior.%20Evaluation.%20and%20Party%20AI.md)
+- [System Spec 16](../../Docs/16%20-%20Adventurer_Economy_and_External_World_Simulation.md)
 - [Phase 5A static qualification](../../Docs/testing/evidence/phase5a-durable-optional-branch-state/static-review-evidence.md)
 - [AI model-selection policy](../../Docs/process/AI_Model_Selection_Policy.md)
 
 ## 2. Verified implementation baseline
 
-PR #209 completed Phase 5A. Schema 10 owns the optional-branch graph, `corridorContent`, and `sharedBranchKnowledge`; `FloorRouteNodeKind.DeadEnd = 6` is implemented; `ac_300` gates branch construction; and branch construction, content custody, structural invalidation, removal, persistence, and required-route regression protection are qualified.
+PR #209 completed Phase 5A. Schema 10 owns optional-branch topology, `corridorContent`, and `sharedBranchKnowledge`; `FloorRouteNodeKind.DeadEnd = 6` is implemented; `ac_300` gates branch construction; and branch construction, content custody, structural invalidation, removal, persistence, and required-route regression protection are qualified.
 
-`BranchKnowledgeRecord` already carries stable floor, branch, and edge IDs; the topology fingerprint; explicit topology/incentive/danger/confidence known flags; bounded perceived incentive, danger, and confidence; and optional last-confirmed run identity. `BranchTopologyFingerprint` is the existing structural applicability authority. Phase 5B must consume these owners rather than create parallel branch or knowledge state.
+`BranchKnowledgeRecord` already carries stable floor, branch, and edge IDs; the topology fingerprint; explicit topology, incentive, danger, and confidence known flags; bounded perceived incentive, danger, and confidence; and optional last-confirmed run identity. `BranchTopologyFingerprint` remains structural-applicability authority.
 
-The current run model does not yet satisfy the Phase 5B decision contract:
+Current runtime remains unchanged by Phase 5B0 and does not yet satisfy this contract:
 
-- `RunSurvivalSummary` carries party size, survivors, deaths, and survivor ratio, but no average party health.
-- `AdventurerPartyCompositionSummary` carries only class IDs. It has no member personality/profile identity or capability record.
-- The configured party-composition preview currently uses a different size range from the run-survival party roll. Phase 5B therefore lacks one authoritative live party instance shared by composition, condition, and route decision.
-- `CanonicalMvpRouteProjection` deliberately ignores optional edges and DeadEnds and exposes only required-route rooms.
-- `RunSimulationService` has no fork-time route-choice step, optional traversal, corridor encounter resolution, branch-specific outcome, or run-driven knowledge mutation.
-- `RunOutcomeRecord` can already carry overall loot, survival, heat, room resolutions, route outcome, and configured/reached/cleared placement-effect summaries, but it has no structured Phase 5B decision or branch-outcome evidence.
+- `RunSurvivalSummary` carries party size, survivors, deaths, and survivor ratio, but no member roster or average party health.
+- `RunSimulationService` independently rolls the survival party in the configured 3–5 range and uses success/failure survivor ratios, composition survivor-ratio adjustments, and casualty-pressure death-count derivation as aggregate casualty authorities.
+- `AdventurerPartyCompositionResolver` independently creates a 1–3 member class preview. It has no member identity, personality, capability, or health.
+- `CanonicalMvpRouteProjection` deliberately ignores optional edges and DeadEnds and exposes only the required route.
+- `RunOutcomeRecord` carries aggregate loot, survival, heat, room resolutions, route outcome, and placement-effect summaries but no detailed Phase 5B branch-decision or branch-outcome evidence.
 
-## 3. Proposed single configuration authority
+Phase 5B must replace those conflicting live-party and casualty authorities deliberately. It must not leave them operating in parallel with member-level HP.
 
-The repository's established production pattern is one `RunSimulationConfig` loaded from `Assets/_Project/Data/Bootstrap/run_simulation_config.json`, validated before `RunSimulationService` creation by `BootstrapConfigValidationService`. Existing run tuning, party-composition inputs, posture tuning, placement-effect signals, outcome tuning, stable rule-source IDs, and validation all use that path.
+## 3. Single configuration authority
 
-Accordingly, the proposed Phase 5B authority is one bounded typed Phase 5B configuration object nested in `RunSimulationConfig` and serialized in the existing `run_simulation_config.json`. Its future validator must fail closed for missing, duplicate, non-finite, out-of-range, unordered, or incomplete values. A second JSON file, ScriptableObject, save field, fallback constant set, or duplicated writable table is not approved.
+The sole future writable Phase 5B tuning authority is one bounded, typed Phase 5B configuration object nested inside the existing `RunSimulationConfig`, serialized through `Assets/_Project/Data/Bootstrap/run_simulation_config.json`, and validated before `RunSimulationService` creation by `BootstrapConfigValidationService`.
 
-**OWNER APPROVAL REQUIRED:** approve this single-owner architecture and the exact typed object/collection shape. Repository evidence does not support a stronger alternative writable tuning authority. The proposal changes no production JSON in Phase 5B0.
+The nested configuration has configuration version `1` and stable branch-decision rule source ID `run.branch_decision.rule.phase5b.v1`. Its typed shape must contain logical sections equivalent to:
 
-## 4. Decision register
+- identity and version;
+- party formation;
+- behavior profiles;
+- capability definitions;
+- intelligence;
+- health;
+- encounter damage profiles;
+- perception and normalization;
+- survivability;
+- branch-decision weights and thresholds;
+- knowledge learning;
+- traversal and targeting;
+- reporting reason codes; and
+- workload limits.
 
-| # | Implementation authority | Current evidence and locked boundary | Owner decision still required |
-|---:|---|---|---|
-| 1 | Production configuration owner | The established run authority is `RunSimulationConfig` plus `run_simulation_config.json`, with bootstrap validation. | **OWNER APPROVAL REQUIRED:** approve the proposed bounded nested Phase 5B object, its stable rule-source ID, required collections, uniqueness rules, and fail-closed absence/version policy. |
-| 2 | Authoritative live party instance | Composition preview produces class IDs; survival independently rolls party size. Their configured size ranges currently differ. | **OWNER APPROVAL REQUIRED:** define one deterministic run-party creation boundary and member-slot identity/order used by composition, behavior, capability, health, survivors, and branch choice. Decide how existing preview and survival generation reconcile without parallel parties. |
-| 3 | Member behavioral-profile generation | No persistent or transient member personality profiles exist. One party profile must be derived deterministically from member composition, but personality must not be inferred directly from class. | **OWNER APPROVAL REQUIRED:** define the independent member-profile source, stable profile IDs, deterministic assignment inputs and mapping, member ordinal identity, and whether profiles are transient per run or obtained from an existing future-approved authority. No durable ordinary-member identity is required. |
-| 4 | Five behavior profiles | The required profiles are Cautious, Greedy, Curious, Goal-Oriented, and Gambler. Each needs four normalized dimensions. | **OWNER APPROVAL REQUIRED:** supply, for every profile, `Reward Appetite`, `Risk Tolerance`, `Uncertainty Tolerance`, and `Required-Route Commitment`, each in `[0,1]`, plus exact stable IDs. No values are proposed here. |
-| 5 | Party-profile aggregation | Behavioral preferences are collective and may use configured weighting; named/hero influence is deferred. | **OWNER APPROVAL REQUIRED:** choose the exact aggregation per behavioral dimension, member weights if any, normalization/clamping, empty/invalid-party behavior, and deterministic tie/order handling. A single universal aggregation rule is not assumed. |
-| 6 | Specialist capability mapping | Personality and capability are separate. Current class IDs exist, but no approved class-to-specialty or capability values exist. | **OWNER APPROVAL REQUIRED:** define stable capability IDs, which approved member data grants each capability, numeric interpretation, aggregation rule such as best expert versus weighted combination, and separate pre-run interpretation versus in-run detection/handling effects. Do not assume Rogue or any other class is the trap specialist without this approval. |
-| 7 | Intelligence quality | Poor, Standard, and Good are locked bands assigned deterministically when the party forms. Numeric meanings and stable IDs are absent. | **OWNER APPROVAL REQUIRED:** approve stable band IDs, numeric interpretation, deterministic assignment identity/mapping, interaction with shared knowledge, and category-specific specialist modifiers. Specialists may interpret existing knowledge but may not manufacture missing pre-run facts. |
-| 8 | Initial and live party health | Phase 5 requires average party health and active/surviving member count. The run model has no health field or transition. Survivor ratio is not average health and must not substitute for it. | **OWNER APPROVAL REQUIRED:** define initial average health, health domain/representation, per-encounter health transition authority, aggregation after deaths, Phase 5 healing or explicit lack of healing, ordering relative to retreat/branch decisions, and terminal behavior when active count is zero. No loss formula is proposed. |
-| 9 | Perceived incentive `I` | Corridor loot assignments expose option IDs and tiles. Existing placement effects expose `LootBonus` and `Attraction`; loot-table value is resolved during encounters, after a decision. The decision interface must remain broader than loot. | **OWNER APPROVAL REQUIRED:** select the authoritative pre-decision loot/incentive signals, map actual and known/perceived signals to `I` in `[0,1]`, define unknown and stale inputs, relevance/preference handling, caps/normalization, and applicability of `LootBonus`, `Attraction`, or other existing signals. Do not use post-resolution loot rolls as foreknowledge. |
-| 10 | Perceived danger `D` | Corridor trap assignments expose option IDs and tiles. Existing placement effects expose `Danger`, `ManaPressure`, and `HeatPressure`; corridor definitions expose trap capacity. Branch danger is primarily traps. | **OWNER APPROVAL REQUIRED:** select which trap/placement signals form actual and perceived danger, define handling/mitigation semantics, aggregate multiple signals, and normalize to `D` in `[0,1]`. Capacity is not automatically realized danger, and no scale is proposed. |
-| 11 | Uncertainty `U` | Schema 10 distinguishes unknown values, confidence, last-confirmed run, and topology applicability. Structural invalidation uses the existing topology fingerprint. Content edits may make knowledge wrong without changing topology. | **OWNER APPROVAL REQUIRED:** define how missing topology/incentive/danger, confidence, topology applicability, and staleness combine into `U` in `[0,1]`; approve knowledge-confidence thresholds, any stale-trust modifiers, run-age interpretation, and behavior for inapplicable records. Stale is not automatically false; unknown is not safety; no passive decay is implied. |
-| 12 | Required-route reserve pressure `Q` | The canonical graph and required-route room placement effects can identify the ordered suffix after the fork, but the current compatibility projection does not publish fork-aware suffix data. The design forbids simulating the entire remaining floor for this choice. | **OWNER APPROVAL REQUIRED:** define the bounded coarse source signals, fork-to-terminal suffix derivation, capability/condition interaction if any, and normalization to `Q` in `[0,1]`. Approve a deterministic graph-aware projection that reads only the required-route remainder needed for this summary. |
-| 13 | Initial inclination `J` | `J` must reflect party goals and usable pre-run intelligence and remain in `[-1,1]`. Existing run posture and `AdventurerRunIntentSummary` scores were designed for other behavior and are not Phase 5 authority. | **OWNER APPROVAL REQUIRED:** define the goal/intelligence inputs, combination and normalization, stable rule source, and neutral/missing-data behavior. Do not alias an existing posture or intent score without explicit approval and semantic reconciliation. |
-| 14 | Coarse expected survivability | Locked inputs are perceived danger, uncertainty, average health, active members, and relevant capability. It must not claim an exact survival probability. | **OWNER APPROVAL REQUIRED:** define the representation/bands, combination rule, capability interpretation, bounds, ordering, and stable reason evidence. No bands, coefficients, or thresholds are proposed. |
-| 15 | `PartyMinimumSurvivability` | The hard rule and equality behavior are locked. Profile-specific production values do not exist. | **OWNER APPROVAL REQUIRED:** supply the value for each approved behavior profile, including aggregation/override behavior when a party profile is derived rather than selected directly. |
-| 16 | Branch-appeal weights | The formula has exactly five nonnegative configuration-owned weights. | **OWNER APPROVAL REQUIRED:** supply `wReward`, `wDanger`, `wUncertainty`, `wReserve`, and `wIntent`. Validation must require finite nonnegative values and `WeightTotal > 0`. No values are proposed. |
-| 17 | Confidence thresholds | Deterministic skip/enter bands are locked; values do not exist. | **OWNER APPROVAL REQUIRED:** supply `SkipThreshold` and `EnterThreshold` with `-1 <= SkipThreshold < EnterThreshold <= 1`. |
-| 18 | Marginal deterministic decision | The formula, tuple order, stable hash, unsigned conversion, linear likelihood, and equality behavior are already locked in Decision 30. | **OWNER APPROVAL REQUIRED:** supply only the stable `BranchDecisionRuleSourceId` value stored in the single Phase 5B config owner. No other gameplay choice is open; implementation must incorporate the locked contract by reference exactly. |
-| 19 | Knowledge learning and merge semantics | Schema 10 can store bounded branch knowledge. The design locks actual observation, survivor propagation, stale knowledge, and coarse wipe information, but no update values or conflict rules exist. | **OWNER APPROVAL REQUIRED:** define updates after skip, entry with survivors, full wipe, observed incentive, observed danger, new confirmation, and stale-but-applicable information; define overwrite/merge precedence, confidence changes, last-confirmed semantics, and which observations count. Skip must not reveal contents; survivor-specific facts require actual observation. |
-| 20 | Coarse full-wipe danger owner | A normal full wipe creates only coarse dungeon/floor danger information and does not reveal exact branch contents. `BranchKnowledgeRecord` is branch-keyed; no separately approved coarse floor-danger owner was found. | **OWNER APPROVAL REQUIRED:** identify the existing compatible owner or approve a schema-10-compatible representation and semantics. Do not silently write precise branch incentive/danger or exact cause from a wipe, and do not pre-authorize schema 11. |
-| 21 | Fork execution and traversal ordering | Required-route projection ignores optional edges. Phase 5A owns one optional edge to a DeadEnd and automatic return, but no run execution plan inserts the fork or branch encounters. | **OWNER APPROVAL REQUIRED:** define deterministic fork position resolution, retreat-before-choice integration, the required/optional execution sequence, corridor tile/content encounter order, automatic return point, resolved-content non-retriggering, and behavior when a branch encounter wipes or stops the party. |
-| 22 | Branch encounter and outcome semantics | Corridor content has custody and placement, while current encounter resolution is room-oriented. Phase 5B must not infer corridor trap/loot behavior from room behavior without approval. | **OWNER APPROVAL REQUIRED:** define corridor trap resolution, loot observation/resolution/extraction, health/casualty/heat effects, success/failure/stop semantics, and which existing placement-effect or loot authorities are reused. Do not mutate Heat or award loot until this contract is approved and implemented atomically. |
-| 23 | Structured reporting | `RunOutcomeRecord` already carries overall run summaries and room resolution. It lacks branch decision inputs/result, fork identity, survivability-gate result, marginal evidence, and branch outcomes. | **OWNER APPROVAL REQUIRED:** approve the minimal structured Phase 5B decision and branch-outcome summary, stable reason codes, persistence versus transient/debug scope, and mapping into existing route/loot/danger/heat reporting. No detailed per-party thought UI is required. Player-facing strings must remain localization-owned. |
-| 24 | Workload and canonical ordering | MVP allows at most one decision per continuing party per floor per run. Schema-10 branch knowledge and corridor content already canonicalize by stable IDs. | **OWNER APPROVAL REQUIRED:** approve explicit per-run/per-floor processing bounds and any failure policy at configured limits. All floors, branches, corridor assignments, observations, and evidence must use specified ordinal/canonical order; dictionary or collection enumeration cannot become authority. |
+Exact C# type names may be selected during implementation. A second Phase 5B JSON file, ScriptableObject tuning authority, save-owned tuning, duplicated runtime constants, fallback tuning table, or hardcoded gameplay default is not approved.
 
-## 5. Locked branch decision contract
+Validation must fail closed for missing required configuration, unsupported configuration version, duplicate stable IDs, missing required profiles, bands, classes, or content profiles, non-finite values, out-of-domain values, invalid min/max ordering, invalid threshold ordering, nonpositive total decision weight, incomplete collections, and unordered or duplicate authoritative entries where canonical ordering is required.
 
-The owner-approved formula in Decision 30 remains unchanged. After the hard survivability gate passes:
+The following are initial production tuning and remain configurable through this authority: party-size range and initial member level; class health; damage ranges; profile dimensions and selection weights; aggregation parameters; capability values and modifiers; intelligence values and distribution; survivability coefficients and bands; incentive, danger, uncertainty, and reserve normalization; branch weights and thresholds; knowledge-confidence changes; workload bounds; and every other gameplay coefficient in this document.
+
+## 4. Closed decision register
+
+All 24 Phase 5B0 owner-decision rows are closed. Implementation-selected details explicitly delegated below—such as zero- versus one-based member ordinals, exact C# type names, stable profile/intelligence assignment-rule source identifiers, and deterministic integer-damage rounding—are engineering contracts to document and test, not unresolved gameplay authority.
+
+| # | Implementation authority | Approved authority |
+|---:|---|---|
+| 1 | Production configuration owner | One version-1 Phase 5B object nested in `RunSimulationConfig` and serialized in the existing `run_simulation_config.json`; no fallback or second authority; fail-closed validation; branch rule ID `run.branch_decision.rule.phase5b.v1`. |
+| 2 | Authoritative live party instance | One transient 3–5 member roster per run. `RunId` plus canonical `MemberOrdinal` identifies each member. Composition, behavior, capability, health, casualties, route choice, and reporting consume this roster. The 1–3 preview becomes a view of it. |
+| 3 | Member behavioral-profile generation | Each member receives one deterministic profile independent of class from the configured profile collection using run identity, member ordinal, and an explicit stable configured assignment rule source. No global RNG, runtime hash, clock, call order, or collection order. Profiles are transient. |
+| 4 | Five behavior profiles | Stable IDs and initial dimensions are approved in section 6. All dimensions and equal selection weights are tunable configuration in `[0,1]`. |
+| 5 | Party-profile aggregation | Arithmetic mean across original party members, equal weighting, no class/survivor/named/hero weighting, no recomputation after casualties, fail closed for empty or invalid party. |
+| 6 | Specialist capability mapping | `adventurer.capability.trap_expertise`; configured class values in section 7; party value is the maximum among active members. Personality remains separate. |
+| 7 | Intelligence quality | Party-scoped transient Poor, Standard, and Good bands with stable IDs, interpretation factors, and formation weights in section 7; deterministic assignment from stable run identity and configured rule source. |
+| 8 | Initial and live party health | Real integer member HP; Level 1 initial class MaxHealth in section 8; initial `CurrentHealth = MaxHealth`; deaths only at `CurrentHealth <= 0`; roster-derived average health and casualties; no Phase 5 healing. |
+| 9 | Perceived incentive `I` | Initial actual incentive is normalized `LootBonus` using configured reference 6. Attraction is not counted again and post-resolution loot rolls are not foreknowledge. The interface remains broader than loot. |
+| 10 | Perceived danger `D` | Initial actual danger is normalized existing `Danger` using configured reference 3. Capacity is not realized danger; ManaPressure and HeatPressure are not injected into `D`. Decisions consume perceived knowledge rather than secret actual values. |
+| 11 | Uncertainty `U` | Mean of incentive and danger uncertainty derived from known flags and effective confidence; unknown is 1; inapplicable topology produces `U = 1` and excludes content knowledge; no passive age decay. |
+| 12 | Required-route reserve pressure `Q` | Graph-aware required-route suffix after the fork, normalized summed `Danger` using configured reference 6. Do not simulate the whole remaining floor or apply health/capability twice. |
+| 13 | Initial inclination `J` | `J = 0` for initial Phase 5. Existing posture or intent scores are not aliases. `wIntent = 0`; the interface remains for future approved goals/intelligence. |
+| 14 | Coarse expected survivability | The normalized condition, threat, mitigation, and survivability calculation in section 10, with configured coefficients and optional diagnostic bands. It is not an exact survival probability. |
+| 15 | `PartyMinimumSurvivability` | Per-profile values in section 10, averaged over original party members and not recomputed after casualties. Strictly less skips; equality continues. |
+| 16 | Branch-appeal weights | `wReward = 1.25`, `wDanger = 1.00`, `wUncertainty = 0.75`, `wReserve = 0.50`, `wIntent = 0.00`; finite, nonnegative, configurable, and total greater than zero. |
+| 17 | Confidence thresholds | `SkipThreshold = -0.15`; `EnterThreshold = 0.15`; configured and validated under the locked inequality. |
+| 18 | Marginal deterministic decision | Rule ID above; Decision 30 identity order, stable-string hash, tuple fold, unsigned conversion, linear likelihood, and strict comparison remain exact and unchanged. |
+| 19 | Knowledge learning | Skip, survivor observation, reconfirmation, contradiction, staleness, topology invalidation, and wipe semantics are approved in section 12. Initial observation confidence is 0.75 and reconfirmation increase is 0.125. |
+| 20 | Coarse full-wipe danger owner | Existing persisted run-history death/wipe evidence remains coarse dungeon-level danger evidence. Do not write precise branch knowledge from a wipe and do not add a branch/floor save owner. |
+| 21 | Fork execution and traversal ordering | The deterministic 13-step sequence in section 13 governs branch origin, retreat precedence, enter/skip, physical order, tie-breaks, stop/wipe, automatic return, and later retreat. |
+| 22 | Branch encounter and outcome semantics | Corridor traps use configured absolute damage, `LeadActive`, severity, and expertise mitigation; loot uses existing deterministic loot and extraction authorities only when reached; Heat uses existing authority; no optional-branch monsters. |
+| 23 | Structured reporting | Detailed Phase 5B decision evidence is transient for MVP with stable reason codes in section 14. Existing aggregate run outcomes remain; durable branch learning stays in `sharedBranchKnowledge`; player text is localization-owned. |
+| 24 | Workload and canonical ordering | Configured limits are 1 decision per floor/run, 5 per complete run, 2 corridor assignments per branch, and 5 knowledge updates per run. Breach fails closed with stable `WorkloadExceeded` evidence and no partial mutation. |
+
+## 5. Authoritative transient run party
+
+One transient roster is created at run formation. The authoritative size remains the existing config-owned run range of 3 through 5. Ordinary members gain no durable save identity solely for Phase 5.
+
+Every member has stable run-local identity composed of `RunId` and `MemberOrdinal`. Implementation may choose zero- or one-based ordinals, but it must state the choice explicitly and use it consistently. All member processing and evidence use ordinal order.
+
+Each member logically carries at least `MemberOrdinal`, `ClassId`, `BehaviorProfileId`, `Level`, `MaxHealth`, `CurrentHealth`, active/dead state, derived capabilities, and deterministic formation position/order.
+
+The old composition preview must become a projection of this roster rather than independently creating another party. Current separate size authorities must not survive as competing writable/live authorities.
+
+## 6. Behavioral profiles and aggregation
+
+Profile assignment is independent of class. Class must not imply personality. Each member receives one deterministic profile from the canonical configured collection using the authoritative run identity, member ordinal, and an explicit stable configured profile-assignment rule source. Initial profile-selection weighting is equal across all five profiles.
+
+| Stable profile ID | Reward Appetite | Risk Tolerance | Uncertainty Tolerance | Required-Route Commitment |
+|---|---:|---:|---:|---:|
+| `adventurer.behavior_profile.cautious` | 0.40 | 0.20 | 0.20 | 0.80 |
+| `adventurer.behavior_profile.greedy` | 0.90 | 0.60 | 0.45 | 0.35 |
+| `adventurer.behavior_profile.curious` | 0.55 | 0.50 | 0.90 | 0.35 |
+| `adventurer.behavior_profile.goal_oriented` | 0.35 | 0.45 | 0.40 | 0.95 |
+| `adventurer.behavior_profile.gambler` | 0.75 | 0.90 | 0.85 | 0.20 |
+
+Every value and each equal selection weight is configuration-owned and tunable in `[0,1]`.
+
+Each party behavioral dimension is the arithmetic mean of the original run-party members' configured values. Phase 5 MVP uses equal member weighting, no class weighting, no survivor weighting, no named-character or hero weighting, and no post-casualty personality recomputation. Casualties change health, active count, and available capabilities, not the party's underlying personality. Empty or invalid party state fails closed.
+
+Future named-character influence may add configured weighting only under a later approved contract.
+
+## 7. Capability and intelligence
+
+The initial capability is `adventurer.capability.trap_expertise`.
+
+| Class | Initial trap expertise |
+|---|---:|
+| Warrior | 0.00 |
+| Rogue | 1.00 |
+| Mage | 0.00 |
+| Cleric | 0.00 |
+| Ranger | 0.50 |
+
+These values are tunable configuration. Party trap expertise is the maximum value among currently active members. If the best expert dies or becomes inactive before the fork, the available party value changes. Personality and capability remain separate. Expertise may improve interpretation of known trap information and mitigate actual trap harm; it cannot manufacture knowledge missing from shared knowledge. No additional Phase 5 specialist capability is approved.
+
+Intelligence belongs to the transient party, not individual members. It is assigned deterministically at formation from stable run identity, the canonical configured bands, configured formation weights, and an explicit stable configured rule source. It is not durable adventurer identity.
+
+| Stable intelligence ID | Interpretation factor | Formation weight |
+|---|---:|---:|
+| `adventurer.intelligence.poor` | 0.60 | 0.25 |
+| `adventurer.intelligence.standard` | 0.80 | 0.50 |
+| `adventurer.intelligence.good` | 1.00 | 0.25 |
+
+For applicable known information, the party's intelligence interpretation factor multiplies the stored confidence. For known trap information, active trap expertise then improves effective danger confidence by up to `0.15 × TrapExpertise`. The `0.15` modifier is configurable. The result is clamped to `[0,1]`. Expertise still cannot create missing shared knowledge.
+
+## 8. Member health and route-condition views
+
+Actual health is integer hit points, not normalized `0..1` health. Every transient member has `Level`, `MaxHealth`, and `CurrentHealth`.
+
+- `MaxHealth > 0`.
+- Initial `CurrentHealth = MaxHealth`.
+- `CurrentHealth` cannot exceed `MaxHealth`.
+- Damage subtracts absolute HP.
+- A member dies only when `CurrentHealth <= 0`.
+- No aggregate resolver may independently declare arbitrary deaths.
+- Survivor and death summaries derive from the roster.
+
+Phase 5 MVP uses Level 1 members with initial configurable MaxHealth:
+
+| Class | Level 1 MaxHealth |
+|---|---:|
+| Warrior | 10 |
+| Cleric | 8 |
+| Rogue | 7 |
+| Ranger | 7 |
+| Mage | 6 |
+
+These are initial tunable production values, not hardcoded class constants. Long-term MaxHealth may incorporate class, level, equipment, buffs, and other approved stat authorities. Phase 5B0 does not approve a Level 2–50 growth curve.
+
+The branch decision derives bounded views from member HP:
+
+```text
+MemberHealthFraction = CurrentHealth / MaxHealth
+
+AveragePartyHealth =
+    average MemberHealthFraction
+    across currently active members
+
+ActiveMemberFraction =
+    ActiveMemberCount / InitialPartySize
+```
+
+If no active member remains, the run is terminal and no branch decision occurs. These fractions are decision inputs, not actual HP authority. Survivor ratio must not substitute for average party health.
+
+No active Phase 5 healing is approved. HP loss persists for the run; there is no automatic between-encounter healing, consumable healing, or Cleric healing. Spec 6's longer-term Support/healing direction remains valid but requires a later contract.
+
+## 9. Formation, targeting, damage, and casualty reconciliation
+
+Initial configurable front-to-rear formation priority is Warrior, Rogue, Ranger, Cleric, then Mage. Same-class ties use canonical `MemberOrdinal`. Active survivors close formation deterministically under the same ordering. Formation priority is config-owned.
+
+Formation is not universal targeting. The encounter architecture must support content-owned policies such as `LeadActive`, `FrontlinePreferred`, `RearlinePreferred`, `SpecificRole`, `AllActive`, `MultiTarget`, and `PositionArea`, without requiring Phase 5B to implement every future policy. Monsters must not be globally assumed to damage the frontline member. Future flanking, rearline attacks, area attacks, cleaves, role targeting, and spell targeting remain possible.
+
+Initial optional-corridor traps use `LeadActive`. Only the current lead active member receives trap HP damage unless future content explicitly owns another policy. Trap expertise remains separate from formation.
+
+Damage is absolute HP and must not scale as a percentage of target MaxHealth. Initial configurable MVP profiles are:
+
+| Content | Minimum damage | Maximum damage |
+|---|---:|---:|
+| Goblin | 1 | 2 |
+| Skeleton | 1 | 3 |
+| Snare | 1 | 2 |
+| Spike Trap | 2 | 4 |
+| Chilling Sigil | 0 | 0 |
+
+These are initial Level 1/MVP tuning, not universal constants. Content IDs must not be hardcoded to literal damage switch cases. Future content, levels, attacks, gear, defenses, resistances, buffs, spells, and multi-target behavior must be able to supply damage profiles without replacing the health authority.
+
+Existing casualty pressure remains encounter-severity input:
+
+```text
+EncounterSeverity = clamp(CasualtyPressure, 0, 1)
+
+Damage =
+    deterministic bounded interpolation
+    from DamageMin through DamageMax
+    using EncounterSeverity
+```
+
+The integer-rounding rule is implementation-selected but must be explicit, deterministic, configuration-independent, and tested. Global randomness is prohibited.
+
+The approved future flow is:
+
+```text
+placement/content effects -> CasualtyPressure -> EncounterSeverity
+encounter source -> configured absolute damage profile
+targeting policy + formation -> affected member/member set
+EncounterSeverity + damage profile -> deterministic absolute HP damage
+individual CurrentHealth -> actual deaths
+actual roster -> SurvivorCount / DeathCount / SurvivorRatio
+```
+
+Current `SuccessSurvivorRatio`, `FailureSurvivorRatio`, composition survivor-ratio adjustments, and casualty-pressure death-count derivation cannot remain parallel casualty authorities after member HP activates. Actual deaths come only from member HP. `SurvivorCount`, `DeathCount`, and `SurvivorRatio` derive from the roster; loot extraction and Heat continue consuming those summaries. Each legacy field must be explicitly classified during implementation as retired active authority, compatibility-only, derived diagnostic evidence, or safely removable under a separately reviewed change. Legacy fields must not independently kill, resurrect, or overwrite members.
+
+Active trap expertise mitigates actual trap damage:
+
+```text
+TrapDamageMultiplier =
+    1 - (0.50 × ActiveTrapExpertise)
+```
+
+Clamp the multiplier to its valid range. The `0.50` coefficient is configurable. This does not imply automatic detection, avoidance, or disarming.
+
+## 10. Decision inputs and survivability
+
+### 10.1 Perceived incentive `I`
+
+```text
+ActualIncentive =
+    clamp(LootBonus / IncentiveReferenceLootBonus, 0, 1)
+```
+
+Initial configurable `IncentiveReferenceLootBonus = 6`. Do not count `Attraction` again as branch incentive; it remains owned by the broader attraction system. Do not use post-resolution loot rolls as pre-decision knowledge. The interface remains extensible beyond loot.
+
+### 10.2 Perceived danger `D`
+
+```text
+ActualDanger =
+    clamp(Danger / DangerReferenceValue, 0, 1)
+```
+
+Initial configurable `DangerReferenceValue = 3`. Trap capacity is not realized danger. ManaPressure and HeatPressure are not injected into `D`. Parties decide from perceived/shared knowledge rather than secret actual values.
+
+### 10.3 Uncertainty `U`
+
+For applicable topology:
+
+```text
+IncentiveUncertainty =
+    IncentiveKnown ? 1 - EffectiveIncentiveConfidence : 1
+
+DangerUncertainty =
+    DangerKnown ? 1 - EffectiveDangerConfidence : 1
+
+U =
+    (IncentiveUncertainty + DangerUncertainty) / 2
+```
+
+All confidence and uncertainty values are clamped to `[0,1]`. If topology knowledge is inapplicable under the existing fingerprint, `U = 1` and content-specific knowledge is not used. There is no passive age decay. Stale is not automatically false; old applicable knowledge retains confidence until contradicted, superseded, or structurally invalidated.
+
+### 10.4 Required-route reserve pressure `Q`
+
+```text
+Q =
+    clamp(
+        SumRemainingRequiredRouteDanger
+        / RequiredRouteDangerReference,
+        0,
+        1
+    )
+```
+
+Initial configurable `RequiredRouteDangerReference = 6`. The graph-aware projection reads the required-route suffix after the fork only and does not simulate the entire remaining floor. Current health and capability are not applied again to `Q`.
+
+### 10.5 Initial inclination `J`
+
+Initial Phase 5 uses `J = 0`. Existing Cautious/Balanced/Greedy posture and adventurer-intent scores are not aliases because that would risk double-counting personality. The interface remains for later approved goals/intelligence systems.
+
+### 10.6 Expected survivability
+
+```text
+Condition =
+    0.65 × AveragePartyHealth
+    + 0.35 × ActiveMemberFraction
+
+Threat =
+    0.70 × D
+    + 0.30 × U
+
+MitigatedThreat =
+    Threat × (1 - 0.35 × TrapExpertise)
+
+ExpectedSurvivability =
+    clamp(
+        Condition - 0.60 × MitigatedThreat,
+        0,
+        1
+    )
+```
+
+Every coefficient is configurable. This is a coarse normalized assessment, not an exact survival probability and not a player-facing probability.
+
+Optional configurable diagnostic bands are Critical below 0.25, Fragile from 0.25 through below 0.50, Viable from 0.50 through below 0.75, and Strong at or above 0.75.
+
+Initial configurable minimum survivability values are Cautious 0.70, Greedy 0.45, Curious 0.50, Goal-Oriented 0.60, and Gambler 0.35. The run threshold is the arithmetic mean of the original members' configured profile minimums and is not recomputed after casualties.
+
+The hard gate remains exact:
+
+```text
+if ExpectedSurvivability < PartyMinimumSurvivability:
+    SKIP
+```
+
+Equality continues to normal branch evaluation.
+
+## 11. Locked branch-appeal and marginal contract
+
+The Decision 30 formula structure is unchanged:
 
 ```text
 RewardTerm      = I * RA
@@ -101,61 +369,121 @@ BranchAppeal =
     )
 ```
 
-All five weights are finite and nonnegative, and `WeightTotal > 0`. Current health and active-member count participate in survivability only and are not duplicated as appeal terms.
+Initial configurable weights are `wReward = 1.25`, `wDanger = 1.00`, `wUncertainty = 0.75`, `wReserve = 0.50`, and `wIntent = 0.00`. All must be finite and nonnegative and `WeightTotal > 0`. Current health and active-member count participate in survivability only.
 
-The hard gate remains exact:
+Initial configurable thresholds are `SkipThreshold = -0.15` and `EnterThreshold = 0.15`. Validation remains `-1 <= SkipThreshold < EnterThreshold <= 1`. `BranchAppeal <= SkipThreshold` skips deterministically; `BranchAppeal >= EnterThreshold` enters deterministically. Boundary equality is not marginal.
+
+Only the strict marginal band uses Decision 30's deterministic resolution. The ordered identity remains exactly:
+
+1. `BranchDecisionRuleSourceId`
+2. `RunId`
+3. `FloorInstanceId`
+4. `OptionalBranchId`
+
+The implementation must use the exact locked `StableStringHash` character fold and ordered tuple fold, convert the signed 32-bit result to `uint`, divide by `4294967296.0` for `[0,1)`, and use:
 
 ```text
-if ExpectedSurvivability < PartyMinimumSurvivability:
-    SKIP
+EntryLikelihood =
+    (BranchAppeal - SkipThreshold)
+    / (EnterThreshold - SkipThreshold)
+
+ENTER only when DecisionRoll < EntryLikelihood
 ```
 
-Equality continues to normal appeal evaluation. Confidence-band validation remains `-1 <= SkipThreshold < EnterThreshold <= 1`; equality at `BranchAppeal <= SkipThreshold` skips deterministically, and equality at `BranchAppeal >= EnterThreshold` enters deterministically.
+Exact equality is `SKIP`. Runtime `GetHashCode`, global/shared RNG, wall clock, call order, iteration position, dictionary order, room order, and unrelated state are prohibited authorities.
 
-The marginal decision is not redefined here. The implementation must reproduce Decision 30 exactly:
+## 12. Knowledge learning
 
-- identity fields in this exact order: `BranchDecisionRuleSourceId`, `RunId`, `FloorInstanceId`, `OptionalBranchId`;
-- the exact `StableStringHash` character fold and ordered tuple fold defined there;
-- signed 32-bit hash converted to `uint`, divided by `4294967296.0`, producing `[0,1)`;
-- the exact linear `EntryLikelihood = (BranchAppeal - SkipThreshold) / (EnterThreshold - SkipThreshold)`;
-- `ENTER` only when `DecisionRoll < EntryLikelihood`; equality is `SKIP`.
+Skipping does not reveal loot, traps, precise danger, or hidden content. A party that physically reached the fork and later retains at least one survivor may confirm applicable topology or branch existence.
 
-Runtime `GetHashCode`, Unity/global or shared RNG, wall-clock time, call order, iteration position, dictionary enumeration, room enumeration, and unrelated state remain prohibited decision authorities.
+Directly observed incentive or danger with survivors begins at configurable `InitialObservationConfidence = 0.75`. Reconfirming the same applicable observation increases confidence by configurable `ReconfirmationConfidenceIncrease = 0.125`, clamped to `1.0`. Contradictory direct survivor evidence replaces the perceived value, resets confidence to the initial observation value, and updates last-confirmed run identity.
 
-## 6. Knowledge and schema boundary
+There is no passive confidence decay. Existing topology-fingerprint applicability remains authoritative. Old applicable knowledge remains usable until contradicted, superseded, or structurally invalidated.
 
-Schema 10 appears sufficient for Phase 5B. It already owns branch identity, topology applicability, bounded perceived incentive/danger/confidence, and confirmation-run identity. Phase 5B0 changes no save field, serializer, schema owner, migration, fixture, or canonical spatial serialization and does not authorize schema 11.
+A full wipe creates no precise branch-specific content knowledge. It does not write exact traps, loot, cause, or branch danger. Existing persisted run-history death/wipe evidence remains the coarse dungeon-level danger signal where existing systems consume recent failures. `BranchKnowledgeRecord` is not overloaded, no new branch/floor save owner is added, and schema 11 is not approved.
 
-That conclusion depends on owner closure of the coarse full-wipe danger owner and the persistence scope of structured decision evidence. If later implementation evidence proves that an approved behavior cannot be represented without new persisted state, the evidence must identify the exact missing state and trigger a separate save/migration review. Convenience, preallocation, or speculative future use is not evidence.
+## 13. Fork execution, traversal, and outcomes
 
-Future mutation must be an atomic complete-state operation across the run outcome and every approved affected owner. Validation and decision preview must remain side-effect-free. Frozen historical schemas remain frozen.
+Execution order is deterministic:
 
-## 7. Additional implementation authority discovered by reconciliation
+1. Traverse the required route to the branch origin.
+2. Resolve the required-route encounter at the origin under existing behavior.
+3. Resolve existing retreat/continue authority.
+4. Retreat ends branch processing; no branch decision or traversal occurs.
+5. Continuing evaluates the branch decision.
+6. `SKIP` continues immediately on the required route.
+7. `ENTER` traverses the optional corridor toward the DeadEnd.
+8. Resolve corridor content in physical path order.
+9. Equivalent position/order ties use stored sequence and then `AssignmentId` ordinal order.
+10. A full wipe ends the run.
+11. An existing run-stop condition ends the run.
+12. Survivors completing the branch return automatically to the fork without retriggering content or making another branch decision.
+13. Existing retreat authority may run again after return using updated condition before required-route progress resumes.
 
-The required list exposed four cross-cutting decisions that need explicit owner closure rather than being hidden inside implementation:
+No discretionary mid-branch reversal is added.
 
-1. **Party identity reconciliation:** the current composition preview and survival roll can describe different party sizes. Phase 5B needs one authoritative transient run-party roster and canonical member order.
-2. **Fork-aware run projection:** current canonical projection intentionally removes optional edges. Phase 5B needs a deterministic graph-aware execution projection without creating a second graph authority.
-3. **Retreat/stop integration:** the design requires retreat to resolve before branch choice, while current route stops are room-result consequences. The exact pre-fork continue/retreat authority and ordering must be named.
-4. **Coarse wipe knowledge ownership:** schema-10 branch records are branch-keyed, while the locked wipe signal is coarse dungeon/floor danger. The owner must choose compatible semantics before knowledge mutation exists.
+Corridor traps use their configured absolute-damage profile, target `LeadActive`, use casualty pressure as encounter severity, apply active trap-expertise mitigation, damage only targeted members, update individual HP, and derive casualties from HP.
 
-These are part of the same Phase 5B0 owner review. They do not justify a second Phase 5B0 PR.
+Branch loot resolves only when its physical location is reached. It uses the existing deterministic loot authority, existing loot tuning, and existing extraction/loss semantics; it joins carried/generated run loot and provides no route-choice foreknowledge.
 
-## 8. Required implementation constraints after approval
+Trap/branch Heat feeds the existing run Heat authority. No branch-only Heat authority is permitted. MVP optional branches contain no monsters, while the member targeting architecture remains compatible with later monsters and richer targeting.
 
-The later Phase 5B implementation must preserve deterministic simulation; stable IDs; explicit ordinal/canonical ordering; the existing research gate; existing topology fingerprint applicability; existing required-route behavior; single-source configuration-owned tuning; stable reason codes; localization-owned player text; bounded mobile-safe work; side-effect-free validation/preview; and atomic complete-state mutation.
+## 14. Reporting and reason codes
 
-It must not introduce a second writable tuning or knowledge authority, infer personality from class, infer average health from survivor ratio, treat unknown as safe, treat stale as false, simulate the entire remaining floor for `Q`, expose a false exact survival probability, or insert hidden terms into `BranchAppeal`.
+Detailed Phase 5B decision evidence is transient for MVP. It must support deterministic tests, debugging, reproduction, balancing, and immediate player-facing reporting where appropriate, without creating durable detailed decision history.
 
-## 9. Phase 5B0 completion checklist
+Approved decision reason codes are:
 
-Phase 5B0 becomes merge-ready only after:
+- `branch.decision.retreat_precedence`
+- `branch.decision.survivability_refusal`
+- `branch.decision.appeal_skip`
+- `branch.decision.appeal_enter`
+- `branch.decision.marginal_skip`
+- `branch.decision.marginal_enter`
+- `branch.decision.invalid_configuration`
 
-- every **OWNER APPROVAL REQUIRED** row has exact approved values or semantic rules;
-- the single configuration shape and all stable IDs are approved;
-- profile, intelligence, survivability, normalization, confidence, knowledge-update, health, traversal, outcome, and workload authorities are complete;
-- the formula and deterministic marginal contract remain byte-for-byte equivalent in meaning to Decision 30;
-- schema 10 sufficiency is reconfirmed against the approved reporting and wipe-knowledge choices;
-- no runtime, save, migration, scene, prefab, ProjectSettings, production gameplay data, research data, localization table, fixture, or `.meta` change is included in this documentation packet.
+Approved outcome reason codes are:
 
-Until then, this packet is ready for owner decision review only, not production Phase 5B implementation.
+- `branch.outcome.skipped`
+- `branch.outcome.completed`
+- `branch.outcome.wiped`
+- `branch.outcome.stopped`
+
+Player-facing text remains localization-owned. Durable learned knowledge remains in `sharedBranchKnowledge`. Existing `RunOutcomeRecord` continues to carry normal aggregate outcomes unless implementation evidence later proves a save change unavoidable. Durable historical branch-decision detail is a plausible post-MVP extension, but Phase 5B0 allocates no save fields and authorizes no schema 11.
+
+## 15. Workload and canonical ordering
+
+Initial configurable workload limits are:
+
+| Bound | Initial value |
+|---|---:|
+| Branch decisions per floor per run | 1 |
+| Branch decisions per complete run | 5 |
+| Corridor content assignments processed per branch | 2 |
+| Branch knowledge updates per run | 5 |
+
+Five corresponds to the locked MVP maximum floor count. Two corresponds to the current one-trap plus one-loot optional-branch model. These are tunable MVP workload limits, not permanent architectural ceilings.
+
+A workload breach fails closed, emits stable `WorkloadExceeded` evidence, and performs no partial branch decision, loot, Heat, route, health, death, or knowledge mutation. Floors, branches, members, corridor assignments, observations, and evidence use explicit ordinal/canonical order. Dictionary or incidental collection enumeration is never simulation authority.
+
+## 16. Schema, atomicity, and determinism boundary
+
+Schema 10 is sufficient for this approved design because ordinary run members and individual HP are transient, detailed decision evidence is transient, durable learning already uses `sharedBranchKnowledge`, coarse wipe danger uses existing run-history evidence, and no persistent ordinary-adventurer identity is introduced. Schema 11 is not authorized.
+
+If later implementation uncovers an unavoidable persisted-state requirement, work must stop and document the exact requirement for separate save/migration review. Convenience or speculative future use is not evidence.
+
+Future Phase 5B implementation must preserve one roster; deterministic formation, targeting, and damage; actual HP-owned death state; stable IDs; canonical ordering; side-effect-free decision evaluation; atomic complete-state mutation; save compatibility; configuration-owned tuning; localization ownership; bounded workloads; and no duplicate health or casualty authority.
+
+A failed branch/run mutation must not partially apply health, death, loot, Heat, route state, or shared knowledge.
+
+## 17. Explicitly deferred systems
+
+This contract preserves architectural room for later adventurer and monster levels, stat growth, equipment, armor, resistances, buffs and debuffs, spells, different attacks, multi-target attacks, flanking, rearline targeting, healing, named adventurers, and heroes. It does not define or implement them.
+
+Level 2–50 health progression, full monster/adventurer scaling, detection and disarming, Cleric healing AI, consumable healing, durable ordinary-member identity, detailed durable branch-decision history, branch monsters, discretionary backtracking, and post-MVP branch topology remain outside Phase 5B0.
+
+## 18. Phase 5B0 completion state
+
+All 24 former owner-decision rows now have approved authority. The configuration architecture, initial tuning, transient party, member health, deterministic damage, normalization, survivability, appeal, knowledge, traversal, reporting, workload, and schema boundaries are closed for implementation planning.
+
+The packet remains documentation-only and pending final external review. Phase 5B gameplay implementation remains unstarted. Final review must confirm that every numeric gameplay value is configuration-owned, Decision 30 semantics are unchanged, schema remains 10, and no runtime, production data, save, migration, Unity asset, scene, prefab, ProjectSettings, localization, fixture, or `.meta` change entered this packet.

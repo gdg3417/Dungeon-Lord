@@ -30,7 +30,7 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
-PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is complete in merged PR #209. Schema 10 owns durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B is the next gameplay packet and remains responsible for route choice, traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production decision tuning. The unresolved authority is enumerated in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). PR #210 is also merged and makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
+PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is complete in merged PR #209. Schema 10 owns durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B is the next gameplay packet and remains responsible for route choice, traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production decision tuning. The [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md) now records owner-approved initial configuration and implementation authority and is pending final external review; Phase 5B gameplay implementation remains unstarted. PR #210 is also merged and makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
 
 At the verified preparation baseline:
 
@@ -965,7 +965,7 @@ The following remain configuration-owned and are not fixed by this design lock:
 - knowledge confidence thresholds
 - stale-information trust modifiers
 
-The current unresolved production values and semantic choices are tracked in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). That prerequisite is not Locked or Approved while any owner-approval row remains open.
+The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That implementation prerequisite is pending final external review and does not activate Phase 5B gameplay.
 
 Runtime code must consume approved configuration.
 

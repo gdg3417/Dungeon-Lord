@@ -9,7 +9,7 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 5A complete through merged PR #209; Phase 5B is the next gameplay packet; Phase 5B0 owner decisions remain open** |
+| Status | **Phase 5A complete through merged PR #209; Phase 5B is the next gameplay packet; Phase 5B0 production authority is owner-approved and pending final external review** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Current implementation baseline | Repository main at merged PR #210 `75781a4cfb7a7e837c855608f9a0753139a1bf77` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
@@ -151,7 +151,7 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 
 ### Phase 5 — Basic branching and route choice
 
-The owner-design gate for branching and route choice is merged in PR #208 and approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). Phase 5A is complete in merged PR #209: schema 10, a research-gated optional dead-end corridor, corridor trap/loot custody, and shared knowledge state are implemented and qualified. Phase 5B remains responsible for route choice, traversal, encounter resolution, branch-specific outcomes, learning, and all production branch-choice tuning. The unresolved production authority is enumerated in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). Phase 5A implements no branch-choice calculation or marginal roll.
+The owner-design gate for branching and route choice is merged in PR #208 and approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). Phase 5A is complete in merged PR #209: schema 10, a research-gated optional dead-end corridor, corridor trap/loot custody, and shared knowledge state are implemented and qualified. The [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md) now records the owner-approved transient-party, health, damage, decision-tuning, knowledge, traversal, reporting, and workload authority; its initial gameplay values remain configuration-owned and the packet remains pending final external review. Phase 5B still owns implementation and qualification of route choice, traversal, encounter resolution, branch-specific outcomes, learning, and production tuning. Phase 5A implements no branch-choice calculation or marginal roll.
 
 1. Connect Basic Branching research to an allowance of at most one optional branch per floor.
 2. Classify required/optional edges and implement a narrow deterministic route selector.
@@ -247,7 +247,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | Direct individual content unassignment | Merged/qualified PR #204 | Existing identities of monsters, traps and reusable loot nodes return to custody; schema 9 and zero mana; automated, build, Editor and standalone qualification passed |
 | Canonical passive online mana | Merged/qualified PR #205 | Config-owned temporary MVP Core baseline and formula tuning; canonical floors/heat/wallet/capacity; deterministic fractional active ticks; periodic save; no legacy double-award |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
-| Narrow branch selection formula and deterministic tie-break | Approved owner design; production authority unresolved | [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md) and [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md); owner-approved production configuration values and semantics, implementation, automated deterministic validation, save/persistence review, manual gameplay validation, and merge qualification remain Phase 5B work |
+| Narrow branch selection formula and deterministic tie-break | Approved owner design and approved Phase 5B0 production authority; pending final external review | [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md) and [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md); implementation, automated deterministic validation, save/persistence review, manual gameplay validation, and merge qualification remain Phase 5B work |
 | Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
 | Canonical offline passive mana | Merged/qualified PR #207 | Base 15% config, monotonic durable save boundary, fractional wallet, no-time-cap and storage-clamp policy are implemented; authoritative clock-cheat enforcement and security monitoring remain pre-MVP follow-up |
 | Exact active-floor/content/device workload limits within the maximum five floors | Phases 6/8/9 | Design/QA data decision and device profiling |
@@ -256,7 +256,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 Completed Phase 5A results and accepted limitations: [Phase 5A qualification evidence](../../Docs/testing/evidence/phase5a-durable-optional-branch-state/static-review-evidence.md).
 
-Phase 3 is closed through merged PR #200. Phase 4 is complete through merged PR #207, the Phase 5 design lock is merged in PR #208, Phase 5A is complete in merged PR #209, and AI model-selection governance is merged in PR #210. Schema 10 owns durable branch/corridor-content/shared-knowledge state and research-gated construction/removal. The active dependency packet is Phase 5B0 owner review in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). Production Phase 5B tuning and semantics are not yet approved; Phase 5B gameplay implementation remains unstarted.
+Phase 3 is closed through merged PR #200. Phase 4 is complete through merged PR #207, the Phase 5 design lock is merged in PR #208, Phase 5A is complete in merged PR #209, and AI model-selection governance is merged in PR #210. Schema 10 owns durable branch/corridor-content/shared-knowledge state and research-gated construction/removal. Phase 5B0 owner decisions are closed in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md), which remains pending final external review. Production values remain configuration-owned; Phase 5B gameplay implementation remains unstarted.
 
 ### Historical GD66 closeout status, superseded by merged PRs #195–#201
 
