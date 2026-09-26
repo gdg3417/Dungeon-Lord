@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 foreach (var field in root.Fields.Skip(3))
                 { writer.Token(","); writer.String(field.Key); writer.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value); }
                 writer.Token("}"); candidate = writer.Finish();
-                return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits).IsValid;
+                return DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(candidate, limits).IsValid;
             }
             catch { candidate = null; return false; }
         }

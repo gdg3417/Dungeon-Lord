@@ -20,6 +20,7 @@ namespace DungeonBuilder.M0
         private StructuralContentRemovalPolicySnapshot _removalPolicy;
         private StructuralEconomySnapshot _economy;
         private ContentAcquisitionEconomySnapshot _acquisition;
+        private BasicBranchingResearchSnapshot _branchingResearch;
         private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
         private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
         private ITimeSource _timeSource = new SystemTimeSource();
@@ -39,6 +40,8 @@ namespace DungeonBuilder.M0
         }
         public void InvalidateRenovationUndo() => _undo = null;
         public void ConfigureContentAcquisitionEconomy(ContentAcquisitionEconomySnapshot acquisition) => _acquisition = acquisition;
+        public void ConfigureBasicBranchingResearch(BasicBranchingResearchSnapshot research) =>
+            _branchingResearch = research;
         public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text) =>
             ContentAcquisitionEconomyPresenter.Present(_acquisition, categoryId, optionId,
                 current?.structureRuntime?.ManaReserve ?? double.NaN, text);
@@ -454,6 +457,48 @@ namespace DungeonBuilder.M0
                 _legacyGameplayConfiguration, _limits.Canonical);
         }
 
+        public OptionalBranchEditPreview PreviewOptionalBranchConstruction(
+            OptionalBranchConstructionRequest request, CompletedResearchState completedResearch,
+            SaveData current)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return OptionalBranchStructuralEditService.InvalidConstruction(
+                    OptionalBranchStructuralEditService.InvalidContextReason, request);
+            OptionalBranchEditPreview preview = OptionalBranchStructuralEditService.PreviewConstruction(
+                state, request,
+                completedResearch, _branchingResearch, _production,
+                _legacyGameplayConfiguration, _limits.Canonical);
+            return AttachOptionalBranchEconomy(preview, current);
+        }
+
+        public OptionalBranchEditPreview PreviewOptionalBranchRemoval(OptionalBranchRemovalRequest request,
+            SaveData current)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return OptionalBranchStructuralEditService.InvalidRemoval(
+                    OptionalBranchStructuralEditService.InvalidContextReason, request);
+            DetachedCompleteSaveValidationResult validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                _canonicalSession.GetCurrentBytes(), _validationContext);
+            if (!validated.IsValid) return OptionalBranchStructuralEditService.InvalidRemoval(
+                OptionalBranchStructuralEditService.InvalidContextReason, request);
+            OptionalBranchEditPreview preview = OptionalBranchStructuralEditService.PreviewRemoval(
+                state, validated.CorridorContent,
+                request, _production, _legacyGameplayConfiguration, _limits.Canonical);
+            return AttachOptionalBranchEconomy(preview, current, validated);
+        }
+
+        private OptionalBranchEditPreview AttachOptionalBranchEconomy(OptionalBranchEditPreview preview,
+            SaveData current, DetachedCompleteSaveValidationResult owned = null)
+        {
+            owned = owned ?? (_canonicalSession == null || _validationContext == null ? null :
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    _canonicalSession.GetCurrentBytes(), _validationContext));
+            preview.Economy = StructuralEconomyService.Preview(preview, owned?.State,
+                owned?.Investment, current?.structureRuntime?.ManaReserve ?? double.NaN,
+                _economy, _economyModifiers);
+            return preview;
+        }
+
         private bool TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state)
         {
             state = null;
@@ -469,7 +514,8 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
-                _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition);
+                _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition,
+                _branchingResearch);
 
         private bool HasOwnedRecoveryEvidence()
         {

@@ -67,6 +67,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.canonicalSpatialAuthority = validation.State.Authority;
                 save.spatialFloors = validation.State.Floors;
                 save.validatedCanonicalSpatialState = validation.State;
+                save.corridorContent = validation.CorridorContent;
+                save.sharedBranchKnowledge = validation.BranchKnowledge;
                 reason = null;
                 return true;
             }
@@ -181,7 +183,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                          !roomNodeIds.Add(node.RoomInstanceId))) return Contradictory();
                     if (node.Kind != FloorRouteNodeKind.Entrance &&
                         node.Kind != FloorRouteNodeKind.Room &&
-                        node.Kind != FloorRouteNodeKind.Completion) return Contradictory();
+                        node.Kind != FloorRouteNodeKind.Completion &&
+                        node.Kind != FloorRouteNodeKind.DeadEnd) return Contradictory();
                 }
                 if (entrance == null || completion == null ||
                     roomNodeIds.Count != roomById.Count ||
@@ -198,23 +201,28 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 var outgoing = new Dictionary<string, FloorRouteEdge>(StringComparer.Ordinal);
                 var incoming = new Dictionary<string, int>(StringComparer.Ordinal);
                 var edgeIds = new HashSet<string>(StringComparer.Ordinal);
+                int requiredEdgeCount = 0;
                 foreach (FloorRouteEdge edge in edges)
                 {
                     if (edge == null || string.IsNullOrWhiteSpace(edge.EdgeId) ||
                         !edgeIds.Add(edge.EdgeId) ||
-                        edge.Classification != RouteClassification.Required ||
                         string.IsNullOrWhiteSpace(edge.SourceNodeId) ||
                         string.IsNullOrWhiteSpace(edge.DestinationNodeId) ||
                         !nodeById.ContainsKey(edge.SourceNodeId) ||
-                        !nodeById.ContainsKey(edge.DestinationNodeId) ||
+                        !nodeById.ContainsKey(edge.DestinationNodeId)) return Contradictory();
+                    if (edge.Classification == RouteClassification.Optional) continue;
+                    if (edge.Classification != RouteClassification.Required ||
                         outgoing.ContainsKey(edge.SourceNodeId)) return Contradictory();
+                    requiredEdgeCount++;
                     outgoing.Add(edge.SourceNodeId, edge);
                     incoming.TryGetValue(edge.DestinationNodeId, out int count);
                     incoming[edge.DestinationNodeId] = count + 1;
                 }
-                if (edges.Length != nodeById.Count - 1 || incoming.ContainsKey(entrance.NodeId) ||
+                int requiredNodeCount = nodes.Count(node => node.Kind != FloorRouteNodeKind.DeadEnd);
+                if (requiredEdgeCount != requiredNodeCount - 1 || incoming.ContainsKey(entrance.NodeId) ||
                     outgoing.ContainsKey(completion.NodeId)) return Contradictory();
-                foreach (FloorRouteNode node in nodes)
+                foreach (FloorRouteNode node in nodes.Where(value =>
+                    value.Kind != FloorRouteNodeKind.DeadEnd))
                     if (node != entrance && (!incoming.TryGetValue(node.NodeId, out int count) ||
                         count != 1) || node != completion && !outgoing.ContainsKey(node.NodeId))
                         return Contradictory();

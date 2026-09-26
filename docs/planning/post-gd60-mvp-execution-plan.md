@@ -1,7 +1,7 @@
 # Post-GD60 MVP Execution Plan
 
 
-**Current status (2026-09-18):** Phase 3 is closed through merged PR #200. Phase 4 structural economy, returned-content redeployment, content acquisition, direct content unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201 through #207. Latest repository main is PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`. PR #207 is implemented, qualified, and externally UAT-validated; it adds no migration or new persisted gameplay authority. Schema remains 9. Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred. Earlier status blockers below are historical and superseded.
+**Current status (2026-09-19):** Phase 3 is closed through merged PR #200, and Phase 4 is complete through merged PR #207. The Phase 5 design lock is merged in PR #208 at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is the current implementation packet: if merged, it advances the writable save schema from 9 to 10 and adds durable optional-branch topology, corridor trap/loot ownership, shared branch knowledge, and `ac_300`-gated construction/removal. Phase 5B remains the separate route-choice/run-integration packet; production route-choice tuning and the branch-choice formula are not implemented by Phase 5A. Run-event mana, durable Core Level progression, research mana effects beyond the existing authored branching effect, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred. Earlier status blockers below are historical and superseded.
 **Historical Phase 3 status (2026-08-27), superseded by PR #200:** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
@@ -9,12 +9,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **PRs #201 through #207 merged; canonical offline passive mana is implemented, qualified, and externally UAT-validated** |
+| Status | **Phase 4 complete through PR #207; Phase 5 design lock merged in PR #208; Phase 5A is the active implementation packet** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Repository main at merged PR #207 `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4` |
+| Current implementation baseline | Repository main at merged PR #208 `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-09-18 |
+| Last reconciled | 2026-09-19 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -41,16 +41,16 @@ Merged history establishes the following at prototype scope:
 
 ### Partially implemented capabilities
 
-- **Layout:** The canonical spatial graph owns footprints, physical corridors/direct doorways, fixed endpoints, occupied-tile capacity, and route/content state. Phase 3 construction, movement, replacement and leaf deletion closed at PR #200. Additional floors and branches remain deferred.
+- **Layout:** The canonical spatial graph owns footprints, physical corridors/direct doorways, fixed endpoints, occupied-tile capacity, and route/content state. Phase 3 construction, movement, replacement and leaf deletion closed at PR #200. Phase 5A now implements the persistence/construction half of one optional dead-end branch; Floor 2 and Phase 5B traversal remain deferred.
 - **Construction:** Phase 3 spatial editing and Phase 4A configured mana prices, affordability, atomic spend/refund, historical investment and session renovation undo are merged and qualified through PR #201.
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** structural spending/refunds, owned-content redeployment, paid acquisition/StartingMana, direct unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201–#207. PR #207 adds one deterministic offline grant for cold start and pause/resume using the #205 rate, a validated 15% base efficiency, fractional wallet precision, no duration cap, capacity clamping, atomic timestamp consumption, localized summary, and structured security evidence. Floor expansion remains deferred.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** The PR #202 baseline writes schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Returned-content redeployment needs no schema change or migration. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
+- **Saves:** The PR #202 baseline writes schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Phase 5A adds exactly one 9 → 10 transition and two explicit schema-10 complete-save owners for corridor content and shared branch knowledge; frozen schema 7/8/9 contracts remain version-specific. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
 
 ### Missing MVP capabilities
 
-After the merged Phase 4 packets through PR #207, remaining MVP capabilities include subsequent acquisition balance review; run-event mana after its required authorities exist; one optional branch and route decision; Floor 2 transition; graphical editor parity; broader room/environment/content choices; Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence. Canonical offline passive mana is implemented, qualified, and externally UAT-validated in merged PR #207 rather than being listed as missing implementation.
+After the merged Phase 4 packets through PR #207, remaining MVP capabilities include subsequent acquisition balance review; run-event mana after its required authorities exist; Phase 5B optional-branch route choice/traversal; Floor 2 transition; graphical editor parity; broader room/environment/content choices; broader Architecture progression; onboarding/accessibility; mobile profiling; and external fun-test evidence. Phase 5A supplies branch persistence/construction only and intentionally leaves required-route run outcomes unchanged.
 
 Merged PR #205 adds canonical passive online mana earning after PR #204. Merged PR #207 adds canonical offline passive mana by consuming that online resolver at the configured 15% base efficiency, retaining fractional precision, applying no duration cap, clamping to structural capacity, and atomically committing wallet plus the existing save timestamp. It does not add persisted Core Level, run-event mana, research effects, active soft-cap tuning, a migration, or new persisted gameplay authority.
 
@@ -151,7 +151,7 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 
 ### Phase 5 — Basic branching and route choice
 
-The owner-design gate for branching and route choice is approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md), including the exact normalized formula structure, confidence-boundary behavior, linear marginal mapping, and deterministic seed/tie-break contract. Production configuration values, implementation, automated deterministic validation, save/persistence review, manual gameplay validation, and merge qualification remain outstanding.
+The owner-design gate for branching and route choice is merged in PR #208 and approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). Phase 5A is the persistence/construction packet: schema 10, a research-gated optional dead-end corridor, corridor trap/loot custody, and shared knowledge state. Phase 5B remains responsible for route choice, traversal, encounter resolution, learning, and all production branch-choice tuning. No branch-choice formula, weights, thresholds, or marginal roll are implemented by Phase 5A.
 
 1. Connect Basic Branching research to an allowance of at most one optional branch per floor.
 2. Classify required/optional edges and implement a narrow deterministic route selector.
@@ -254,9 +254,9 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 
 ## 9. Current dependency packet
 
-Current results and accepted limitations: [offline-passive-mana qualification evidence](../../Docs/testing/evidence/phase4-offline-passive-mana/static-review-evidence.md).
+Current Phase 5A results and accepted limitations: [Phase 5A qualification evidence](../../Docs/testing/evidence/phase5a-durable-optional-branch-state/static-review-evidence.md).
 
-Phase 3 is closed through merged PR #200. Phase 4 structural economy, returned-content redeployment, content acquisition, direct content unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201–#207. Latest repository main is PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`. Canonical offline passive mana is implemented, qualified, and externally UAT-validated; there is no unmerged Phase 4 offline dependency packet at this baseline. Schema remains 9, and PR #207 adds no migration or new persisted gameplay authority. Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain explicitly deferred. Phase 5 owner decisions, including the exact formula and deterministic marginal tie-break contract, are documented; production configuration values, implementation, automated deterministic validation, save/persistence review, manual gameplay validation, and merge qualification remain outstanding.
+Phase 3 is closed through merged PR #200. Phase 4 is complete through merged PR #207, and the Phase 5 design lock is merged in PR #208 at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is the active implementation packet and advances schema 9 to 10 if merged. It owns durable branch/corridor-content/shared-knowledge state and research-gated construction/removal. Phase 5B remains the route-choice and run-integration packet; production Phase 5B tuning is unapproved and unimplemented, and Phase 5A contains no branch-choice formula.
 
 ### Historical GD66 closeout status, superseded by merged PRs #195–#201
 

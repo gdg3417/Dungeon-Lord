@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             current = null;
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
-                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out current);
+                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine) &&
+                SchemaNineToTenUpgrade.TryPrepare(nine, limits, out current);
         }
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)

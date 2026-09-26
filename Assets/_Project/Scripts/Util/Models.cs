@@ -1498,6 +1498,8 @@ namespace DungeonBuilder.M0
         [NonSerialized] public CanonicalSpatialAuthorityMarker canonicalSpatialAuthority;
         [NonSerialized] public SavedSpatialFloor[] spatialFloors;
         [NonSerialized] internal DetachedCanonicalSpatialSaveState validatedCanonicalSpatialState;
+        [NonSerialized] public CorridorContentAuthority corridorContent;
+        [NonSerialized] public SharedBranchKnowledgeAuthority sharedBranchKnowledge;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

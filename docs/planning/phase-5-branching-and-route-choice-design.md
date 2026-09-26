@@ -1,10 +1,15 @@
 # Phase 5 Branching and Route Choice Design Lock
 
-**Project:** Dungeon Lord  
-**Status:** Owner-approved design decisions, reconciled for repository documentation merge  
-**Approved:** 2026-09-17  
-**Repository reconciliation refreshed:** 2026-09-18  
-**Verified preparation baseline:** merged PR #207 at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`  
+**Project:** Dungeon Lord
+
+**Status:** Owner-approved design decisions, reconciled for repository documentation merge
+
+**Approved:** 2026-09-17
+
+**Repository reconciliation refreshed:** 2026-09-19
+
+**Verified repository baseline:** merged PR #208 at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`
+
 **Intended repository path:** `docs/planning/phase-5-branching-and-route-choice-design.md`
 
 ## 1. Purpose
@@ -25,6 +30,8 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
+PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is the current implementation packet: it owns schema 10, durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B remains the distinct route-choice and run-integration packet. Phase 5A does not implement `BranchAppeal`, production decision weights/thresholds, traversal, branch encounter resolution, or run-driven knowledge learning.
+
 At the verified preparation baseline:
 
 - `main` is `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
@@ -33,7 +40,7 @@ At the verified preparation baseline:
 - Save schema remains 9.
 - PR #207 added no migration or new persisted gameplay authority.
 - Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred.
-- Phase 5 runtime branching is not yet implemented.
+- Phase 5A implementation is in progress; Phase 5B runtime route choice remains unimplemented.
 
 Repository documentation that describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale and conflicts with this recorded baseline.
 

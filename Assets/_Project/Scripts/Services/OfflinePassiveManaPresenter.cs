@@ -30,8 +30,15 @@ namespace DungeonBuilder.M0
                 string format = Localized(localize, AppliedFormatKey);
                 if (string.IsNullOrEmpty(format)) return string.Empty;
                 string text = string.Format(formatProvider, format,
-                    result.ObservedElapsedSeconds, result.EffectiveOfflineManaPerHour,
-                    result.ActualAwardedMana, result.WalletAfter, result.Capacity);
+                    result.ObservedElapsedSeconds,
+                    PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                        result.EffectiveOfflineManaPerHour, formatProvider),
+                    PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                        result.ActualAwardedMana, formatProvider),
+                    PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                        result.WalletAfter, formatProvider),
+                    PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                        result.Capacity, formatProvider));
                 if (result.CapacityLimited)
                 {
                     string limited = Localized(localize, CapacityLimitedKey);

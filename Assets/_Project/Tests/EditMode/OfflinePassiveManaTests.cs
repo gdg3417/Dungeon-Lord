@@ -87,14 +87,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var strings = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 [OfflinePassiveManaPresenter.AppliedFormatKey] =
-                    "Away {0:N0}; rate {1:0.###}; earned {2:0.###}; mana {3:0.###}/{4:0.###}",
+                    "Away {0:N0}; rate {1}; earned {2}; mana {3}/{4}",
                 [OfflinePassiveManaPresenter.CapacityLimitedKey] = "Capacity limited"
             };
             string text = OfflinePassiveManaPresenter.Build(result.WithPersistence(
                     OfflinePassiveManaReason.Applied, true), CultureInfo.InvariantCulture,
                 key => strings.TryGetValue(key, out string value) ? value : key);
 
-            Assert.That(text, Does.Contain("Away 63; rate 18; earned 0.315; mana 0.738/1000"));
+            Assert.That(text, Does.Contain("Away 63; rate 18; earned 0.3; mana 0.7/1000"));
             Assert.That(text, Does.Not.Contain("Capacity limited"));
         }
 
@@ -237,7 +237,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(calculated.WalletAfter));
             Assert.That(write.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(4600));
             string persisted = Encoding.UTF8.GetString(write.GetPersistedBytes());
-            Assert.That(persisted, Does.Contain("\"schemaVersion\":9"));
+            Assert.That(persisted, Does.Contain("\"schemaVersion\":10"));
             Assert.That(persisted, Does.Not.Contain("OfflinePassiveMana"));
             Assert.That(persisted, Does.Not.Contain("BaseOfflineEfficiency"));
         }
@@ -348,7 +348,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         fixture.Profile.Canonical).Value);
                     Assert.That(Encoding.UTF8.GetString(
                         reopenedService.CanonicalSession.GetCurrentBytes()),
-                        Does.Contain("\"schemaVersion\":9"));
+                        Does.Contain("\"schemaVersion\":10"));
                     Assert.That(reopened, Is.SameAs(reopenedRoot.Save));
                 }
                 finally { UnityEngine.Object.DestroyImmediate(reopenedGo); }
@@ -430,7 +430,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
             Assert.That(Encoding.UTF8.GetString(fixture.Session.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":9"));
+                Does.Contain("\"schemaVersion\":10"));
         }
 
         [Test]
@@ -520,7 +520,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var strings = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 [OfflinePassiveManaPresenter.AppliedFormatKey] =
-                    "Sekunden {0:N0}; Rate {1:0.###}; Gewinn {2:0.####}; Mana {3:0.####}/{4:0.###}",
+                    "Sekunden {0:N0}; Rate {1}; Gewinn {2}; Mana {3}/{4}",
                 [OfflinePassiveManaPresenter.CapacityLimitedKey] = "Begrenzt",
                 [OfflinePassiveManaPresenter.AppliedReasonKey] = "Angewendet"
             };
@@ -529,7 +529,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CultureInfo.GetCultureInfo("de-DE"),
                 key => strings.TryGetValue(key, out string value) ? value : key);
 
-            Assert.That(text, Does.Contain("12,5075"));
+            Assert.That(text, Does.Contain("12,5"));
+            Assert.That(text, Does.Not.Contain("12,5075"));
+            Assert.That(result.WalletAfter, Is.EqualTo(12.5075d).Within(1e-12));
             Assert.That(text, Does.Not.Contain("ui.offline_mana"));
             Assert.That(text, Does.Not.Contain(nameof(OfflinePassiveManaReason.Applied)));
         }
@@ -543,7 +545,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var strings = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 [OfflinePassiveManaPresenter.AppliedFormatKey] =
-                    "Away {0:N0}; rate {1:0.###}; earned {2:0.###}; mana {3:0.###}/{4:0.###}",
+                    "Away {0:N0}; rate {1}; earned {2}; mana {3}/{4}",
                 [OfflinePassiveManaPresenter.CapacityLimitedKey] = "Capacity limited",
                 [OfflinePassiveManaPresenter.NoAwardFormatKey] = "No award: {0}",
                 [OfflinePassiveManaPresenter.ZeroElapsedReasonKey] = "zero elapsed"

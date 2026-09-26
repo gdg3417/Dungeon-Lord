@@ -29,4 +29,5 @@ namespace DungeonBuilder.M0.Editor.Tests
     [TestFixture] public sealed class PhaseFourCompatibility : SpatialLayoutCompatibilityProfileTests { }
     [TestFixture] public sealed class PhaseFourContent : ProductionSpatialContentLoadingTests { }
     [TestFixture] public sealed class PhaseFourIdentity : NativeStructuralIdentityTests { }
+    [TestFixture] public sealed class PhaseFiveADurableBranch : PhaseFiveADurableBranchTests { }
 }

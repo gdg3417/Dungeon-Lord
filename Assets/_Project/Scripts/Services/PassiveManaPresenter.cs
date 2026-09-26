@@ -33,13 +33,19 @@ namespace DungeonBuilder.M0
 
             var builder = new StringBuilder();
             builder.AppendFormat(formatProvider,
-                Localized(localize, BalanceAndRateFormatKey), currentMana, capacity,
-                summary.ManaPerHour);
+                Localized(localize, BalanceAndRateFormatKey),
+                PlayerManaPresentationFormatter.FormatLiveBalance(currentMana,
+                    summary.ManaPerHour, formatProvider),
+                PlayerManaPresentationFormatter.FormatDiscreteAmount(capacity, formatProvider),
+                PlayerManaPresentationFormatter.FormatDiscreteAmount(summary.ManaPerHour,
+                    formatProvider));
             builder.Append('\n');
             builder.AppendFormat(formatProvider,
                 Localized(localize, ContributionsFormatKey),
-                summary.CoreContributionManaPerHour, summary.ActiveFloorCount,
-                summary.ActiveFloorContributionManaPerHour);
+                PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                    summary.CoreContributionManaPerHour, formatProvider), summary.ActiveFloorCount,
+                PlayerManaPresentationFormatter.FormatDiscreteAmount(
+                    summary.ActiveFloorContributionManaPerHour, formatProvider));
             builder.Append('\n');
             builder.AppendFormat(formatProvider,
                 Localized(localize, HeatFormatKey), heatLabel,
@@ -78,5 +84,21 @@ namespace DungeonBuilder.M0
                 ? string.Empty
                 : value;
         }
+    }
+
+    /// <summary>
+    /// Formats player-facing mana without changing its authoritative numeric value.
+    /// </summary>
+    public static class PlayerManaPresentationFormatter
+    {
+        public const double WholeBalancePassiveManaPerHourThreshold = 3600d;
+
+        public static string FormatDiscreteAmount(double value, IFormatProvider formatProvider) =>
+            value.ToString("0.#", formatProvider);
+
+        public static string FormatLiveBalance(double value, double passiveManaPerHour,
+            IFormatProvider formatProvider) =>
+            value.ToString(passiveManaPerHour >= WholeBalancePassiveManaPerHourThreshold
+                ? "0" : "0.#", formatProvider);
     }
 }

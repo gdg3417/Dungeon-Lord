@@ -191,15 +191,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PreviewFixture fixture = CreateR1();
             SavedSpatialFloor floor = fixture.State.Floors[0];
             FloorRouteNode room = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Room);
-            FloorRouteNode completion = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion);
+            var deadEnd = new FloorRouteNode { NodeId = "compat.floor.00.node.test-dead-end",
+                FloorId = floor.FloorInstanceId, Kind = FloorRouteNodeKind.DeadEnd };
+            floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { deadEnd }).ToArray();
             floor.Layout.Edges = floor.Layout.Edges.Concat(new[] { new FloorRouteEdge
             {
                 EdgeId = "compat.floor.00.edge.test-corridor", FloorId = floor.FloorInstanceId,
-                SourceNodeId = room.NodeId, DestinationNodeId = completion.NodeId,
+                SourceNodeId = room.NodeId, DestinationNodeId = deadEnd.NodeId,
                 CorridorDefinitionId = "spatial.corridor.straight_stone",
                 ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor,
                 Classification = RouteClassification.Optional, OptionalBranchId = "test.branch",
-                Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(0, 6) })
+                Footprint = new ResolvedTileFootprint(new[] { new TileCoordinate(4, 3) })
             } }).ToArray();
             Assert.That(CanonicalSpatialSaveContracts.TryCanonicalize(fixture.State, fixture.Limits.Spatial,
                 out DetachedCanonicalSpatialSaveState canonical), Is.True);
@@ -209,8 +211,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.Production, fixture.Configuration, fixture.Limits.Spatial).IsValid, Is.True);
             fixture.State = canonical;
             AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
-            { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
-              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
+            { RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(4, 2),
+              Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "east" },
                 fixture.Production, fixture.Limits, StructuralEditService.CorridorOverlapReason);
         }
 
@@ -237,11 +239,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PreviewFixture fixture = CreateR1();
             SavedSpatialFloor floor = fixture.State.Floors[0];
             FloorRouteNode room = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Room);
-            FloorRouteNode completion = floor.Layout.Nodes.Single(value => value.Kind == FloorRouteNodeKind.Completion);
+            var deadEnd = new FloorRouteNode { NodeId = "compat.floor.00.node.test-derived-dead-end",
+                FloorId = floor.FloorInstanceId, Kind = FloorRouteNodeKind.DeadEnd };
+            floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { deadEnd }).ToArray();
             floor.Layout.Edges = floor.Layout.Edges.Concat(new[] { new FloorRouteEdge
             {
                 EdgeId = "compat.floor.00.edge.test-corridor-derived", FloorId = floor.FloorInstanceId,
-                SourceNodeId = room.NodeId, DestinationNodeId = completion.NodeId,
+                SourceNodeId = room.NodeId, DestinationNodeId = deadEnd.NodeId,
                 CorridorDefinitionId = "spatial.corridor.straight_stone",
                 ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor,
                 Classification = RouteClassification.Optional, OptionalBranchId = "test.branch.derived",
@@ -830,12 +834,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SavedSpatialFloor floor = corridorOverlap.State.Floors[0];
             FloorRouteNode room = floor.Layout.Nodes.Single(value =>
                 value.RoomInstanceId == "compat.floor.00.room.player.0000");
-            FloorRouteNode completion = floor.Layout.Nodes.Single(value =>
-                value.Kind == FloorRouteNodeKind.Completion);
+            var deadEnd = new FloorRouteNode { NodeId = "test.optional.dead-end",
+                FloorId = floor.FloorInstanceId, Kind = FloorRouteNodeKind.DeadEnd };
+            floor.Layout.Nodes = floor.Layout.Nodes.Concat(new[] { deadEnd }).ToArray();
             floor.Layout.Edges = floor.Layout.Edges.Concat(new[] { new FloorRouteEdge
             {
                 EdgeId = "test.optional.corridor", FloorId = floor.FloorInstanceId,
-                SourceNodeId = room.NodeId, DestinationNodeId = completion.NodeId,
+                SourceNodeId = room.NodeId, DestinationNodeId = deadEnd.NodeId,
                 CorridorDefinitionId = "spatial.corridor.straight_stone",
                 ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor,
                 Classification = RouteClassification.Optional, OptionalBranchId = "test.branch",

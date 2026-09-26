@@ -358,9 +358,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Native();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(40));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(9));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(9));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":9"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(10));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(10));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":10"));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, Target(f))));
             f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);

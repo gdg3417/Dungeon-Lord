@@ -179,21 +179,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public DetachedCanonicalSaveSessionResult PrepareSpatialOnlyReplacement(
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null) =>
-            PrepareReplacement(null, replacement, investment);
+            PrepareReplacement(null, replacement, investment, null, null);
 
         public DetachedCanonicalSaveSessionResult PrepareLiveReplacement(
             DetachedRecognizedSaveStateSnapshotResult recognizedState,
-            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null)
+            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null,
+            CorridorContentAuthority corridorContent = null,
+            SharedBranchKnowledgeAuthority branchKnowledge = null)
         {
             if (recognizedState == null || !recognizedState.IsSuccess)
                 return Failure(recognizedState?.Reason ??
                     DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
-            return PrepareReplacement(recognizedState.Snapshot, replacement, investment);
+            return PrepareReplacement(recognizedState.Snapshot, replacement, investment,
+                corridorContent, branchKnowledge);
         }
 
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
-            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null)
+            DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment,
+            CorridorContentAuthority corridorContent,
+            SharedBranchKnowledgeAuthority branchKnowledge)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -219,6 +224,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 for (int nameIndex = 0; nameIndex < recognizedNames.Count; nameIndex++)
                 {
                     string name = recognizedNames[nameIndex];
+                    if (name == PhaseFiveSaveContracts.CorridorOwnerName ||
+                        name == PhaseFiveSaveContracts.KnowledgeOwnerName) continue;
                     byte[] valueBytes;
                     if (IsFrozenLegacySpatialMember(name) || recognizedState == null)
                     {
@@ -230,7 +237,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                for (int index = 0; index < primary.Fields.Count - 4; index++)
+                const int canonicalMemberCount = 6;
+                int canonicalStart = primary.Fields.Count - canonicalMemberCount;
+                for (int index = 0; index < canonicalStart; index++)
                 {
                     KeyValuePair<string, ContractJsonNode> field = primary.Fields[index];
                     if (Contains(recognizedNames, field.Key)) continue;
@@ -246,7 +255,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     spatial.Value.LifecycleAndOwnership, false);
                 writer.Token(",\"structuralInvestment\":");
                 if (investment != null) StructuralInvestment.Write(writer, investment);
-                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[primary.Fields.Count - 1].Value);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 3].Value);
+                writer.Token(","); writer.String(PhaseFiveSaveContracts.CorridorOwnerName); writer.Token(":");
+                if (corridorContent != null) PhaseFiveSaveContracts.Write(writer, corridorContent);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 4].Value);
+                writer.Token(","); writer.String(PhaseFiveSaveContracts.KnowledgeOwnerName); writer.Token(":");
+                if (branchKnowledge != null) PhaseFiveSaveContracts.Write(writer, branchKnowledge);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 5].Value);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)
@@ -315,7 +330,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal static bool IsLiveRecognizedMember(string name) =>
             Contains(RawSavePayloadClassifier.RecognizedSaveDataMemberNames, name) &&
-            !IsFrozenLegacySpatialMember(name);
+            !IsFrozenLegacySpatialMember(name) &&
+            name != PhaseFiveSaveContracts.CorridorOwnerName &&
+            name != PhaseFiveSaveContracts.KnowledgeOwnerName;
 
         private static bool IsFrozenLegacySpatialMember(string name) =>
             name == "mvpDungeonPlacements" || name == "mvpDungeonFloorLayout" ||

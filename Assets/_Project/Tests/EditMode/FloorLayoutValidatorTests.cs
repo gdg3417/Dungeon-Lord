@@ -713,10 +713,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void ReasonCodeValuesRemainStableAndAppendExactlyFortyThroughFortySix()
+        public void ReasonCodeValuesRemainStableAndAppendExactlyFortySevenThroughFiftyFive()
         {
             int[] values = Enum.GetValues(typeof(FloorLayoutValidationReason)).Cast<int>().ToArray();
-            CollectionAssert.AreEqual(Enumerable.Range(1, 46), values);
+            CollectionAssert.AreEqual(Enumerable.Range(1, 55), values);
             Assert.That((int)FloorLayoutValidationReason.InvalidFloorBounds, Is.EqualTo(40));
             Assert.That((int)FloorLayoutValidationReason.StructureTileOutsideFloorBounds, Is.EqualTo(41));
             Assert.That((int)FloorLayoutValidationReason.FinalCapacityExceedsFloorBounds, Is.EqualTo(42));
@@ -724,6 +724,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition, Is.EqualTo(44));
             Assert.That((int)FloorLayoutValidationReason.DirectDoorwayHasFootprint, Is.EqualTo(45));
             Assert.That((int)FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch, Is.EqualTo(46));
+            Assert.That((int)FloorLayoutValidationReason.OptionalDirectDoorway, Is.EqualTo(47));
+            Assert.That((int)FloorLayoutValidationReason.OptionalBranchDestinationNotDeadEnd, Is.EqualTo(48));
+            Assert.That((int)FloorLayoutValidationReason.DeadEndHasRoomReference, Is.EqualTo(49));
+            Assert.That((int)FloorLayoutValidationReason.DeadEndDegreeInvalid, Is.EqualTo(50));
+            Assert.That((int)FloorLayoutValidationReason.DeadEndOnRequiredRoute, Is.EqualTo(51));
+            Assert.That((int)FloorLayoutValidationReason.OptionalBranchSourceNotOnRequiredRoute, Is.EqualTo(52));
+            Assert.That((int)FloorLayoutValidationReason.OptionalBranchEdgeCountInvalid, Is.EqualTo(53));
+            Assert.That((int)FloorLayoutValidationReason.OptionalBranchSourceIsDeadEnd, Is.EqualTo(54));
+            Assert.That((int)FloorLayoutValidationReason.DeadEndUnreachable, Is.EqualTo(55));
         }
 
         private static FloorSpatialLayout Canonicalize(FloorSpatialLayout source, int maximumTiles = 100)

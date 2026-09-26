@@ -215,8 +215,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var first = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(first.LoadOrCreate("phase-four", out _), Is.Not.Null);
             string current = Encoding.UTF8.GetString(first.CanonicalSession.GetCurrentBytes());
-            byte[] eight = Encoding.UTF8.GetBytes(current.Replace(",\"structuralInvestment\":[]", "")
-                .Replace("\"schemaVersion\":9", "\"schemaVersion\":8"));
+            int schemaTenOwners = current.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
+            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(schemaTenOwners, current.Length - 2 - schemaTenOwners)
+                .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(eight, fixture.Limits).IsValid, Is.True);
             fileSystem.Seed(first.SavePath, eight);
             if (failPersistence)
@@ -251,7 +252,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":9"));
+                Does.Contain("\"schemaVersion\":10"));
         }
 
         [Test]

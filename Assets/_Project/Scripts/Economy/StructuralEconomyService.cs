@@ -8,6 +8,8 @@ namespace DungeonBuilder.M0.Economy
     public sealed class StructuralEconomyPreview
     {
         public StructuralEditPreview Spatial { get; internal set; }
+        public OptionalBranchEditPreview OptionalBranch { get; internal set; }
+        public StructuralEditOperation Operation { get; internal set; }
         public double CurrentMana { get; internal set; }
         public double BaseCost { get; internal set; }
         public double Cost { get; internal set; }
@@ -37,12 +39,33 @@ namespace DungeonBuilder.M0.Economy
             result.Spatial = spatial; return result;
         }
 
+        public static StructuralEconomyPreview Preview(OptionalBranchEditPreview spatial,
+            DetachedCanonicalSpatialSaveState current, StructuralInvestmentRecord[] investment,
+            double balance, StructuralEconomySnapshot config,
+            IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            StructuralEditOperation operation = spatial?.Operation == OptionalBranchEditOperation.Removal
+                ? StructuralEditOperation.OptionalBranchRemoval
+                : StructuralEditOperation.OptionalBranchConstruction;
+            if (spatial?.IsSpatiallyValid != true) return new StructuralEconomyPreview
+            {
+                OptionalBranch = spatial, Operation = operation, CurrentMana = balance,
+                ResultingMana = balance,
+                Reason = spatial?.ReasonCodes.FirstOrDefault() ?? InvalidReason
+            };
+            var result = Prepare(current, spatial.DetachedCandidate, investment, balance, config,
+                operation, null, modifiers);
+            result.OptionalBranch = spatial;
+            return result;
+        }
+
         internal static StructuralEconomyPreview Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
             double balance, StructuralEconomySnapshot config, StructuralEditOperation operation,
             string target, IReadOnlyList<FormulaModifier> modifiers = null)
         {
-            var result = new StructuralEconomyPreview { CurrentMana = balance, ResultingMana = balance, Reason = InvalidReason };
+            var result = new StructuralEconomyPreview { Operation = operation, CurrentMana = balance,
+                ResultingMana = balance, Reason = InvalidReason };
             if (config == null || current == null || candidate == null || !StructuralEconomySnapshot.Nonnegative(balance) ||
                 !StructuralInvestment.Valid(investment, current, int.MaxValue)) return result;
             try
@@ -102,7 +125,8 @@ namespace DungeonBuilder.M0.Economy
                 result.Refund = Math.Floor(result.RefundBasis * config.RefundPercentage);
                 if (!StructuralEconomySnapshot.Nonnegative(result.RefundBasis) ||
                     !StructuralEconomySnapshot.Nonnegative(result.Refund)) return result;
-                if (operation == StructuralEditOperation.Deletion)
+                if (operation == StructuralEditOperation.Deletion ||
+                    operation == StructuralEditOperation.OptionalBranchRemoval)
                 {
                     result.ResultingMana = config.AddWithinCapacity(balance, result.Refund);
                     result.CreditedRefund = result.ResultingMana - balance;
@@ -112,10 +136,13 @@ namespace DungeonBuilder.M0.Economy
                     RoomSpatialInstance room;
                     double roomBase;
                     var corridorBases = new Dictionary<string, double>(StringComparer.Ordinal);
-                    if (operation == StructuralEditOperation.Construction)
+                    if (operation == StructuralEditOperation.Construction ||
+                        operation == StructuralEditOperation.OptionalBranchConstruction)
                     {
-                        room = afterRooms.Single(r => !old.ContainsKey(r.RoomInstanceId));
-                        if (!config.TryRoom(room.RoomDefinitionId, out roomBase)) return result;
+                        room = operation == StructuralEditOperation.Construction
+                            ? afterRooms.Single(r => !old.ContainsKey(r.RoomInstanceId)) : null;
+                        roomBase = 0d;
+                        if (room != null && !config.TryRoom(room.RoomDefinitionId, out roomBase)) return result;
                         foreach (var edge in afterEdges.Where(e => !old.ContainsKey(e.EdgeId) &&
                             e.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor).OrderBy(e => e.EdgeId, StringComparer.Ordinal))
                         {
@@ -148,7 +175,8 @@ namespace DungeonBuilder.M0.Economy
                     if (balance < result.Cost) { result.Reason = InsufficientReason; return result; }
                     // Reject balances too large to represent the exact configured charge in the existing double wallet.
                     if (balance - result.ResultingMana != result.Cost) return result;
-                    if (operation == StructuralEditOperation.Construction)
+                    if (operation == StructuralEditOperation.Construction ||
+                        operation == StructuralEditOperation.OptionalBranchConstruction)
                     {
                         double assigned = 0;
                         foreach (var pair in corridorBases)
@@ -156,7 +184,8 @@ namespace DungeonBuilder.M0.Economy
                             double share = result.BaseCost == 0 ? 0 : Math.Floor(result.Cost * (pair.Value / result.BaseCost));
                             next[pair.Key].ConstructionMana += share; assigned += share;
                         }
-                        next[room.RoomInstanceId].ConstructionMana += result.Cost - assigned;
+                        if (room != null) next[room.RoomInstanceId].ConstructionMana += result.Cost - assigned;
+                        else if (assigned != result.Cost || corridorBases.Count == 0) return result;
                     }
                     else next[room.RoomInstanceId].RenovationMana += result.Cost;
                     double afterSpend = result.ResultingMana;
@@ -188,9 +217,14 @@ namespace DungeonBuilder.M0.Economy
         internal static StructuralEditOperation Operation(DetachedCanonicalMutationRequest request) =>
             request.Kind == DetachedCanonicalMutationKind.StructuralConstruction ? StructuralEditOperation.Construction :
             request.Kind == DetachedCanonicalMutationKind.StructuralMovement ? StructuralEditOperation.Movement :
-            request.Kind == DetachedCanonicalMutationKind.StructuralReplacement ? StructuralEditOperation.Replacement : StructuralEditOperation.Deletion;
+            request.Kind == DetachedCanonicalMutationKind.StructuralReplacement ? StructuralEditOperation.Replacement :
+            request.Kind == DetachedCanonicalMutationKind.OptionalBranchConstruction ? StructuralEditOperation.OptionalBranchConstruction :
+            request.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval ? StructuralEditOperation.OptionalBranchRemoval : StructuralEditOperation.Deletion;
         internal static bool IsStructural(DetachedCanonicalMutationRequest request) => request != null &&
-            request.Kind >= DetachedCanonicalMutationKind.StructuralConstruction && request.Kind <= DetachedCanonicalMutationKind.StructuralDeletion;
+            (request.Kind >= DetachedCanonicalMutationKind.StructuralConstruction &&
+             request.Kind <= DetachedCanonicalMutationKind.StructuralDeletion ||
+             request.Kind == DetachedCanonicalMutationKind.OptionalBranchConstruction ||
+             request.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval);
         internal static string Target(DetachedCanonicalMutationRequest request) =>
             request.MovementIntent?.RoomInstanceId ?? request.ReplacementIntent?.RoomInstanceId ?? request.DeletionIntent?.TargetRoomInstanceId;
     }

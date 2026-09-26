@@ -444,8 +444,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             string current = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
             int start = current.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
-            int end = current.IndexOf(']', start) + 1;
-            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(start, end - start).Replace("\"schemaVersion\":9", "\"schemaVersion\":8"));
+            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(start, current.Length - 2 - start)
+                .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, f.Profile.Canonical, out byte[] nine), Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, f.Profile.Canonical, out byte[] again), Is.True);
             CollectionAssert.AreEqual(nine, again);
@@ -454,12 +454,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int investmentEnd = upgraded.IndexOf(']', investmentStart) + 1;
             Assert.That(upgraded.Remove(investmentStart, investmentEnd - investmentStart)
                 .Replace("\"schemaVersion\":9", "\"schemaVersion\":8"), Is.EqualTo(Encoding.UTF8.GetString(eight)));
-            var restored = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(nine, f.Context);
+            var restored = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
+                nine, f.Profile.Canonical);
             Assert.That(restored.IsValid, Is.True); Assert.That(restored.Investment.All(r => r.ConstructionMana == 0 && r.RenovationMana == 0), Is.True);
             CollectionAssert.AreEqual(CanonicalSpatialSaveSerializer.Serialize(f.State, f.Profile.Canonical).Value,
                 CanonicalSpatialSaveSerializer.Serialize(restored.State, f.Profile.Canonical).Value);
             Assert.That(Encoding.UTF8.GetString(nine), Does.Contain("\"ManaReserve\":123.5"));
-            Assert.That(DetachedCanonicalSaveSession.Open(nine, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, f.Profile.Canonical, out byte[] ten), Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(ten, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }
@@ -496,6 +498,100 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(text, Does.Contain(dictionary[StructuralEconomyService.InsufficientReason]));
             Assert.That(text, Does.Not.Contain("spatial.").And.Not.Contain("structural.economy.").And.Not.Contain("compat."));
             Assert.That(text, Is.EqualTo(StructuralEconomyPresenter.Present(Price(f, Build(f)), key => dictionary[key])));
+        }
+
+        [TestCase(5d, "5")]
+        [TestCase(5.0d, "5")]
+        [TestCase(5.5d, "5.5")]
+        [TestCase(5.527d, "5.5")]
+        public void StructuralEconomyPresentationTransactionAmountsUseAtMostOneDecimal(double value,
+            string expected)
+        {
+            Assert.That(StructuralEconomyPresenter.FormatTransactionAmount(value), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void StructuralEconomyPresentationFormatsWalletByAuthoritativePassiveRateWithoutMutatingValues()
+        {
+            const double current = 47.86416666666667d;
+            const double fractionalResult = 42.36416666666667d;
+            var integral = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchConstruction,
+                CurrentMana = current, BaseCost = 5d, Cost = 5d, ResultingMana = current - 5d
+            };
+            var fractional = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchConstruction,
+                CurrentMana = current, BaseCost = 5.5d, Cost = 5.5d, ResultingMana = fractionalResult
+            };
+
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 1d, false), Is.EqualTo("47.9"));
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 3600d, false), Is.EqualTo("48"));
+            Assert.That(StructuralEconomyPresenter.FormatBalance(current, 7200d, false), Is.EqualTo("48"));
+
+            string text = StructuralEconomyPresenter.Present(fractional, PresentationText, 3600d);
+            Assert.That(text, Does.Contain("Current mana: 47.9. Mana after committing: 42.4."));
+            Assert.That(text, Does.Contain("Base cost: 5.5 mana. Final build or renovation cost: 5.5 mana."));
+            Assert.That(text, Does.Not.Contain("47.86416666666667").And.Not.Contain("42.36416666666667")
+                .And.Not.Contain("ui.structural.economy").And.Not.Contain("structural.economy."));
+            Assert.That(fractional.CurrentMana, Is.EqualTo(current));
+            Assert.That(fractional.ResultingMana, Is.EqualTo(fractionalResult));
+            Assert.That(fractional.BaseCost, Is.EqualTo(5.5d));
+            Assert.That(fractional.Cost, Is.EqualTo(5.5d));
+            Assert.That(StructuralEconomyPresenter.Present(integral, PresentationText, 3600d),
+                Does.Contain("Current mana: 48. Mana after committing: 43."));
+        }
+
+        [Test]
+        public void StructuralEconomyPresentationFormatsRemovalRefundAmountsAndBranchTilesWithLocalizedGrammar()
+        {
+            var removal = new StructuralEconomyPreview
+            {
+                Operation = StructuralEditOperation.OptionalBranchRemoval,
+                CurrentMana = 47.86416666666667d, RefundBasis = 5.527d, Refund = 2.555d,
+                CreditedRefund = 2.444d, ResultingMana = 50.30816666666667d
+            };
+            string text = StructuralEconomyPresenter.Present(removal, PresentationText, 7200d);
+            Assert.That(text, Does.Contain("Historical investment removed: 5.5 mana. Refund: 2.6 mana; credited within storage capacity: 2.4 mana."));
+            Assert.That(text, Does.Contain("Current mana: 47.9. Mana after committing: 50.3."));
+            Assert.That(BootstrapOverlay.BuildOptionalBranchPreviewSummary(1, 2, 3, 4, PresentationText),
+                Is.EqualTo("Branch preview: 1 tile; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(BootstrapOverlay.BuildOptionalBranchPreviewSummary(2, 2, 3, 4, PresentationText),
+                Is.EqualTo("Branch preview: 2 tiles; trap capacity 2; loot capacity 3; floor space remaining 4."));
+        }
+
+        [Test]
+        public void BranchPreviewGrammarUsesProductionLocalizationWithoutLeakingKeys()
+        {
+            var table = JsonUtility.FromJson<StringTable>(
+                File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            var dictionary = table.entries.ToDictionary(entry => entry.key, entry => entry.text);
+            foreach (string key in new[] { "ui.branch.preview.success.singular", "ui.branch.preview.success.plural" })
+                Assert.That(dictionary.ContainsKey(key), Is.True, key);
+
+            string singular = BootstrapOverlay.BuildOptionalBranchPreviewSummary(1, 2, 3, 4,
+                key => dictionary[key]);
+            string plural = BootstrapOverlay.BuildOptionalBranchPreviewSummary(2, 2, 3, 4,
+                key => dictionary[key]);
+            Assert.That(singular, Is.EqualTo("Branch preview: 1 tile; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(plural, Is.EqualTo("Branch preview: 2 tiles; trap capacity 2; loot capacity 3; floor space remaining 4."));
+            Assert.That(singular + plural, Does.Not.Contain("ui.branch.").And.Not.Contain("branch.edit."));
+        }
+
+        private static string PresentationText(string key)
+        {
+            switch (key)
+            {
+                case "ui.structural.economy.cost": return "Base cost: {0} mana. Final build or renovation cost: {1} mana.";
+                case "ui.structural.economy.refund": return "Historical investment removed: {0} mana. Refund: {1} mana; credited within storage capacity: {2} mana.";
+                case "ui.structural.economy.balance": return "Current mana: {0}. Mana after committing: {1}.";
+                case "ui.structural.economy.affordable": return "This edit is affordable.";
+                case "structural.economy.insufficient_mana": return "Insufficient mana.";
+                case "ui.branch.preview.success.singular": return "Branch preview: {0} tile; trap capacity {1}; loot capacity {2}; floor space remaining {3}.";
+                case "ui.branch.preview.success.plural": return "Branch preview: {0} tiles; trap capacity {1}; loot capacity {2}; floor space remaining {3}.";
+                default: return "Invalid preview.";
+            }
         }
 
         [TestCase(false)][TestCase(true)]

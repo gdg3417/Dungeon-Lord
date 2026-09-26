@@ -141,13 +141,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         public static SpatialContractResult<DetachedCanonicalSpatialSaveState> Parse(byte[] bytes,
-            CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, true);
+            CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, true,
+                CanonicalSaveSchemaVersions.CurrentWritableTarget);
 
         internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenSchemaSeven(
-            byte[] bytes, CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, false);
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, false, 7);
+
+        internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenPrePhaseFive(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits, int schemaVersion) =>
+            ParseCore(bytes, limits, true, schemaVersion);
 
         private static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseCore(byte[] bytes,
-            CanonicalSpatialSerializationLimits limits, bool includeLifecycle)
+            CanonicalSpatialSerializationLimits limits, bool includeLifecycle, int schemaVersion)
         {
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (!limits.IsValid)
@@ -167,9 +172,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var value = (DetachedCanonicalSpatialSaveState)materialized;
                 ValidateAuthority(value == null ? null : value.Authority, issues);
                 if (issues.Count == 0) NormalizeNativeAuthorityForCanonicalBytes(value == null ? null : value.Authority);
-                CanonicalSpatialSaveValidationResult validation = includeLifecycle
-                    ? CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true)
-                    : CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(value, limits.Spatial, true);
+                CanonicalSpatialSaveValidationResult validation = !includeLifecycle
+                    ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(value, limits.Spatial, true)
+                    : schemaVersion < CanonicalSaveSchemaVersions.CurrentWritableTarget
+                        ? CanonicalSpatialSaveContracts.ValidateFrozenPrePhaseFive(value,
+                            limits.Spatial, schemaVersion, true)
+                        : CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true);
                 if (issues.Count == 0 && !validation.IsValid)
                     issues.Add(SpatialContractIssue.StructuralValidationFailed);
                 if (issues.Count == 0 && includeLifecycle)

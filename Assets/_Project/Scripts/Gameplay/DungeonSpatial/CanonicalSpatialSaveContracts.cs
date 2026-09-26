@@ -209,18 +209,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static CanonicalSpatialSaveValidationResult Validate(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering = false)
-        {
-            var issues = new List<CanonicalSpatialSaveValidationIssue>();
-            return ValidateCore(state, limits, requireCanonicalOrdering, true);
-        }
+            => ValidateCore(state, limits, requireCanonicalOrdering, true,
+                CanonicalSaveSchemaVersions.CurrentWritableTarget);
 
         internal static CanonicalSpatialSaveValidationResult ValidateFrozenSchemaSeven(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
             bool requireCanonicalOrdering = false) =>
-            ValidateCore(state, limits, requireCanonicalOrdering, false);
+            ValidateCore(state, limits, requireCanonicalOrdering, false, 7);
+
+        internal static CanonicalSpatialSaveValidationResult ValidateFrozenPrePhaseFive(
+            DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
+            int schemaVersion, bool requireCanonicalOrdering = false) =>
+            schemaVersion == 8 || schemaVersion == 9
+                ? ValidateCore(state, limits, requireCanonicalOrdering, true, schemaVersion)
+                : new CanonicalSpatialSaveValidationResult(new[]
+                    { CanonicalSpatialSaveValidationIssue.InvalidSource });
 
         private static CanonicalSpatialSaveValidationResult ValidateCore(DetachedCanonicalSpatialSaveState state,
-            CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering, bool includeLifecycle)
+            CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering, bool includeLifecycle,
+            int schemaVersion)
         {
             var issues = new List<CanonicalSpatialSaveValidationIssue>();
             CanonicalizationFailure failure = TryCanonicalizeCore(state, limits, includeLifecycle,
@@ -238,7 +245,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             var instanceIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (SavedSpatialFloor floor in floors)
-                ValidateFloor(floor, instanceIds, issues);
+                ValidateFloor(floor, instanceIds, issues, schemaVersion);
 
             if (includeLifecycle) ValidateLifecycleAndOwnership(state, instanceIds, issues);
 
@@ -473,7 +480,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static void ValidateFloor(SavedSpatialFloor floor, HashSet<string> instanceIds,
-            ICollection<CanonicalSpatialSaveValidationIssue> issues)
+            ICollection<CanonicalSpatialSaveValidationIssue> issues, int schemaVersion)
         {
             if (floor == null) { Add(issues, CanonicalSpatialSaveValidationIssue.NullFloorRecord); return; }
             CheckInstanceId(floor.FloorInstanceId, instanceIds, issues); CheckId(floor.FloorDefinitionId, issues);
@@ -500,13 +507,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (node == null) { Add(issues, CanonicalSpatialSaveValidationIssue.NullNodeRecord); continue; }
                 CheckInstanceId(node.NodeId, instanceIds, issues); nodeIds.Add(node.NodeId);
                 CheckFloorReference(node.FloorId, floor.FloorInstanceId, issues);
-                if (!Enum.IsDefined(typeof(FloorRouteNodeKind), node.Kind)) Add(issues, CanonicalSpatialSaveValidationIssue.InvalidNodeKind);
+                bool nodeKindValid = IsNodeKindSupported(node.Kind, schemaVersion);
+                if (!nodeKindValid) Add(issues, CanonicalSpatialSaveValidationIssue.InvalidNodeKind);
                 if (node.Kind == FloorRouteNodeKind.Room)
                 {
                     CheckId(node.RoomInstanceId, issues);
                     if (!roomIds.Contains(node.RoomInstanceId)) Add(issues, CanonicalSpatialSaveValidationIssue.UnknownRoomReference);
                 }
-                else if (Enum.IsDefined(typeof(FloorRouteNodeKind), node.Kind) && !string.IsNullOrEmpty(node.RoomInstanceId))
+                else if (nodeKindValid && !string.IsNullOrEmpty(node.RoomInstanceId))
                     Add(issues, CanonicalSpatialSaveValidationIssue.NonRoomNodeHasRoomReference);
             }
             foreach (FloorRouteEdge edge in edges)
@@ -544,6 +552,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!Enum.IsDefined(typeof(FixedSpatialStructureKind), value.Kind)) Add(issues, CanonicalSpatialSaveValidationIssue.InvalidFixedStructureKind);
             }
             ValidateContents(floor.RoomContents, roomIds, instanceIds, issues);
+        }
+
+        private static bool IsNodeKindSupported(FloorRouteNodeKind kind, int schemaVersion)
+        {
+            if (schemaVersion >= CanonicalSaveSchemaVersions.PhaseFiveIntroduction)
+                return Enum.IsDefined(typeof(FloorRouteNodeKind), kind);
+            if (kind == FloorRouteNodeKind.Entrance || kind == FloorRouteNodeKind.Room ||
+                kind == FloorRouteNodeKind.Exit || kind == FloorRouteNodeKind.Descent ||
+                kind == FloorRouteNodeKind.Completion) return schemaVersion >= 7;
+            return false;
         }
 
         private static void ValidateContents(FloorRoomContentState contents, HashSet<string> roomIds,

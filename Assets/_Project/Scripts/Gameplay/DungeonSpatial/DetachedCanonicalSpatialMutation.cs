@@ -15,7 +15,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         StructuralReplacement = 5,
         StructuralDeletion = 6,
         RedeployReturnedContent = 7,
-        UnassignContent = 8
+        UnassignContent = 8,
+        OptionalBranchConstruction = 9,
+        OptionalBranchRemoval = 10,
+        CorridorContentAcquisition = 11,
+        CorridorContentRedeployment = 12
     }
 
     public sealed class DetachedCanonicalMutationRequest
@@ -29,6 +33,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal StructuralMovementRequest MovementIntent { get; private set; }
         internal StructuralReplacementRequest ReplacementIntent { get; private set; }
         internal StructuralDeletionRequest DeletionIntent { get; private set; }
+        internal OptionalBranchConstructionRequest BranchConstructionIntent { get; private set; }
+        internal OptionalBranchRemovalRequest BranchRemovalIntent { get; private set; }
+        internal string FloorInstanceId { get; private set; }
+        internal string OptionalBranchId { get; private set; }
+        internal TileCoordinate CorridorTile { get; private set; }
         internal string StructuralBaselineFingerprint { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
@@ -48,6 +57,44 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCanonicalMutationRequest Unassign(string assignmentId) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.UnassignContent, AssignmentId = assignmentId };
+
+        public static DetachedCanonicalMutationRequest ConstructBranch(OptionalBranchEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.OptionalBranchConstruction,
+                BranchConstructionIntent = preview != null && preview.IsValid
+                    ? preview.Intent as OptionalBranchConstructionRequest : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid
+                    ? preview.BaselineFingerprint : null
+            };
+
+        public static DetachedCanonicalMutationRequest RemoveBranch(OptionalBranchEditPreview preview) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.OptionalBranchRemoval,
+                BranchRemovalIntent = preview != null && preview.IsValid
+                    ? preview.Intent as OptionalBranchRemovalRequest : null,
+                StructuralBaselineFingerprint = preview != null && preview.IsValid
+                    ? preview.BaselineFingerprint : null
+            };
+
+        public static DetachedCanonicalMutationRequest PlaceCorridor(string categoryId, string optionId,
+            string floorInstanceId, string optionalBranchId, TileCoordinate tile) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.CorridorContentAcquisition,
+                CategoryId = categoryId, OptionId = optionId, FloorInstanceId = floorInstanceId,
+                OptionalBranchId = optionalBranchId, CorridorTile = tile
+            };
+
+        public static DetachedCanonicalMutationRequest RedeployCorridor(string assignmentId,
+            string floorInstanceId, string optionalBranchId, TileCoordinate tile) =>
+            new DetachedCanonicalMutationRequest
+            {
+                Kind = DetachedCanonicalMutationKind.CorridorContentRedeployment,
+                AssignmentId = assignmentId, FloorInstanceId = floorInstanceId,
+                OptionalBranchId = optionalBranchId, CorridorTile = tile
+            };
 
         public static DetachedCanonicalMutationRequest Construct(StructuralEditPreview preview) =>
             new DetachedCanonicalMutationRequest
@@ -83,13 +130,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCanonicalMutationResult
     {
         internal DetachedCanonicalMutationResult(DetachedCanonicalSpatialSaveState state, string reason,
-            bool roomEffect)
-        { State = state; Reason = reason; ApplyExplicitRoomEffect = roomEffect; }
+            bool roomEffect, CorridorContentAuthority corridorContent = null,
+            SharedBranchKnowledgeAuthority branchKnowledge = null)
+        { State = state; Reason = reason; ApplyExplicitRoomEffect = roomEffect;
+          CorridorContent = corridorContent; BranchKnowledge = branchKnowledge; }
         public DetachedCanonicalSpatialSaveState State { get; }
         public string Reason { get; }
         public bool IsSuccess => State != null;
         public bool IsNoOp => Reason == DetachedCanonicalSpatialMutation.NoOpReason;
         public bool ApplyExplicitRoomEffect { get; }
+        public CorridorContentAuthority CorridorContent { get; }
+        public SharedBranchKnowledgeAuthority BranchKnowledge { get; }
     }
 
     public static class CanonicalRoomCapacityResolver
@@ -137,19 +188,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
             CanonicalSpatialSerializationLimits limits,
-            StructuralContentRemovalPolicySnapshot removalPolicy = null)
+            StructuralContentRemovalPolicySnapshot removalPolicy = null,
+            CorridorContentAuthority corridorContent = null,
+            SharedBranchKnowledgeAuthority branchKnowledge = null,
+            CompletedResearchState completedResearch = null,
+            BasicBranchingResearchSnapshot branchingResearch = null)
         {
             if (current?.Authority == null || current.Floors == null || request == null ||
                 production == null || compatibility == null || configuration == null || !limits.IsValid)
                 return Failure(ValidationFailedReason);
             if (!TryClone(current, limits, out DetachedCanonicalSpatialSaveState proposed))
                 return Failure(ValidationFailedReason);
+            CorridorContentAuthority proposedCorridor = PhaseFiveSaveContracts.Canonicalize(
+                corridorContent ?? new CorridorContentAuthority());
+            SharedBranchKnowledgeAuthority proposedKnowledge = PhaseFiveSaveContracts.Canonicalize(
+                branchKnowledge ?? new SharedBranchKnowledgeAuthority());
             // Ownership transitions must not repair an invalid source by removing its bad record.
             if ((request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
-                 request.Kind == DetachedCanonicalMutationKind.UnassignContent) &&
+                 request.Kind == DetachedCanonicalMutationKind.UnassignContent ||
+                 request.Kind == DetachedCanonicalMutationKind.CorridorContentAcquisition ||
+                 request.Kind == DetachedCanonicalMutationKind.CorridorContentRedeployment ||
+                 request.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval) &&
                 (!CanonicalSpatialSaveContracts.Validate(current, limits.Spatial, true).IsValid ||
                  !DetachedCanonicalProductionSemanticValidation.Validate(current, production,
-                     configuration, limits.Spatial).IsValid))
+                     configuration, limits.Spatial).IsValid ||
+                 !PhaseFiveSaveContracts.Validate(proposedCorridor, proposedKnowledge, current,
+                     production, configuration, limits.Spatial)))
                 return Failure(ValidationFailedReason);
             bool roomEffect = false;
             string reason;
@@ -194,10 +258,55 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!refreshed.IsValid) return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
                 proposed = refreshed.DetachedCandidate; reason = null;
             }
+            else if (request.Kind == DetachedCanonicalMutationKind.OptionalBranchConstruction)
+            {
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    request.BranchConstructionIntent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(OptionalBranchStructuralEditService.StalePreviewReason);
+                OptionalBranchEditPreview refreshed = OptionalBranchStructuralEditService.PreviewConstruction(
+                    current, request.BranchConstructionIntent, completedResearch, branchingResearch,
+                    production, configuration, limits);
+                if (!refreshed.IsValid)
+                    return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate; reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval)
+            {
+                if (!StructuralEditService.TryFingerprint(current, limits, out string currentFingerprint) ||
+                    request.BranchRemovalIntent == null || !string.Equals(currentFingerprint,
+                        request.StructuralBaselineFingerprint, StringComparison.Ordinal))
+                    return Failure(OptionalBranchStructuralEditService.StalePreviewReason);
+                OptionalBranchEditPreview refreshed = OptionalBranchStructuralEditService.PreviewRemoval(
+                    current, proposedCorridor, request.BranchRemovalIntent, production,
+                    configuration, limits);
+                if (!refreshed.IsValid)
+                    return Failure(refreshed.ReasonCodes.FirstOrDefault() ?? ValidationFailedReason);
+                proposed = refreshed.DetachedCandidate;
+                proposedKnowledge.Records = proposedKnowledge.Records.Where(value => value != null &&
+                    !(value.FloorInstanceId == request.BranchRemovalIntent.FloorInstanceId &&
+                      value.OptionalBranchId == request.BranchRemovalIntent.OptionalBranchId)).ToArray();
+                reason = null;
+            }
+            else if (request.Kind == DetachedCanonicalMutationKind.CorridorContentAcquisition)
+                reason = CorridorContentMutationService.Acquire(proposed, proposedCorridor,
+                    request.CategoryId, request.OptionId, request.FloorInstanceId,
+                    request.OptionalBranchId, request.CorridorTile, production);
+            else if (request.Kind == DetachedCanonicalMutationKind.CorridorContentRedeployment)
+                reason = CorridorContentMutationService.Redeploy(proposed, proposedCorridor,
+                    request.AssignmentId, request.FloorInstanceId, request.OptionalBranchId,
+                    request.CorridorTile, production);
             else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
                 reason = RedeployContent(proposed, request.AssignmentId, request.RoomInstanceId, production, configuration);
             else if (request.Kind == DetachedCanonicalMutationKind.UnassignContent)
-                reason = UnassignContent(proposed, request.AssignmentId, removalPolicy);
+            {
+                bool isCorridor = proposedCorridor.Assignments.Any(value => value != null &&
+                    value.AssignmentId == request.AssignmentId);
+                reason = isCorridor
+                    ? CorridorContentMutationService.Unassign(proposed, proposedCorridor,
+                        request.AssignmentId, removalPolicy)
+                    : UnassignContent(proposed, request.AssignmentId, removalPolicy);
+            }
             else if (request.Kind == DetachedCanonicalMutationKind.RemoveRoom)
                 reason = Remove(proposed, request.RoomInstanceId);
             else if (string.Equals(request.CategoryId, MvpDungeonPlacementIds.RoomCategoryId,
@@ -209,12 +318,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     request.RoomInstanceId, production, compatibility);
             if (reason != null) return reason == NoOpReason
                 ? new DetachedCanonicalMutationResult(null, reason, false) : Failure(reason);
+            proposedCorridor = PhaseFiveSaveContracts.Canonicalize(proposedCorridor);
+            proposedKnowledge = PhaseFiveSaveContracts.Canonicalize(proposedKnowledge);
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(proposed, limits.Spatial,
                     out DetachedCanonicalSpatialSaveState canonical) ||
                 !CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(canonical, production,
-                    configuration, limits.Spatial).IsValid) return Failure(ValidationFailedReason);
-            return new DetachedCanonicalMutationResult(canonical, null, roomEffect);
+                    configuration, limits.Spatial).IsValid ||
+                !PhaseFiveSaveContracts.Validate(proposedCorridor, proposedKnowledge, canonical,
+                    production, configuration, limits.Spatial)) return Failure(ValidationFailedReason);
+            return new DetachedCanonicalMutationResult(canonical, null, roomEffect,
+                proposedCorridor, proposedKnowledge);
         }
 
         private static string UnassignContent(DetachedCanonicalSpatialSaveState state, string assignmentId,

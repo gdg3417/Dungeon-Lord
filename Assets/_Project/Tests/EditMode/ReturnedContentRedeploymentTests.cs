@@ -240,8 +240,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             CollectionAssert.AreEqual(result.GetPersistedBytes(), f.FileSystem.ReadAllBytes(f.ActivePath));
             f.Accept(result); f.Reopen();
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(9));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":9"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(10));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":10"));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(owned.AssignmentId));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Any(i => i.AssignmentId == owned.AssignmentId), Is.False);
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));

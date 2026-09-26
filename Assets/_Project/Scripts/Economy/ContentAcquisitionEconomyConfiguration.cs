@@ -45,8 +45,9 @@ namespace DungeonBuilder.M0.Economy
                 prices.TryGetValue(optionId, out mana);
         }
         public static bool IsAcquisition(DetachedCanonicalMutationRequest request) =>
-            request?.Kind == DetachedCanonicalMutationKind.PlaceOrReplace &&
-            request.CategoryId != MvpDungeonPlacementIds.RoomCategoryId;
+            (request?.Kind == DetachedCanonicalMutationKind.PlaceOrReplace &&
+             request.CategoryId != MvpDungeonPlacementIds.RoomCategoryId) ||
+            request?.Kind == DetachedCanonicalMutationKind.CorridorContentAcquisition;
 
         public static bool TryCreate(ContentAcquisitionEconomyConfiguration config, StructuralEconomySnapshot economy,
             CanonicalSpatialSerializationLimits limits, out ContentAcquisitionEconomySnapshot result)

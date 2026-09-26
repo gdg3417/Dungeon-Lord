@@ -13,11 +13,11 @@
     },
     {
       "key": "ui.passive_mana.balance_rate_format",
-      "text": "Mana: {0:0.###} / {1:0.###}. Passive rate: {2:0.###} mana/hour."
+      "text": "Mana: {0} / {1}. Passive rate: {2} mana/hour."
     },
     {
       "key": "ui.passive_mana.contributions_format",
-      "text": "Core contribution: {0:0.###} mana/hour. Active floors ({1}): {2:0.###} mana/hour."
+      "text": "Core contribution: {0} mana/hour. Active floors ({1}): {2} mana/hour."
     },
     {
       "key": "ui.passive_mana.heat_format",
@@ -33,7 +33,7 @@
     },
     {
       "key": "ui.offline_mana.applied_format",
-      "text": "Away for {0:N0} seconds. Offline rate: {1:0.###} mana/hour. Earned: {2:0.###} mana. Current mana: {3:0.###} / {4:0.###}."
+      "text": "Away for {0:N0} seconds. Offline rate: {1} mana/hour. Earned: {2} mana. Current mana: {3} / {4}."
     },
     {
       "key": "ui.offline_mana.capacity_limited",
@@ -3347,6 +3347,100 @@
     {
       "key": "ui.banner.qa_mana_filled",
       "text": "QA mana filled to capacity and saved. Any existing balance above capacity was preserved."
-    }
+    },
+    {
+      "key": "branch.research.configuration_invalid",
+      "text": "Basic Branching configuration is unavailable or invalid."
+    },
+    {
+      "key": "branch.research.required",
+      "text": "Complete Basic Branching research before constructing an optional branch."
+    },
+    {
+      "key": "branch.edit.invalid_context",
+      "text": "Optional branch editing is unavailable for the current dungeon state."
+    },
+    {
+      "key": "branch.edit.invalid_origin",
+      "text": "Select a valid room on the required route as the branch origin."
+    },
+    {
+      "key": "branch.edit.connection_point_invalid",
+      "text": "The selected branch connection point is unavailable or incompatible."
+    },
+    {
+      "key": "branch.edit.corridor_length_invalid",
+      "text": "The selected branch corridor length is outside the authored range."
+    },
+    {
+      "key": "branch.edit.allowance_exceeded",
+      "text": "This floor cannot support another optional branch."
+    },
+    {
+      "key": "branch.edit.layout_invalid",
+      "text": "The optional branch would create an invalid floor layout."
+    },
+    {
+      "key": "branch.edit.branch_not_found",
+      "text": "The selected optional branch no longer exists."
+    },
+    {
+      "key": "branch.edit.assigned_content",
+      "text": "Unassign every trap and loot item from this branch before removing it."
+    },
+    {
+      "key": "branch.edit.stale_preview",
+      "text": "The dungeon changed after this branch preview. Preview the edit again."
+    },
+    {
+      "key": "corridor.content.invalid_target",
+      "text": "Content can only be assigned to an eligible optional physical corridor."
+    },
+    {
+      "key": "corridor.content.category_not_allowed",
+      "text": "Only traps and reusable loot can be assigned to an optional corridor."
+    },
+    {
+      "key": "corridor.content.invalid_tile",
+      "text": "Select a tile within the optional corridor footprint."
+    },
+    {
+      "key": "corridor.content.tile_occupied",
+      "text": "That corridor tile is already occupied."
+    },
+    {
+      "key": "corridor.content.capacity_exceeded",
+      "text": "This corridor has no remaining capacity for that content category."
+    },
+    {
+      "key": "corridor.content.loot_requires_terminal_tile",
+      "text": "Corridor loot must occupy the terminal tile beside the dead end."
+    },
+    {"key": "ui.branch.heading", "text": "Optional Branch (Phase 5A QA)"},
+    {"key": "ui.branch.origin.format", "text": "Origin node: {0}"},
+    {"key": "ui.branch.origin.next", "text": "Next Branch Origin"},
+    {"key": "ui.branch.connection.format", "text": "Origin connection: {0}"},
+    {"key": "ui.branch.connection.next", "text": "Next Origin Connection"},
+    {"key": "ui.branch.length.format", "text": "Corridor length: {0}"},
+    {"key": "ui.branch.length.next", "text": "Next Corridor Length"},
+    {"key": "ui.branch.preview.action", "text": "Preview Branch Construction"},
+    {"key": "ui.branch.commit.action", "text": "Commit Previewed Branch Edit"},
+    {"key": "ui.branch.preview.success.singular", "text": "Branch preview: {0} tile; trap capacity {1}; loot capacity {2}; floor space remaining {3}."},
+    {"key": "ui.branch.preview.success.plural", "text": "Branch preview: {0} tiles; trap capacity {1}; loot capacity {2}; floor space remaining {3}."},
+    {"key": "ui.branch.commit.success", "text": "The optional branch edit was saved."},
+    {"key": "ui.branch.removal.preview.action", "text": "Preview Branch Removal"},
+    {"key": "ui.branch.removal.preview.success", "text": "The empty optional branch can be removed."},
+    {"key": "ui.branch.tile.next", "text": "Next Corridor Tile"},
+    {"key": "ui.branch.content.acquire", "text": "Acquire Selected Trap or Loot for Corridor"},
+    {"key": "ui.branch.content.acquire.success", "text": "The selected content was acquired and assigned to the corridor."},
+    {"key": "ui.branch.content.redeploy", "text": "Redeploy Selected Returned Content to Corridor"},
+    {"key": "ui.branch.content.redeploy.success", "text": "The returned content was redeployed to the corridor at no mana cost."},
+    {"key": "ui.branch.content.next", "text": "Next Assigned Corridor Content"},
+    {"key": "ui.branch.content.unassign", "text": "Unassign Selected Corridor Content"},
+    {"key": "ui.branch.content.unassign.success", "text": "The corridor content was returned to custody at no mana cost."},
+    {"key": "ui.branch.qa.research.set", "text": "QA: Complete Basic Branching"},
+    {"key": "ui.branch.qa.research.clear", "text": "QA: Clear Basic Branching"},
+    {"key": "ui.branch.qa.research.set.success", "text": "Basic Branching completion was established and saved for QA."},
+    {"key": "ui.branch.qa.research.clear.success", "text": "Basic Branching completion was cleared and saved for QA."}
   ]
 }
