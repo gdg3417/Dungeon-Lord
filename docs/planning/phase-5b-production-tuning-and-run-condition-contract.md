@@ -80,10 +80,10 @@ All 24 Phase 5B0 owner-decision rows are closed. Implementation-selected details
 | 1 | Production configuration owner | One version-1 Phase 5B object nested in `RunSimulationConfig` and serialized in the existing `run_simulation_config.json`; no fallback or second authority; fail-closed validation; branch rule ID `run.branch_decision.rule.phase5b.v1`. |
 | 2 | Authoritative live party instance | One transient 3–5 member roster per run. `RunId` plus canonical `MemberOrdinal` identifies each member. Composition, behavior, capability, health, casualties, route choice, and reporting consume this roster. The 1–3 preview becomes a view of it. |
 | 3 | Member behavioral-profile generation | Each member receives one deterministic profile independent of class from the configured profile collection using run identity, member ordinal, and an explicit stable configured assignment rule source. No global RNG, runtime hash, clock, call order, or collection order. Profiles are transient. |
-| 4 | Five behavior profiles | Stable IDs and initial dimensions are approved in section 6. All dimensions and equal selection weights are tunable configuration in `[0,1]`. |
+| 4 | Five behavior profiles | Stable IDs, initial dimensions, and explicit initial selection weight `0.20` per profile are approved in section 6. All dimensions and weights are tunable configuration in `[0,1]`; weights form a valid normalized distribution after runtime normalization. |
 | 5 | Party-profile aggregation | Arithmetic mean across original party members, equal weighting, no class/survivor/named/hero weighting, no recomputation after casualties, fail closed for empty or invalid party. |
 | 6 | Specialist capability mapping | `adventurer.capability.trap_expertise`; configured class values in section 7; party value is the maximum among active members. Personality remains separate. |
-| 7 | Intelligence quality | Party-scoped transient Poor, Standard, and Good bands with stable IDs, interpretation factors, and formation weights in section 7; deterministic assignment from stable run identity and configured rule source. |
+| 7 | Intelligence quality and report-confidence interpretation | Party-scoped transient Poor, Standard, and Good bands with stable IDs, interpretation factors, and formation weights in section 7; deterministic assignment from stable run identity and configured rule source. Schema 10 retains one shared branch-report confidence, with transient effective incentive/danger confidence derived in section 7. |
 | 8 | Initial and live party health | Real integer member HP; Level 1 initial class MaxHealth in section 8; initial `CurrentHealth = MaxHealth`; deaths only at `CurrentHealth <= 0`; roster-derived average health and casualties; no Phase 5 healing. |
 | 9 | Perceived incentive `I` | Initial actual incentive is normalized `LootBonus` using configured reference 6. Attraction is not counted again and post-resolution loot rolls are not foreknowledge. The interface remains broader than loot. |
 | 10 | Perceived danger `D` | Initial actual danger is normalized existing `Danger` using configured reference 3. Capacity is not realized danger; ManaPressure and HeatPressure are not injected into `D`. Decisions consume perceived knowledge rather than secret actual values. |
@@ -98,7 +98,7 @@ All 24 Phase 5B0 owner-decision rows are closed. Implementation-selected details
 | 19 | Knowledge learning | Skip, survivor observation, reconfirmation, contradiction, staleness, topology invalidation, and wipe semantics are approved in section 12. Initial observation confidence is 0.75 and reconfirmation increase is 0.125. |
 | 20 | Coarse full-wipe danger owner | Existing persisted run-history death/wipe evidence remains coarse dungeon-level danger evidence. Do not write precise branch knowledge from a wipe and do not add a branch/floor save owner. |
 | 21 | Fork execution and traversal ordering | The deterministic 13-step sequence in section 13 governs branch origin, retreat precedence, enter/skip, physical order, tie-breaks, stop/wipe, automatic return, and later retreat. |
-| 22 | Branch encounter and outcome semantics | Corridor traps use configured absolute damage, `LeadActive`, severity, and expertise mitigation; loot uses existing deterministic loot and extraction authorities only when reached; Heat uses existing authority; no optional-branch monsters. |
+| 22 | Branch and current-room encounter/outcome semantics | Current MVP Goblin, Skeleton, Snare, Spike Trap, and Chilling Sigil assignments use `LeadActive`; each damaging assignment resolves one sequential member-level event using room/branch severity, configured profile, formation, targeting, and approved mitigation. Loot uses existing deterministic loot and extraction authorities only when reached; Heat uses existing authority; no optional-branch monsters. |
 | 23 | Structured reporting | Detailed Phase 5B decision evidence is transient for MVP with stable reason codes in section 14. Existing aggregate run outcomes remain; durable branch learning stays in `sharedBranchKnowledge`; player text is localization-owned. |
 | 24 | Workload and canonical ordering | Configured limits are 1 decision per floor/run, 5 per complete run, 2 corridor assignments per branch, and 5 knowledge updates per run. Breach fails closed with stable `WorkloadExceeded` evidence and no partial mutation. |
 
@@ -116,15 +116,15 @@ The old composition preview must become a projection of this roster rather than 
 
 Profile assignment is independent of class. Class must not imply personality. Each member receives one deterministic profile from the canonical configured collection using the authoritative run identity, member ordinal, and an explicit stable configured profile-assignment rule source. Initial profile-selection weighting is equal across all five profiles.
 
-| Stable profile ID | Reward Appetite | Risk Tolerance | Uncertainty Tolerance | Required-Route Commitment |
-|---|---:|---:|---:|---:|
-| `adventurer.behavior_profile.cautious` | 0.40 | 0.20 | 0.20 | 0.80 |
-| `adventurer.behavior_profile.greedy` | 0.90 | 0.60 | 0.45 | 0.35 |
-| `adventurer.behavior_profile.curious` | 0.55 | 0.50 | 0.90 | 0.35 |
-| `adventurer.behavior_profile.goal_oriented` | 0.35 | 0.45 | 0.40 | 0.95 |
-| `adventurer.behavior_profile.gambler` | 0.75 | 0.90 | 0.85 | 0.20 |
+| Stable profile ID | Initial selection weight | Reward Appetite | Risk Tolerance | Uncertainty Tolerance | Required-Route Commitment |
+|---|---:|---:|---:|---:|---:|
+| `adventurer.behavior_profile.cautious` | 0.20 | 0.40 | 0.20 | 0.20 | 0.80 |
+| `adventurer.behavior_profile.greedy` | 0.20 | 0.90 | 0.60 | 0.45 | 0.35 |
+| `adventurer.behavior_profile.curious` | 0.20 | 0.55 | 0.50 | 0.90 | 0.35 |
+| `adventurer.behavior_profile.goal_oriented` | 0.20 | 0.35 | 0.45 | 0.40 | 0.95 |
+| `adventurer.behavior_profile.gambler` | 0.20 | 0.75 | 0.90 | 0.85 | 0.20 |
 
-Every value and each equal selection weight is configuration-owned and tunable in `[0,1]`.
+Every value and selection weight is configuration-owned and tunable in `[0,1]`. The initial weights total `1.0`; validation requires every configured weight to be finite and nonnegative and the total to be finite and greater than zero. Runtime normalizes the configured weights and must not hardcode a 20-percent selection probability or require future weights to sum exactly to `1.0`.
 
 Each party behavioral dimension is the arithmetic mean of the original run-party members' configured values. Phase 5 MVP uses equal member weighting, no class weighting, no survivor weighting, no named-character or hero weighting, and no post-casualty personality recomputation. Casualties change health, active count, and available capabilities, not the party's underlying personality. Empty or invalid party state fails closed.
 
@@ -152,7 +152,27 @@ Intelligence belongs to the transient party, not individual members. It is assig
 | `adventurer.intelligence.standard` | 0.80 | 0.50 |
 | `adventurer.intelligence.good` | 1.00 | 0.25 |
 
-For applicable known information, the party's intelligence interpretation factor multiplies the stored confidence. For known trap information, active trap expertise then improves effective danger confidence by up to `0.15 × TrapExpertise`. The `0.15` modifier is configurable. The result is clamped to `[0,1]`. Expertise still cannot create missing shared knowledge.
+Schema 10 has one persisted `ConfidenceKnown`/`Confidence` pair per `BranchKnowledgeRecord`, not separate incentive- and danger-confidence fields. Persisted `Confidence` is the shared confidence in that record's applicable branch report; it is not separate per-fact confidence. No `IncentiveConfidence`, `DangerConfidence`, additional knowledge owner, or schema 11 is approved for Phase 5B MVP.
+
+For an applicable record, transient decision interpretation derives confidence exactly as follows:
+
+```text
+EffectiveIncentiveConfidence =
+    IncentiveKnown
+        ? clamp(Confidence × IntelligenceInterpretationFactor, 0, 1)
+        : 0
+
+EffectiveDangerConfidence =
+    DangerKnown
+        ? clamp(
+            Confidence × IntelligenceInterpretationFactor
+            + TrapInterpretationConfidenceBonus × ActiveTrapExpertise,
+            0,
+            1)
+        : 0
+```
+
+`TrapInterpretationConfidenceBonus = 0.15` is initial tunable configuration. Active expertise therefore improves interpretation of known danger information only; it cannot manufacture missing shared knowledge. Effective values are transient decision inputs and are never persisted separately.
 
 ## 8. Member health and route-condition views
 
@@ -203,6 +223,8 @@ Formation is not universal targeting. The encounter architecture must support co
 
 Initial optional-corridor traps use `LeadActive`. Only the current lead active member receives trap HP damage unless future content explicitly owns another policy. Trap expertise remains separate from formation.
 
+For the current MVP content set, Goblin, Skeleton, Snare, Spike Trap, and Chilling Sigil assignments all use `LeadActive`. This is initial configurable content behavior, not a universal targeting rule. The architecture continues to support future content-owned `FrontlinePreferred`, `RearlinePreferred`, `SpecificRole`, `AllActive`, `MultiTarget`, `PositionArea`, and later approved policies, but Phase 5B does not implement flanking, rearline attacks, cleaves, area attacks, or multi-target monster attacks merely because the architecture permits them.
+
 Damage is absolute HP and must not scale as a percentage of target MaxHealth. Initial configurable MVP profiles are:
 
 | Content | Minimum damage | Maximum damage |
@@ -227,6 +249,24 @@ Damage =
 ```
 
 The integer-rounding rule is implementation-selected but must be explicit, deterministic, configuration-independent, and tested. Global randomness is prohibited.
+
+For each reached required-route room, resolve the existing approved room-level casualty pressure once and derive:
+
+```text
+RoomEncounterSeverity = clamp(RoomCasualtyPressure, 0, 1)
+```
+
+Supply that same `RoomEncounterSeverity` to every damaging content assignment resolved in that room. Do not independently reroll or recompute unrelated casualty pressure per target. Each current damaging assignment resolves exactly one member-level damage event in canonical room-content order using its configured damage profile, the room severity, its configured targeting policy, current formation, and approved capability mitigation:
+
+- Goblin: one `LeadActive` event.
+- Skeleton: one `LeadActive` event.
+- Snare: one `LeadActive` event.
+- Spike Trap: one `LeadActive` event.
+- Chilling Sigil: `LeadActive` targeting contract with configured `0..0` HP damage; it causes no HP loss while retaining its existing non-HP effects.
+
+The canonical room-content order is Monster, then Trap, then Loot. Within each category, preserve the existing canonical persisted ordering: sequence, then stable `AssignmentId` ordinal order. This order has gameplay consequences: every event applies immediately to the live roster, and if an event reduces the current lead to zero HP, that member becomes inactive, formation closes deterministically, and the next canonical event targets the new `LeadActive` member. Do not batch room damage and assign deaths afterward. Formation determines position, targeting policy determines affected member(s), damage profile determines absolute HP damage, and member HP determines casualties.
+
+Loot is non-damaging and resolves under its existing authority after Monster and Trap processing only when the room was reached and the run is not terminal. If member-level damage causes a full wipe, stop subsequent room-content processing and route progression, derive the wipe from the roster, and do not process later Trap or Loot assignments. Other approved run-stop behavior retains its existing traversal precedence.
 
 The approved future flow is:
 
@@ -285,7 +325,7 @@ U =
     (IncentiveUncertainty + DangerUncertainty) / 2
 ```
 
-All confidence and uncertainty values are clamped to `[0,1]`. If topology knowledge is inapplicable under the existing fingerprint, `U = 1` and content-specific knowledge is not used. There is no passive age decay. Stale is not automatically false; old applicable knowledge retains confidence until contradicted, superseded, or structurally invalidated.
+All confidence and uncertainty values are clamped to `[0,1]`. The effective confidence terms are the transient single-record derivations in section 7; schema 10 persists only the shared branch-report `Confidence` value. If topology knowledge is inapplicable under the existing fingerprint, `U = 1` and content-specific knowledge is not used. There is no passive age decay. Stale is not automatically false; old applicable knowledge retains confidence until contradicted, superseded, or structurally invalidated.
 
 ### 10.4 Required-route reserve pressure `Q`
 
@@ -396,7 +436,7 @@ Exact equality is `SKIP`. Runtime `GetHashCode`, global/shared RNG, wall clock, 
 
 Skipping does not reveal loot, traps, precise danger, or hidden content. A party that physically reached the fork and later retains at least one survivor may confirm applicable topology or branch existence.
 
-Directly observed incentive or danger with survivors begins at configurable `InitialObservationConfidence = 0.75`. Reconfirming the same applicable observation increases confidence by configurable `ReconfirmationConfidenceIncrease = 0.125`, clamped to `1.0`. Contradictory direct survivor evidence replaces the perceived value, resets confidence to the initial observation value, and updates last-confirmed run identity.
+Directly observed incentive or danger with survivors begins at configurable `InitialObservationConfidence = 0.75`. Reconfirming the same applicable observation increases configurable `ReconfirmationConfidenceIncrease = 0.125`, clamped to `1.0`. These updates apply to the one persisted shared branch-report `Confidence` value. Both currently known incentive and danger subsequently consume that same persisted confidence, while `IncentiveKnown` and `DangerKnown` independently control whether each fact exists; confidence never makes an unknown fact known. Contradictory direct survivor evidence replaces the relevant perceived fact, resets the shared confidence to the initial observation value, and updates last-confirmed run identity. Independent incentive/danger confidence histories would be a post-MVP persistence redesign requiring separate save/schema review.
 
 There is no passive confidence decay. Existing topology-fingerprint applicability remains authoritative. Old applicable knowledge remains usable until contradicted, superseded, or structurally invalidated.
 
