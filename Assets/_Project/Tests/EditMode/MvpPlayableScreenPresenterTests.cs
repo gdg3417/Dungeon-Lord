@@ -1,14 +1,73 @@
 #if UNITY_EDITOR
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using System.Collections.Generic;
+using System.IO;
 using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
 {
     public class MvpPlayableScreenPresenterTests
     {
+        [Test]
+        public void BuildScreenText_ReopenedPhaseFiveBRunUsesPersistedPartyAggregateWithoutRegeneratingRoster()
+        {
+            RunSimulationConfig config = PhaseFiveBTestConfig.Production();
+            config.BaseSuccessChance = 1d; config.SuccessThreshold = 0d;
+            config.HeatPenaltyPerPoint = 0d; config.ManaReserveBonusPerPoint = 0d;
+            config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 5;
+            foreach (RunClassProfile profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
+            RunOutcomeRecord outcome = new RunSimulationService(config, JsonUtility.FromJson<LootConfig>(File.ReadAllText(
+                "Assets/_Project/Data/Bootstrap/loot_config.json"))).SimulateRoute(
+                new StructureRuntimeState(), 9001L, 1, RunPostureResolver.BalancedId,
+                new[] { new MvpOrderedRouteRoom {
+                    FloorIndex = 0, RoomIndex = 0, HasActiveContent = true,
+                    RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
+                    Assignments = new[] { new RunRoomAssignment {
+                        AssignmentId = "goblin", OptionId = MvpDungeonPlacementIds.GoblinOptionId,
+                        CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, Sequence = 0 } }
+                } });
+            var save = new SaveData();
+            save.runHistory.AppendOutcome(outcome, 10);
+            SaveData reopened = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(save));
+            RunOutcomeRecord reopenedOutcome = reopened.runHistory.LatestOutcome;
+
+            Assert.That(outcome.Party, Is.Not.Null);
+            Assert.That(reopenedOutcome.Party, Is.Null);
+            Assert.That(reopenedOutcome.EncounterEvents, Is.Null);
+            Assert.That(reopenedOutcome.SurvivalSummary.PartySize, Is.EqualTo(5));
+            Assert.That(reopenedOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(4));
+            Assert.That(reopenedOutcome.SurvivalSummary.DeathCount, Is.EqualTo(1));
+
+            MvpPlayerLoopSummary summary = MvpPlayerLoopSummaryPresenter.Resolve(reopened, config);
+            string text = MvpPlayableScreenPresenter.BuildScreenText(summary,
+                new GuidedMvpActionPathSummary { RuleResolved = true }, string.Empty, string.Empty, string.Empty,
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true }, null, null, Localize);
+
+            Assert.That(summary.HasRunOutcome, Is.True);
+            Assert.That(summary.AdventurerPartyPreviewResolved, Is.False);
+            Assert.That(summary.AdventurerPartyClassIds, Is.Empty);
+            Assert.That(text, Does.Contain("Party details unavailable after reopen. Survivors: 4/5; deaths: 1"));
+            Assert.That(text, Does.Not.Contain("Party: no adventurers observed yet."));
+            Assert.That(text, Does.Not.Contain("adventurer.class.").And.Not.Contain("ui.mvp_screen.party"));
+        }
+
+        [Test]
+        public void BuildScreenText_NoRunKeepsPartyUnavailableMessage()
+        {
+            string text = MvpPlayableScreenPresenter.BuildScreenText(
+                new MvpPlayerLoopSummary { RuleResolved = true, HasRunOutcome = false },
+                new GuidedMvpActionPathSummary { RuleResolved = true }, string.Empty, string.Empty, string.Empty,
+                string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty,
+                new MvpFirstSessionObjectiveSummary { RuleResolved = true }, null, null, Localize);
+
+            Assert.That(text, Does.Contain("No adventurer visit yet. Use Run / observe dungeon after the path is ready."));
+        }
+
         [Test]
         public void BuildScreenText_OrganizesPlayerFacingLoopIntoPlayableSections()
         {
@@ -486,6 +545,7 @@ namespace DungeonBuilder.Tests.EditMode
             [MvpPlayableScreenPresenter.NoRunFeedbackKey] = "No adventurer visit observed yet this session.",
             [MvpPlayableScreenPresenter.NoAnalysisKey] = "Why it happened: observe adventurer activity to see the first result.",
             [MvpPlayableScreenPresenter.PartyUnavailableKey] = "Party: no adventurers observed yet.",
+            [MvpPlayableScreenPresenter.PartyHistoricalSummaryFormatKey] = "Party details unavailable after reopen. Survivors: {0}/{1}; deaths: {2}",
             [MvpPlayableScreenPresenter.PartyFormatKey] = "Party: {0}",
             [MvpPlayableScreenPresenter.ResearchFormatKey] = "Research: {0}",
             [MvpPlayableScreenPresenter.PathCompleteFormatKey] = "Path complete: {0}",

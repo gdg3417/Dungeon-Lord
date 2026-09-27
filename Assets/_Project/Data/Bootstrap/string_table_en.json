@@ -1856,6 +1856,10 @@
       "text": "Party: no adventurers observed yet."
     },
     {
+      "key": "ui.mvp_screen.party.historical_summary_format",
+      "text": "Party details unavailable after reopen. Survivors: {0}/{1}; deaths: {2}"
+    },
+    {
       "key": "ui.mvp_screen.analysis.format",
       "text": "Why it happened: {0}"
     },

@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0
         public const string NoComparisonKey = "ui.mvp_screen.comparison.none";
         public const string NoAnalysisKey = "ui.mvp_screen.analysis.no_run";
         public const string PartyUnavailableKey = "ui.mvp_screen.party.unavailable";
+        public const string PartyHistoricalSummaryFormatKey = "ui.mvp_screen.party.historical_summary_format";
         public const string PartyFormatKey = "ui.mvp_screen.party.format";
         public const string ResearchFormatKey = "ui.mvp_screen.research_format";
         public const string AnalysisFormatKey = "ui.mvp_screen.analysis.format";
@@ -234,6 +235,15 @@ namespace DungeonBuilder.M0
         {
             if (summary == null || !summary.AdventurerPartyPreviewResolved || summary.AdventurerPartyClassIds == null || summary.AdventurerPartyClassIds.Length == 0)
             {
+                if (summary != null && summary.HasRunOutcome && summary.LatestRunPartySize > 0)
+                {
+                    return string.Format(
+                        Localize(localize, PartyHistoricalSummaryFormatKey),
+                        summary.LatestRunSurvivorCount,
+                        summary.LatestRunPartySize,
+                        summary.LatestRunDeathCount);
+                }
+
                 return Localize(localize, PartyUnavailableKey);
             }
 
