@@ -11,7 +11,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void TwoEmptyRooms_TraverseWithoutLootDeathsOrHeatMutation()
         {
-            var config = new RunSimulationConfig { BaseSuccessChance = 0.6d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
+            var config = new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = 0.6d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
                 MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
             var service = new RunSimulationService(config);
             var runtime = new StructureRuntimeState { Heat = 17d, ManaReserve = 4d };
@@ -38,7 +38,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void TwoEmptyRooms_AreDeterministicForIdenticalInputs()
         {
-            var config = new RunSimulationConfig { BaseSuccessChance = 0.6d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
+            var config = new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = 0.6d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
                 MinPartySize = 2, MaxPartySize = 4, MaxAllowedPartySize = 4, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
             var service = new RunSimulationService(config);
             RunOutcomeRecord first = service.SimulateRoute(new StructureRuntimeState { Heat = 8d }, 44L, 2, RunPostureResolver.BalancedId, new[] { EmptyRoom(0), EmptyRoom(1) });
@@ -51,13 +51,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ClearedRoomOnePressureWipe_OverridesClearAndPreventsRoomTwo()
         {
-            var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 100,
+            var config = new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 100,
                 MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d,
                 CasualtyPressureRuleSourceId = "test.casualty", CasualtyPressurePerDanger = 1d, CasualtyPressureMinimum = 0d, CasualtyPressureMaximum = 1d,
                 BalancedCasualtyPressureMultiplier = 1d, PartyWipeCasualtyPressureThreshold = 0.5d,
                 MvpPlacementEffects = new[] { new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 1 } } };
             var service = new RunSimulationService(config);
-            MvpOrderedRouteRoom dangerous = EmptyRoom(0); dangerous.HasActiveContent = true; dangerous.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId };
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
+            config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
+            MvpOrderedRouteRoom dangerous = EmptyRoom(0); dangerous.HasActiveContent = true;
+            dangerous.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.SkeletonOptionId };
             RunOutcomeRecord outcome = service.SimulateRoute(new StructureRuntimeState(), 9L, 1, RunPostureResolver.BalancedId, new[] { dangerous, EmptyRoom(1) });
             Assert.That(outcome.RoomResolutions, Has.Length.EqualTo(1));
             Assert.That(outcome.RoomResolutions[0].Cleared, Is.True);
@@ -74,7 +77,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void TwoClearedRooms_CarryExactSurvivorsAndPreserveOriginalTick()
         {
-            var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
+            var config = new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = 1d, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10,
                 MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
             var service = new RunSimulationService(config);
             MvpOrderedRouteRoom first = EmptyRoom(0); first.HasActiveContent = true; first.AssignedMonsterOptionIds = new[] { MvpDungeonPlacementIds.SkeletonOptionId };
@@ -94,6 +97,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RunSimulationConfig config = BaseConfig(1d, 1d);
             config.CasualtyPressureRuleSourceId = "test.casualty"; config.CasualtyPressurePerDanger = 0.34d; config.CasualtyPressureMaximum = 1d;
             config.BalancedCasualtyPressureMultiplier = 1d; config.PartyWipeCasualtyPressureThreshold = 0.9d;
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
             config.MvpPlacementEffects = new[] { new MvpPlacementEffectConfig { CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.SkeletonOptionId, Danger = 1 } };
             var service = new RunSimulationService(config); MvpOrderedRouteRoom first = ActiveRoom(0, MvpDungeonPlacementIds.SkeletonOptionId); MvpOrderedRouteRoom second = ActiveRoom(1, MvpDungeonPlacementIds.GoblinOptionId);
             RunOutcomeRecord outcome = service.SimulateRoute(new StructureRuntimeState(), 1L, 1, RunPostureResolver.BalancedId, new[] { first, second });
@@ -140,7 +144,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(route.HeatAtStart, Is.EqualTo(once.HeatAtStart)); Assert.That(route.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(once.RunHeatApplicationSummary.HeatAfter)); Assert.That(route.FinalChance, Is.EqualTo(once.FinalChance)); Assert.That(route.RunPostureId, Is.EqualTo(once.RunPostureId));
         }
 
-        private static RunSimulationConfig BaseConfig(double chance, double failureRatio) => new RunSimulationConfig { BaseSuccessChance = chance, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10, MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = failureRatio };
+        private static RunSimulationConfig BaseConfig(double chance, double failureRatio) => new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = chance, SuccessThreshold = 0.5d, BaseScoreOnSuccess = 10, MinPartySize = 3, MaxPartySize = 3, MaxAllowedPartySize = 3, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = failureRatio };
         private static MvpOrderedRouteRoom ActiveRoom(int index, string monster) { MvpOrderedRouteRoom room = EmptyRoom(index); room.HasActiveContent = true; room.AssignedMonsterOptionIds = new[] { monster }; return room; }
         private static LootConfig TestLootConfig() => new LootConfig { items = new[] { new LootItemRecord { id = "loot.test.item", worldValue = 5, reserveCost = 1, isTradeable = true, nameKey = "loot.test.name" } }, tables = new[] { new LootTableRecord { id = "loot.test", minRollCount = 1, maxRollCount = 1, pool = new[] { new LootTablePoolEntry { itemId = "loot.test.item", weight = 1d } } } } };
 

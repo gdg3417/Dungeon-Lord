@@ -59,7 +59,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static RunSimulationConfig BuildConfig()
         {
             return new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 BaseSuccessChance = 0.6d,
                 HeatPenaltyPerPoint = 0.004d,
                 ManaReserveBonusPerPoint = 0.01d,
@@ -489,8 +489,14 @@ namespace DungeonBuilder.Tests.EditMode
         [Test]
         public void SimulateOnce_ExtractionSummary_ZeroSurvivors_ExtractsNone()
         {
-            var service = new RunSimulationService(BuildConfig(), BuildLootConfig());
-            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 10, 3);
+            var config = BuildConfig();
+            config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
+            var service = new RunSimulationService(config, BuildLootConfig());
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 10, 3,
+                RunPostureResolver.BalancedId, new MvpPlacementEffectsSummary { ContributingOptionIds = new[] {
+                    MvpDungeonPlacementIds.GoblinOptionId, MvpDungeonPlacementIds.GoblinOptionId, MvpDungeonPlacementIds.GoblinOptionId } });
+            Assert.That(outcome.Party.IsWiped, Is.True);
             Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.True);
             Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.Empty);
             Assert.That(outcome.LootExtractionSummary.LostItemIds, Is.EqualTo(outcome.LootSummary.GeneratedItemIds));
@@ -520,26 +526,29 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SimulateOnce_ExtractionSummary_FailedSurvivalSummary_ReturnsDeterministicFailure()
+        public void SimulateOnce_InvalidPhaseFiveBHealthFailsClosedBeforeExtraction()
         {
             RunSimulationConfig config = BuildConfig();
-            config.SuccessSurvivorRatio = 1.5d;
+            config.PhaseFiveB.Classes[0].LevelOneMaxHealth = 0;
             var service = new RunSimulationService(config, BuildLootConfig());
-            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 20, 6);
-            Assert.That(outcome.LootExtractionSummary.RuleResolved, Is.False);
-            Assert.That(outcome.LootExtractionSummary.DeterministicErrorCode, Is.EqualTo((int)RunLootExtractionSummaryErrorCode.SurvivalSummaryMissingOrFailed));
+            Assert.Throws<System.ArgumentException>(() => service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d }, 20, 6));
         }
 
         [Test]
-        public void SimulateOnce_ExtractionSummary_PartialRatio_ExtractsDeterministicSubset()
+        public void SimulateOnce_ExtractionSummary_HpCasualtiesExtractDeterministicSubset()
         {
             RunSimulationConfig config = BuildConfig();
             config.MinPartySize = 4;
             config.MaxPartySize = 4;
             config.SuccessSurvivorRatio = 0.5d;
+            config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 4;
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
             var service = new RunSimulationService(config, BuildLootConfig());
 
-            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2);
+            RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 10, 2,
+                RunPostureResolver.BalancedId, new MvpPlacementEffectsSummary { ContributingOptionIds = new[] {
+                    MvpDungeonPlacementIds.GoblinOptionId, MvpDungeonPlacementIds.GoblinOptionId } });
+            Assert.That(outcome.SurvivalSummary.DeathCount, Is.EqualTo(2));
 
             Assert.That(outcome.LootSummary.GeneratedItemIds.Length, Is.EqualTo(2));
             Assert.That(outcome.LootExtractionSummary.ExtractedItemIds, Is.EqualTo(new[] { "loot.item.scrap.iron" }));
@@ -583,7 +592,8 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(successOutcome.SurvivalSummary.PartySize, Is.InRange(3, 5));
             Assert.That(successOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(successOutcome.SurvivalSummary.PartySize));
-            Assert.That(failureOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(0));
+            Assert.That(failureOutcome.SurvivalSummary.SurvivorCount, Is.EqualTo(failureOutcome.Party.ActiveCount));
+            Assert.That(failureOutcome.SurvivalSummary.DeathCount, Is.Zero, "Threshold failure cannot kill undamaged members.");
             Assert.That(successOutcome.SurvivalSummary.SurvivorRatio, Is.EqualTo((double)successOutcome.SurvivalSummary.SurvivorCount / successOutcome.SurvivalSummary.PartySize));
             Assert.That(failureOutcome.SurvivalSummary.SurvivorRatio, Is.EqualTo((double)failureOutcome.SurvivalSummary.SurvivorCount / failureOutcome.SurvivalSummary.PartySize));
             Assert.That(successOutcome.SurvivalSummary.DeathCount, Is.EqualTo(successOutcome.SurvivalSummary.PartySize - successOutcome.SurvivalSummary.SurvivorCount));
@@ -591,7 +601,7 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
-        public void SimulateOnce_SurvivalSummary_InvalidConfiguredRatio_ReturnsDeterministicFailure()
+        public void SimulateOnce_SurvivalSummary_RetiredRatiosCannotOverrideHp()
         {
             RunSimulationConfig invalidSuccessRatio = BuildConfig();
             invalidSuccessRatio.SuccessSurvivorRatio = 2d;
@@ -600,8 +610,8 @@ namespace DungeonBuilder.Tests.EditMode
             RunOutcomeRecord successOutcome = successService.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 12, 8);
 
             Assert.That(successOutcome.SurvivalSummary, Is.Not.Null);
-            Assert.That(successOutcome.SurvivalSummary.RuleResolved, Is.False);
-            Assert.That(successOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
+            Assert.That(successOutcome.SurvivalSummary.RuleResolved, Is.True);
+            Assert.That(successOutcome.SurvivalSummary.DeathCount, Is.Zero);
 
             RunSimulationConfig invalidFailureRatio = BuildConfig();
             invalidFailureRatio.FailureSurvivorRatio = -0.1d;
@@ -610,8 +620,8 @@ namespace DungeonBuilder.Tests.EditMode
             RunOutcomeRecord failureOutcome = failureService.SimulateOnce(new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true }, 13, 9);
 
             Assert.That(failureOutcome.SurvivalSummary, Is.Not.Null);
-            Assert.That(failureOutcome.SurvivalSummary.RuleResolved, Is.False);
-            Assert.That(failureOutcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio));
+            Assert.That(failureOutcome.SurvivalSummary.RuleResolved, Is.True);
+            Assert.That(failureOutcome.SurvivalSummary.DeathCount, Is.Zero);
         }
 
         [Test]
@@ -1997,6 +2007,8 @@ namespace DungeonBuilder.Tests.EditMode
                     runHistory = new RunHistoryState { NextRunSequence = 1 }
                 });
 
+                root.Save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(
+                    MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 0));
                 bool ok = root.SimulateRunOnce();
                 Assert.That(ok, Is.True);
                 RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
@@ -2037,6 +2049,8 @@ namespace DungeonBuilder.Tests.EditMode
                     runHistory = new RunHistoryState { NextRunSequence = 1 }
                 });
 
+                root.Save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(
+                    MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 0));
                 bool ok = root.SimulateRunOnce();
                 Assert.That(ok, Is.True);
                 RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
@@ -2071,6 +2085,8 @@ namespace DungeonBuilder.Tests.EditMode
                     runHistory = new RunHistoryState { NextRunSequence = 1 }
                 });
 
+                root.Save.mvpDungeonPlacements.Entries.Add(new MvpDungeonPlacementEntry(
+                    MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, 0));
                 bool ok = root.SimulateRunOnce();
                 Assert.That(ok, Is.True);
                 RunOutcomeRecord latest = root.Save.runHistory.LatestOutcome;
@@ -2087,7 +2103,7 @@ namespace DungeonBuilder.Tests.EditMode
             finally { Object.DestroyImmediate(go); }
         }
         [Test]
-        public void SimulateOnce_SurvivalSummary_MaxPartyAboveAllowed_ReturnsInvalidPartySizeRange()
+        public void SimulateOnce_SurvivalSummary_LegacySizeDoesNotOverridePhaseFiveB()
         {
             RunSimulationConfig invalid = BuildConfig();
             invalid.MaxAllowedPartySize = 4;
@@ -2097,8 +2113,9 @@ namespace DungeonBuilder.Tests.EditMode
             RunOutcomeRecord outcome = service.SimulateOnce(new StructureRuntimeState { Heat = 0d, ManaReserve = 50d, IsHeatCrisisActive = false }, 14, 10);
 
             Assert.That(outcome.SurvivalSummary, Is.Not.Null);
-            Assert.That(outcome.SurvivalSummary.RuleResolved, Is.False);
-            Assert.That(outcome.SurvivalSummary.DeterministicErrorCode, Is.EqualTo((int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange));
+            Assert.That(outcome.SurvivalSummary.RuleResolved, Is.True);
+            Assert.That(outcome.SurvivalSummary.PartySize, Is.EqualTo(outcome.Party.Members.Count));
+            Assert.That(outcome.SurvivalSummary.PartySize, Is.InRange(3, 5));
         }
 
         [Test]
@@ -2354,11 +2371,11 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(outcome.RunHeatDeltaSummary.RuleResolved, Is.True);
             Assert.That(outcome.RunHeatDeltaSummary.RuleSourceIdUsed, Is.EqualTo(config.RunHeatDeltaRuleSourceId));
             Assert.That(outcome.RunHeatDeltaSummary.DeterministicSeed, Is.EqualTo(outcome.LootSummary.ResolverSeed));
-            Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.EqualTo(3d));
+            Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.EqualTo(0d));
             Assert.That(outcome.RunHeatDeltaSummary.EliteDeathHeatDelta, Is.EqualTo(0d));
-            Assert.That(outcome.RunHeatDeltaSummary.SurvivorCoolingDelta, Is.EqualTo(0d));
+            Assert.That(outcome.RunHeatDeltaSummary.SurvivorCoolingDelta, Is.EqualTo(-outcome.Party.ActiveCount * config.RunHeatSurvivorCoolingPerSurvivor));
             Assert.That(outcome.RunHeatDeltaSummary.LootCoolingDelta, Is.EqualTo(0d));
-            Assert.That(outcome.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(4d));
+            Assert.That(outcome.RunHeatDeltaSummary.FinalHeatDelta, Is.EqualTo(outcome.RunHeatDeltaSummary.SurvivorCoolingDelta));
         }
 
         [Test]
@@ -2396,7 +2413,7 @@ namespace DungeonBuilder.Tests.EditMode
                 root.RefreshRunLine();
 
                 Assert.That(runtime.Heat, Is.EqualTo(heatAfterSimulation));
-                Assert.That(root.RunHeatApplicationLine, Is.EqualTo("Heat Application: resolved=True error=0 before=20 delta=4 after=24 tierBefore=heat_tier.notice tierAfter=heat_tier.notice tierChanged=False ruleSource=run.heat_application.rule.v1"));
+                Assert.That(root.RunHeatApplicationLine, Is.EqualTo("Heat Application: resolved=True error=0 before=20 delta=-2 after=18 tierBefore=heat_tier.notice tierAfter=heat_tier.notice tierChanged=False ruleSource=run.heat_application.rule.v1"));
             }
             finally { Object.DestroyImmediate(rootObject); }
         }
@@ -3129,6 +3146,8 @@ namespace DungeonBuilder.Tests.EditMode
         public void SimulateOnce_CasualtyPressure_GreedyIsRiskierThanCautious()
         {
             RunSimulationConfig config = BuildConfig();
+            // Test-only HP boundary: greater severity must cross a real member's death threshold.
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 3;
             config.MinPartySize = 5;
             config.MaxPartySize = 5;
             var service = new RunSimulationService(config, BuildLootConfig());
@@ -3144,6 +3163,7 @@ namespace DungeonBuilder.Tests.EditMode
         public void SimulateOnce_CasualtiesReduceLootAndIncreaseHeat()
         {
             RunSimulationConfig config = BuildConfig();
+            foreach (var profile in config.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 2;
             config.MinPartySize = 5;
             config.MaxPartySize = 5;
             config.RunHeatSurvivorCoolingPerSurvivor = 0d;

@@ -274,6 +274,7 @@ namespace DungeonBuilder.M0
 [Serializable]
     public sealed class RunSimulationConfig
     {
+        public Gameplay.RunSimulation.PhaseFiveBConfig PhaseFiveB;
         public double BaseSuccessChance;
         public double HeatPenaltyPerPoint;
         public double ManaReserveBonusPerPoint;
@@ -286,9 +287,11 @@ namespace DungeonBuilder.M0
         public double LowManaFeedbackThreshold;
         public double StrongManaReserveFeedbackThreshold;
         public string LootTableId;
+        // Legacy fields remain readable for old fixtures/configuration. PhaseFiveB owns live party size.
         public int MinPartySize;
         public int MaxPartySize;
         public int MaxAllowedPartySize;
+        // Retired casualty authorities; compatibility-only and never applied to a live roster.
         public double SuccessSurvivorRatio;
         public double FailureSurvivorRatio;
         public string CasualtyPressureRuleSourceId;
@@ -302,7 +305,7 @@ namespace DungeonBuilder.M0
         public double CasualtyPressureMaximum;
         public double CasualtyLootExtractionPenaltyPerCasualty;
         public double CasualtyHeatDeltaPerCasualty;
-        public double PartyWipeCasualtyPressureThreshold;
+        public double PartyWipeCasualtyPressureThreshold; // Compatibility-only; a wipe is all members at zero HP.
         public string MvpPlacementEffectsRuleSourceId;
         public MvpPlacementEffectConfig[] MvpPlacementEffects = Array.Empty<MvpPlacementEffectConfig>();
         public MvpRoomSlotCapacityConfig[] MvpRoomSlotCapacities = Array.Empty<MvpRoomSlotCapacityConfig>();
@@ -339,6 +342,7 @@ namespace DungeonBuilder.M0
         public double HeatConcernMinimum;
         public double HeatConcernMaximum;
         public string RunHeatApplicationRuleSourceId;
+        // Retired preview-generation configuration; presentation projects the actual transient roster.
         public string AdventurerPartyCompositionRuleSourceId;
         public int AdventurerPartyCompositionMinSize;
         public int AdventurerPartyCompositionMaxSize;
@@ -485,6 +489,9 @@ namespace DungeonBuilder.M0
     [Serializable]
     public sealed class RunOutcomeRecord
     {
+        // Properties are transient: Unity and the strict public-field save contract omit them.
+        public Gameplay.RunSimulation.RunParty Party { get; internal set; }
+        public Gameplay.RunSimulation.RunEncounterEvent[] EncounterEvents { get; internal set; }
         public string RunId;
         public long TickStarted;
         public bool Success;

@@ -555,7 +555,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static RunSimulationConfig BuildRunConfigForMvpActiveLoop()
         {
             return new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 BaseSuccessChance = 0.6d,
                 HeatPenaltyPerPoint = 0.004d,
                 ManaReserveBonusPerPoint = 0.01d,

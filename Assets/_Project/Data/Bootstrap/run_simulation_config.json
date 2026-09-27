@@ -1,4 +1,144 @@
 {
+  "PhaseFiveB": {
+  "Version": 1,
+  "PartyRuleSourceId": "run.party.phase5b.v1",
+  "BehaviorRuleSourceId": "run.behavior.phase5b.v1",
+  "IntelligenceRuleSourceId": "run.intelligence.phase5b.v1",
+  "EncounterRuleSourceId": "run.encounter.phase5b.v1",
+  "MinPartySize": 3,
+  "MaxPartySize": 5,
+  "InitialLevel": 1,
+  "CapabilityId": "adventurer.capability.trap_expertise",
+  "TrapMitigationCoefficient": 0.5,
+  "Classes": [
+    {
+      "ClassId": "adventurer.class.warrior",
+      "LevelOneMaxHealth": 10,
+      "TrapExpertise": 0.0,
+      "FormationPriority": 1
+    },
+    {
+      "ClassId": "adventurer.class.cleric",
+      "LevelOneMaxHealth": 8,
+      "TrapExpertise": 0.0,
+      "FormationPriority": 4
+    },
+    {
+      "ClassId": "adventurer.class.rogue",
+      "LevelOneMaxHealth": 7,
+      "TrapExpertise": 1.0,
+      "FormationPriority": 2
+    },
+    {
+      "ClassId": "adventurer.class.ranger",
+      "LevelOneMaxHealth": 7,
+      "TrapExpertise": 0.5,
+      "FormationPriority": 3
+    },
+    {
+      "ClassId": "adventurer.class.mage",
+      "LevelOneMaxHealth": 6,
+      "TrapExpertise": 0.0,
+      "FormationPriority": 5
+    }
+  ],
+  "Behaviors": [
+    {
+      "Id": "adventurer.behavior_profile.cautious",
+      "Weight": 0.2,
+      "RewardAppetite": 0.4,
+      "RiskTolerance": 0.2,
+      "UncertaintyTolerance": 0.2,
+      "RequiredRouteCommitment": 0.8
+    },
+    {
+      "Id": "adventurer.behavior_profile.greedy",
+      "Weight": 0.2,
+      "RewardAppetite": 0.9,
+      "RiskTolerance": 0.6,
+      "UncertaintyTolerance": 0.45,
+      "RequiredRouteCommitment": 0.35
+    },
+    {
+      "Id": "adventurer.behavior_profile.curious",
+      "Weight": 0.2,
+      "RewardAppetite": 0.55,
+      "RiskTolerance": 0.5,
+      "UncertaintyTolerance": 0.9,
+      "RequiredRouteCommitment": 0.35
+    },
+    {
+      "Id": "adventurer.behavior_profile.goal_oriented",
+      "Weight": 0.2,
+      "RewardAppetite": 0.35,
+      "RiskTolerance": 0.45,
+      "UncertaintyTolerance": 0.4,
+      "RequiredRouteCommitment": 0.95
+    },
+    {
+      "Id": "adventurer.behavior_profile.gambler",
+      "Weight": 0.2,
+      "RewardAppetite": 0.75,
+      "RiskTolerance": 0.9,
+      "UncertaintyTolerance": 0.85,
+      "RequiredRouteCommitment": 0.2
+    }
+  ],
+  "IntelligenceBands": [
+    {
+      "Id": "adventurer.intelligence.poor",
+      "InterpretationFactor": 0.6,
+      "Weight": 0.25
+    },
+    {
+      "Id": "adventurer.intelligence.standard",
+      "InterpretationFactor": 0.8,
+      "Weight": 0.5
+    },
+    {
+      "Id": "adventurer.intelligence.good",
+      "InterpretationFactor": 1.0,
+      "Weight": 0.25
+    }
+  ],
+  "DamageProfiles": [
+    {
+      "OptionId": "placement.option.monster.goblin",
+      "CategoryId": "placement.category.monster",
+      "TargetingPolicyId": "run.targeting.lead_active",
+      "MinimumDamage": 1,
+      "MaximumDamage": 2
+    },
+    {
+      "OptionId": "placement.option.monster.skeleton",
+      "CategoryId": "placement.category.monster",
+      "TargetingPolicyId": "run.targeting.lead_active",
+      "MinimumDamage": 1,
+      "MaximumDamage": 3
+    },
+    {
+      "OptionId": "placement.option.trap.snare",
+      "CategoryId": "placement.category.trap",
+      "TargetingPolicyId": "run.targeting.lead_active",
+      "MinimumDamage": 1,
+      "MaximumDamage": 2
+    },
+    {
+      "OptionId": "placement.option.trap.spike",
+      "CategoryId": "placement.category.trap",
+      "TargetingPolicyId": "run.targeting.lead_active",
+      "MinimumDamage": 2,
+      "MaximumDamage": 4
+    },
+    {
+      "OptionId": "placement.option.trap.chilling_sigil",
+      "CategoryId": "placement.category.trap",
+      "TargetingPolicyId": "run.targeting.lead_active",
+      "MinimumDamage": 0,
+      "MaximumDamage": 0
+    }
+  ]
+},
   "BaseSuccessChance": 0.6,
   "HeatPenaltyPerPoint": 0.004,
   "ManaReserveBonusPerPoint": 0.01,

@@ -50,7 +50,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string directory = Path.Combine(Path.GetTempPath(), "gd60-real-route-" + Guid.NewGuid().ToString("N"));
             try
             {
-                var config = new RunSimulationConfig { BaseSuccessChance = 1d, SuccessThreshold = 0.5d, MinPartySize = 2, MaxPartySize = 2, MaxAllowedPartySize = 2, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
+                var config = new RunSimulationConfig { PhaseFiveB = PhaseFiveBTestConfig.Create(), BaseSuccessChance = 1d, SuccessThreshold = 0.5d, MinPartySize = 2, MaxPartySize = 2, MaxAllowedPartySize = 2, SuccessSurvivorRatio = 1d, FailureSurvivorRatio = 0d };
                 var simulation = new RunSimulationService(config); var runtime = new StructureRuntimeState { Heat = 6d };
                 MvpOrderedRouteRoom first = ActiveRoom(0, MvpDungeonPlacementIds.SkeletonOptionId); MvpOrderedRouteRoom second = ActiveRoom(1, MvpDungeonPlacementIds.GoblinOptionId);
                 RunOutcomeRecord outcome = simulation.SimulateRoute(runtime, 55L, 1, RunPostureResolver.BalancedId, new[] { first, second });

@@ -803,7 +803,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static RunSimulationConfig RoomSlotConfig()
         {
             return new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 MvpRoomSlotCapacities = new[]
                 {
                     new MvpRoomSlotCapacityConfig { RoomOptionId = MvpDungeonPlacementIds.NarrowHallOptionId, MonsterCapacity = 1, TrapCapacity = 1, LootCapacity = 0 },
@@ -815,7 +815,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static RunSimulationConfig PlacementEffectsConfig()
         {
             return new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 MvpPlacementEffectsRuleSourceId = "mvp.placement_effects.rule.test",
                 MvpPlacementEffects = new[]
                 {

@@ -11,50 +11,21 @@ namespace DungeonBuilder.M0
         public const string ClericClassId = "adventurer.class.cleric";
         public const string RangerClassId = "adventurer.class.ranger";
 
-        public static AdventurerPartyCompositionSummary Resolve(
-            RunSimulationConfig config,
-            string runId,
-            long tickStarted,
-            string structureContextId)
+        public static AdventurerPartyCompositionSummary Resolve(Gameplay.RunSimulation.RunParty party)
         {
-            int seed = ComputeSeed(runId, tickStarted, structureContextId);
-            if (config == null ||
-                string.IsNullOrWhiteSpace(config.AdventurerPartyCompositionRuleSourceId) ||
-                config.AdventurerPartyCompositionMinSize < 1 ||
-                config.AdventurerPartyCompositionMaxSize < config.AdventurerPartyCompositionMinSize ||
-                config.AdventurerPartyCompositionMaxAllowedSize < 1 ||
-                config.AdventurerPartyCompositionMaxSize > config.AdventurerPartyCompositionMaxAllowedSize)
-            {
-                return CreateError(config, seed, AdventurerPartyCompositionSummaryErrorCode.MissingOrInvalidConfig);
-            }
-
-            string[] allowedClasses = FilterMvpClassIds(config.AdventurerPartyCompositionClassIds);
-            if (allowedClasses.Length == 0)
-            {
-                return CreateError(config, seed, AdventurerPartyCompositionSummaryErrorCode.NoAllowedMvpClasses);
-            }
-
-            int sizeRange = config.AdventurerPartyCompositionMaxSize - config.AdventurerPartyCompositionMinSize + 1;
-            int partySize = config.AdventurerPartyCompositionMinSize + PositiveModulo(seed, sizeRange);
-            partySize = Math.Min(partySize, allowedClasses.Length);
-
-            int startIndex = PositiveModulo(seed, allowedClasses.Length);
-            var classIds = new List<string>(partySize);
-            for (int i = 0; i < partySize; i++)
-            {
-                classIds.Add(allowedClasses[(startIndex + i) % allowedClasses.Length]);
-            }
-
-            return new AdventurerPartyCompositionSummary
-            {
-                RuleSourceId = config.AdventurerPartyCompositionRuleSourceId,
-                DeterministicSeed = seed,
-                RuleResolved = true,
-                DeterministicErrorCode = (int)AdventurerPartyCompositionSummaryErrorCode.None,
-                ClassIds = classIds.ToArray()
+            return new AdventurerPartyCompositionSummary {
+                RuleResolved = party != null,
+                DeterministicErrorCode = party == null ? (int)AdventurerPartyCompositionSummaryErrorCode.MissingOrInvalidConfig : 0,
+                RuleSourceId = party?.RuleSourceId,
+                DeterministicSeed = party?.DeterministicSeed ?? 0,
+                ClassIds = party == null ? Array.Empty<string>() : System.Linq.Enumerable.ToArray(
+                    System.Linq.Enumerable.Select(party.Members, member => member.ClassId))
             };
         }
 
+        // Legacy API retained for source compatibility; it no longer generates any party.
+        public static AdventurerPartyCompositionSummary Resolve(RunSimulationConfig config,
+            string runId, long tickStarted, string structureContextId) => Resolve((Gameplay.RunSimulation.RunParty)null);
         public static string ResolveClassLabel(string classId, Func<string, string, string> localize)
         {
             string key = GetClassLabelKey(classId);
@@ -94,84 +65,5 @@ namespace DungeonBuilder.M0
                    classId == RangerClassId;
         }
 
-        private static AdventurerPartyCompositionSummary CreateError(
-            RunSimulationConfig config,
-            int seed,
-            AdventurerPartyCompositionSummaryErrorCode code)
-        {
-            return new AdventurerPartyCompositionSummary
-            {
-                RuleSourceId = config != null ? config.AdventurerPartyCompositionRuleSourceId : string.Empty,
-                DeterministicSeed = seed,
-                RuleResolved = false,
-                DeterministicErrorCode = (int)code,
-                ClassIds = Array.Empty<string>()
-            };
-        }
-
-        private static string[] FilterMvpClassIds(string[] configuredClassIds)
-        {
-            if (configuredClassIds == null || configuredClassIds.Length == 0)
-            {
-                return Array.Empty<string>();
-            }
-
-            var result = new List<string>(configuredClassIds.Length);
-            for (int i = 0; i < configuredClassIds.Length; i++)
-            {
-                string classId = configuredClassIds[i];
-                if (!IsMvpClassId(classId) || result.Contains(classId))
-                {
-                    continue;
-                }
-
-                result.Add(classId);
-            }
-
-            return result.ToArray();
-        }
-
-        private static int ComputeSeed(string runId, long tickStarted, string structureContextId)
-        {
-            unchecked
-            {
-                int hash = 17;
-                hash = (hash * 31) + StableStringHash(runId);
-                hash = (hash * 31) + (int)(tickStarted & 0xFFFFFFFFL);
-                hash = (hash * 31) + (int)((tickStarted >> 32) & 0xFFFFFFFFL);
-                hash = (hash * 31) + StableStringHash(structureContextId);
-                return hash;
-            }
-        }
-
-        private static int StableStringHash(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return 0;
-            }
-
-            unchecked
-            {
-                int hash = 23;
-                for (int i = 0; i < value.Length; i++)
-                {
-                    hash = (hash * 31) + value[i];
-                }
-
-                return hash;
-            }
-        }
-
-        private static int PositiveModulo(int value, int modulo)
-        {
-            if (modulo <= 0)
-            {
-                return 0;
-            }
-
-            int result = value % modulo;
-            return result < 0 ? result + modulo : result;
-        }
     }
 }

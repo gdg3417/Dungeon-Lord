@@ -690,6 +690,19 @@ namespace DungeonBuilder.M0
         private void PublishCanonicalRuntime(SaveData published)
         {
             if (published == null || _explicitSaveDeleteQuiesced) return;
+            // Durable readback replaces SaveData. Retain same-session transient evidence by run identity;
+            // never reconstruct a historical roster from current tuning or serialize individual members.
+            RunOutcomeRecord[] previousRuns = Save?.runHistory?.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>();
+            foreach (RunOutcomeRecord run in (published.runHistory?.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>())
+                .Concat(new[] { published.runHistory?.LatestOutcome }))
+            {
+                if (run == null) continue;
+                RunOutcomeRecord previous = previousRuns.Concat(new[] { Save?.runHistory?.LatestOutcome })
+                    .FirstOrDefault(p => p != null && p.RunId == run.RunId && p.TickStarted == run.TickStarted);
+                if (previous == null) continue;
+                run.Party = previous.Party;
+                run.EncounterEvents = previous.EncounterEvents;
+            }
             Save = published;
             StructuralConstructionPreview = null;
             StructuralRenovationPreview = null;
@@ -2614,7 +2627,9 @@ namespace DungeonBuilder.M0
                 return survivalFormatKey;
             }
 
-            return string.Format(format, survival.PartySize, survival.SurvivorCount, survival.DeathCount, survival.SurvivorRatio, survival.DeterministicSeed, survival.DeterministicErrorCode);
+            string summary = string.Format(format, survival.PartySize, survival.SurvivorCount, survival.DeathCount, survival.SurvivorRatio, survival.DeterministicSeed, survival.DeterministicErrorCode);
+            string health = DevPanelEnabled ? RunPartyDiagnosticsPresenter.Build(outcome, Content.GetString) : string.Empty;
+            return string.IsNullOrEmpty(health) ? summary : summary + "\n" + health;
         }
         private string BuildExtractionLine(RunOutcomeRecord outcome)
         {

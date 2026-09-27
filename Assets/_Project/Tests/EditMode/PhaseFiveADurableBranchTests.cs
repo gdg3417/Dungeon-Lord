@@ -328,12 +328,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             var service = new RunSimulationService(fixture.Configuration);
             var runtime = new StructureRuntimeState { Heat = 3d, ManaReserve = 20d };
-            string first = JsonUtility.ToJson(service.SimulateRoute(runtime, 123L, 7,
-                RunPostureResolver.BalancedId, beforeProjection.Rooms));
-            string second = JsonUtility.ToJson(service.SimulateRoute(new StructureRuntimeState
+            string knowledgeBefore = JsonUtility.ToJson(fixture.Runtime.sharedBranchKnowledge);
+            RunOutcomeRecord firstRun = service.SimulateRoute(runtime, 123L, 7,
+                RunPostureResolver.BalancedId, beforeProjection.Rooms);
+            RunOutcomeRecord secondRun = service.SimulateRoute(new StructureRuntimeState
                 { Heat = 3d, ManaReserve = 20d }, 123L, 7,
-                RunPostureResolver.BalancedId, afterProjection.Rooms));
-            Assert.That(second, Is.EqualTo(first));
+                RunPostureResolver.BalancedId, afterProjection.Rooms);
+            Assert.That(JsonUtility.ToJson(secondRun), Is.EqualTo(JsonUtility.ToJson(firstRun)));
+            Assert.That(secondRun.Party.Members.Select(m => m.CurrentHealth),
+                Is.EqualTo(firstRun.Party.Members.Select(m => m.CurrentHealth)));
+            Assert.That(secondRun.EncounterEvents.Select(e => e.AssignmentId),
+                Is.EqualTo(firstRun.EncounterEvents.Select(e => e.AssignmentId)));
+            Assert.That(secondRun.EncounterEvents.Any(e => e.AssignmentId.StartsWith(edge.EdgeId, StringComparison.Ordinal)), Is.False);
+            Assert.That(JsonUtility.ToJson(fixture.Runtime.sharedBranchKnowledge), Is.EqualTo(knowledgeBefore));
         }
 
         [Serializable]

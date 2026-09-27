@@ -2118,7 +2118,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static RunSimulationService BuildRunSimulationServiceForActionTest()
         {
             return new RunSimulationService(new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 BaseSuccessChance = 0.6d,
                 HeatPenaltyPerPoint = 0.004d,
                 ManaReserveBonusPerPoint = 0.01d,

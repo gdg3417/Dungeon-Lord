@@ -352,9 +352,28 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void RunUntilNotice(GameRoot root)
         {
-            for (int i = 0; i < 20 && !string.Equals(CurrentHeatTierResolver.Resolve(_config, root.Save.structureRuntime.Heat).TierId, CurrentHeatTierResolver.NoticeTierId, StringComparison.Ordinal); i++)
+            // This lifecycle test needs a Notice-tier save boundary. Its old setup reached that
+            // boundary through pressure-created deaths, which Phase 5B1 intentionally retired.
+            // Test-only health makes the existing Skeleton/Spike route create real HP deaths.
+            int[] originalHealth = _config.PhaseFiveB.Classes.Select(c => c.LevelOneMaxHealth).ToArray();
+            try
             {
-                Assert.That(root.SimulateRunOnce(RunPostureResolver.GreedyId), Is.True);
+                foreach (RunClassProfile profile in _config.PhaseFiveB.Classes)
+                    profile.LevelOneMaxHealth = 2;
+                for (int i = 0; i < 20 && !string.Equals(CurrentHeatTierResolver.Resolve(_config, root.Save.structureRuntime.Heat).TierId, CurrentHeatTierResolver.NoticeTierId, StringComparison.Ordinal); i++)
+                {
+                    Assert.That(root.SimulateRunOnce(RunPostureResolver.GreedyId), Is.True);
+                    RunOutcomeRecord outcome = root.Save.runHistory.LatestOutcome;
+                    Assert.That(outcome.SurvivalSummary.DeathCount, Is.GreaterThan(0));
+                    Assert.That(outcome.SurvivalSummary.DeathCount,
+                        Is.EqualTo(outcome.Party.Members.Count(member => !member.IsActive)));
+                    Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.GreaterThan(0d));
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < originalHealth.Length; i++)
+                    _config.PhaseFiveB.Classes[i].LevelOneMaxHealth = originalHealth[i];
             }
         }
 
