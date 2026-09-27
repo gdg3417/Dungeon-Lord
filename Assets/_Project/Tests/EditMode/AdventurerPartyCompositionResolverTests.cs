@@ -14,13 +14,14 @@ namespace DungeonBuilder.Tests.EditMode
         {
             RunSimulationConfig config = ValidConfig();
 
-            AdventurerPartyCompositionSummary first = AdventurerPartyCompositionResolver.Resolve(config, "run-1", 42L, StructureSimulationPass.ManaGeneratorBasicId);
-            AdventurerPartyCompositionSummary second = AdventurerPartyCompositionResolver.Resolve(config, "run-1", 42L, StructureSimulationPass.ManaGeneratorBasicId);
+            var roster = DungeonBuilder.M0.Gameplay.RunSimulation.RunPartyGenerator.Create(PhaseFiveBTestConfig.Create(), "run-1");
+            AdventurerPartyCompositionSummary first = AdventurerPartyCompositionResolver.Resolve(roster);
+            AdventurerPartyCompositionSummary second = AdventurerPartyCompositionResolver.Resolve(roster);
 
             Assert.That(second.RuleResolved, Is.EqualTo(first.RuleResolved));
             Assert.That(second.DeterministicSeed, Is.EqualTo(first.DeterministicSeed));
             Assert.That(second.ClassIds, Is.EqualTo(first.ClassIds));
-            Assert.That(first.ClassIds.Length, Is.InRange(config.AdventurerPartyCompositionMinSize, config.AdventurerPartyCompositionMaxSize));
+            Assert.That(first.ClassIds.Length, Is.EqualTo(roster.Members.Count));
         }
 
         [Test]
@@ -41,7 +42,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(nullConfig.DeterministicErrorCode, Is.EqualTo((int)AdventurerPartyCompositionSummaryErrorCode.MissingOrInvalidConfig));
             Assert.That(emptyClasses.RuleResolved, Is.False);
             Assert.That(emptyClasses.ClassIds, Is.Empty);
-            Assert.That(emptyClasses.DeterministicErrorCode, Is.EqualTo((int)AdventurerPartyCompositionSummaryErrorCode.NoAllowedMvpClasses));
+            Assert.That(emptyClasses.DeterministicErrorCode, Is.EqualTo((int)AdventurerPartyCompositionSummaryErrorCode.MissingOrInvalidConfig));
         }
 
         [Test]
@@ -122,7 +123,8 @@ namespace DungeonBuilder.Tests.EditMode
             };
             string before = JsonUtility.ToJson(save);
 
-            AdventurerPartyCompositionSummary party = AdventurerPartyCompositionResolver.Resolve(ValidConfig(), "run-3", 9L, StructureSimulationPass.RiskLabBasicId);
+            var roster = DungeonBuilder.M0.Gameplay.RunSimulation.RunPartyGenerator.Create(PhaseFiveBTestConfig.Create(), "run-3");
+            AdventurerPartyCompositionSummary party = AdventurerPartyCompositionResolver.Resolve(roster);
             string preview = MvpRunResultFeedbackPresenter.BuildPartyPreview(new MvpPlayerLoopSummary
             {
                 RuleResolved = true,

@@ -252,6 +252,9 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                         {
                             FloorIndex = floor.FloorIndex, RoomIndex = result.Count,
                             RoomInstanceId = room.RoomInstanceId,
+                            Assignments = owned.Select(value => new RunRoomAssignment {
+                                AssignmentId = value.AssignmentId, CategoryId = value.CategoryId,
+                                OptionId = value.OptionId, Sequence = value.Sequence }).ToArray(),
                             RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
                             IncludeRoomPlacement = origin !=
                                 LegacyRoomOriginKind.ImplicitCompatibilityContainer,

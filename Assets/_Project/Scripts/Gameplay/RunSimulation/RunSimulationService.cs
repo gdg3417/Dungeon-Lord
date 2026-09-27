@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using DungeonBuilder.M0.Gameplay.Structures;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
@@ -31,24 +33,35 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
-            if (route == null || route.Length <= 1)
+            route = (route ?? Array.Empty<MvpOrderedRouteRoom>()).OrderBy(r => r.FloorIndex).ThenBy(r => r.RoomIndex).ToArray();
+            ValidateAssignments(route);
+            // Preserve the existing zero/one-room compatibility outcome when there are no
+            // assignments to execute. SimulateOnce now uses the same authoritative roster and HP
+            // model, so this path cannot reintroduce aggregate casualty authority.
+            if (route.Length == 0 || (route.Length == 1 && route[0].OrderedAssignments().Length == 0))
             {
-                MvpPlacementEffectsSummary effects = route != null && route.Length == 1
-                    ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config) : null;
+                MvpPlacementEffectsSummary effects = route.Length == 1
+                    ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config)
+                    : null;
                 RunOutcomeRecord compatible = SimulateOnce(runtime, tickStarted, runSequence, postureId, effects);
                 compatible.ConfiguredRoutePlacementEffects = ClonePlacementEffects(effects);
                 compatible.ReachedRoutePlacementEffects = ClonePlacementEffects(effects);
-                compatible.ClearedRewardPlacementEffects = compatible.Success ? ClonePlacementEffects(effects) : EmptyPlacementEffects();
-                compatible.ConfiguredRoomCount = route?.Length ?? 0;
+                compatible.ClearedRewardPlacementEffects = compatible.Success
+                    ? ClonePlacementEffects(effects)
+                    : EmptyPlacementEffects();
+                compatible.ConfiguredRoomCount = route.Length;
                 AddCompatibleRoomMetadata(compatible, route);
                 return compatible;
             }
+
+            RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
+            var events = new List<RunEncounterEvent>();
 
             RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
             double heatAtStart = runtime.Heat;
             double manaAtStart = runtime.ManaReserve;
             int seed = ComputeResolverSeed(runSequence, tickStarted);
-            RunSurvivalSummary partyRoll = BuildSurvivalSummary(runSequence, tickStarted, true);
+            RunSurvivalSummary partyRoll = party.DeriveSurvival(true);
             int initialParty = partyRoll.PartySize;
             int currentSurvivors = initialParty;
             var rooms = new System.Collections.Generic.List<RunRoomResolutionSummary>();
@@ -70,11 +83,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 MvpOrderedRouteRoom routeRoom = route[i];
                 MvpPlacementEffectsSummary localEffects = MvpPlacementEffectsResolver.ResolvePlacements(routeRoom.ToOrderedPlacements(), _config);
-                AddPlacementEffects(reachedEffects, localEffects);
                 int entrants = currentSurvivors;
-                int roomSeed = DeriveRoomSeed(seed, routeRoom.FloorIndex, routeRoom.RoomIndex);
-                if (!routeRoom.HasActiveContent)
+                // Preserve the pre-Phase-5B one-room loot identity; multi-room identity is unchanged.
+                int roomSeed = route.Length == 1 ? seed : DeriveRoomSeed(seed, routeRoom.FloorIndex, routeRoom.RoomIndex);
+                RunRoomAssignment[] assignments = routeRoom.OrderedAssignments();
+                if (assignments.Length == 0)
                 {
+                    AddPlacementEffects(reachedEffects, localEffects);
                     rooms.Add(BuildEmptyRoomSummary(routeRoom, entrants, localEffects, roomSeed, generatedValue));
                     continue;
                 }
@@ -86,13 +101,36 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 finalCrisisPenalty = runtime.IsHeatCrisisActive ? _config.CrisisFailurePenalty : 0d;
                 finalChance = Math.Max(0d, Math.Min(1d, _config.BaseSuccessChance - finalHeatPenalty + finalManaBonus - finalCrisisPenalty + composition.SuccessChanceDelta));
                 bool cleared = finalChance >= _config.SuccessThreshold;
-                RunSurvivalSummary roomSurvival = BuildSurvivalSummaryForParty(entrants, roomSeed, cleared);
-                ApplyCompositionToSurvivalSummary(roomSurvival, composition);
-                ApplyCasualtyPressureToSurvivalSummary(roomSurvival, composition, posture);
-                currentSurvivors = roomSurvival.SurvivorCount;
+                double pressure = ResolveCasualtyPressure(composition, posture);
+                var executed = new List<MvpDungeonPlacementEntry>();
+                if (routeRoom.IncludeRoomPlacement)
+                    executed.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, routeRoom.RoomOptionId, 0));
+                foreach (RunRoomAssignment assignment in assignments)
+                {
+                    if (party.IsWiped) break;
+                    if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) continue;
+                    executed.Add(new MvpDungeonPlacementEntry(assignment.CategoryId, assignment.OptionId, executed.Count));
+                    events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment,
+                        routeRoom.FloorIndex, routeRoom.RoomIndex, pressure));
+                }
+                if (party.IsWiped)
+                {
+                    // Unreached later assignments cannot contribute loot, attraction, or Heat effects.
+                    // Severity remains the one room-level value calculated above.
+                    localEffects = MvpPlacementEffectsResolver.ResolvePlacements(executed.ToArray(), _config);
+                    composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
+                }
+                AddPlacementEffects(reachedEffects, localEffects);
+                currentSurvivors = party.ActiveCount;
+                RunSurvivalSummary roomSurvival = party.DeriveSurvival(cleared);
+                // Room evidence is the delta of the same live roster, not a second casualty roll.
+                roomSurvival.PartySize = entrants;
+                roomSurvival.DeathCount = entrants - currentSurvivors;
+                roomSurvival.SurvivorRatio = (double)currentSurvivors / entrants;
+                ApplyCasualtyEvidence(roomSurvival, pressure);
 
                 RunLootSummary roomLoot = null;
-                if (cleared)
+                if (cleared && !party.IsWiped)
                 {
                     AddPlacementEffects(clearedRewardEffects, localEffects);
                     roomLoot = ApplyCompositionToLootSummary(ApplyPostureToLootSummary(BuildLootSummary(roomSeed), posture), composition);
@@ -130,13 +168,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             if (!hasActiveEncounter)
             {
-                return BuildNoEncounterRouteOutcome(runtime, tickStarted, runSequence, posture, heatAtStart, manaAtStart, partyRoll, rooms, configuredEffects, reachedEffects);
+                RunOutcomeRecord empty = BuildNoEncounterRouteOutcome(runtime, tickStarted, runSequence, posture, heatAtStart, manaAtStart, partyRoll, rooms, configuredEffects, reachedEffects);
+                empty.Party = party; empty.EncounterEvents = events.ToArray();
+                return empty;
             }
 
             var loot = new RunLootSummary { LootTableId = _lootTableId, ResolverSeed = seed, ResolverSuccess = lootResolverSuccess, ResolverErrorCode = lootResolverErrorCode, RollCount = rollCount,
                 GeneratedItemIds = generatedItems.ToArray(), TotalGeneratedWorldValue = generatedValue,
                 TotalGeneratedReserveCost = generatedReserve, TotalGeneratedTradeableWorldValue = Math.Min(generatedValue, generatedTradeable) };
-            var survival = BuildAggregateSurvival(partyRoll, initialParty, currentSurvivors, rooms);
+            var survival = party.DeriveSurvival(finalSuccess);
+            survival.CasualtyPressure = rooms.Select(r => r.CasualtyPressure).DefaultIfEmpty().Max();
+            survival.CasualtyLootExtractionPenalty = Math.Min(1d, rooms.Sum(r => r.CasualtyLootExtractionPenalty));
+            survival.CasualtyHeatDelta = rooms.Sum(r => r.CasualtyPressureHeatDelta);
             RunCompositionOutcomeSummary aggregateComposition = BuildCompositionOutcomeSummary(reachedEffects, manaAtStart);
             RunCompositionOutcomeSummary rewardComposition = BuildCompositionOutcomeSummary(clearedRewardEffects, manaAtStart);
             RunLootExtractionSummary extraction = ApplyCompositionToExtractionSummary(
@@ -160,7 +203,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 rooms[rooms.Count - 1].RoomIndex == 0 ? RouteStoppedRoomOneKey :
                 rooms[rooms.Count - 1].RoomIndex == 1 ? RouteStoppedRoomTwoKey : RouteRetreatedKey;
             return new RunOutcomeRecord {
-                RunId = $"run-{runSequence}", TickStarted = tickStarted, Success = fullClear,
+                Party = party, EncounterEvents = events.ToArray(),
+                RunId = RunId(runSequence), TickStarted = tickStarted, Success = fullClear,
                 Score = fullClear ? _config.BaseScoreOnSuccess + (int)Math.Round(aggregateComposition.EffectiveManaReserve * _config.ScorePerManaPoint) : 0,
                 ReasonKey = partyWiped ? PartyWipedReasonKey : fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),
                 HeatAtStart = heatAtStart, ManaAtStart = manaAtStart, CrisisActiveAtStart = runtime.IsHeatCrisisActive, HasBreakdown = true,
@@ -189,7 +233,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 HeatAtStart = heatAtStart, ManaAtStart = manaAtStart, CrisisActiveAtStart = runtime.IsHeatCrisisActive, HasBreakdown = true, BaseChance = _config.BaseSuccessChance, FinalChance = _config.BaseSuccessChance, SuccessThresholdUsed = _config.SuccessThreshold,
                 FeedbackTagKeys = BuildFeedbackTagKeys(runtime, false, BuildCompositionOutcomeSummary(EmptyPlacementEffects(), manaAtStart)), LootSummary = loot, LootExtractionSummary = extraction, LootBreakdown = Array.Empty<RunLootDropRecord>(),
                 SurvivalSummary = party, RunHeatDeltaSummary = heatDelta, RunHeatApplicationSummary = heatApplication, CompositionOutcomeSummary = BuildCompositionOutcomeSummary(reached, manaAtStart), RunPostureId = posture?.Id,
-                RoomResolutions = rooms.ToArray(), HighestRoomReached = rooms[rooms.Count - 1].RoomIndex, ReachedRoomCount = rooms.Count, ConfiguredRoomCount = rooms.Count, ClearedRoomCount = rooms.Count, FinalRouteOutcomeKey = RouteNoEncounterKey,
+                RoomResolutions = rooms.ToArray(), HighestRoomReached = rooms.Count == 0 ? -1 : rooms[rooms.Count - 1].RoomIndex, ReachedRoomCount = rooms.Count, ConfiguredRoomCount = rooms.Count, ClearedRoomCount = rooms.Count, FinalRouteOutcomeKey = RouteNoEncounterKey,
                 ConfiguredRoutePlacementEffects = configured, ReachedRoutePlacementEffects = reached, ClearedRewardPlacementEffects = EmptyPlacementEffects() };
         }
 
@@ -202,13 +246,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public const string PartyWipedReasonKey = "run.reason.party_wiped";
         public const string NoEncounterReasonKey = "run.reason.no_encounter";
 
-        private void AddCompatibleRoomMetadata(RunOutcomeRecord outcome, MvpOrderedRouteRoom[] route)
+        private static void AddCompatibleRoomMetadata(RunOutcomeRecord outcome, MvpOrderedRouteRoom[] route)
         {
             if (route == null || route.Length == 0) return;
-            outcome.RoomResolutions = new[] { BuildRoomSummary(route[0], outcome, outcome.SurvivalSummary?.PartySize ?? 0, !outcome.Success) };
-            outcome.ReachedRoomCount = 1; outcome.ClearedRoomCount = outcome.Success ? 1 : 0;
+            outcome.RoomResolutions = new[] {
+                BuildRoomSummary(route[0], outcome, outcome.SurvivalSummary?.PartySize ?? 0, !outcome.Success)
+            };
+            outcome.ReachedRoomCount = 1;
+            outcome.ClearedRoomCount = outcome.Success ? 1 : 0;
             outcome.HighestRoomReached = route[0].RoomIndex;
-            outcome.FinalRouteOutcomeKey = outcome.Success ? RouteClearedKey : (outcome.SurvivalSummary?.SurvivorCount ?? 0) == 0 ? RouteWipedKey : RouteRetreatedKey;
+            outcome.FinalRouteOutcomeKey = outcome.Success
+                ? RouteClearedKey
+                : (outcome.SurvivalSummary?.SurvivorCount ?? 0) == 0 ? RouteWipedKey : RouteRetreatedKey;
         }
 
         private static RunRoomResolutionSummary BuildEmptyRoomSummary(MvpOrderedRouteRoom room, int entrants, MvpPlacementEffectsSummary effects, int seed, int carriedLoot)
@@ -224,12 +273,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return new RunRoomResolutionSummary { FloorIndex = room.FloorIndex, RoomIndex = room.RoomIndex, RoomOptionId = room.RoomOptionId,
                 Reached = true, Cleared = outcome.Success, PartyEntering = entrants, SurvivorsLeaving = survival?.SurvivorCount ?? entrants,
                 Deaths = survival?.DeathCount ?? 0, StoppedRoute = stopped, StopReasonKey = stopped ? outcome.ReasonKey : string.Empty,
-                LocalPlacementEffects = outcome.CompositionOutcomeSummary?.PlacementEffects, GeneratedLootValue = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0,
+                LocalPlacementEffects = outcome.CompositionOutcomeSummary?.PlacementEffects,
+                GeneratedLootValue = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0,
                 CarriedLootValueAfterRoom = outcome.Success ? outcome.LootSummary?.TotalGeneratedWorldValue ?? 0 : 0,
                 LocalHeatPressureDelta = outcome.CompositionOutcomeSummary?.HeatDeltaOffset ?? 0d,
-                CasualtyPressureHeatDelta = survival?.CasualtyHeatDelta ?? 0d, CasualtyPressure = survival?.CasualtyPressure ?? 0d,
-                CasualtyLootExtractionPenalty = survival?.CasualtyLootExtractionPenalty ?? 0d, ManaPressureCost = outcome.CompositionOutcomeSummary?.ManaReservePressureCost ?? 0d,
-                DeterministicSeed = survival?.DeterministicSeed ?? 0, RuleSourceId = outcome.CompositionOutcomeSummary?.RuleSourceId };
+                CasualtyPressureHeatDelta = survival?.CasualtyHeatDelta ?? 0d,
+                CasualtyPressure = survival?.CasualtyPressure ?? 0d,
+                CasualtyLootExtractionPenalty = survival?.CasualtyLootExtractionPenalty ?? 0d,
+                ManaPressureCost = outcome.CompositionOutcomeSummary?.ManaReservePressureCost ?? 0d,
+                DeterministicSeed = survival?.DeterministicSeed ?? 0,
+                RuleSourceId = outcome.CompositionOutcomeSummary?.RuleSourceId };
         }
 
         private RunLootSummary BuildLootSummary(int deterministicSeed)
@@ -262,26 +315,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var keys = new System.Collections.Generic.List<string>(target.EffectLocalizationKeys ?? Array.Empty<string>()); keys.AddRange(value.EffectLocalizationKeys ?? Array.Empty<string>()); target.EffectLocalizationKeys = keys.ToArray();
         }
 
-        private static RunSurvivalSummary BuildAggregateSurvival(RunSurvivalSummary partyRoll, int initialParty, int survivors, System.Collections.Generic.List<RunRoomResolutionSummary> rooms)
-        {
-            double casualtyPenalty = 0d, casualtyHeat = 0d, pressure = 0d;
-            // Route pressure is the maximum resolved room pressure; penalties and casualty heat are additive.
-            foreach (RunRoomResolutionSummary room in rooms)
-            {
-                pressure = Math.Max(pressure, room.CasualtyPressure);
-                casualtyPenalty += room.CasualtyLootExtractionPenalty;
-                casualtyHeat += room.CasualtyPressureHeatDelta;
-            }
-            casualtyPenalty = Math.Max(0d, Math.Min(1d, casualtyPenalty));
-            return new RunSurvivalSummary { PartySize = initialParty, SurvivorCount = survivors, DeathCount = initialParty - survivors,
-                SurvivorRatio = initialParty > 0 ? (double)survivors / initialParty : 0d, DeterministicSeed = partyRoll.DeterministicSeed,
-                RuleResolved = partyRoll.RuleResolved, DeterministicErrorCode = partyRoll.DeterministicErrorCode, RuleSourceId = partyRoll.RuleSourceId,
-                SuccessAtResolution = survivors > 0, CasualtyLootExtractionPenalty = casualtyPenalty, CasualtyHeatDelta = casualtyHeat, CasualtyPressure = pressure };
-        }
-
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary placementEffects)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
+            RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
+            var events = new List<RunEncounterEvent>();
 
             RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
             RunCompositionOutcomeSummary compositionOutcome = BuildCompositionOutcomeSummary(placementEffects, runtime.ManaReserve);
@@ -305,13 +343,27 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
             string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
 
-            RunLootSummary lootSummary = ApplyCompositionToLootSummary(
+            // Compatibility callers supply aggregate placement evidence, not canonical room assignments.
+            // Resolve its available content IDs through the same HP authority; absent content cannot kill.
+            var compatibilityRoom = new MvpOrderedRouteRoom {
+                Assignments = (placementEffects?.ContributingOptionIds ?? Array.Empty<string>())
+                    .Select((id, index) => new { id, index, profile = _config.PhaseFiveB.DamageProfiles.SingleOrDefault(p => p.OptionId == id) })
+                    .Where(x => x.profile != null).Select(x => new RunRoomAssignment {
+                        AssignmentId = "legacy.assignment." + x.index.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        OptionId = x.id, CategoryId = x.profile.CategoryId, Sequence = x.index }).ToArray()
+            };
+            double pressure = ResolveCasualtyPressure(compositionOutcome, posture);
+            foreach (RunRoomAssignment assignment in compatibilityRoom.OrderedAssignments())
+            {
+                if (party.IsWiped) break;
+                events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment, 0, 0, pressure));
+            }
+            if (party.IsWiped) { success = false; score = 0; reasonKey = PartyWipedReasonKey; }
+            RunLootSummary lootSummary = party.IsWiped ? new RunLootSummary { ResolverSuccess = true } : ApplyCompositionToLootSummary(
                 ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture),
                 compositionOutcome);
-            RunSurvivalSummary survivalSummary = ApplyCasualtyPressureToSurvivalSummary(
-                ApplyCompositionToSurvivalSummary(BuildSurvivalSummary(runSequence, tickStarted, success), compositionOutcome),
-                compositionOutcome,
-                posture);
+            RunSurvivalSummary survivalSummary = party.DeriveSurvival(success);
+            ApplyCasualtyEvidence(survivalSummary, pressure);
             int resolverSeed = ComputeResolverSeed(runSequence, tickStarted);
             RunLootExtractionSummary extractionSummary = ApplyCompositionToExtractionSummary(
                 ApplyPostureToExtractionSummary(LootExtractionResolver.Resolve(
@@ -356,7 +408,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             return new RunOutcomeRecord
             {
-                RunId = $"run-{runSequence}",
+                Party = party, EncounterEvents = events.ToArray(),
+                RunId = RunId(runSequence),
                 TickStarted = tickStarted,
                 Success = success,
                 Score = score,
@@ -409,6 +462,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 (effects.Danger * tuning.SuccessChancePenaltyPerDanger);
             summary.ManaReservePressureCost = Math.Max(0d, effects.ManaPressure * tuning.ManaReserveCostPerManaPressure);
             summary.EffectiveManaReserve = Math.Max(0d, manaReserve - summary.ManaReservePressureCost);
+            // Derived legacy diagnostic only. Never used to mutate HP or casualty counts.
             summary.SurvivorRatioDelta =
                 (effects.PathCapacity * tuning.SurvivorRatioBonusPerPathCapacity) -
                 (effects.Danger * tuning.SurvivorRatioPenaltyPerDanger);
@@ -438,67 +492,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 Attraction = effects.Attraction,
                 ContributingOptionIds = effects.ContributingOptionIds != null ? (string[])effects.ContributingOptionIds.Clone() : Array.Empty<string>(),
                 EffectLocalizationKeys = effects.EffectLocalizationKeys != null ? (string[])effects.EffectLocalizationKeys.Clone() : Array.Empty<string>()
-            };
-        }
-
-        private RunSurvivalSummary BuildSurvivalSummaryForParty(int partySize, int seed, bool success)
-        {
-            double ratio = success ? _config.SuccessSurvivorRatio : _config.FailureSurvivorRatio;
-            int survivors = ratio < 0d || ratio > 1d ? 0 : Math.Max(0, Math.Min(partySize, (int)Math.Round(partySize * ratio)));
-            return new RunSurvivalSummary { PartySize = partySize, SurvivorCount = survivors, DeathCount = partySize - survivors,
-                SurvivorRatio = partySize > 0 ? (double)survivors / partySize : 0d, DeterministicSeed = seed, RuleResolved = ratio >= 0d && ratio <= 1d,
-                DeterministicErrorCode = ratio >= 0d && ratio <= 1d ? (int)RunSurvivalSummaryErrorCode.None : (int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio,
-                RuleSourceId = "run.survival.rule.v1", SuccessAtResolution = success };
-        }
-
-        private RunSurvivalSummary BuildSurvivalSummary(int runSequence, long tickStarted, bool success)
-        {
-            int seed = ComputeResolverSeed(runSequence, tickStarted);
-            int minPartySize = _config.MinPartySize;
-            int maxPartySize = _config.MaxPartySize;
-            int maxAllowedPartySize = _config.MaxAllowedPartySize;
-            if (minPartySize < 1 || maxPartySize < minPartySize || maxAllowedPartySize < 1 || maxPartySize > maxAllowedPartySize)
-            {
-                return new RunSurvivalSummary
-                {
-                    RuleResolved = false,
-                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidPartySizeRange,
-                    DeterministicSeed = seed,
-                    RuleSourceId = "run.survival.rule.v1",
-                    SuccessAtResolution = success
-                };
-            }
-
-            int partySizeRange = maxPartySize - minPartySize + 1;
-            int partySizeOffset = Math.Abs(seed % partySizeRange);
-            int partySize = minPartySize + partySizeOffset;
-            double ratio = success ? _config.SuccessSurvivorRatio : _config.FailureSurvivorRatio;
-            if (ratio < 0d || ratio > 1d)
-            {
-                return new RunSurvivalSummary
-                {
-                    RuleResolved = false,
-                    DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.InvalidSurvivorRatio,
-                    DeterministicSeed = seed,
-                    RuleSourceId = "run.survival.rule.v1",
-                    SuccessAtResolution = success
-                };
-            }
-
-            int survivorCount = (int)Math.Round(partySize * ratio);
-            survivorCount = Math.Max(0, Math.Min(partySize, survivorCount));
-
-            return new RunSurvivalSummary
-            {
-                PartySize = partySize,
-                SurvivorCount = survivorCount,
-                DeathCount = partySize - survivorCount,
-                SurvivorRatio = partySize > 0 ? (double)survivorCount / partySize : 0d,
-                DeterministicSeed = seed,
-                RuleResolved = true,
-                DeterministicErrorCode = (int)RunSurvivalSummaryErrorCode.None,
-                RuleSourceId = "run.survival.rule.v1",
-                SuccessAtResolution = success
             };
         }
 
@@ -551,57 +544,46 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return summary;
         }
 
-        private RunSurvivalSummary ApplyCompositionToSurvivalSummary(RunSurvivalSummary summary, RunCompositionOutcomeSummary composition)
-        {
-            if (summary == null || composition == null || !summary.RuleResolved || summary.DeterministicErrorCode != (int)RunSurvivalSummaryErrorCode.None)
-            {
-                return summary;
-            }
+        private static string RunId(int sequence) => "run-" + sequence.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-            double ratio = Math.Max(0d, Math.Min(1d, summary.SurvivorRatio + composition.SurvivorRatioDelta));
-            int survivorCount = Math.Max(0, Math.Min(summary.PartySize, (int)Math.Round(summary.PartySize * ratio)));
-            summary.SurvivorCount = survivorCount;
-            summary.DeathCount = summary.PartySize - survivorCount;
-            summary.SurvivorRatio = summary.PartySize > 0 ? (double)survivorCount / summary.PartySize : 0d;
-            return summary;
+        private void ValidateAssignments(MvpOrderedRouteRoom[] route)
+        {
+            if (route.GroupBy(r => new { r.FloorIndex, r.RoomIndex }).Any(g => g.Count() != 1))
+                throw new ArgumentException("run.phase5b.invalid_route");
+            foreach (MvpOrderedRouteRoom room in route)
+            {
+                RunRoomAssignment[] assignments = room.OrderedAssignments();
+                if (assignments.Any(a => a == null || string.IsNullOrWhiteSpace(a.AssignmentId)) ||
+                    assignments.Select(a => a.AssignmentId).Distinct(StringComparer.Ordinal).Count() != assignments.Length)
+                    throw new ArgumentException("run.phase5b.invalid_assignment");
+                foreach (RunRoomAssignment a in assignments)
+                {
+                    if (a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) continue;
+                    if (!_config.PhaseFiveB.DamageProfiles.Any(p => p.OptionId == a.OptionId && p.CategoryId == a.CategoryId))
+                        throw new ArgumentException(PhaseFiveBConfigValidation.InvalidConfiguration);
+                }
+            }
         }
 
-        private RunSurvivalSummary ApplyCasualtyPressureToSurvivalSummary(RunSurvivalSummary summary, RunCompositionOutcomeSummary composition, RunPostureConfig posture)
+        private double ResolveCasualtyPressure(RunCompositionOutcomeSummary composition, RunPostureConfig posture)
         {
-            if (summary == null || composition == null || !summary.RuleResolved || summary.DeterministicErrorCode != (int)RunSurvivalSummaryErrorCode.None || string.IsNullOrWhiteSpace(_config.CasualtyPressureRuleSourceId))
-            {
-                return summary;
-            }
-
             MvpPlacementEffectsSummary effects = composition.PlacementEffects;
-            double rawPressure =
-                ((effects?.Danger ?? 0) * _config.CasualtyPressurePerDanger) -
+            double raw = ((effects?.Danger ?? 0) * _config.CasualtyPressurePerDanger) -
                 ((effects?.PathCapacity ?? 0) * _config.CasualtyPressureReductionPerPathCapacity) +
                 ((effects?.ManaPressure ?? 0) * _config.CasualtyPressurePerManaPressure);
-            double multiplier = ResolveCasualtyPressureMultiplier(posture);
-            double pressure = Math.Max(_config.CasualtyPressureMinimum, Math.Min(_config.CasualtyPressureMaximum, rawPressure * multiplier));
+            double pressure = Math.Max(_config.CasualtyPressureMinimum,
+                Math.Min(_config.CasualtyPressureMaximum, raw * ResolveCasualtyPressureMultiplier(posture)));
             if (double.IsNaN(pressure) || double.IsInfinity(pressure))
-            {
-                return summary;
-            }
+                throw new ArgumentException(PhaseFiveBConfigValidation.InvalidConfiguration);
+            return pressure;
+        }
 
-            int originalDeathCount = summary.DeathCount;
-            int pressureDeaths = Math.Max(0, Math.Min(summary.PartySize, (int)Math.Round(summary.PartySize * pressure)));
-            if (pressure < _config.PartyWipeCasualtyPressureThreshold && pressureDeaths >= summary.PartySize && summary.PartySize > 0)
-            {
-                pressureDeaths = summary.PartySize - 1;
-            }
-
-            int deathCount = Math.Max(summary.DeathCount, pressureDeaths);
-            summary.DeathCount = Math.Max(0, Math.Min(summary.PartySize, deathCount));
-            summary.SurvivorCount = Math.Max(0, summary.PartySize - summary.DeathCount);
-            summary.SurvivorRatio = summary.PartySize > 0 ? (double)summary.SurvivorCount / summary.PartySize : 0d;
+        private void ApplyCasualtyEvidence(RunSurvivalSummary summary, double pressure)
+        {
+            // Pressure is severity only. Existing per-casualty costs now consume actual HP deaths.
             summary.CasualtyPressure = pressure;
-            int pressureCasualties = Math.Max(0, summary.DeathCount - originalDeathCount);
-            summary.CasualtyLootExtractionPenalty = Math.Max(0d, pressureCasualties * _config.CasualtyLootExtractionPenaltyPerCasualty);
-            summary.CasualtyHeatDelta = Math.Max(0d, pressureCasualties * _config.CasualtyHeatDeltaPerCasualty);
-            summary.RuleSourceId = _config.CasualtyPressureRuleSourceId;
-            return summary;
+            summary.CasualtyLootExtractionPenalty = Math.Max(0d, summary.DeathCount * _config.CasualtyLootExtractionPenaltyPerCasualty);
+            summary.CasualtyHeatDelta = Math.Max(0d, summary.DeathCount * _config.CasualtyHeatDeltaPerCasualty);
         }
 
         private double ResolveCasualtyPressureMultiplier(RunPostureConfig posture)

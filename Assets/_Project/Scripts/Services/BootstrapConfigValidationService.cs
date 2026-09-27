@@ -83,7 +83,7 @@ namespace DungeonBuilder.M0
 
         internal static bool IsValidRunSimulationConfig(RunSimulationConfig config)
         {
-            if (config == null)
+            if (config == null || !PhaseFiveBConfigValidation.IsValid(config.PhaseFiveB))
             {
                 return false;
             }

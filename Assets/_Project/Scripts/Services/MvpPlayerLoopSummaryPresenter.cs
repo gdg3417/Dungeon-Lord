@@ -98,7 +98,7 @@ namespace DungeonBuilder.M0
             int extractedWorldValue = extractionSummary?.TotalExtractedWorldValue ?? 0;
             int extractedTradeableWorldValue = extractionSummary?.TotalExtractedTradeableWorldValue ?? 0;
             AdventurerPartyCompositionSummary partyPreview = hasRunOutcome
-                ? AdventurerPartyCompositionResolver.Resolve(runConfig, latestRun.RunId, latestRun.TickStarted, selectedSlot.HasValue ? selectedSlot.Value.StructureId : string.Empty)
+                ? AdventurerPartyCompositionResolver.Resolve(latestRun.Party)
                 : null;
 
             var summary = new MvpPlayerLoopSummary

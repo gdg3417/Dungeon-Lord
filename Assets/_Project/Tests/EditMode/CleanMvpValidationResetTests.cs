@@ -451,7 +451,7 @@ namespace DungeonBuilder.Tests.EditMode
         private static RunSimulationConfig BuildOverlayRunSimulationConfig()
         {
             return new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 HeatPeaceMinimum = 0d,
                 HeatPeaceMaximum = 9d,
                 HeatNoticeMinimum = 10d,

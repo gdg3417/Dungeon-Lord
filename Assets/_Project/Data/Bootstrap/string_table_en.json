@@ -4,6 +4,14 @@
   "language": "en",
   "entries": [
     {
+      "key": "ui.run.health.member_format",
+      "text": "Member {0}: {1}, HP {2}/{3}"
+    },
+    {
+      "key": "ui.run.health.event_format",
+      "text": "Room {0}: {1} ({2}) -> member {3}, HP {4}->{5}, damage {6}, severity {7:0.###}, trap expertise {8:0.##}"
+    },
+    {
       "key": "mana.passive_online.configuration_invalid",
       "text": "Passive mana production is unavailable because its configuration could not be validated."
     },

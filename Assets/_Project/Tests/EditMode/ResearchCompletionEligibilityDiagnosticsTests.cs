@@ -30,7 +30,7 @@ namespace DungeonBuilder.Tests.EditMode
             SetBackingField("<Content>k__BackingField", BuildContent());
             SetBackingField("<Save>k__BackingField", BuildSave());
             SetBackingField("_runSimulationService", new RunSimulationService(new RunSimulationConfig
-            {
+            { PhaseFiveB = PhaseFiveBTestConfig.Create(),
                 MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig
                 {
                     ObjectiveId = "test.first_contract",

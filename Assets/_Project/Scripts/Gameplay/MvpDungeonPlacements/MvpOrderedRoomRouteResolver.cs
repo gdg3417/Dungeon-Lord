@@ -5,8 +5,19 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
+    [Serializable]
+    public sealed class RunRoomAssignment
+    {
+        public string AssignmentId;
+        public string CategoryId;
+        public string OptionId;
+        public long Sequence;
+    }
+
     public sealed class MvpOrderedRouteRoom
     {
+        // Canonical projection retains persisted ordering evidence, never writes it back.
+        public RunRoomAssignment[] Assignments;
         public int FloorIndex;
         public int RoomIndex;
         public string RoomInstanceId;
@@ -22,11 +33,31 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         {
             var result = new List<MvpDungeonPlacementEntry>();
             if (IncludeRoomPlacement) Add(result, MvpDungeonPlacementIds.RoomCategoryId, new[] { RoomOptionId });
+            if (Assignments != null)
+            {
+                result.AddRange(OrderedAssignments().Select((a, i) => new MvpDungeonPlacementEntry(a.CategoryId, a.OptionId, i)));
+                return result.ToArray();
+            }
             Add(result, MvpDungeonPlacementIds.MonsterCategoryId, AssignedMonsterOptionIds);
             Add(result, MvpDungeonPlacementIds.TrapCategoryId, AssignedTrapOptionIds);
             Add(result, MvpDungeonPlacementIds.LootNodeCategoryId, AssignedLootNodeOptionIds);
             return result.ToArray();
         }
+
+        public RunRoomAssignment[] OrderedAssignments()
+        {
+            if (Assignments != null)
+                return Assignments.OrderBy(a => CategoryRank(a.CategoryId)).ThenBy(a => a.Sequence)
+                    .ThenBy(a => a.AssignmentId, StringComparer.Ordinal).ToArray();
+            // Legacy/test-only adapters lack persisted assignment identities; array order was their contract.
+            return ToOrderedPlacements().Where(p => p.CategoryId != MvpDungeonPlacementIds.RoomCategoryId)
+                .Select((p, i) => new RunRoomAssignment { CategoryId = p.CategoryId, OptionId = p.OptionId,
+                    Sequence = i, AssignmentId = "legacy.assignment." + i.ToString(System.Globalization.CultureInfo.InvariantCulture) }).ToArray();
+        }
+
+        private static int CategoryRank(string id) => id == MvpDungeonPlacementIds.MonsterCategoryId ? 0 :
+            id == MvpDungeonPlacementIds.TrapCategoryId ? 1 : id == MvpDungeonPlacementIds.LootNodeCategoryId ? 2 :
+            throw new ArgumentException("run.phase5b.invalid_assignment");
 
         private static void Add(List<MvpDungeonPlacementEntry> target, string category, string[] ids)
         {

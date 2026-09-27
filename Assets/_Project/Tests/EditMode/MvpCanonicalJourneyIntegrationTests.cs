@@ -296,10 +296,16 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void RunUntilNotice()
         {
-            for (int i = 0; i < 20 && !string.Equals(CurrentTier(), CurrentHeatTierResolver.NoticeTierId, StringComparison.Ordinal); i++)
+            // The previous fixture relied on pressure creating deaths directly. Exercise real HP deaths
+            // under explicit test tuning to reach the same Heat/presentation integration boundary.
+            int[] originalHealth = _config.PhaseFiveB.Classes.Select(c => c.LevelOneMaxHealth).ToArray();
+            try
             {
-                Assert.That(_root.SimulateRunOnce(RunPostureResolver.GreedyId), Is.True);
+                foreach (var c in _config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 2;
+                for (int i = 0; i < 20 && !string.Equals(CurrentTier(), CurrentHeatTierResolver.NoticeTierId, StringComparison.Ordinal); i++)
+                    Assert.That(_root.SimulateRunOnce(RunPostureResolver.GreedyId), Is.True);
             }
+            finally { for (int i = 0; i < originalHealth.Length; i++) _config.PhaseFiveB.Classes[i].LevelOneMaxHealth = originalHealth[i]; }
         }
 
         private string CurrentTier() => CurrentHeatTierResolver.Resolve(_config, _root.Save.structureRuntime.Heat).TierId;

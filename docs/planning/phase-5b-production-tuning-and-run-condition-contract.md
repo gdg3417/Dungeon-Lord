@@ -1,6 +1,6 @@
 # Phase 5B Production Tuning and Run-Condition Contract
 
-**Status:** Owner-approved Phase 5B implementation prerequisite; pending final external review
+**Status:** Owner-approved Phase 5B implementation prerequisite; final external review passed and merged in PR #211
 
 **Packet:** Phase 5B0 — lock route-choice tuning and live party-condition authority
 
@@ -16,7 +16,7 @@ This document closes the production semantics and initial tuning required before
 
 All values identified as initial tuning are owned by the single Phase 5B configuration authority. They are not universal game constants and must not be hardcoded in runtime logic. Stable IDs, formula structure, ordering contracts, deterministic hash rules, authority ownership, and semantic invariants are contracts rather than ordinary balance tuning.
 
-Phase 5B implementation remains blocked until this documentation packet receives final external review and is merged. Runtime implementation then requires its own review, tests, qualification, and atomicity evidence.
+This prerequisite passed final external review and merged in PR #211 at `26016f75f36e63a432f4d784b93c169d65b07bbe`. Runtime implementation requires its own review, tests, qualification, and atomicity evidence.
 
 Governing sources:
 
@@ -526,4 +526,20 @@ Level 2–50 health progression, full monster/adventurer scaling, detection and 
 
 All 24 former owner-decision rows now have approved authority. The configuration architecture, initial tuning, transient party, member health, deterministic damage, normalization, survivability, appeal, knowledge, traversal, reporting, workload, and schema boundaries are closed for implementation planning.
 
-The packet remains documentation-only and pending final external review. Phase 5B gameplay implementation remains unstarted. Final review must confirm that every numeric gameplay value is configuration-owned, Decision 30 semantics are unchanged, schema remains 10, and no runtime, production data, save, migration, Unity asset, scene, prefab, ProjectSettings, localization, fixture, or `.meta` change entered this packet.
+The merged Phase 5B0 packet was documentation-only. Its final external review passed in PR #211. Every numeric gameplay value remains configuration-owned; Decision 30 semantics and schema 10 are unchanged.
+
+## 19. Phase 5B1 implementation boundary
+
+Phase 5B1 implements the prerequisite transient roster and integer HP encounter authority on the existing required route. Phase 5B2 retains branch decision, optional traversal, corridor encounters, and knowledge learning. Phase 5B is not complete.
+
+The version-1 `RunSimulationConfig.PhaseFiveB` object owns the implemented party, class-health/capability/formation, behavior, intelligence, and damage sections. Deferred decision/knowledge/traversal tuning is not activated or duplicated elsewhere. Existing room pressure, loot, Heat, and success-threshold configuration remains with its established owner.
+
+Party generation uses the existing `RunId` (`run-` plus invariant-culture run sequence). Each deterministic selection hashes the ordered tuple `(configured rule source, RunId, purpose, zero-based MemberOrdinal)` using SHA-256 over UTF-8 fields prefixed with their four-byte big-endian byte lengths. The first four digest bytes form an unsigned big-endian word. Purpose is `size`, `class`, `behavior`, or `intelligence`; size and intelligence use ordinal zero. Size uses modulo over the configured inclusive range; class selection uses modulo over class IDs sorted ordinally. Behavior and intelligence selection use the unsigned word divided by `4294967296`, normalized configured weights, and strict-less-than cumulative selection over ordinal IDs. Tick, selected structure, room order, and mutable state are not party-generation inputs. This is a party-generation engineering contract, not a change to Decision 30's locked future branch hash.
+
+Damage is `Round(min + (max - min) * clamp(severity, 0, 1), AwayFromZero)`. Traps then apply `Round(damage * clamp(1 - coefficient * active expertise, 0, 1), AwayFromZero)`. The latter may be below the unmitigated profile minimum. HP clamps at zero; formation immediately excludes zero-HP members. Formation sorts configured priority then member ordinal, and the implemented targeting policy is `run.targeting.lead_active`.
+
+The canonical route projection retains assignment IDs and 64-bit sequences. Category order is Monster, Trap, Loot, with sequence then ordinal assignment ID within a category. Room pressure is evaluated once before sequential damage. A wipe prevents later assignments and rooms from contributing loot or other effects. The existing per-cleared-room loot roll is retained after reached damaging content, including its existing monster-room reward behavior; it is not multiplied into a new roll per loot assignment. One-room loot uses its existing base seed, while multi-room loot retains its existing room seed derivation.
+
+`SuccessSurvivorRatio` and `FailureSurvivorRatio` are retired active authorities retained as compatibility-only fields. Composition `SurvivorRatioDelta` remains derived diagnostic evidence only. `PartyWipeCasualtyPressureThreshold` is compatibility-only. The direct pressure-to-death calculation is removed. Pressure remains severity evidence; existing per-casualty extraction penalties and Heat surcharges consume actual HP deaths. `RunSurvivalSummary` is a derived snapshot, not a roster mutation input.
+
+The ordinary-member roster and encounter evidence are transient properties, omitted from Unity and strict public-field save serialization. Same-session canonical readback retains references to existing evidence by run ID and tick; reopening a save leaves historical party detail unavailable rather than regenerating it from current tuning. Historical aggregate evidence remains readable. Development diagnostics expose localized member HP and technical encounter evidence on the existing survival surface. No new save field, schema, or migration is authorized by this implementation.
