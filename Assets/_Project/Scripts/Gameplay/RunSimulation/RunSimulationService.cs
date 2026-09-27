@@ -341,7 +341,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             string reasonKey = success
                 ? "run.reason.success"
                 : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold");
-            string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
 
             // Compatibility callers supply aggregate placement evidence, not canonical room assignments.
             // Resolve its available content IDs through the same HP authority; absent content cannot kill.
@@ -359,6 +358,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment, 0, 0, pressure));
             }
             if (party.IsWiped) { success = false; score = 0; reasonKey = PartyWipedReasonKey; }
+            string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
             RunLootSummary lootSummary = party.IsWiped ? new RunLootSummary { ResolverSuccess = true } : ApplyCompositionToLootSummary(
                 ApplyPostureToLootSummary(BuildLootSummary(runSequence, tickStarted), posture),
                 compositionOutcome);

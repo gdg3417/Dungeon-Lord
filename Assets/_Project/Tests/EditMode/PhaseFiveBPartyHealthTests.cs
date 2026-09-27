@@ -251,6 +251,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void SimulateOnce_HpWipeUsesFinalFailureFeedbackAndPreservesOtherTags()
+        {
+            var c = Config();
+            c.PhaseFiveB.MinPartySize = c.PhaseFiveB.MaxPartySize = 3;
+            foreach (var profile in c.PhaseFiveB.Classes) profile.LevelOneMaxHealth = 1;
+            var result = new RunSimulationService(c, JsonUtility.FromJson<LootConfig>(File.ReadAllText(
+                "Assets/_Project/Data/Bootstrap/loot_config.json"))).SimulateOnce(
+                new StructureRuntimeState { Heat = 100d, ManaReserve = 0d, IsHeatCrisisActive = true },
+                9100L,
+                1,
+                RunPostureResolver.BalancedId,
+                new MvpPlacementEffectsSummary {
+                    ContributingOptionIds = new[] {
+                        MvpDungeonPlacementIds.GoblinOptionId,
+                        MvpDungeonPlacementIds.GoblinOptionId,
+                        MvpDungeonPlacementIds.GoblinOptionId
+                    }
+                });
+
+            Assert.That(result.FinalChance, Is.GreaterThanOrEqualTo(result.SuccessThresholdUsed));
+            Assert.That(result.Party.IsWiped, Is.True);
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.ReasonKey, Is.EqualTo("run.reason.party_wiped"));
+            Assert.That(result.FeedbackTagKeys, Is.EqualTo(new[] {
+                "run.feedback.failure",
+                "run.feedback.high_heat",
+                "run.feedback.low_mana",
+                "run.feedback.heat_crisis"
+            }));
+            Assert.That(result.FeedbackTagKeys, Does.Not.Contain("run.feedback.success"));
+        }
+
+        [Test]
         public void EmptyOneRoomCompatibilityPreservesSuccessThroughAuthoritativeRoster()
         {
             var c = Config();
