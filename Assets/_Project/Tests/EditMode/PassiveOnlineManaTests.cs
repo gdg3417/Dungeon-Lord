@@ -496,12 +496,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 GameRoot root = go.AddComponent<GameRoot>();
                 SetField(root, "<Save>k__BackingField", fixture.Runtime);
-                saveService = new SaveService(new SimpleLogger(false, (level, message) => { }), new SaveConfig
-                {
-                    fileName = "canonical_adventure_passive_boundary_" + Guid.NewGuid().ToString("N") + ".json",
-                    useAtomicWrites = false
-                });
-                SetField(root, "<SaveService>k__BackingField", saveService);
+                saveService = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
+                root.AttachSaveServiceForTests(saveService);
                 SetField(root, "_runSimulationService", new RunSimulationService(fixture.Configuration));
                 SetField(root, "_structureSimulationPass",
                     new StructureSimulationPass(new HeatSystem(), LegacyStructureConfig()));

@@ -16,7 +16,14 @@ namespace DungeonBuilder.M0
             var events = (outcome.EncounterEvents ?? Array.Empty<Gameplay.RunSimulation.RunEncounterEvent>())
                 .Select(e => string.Format(eventFormat, e.RoomIndex + 1, e.AssignmentId, e.OptionId,
                     e.MemberOrdinal + 1, e.HealthBefore, e.HealthAfter, e.Damage, e.Severity, e.TrapExpertise));
-            return string.Join("\n", members.Concat(events));
+            string branchFormat = localize("ui.run.branch.format", "ui.run.branch.format");
+            var branches = (outcome.BranchOutcomes ?? Array.Empty<Gameplay.RunSimulation.BranchOutcomeEvidence>()).Select(b =>
+                string.Format(branchFormat, b.Fork.OptionalBranchId,
+                    localize(b.Decision?.Reason ?? b.PrecedenceReason, b.Decision?.Reason ?? b.PrecedenceReason),
+                    b.Decision?.Condition ?? 0d, b.Decision?.ExpectedSurvivability ?? 0d,
+                    localize(b.Reason, b.Reason), b.ReachedAssignments.Length,
+                    localize(b.KnowledgeOutcome, b.KnowledgeOutcome)));
+            return string.Join("\n", members.Concat(events).Concat(branches));
         }
     }
 }

@@ -34,7 +34,7 @@ PR #209 completed Phase 5A. Schema 10 owns optional-branch topology, `corridorCo
 
 `BranchKnowledgeRecord` already carries stable floor, branch, and edge IDs; the topology fingerprint; explicit topology, incentive, danger, and confidence known flags; bounded perceived incentive, danger, and confidence; and optional last-confirmed run identity. `BranchTopologyFingerprint` remains structural-applicability authority.
 
-Current runtime remains unchanged by Phase 5B0 and does not yet satisfy this contract:
+Historical runtime at the Phase 5B0 preparation baseline (superseded by PR #212 and Phase 5B2):
 
 - `RunSurvivalSummary` carries party size, survivors, deaths, and survivor ratio, but no member roster or average party health.
 - `RunSimulationService` independently rolls the survival party in the configured 3–5 range and uses success/failure survivor ratios, composition survivor-ratio adjustments, and casualty-pressure death-count derivation as aggregate casualty authorities.
@@ -42,11 +42,11 @@ Current runtime remains unchanged by Phase 5B0 and does not yet satisfy this con
 - `CanonicalMvpRouteProjection` deliberately ignores optional edges and DeadEnds and exposes only the required route.
 - `RunOutcomeRecord` carries aggregate loot, survival, heat, room resolutions, route outcome, and placement-effect summaries but no detailed Phase 5B branch-decision or branch-outcome evidence.
 
-Phase 5B must replace those conflicting live-party and casualty authorities deliberately. It must not leave them operating in parallel with member-level HP.
+PR #212 replaced the conflicting live-party and casualty authorities. Phase 5B2 consumes that same roster and member-level HP authority.
 
 ## 3. Single configuration authority
 
-The sole future writable Phase 5B tuning authority is one bounded, typed Phase 5B configuration object nested inside the existing `RunSimulationConfig`, serialized through `Assets/_Project/Data/Bootstrap/run_simulation_config.json`, and validated before `RunSimulationService` creation by `BootstrapConfigValidationService`.
+The sole writable Phase 5B tuning authority is one bounded, typed Phase 5B configuration object nested inside the existing `RunSimulationConfig`, serialized through `Assets/_Project/Data/Bootstrap/run_simulation_config.json`, and validated before `RunSimulationService` creation by `BootstrapConfigValidationService`.
 
 The nested configuration has configuration version `1` and stable branch-decision rule source ID `run.branch_decision.rule.phase5b.v1`. Its typed shape must contain logical sections equivalent to:
 
@@ -530,9 +530,9 @@ The merged Phase 5B0 packet was documentation-only. Its final external review pa
 
 ## 19. Phase 5B1 implementation boundary
 
-Phase 5B1 implements the prerequisite transient roster and integer HP encounter authority on the existing required route. Phase 5B2 retains branch decision, optional traversal, corridor encounters, and knowledge learning. Phase 5B is not complete.
+Phase 5B1 implements the prerequisite transient roster and integer HP encounter authority on the existing required route. Phase 5B2 now implements branch decision, optional traversal, corridor encounters, and knowledge learning. Manual Phase 5B qualification remains outstanding.
 
-The version-1 `RunSimulationConfig.PhaseFiveB` object owns the implemented party, class-health/capability/formation, behavior, intelligence, and damage sections. Deferred decision/knowledge/traversal tuning is not activated or duplicated elsewhere. Existing room pressure, loot, Heat, and success-threshold configuration remains with its established owner.
+The version-1 `RunSimulationConfig.PhaseFiveB` object owns the implemented party, class-health/capability/formation, behavior, intelligence, and damage sections. Phase 5B2 extends that same version-1 object with BranchDecision configuration; no second tuning authority exists. Existing room pressure, loot, Heat, and success-threshold configuration remains with its established owner.
 
 Party generation uses the existing `RunId` (`run-` plus invariant-culture run sequence). Each deterministic selection hashes the ordered tuple `(configured rule source, RunId, purpose, zero-based MemberOrdinal)` using SHA-256 over UTF-8 fields prefixed with their four-byte big-endian byte lengths. The first four digest bytes form an unsigned big-endian word. Purpose is `size`, `class`, `behavior`, or `intelligence`; size and intelligence use ordinal zero. Size uses modulo over the configured inclusive range; class selection uses modulo over class IDs sorted ordinally. Behavior and intelligence selection use the unsigned word divided by `4294967296`, normalized configured weights, and strict-less-than cumulative selection over ordinal IDs. Tick, selected structure, room order, and mutable state are not party-generation inputs. This is a party-generation engineering contract, not a change to Decision 30's locked future branch hash.
 
@@ -543,3 +543,15 @@ The canonical route projection retains assignment IDs and 64-bit sequences. Cate
 `SuccessSurvivorRatio` and `FailureSurvivorRatio` are retired active authorities retained as compatibility-only fields. Composition `SurvivorRatioDelta` remains derived diagnostic evidence only. `PartyWipeCasualtyPressureThreshold` is compatibility-only. The direct pressure-to-death calculation is removed. Pressure remains severity evidence; existing per-casualty extraction penalties and Heat surcharges consume actual HP deaths. `RunSurvivalSummary` is a derived snapshot, not a roster mutation input.
 
 The ordinary-member roster and encounter evidence are transient properties, omitted from Unity and strict public-field save serialization. Same-session canonical readback retains references to existing evidence by run ID and tick; reopening a save leaves historical party detail unavailable rather than regenerating it from current tuning. Historical aggregate evidence remains readable. Development diagnostics expose localized member HP and technical encounter evidence on the existing survival surface. No new save field, schema, or migration is authorized by this implementation.
+
+## 20. Phase 5B2 implementation boundary
+
+Phase 5B2 starts at merged PR #212, `ff797d7249d0ab50025a0e506d4c0c0c922f15ab`. `BranchDecisionResolver` implements Decision 30 with the exact four-field ordinal character/tuple fold, strict survivability refusal, deterministic threshold equality, and strict marginal roll comparison. Its structured evidence and branch traversal outcomes are transient properties, retained by run ID and tick only for the same session.
+
+`PhaseFiveBRouteProjection` derives stable room/node/floor identities, forks, physical order and the required-route suffix from validated schema 10 state and `CanonicalMvpRouteProjection`. Corridor order is distance from the resolved source tile, then stored sequence and ordinal assignment ID. It accepts only required-room origins and the existing straight DeadEnd corridor. Corridor traps call `RunEncounterResolver`; reached loot calls the existing loot resolver. The branch loot segment seed folds the stable domain `run.loot.branch_segment.v1`, RunId, FloorInstanceId, OptionalBranchId and AssignmentId using the repository ordinal integer fold. Required-room loot seeds and party-generation SHA-256 identities are unchanged.
+
+Current retreat authority is the existing required-room success-threshold stop plus HP wipe. It executes before branch choice. Return adds no content event and checks the resulting roster for terminal state before continuing; no new HP-based retreat formula is introduced. Content learning is finalized only after the complete run retains survivors. A skipped or stopped fork can confirm topology only; a completed physical observation records both present and absent content. Unknown or contradicted observed facts reset the single shared confidence to 0.75, and reconfirmation increases it once by 0.125 up to 1. Content edits do not rewrite knowledge.
+
+`SaveService.CommitPhaseFiveBRun` delegates to the existing detached canonical write authority. The writer verifies its session and durable bytes, clones recognized live state, calculates with detached Heat and a local RunParty, proposes history/objectives/knowledge, validates workloads, then captures recognized state. `PrepareLiveReplacement` receives the owned spatial state, investment and corridor content plus the explicit proposed shared knowledge. Existing exact-byte persistence/readback runs before runtime publication. Failure publishes no candidate. Schema remains 10; no migration, persisted HP, detailed branch history or extra owner is added.
+
+Four explicit counters enforce configured per-floor decisions, complete-run decisions, processed corridor assignments and knowledge updates. Pure fixtures exercise future-scale bounds without adding production floors. The existing Bootstrap survival diagnostics display localized branch reasons and outcomes. Automated results and remaining manual qualification are recorded in the Phase 5B2 evidence document; this implementation does not claim Editor UAT or standalone qualification.

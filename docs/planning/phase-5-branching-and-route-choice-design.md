@@ -22,7 +22,7 @@ It closes the owner-decision portion of the Phase 5 gate identified by:
 - `docs/planning/post-gd60-mvp-execution-plan.md`
 - `docs/planning/gd63-spatial-and-progression-design-decisions.md`
 
-Phase 5 still requires implementation, configuration, deterministic tests, integration review, and gameplay validation. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
+Phase 5B2 implements the remaining approved branch runtime behavior after the merged Phase 5B1 party/HP prerequisite. Integration review and manual gameplay qualification remain outstanding. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
 
 All numeric weights, thresholds, confidence-band limits, normalization curves, influence multipliers, and other tuning values remain configuration-owned and must not be invented in runtime code.
 
@@ -30,7 +30,7 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
-PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is complete in merged PR #209. Schema 10 owns durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B is the next gameplay packet and remains responsible for route choice, traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production decision tuning. The [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md) now records owner-approved initial configuration and implementation authority and is pending final external review; Phase 5B gameplay implementation remains unstarted. PR #210 is also merged and makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
+PR #208 merged this design lock. PR #209 supplies schema 10 branch/corridor/knowledge state. The production contract merged in PR #211, and PR #212 (`ff797d7249d0ab50025a0e506d4c0c0c922f15ab`) supplies the authoritative transient party and HP prerequisite. This Phase 5B2 packet implements Decision 30, traversal, corridor encounters and survivor learning through one detached atomic run commit. Manual qualification and review remain outstanding; no migration or schema change is added.
 
 At the verified preparation baseline:
 
@@ -40,7 +40,7 @@ At the verified preparation baseline:
 - Save schema was 9 at that preparation baseline.
 - PR #207 added no migration or new persisted gameplay authority.
 - Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred.
-- Phase 5A had not yet been implemented at that preparation baseline; Phase 5B runtime route choice remains unimplemented at the current PR #210 baseline.
+- Phase 5A had not yet been implemented at that preparation baseline; that historical state is superseded by Phase 5B1 and the current Phase 5B2 implementation.
 
 Repository documentation that describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale and conflicts with this recorded baseline.
 
@@ -965,7 +965,7 @@ The following remain configuration-owned and are not fixed by this design lock:
 - knowledge confidence thresholds
 - stale-information trust modifiers
 
-The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That implementation prerequisite is pending final external review and does not activate Phase 5B gameplay.
+The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That prerequisite merged in PR #211. Phase 5B1 and Phase 5B2 implement its approved runtime authorities; manual qualification remains outstanding.
 
 Runtime code must consume approved configuration.
 

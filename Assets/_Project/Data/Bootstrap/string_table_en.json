@@ -3,6 +3,90 @@
   "schemaVersion": 1,
   "language": "en",
   "entries": [
+{
+    "key": "ui.run.branch.format",
+    "text": "Branch {0}: {1}; condition {2:0.###}, survivability {3:0.###}; {4}; reached assignments {5}; {6}"
+  },
+  {
+    "key": "branch.decision.retreat_precedence",
+    "text": "Stopped before branch choice"
+  },
+  {
+    "key": "branch.decision.survivability_refusal",
+    "text": "Skipped: insufficient survivability"
+  },
+  {
+    "key": "branch.decision.appeal_skip",
+    "text": "Skipped: low appeal"
+  },
+  {
+    "key": "branch.decision.appeal_enter",
+    "text": "Entered: high appeal"
+  },
+  {
+    "key": "branch.decision.marginal_skip",
+    "text": "Skipped: marginal choice"
+  },
+  {
+    "key": "branch.decision.marginal_enter",
+    "text": "Entered: marginal choice"
+  },
+  {
+    "key": "branch.decision.invalid_configuration",
+    "text": "Branch decision configuration is invalid."
+  },
+  {
+    "key": "branch.outcome.skipped",
+    "text": "Branch skipped"
+  },
+  {
+    "key": "branch.outcome.completed",
+    "text": "Branch completed and returned"
+  },
+  {
+    "key": "branch.outcome.wiped",
+    "text": "Party wiped in branch"
+  },
+  {
+    "key": "branch.outcome.stopped",
+    "text": "Stopped at fork"
+  },
+  {
+    "key": "branch.knowledge.no_survivors",
+    "text": "No survivor report"
+  },
+  {
+    "key": "branch.knowledge.topology",
+    "text": "Branch existence confirmed"
+  },
+  {
+    "key": "branch.knowledge.observed",
+    "text": "Content observation recorded"
+  },
+  {
+    "key": "branch.knowledge.reconfirmed",
+    "text": "Content observation reconfirmed"
+  },
+  {
+    "key": "branch.run.invalid_route",
+    "text": "The optional branch route could not be validated."
+  },
+  {
+    "key": "branch.run.invalid_state",
+    "text": "The run state could not be validated. No run was committed."
+  },
+  {
+    "key": "branch.run.stale_session",
+    "text": "The save changed before this run. No run was committed."
+  },
+  {
+    "key": "branch.run.commit_failed",
+    "text": "The complete run could not be saved. No run was committed."
+  },
+  {
+    "key": "branch.run.WorkloadExceeded",
+    "text": "The run exceeded its configured workload. No run was committed."
+  },
     {
       "key": "ui.run.health.member_format",
       "text": "Member {0}: {1}, HP {2}/{3}"
