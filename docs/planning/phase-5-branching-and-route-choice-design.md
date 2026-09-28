@@ -902,7 +902,7 @@ Phase 5 implementation must preserve:
 - canonical ordering
 - decision-specific deterministic seeded variation only where approved
 - the exact ordered decision identity `BranchDecisionRuleSourceId`, `RunId`, `FloorInstanceId`, `OptionalBranchId`
-- the explicit stable-string hash and ordered tuple-fold algorithm in Decision 30
+- the active Decision 30 v2 algorithm: length-prefixed UTF-8 encoding of the exact ordered identity, SHA-256 over the concatenated stream, and the first four digest bytes as one unsigned 32-bit big-endian word
 - the unsigned 32-bit `[0, 1)` roll conversion and strict-less-than marginal comparison in Decision 30
 - no use of runtime `GetHashCode` as deterministic seed authority
 - no dependence on global RNG state
