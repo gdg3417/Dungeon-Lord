@@ -3,9 +3,13 @@
   "schemaVersion": 1,
   "language": "en",
   "entries": [
-{
+  {
     "key": "ui.run.branch.format",
     "text": "Branch {0}: {1}; condition {2:0.###}, survivability {3:0.###}; {4}; reached assignments {5}; {6}"
+  },
+  {
+    "key": "ui.run.branch.no_decision_format",
+    "text": "Branch {0}: no branch decision occurred ({1}); {2}; reached assignments {3}; {4}"
   },
   {
     "key": "branch.decision.retreat_precedence",

@@ -12,7 +12,7 @@ Decision identity is exactly `(BranchDecisionRuleSourceId, RunId, FloorInstanceI
 
 `PhaseFiveBRouteProjection` consumes the validated schema 10 graph and the existing required-route projection. Its transient view associates required rooms with stable floor/node identities and exposes the fork, DeadEnd, physical tiles, assignments, applicable knowledge and required suffix. Only required-room origins are accepted. Physical ordering uses Manhattan distance from `OptionalBranchGeometry.TryResolveSourceTile`, then stored 64-bit Sequence, then ordinal AssignmentId. Straight one-tile-wide geometry remains validated by Phase 5A; no saved order or duplicate topology is introduced.
 
-The origin encounter and its existing threshold/wipe stop precede any decision. Entering resolves reached assignments in physical order using `RunEncounterResolver` for traps and the existing loot resolver for loot. HP persists across the fork and return. A wipe stops later assignments, including loot. Returning is a control-flow transition, with no second decision, event, reward, Heat application or observation. The current retreat authority is the existing room success-threshold stop and roster wipe check; no new HP-based retreat formula is invented.
+The origin encounter and its existing threshold/wipe stop precede any decision. Entering resolves reached assignments in physical order using `RunEncounterResolver` for traps and the existing loot resolver for loot. HP persists across the fork and return. A wipe stops later assignments, including loot. Returning is a control-flow transition, with no second decision, event, reward, Heat application or observation. The current retreat authority is the existing room success-threshold stop and roster wipe check; no new HP-based retreat formula is invented. When that stop prevents branch evaluation, localized diagnostics use a dedicated no-decision format and do not fabricate condition or survivability values. Actual SKIP and ENTER decisions retain the detailed metric-bearing format.
 
 Branch loot uses the existing resolver with a separate deterministic segment seed: the repository integer fold over `run.loot.branch_segment.v1`, RunId, FloorInstanceId, OptionalBranchId and AssignmentId. It never consumes the choice roll. Required one-room and multi-room seed rules are untouched. Reached effects and actual casualties feed the existing extraction, Heat delta, Heat application and cooling authorities exactly once.
 
@@ -38,17 +38,18 @@ The existing version-1 `RunSimulationConfig.PhaseFiveB.BranchDecision` object co
 
 Unity version: `6000.3.2f1`; installed Unity CLI: `1.0.0-beta.10`. The repository's Editor test-discovery bridge registers all new fixtures. No new test is hidden behind a platform skip.
 
-The focused fixtures cover configuration omissions/domains, hash vectors and boundaries, survivability/unknown knowledge, origin timing and retreat precedence, physical order, HP carryover/retargeting, wipe-before-loot, return, repeated loot identity, learning/reconfirmation/contradiction, workload bounds, atomic write failure/stale session, transient readback and reopen, schema 10, and unchanged corridor/topology ownership.
+The focused fixtures cover configuration omissions/domains, hash vectors and boundaries, survivability/unknown knowledge, origin timing and retreat precedence, no-decision versus actual-decision diagnostic formatting, physical order, HP carryover/retargeting, wipe-before-loot, return, repeated loot identity, learning/reconfirmation/contradiction, workload bounds, atomic write failure/stale session, transient readback and reopen, schema 10, and unchanged corridor/topology ownership.
 
 Final automated results against the completed diff:
 
 | Suite | Total | Passed | Failed | Skipped | Inconclusive | Duration |
 |---|---:|---:|---:|---:|---:|---:|
-| Focused Phase 5B EditMode | 102 | 102 | 0 | 0 | 0 | 2.125 s |
-| Complete EditMode | 1,067 | 1,067 | 0 | 0 | 0 | 130.787 s |
-| Complete PlayMode | 2,569 | 2,559 | 0 | 10 | 0 | 129.425 s |
+| Focused presenter/localization regression | 13 | 13 | 0 | 0 | 0 | 1.571 s |
+| Focused Phase 5B EditMode | 105 | 105 | 0 | 0 | 0 | 2.165 s |
+| Complete EditMode | 1,070 | 1,070 | 0 | 0 | 0 | 132.794 s |
+| Complete PlayMode | 2,572 | 2,562 | 0 | 10 | 0 | 132.152 s |
 
-The ten PlayMode skips are the same established guards: eight synchronous EditMode-only GameRoot structural fixtures, the non-Windows inverse native-filesystem fixture, and the Windows Player-only standalone qualification fixture. No Phase 5B2 test is skipped. The transient two-test regression check used while correcting canonical GameRoot fixture setup also passed 2/2; the final complete suites supersede it as qualification evidence.
+The ten PlayMode skips are the same established guards: eight synchronous EditMode-only GameRoot structural fixtures, the non-Windows inverse native-filesystem fixture, and the Windows Player-only standalone qualification fixture. No Phase 5B2 test is skipped. Both bootstrap JSON files parse, the localization table has no duplicate keys, and the new no-decision localization entry is present. The final complete suites supersede earlier qualification counts on this branch.
 
 ## Manual qualification still required
 

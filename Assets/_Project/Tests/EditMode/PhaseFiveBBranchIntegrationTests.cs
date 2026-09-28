@@ -183,10 +183,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var requested = new System.Collections.Generic.List<string>();
             string text = RunPartyDiagnosticsPresenter.Build(run, (key, fallback) => { requested.Add(key); return fallback; });
             Assert.That(requested, Does.Contain("ui.run.branch.format"));
+            Assert.That(requested, Does.Not.Contain("ui.run.branch.no_decision_format"));
             Assert.That(requested, Does.Contain("branch.outcome.completed"));
             Assert.That(requested, Does.Contain("branch.knowledge.observed"));
             f.Accept(result); f.Reopen(); Assert.That(f.Runtime.runHistory.LatestOutcome.BranchOutcomes, Is.Null);
         }
+
+        [Test]
+        public void RetreatPrecedenceDiagnosticsStateNoDecisionWithoutFabricatedMetrics()
+        {
+            var outcome = DiagnosticOutcome(null);
+            var requested = new System.Collections.Generic.List<string>();
+            string text = RunPartyDiagnosticsPresenter.Build(outcome, (key, fallback) =>
+            {
+                requested.Add(key);
+                if (key == "ui.run.branch.no_decision_format") return "NO DECISION {0} | {1} | {2} | reached {3} | {4}";
+                if (key == "ui.run.branch.format") return "DECISION {0} | condition {2:0.###} | survivability {3:0.###}";
+                return key;
+            });
+            Assert.That(text, Does.Contain("NO DECISION branch-1"));
+            Assert.That(text, Does.Contain("branch.decision.retreat_precedence"));
+            Assert.That(text, Does.Not.Contain("condition").And.Not.Contain("survivability"));
+            Assert.That(requested, Does.Contain("ui.run.branch.no_decision_format"));
+            Assert.That(requested, Does.Not.Contain("ui.run.branch.format"));
+        }
+
+        [TestCase(false, "branch.decision.appeal_skip")]
+        [TestCase(true, "branch.decision.appeal_enter")]
+        public void ActualDecisionDiagnosticsRetainDetailedMetrics(bool enter, string reason)
+        {
+            var outcome = DiagnosticOutcome(new BranchDecisionEvidence {
+                Enter = enter, Reason = reason, Condition = .625d, ExpectedSurvivability = .5d });
+            var requested = new System.Collections.Generic.List<string>();
+            string text = RunPartyDiagnosticsPresenter.Build(outcome, (key, fallback) =>
+            {
+                requested.Add(key);
+                if (key == "ui.run.branch.no_decision_format") return "NO DECISION {0}";
+                if (key == "ui.run.branch.format") return "DECISION {0} | condition {2:0.###} | survivability {3:0.###}";
+                return key;
+            });
+            Assert.That(text, Does.Contain("DECISION branch-1 | condition 0.625 | survivability 0.5"));
+            Assert.That(requested, Does.Contain("ui.run.branch.format"));
+            Assert.That(requested, Does.Not.Contain("ui.run.branch.no_decision_format"));
+        }
+
+        private static RunOutcomeRecord DiagnosticOutcome(BranchDecisionEvidence decision) => new RunOutcomeRecord {
+            Party = RunPartyGenerator.Create(PhaseFiveBTestConfig.Create(), "run-diagnostics"),
+            BranchOutcomes = new[] { new BranchOutcomeEvidence {
+                Fork = new PhaseFiveBFork { OptionalBranchId = "branch-1" }, Decision = decision,
+                PrecedenceReason = decision == null ? "branch.decision.retreat_precedence" : null,
+                Reason = decision == null ? "branch.outcome.stopped" : decision.Enter ? "branch.outcome.completed" : "branch.outcome.skipped",
+                KnowledgeOutcome = "branch.knowledge.topology" } }
+        };
 
         [Test]
         public void KnowledgeUnknownFactsResetSharedConfidenceAndSkipHasNoPassiveDecay()
