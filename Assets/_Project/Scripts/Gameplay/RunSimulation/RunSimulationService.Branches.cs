@@ -124,7 +124,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 int hash = 17;
                 foreach (string field in new[] { "run.loot.branch_segment.v1", run, floor, branch, assignment })
-                    hash = hash * 31 + BranchDecisionResolver.StableStringHash(field);
+                    hash = hash * 31 + BranchLootStableStringHash(field);
+                return hash;
+            }
+        }
+
+        private static int BranchLootStableStringHash(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return 0;
+            unchecked
+            {
+                int hash = 23;
+                foreach (char character in value) hash = hash * 31 + character;
                 return hash;
             }
         }

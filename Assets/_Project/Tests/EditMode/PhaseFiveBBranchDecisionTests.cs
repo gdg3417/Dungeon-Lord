@@ -15,21 +15,76 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Applicable = known, Knowledge = new BranchKnowledgeRecord { IncentiveKnown = known, DangerKnown = known,
                 ConfidenceKnown = known, Confidence = known ? 1d : 0d, PerceivedIncentive = known ? 1d : 0d } };
 
-        [TestCase(null, 0)][TestCase("", 0)][TestCase("a", 810)][TestCase("abc", 781547)]
-        [TestCase("run.branch_decision.rule.phase5b.v1", 1863268836)]
-        public void StableStringVectors(string input, int expected) => Assert.That(BranchDecisionResolver.StableStringHash(input), Is.EqualTo(expected));
+        [TestCase("run-1", "floor-1", "branch-1", "2f14e61aaba388a5c2355af4ab258bb29c8b494aad3d5c0af7f0da91018a2a9e", 789898778L)]
+        [TestCase("run-2", "compat.floor.00", "compat.floor.00.edge.native.00000000.branch", "3454cfedea2e165d2ecccc3aeb0c1034c49cf5992619509870cf5fc3f7a6be2a", 877973485L)]
+        public void DecisionV2KnownVectors(string run, string floor, string branch, string expectedDigest, long expectedWord)
+        {
+            const string rule = "run.branch_decision.rule.phase5b.v2";
+            byte[] digest = BranchDecisionResolver.IdentityDigest(rule, run, floor, branch);
+            Assert.That(BitConverter.ToString(digest).Replace("-", "").ToLowerInvariant(), Is.EqualTo(expectedDigest));
+            Assert.That(BranchDecisionResolver.IdentityWord(rule, run, floor, branch), Is.EqualTo((uint)expectedWord));
+            Assert.That(BranchDecisionResolver.Roll(rule, run, floor, branch),
+                Is.EqualTo(expectedWord / 4294967296d));
+        }
 
         [Test]
-        public void OrderedIdentityVectorAndGlobalRandomIndependence()
+        public void OrderedIdentityIsIndependentOfGlobalRandomCallOrderAndRuntimeHashes()
         {
-            const string rule = "run.branch_decision.rule.phase5b.v1";
-            Assert.That(BranchDecisionResolver.IdentityHash(rule, "run-1", "floor-1", "branch-1"), Is.EqualTo(-356988631));
+            const string rule = "run.branch_decision.rule.phase5b.v2";
             double first = BranchDecisionResolver.Roll(rule, "run-1", "floor-1", "branch-1");
             var previous = UnityEngine.Random.state;
             try { UnityEngine.Random.InitState(873); Assert.That(BranchDecisionResolver.Roll(rule, "run-1", "floor-1", "branch-1"), Is.EqualTo(first)); }
             finally { UnityEngine.Random.state = previous; }
-            Assert.That(first, Is.EqualTo(3937978665d / 4294967296d));
+            Assert.That(first, Is.EqualTo(789898778d / 4294967296d));
+            double unrelated = BranchDecisionResolver.Roll(rule, "run-unrelated", "floor-unrelated", "branch-unrelated");
+            Assert.That(BranchDecisionResolver.Roll(rule, "run-1", "floor-1", "branch-1"), Is.EqualTo(first));
+            Assert.That(unrelated, Is.Not.EqualTo(first));
             Assert.That(BranchDecisionResolver.Roll(rule, "floor-1", "run-1", "branch-1"), Is.Not.EqualTo(first));
+            foreach (var changed in new[] {
+                new[] { rule + ".changed", "run-1", "floor-1", "branch-1" },
+                new[] { rule, "run-1.changed", "floor-1", "branch-1" },
+                new[] { rule, "run-1", "floor-1.changed", "branch-1" },
+                new[] { rule, "run-1", "floor-1", "branch-1.changed" } })
+                Assert.That(BranchDecisionResolver.Roll(changed[0], changed[1], changed[2], changed[3]), Is.Not.EqualTo(first));
+            Assert.That(BranchDecisionResolver.Roll(new string(rule.ToCharArray()), new string("run-1".ToCharArray()),
+                new string("floor-1".ToCharArray()), new string("branch-1".ToCharArray())), Is.EqualTo(first));
+        }
+
+        [Test]
+        public void ProductionValidationAcceptsOnlyDecisionV2Rule()
+        {
+            var c = PhaseFiveBTestConfig.Create();
+            Assert.That(c.Version, Is.EqualTo(1));
+            Assert.That(c.BranchDecision.RuleSourceId, Is.EqualTo("run.branch_decision.rule.phase5b.v2"));
+            Assert.That(PhaseFiveBConfigValidation.ValidDecision(c.BranchDecision), Is.True);
+            c.BranchDecision.RuleSourceId = "run.branch_decision.rule.phase5b.v1";
+            Assert.That(PhaseFiveBConfigValidation.ValidDecision(c.BranchDecision), Is.False);
+        }
+
+        [Test]
+        public void SequentialProductionIdentitiesSpanLowAndHighRolls()
+        {
+            const string rule = "run.branch_decision.rule.phase5b.v2";
+            double[] rolls = Enumerable.Range(1, 16).Select(n => BranchDecisionResolver.Roll(rule, "run-" + n,
+                "compat.floor.00", "compat.floor.00.edge.native.00000000.branch")).ToArray();
+            Assert.That(rolls.All(r => r >= 0d && r < 1d), Is.True);
+            Assert.That(rolls.Any(r => r < .25d), Is.True);
+            Assert.That(rolls.Any(r => r > .75d), Is.True);
+        }
+
+        [Test]
+        public void ProductionLikeUnknownBranchAllowsEarlyRunTwoEntry()
+        {
+            var c = PhaseFiveBTestConfig.Create();
+            var result = BranchDecisionResolver.Resolve(c.BranchDecision, new BranchDecisionInput {
+                Party = RunPartyGenerator.Create(c, "run-2"), FloorInstanceId = "compat.floor.00",
+                OptionalBranchId = "compat.floor.00.edge.native.00000000.branch", Applicable = true,
+                Knowledge = new BranchKnowledgeRecord { TopologyKnown = true }, RemainingRequiredDanger = 0d });
+            Assert.That(result.U, Is.EqualTo(1d));
+            Assert.That(result.IncentiveKnown || result.DangerKnown, Is.False);
+            Assert.That(result.DecisionRoll, Is.EqualTo(877973485d / 4294967296d));
+            Assert.That(result.Reason, Is.EqualTo("branch.decision.marginal_enter"));
+            Assert.That(result.Enter, Is.True);
         }
 
         [TestCase("missing")][TestCase("rule")][TestCase("nan")][TestCase("infinity")]

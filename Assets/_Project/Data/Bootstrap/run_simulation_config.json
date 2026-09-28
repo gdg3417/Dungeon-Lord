@@ -1,7 +1,7 @@
 {
   "PhaseFiveB": {
   "BranchDecision": {
-    "RuleSourceId": "run.branch_decision.rule.phase5b.v1",
+    "RuleSourceId": "run.branch_decision.rule.phase5b.v2",
     "TrapInterpretationConfidenceBonus": 0.15,
     "IncentiveReferenceLootBonus": 6,
     "DangerReferenceValue": 3,

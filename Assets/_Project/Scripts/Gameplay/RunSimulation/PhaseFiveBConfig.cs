@@ -147,7 +147,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private static bool PositiveTotal(double[] values) => values.Sum() > 0d && Finite(values.Sum());
         public static bool ValidDecision(BranchDecisionConfig c)
         {
-            if (c == null || c.RuleSourceId != "run.branch_decision.rule.phase5b.v1") return false;
+            if (c == null || c.RuleSourceId != "run.branch_decision.rule.phase5b.v2") return false;
             double[] units = { c.TrapInterpretationConfidenceBonus, c.ConditionHealthWeight,
                 c.ConditionActiveMemberWeight, c.ThreatDangerWeight, c.ThreatUncertaintyWeight,
                 c.TrapExpertiseThreatMitigation, c.SurvivabilityThreatPenalty,

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
@@ -32,25 +35,31 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     public static class BranchDecisionResolver
     {
         public const string InvalidConfiguration = "branch.decision.invalid_configuration";
-        public static int StableStringHash(string value)
+
+        public static byte[] IdentityDigest(string rule, string run, string floor, string branch)
         {
-            if (string.IsNullOrEmpty(value)) return 0;
-            unchecked { int hash = 23; foreach (char character in value) hash = hash * 31 + character; return hash; }
+            var bytes = new List<byte>();
+            foreach (string field in new[] { rule, run, floor, branch })
+            {
+                byte[] value = Encoding.UTF8.GetBytes(field ?? string.Empty);
+                uint length = (uint)value.Length;
+                bytes.Add((byte)(length >> 24));
+                bytes.Add((byte)(length >> 16));
+                bytes.Add((byte)(length >> 8));
+                bytes.Add((byte)length);
+                bytes.AddRange(value);
+            }
+            using (var sha = SHA256.Create()) return sha.ComputeHash(bytes.ToArray());
         }
 
-        public static int IdentityHash(string rule, string run, string floor, string branch)
+        public static uint IdentityWord(string rule, string run, string floor, string branch)
         {
-            unchecked
-            {
-                int hash = 17;
-                foreach (string field in new[] { rule, run, floor, branch })
-                    hash = hash * 31 + StableStringHash(field);
-                return hash;
-            }
+            byte[] digest = IdentityDigest(rule, run, floor, branch);
+            return ((uint)digest[0] << 24) | ((uint)digest[1] << 16) | ((uint)digest[2] << 8) | digest[3];
         }
 
         public static double Roll(string rule, string run, string floor, string branch) =>
-            unchecked((uint)IdentityHash(rule, run, floor, branch)) / 4294967296.0;
+            IdentityWord(rule, run, floor, branch) / 4294967296.0;
 
         public static bool MarginalEnter(double roll, double likelihood) => roll < likelihood;
 

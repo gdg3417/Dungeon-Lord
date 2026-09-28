@@ -48,7 +48,7 @@ PR #212 replaced the conflicting live-party and casualty authorities. Phase 5B2 
 
 The sole writable Phase 5B tuning authority is one bounded, typed Phase 5B configuration object nested inside the existing `RunSimulationConfig`, serialized through `Assets/_Project/Data/Bootstrap/run_simulation_config.json`, and validated before `RunSimulationService` creation by `BootstrapConfigValidationService`.
 
-The nested configuration has configuration version `1` and stable branch-decision rule source ID `run.branch_decision.rule.phase5b.v1`. Its typed shape must contain logical sections equivalent to:
+The nested configuration has configuration version `1` and stable branch-decision rule source ID `run.branch_decision.rule.phase5b.v2`. Its typed shape must contain logical sections equivalent to:
 
 - identity and version;
 - party formation;
@@ -77,7 +77,7 @@ All 24 Phase 5B0 owner-decision rows are closed. Implementation-selected details
 
 | # | Implementation authority | Approved authority |
 |---:|---|---|
-| 1 | Production configuration owner | One version-1 Phase 5B object nested in `RunSimulationConfig` and serialized in the existing `run_simulation_config.json`; no fallback or second authority; fail-closed validation; branch rule ID `run.branch_decision.rule.phase5b.v1`. |
+| 1 | Production configuration owner | One version-1 Phase 5B object nested in `RunSimulationConfig` and serialized in the existing `run_simulation_config.json`; no fallback or second authority; fail-closed validation; branch rule ID `run.branch_decision.rule.phase5b.v2`. |
 | 2 | Authoritative live party instance | One transient 3–5 member roster per run. `RunId` plus canonical `MemberOrdinal` identifies each member. Composition, behavior, capability, health, casualties, route choice, and reporting consume this roster. The 1–3 preview becomes a view of it. |
 | 3 | Member behavioral-profile generation | Each member receives one deterministic profile independent of class from the configured profile collection using run identity, member ordinal, and an explicit stable configured assignment rule source. No global RNG, runtime hash, clock, call order, or collection order. Profiles are transient. |
 | 4 | Five behavior profiles | Stable IDs, initial dimensions, and explicit initial selection weight `0.20` per profile are approved in section 6. All dimensions and weights are tunable configuration in `[0,1]`; weights form a valid normalized distribution after runtime normalization. |
@@ -94,7 +94,7 @@ All 24 Phase 5B0 owner-decision rows are closed. Implementation-selected details
 | 15 | `PartyMinimumSurvivability` | Per-profile values in section 10, averaged over original party members and not recomputed after casualties. Strictly less skips; equality continues. |
 | 16 | Branch-appeal weights | `wReward = 1.25`, `wDanger = 1.00`, `wUncertainty = 0.75`, `wReserve = 0.50`, `wIntent = 0.00`; finite, nonnegative, configurable, and total greater than zero. |
 | 17 | Confidence thresholds | `SkipThreshold = -0.15`; `EnterThreshold = 0.15`; configured and validated under the locked inequality. |
-| 18 | Marginal deterministic decision | Rule ID above; Decision 30 identity order, stable-string hash, tuple fold, unsigned conversion, linear likelihood, and strict comparison remain exact and unchanged. |
+| 18 | Marginal deterministic decision | Rule ID above; Decision 30 v2 preserves the four-field identity order and uses length-prefixed UTF-8 SHA-256, an unsigned big-endian first word, the existing linear likelihood, and strict comparison. |
 | 19 | Knowledge learning | Skip, survivor observation, reconfirmation, contradiction, staleness, topology invalidation, and wipe semantics are approved in section 12. Initial observation confidence is 0.75 and reconfirmation increase is 0.125. |
 | 20 | Coarse full-wipe danger owner | Existing persisted run-history death/wipe evidence remains coarse dungeon-level danger evidence. Do not write precise branch knowledge from a wipe and do not add a branch/floor save owner. |
 | 21 | Fork execution and traversal ordering | The deterministic 13-step sequence in section 13 governs branch origin, retreat precedence, enter/skip, physical order, tie-breaks, stop/wipe, automatic return, and later retreat. |
@@ -420,7 +420,7 @@ Only the strict marginal band uses Decision 30's deterministic resolution. The o
 3. `FloorInstanceId`
 4. `OptionalBranchId`
 
-The implementation must use the exact locked `StableStringHash` character fold and ordered tuple fold, convert the signed 32-bit result to `uint`, divide by `4294967296.0` for `[0,1)`, and use:
+For each identity field in order, the implementation encodes UTF-8 bytes, prefixes their byte length as an unsigned 32-bit big-endian integer, and appends both to one stream. SHA-256 hashes the complete stream. The first four digest bytes form one unsigned 32-bit big-endian word; dividing that word by `4294967296.0` produces the `[0,1)` roll. Decision 30 v1's signed polynomial string and tuple folds are superseded and are not active production authority. Resolution remains:
 
 ```text
 EntryLikelihood =
@@ -431,6 +431,8 @@ ENTER only when DecisionRoll < EntryLikelihood
 ```
 
 Exact equality is `SKIP`. Runtime `GetHashCode`, global/shared RNG, wall clock, call order, iteration position, dictionary order, room order, and unrelated state are prohibited authorities.
+
+Manual Phase 5B2 qualification exposed pathological correlation between sequential `RunId` values under v1, repeatedly producing marginal skips while topology-only knowledge correctly revealed no hidden content. The owner-approved v2 correction changes only the deterministic marginal roll derivation. Thresholds, appeal, survivability, knowledge, traversal, HP, loot, Heat, workload, atomic persistence, the four-field identity tuple, roll conversion, and strict comparison remain unchanged. Schema remains 10 and no migration is required.
 
 ## 12. Knowledge learning
 
@@ -546,7 +548,7 @@ The ordinary-member roster and encounter evidence are transient properties, omit
 
 ## 20. Phase 5B2 implementation boundary
 
-Phase 5B2 starts at merged PR #212, `ff797d7249d0ab50025a0e506d4c0c0c922f15ab`. `BranchDecisionResolver` implements Decision 30 with the exact four-field ordinal character/tuple fold, strict survivability refusal, deterministic threshold equality, and strict marginal roll comparison. Its structured evidence and branch traversal outcomes are transient properties, retained by run ID and tick only for the same session.
+Phase 5B2 starts at merged PR #212, `ff797d7249d0ab50025a0e506d4c0c0c922f15ab`. `BranchDecisionResolver` implements Decision 30 v2 with the exact four-field identity encoded as length-prefixed UTF-8 and hashed with SHA-256; the first unsigned big-endian digest word produces the roll. Strict survivability refusal, deterministic threshold equality, and strict marginal roll comparison remain unchanged. Its structured evidence and branch traversal outcomes are transient properties, retained by run ID and tick only for the same session.
 
 `PhaseFiveBRouteProjection` derives stable room/node/floor identities, forks, physical order and the required-route suffix from validated schema 10 state and `CanonicalMvpRouteProjection`. Corridor order is distance from the resolved source tile, then stored sequence and ordinal assignment ID. It accepts only required-room origins and the existing straight DeadEnd corridor. Corridor traps call `RunEncounterResolver`; reached loot calls the existing loot resolver. The branch loot segment seed folds the stable domain `run.loot.branch_segment.v1`, RunId, FloorInstanceId, OptionalBranchId and AssignmentId using the repository ordinal integer fold. Required-room loot seeds and party-generation SHA-256 identities are unchanged.
 

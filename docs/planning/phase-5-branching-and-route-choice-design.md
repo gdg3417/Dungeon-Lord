@@ -771,34 +771,29 @@ The approved resolver order is:
 
    No new durable `PartyId` is required solely for Phase 5 branch selection because the MVP party is associated with its run identity. Implementation must reconcile with the repository's existing stable `RunId`, canonical `FloorInstanceId`, and persisted `OptionalBranchId` contracts rather than create parallel identity authorities.
 
-   Derive the stable signed 32-bit hash using the repository's explicit convention:
+   Manual Phase 5B2 qualification exposed pathological correlation between sequential `RunId` values under the original Decision 30 v1 polynomial hash, repeatedly producing marginal skips before precise branch knowledge could be learned. The owner-approved Decision 30 v2 correction preserves the identity tuple and replaces only its roll derivation. The active rule source ID is `run.branch_decision.rule.phase5b.v2`; v1 polynomial hashing is superseded and is not active production authority.
+
+   For each identity field in the exact order above:
 
    ```text
-   hash = 17
-
-   for each decision-identity field in the exact order above:
-       hash = unchecked(hash * 31 + StableStringHash(field))
+   fieldBytes = UTF8(field)
+   append UInt32BigEndian(fieldBytes.Length)
+   append fieldBytes
    ```
 
-   `StableStringHash` is exactly:
+   Hash the complete concatenated byte stream with SHA-256. Read the first four digest bytes as one unsigned 32-bit big-endian word:
 
    ```text
-   if value is null or empty:
-       return 0
-
-   hash = 23
-
-   for each character in ordinal string order:
-       hash = unchecked(hash * 31 + character)
-
-   return hash
+   word =
+       digest[0] << 24
+       | digest[1] << 16
+       | digest[2] << 8
+       | digest[3]
    ```
-
-   Convert the final signed 32-bit hash to an unsigned 32-bit value and derive:
 
    ```text
    DecisionRoll =
-       ((uint)hash) / 4294967296.0
+       word / 4294967296.0
    ```
 
    The roll domain is `0 <= DecisionRoll < 1`. Resolve the marginal choice exactly as:
@@ -815,7 +810,7 @@ The approved resolver order is:
 10. **Commit one route choice.**  
     Enter or skip. Phase 5 adds no discretionary mid-branch reversal. Completing the optional dead end automatically returns the party to the required route without a second branch decision.
 
-Numeric weight values, threshold values, input normalization curves, survivability bands, and modifiers are configuration-owned. The formula structure, term signs, normalized input domains, confidence-boundary semantics, linear marginal mapping, decision-identity fields and order, stable hash algorithm, roll conversion, and equality behavior are locked design.
+Numeric weight values, threshold values, input normalization curves, survivability bands, and modifiers are configuration-owned. The formula structure, term signs, normalized input domains, confidence-boundary semantics, linear marginal mapping, decision-identity fields and order, Decision 30 v2 length-prefixed UTF-8 SHA-256 algorithm, roll conversion, and equality behavior are locked design. This transient roll correction changes no save representation: schema remains 10 and no migration is required.
 
 ### Decision 31: Player-facing reporting
 

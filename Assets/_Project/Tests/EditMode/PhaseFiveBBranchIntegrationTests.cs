@@ -62,6 +62,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix));
 
         [Test]
+        public void ProductionLikeUnknownBranchEntersOnEarlySequentialRun()
+        {
+            var f = Fixture();
+            var production = PhaseFiveBTestConfig.Production().PhaseFiveB.BranchDecision;
+            var decision = f.Configuration.PhaseFiveB.BranchDecision;
+            decision.SkipThreshold = production.SkipThreshold;
+            decision.EnterThreshold = production.EnterThreshold;
+            foreach (var minimum in decision.ProfileMinimums)
+                minimum.MinimumSurvivability = production.ProfileMinimums.Single(p => p.ProfileId == minimum.ProfileId).MinimumSurvivability;
+
+            f.Accept(Run(f));
+            var first = f.Runtime.runHistory.LatestOutcome.BranchOutcomes.Single();
+            Assert.That(first.Decision.RunId, Is.EqualTo("run-1"));
+            Assert.That(first.Reason, Is.EqualTo("branch.outcome.skipped"));
+            var topologyOnly = f.Runtime.sharedBranchKnowledge.Records.Single();
+            Assert.That(topologyOnly.TopologyKnown, Is.True);
+            Assert.That(topologyOnly.IncentiveKnown || topologyOnly.DangerKnown, Is.False);
+
+            f.Accept(Run(f));
+            var second = f.Runtime.runHistory.LatestOutcome.BranchOutcomes.Single();
+            Assert.That(second.Decision.RunId, Is.EqualTo("run-2"));
+            Assert.That(second.Decision.DecisionRoll, Is.EqualTo(877973485d / 4294967296d));
+            Assert.That(second.Decision.Reason, Is.EqualTo("branch.decision.marginal_enter"));
+            Assert.That(second.Traversed, Is.True);
+        }
+
+        [Test]
         public void EnterAppliesOneTrapOneLootReturnsAndLearnsDurablyWithoutNewSchema()
         {
             var f = Fixture(); string corridor = JsonUtility.ToJson(f.Runtime.corridorContent);
