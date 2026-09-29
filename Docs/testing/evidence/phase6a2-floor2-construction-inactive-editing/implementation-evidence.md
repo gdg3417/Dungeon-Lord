@@ -1,6 +1,15 @@
 # Phase 6A2 — Floor 2 construction and inactive editing
 
-Status: implementation external re-review, automated qualification, and owner Editor/Windows standalone qualification passed. Final post-documentation external ChatGPT merge review remains pending; not declared ready to merge.
+Status: merged as PR #216 at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f`. External review, automated qualification, owner Editor qualification, and Windows standalone qualification passed.
+
+## Merge closeout
+
+- PR: #216, **Phase 6A2: Construct Floor 2 and enable floor-targeted inactive editing**.
+- Merge commit: `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f`.
+- External review and correction re-review passed before merge.
+- The automated suites and production gates recorded below passed.
+- Owner Editor qualification and Windows standalone qualification recorded below passed.
+- The known local-only `ProjectSettings/UnityConnectSettings.asset` `m_Enabled: 0 -> 1` environment change was not part of PR #216.
 
 ## Baseline and continuation audit
 
@@ -226,6 +235,6 @@ Current status/evidence and generated-test hygiene:
 
 No requirement needs schema 12. No activation/deactivation, lifecycle cascade, additional deeper floor, multi-floor traversal, descend/exit decision, survivor transfer, multi-floor settlement/reporting/knowledge, Floor-2-exclusive content, shell demolition/refund, run-event mana, backend/concurrency redesign, or Phase 7 editor is implemented. Research progression UI remains the existing scaffold. Selected floor/room is transient editor presentation, not persisted identity authority; reopen uses deterministic default selection.
 
-Owner Editor and Windows standalone qualification passed as recorded above. **FINAL EXTERNAL CHATGPT MERGE REVIEW PENDING — do not merge yet.**
+PR #216 completed final external review and merged at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f` after the recorded automated, Editor, and Windows standalone qualification passed.
 
-This packet is not declared ready to merge. Stop for final external ChatGPT review.
+This packet is merged and qualified. The recorded limitations above remain in effect.

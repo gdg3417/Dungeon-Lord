@@ -1,6 +1,6 @@
 # Phase 6A0: Multi-floor foundation design and tuning lock
 
-**Implementation reconciliation (2026-09-29):** Phase 6A1 persisted schema 11 activation authority. Phase 6A2 implements Floor 2 permission, shell construction, and explicit floor-targeted inactive editing against merged PR #215 / `87245ed2eb68d20b6559631f6e9dba3fb5f715fc`. The locked decisions below remain unchanged. Activation actions and multi-floor runs are not implemented; external review and later owner qualification remain pending. See [Phase 6A2 evidence](../../Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md).
+**Implementation reconciliation (2026-09-29):** Phase 6A1 persisted schema 11 activation authority. Phase 6A2 merged as PR #216 at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f` after external review, automated qualification, Editor qualification, and Windows standalone qualification passed; it implements Floor 2 permission, shell construction, and explicit floor-targeted inactive editing. Phase 6A3 adds only deterministic read-only Floor 2 activation eligibility, consuming existing canonical, research, production-semantic, and `ActivationValid` layout authorities and requiring a required route through at least one room. The locked decisions below remain unchanged. No activation/deactivation mutation or multi-floor run support is implemented. See [Phase 6A2 evidence](../../Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md).
 
 | Field | Authority |
 | --- | --- |
