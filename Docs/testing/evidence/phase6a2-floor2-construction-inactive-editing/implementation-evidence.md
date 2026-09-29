@@ -1,0 +1,217 @@
+# Phase 6A2 — Floor 2 construction and inactive editing
+
+Status: implementation and automated qualification complete; external ChatGPT PR review and owner manual qualification have not been performed. Not declared ready to merge.
+
+## Baseline and continuation audit
+
+- Exact verified starting baseline: `87245ed2eb68d20b6559631f6e9dba3fb5f715fc`, merged PR #215, **Phase 6A1: Persist schema 11 floor activation authority**.
+- Branch: `codex/phase-6a2-floor2-construction-inactive-editing`.
+- This continued the interrupted local implementation, not a fresh checkout. At continuation, HEAD was the exact baseline, with nine modified files and four untracked implementation/configuration files. Those changes were inspected and retained. No reset, checkout, stash, or alternate implementation was used.
+- The original run verified clean main and refreshed origin before creating the branch. Continuation compared HEAD, origin/main, all tracked diffs, and new files against the exact baseline; there were no already-committed Phase 6A2 changes to overlook.
+- Read repository guardrails, model policy, Phase 6 lock/execution plan, Specs 28/38, invariant glossary, actual merged #215 implementation and evidence, and production authoring/export, research, investment, detached persistence, editing, run, passive-mana, and Bootstrap authorities.
+- Initial audit: profile/content, lifecycle-aware validation, construction writer, ledger extension, and initial SaveService/GameRoot hooks were partial. Explicit floor targeting, empty-shell room editing, run isolation, usable Bootstrap controls, localization, production export, and Phase 6A2 tests/evidence were incomplete or untested. The continuation finished and reconciled those existing paths.
+- Recommendation: **GPT-6 Sol, High; Complex**. The owner explicitly changed the optimization goal toward usage conservation, with locked architecture and recent consumption evidence justifying the exception to the older Complex default. No model-governance change is included.
+
+## New implementation and retained authorities
+
+### Production floor and dedicated construction profile
+
+Canonical authoring tables add `spatial.floor.02`, index **1** (player-facing Floor 2), minimum `(0,0)`, bounds **14 × 14**, base `FinalFloorSpaceCapacity` **80**, and authored `OptionalBranchAllowance` **1**. Existing `ac_300` still owns effective branch permission/allowance.
+
+Allowlisted rooms are `spatial.room.basic`, `spatial.room.large_chamber`, and `spatial.room.rectangle`; the corridor is `spatial.corridor.straight_stone`. Fixed definitions remain `spatial.fixed.entrance_hall` and `spatial.fixed.completion_terminal`. There are no new exclusive encounters, rooms, corridors, monsters, traps, or loot, and no floor-number difficulty bonus.
+
+Dedicated Resource configuration `floor_construction_profiles.json` owns exactly these shell-operation values:
+
+| Field | Authored value |
+| --- | --- |
+| Profile identity/version | `floor.construction.02.v1` / `1` |
+| Production floor | `spatial.floor.02` |
+| Required research | `ac_100` |
+| Shell mana cost | `450` |
+| Entrance anchor/orientation | `(1,0)` / `CardinalOrientation.Zero` (serialized enum `0`) |
+| Completion anchor/orientation | `(11,12)` / `CardinalOrientation.Zero` (serialized enum `0`) |
+
+Both footprints fit, do not overlap, use allowed orientations, and preserve useful space. With the authored north-facing Entrance socket, a Basic Room at `(1,2)`, Zero orientation and east terminal connection is one deterministically tested first-room placement. The existing socket/door/corridor algorithm can move the same Completion Terminal when building; the shell profile is not reapplied during later editing or reopening. Deleting the final room leaves the current legal fixed-structure layout, not a reset to original profile coordinates.
+
+The profile does not duplicate bounds, capacities, or allowlists and is neither a migration compatibility profile nor a canonical starter. Strict bounded JSON/type/property validation, unique profile/floor resolution, production definition checks, orientation/bounds/footprint checks, and no-overlap validation fail closed.
+
+The existing CSV exporter generated the committed catalog. Generated English and manifest remain byte-unchanged. The authoring contract currently pins content version `0.1.0`; that version and content schema/registration remain unchanged. An attempted `0.2.0` export correctly failed the pinned authoring gate and was corrected in authoring before successful regeneration. Generated JSON was not used as writable authority.
+
+### Research permission
+
+`FloorConstructionResearchAuthority` resolves exactly one production Architecture `ac_100` node with `unlock_type=effect`, target `max_floors`, and effect profile `eff_ac_floor_2_permit`, then exactly one matching `max_floors_set` effect with integer unit/value. Relevant raw property types and duplicate properties/records are checked before deserialization; malformed, contradictory, missing, or duplicated configuration fails closed. The resolved maximum floor count must agree with the profile's production index. Permission requires exactly one completed `ac_100` entry in the existing completed-research owner.
+
+Completion creates no floor. Reopening a completed-research save with no Floor 2 remains unlocked/unconstructed. No research-completion lifecycle or completion writer is added. The existing player research screen remains the scaffold project, not a production Architecture progression interface; qualification of the permit uses an approved completed-state fixture/existing save. This limitation is not disguised as a new research screen.
+
+### Identity, schema, investment, and transaction
+
+Schema remains **11**. No save field, parallel investment collection, migration, wallet, activation authority, or writer is added. Frozen schemas 7–10 and 10→11 behavior remain unchanged; no migration manufactures Floor 2 or a Floor 1 shell investment. Unknown complete-save extension preservation remains owned by the existing lossless session pipeline.
+
+Native additional-floor identities use one shared deterministic convention: `canonical.floor.` plus zero-based production index formatted `D2`. Floor 2 is `canonical.floor.01`; fixed IDs end `.fixed.entrance` / `.fixed.completion`, and nodes end `.node.entrance` / `.node.completion`. Construction collision-checks proposed persistent identities. Room/edge allocation continues using each floor's existing monotonic lifecycle, initially room ordinal `0`, edge ordinal `0` for the empty shell. Returned content and assignment sequencing retain existing custody/allocation authorities.
+
+The existing `StructuralInvestmentRecord` owner now recognizes a shell record for native constructed additional-floor identities: `canonical.floor.01.shell`, `ConstructionMana=450`, other investment components initially zero. Historical compatibility identities/frozen records retain their room/edge-only shape and no Floor 1 shell record is fabricated. Normal structural changes copy this stable record unchanged; refunds still apply only to the selected removable rooms/edges. No shell refund or whole-floor demolition action exists. The record concept extends to later native additional-floor identities without implementing additional floors now.
+
+Construction uses a focused `DetachedCanonicalWriteAuthority.ConstructFloor` request through SaveService. It validates the owned current complete session, exact active-file bytes, canonical baseline fingerprint, permission, single configured production/profile target, absence of Floor 2, valid affordable wallet, and collision-safe identities. It refreshes the preview and compares all profile values/version, then prepares a detached Inactive floor with exactly two fixed structures, two route nodes, empty room/edge/content collections, and its per-floor lifecycle. Exactly the configured cost is subtracted from the existing mana reserve and recorded through the existing investment owner.
+
+The retained complete-save path validates/canonicalizes the candidate, validates reopening those exact candidate bytes, prepares a detached runtime projection, and invokes the existing exact atomic persistence/readback/rollback authority. Only successful exact durable equality releases the already-validated reopened session and runtime projection for live publication. This retains established preflight/reopen validation plus exact durable-byte equivalence; it does not introduce an unprotected fallible post-install read or a second save writer. Tested write, flush, replace, readback, stale-preview/session, malformed state/configuration, insufficient-funds, and repeat-construction failures publish nothing. Existing transaction recovery behavior is not replaced.
+
+### Lifecycle-aware validity and explicit editing targets
+
+`FloorLayoutValidationMode` makes the distinction explicit. Inactive construction mode tolerates a missing complete Entrance→Completion required route; Active mode retains the existing full route requirements. Both retain fixed-structure cardinality/definition/geometry, bounds, overlaps, capacity, room/corridor definitions, graph reference/connection/reachability checks, same-floor ownership, content capacities, lifecycle, investment, stable IDs, canonical ordering, and configured workload limits. Invalid mode values do not weaken full graph validation. No activation command or eligibility writer is added.
+
+The shared `CanonicalEditFloorTarget` resolves an explicit stable floor ID; omission is compatible only when exactly one persisted floor is unambiguous. Structural construction/movement/replacement/deletion and room placement/redeployment/unassignment now validate the target floor and room ownership. Optional-branch/corridor requests retain their existing explicit stable-ID pattern. Ambiguous, duplicate, absent, stale, and mismatched targets fail closed without array/UI-index authority. Canonicalization happens before validation/publication, and floor sorting uses index then stable identity.
+
+The first room on an empty Inactive shell uses the Entrance's authored footprint/socket as an adapter to the existing room connection solver. Existing corridor geometry, capacity, identity allocation, mana prices, and validation remain authoritative. Subsequent construction/movement/replacement/deletion uses the same paths as Floor 1. Deliberate last-room deletion returns a legal Inactive shell, preserves fixed IDs/current positions and lifecycle high-water marks, resolves contents under existing removal policies, retains shell investment, and reports correct configured capacity. Active Floor 1 minimum-room deletion rules are unchanged.
+
+### Runs, mana, and Bootstrap
+
+Current runs select the unique Active floor at canonical index 0, by identity/index, with all deeper persisted floors Inactive. A second Active floor is rejected, not silently ignored. Phase 5B fork projection and GameRoot branch gating exclude Inactive floor branches/content. An equivalent-input durable run-history comparison verifies Floor 1 output is identical with edited/inhabited Inactive Floor 2. The comparison normalizes the existing wallet through its established QA writer because real shell/edit spending necessarily changes wallet input; it does not hide or refund that spending in production.
+
+Phase 6A1 active-only online/offline passive mana authority and tuning are unchanged. Constructing, editing, and reopening Floor 2 retains one Active floor.
+
+The temporary Bootstrap action scroll panel adds localized Locked, Unlocked/unconstructed, Constructed Inactive, and Active presentation, configured price/affordability, eligibility refresh, construction, and stable-ID existing-floor selection. All structural/content/branch/corridor controls target the selected floor. Editing availability no longer depends on successful one-floor run projection. A read-only selected-room adapter feeds existing localized capacity/fit presenters; it is not a writable layout owner. Twenty-five new English-table keys cover statuses/actions/costs/results/reasons; branch display uses ordinals instead of raw persistent IDs. No Activate/Deactivate control, production editor framework, scene, prefab, or UI package is introduced. Unity UI/IMGUI skills guided reuse of the existing debug surface rather than a new editor architecture.
+
+## Automated qualification
+
+Final NUnit XML proves the following results. All three CLI test commands completed with exit code 0; no inconclusive results or unexpected skips occurred.
+
+| Suite | Total | Passed | Failed | Skipped | Inconclusive |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Focused EditMode | 1174 | 1174 | 0 | 0 | 0 |
+| Complete EditMode | 1174 | 1174 | 0 | 0 | 0 |
+| Complete PlayMode | 2672 | 2662 | 0 | 10 | 0 |
+
+The focused expression deliberately includes the repository's inherited Editor bridge names (`PhaseFour`, `PhaseFiveA`, `PhaseFiveB`) rather than only runtime base-class names; those broad affected-system fixtures cover the current EditMode suite. The new Phase 6A2 fixture contributes **57** cases. All **59** production build-gate cases pass, including `ProductionGate_ValidInstalledSetAndExactBootstrapAssignmentsPass` and `ProductionGate_SuccessPreservesRequiredFilesByteForByte`.
+
+Local XML SHA-256:
+
+- `TestResults/phase6a2-focused.xml`: `FA6C86324730EE8B34D1C075AA9B1F73AE9F45F08FF2C8F3E28BB02A13DB628A`
+- `TestResults/phase6a2-full-editmode.xml`: `7B947A329E8F6900DEF66967B04F4A06B6A25DCB9933BAC1A2096F6FC2ED91C9`
+- `TestResults/phase6a2-full-playmode.xml`: `7846A94132767C3786A3D5D3273FEB25DF02EFD66B9B9507D7F1C7DD678F4434`
+
+Two final canonical export repetitions completed with exit code 0 and preserved all three output hashes exactly:
+
+- Generated catalog: `CE545EEADAA36E3EB50DD227932093164255CC481011DC2166D6E8D7181CD9AB`
+- Generated English: `37ECE030181BB51FF887A75AA41A2293BDECE9EED8D292EF6EC40E48BEEF3262`
+- Generated manifest: `FB48BBBC3975827A295188818C7140BD91447E6D401C3A8CA1554A5402089902`
+
+`git diff --check` passes. Bootstrap English JSON contains **939** entries, zero duplicate keys (25 added to the baseline 914). No frozen schema/descriptor/migration/compatibility-profile file changed. Unity's incidental `applicationIdentifier` key reordering was restored; there is no intended ProjectSettings, scene, prefab, or generated test-scene change. Generated outputs are deterministic; no unexpected byte changes remain.
+
+Focused command (actual EditMode bridge classes included):
+
+```powershell
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --filter 'PhaseSixA2FloorConstruction|PhaseSixAActivation|PhaseFour|PhaseFiveA|PhaseFiveB|ProductionSpatialContent|OptionalBranch|Bootstrap|CanonicalMvp' --output 'TestResults/phase6a2-focused.xml' --timeout 1200 --no-color
+```
+
+Complete commands:
+
+```powershell
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --output 'TestResults/phase6a2-full-editmode.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode PlayMode --output 'TestResults/phase6a2-full-playmode.xml' --timeout 1200 --no-color
+```
+
+Deterministic production export command:
+
+```powershell
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' run 'C:/Dev/Dungeon-Lord' --timeout 600 --no-color -- -executeMethod DungeonBuilder.M0.Editor.DungeonSpatial.ProductionSpatialContentExportCommand.ExportProductionSpatialContentCommandLine
+```
+
+New `PhaseSixA2FloorConstructionTests` plus its Editor bridge cover production/profile/research validation, empty shell, stable identity, exact spend/investment, deterministic previews, refusal/failure atomicity, lifecycle-aware geometry/reference rejection, first/subsequent room construction, movement/replacement/deletion/rebuild, per-floor ordinals, monster/trap/loot acquisition/unassignment/cross-floor custody/redeployment, optional branch/corridor content/removal, wrong/omitted targets, exact save/reopen, active-only mana, Floor 1 run isolation, localization/selection/no activation control, and configured record/investment workload boundaries.
+
+Retained complete suites cover frozen schema/migration/extensions, Windows persistence/recovery, structural economy, acquisition/custody, branches, deterministic runs, mana, localization, Bootstrap layout/pagination, content pipeline/build gate, and workload measurements. Production-dependent old fixture counts are updated for one additional floor/four allowlist records, retaining exact-boundary/one-over assertions and explicit original Floor 1 expectations.
+
+Failures encountered and corrected during qualification:
+
+- Sandbox Unity licensing/config access required an approved unrestricted CLI run; the blocked launch supplied no test verdict.
+- Compile corrections included duplicate pattern variable/out-parameter lambda capture and an incorrect test option/helper name; no incomplete launch was counted as a pass.
+- Early focused runs exposed one-floor UI compatibility/reason regressions and changed production record counts; those were corrected while retaining one-floor compatibility and exact workload boundaries.
+- An inactive corridor-removal test initially attempted deletion while assigned content remained. Production correctly blocked it; the test now performs explicit unassignment first and preserves that safety rule.
+- The first complete EditMode run was **1170 total / 1156 passed / 14 failed / 0 skipped**. Production-dependent test fixtures using catalog `.Single()` now explicitly select Floor 1; exact loader nested budgets increase by four records. Fresh native QA wallet availability is separated from floor-local editing so a valid empty canonical save still supports the existing wallet controls and reason presentation.
+- Final review restricted construction-mode selection to **explicitly Inactive** floors through the shared mode resolver. Historical activation-less records therefore retain full graph checks; a focused regression exercises the incomplete-shell historical case. All final suites were rerun after this correction.
+- The first historical regression run placed the test mutation before its valid-shell baseline assertion. The mutation was moved to the invalid-state switch; final 57-case Phase 6A2 and complete-suite XML prove both baseline acceptance and historical/full-route rejection. No production check was weakened to pass it.
+- The staged whitespace check caught three trailing spaces in Unity-generated empty importer fields of the new profile `.meta`; they were removed without changing metadata values. Both staged and working-tree `git diff --check` then passed. Remaining Git LF→CRLF notices describe the repository's line-ending conversion, not whitespace errors.
+
+Generated test XML remains local under `TestResults/`, now ignored like other generated Unity outputs; evidence records exact paths/results/hashes rather than committing generated test noise.
+
+Expected PlayMode skips remain the baseline ten, with no additional skip introduced:
+
+- Eight synchronous EditMode-only `Gd66GameRootBootIntegrationTests` cases (`gd66.test.synchronous_edit_mode_fixture`): localized deletion presentation; localized renovation presentation; structural construction through the real root; missing deletion policy; both direct/corridor deletion cases; both replacement cases.
+- `Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed` (`gd66.test.windows_only_inverse`) on this Windows host.
+- `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` (`gd66.test.windows_player_only`), which requires an actual Windows Player and is not claimed as qualified here.
+
+## Changed files by responsibility
+
+Production authoring/configuration/localization:
+
+- `ContentAuthoring/DungeonSpatial/tables/floors.csv`
+- `ContentAuthoring/DungeonSpatial/tables/floor_allowed_rooms.csv`
+- `ContentAuthoring/DungeonSpatial/tables/floor_allowed_corridors.csv`
+- `Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json` (generated)
+- `Assets/_Project/Resources/floor_construction_profiles.json`
+- `Assets/_Project/Resources/floor_construction_profiles.json.meta`
+- `Assets/_Project/Data/Bootstrap/string_table_en.json`
+
+Canonical mutation, validation, economy, editing, and publication:
+
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorConstructionAuthority.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorConstructionAuthority.cs.meta`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalProductionSemanticValidation.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSpatialMutation.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLayoutValidation.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralDeletionService.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralEditService.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralInvestment.cs`
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralRenovationService.cs`
+- `Assets/_Project/Scripts/Services/SaveService.cs`
+- `Assets/_Project/Scripts/Core/GameRoot.cs`
+
+Run isolation and temporary Bootstrap presentation:
+
+- `Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/CanonicalMvpRouteProjection.cs`
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseFiveBRouteProjection.cs`
+- `Assets/_Project/Scripts/UI/BootstrapOverlay.cs`
+
+Build gate and tests:
+
+- `Assets/_Project/Editor/DungeonSpatial/ProductionSpatialContentBuildGate.cs`
+- `Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSixAEditModeFixtures.cs`
+- `Assets/_Project/Editor/DungeonSpatial/Tests/ProductionSpatialContentExportTests.cs`
+- `Assets/_Project/Tests/EditMode/PhaseSixA2FloorConstructionTests.cs`
+- `Assets/_Project/Tests/EditMode/PhaseSixA2FloorConstructionTests.cs.meta`
+- `Assets/_Project/Tests/EditMode/Gd66SaveWorkloadMeasurementTests.cs`
+- `Assets/_Project/Tests/EditMode/PhaseFiveADurableBranchTests.cs`
+- `Assets/_Project/Tests/EditMode/ProductionSpatialContentLoadingTests.cs`
+- `Assets/_Project/Tests/EditMode/StructuralEditServiceTests.cs`
+
+Current status/evidence and generated-test hygiene:
+
+- `Docs/28 - Save_Data_Model_Versioning_and_Migration.md`
+- `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md`
+- `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md`
+- `docs/planning/phase-6-multi-floor-foundation-design-and-tuning-lock.md`
+- `docs/planning/post-gd60-mvp-execution-plan.md`
+- `Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md`
+- `README.md`
+- `.gitignore`
+
+## Known limits and proposed later owner qualification
+
+No requirement needs schema 12. No activation, lifecycle cascade, additional deeper floor, multi-floor traversal/transfer/settlement/knowledge/report, exclusive content, shell refund, run-event mana, backend/concurrency redesign, or Phase 7 editor is implemented. Research progression UI remains the existing scaffold. Selected floor/room is transient editor presentation, not persisted identity authority; reopen uses deterministic default selection. No new Windows standalone qualification or owner manual play has been performed.
+
+**PENDING EXTERNAL CHATGPT REVIEW — do not start owner qualification yet.** Proposed later plan:
+
+1. Open an existing Floor 1 save normally, including a schema-10 upgrade fixture if review requests it.
+2. Confirm Floor 2 is Locked without completed `ac_100`.
+3. Through an approved research-state fixture/existing lifecycle qualification, complete `ac_100`; confirm no automatic floor creation and unlocked/unconstructed presentation after reopen.
+4. With sufficient existing mana, construct once; verify exactly 450 spent, one Inactive Floor 2, fixed endpoints only, and repeated construction unavailable/no charge.
+5. Select Floor 2 explicitly and build a first room (tested Basic Room example `(1,2)`, Zero, east), then legal subsequent rooms; move, replace, and delete through existing previews.
+6. Place monsters, traps, and loot; unassign and redeploy on intended rooms/floors. If `ac_300` and topology permit, exercise optional corridor content and branch removal after unassignment.
+7. Select Floor 1 and confirm edits are isolated; switch back and verify Floor 2 retained its state.
+8. Run normally; confirm Floor 1 only, without Floor 2 encounters/branches or multi-floor decisions.
+9. Confirm online/offline passive mana counts one Active floor.
+10. Save, close, reopen, and continue editing; verify both floors' stable identities, layout/content, lifecycle, historical shell investment, and Inactive status independent of selection.
+11. Confirm no Activate/Deactivate control exists, and Floor 1's last required room cannot be deleted.
+12. External review may require Windows standalone parity because this adds a player-triggered persistent transaction. Such qualification remains unperformed and must not be inferred from automated Editor tests.
+
+This packet is not declared ready to merge. Create the PR, stop, obtain external review, then decide owner Unity/standalone qualification.

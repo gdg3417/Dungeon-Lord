@@ -28,6 +28,30 @@
             ],
             "EntranceStructureDefinitionId": "spatial.fixed.entrance_hall",
             "CompletionStructureDefinitionId": "spatial.fixed.completion_terminal"
+        },
+        {
+            "FloorDefinitionId": "spatial.floor.02",
+            "FloorIndex": 1,
+            "Bounds": {
+                "Minimum": {
+                    "X": 0,
+                    "Y": 0
+                },
+                "Width": 14,
+                "Height": 14
+            },
+            "FinalFloorSpaceCapacity": 80,
+            "OptionalBranchAllowance": 1,
+            "AllowedRoomDefinitionIds": [
+                "spatial.room.basic",
+                "spatial.room.large_chamber",
+                "spatial.room.rectangle"
+            ],
+            "AllowedCorridorDefinitionIds": [
+                "spatial.corridor.straight_stone"
+            ],
+            "EntranceStructureDefinitionId": "spatial.fixed.entrance_hall",
+            "CompletionStructureDefinitionId": "spatial.fixed.completion_terminal"
         }
     ],
     "Rooms": [

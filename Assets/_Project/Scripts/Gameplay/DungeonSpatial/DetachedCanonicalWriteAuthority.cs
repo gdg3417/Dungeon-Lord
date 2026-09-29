@@ -47,6 +47,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly StructuralEconomySnapshot economy;
         private readonly ContentAcquisitionEconomySnapshot acquisition;
         private readonly BasicBranchingResearchSnapshot branchingResearch;
+        private readonly FloorConstructionProfileSnapshot floorConstructionProfiles;
+        private readonly FloorConstructionResearchSnapshot floorConstructionResearch;
         private readonly FormulaModifier[] economyModifiers;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
@@ -54,7 +56,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits,
             StructuralContentRemovalPolicySnapshot removalPolicy = null, StructuralEconomySnapshot economy = null,
             IReadOnlyList<FormulaModifier> economyModifiers = null, ContentAcquisitionEconomySnapshot acquisition = null,
-            BasicBranchingResearchSnapshot branchingResearch = null)
+            BasicBranchingResearchSnapshot branchingResearch = null,
+            FloorConstructionProfileSnapshot floorConstructionProfiles = null,
+            FloorConstructionResearchSnapshot floorConstructionResearch = null)
         {
             this.production = production; this.compatibility = compatibility;
             this.configuration = configuration; this.context = context; this.limits = limits;
@@ -62,7 +66,59 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.economy = economy;
             this.acquisition = acquisition;
             this.branchingResearch = branchingResearch;
+            this.floorConstructionProfiles = floorConstructionProfiles;
+            this.floorConstructionResearch = floorConstructionResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
+        }
+
+        public DetachedCanonicalWriteResult ConstructFloor(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, FloorConstructionPreview preview)
+        {
+            if (fileSystem == null || session == null || currentRuntime?.structureRuntime == null ||
+                preview?.Profile == null || string.IsNullOrWhiteSpace(preview.BaselineFingerprint) ||
+                floorConstructionProfiles == null || floorConstructionResearch == null)
+                return Failure(FloorConstructionService.InvalidContextReason);
+            DetachedCompleteSaveValidationResult owned = ValidateSession(session);
+            if (owned?.IsValid != true || !owned.CurrentTargetValidated ||
+                !StructuralEditService.TryFingerprint(owned.State, limits.Canonical, out string fingerprint) ||
+                !string.Equals(fingerprint, preview.BaselineFingerprint, StringComparison.Ordinal))
+                return Failure(FloorConstructionService.StalePreviewReason);
+            try
+            {
+                if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
+                    return Failure(FloorConstructionService.StalePreviewReason);
+            }
+            catch (Exception) { return Failure(AtomicSaveFailedReason); }
+
+            FloorConstructionPreview refreshed = FloorConstructionService.Preview(owned.State,
+                currentRuntime, currentRuntime.completedResearch, floorConstructionProfiles,
+                floorConstructionResearch, production, configuration, limits.Canonical);
+            if (!refreshed.IsCommittable || !refreshed.Profile.Matches(preview.Profile) ||
+                refreshed.FloorInstanceId != preview.FloorInstanceId)
+                return Failure(refreshed.Reason ?? FloorConstructionService.StalePreviewReason);
+
+            double resultingMana = currentRuntime.structureRuntime.ManaReserve -
+                refreshed.Profile.ConstructionMana;
+            if (!StructuralEconomySnapshot.Nonnegative(resultingMana))
+                return Failure(FloorConstructionService.InsufficientManaReason);
+            var prior = owned.Investment.ToDictionary(value => value.StructureId,
+                StringComparer.Ordinal);
+            StructuralInvestmentRecord[] investment = StructuralInvestment.Zero(refreshed.Candidate)
+                .Select(value => prior.TryGetValue(value.StructureId, out StructuralInvestmentRecord retained)
+                    ? retained.Copy() : value).ToArray();
+            string shellId = StructuralInvestment.ShellId(refreshed.FloorInstanceId);
+            StructuralInvestmentRecord[] shellRecords = investment.Where(value =>
+                value.StructureId == shellId).ToArray();
+            if (shellRecords.Length != 1 || prior.ContainsKey(shellId))
+                return Failure(FloorConstructionService.IdentityInvalidReason);
+            shellRecords[0].ConstructionMana = refreshed.Profile.ConstructionMana;
+            DetachedRecognizedSaveStateSnapshotResult snapshot =
+                DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, resultingMana, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            DetachedCanonicalSaveSessionResult prepared = session.PrepareLiveReplacement(snapshot,
+                refreshed.Candidate, investment, owned.CorridorContent, owned.BranchKnowledge);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
         }
 
         public DetachedCanonicalWriteResult Execute(string activePath,

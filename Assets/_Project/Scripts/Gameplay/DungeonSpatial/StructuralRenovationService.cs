@@ -7,12 +7,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed class StructuralMovementRequest
     {
+        public string FloorInstanceId;
         public string RoomInstanceId;
         public TileCoordinate Anchor;
     }
 
     public sealed class StructuralReplacementRequest
     {
+        public string FloorInstanceId;
         public string RoomInstanceId;
         public string RoomDefinitionId;
     }
@@ -62,7 +64,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             preview.RoomDefinitionId = preview.PreviousRoomDefinitionId = target.RoomDefinitionId;
             preview.Orientation = preview.PreviousOrientation = target.Orientation;
             preview.PreviousAnchor = target.Anchor;
-            preview.Intent = new StructuralMovementRequest { RoomInstanceId = request.RoomInstanceId,
+            preview.Intent = new StructuralMovementRequest { FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = request.RoomInstanceId,
                 Anchor = request.Anchor };
             TileCoordinate delta = Delta(target.Anchor, request.Anchor);
             return Apply(preview, candidate, floor, floorDefinition, production, configuration, limits,
@@ -86,7 +88,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             preview.PreviousRoomDefinitionId = target.RoomDefinitionId;
             preview.PreviousAnchor = preview.Anchor = target.Anchor;
             preview.PreviousOrientation = preview.Orientation = target.Orientation;
-            preview.Intent = new StructuralReplacementRequest { RoomInstanceId = request.RoomInstanceId,
+            preview.Intent = new StructuralReplacementRequest { FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = request.RoomInstanceId,
                 RoomDefinitionId = request.RoomDefinitionId };
             if (replacement == null) return Fail(preview, StructuralEditService.RoomDefinitionInvalidReason);
             if (string.Equals(request.RoomDefinitionId, target.RoomDefinitionId, StringComparison.Ordinal))
@@ -208,9 +210,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (geometryReason != null) return Fail(preview, geometryReason);
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
                 return Fail(preview, StructuralEditService.WorkloadReason);
-            FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
+            floor = candidate.Floors.Single(value => value.FloorInstanceId == floor.FloorInstanceId);
+            FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(floor.Layout,
                 floorDefinition, catalog.Rooms, catalog.Corridors, workload,
-                candidate.Floors[0].FixedStructures, catalog.FixedStructures);
+                floor.FixedStructures, catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
             if (!validation.IsValid) return Fail(preview, Map(validation.Issues));
             if (!CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production,
@@ -236,13 +239,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             candidate = null; floor = null; floorDefinition = null; path = null; targetIndex = -1;
             workload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
             if (current?.Authority == null || request == null || production == null || compatibility == null ||
-                configuration == null || !limits.IsValid || current.Floors?.Length != 1)
+                configuration == null || !limits.IsValid)
             { Fail(preview, StructuralEditService.InvalidContextReason); return false; }
             if (!StructuralEditService.TryFingerprint(current, limits, out string fingerprint) ||
                 !Clone(current, limits, out candidate))
             { Fail(preview, StructuralEditService.InvalidContextReason); return false; }
             preview.BaselineFingerprint = fingerprint;
-            SavedSpatialFloor candidateFloor = candidate.Floors[0];
+            string requestedFloor = request is StructuralMovementRequest floorMovement
+                ? floorMovement.FloorInstanceId : ((StructuralReplacementRequest)request).FloorInstanceId;
+            if (!CanonicalEditFloorTarget.TryResolve(candidate, requestedFloor, out SavedSpatialFloor candidateFloor))
+            { Fail(preview, CanonicalEditFloorTarget.InvalidReason); return false; }
             floor = candidateFloor;
             floorDefinition = (production.Catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
                 .SingleOrDefault(value => value != null &&
@@ -264,7 +270,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { Fail(preview, StructuralEditService.TargetRoomNotBuildableReason); return false; }
             FloorLayoutValidationResult prior = FloorLayoutValidator.Validate(candidateFloor.Layout, floorDefinition,
                 production.Catalog.Rooms, production.Catalog.Corridors, workload,
-                candidateFloor.FixedStructures, production.Catalog.FixedStructures);
+                candidateFloor.FixedStructures, production.Catalog.FixedStructures, CanonicalEditFloorTarget.Mode(candidateFloor));
             if (!prior.IsValid) { Fail(preview, StructuralEditService.LayoutInvalidReason); return false; }
             preview.PreviousUsedFloorSpace = prior.Capacity.UsedFloorSpaceCapacity;
             return true;

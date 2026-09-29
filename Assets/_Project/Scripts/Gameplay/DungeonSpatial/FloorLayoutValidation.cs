@@ -56,12 +56,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsValid => Issues.Length == 0;
     }
 
+    public enum FloorLayoutValidationMode
+    {
+        ActivationValid = 1,
+        ConstructionValid = 2
+    }
+
     public static class FloorLayoutValidator
     {
         public static FloorLayoutValidationResult Validate(FloorSpatialLayout suppliedLayout, FloorSpatialConfiguration floor,
             IEnumerable<RoomSpatialDefinition> suppliedRoomDefinitions, IEnumerable<CorridorSpatialDefinition> suppliedCorridorDefinitions,
             SpatialValidationWorkloadLimits limits, IEnumerable<SavedFixedSpatialStructure> suppliedFixedStructures = null,
-            IEnumerable<FixedSpatialStructureDefinition> suppliedFixedDefinitions = null)
+            IEnumerable<FixedSpatialStructureDefinition> suppliedFixedDefinitions = null,
+            FloorLayoutValidationMode mode = FloorLayoutValidationMode.ActivationValid)
         {
             var issues = new List<FloorLayoutValidationIssue>();
             FloorSpatialLayout layout = suppliedLayout ?? new FloorSpatialLayout();
@@ -199,7 +206,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             EmitOverlaps(occupancy, issues);
             int usedCapacity = usedTiles.Count;
             if (usedCapacity > finalCapacity) Add(issues, FloorLayoutValidationReason.CapacityExceeded, layout.FloorId);
-            ValidateGraph(layout, floor, roomById, validNodeById, roomDefinitionById, validEdges.ToArray(), issues);
+            ValidateGraph(layout, floor, roomById, validNodeById, roomDefinitionById,
+                validEdges.ToArray(), mode, issues);
             return new FloorLayoutValidationResult
             {
                 Capacity = new FloorCapacitySummary { FinalFloorSpaceCapacity = finalCapacity, UsedFloorSpaceCapacity = usedCapacity, RemainingFloorSpaceCapacity = finalCapacity - usedCapacity },
@@ -364,7 +372,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static void ValidateGraph(FloorSpatialLayout layout, FloorSpatialConfiguration floor,
             Dictionary<string, RoomSpatialInstance> roomById, Dictionary<string, FloorRouteNode> validNodeById,
-            Dictionary<string, RoomSpatialDefinition> roomDefinitions, FloorRouteEdge[] validEdges, List<FloorLayoutValidationIssue> issues)
+            Dictionary<string, RoomSpatialDefinition> roomDefinitions, FloorRouteEdge[] validEdges,
+            FloorLayoutValidationMode mode, List<FloorLayoutValidationIssue> issues)
         {
             FloorRouteNode[] validNodes = validNodeById.Values.OrderBy(x => x.NodeId, StringComparer.Ordinal).ToArray();
             FloorRouteNode[] entrances = validNodes.Where(x => x.Kind == FloorRouteNodeKind.Entrance).ToArray();
@@ -379,8 +388,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     Add(issues, FloorLayoutValidationReason.ConnectionLimitExceeded, node.NodeId, room.RoomInstanceId);
             HashSet<string> requiredReachable = entrances.Length == 1 ? Reachable(entrances[0].NodeId, validEdges, RouteClassification.Required) : new HashSet<string>(StringComparer.Ordinal);
             var terminals = new HashSet<string>(validNodes.Where(x => x.Kind == FloorRouteNodeKind.Exit || x.Kind == FloorRouteNodeKind.Descent || x.Kind == FloorRouteNodeKind.Completion).Select(x => x.NodeId), StringComparer.Ordinal);
-            foreach (string nodeId in requiredReachable.OrderBy(x => x, StringComparer.Ordinal))
-                if (!Reachable(nodeId, validEdges, RouteClassification.Required).Overlaps(terminals)) Add(issues, FloorLayoutValidationReason.RequiredRouteWithoutTerminal, nodeId);
+            if (mode != FloorLayoutValidationMode.ConstructionValid)
+                foreach (string nodeId in requiredReachable.OrderBy(x => x, StringComparer.Ordinal))
+                    if (!Reachable(nodeId, validEdges, RouteClassification.Required).Overlaps(terminals))
+                        Add(issues, FloorLayoutValidationReason.RequiredRouteWithoutTerminal, nodeId);
             FloorRouteEdge[] optionalEdges = validEdges.Where(x =>
                 x.Classification == RouteClassification.Optional).ToArray();
             foreach (IGrouping<string, FloorRouteEdge> branch in optionalEdges.GroupBy(

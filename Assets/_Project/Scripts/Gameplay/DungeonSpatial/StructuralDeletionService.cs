@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
-    public sealed class StructuralDeletionRequest { public string TargetRoomInstanceId; }
+    public sealed class StructuralDeletionRequest { public string FloorInstanceId; public string TargetRoomInstanceId; }
 
     /// <summary>Pure schema-8 leaf deletion preview. All mutation occurs on detached candidates.</summary>
     public static class StructuralDeletionService
@@ -24,12 +24,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             var result = Invalid(StructuralEditService.InvalidContextReason, request);
             if (current?.Authority == null || request == null || policy == null || production == null ||
-                configuration == null || !limits.IsValid || current.Floors?.Length != 1) return result;
+                configuration == null || !limits.IsValid) return result;
             if (!StructuralEditService.TryFingerprint(current, limits, out string fingerprint) ||
                 !Clone(current, limits, out DetachedCanonicalSpatialSaveState seed)) return result;
             result.BaselineFingerprint = fingerprint; result.Intent = new StructuralDeletionRequest
-                { TargetRoomInstanceId = request.TargetRoomInstanceId };
-            SavedSpatialFloor floor = seed.Floors[0]; SpatialContentCatalog catalog = production.Catalog;
+                { FloorInstanceId = request.FloorInstanceId, TargetRoomInstanceId = request.TargetRoomInstanceId };
+            if (!CanonicalEditFloorTarget.TryResolve(seed, request.FloorInstanceId, out SavedSpatialFloor floor))
+                return Fail(result, CanonicalEditFloorTarget.InvalidReason);
+            ((StructuralDeletionRequest)result.Intent).FloorInstanceId = floor.FloorInstanceId;
+            SpatialContentCatalog catalog = production.Catalog;
             FloorRouteNode[] nodes = floor.Layout?.Nodes ?? Array.Empty<FloorRouteNode>();
             FloorRouteEdge[] edges = floor.Layout?.Edges ?? Array.Empty<FloorRouteEdge>();
             RoomSpatialInstance[] rooms = floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>();
@@ -52,11 +55,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 e.SourceNodeId == targetNode.NodeId && e.EdgeId != outgoing[0].EdgeId)) return Fail(result, NotLeafReason);
             FloorRouteNode predecessor = nodes.SingleOrDefault(n => n?.NodeId == incoming[0].SourceNodeId);
             RoomSpatialInstance predecessorRoom = rooms.SingleOrDefault(r => r?.RoomInstanceId == predecessor?.RoomInstanceId);
-            if (predecessorRoom == null) return Fail(result, MinimumRoomReason);
+            bool returnToShell = floor.ActivationState == FloorActivationState.Inactive &&
+                rooms.Length == 1 && predecessor?.Kind == FloorRouteNodeKind.Entrance && edges.Length == 2;
+            if (predecessorRoom == null && !returnToShell) return Fail(result, MinimumRoomReason);
             if (!TryRequiredPathRoomIds(floor, out HashSet<string> requiredRoomIds))
                 return Fail(result, StructuralEditService.RequiredRouteAmbiguousReason);
             if (semantics.Count(s => s != null && requiredRoomIds.Contains(s.RoomInstanceId) &&
-                    s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer) <= 1)
+                    s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer) <= 1 && !returnToShell)
                 return Fail(result, MinimumRoomReason);
 
             RoomContentAssignment[] assigned = (floor.RoomContents?.Assignments ?? Array.Empty<RoomContentAssignment>())
@@ -73,6 +78,48 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (blockers.Count != 0)
             { result.BlockingContentOptionIds = blockers.OrderBy(value => value, StringComparer.Ordinal).ToArray();
               return Fail(result, StructuralContentRemovalPolicyAuthority.MissingOrUnresolvedReason); }
+            if (returnToShell)
+            {
+                FloorSpatialConfiguration shellDefinition = catalog.Floors.SingleOrDefault(value =>
+                    value.FloorDefinitionId == floor.FloorDefinitionId && value.FloorIndex == floor.FloorIndex);
+                var shellWorkload = new SpatialValidationWorkloadLimits(limits.Spatial.MaximumMaterializedTiles);
+                FloorLayoutValidationResult beforeShell = FloorLayoutValidator.Validate(floor.Layout,
+                    shellDefinition, catalog.Rooms, catalog.Corridors, shellWorkload, floor.FixedStructures,
+                    catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
+                if (!beforeShell.IsValid) return Fail(result, StructuralEditService.LayoutInvalidReason);
+                floor.Layout.Rooms = Array.Empty<RoomSpatialInstance>();
+                floor.Layout.Nodes = nodes.Where(value => value.NodeId != targetNode.NodeId).ToArray();
+                floor.Layout.Edges = Array.Empty<FloorRouteEdge>();
+                floor.RoomContents.Assignments = Array.Empty<RoomContentAssignment>();
+                floor.RoomContents.RoomSemantics = Array.Empty<CanonicalRoomSemantics>();
+                foreach (var disposition in dispositions.Where(value =>
+                    value.Item2 == StructuralContentRemovalPolicy.ReturnToPlayerCustody))
+                    seed.LifecycleAndOwnership.ReturnedContents = seed.LifecycleAndOwnership.ReturnedContents.Concat(new[] {
+                        new ReturnedStructuralContent { AssignmentId = disposition.Item1.AssignmentId,
+                            CategoryId = disposition.Item1.CategoryId, OptionId = disposition.Item1.OptionId,
+                            Sequence = disposition.Item1.Sequence,
+                            RemovalDisposition = StructuralContentRemovalDisposition.ReturnToPlayerCustody } }).ToArray();
+                if (!CanonicalSpatialSaveContracts.TryCanonicalize(seed, limits.Spatial, out seed) ||
+                    !DetachedCanonicalProductionSemanticValidation.Validate(seed, production, configuration, limits.Spatial).IsValid)
+                    return Fail(result, StructuralEditService.LayoutInvalidReason);
+                result.DetachedCandidate = seed; result.ReasonCodes = Array.Empty<string>();
+                result.RoomDefinitionId = target.RoomDefinitionId;
+                SavedSpatialFloor emptyShell = seed.Floors.Single(value => value.FloorInstanceId == floor.FloorInstanceId);
+                FloorLayoutValidationResult afterShell = FloorLayoutValidator.Validate(emptyShell.Layout,
+                    shellDefinition, catalog.Rooms, catalog.Corridors, shellWorkload, emptyShell.FixedStructures,
+                    catalog.FixedStructures, CanonicalEditFloorTarget.Mode(emptyShell));
+                result.PreviousUsedFloorSpace = beforeShell.Capacity.UsedFloorSpaceCapacity;
+                result.ResultingUsedFloorSpace = afterShell.Capacity.UsedFloorSpaceCapacity;
+                result.ResultingRemainingFloorSpace = afterShell.Capacity.RemainingFloorSpaceCapacity;
+                result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomRemoved,
+                    StableId = target.RoomInstanceId } }.Concat(edges.Select(edge => new StructuralChange {
+                    Kind = StructuralChangeKind.EdgeRemoved, StableId = edge.EdgeId })).Concat(dispositions.Select(value =>
+                    new StructuralChange { Kind = value.Item2 == StructuralContentRemovalPolicy.ReturnToPlayerCustody
+                        ? StructuralChangeKind.ContentReturned : StructuralChangeKind.ContentRemoved,
+                        StableId = value.Item1.AssignmentId })).OrderBy(value => value.Kind)
+                    .ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
+                return result;
+            }
             RoomSpatialDefinition predecessorDefinition = catalog.Rooms.SingleOrDefault(r =>
                 r?.RoomDefinitionId == predecessorRoom.RoomDefinitionId);
             RoomSpatialDefinition targetDefinition = catalog.Rooms.SingleOrDefault(r =>
@@ -110,7 +157,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (terminalOrientations.Length == 0) return Fail(result, StructuralEditService.ConnectionUnavailableReason);
             if (terminalOrientations.Length != 1) return Fail(result, StructuralEditService.ConnectionAmbiguousReason);
             if (!Clone(seed, limits, out DetachedCanonicalSpatialSaveState candidate)) return result;
-            SavedSpatialFloor cf = candidate.Floors[0]; SavedFixedSpatialStructure ct = cf.FixedStructures.Single(f =>
+            SavedSpatialFloor cf = candidate.Floors.Single(value => value.FloorInstanceId == floor.FloorInstanceId); SavedFixedSpatialStructure ct = cf.FixedStructures.Single(f =>
                     f.FixedStructureInstanceId == terminal.FixedStructureInstanceId);
             TileCoordinate terminalSocket = relationship.TargetWorld;
             ct.Anchor = AnchorFor(terminalSocket, terminalPoint.Offset, terminalOrientations[0],
@@ -145,10 +192,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (geometryReason != null) return Fail(result, geometryReason);
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
                 return Fail(result, StructuralEditService.WorkloadReason);
-                replacementEdge = candidate.Floors[0].Layout.Edges.Single(e => e.EdgeId == edgeId);
-                FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
-                    floorDefinition, catalog.Rooms, catalog.Corridors, workload, candidate.Floors[0].FixedStructures,
-                    catalog.FixedStructures);
+                cf = candidate.Floors.Single(value => value.FloorInstanceId == floor.FloorInstanceId);
+                replacementEdge = cf.Layout.Edges.Single(e => e.EdgeId == edgeId);
+                FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(cf.Layout,
+                    floorDefinition, catalog.Rooms, catalog.Corridors, workload, cf.FixedStructures,
+                    catalog.FixedStructures, CanonicalEditFloorTarget.Mode(cf));
             if (!validation.IsValid) return Fail(result, StructuralRenovationService.Map(validation.Issues));
             if (!CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production, configuration,

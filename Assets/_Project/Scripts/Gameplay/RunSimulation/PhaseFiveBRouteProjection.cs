@@ -53,7 +53,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return new PhaseFiveBRequiredRoom { Room = room, FloorInstanceId = floor.FloorInstanceId, NodeId = node.NodeId };
             }).ToArray();
             var result = new System.Collections.Generic.List<PhaseFiveBFork>();
-            foreach (var floor in owned.State.Floors.OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
+            foreach (var floor in owned.State.Floors.Where(f => f.ActivationState == FloorActivationState.Active)
+                .OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
             {
                 var edges = floor.Layout.Edges.Where(e => e.Classification == RouteClassification.Optional)
                     .OrderBy(e => e.OptionalBranchId, StringComparer.Ordinal).ToArray();

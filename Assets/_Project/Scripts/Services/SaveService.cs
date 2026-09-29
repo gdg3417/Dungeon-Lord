@@ -21,6 +21,8 @@ namespace DungeonBuilder.M0
         private StructuralEconomySnapshot _economy;
         private ContentAcquisitionEconomySnapshot _acquisition;
         private BasicBranchingResearchSnapshot _branchingResearch;
+        private FloorConstructionProfileSnapshot _floorConstructionProfiles;
+        private FloorConstructionResearchSnapshot _floorConstructionResearch;
         private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
         private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
         private ITimeSource _timeSource = new SystemTimeSource();
@@ -42,6 +44,9 @@ namespace DungeonBuilder.M0
         public void ConfigureContentAcquisitionEconomy(ContentAcquisitionEconomySnapshot acquisition) => _acquisition = acquisition;
         public void ConfigureBasicBranchingResearch(BasicBranchingResearchSnapshot research) =>
             _branchingResearch = research;
+        public void ConfigureFloorConstruction(FloorConstructionProfileSnapshot profiles,
+            FloorConstructionResearchSnapshot research)
+        { _floorConstructionProfiles = profiles; _floorConstructionResearch = research; }
         public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text) =>
             ContentAcquisitionEconomyPresenter.Present(_acquisition, categoryId, optionId,
                 current?.structureRuntime?.ManaReserve ?? double.NaN, text);
@@ -428,6 +433,33 @@ namespace DungeonBuilder.M0
             return result;
         }
 
+        public FloorConstructionPreview PreviewFloorConstruction(SaveData current)
+        {
+            if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
+                return new FloorConstructionPreview { Reason = FloorConstructionService.InvalidContextReason };
+            return FloorConstructionService.Preview(state, current, current?.completedResearch,
+                _floorConstructionProfiles, _floorConstructionResearch, _production,
+                _legacyGameplayConfiguration, _limits.Canonical);
+        }
+
+        public DetachedCanonicalWriteResult CommitFloorConstruction(SaveData current,
+            FloorConstructionPreview preview)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false,
+                    FloorConstructionService.InvalidContextReason, false, false,
+                    null, null, null, null);
+            DetachedCanonicalWriteResult result = CreateWriteAuthority().ConstructFloor(SavePath,
+                _canonicalFileSystem, _canonicalSession, current, preview);
+            if (result.IsSuccess)
+            {
+                _undo = null;
+                _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
+
         public StructuralEditPreview PreviewStructuralConstruction(
             StructuralConstructionRequest request)
         {
@@ -530,7 +562,7 @@ namespace DungeonBuilder.M0
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
                 _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition,
-                _branchingResearch);
+                _branchingResearch, _floorConstructionProfiles, _floorConstructionResearch);
 
         private bool HasOwnedRecoveryEvidence()
         {

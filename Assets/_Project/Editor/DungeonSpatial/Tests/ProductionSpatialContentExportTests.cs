@@ -167,7 +167,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             ProductionSpatialGeneratedSet valid = Build().Output;
             SpatialContentValidationWorkloadLimits production = Limits();
-            var exactTop = new SpatialContentValidationWorkloadLimits(8,
+            var exactTop = new SpatialContentValidationWorkloadLimits(9,
                 production.MaximumNestedRecords, production.MaximumMaterializedTiles,
                 production.MaximumIssues, production.MaximumStringCharacters);
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactTop).Success, Is.True);
@@ -180,7 +180,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             });
             AssertExactFailure(overTop, exactTop, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
 
-            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 41,
+            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 45,
                 production.MaximumMaterializedTiles, production.MaximumIssues,
                 production.MaximumStringCharacters);
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactNested).Success, Is.True);
@@ -368,7 +368,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(built.Output.Files[0].Bytes[0], Is.EqualTo(original));
             ProductionSpatialGeneratedSetResult parsed = ProductionSpatialGeneratedSetParser.ParseAndValidate(built.Output, Limits());
             Assert.That(parsed.Success, Is.True, string.Join(",", parsed.Diagnostics));
-            Assert.That(parsed.Value.Catalog.Floors, Has.Length.EqualTo(1));
+            Assert.That(parsed.Value.Catalog.Floors, Has.Length.EqualTo(2));
             Assert.That(parsed.Value.English.entries, Has.Length.EqualTo(6));
             Assert.That(parsed.Value.Manifest.requiredSchemas, Has.Length.EqualTo(2));
             CollectionAssert.AreEqual(built.Output.Files.Single(file => file.Path == ProductionSpatialGeneratedSetParser.CatalogPath).Bytes,
@@ -676,11 +676,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(source, Limits(), true);
             Assert.That(result.Success, Is.True, string.Join("\n", result.Issues.Select(x => x.ToString())));
             SpatialContentCatalog catalog = result.Projection.Catalog;
-            Assert.That(catalog.Floors.Length + catalog.Rooms.Length + catalog.Corridors.Length + catalog.FixedStructures.Length + catalog.SocketTypes.Length, Is.EqualTo(8));
+            Assert.That(catalog.Floors.Length + catalog.Rooms.Length + catalog.Corridors.Length + catalog.FixedStructures.Length + catalog.SocketTypes.Length, Is.EqualTo(9));
             Assert.That(catalog.Metadata.SchemaId, Is.EqualTo("dungeon_spatial_content"));
             Assert.That(catalog.Metadata.SchemaVersion, Is.EqualTo(1));
             Assert.That(catalog.Metadata.ContentVersion, Is.EqualTo("0.1.0"));
-            Assert.That(catalog.Floors, Has.Length.EqualTo(1)); Assert.That(catalog.Rooms, Has.Length.EqualTo(3));
+            Assert.That(catalog.Floors, Has.Length.EqualTo(2)); Assert.That(catalog.Rooms, Has.Length.EqualTo(3));
             Assert.That(catalog.Corridors, Has.Length.EqualTo(1)); Assert.That(catalog.FixedStructures, Has.Length.EqualTo(2));
             Assert.That(catalog.SocketTypes, Has.Length.EqualTo(1));
             Assert.That(catalog.Floors[0].Bounds.TileCount, Is.EqualTo(144));
@@ -768,7 +768,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DungeonSpatialAuthoringResult result = DungeonSpatialAuthoringPackageParser.ParseAndProject(Production(), Limits());
             Assert.That(result.Success, Is.True, string.Join("\n", result.Issues.Select(issue => issue.ToString())));
             SpatialContentCatalog catalog = result.Projection.Catalog;
-            FloorSpatialConfiguration floor = catalog.Floors.Single();
+            FloorSpatialConfiguration floor = catalog.Floors.Single(value => value.FloorIndex == 0);
             Assert.That(floor.FloorDefinitionId, Is.EqualTo("spatial.floor.01"));
             Assert.That(floor.FloorIndex, Is.Zero);
             Assert.That(floor.Bounds.Minimum.X, Is.Zero);
@@ -874,7 +874,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void FloorEndpointForeignKeys_AreSchemaValidatedWithExactIssue(string column, string value)
         {
             DungeonSpatialAuthoringResult result = Change("tables/floors.csv", text => text.Replace(value, "test.missing.fixed"));
-            DungeonSpatialAuthoringIssue issue = result.Issues.Single(item => item.Diagnostic == DungeonSpatialAuthoringDiagnostic.MissingForeignKey && item.Column == column);
+            DungeonSpatialAuthoringIssue[] endpointIssues = result.Issues.Where(item =>
+                item.Diagnostic == DungeonSpatialAuthoringDiagnostic.MissingForeignKey && item.Column == column).ToArray();
+            Assert.That(endpointIssues, Has.Length.EqualTo(2));
+            DungeonSpatialAuthoringIssue issue = endpointIssues.Single(item => item.RecordKey == "spatial.floor.01");
             Assert.That(issue.RelativePath, Is.EqualTo("tables/floors.csv")); Assert.That(issue.TableId, Is.EqualTo("floors")); Assert.That(issue.RecordKey, Is.EqualTo("spatial.floor.01"));
         }
 
