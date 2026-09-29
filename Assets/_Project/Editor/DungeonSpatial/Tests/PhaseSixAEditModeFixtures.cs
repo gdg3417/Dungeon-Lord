@@ -7,4 +7,6 @@ namespace DungeonBuilder.M0.Editor.Tests
     public sealed class PhaseSixAActivation : DungeonBuilder.M0.Tests.EditMode.PhaseSixAActivationTests { }
     [TestFixture]
     public sealed class PhaseSixA2FloorConstruction : DungeonBuilder.M0.Tests.EditMode.PhaseSixA2FloorConstructionTests { }
+    [TestFixture]
+    public sealed class PhaseSixA3FloorActivationEligibility : DungeonBuilder.M0.Tests.EditMode.PhaseSixA3FloorActivationEligibilityTests { }
 }

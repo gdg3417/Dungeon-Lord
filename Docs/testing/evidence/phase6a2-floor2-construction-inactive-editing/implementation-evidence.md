@@ -1,6 +1,15 @@
 # Phase 6A2 — Floor 2 construction and inactive editing
 
-Status: implementation external re-review, automated qualification, and owner Editor/Windows standalone qualification passed. Final post-documentation external ChatGPT merge review remains pending; not declared ready to merge.
+Status: merged as PR #216 at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f`. External review, automated qualification, owner Editor qualification, and Windows standalone qualification passed.
+
+## Merge closeout
+
+- PR: #216, **Phase 6A2: Construct Floor 2 and enable floor-targeted inactive editing**.
+- Merge commit: `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f`.
+- External review and correction re-review passed before merge.
+- The automated suites and production gates recorded below passed.
+- Owner Editor qualification and Windows standalone qualification recorded below passed.
+- The known local-only `ProjectSettings/UnityConnectSettings.asset` `m_Enabled: 0 -> 1` environment change was not part of PR #216.
 
 ## Baseline and continuation audit
 
