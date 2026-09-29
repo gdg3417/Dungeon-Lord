@@ -185,10 +185,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             while (queue.Count > 0)
             {
                 RouteStep current = queue.Dequeue();
+                if (string.Equals(current.NodeId, completions[0].NodeId,
+                        StringComparison.Ordinal)) return current.HasRoom;
                 string key = current.NodeId + (current.HasRoom ? "\u0001" : "\u0000");
                 if (!visited.Add(key)) continue;
-                if (current.HasRoom && string.Equals(current.NodeId,
-                        completions[0].NodeId, StringComparison.Ordinal)) return true;
                 foreach (FloorRouteEdge edge in edges.Where(value =>
                     string.Equals(value.SourceNodeId, current.NodeId, StringComparison.Ordinal)))
                 {

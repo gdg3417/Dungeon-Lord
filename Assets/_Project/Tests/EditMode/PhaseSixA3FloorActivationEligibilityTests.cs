@@ -137,6 +137,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.PrimaryBlocker, Is.EqualTo(FloorActivationEligibilityReasons.RequiredRouteMissingRoom));
         }
 
+        [Test]
+        public void RoomReachedOnlyAfterCompletionDoesNotSatisfyRequiredRoute()
+        {
+            Fixture fixture = Eligible();
+            SavedSpatialFloor floor = Two(fixture);
+            string entrance = floor.Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Entrance).NodeId;
+            string completion = floor.Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Completion).NodeId;
+            string room = floor.Layout.Nodes.Single(value =>
+                value.Kind == FloorRouteNodeKind.Room).NodeId;
+            floor.Layout.Edges = new[]
+            {
+                RequiredEdge(entrance, completion, FloorId + ".edge.completion.first"),
+                RequiredEdge(completion, room, FloorId + ".edge.after.completion"),
+                RequiredEdge(room, completion, FloorId + ".edge.return.to.completion")
+            }.OrderBy(value => value.Classification)
+                .ThenBy(value => value.SourceNodeId, StringComparer.Ordinal)
+                .ThenBy(value => value.DestinationNodeId, StringComparer.Ordinal)
+                .ThenBy(value => value.EdgeId, StringComparer.Ordinal).ToArray();
+            FloorSpatialConfiguration configuration = fixture.Production.Catalog.Floors.Single(value =>
+                value.FloorDefinitionId == "spatial.floor.02");
+            FloorLayoutValidationResult layout = FloorLayoutValidator.Validate(floor.Layout,
+                configuration, fixture.Production.Catalog.Rooms, fixture.Production.Catalog.Corridors,
+                new SpatialValidationWorkloadLimits(
+                    fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles),
+                floor.FixedStructures, fixture.Production.Catalog.FixedStructures,
+                FloorLayoutValidationMode.ActivationValid);
+            Assert.That(layout.IsValid, Is.True, string.Join(",",
+                layout.Issues.Select(value => value.Reason)));
+            string spatial = JsonUtility.ToJson(fixture.State);
+            string runtime = JsonUtility.ToJson(fixture.Runtime);
+            string research = JsonUtility.ToJson(fixture.Runtime.completedResearch);
+            byte[] save = fixture.Session.GetCurrentBytes();
+
+            FloorActivationEligibilityResult result = Resolve(fixture);
+
+            Assert.That(result.IsEligible, Is.False);
+            Assert.That(result.PrimaryBlocker,
+                Is.EqualTo(FloorActivationEligibilityReasons.RequiredRouteMissingRoom));
+            CollectionAssert.AreEqual(new[]
+            {
+                FloorActivationEligibilityReasons.RequiredRouteMissingRoom
+            }, result.ReasonCodes);
+            Assert.That(JsonUtility.ToJson(fixture.State), Is.EqualTo(spatial));
+            Assert.That(JsonUtility.ToJson(fixture.Runtime), Is.EqualTo(runtime));
+            Assert.That(JsonUtility.ToJson(fixture.Runtime.completedResearch), Is.EqualTo(research));
+            CollectionAssert.AreEqual(save, fixture.Session.GetCurrentBytes());
+        }
+
         [TestCase("missing_entrance")]
         [TestCase("duplicate_completion")]
         public void InvalidEntranceOrCompletionCardinalityFails(string scenario)
