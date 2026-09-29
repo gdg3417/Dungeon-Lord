@@ -61,7 +61,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode source) || source.Kind != ContractJsonKind.Object)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":10,\"primary\":{");
+                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":11,\"primary\":{");
                 bool first = true;
                 foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
                 {

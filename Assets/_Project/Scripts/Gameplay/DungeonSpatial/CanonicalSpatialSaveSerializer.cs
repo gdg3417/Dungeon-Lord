@@ -33,7 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             { typeof(DetachedCanonicalSpatialSaveState), new[] { "Authority", "Floors", "LifecycleAndOwnership" } },
             { typeof(CanonicalSpatialAuthorityMarker), new[] { "CanonicalLayoutContractVersion", "CreationKind", "MigrationTransactionId", "MigrationDescriptorFingerprint" } },
-            { typeof(SavedSpatialFloor), new[] { "FloorInstanceId", "FloorDefinitionId", "FloorIndex", "Layout", "FixedStructures", "RoomContents" } },
+            { typeof(SavedSpatialFloor), new[] { "FloorInstanceId", "FloorDefinitionId", "FloorIndex", "ActivationState", "Layout", "FixedStructures", "RoomContents" } },
             { typeof(FloorSpatialLayout), new[] { "FloorId", "Rooms", "Nodes", "Edges" } },
             { typeof(RoomSpatialInstance), new[] { "RoomInstanceId", "RoomDefinitionId", "FloorId", "Anchor", "Orientation" } },
             { typeof(TileCoordinate), new[] { "X", "Y" } },
@@ -48,9 +48,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { typeof(FloorStructuralIdentityLifecycle), new[] { "FloorInstanceId", "NextNativeRoomOrdinal", "NextNativeEdgeOrdinal" } },
             { typeof(ReturnedStructuralContent), new[] { "AssignmentId", "CategoryId", "OptionId", "Sequence", "RemovalDisposition" } }
         };
+        private static readonly string[] FrozenFloorFields =
+            { "FloorInstanceId", "FloorDefinitionId", "FloorIndex", "Layout", "FixedStructures", "RoomContents" };
+
+        private static string[] FieldsFor(Type type, int schemaVersion) =>
+            type == typeof(SavedSpatialFloor) && schemaVersion < CanonicalSaveSchemaVersions.FloorActivationIntroduction
+                ? FrozenFloorFields : Fields[type];
 
         public static SpatialContractResult<byte[]> Serialize(DetachedCanonicalSpatialSaveState source,
-            CanonicalSpatialSerializationLimits limits)
+            CanonicalSpatialSerializationLimits limits) =>
+            SerializeForSchema(source, limits, CanonicalSaveSchemaVersions.CurrentWritableTarget);
+
+        private static SpatialContractResult<byte[]> SerializeForSchema(DetachedCanonicalSpatialSaveState source,
+            CanonicalSpatialSerializationLimits limits, int schemaVersion)
         {
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (!limits.IsValid)
@@ -64,13 +74,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical))
                 { issues.Add(SpatialContractIssue.StructuralValidationFailed); return Result<byte[]>(null, issues); }
                 NormalizeNativeAuthorityForCanonicalBytes(canonical.Authority);
-                if (!CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid)
+                if (!ValidateForSchema(canonical, limits, true, schemaVersion).IsValid)
                 { issues.Add(SpatialContractIssue.StructuralValidationFailed); return Result<byte[]>(null, issues); }
                 if (!DeclaredFieldsMatchSerializableFields())
                 { issues.Add(SpatialContractIssue.InvalidField); return Result<byte[]>(null, issues); }
 
                 var writer = new ContractJsonWriter(limits.Serialized);
-                Write(writer, canonical, typeof(DetachedCanonicalSpatialSaveState));
+                Write(writer, canonical, typeof(DetachedCanonicalSpatialSaveState), schemaVersion);
                 return Result(writer.Finish(), issues);
             }
             catch (ContractJsonBudgetException failure)
@@ -121,7 +131,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try
             {
                 ValidateAuthority(source?.Authority, issues);
-                if (!limits.IsValid || issues.Count != 0 ||
+                if (!limits.IsValid || issues.Count != 0 || !DeclaredFieldsMatchSerializableFields() ||
                     !CanonicalSpatialSaveContracts.TryCanonicalizeFrozenSchemaSeven(source,
                         limits.Spatial, out DetachedCanonicalSpatialSaveState canonical) ||
                     !CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(canonical,
@@ -129,9 +139,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return new SpatialContractResult<SerializedMembers>(null,
                         new[] { SpatialContractIssue.StructuralValidationFailed });
                 var authorityWriter = new ContractJsonWriter(limits.Serialized);
-                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
+                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker), 7);
                 var floorsWriter = new ContractJsonWriter(limits.Serialized);
-                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]));
+                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]), 7);
                 return new SpatialContractResult<SerializedMembers>(new SerializedMembers(
                     authorityWriter.Finish(), floorsWriter.Finish(), null),
                     Array.Empty<SpatialContractIssue>());
@@ -147,7 +157,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenSchemaSeven(
             byte[] bytes, CanonicalSpatialSerializationLimits limits) => ParseCore(bytes, limits, false, 7);
 
-        internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenPrePhaseFive(
+        internal static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseFrozenWithLifecycle(
             byte[] bytes, CanonicalSpatialSerializationLimits limits, int schemaVersion) =>
             ParseCore(bytes, limits, true, schemaVersion);
 
@@ -163,26 +173,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode root;
                 if (!ContractJson.TryParse(bytes, limits.Serialized, issues, out root))
                     return Result<DetachedCanonicalSpatialSaveState>(null, issues);
-                ValidateNode(root, typeof(DetachedCanonicalSpatialSaveState), null, null, issues);
+                if (!DeclaredFieldsMatchSerializableFields())
+                { issues.Add(SpatialContractIssue.InvalidField); return Result<DetachedCanonicalSpatialSaveState>(null, issues); }
+                ValidateNode(root, typeof(DetachedCanonicalSpatialSaveState), null, null, issues, schemaVersion);
                 if (issues.Count != 0) return Result<DetachedCanonicalSpatialSaveState>(null, issues);
 
                 object materialized;
-                if (!TryMaterialize(root, typeof(DetachedCanonicalSpatialSaveState), issues, out materialized))
+                if (!TryMaterialize(root, typeof(DetachedCanonicalSpatialSaveState), issues, schemaVersion, out materialized))
                     return Result<DetachedCanonicalSpatialSaveState>(null, issues);
                 var value = (DetachedCanonicalSpatialSaveState)materialized;
                 ValidateAuthority(value == null ? null : value.Authority, issues);
                 if (issues.Count == 0) NormalizeNativeAuthorityForCanonicalBytes(value == null ? null : value.Authority);
                 CanonicalSpatialSaveValidationResult validation = !includeLifecycle
                     ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(value, limits.Spatial, true)
-                    : schemaVersion < CanonicalSaveSchemaVersions.CurrentWritableTarget
-                        ? CanonicalSpatialSaveContracts.ValidateFrozenPrePhaseFive(value,
-                            limits.Spatial, schemaVersion, true)
-                        : CanonicalSpatialSaveContracts.Validate(value, limits.Spatial, true);
+                    : ValidateForSchema(value, limits, true, schemaVersion);
                 if (issues.Count == 0 && !validation.IsValid)
                     issues.Add(SpatialContractIssue.StructuralValidationFailed);
                 if (issues.Count == 0 && includeLifecycle)
                 {
-                    SpatialContractResult<byte[]> again = Serialize(value, limits);
+                    SpatialContractResult<byte[]> again = SerializeForSchema(value, limits, schemaVersion);
                     if (!again.IsValid || !BytesEqual(bytes, again.Value)) issues.Add(SpatialContractIssue.NonCanonicalBytes);
                 }
                 return Result(issues.Count == 0 ? value : null, issues);
@@ -190,6 +199,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch
             { issues.Add(SpatialContractIssue.MalformedJson); return Result<DetachedCanonicalSpatialSaveState>(null, issues); }
         }
+
+        private static CanonicalSpatialSaveValidationResult ValidateForSchema(
+            DetachedCanonicalSpatialSaveState state, CanonicalSpatialSerializationLimits limits,
+            bool ordered, int schemaVersion) => schemaVersion < CanonicalSaveSchemaVersions.CurrentWritableTarget
+                ? CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(state, limits.Spatial, schemaVersion, ordered)
+                : CanonicalSpatialSaveContracts.Validate(state, limits.Spatial, ordered);
 
         public static bool DeclaredFieldsMatchSerializableFields()
         {
@@ -200,10 +215,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string[] declared = pair.Value.OrderBy(name => name, StringComparer.Ordinal).ToArray();
                 if (!actual.SequenceEqual(declared)) return false;
             }
-            return true;
+            // Frozen contracts omit exactly the schema-11 activation member; all other
+            // serializable fields must still match the explicitly declared contract.
+            return FrozenFloorFields.SequenceEqual(Fields[typeof(SavedSpatialFloor)]
+                .Where(name => name != nameof(SavedSpatialFloor.ActivationState)));
         }
 
-        private static void Write(ContractJsonWriter writer, object value, Type type)
+        private static void Write(ContractJsonWriter writer, object value, Type type,
+            int schemaVersion = CanonicalSaveSchemaVersions.CurrentWritableTarget)
         {
             writer.Node();
             if (value == null) { writer.Token("null"); return; }
@@ -219,30 +238,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     writer.Record();
                     if (index++ != 0) writer.Token(",");
-                    Write(writer, item, type.GetElementType());
+                    Write(writer, item, type.GetElementType(), schemaVersion);
                 }
                 writer.Token("]"); return;
             }
 
-            writer.Token("{"); string[] names = Fields[type];
+            writer.Token("{"); string[] names = FieldsFor(type, schemaVersion);
             for (int index = 0; index < names.Length; index++)
             {
                 if (index != 0) writer.Token(",");
                 writer.String(names[index]); writer.Token(":");
                 FieldInfo field = type.GetField(names[index], BindingFlags.Instance | BindingFlags.Public);
                 if (field == null) throw new MissingFieldException();
-                Write(writer, field.GetValue(value), field.FieldType);
+                Write(writer, field.GetValue(value), field.FieldType, schemaVersion);
             }
             writer.Token("}");
         }
 
         private static bool TryMaterialize(ContractJsonNode node, Type type,
-            SpatialIssueCollector issues, out object value)
+            SpatialIssueCollector issues, int schemaVersion, out object value)
         {
             value = null;
             try
             {
-                value = Materialize(node, type);
+                value = Materialize(node, type, schemaVersion);
                 return true;
             }
             catch (OverflowException)
@@ -260,7 +279,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return false;
         }
 
-        private static object Materialize(ContractJsonNode node, Type type)
+        private static object Materialize(ContractJsonNode node, Type type, int schemaVersion)
         {
             if (node.Kind == ContractJsonKind.Null)
             {
@@ -283,17 +302,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Type elementType = type.GetElementType();
                 Array array = Array.CreateInstance(elementType, node.Items.Count);
                 for (int index = 0; index < node.Items.Count; index++)
-                    array.SetValue(Materialize(node.Items[index], elementType), index);
+                    array.SetValue(Materialize(node.Items[index], elementType, schemaVersion), index);
                 return array;
             }
 
             object instance = Activator.CreateInstance(type);
-            string[] names = Fields[type];
+            string[] names = FieldsFor(type, schemaVersion);
             for (int index = 0; index < names.Length; index++)
             {
                 FieldInfo field = type.GetField(names[index], BindingFlags.Instance | BindingFlags.Public);
                 if (field == null) throw new MissingFieldException(type.FullName, names[index]);
-                field.SetValue(instance, Materialize(ContractJson.Field(node, index), field.FieldType));
+                field.SetValue(instance, Materialize(ContractJson.Field(node, index), field.FieldType, schemaVersion));
             }
             return instance;
         }
@@ -325,7 +344,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static void ValidateNode(ContractJsonNode node, Type type, Type declaringType,
-            string fieldName, SpatialIssueCollector issues)
+            string fieldName, SpatialIssueCollector issues, int schemaVersion)
         {
             if (issues.IsExhausted) return;
             if (type == typeof(string))
@@ -355,15 +374,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (node.Kind != ContractJsonKind.Array)
                 { issues.Add(SpatialContractIssue.WrongFieldType); return; }
                 foreach (ContractJsonNode item in node.Items)
-                { ValidateNode(item, type.GetElementType(), null, null, issues); if (issues.IsExhausted) break; }
+                { ValidateNode(item, type.GetElementType(), null, null, issues, schemaVersion); if (issues.IsExhausted) break; }
                 return;
             }
             if (node.Kind == ContractJsonKind.Null) return;
-            string[] names = Fields[type];
+            string[] names = FieldsFor(type, schemaVersion);
             if (!ContractJson.ValidateShape(node, names, issues)) return;
             for (int index = 0; index < names.Length && !issues.IsExhausted; index++)
                 ValidateNode(ContractJson.Field(node, index), type.GetField(names[index]).FieldType,
-                    type, names[index], issues);
+                    type, names[index], issues, schemaVersion);
         }
 
         private static SpatialContractResult<T> Result<T>(T value, SpatialIssueCollector issues) =>

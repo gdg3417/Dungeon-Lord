@@ -276,7 +276,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             LifecycleFixture fixture = CreateLifecycle(ProductionSaveLimits());
             byte[] before = fixture.Session.GetCurrentBytes();
-            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, 10);
+            int required = dimension == 0 ? before.Length : MinimumRaw(before, dimension - 1, CanonicalSaveSchemaVersions.CurrentWritableTarget);
             foreach (int bound in new[] { required, required - 1 })
             {
                 var raw = new RawSavePayloadClassificationLimits(dimension == 0 ? bound : High,
@@ -428,9 +428,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     new CanonicalSpatialSaveWorkloadLimits(records - 1, fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles))).IsValid, Is.False);
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}"));
             Assert.That(Encoding.UTF8.GetString(bytes), Does.Contain("\"phase3UnknownRoot\":[1,true]"));
-            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, 10) +
-                ",rawMembers=" + MinimumRaw(bytes, 1, 10) + ",rawElements=" + MinimumRaw(bytes, 2, 10) +
-                ",rawStringBytes=" + MinimumRaw(bytes, 3, 10) + ",rawScanWork=" + MinimumRaw(bytes, 4, 10) +
+            return name + ":rawBytes=" + bytes.Length + ",rawDepth=" + MinimumRaw(bytes, 0, CanonicalSaveSchemaVersions.CurrentWritableTarget) +
+                ",rawMembers=" + MinimumRaw(bytes, 1, CanonicalSaveSchemaVersions.CurrentWritableTarget) + ",rawElements=" + MinimumRaw(bytes, 2, CanonicalSaveSchemaVersions.CurrentWritableTarget) +
+                ",rawStringBytes=" + MinimumRaw(bytes, 3, CanonicalSaveSchemaVersions.CurrentWritableTarget) + ",rawScanWork=" + MinimumRaw(bytes, 4, CanonicalSaveSchemaVersions.CurrentWritableTarget) +
                 ",candidateBytes=" + bytes.Length + ",strictInputBytes=" + bytes.Length +
                 ",strictNodes=" + MinimumStrict(bytes, fixture.State, 0, true) +
                 ",strictRecords=" + MinimumStrict(bytes, fixture.State, 1, true) +

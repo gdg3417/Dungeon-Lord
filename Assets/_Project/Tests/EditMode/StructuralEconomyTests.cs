@@ -442,7 +442,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MvpDungeonPlacementIds.SkeletonOptionId, f.State.Floors[0].Layout.Rooms[0].RoomInstanceId)));
             f.Runtime.structureRuntime.ManaReserve = 123.5;
             f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            string current = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
+            string current = PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes());
             int start = current.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
             byte[] eight = Encoding.UTF8.GetBytes(current.Remove(start, current.Length - 2 - start)
                 .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
@@ -457,11 +457,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var restored = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
                 nine, f.Profile.Canonical);
             Assert.That(restored.IsValid, Is.True); Assert.That(restored.Investment.All(r => r.ConstructionMana == 0 && r.RenovationMana == 0), Is.True);
+            foreach (SavedSpatialFloor floor in restored.State.Floors)
+                floor.ActivationState = FloorActivationState.Active;
             CollectionAssert.AreEqual(CanonicalSpatialSaveSerializer.Serialize(f.State, f.Profile.Canonical).Value,
                 CanonicalSpatialSaveSerializer.Serialize(restored.State, f.Profile.Canonical).Value);
             Assert.That(Encoding.UTF8.GetString(nine), Does.Contain("\"ManaReserve\":123.5"));
             Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, f.Profile.Canonical, out byte[] ten), Is.True);
-            Assert.That(DetachedCanonicalSaveSession.Open(ten, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(eleven, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }

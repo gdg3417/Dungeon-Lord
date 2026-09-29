@@ -148,7 +148,8 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 if (state.Floors.Length == 0)
                     return Valid(Array.Empty<MvpOrderedRouteRoom>());
                 if (state.Floors.Length != 1 || state.Floors[0] == null ||
-                    state.Floors[0].FloorIndex != 0)
+                    state.Floors[0].FloorIndex != 0 ||
+                    state.Floors[0].ActivationState != FloorActivationState.Active)
                     return Contradictory();
                 SavedSpatialFloor floor = state.Floors[0];
                 if (floor.Layout == null || floor.RoomContents == null)

@@ -552,6 +552,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 FloorInstanceId = floorId, FloorDefinitionId = floorDefinition.FloorDefinitionId,
                 FloorIndex = geometry.FloorIndex,
+                ActivationState = FloorActivationState.Active,
                 Layout = new FloorSpatialLayout { FloorId = floorId, Rooms = new[] { room },
                     Nodes = nodes, Edges = edges }, FixedStructures = fixedValues,
                 RoomContents = new FloorRoomContentState { Assignments = Array.Empty<RoomContentAssignment>(),

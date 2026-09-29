@@ -1,7 +1,7 @@
 # Post-GD60 MVP Execution Plan
 
 
-**Current status (2026-09-28):** Phase 5A is complete through PR #209; Phase 5B0 authority merged in PR #211 and the Phase 5B1 transient party/HP prerequisite merged in PR #212 (`ff797d7249d0ab50025a0e506d4c0c0c922f15ab`). PR #213 implements and has passed automated and owner manual qualification for fork decisions, physical corridor traversal, HP encounters, survivor learning, transient diagnostics, Decision 30 v2, and atomic complete-run publication. Schema remains 10 with no migration. Floor 2, run-event mana and other deferred systems remain outside this packet.
+**Phase 6A1 implementation status (2026-09-28):** Schema 11 is the current writable target. Each persisted floor owns one explicit `ActivationState` (Active or Inactive), the sole writable activation authority. Frozen schemas 7–10 retain their historical shapes; the sequential migration chain maps every schema 10 floor to Active, preserves existing state and extension members, and creates no floors. Validation requires Floor 1 active and deeper active floors to form a contiguous prefix. Online and offline passive mana count only validated Active floors. Production still contains only Floor 1; Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
 **Historical Phase 3 status (2026-08-27), superseded by PR #200:** PR #197 / Phase 3B1 is merged and complete at `8341108124899c985849563fbc8421623af5bc66`. Phase 3B2 is split into exactly two substantive packets unless new evidence forces another split: Phase 3B2A owns schema-8 identity-lifecycle and returned-content ownership prerequisites; Phase 3B2B owns player-usable leaf deletion and Phase 3 closeout. Phase 4 remains blocked until Phase 3B2B and all Phase 3 exit criteria pass.**
 
 **Historical Phase 2B6A status:** PR #194 is merged at `2bcc336f5fbbb9797f6f319f738e7b9f7d0613bd`; detached candidate, transaction, recovery, activation preflight, and Windows durability qualification are complete. Phase 2B6A adds the Windows durability implementation and activation-preflight boundary. It supports only Windows Editor and Windows Standalone with a local, nonredirected NTFS save directory. Durable creation uses a write-through file handle and explicit file-buffer flush; same-directory moves/replacements use `SetFileInformationByHandle(FileRenameInfo)` on a source handle opened with `DELETE | GENERIC_WRITE`, `OPEN_EXISTING`, and `FILE_FLAG_WRITE_THROUGH`, followed by `FlushFileBuffers` on the renamed handle and source/destination verification. No directory-fsync equivalent is claimed, and storage hardware that falsely acknowledges cache flushes remains outside the OS contract. Unsupported platforms, filesystem types, redirected/reparse paths, invalid paths, and native probe failures return stable fail-closed capability codes and no filesystem. Windows Editor and Windows Standalone durability qualification passed for PR #194; any activated schema-7 lifecycle still requires its own owner validation. Live schema remains **6**, schema 7 remains inactive, and `SaveService`, `GameRoot`, native creation, canonical runtime readers/writers, and legacy authority remain unchanged. Phase 2B6B is the final activation packet; GD66 is not complete.
@@ -9,12 +9,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 5B1 merged in PR #212; PR #213 Phase 5B2 implemented and passed automated and owner manual qualification** |
+| Status | **Phase 5B2 and Phase 6A0 merged; Phase 6A1 implements schema 11 floor activation persistence and migration** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Verified Phase 5B2 starting main: PR #212 `ff797d7249d0ab50025a0e506d4c0c0c922f15ab` |
+| Current implementation baseline | Phase 6A1 starts from merged PR #214 / `main` `7b7afa1eabbde2f03255fc0de8fdfe4f0e81d869` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-09-27 |
+| Last reconciled | 2026-09-28 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -46,7 +46,7 @@ Merged history establishes the following at prototype scope:
 - **Research:** a minimal bridge and completion flow exist; Architecture branching/expansion and a meaningful research interface do not.
 - **Economy/offline:** structural spending/refunds, owned-content redeployment, paid acquisition/StartingMana, direct unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201–#207. PR #207 adds one deterministic offline grant for cold start and pause/resume using the #205 rate, a validated 15% base efficiency, fractional wallet precision, no duration cap, capacity clamping, atomic timestamp consumption, localized summary, and structured security evidence. Floor expansion remains deferred.
 - **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
-- **Saves:** The PR #202 baseline introduced schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Merged PR #209 adds exactly one 9 → 10 transition and two explicit schema-10 complete-save owners for corridor content and shared branch knowledge; frozen schema 7/8/9 contracts remain version-specific. Schema 10 is the current writable target. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
+- **Saves:** The PR #202 baseline introduced schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Merged PR #209 adds exactly one 9 → 10 transition and two explicit schema-10 complete-save owners for corridor content and shared branch knowledge; frozen schema 7/8/9 contracts remain version-specific. Phase 6A1 advances the writable target to schema 11 and adds one explicit per-floor activation state; schema 10 remains frozen and readable through the 10 → 11 upgrade. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
 
 ### Missing MVP capabilities
 
@@ -161,7 +161,7 @@ The owner-design gate for branching and route choice is merged in PR #208 and ap
 
 ### Phase 6 — Additional floor foundation
 
-**Design/tuning gate closed:** [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md) is owner-approved against merged PR #213 / `main` `7e94dee13ab0c4252531cf152241426065a9db75`. It records Floor 2 permission/construction/lifecycle, run continuity, terminal decision, transfer, settlement, knowledge, determinism, workload, and schema direction. Runtime implementation remains unstarted; schema 10 remains current writable and schema 11 is direction only.
+**Design/tuning gate closed:** [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md) is owner-approved against merged PR #213 / `main` `7e94dee13ab0c4252531cf152241426065a9db75`. It records Floor 2 permission/construction/lifecycle, run continuity, terminal decision, transfer, settlement, knowledge, determinism, workload, and schema direction. Phase 6A1 implements schema 11 activation persistence and migration. Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
 
 1. Author Floor 2 unlock and configured larger base capacity without tying floor index to monster level.
 2. Give each active MVP floor exactly one entrance and add terminal semantics and survivor/run-state transfer.

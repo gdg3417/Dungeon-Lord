@@ -293,18 +293,23 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             }
         }
 
-        [Test]
-        public void CompatibilityReleasePolicyRejectsCrossProfileGeometryHashMismatch()
+        [TestCase(7)]
+        [TestCase(8)]
+        [TestCase(9)]
+        [TestCase(10)]
+        [TestCase(11)]
+        public void CompatibilityReleasePolicyRejectsCrossProfileGeometryHashMismatch(int schemaVersion)
         {
             SpatialLayoutCompatibilityProfilesData data = ProductionCompatibilityData();
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data), Is.True);
             string migrationGeometryId = data.MigrationProfiles[0].GeometryId;
             int migrationGeometryVersion = data.MigrationProfiles[0].GeometryVersion;
-            data.StarterProfiles[0].GeometryCanonicalHash = new string('a', 64);
-            data.StarterProfiles[0].CanonicalHash =
-                SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(data.StarterProfiles[0]);
-            Assert.That(data.StarterProfiles[0].GeometryId, Is.EqualTo(migrationGeometryId));
-            Assert.That(data.StarterProfiles[0].GeometryVersion, Is.EqualTo(migrationGeometryVersion));
+            CanonicalStarterLayoutProfile starter = data.StarterProfiles.Single(value =>
+                value.TargetSchemaVersion == schemaVersion);
+            starter.GeometryCanonicalHash = new string('a', 64);
+            starter.CanonicalHash = SpatialLayoutCompatibilityProfiles.ComputeStarterProfileHash(starter);
+            Assert.That(starter.GeometryId, Is.EqualTo(migrationGeometryId));
+            Assert.That(starter.GeometryVersion, Is.EqualTo(migrationGeometryVersion));
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data), Is.False);
         }
 

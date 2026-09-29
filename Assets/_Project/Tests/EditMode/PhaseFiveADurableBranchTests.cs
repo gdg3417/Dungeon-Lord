@@ -18,7 +18,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SchemaNineUpgradesOnceToTenWithEmptyOwnersAndFrozenBytesOtherwisePreserved()
         {
             var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
-            string ten = Encoding.UTF8.GetString(fixture.Session.GetCurrentBytes());
+            string ten = PhaseFourTestSupport.FrozenTen(fixture.Session.GetCurrentBytes());
             int owners = ten.IndexOf(",\"corridorContent\":", StringComparison.Ordinal);
             string nineText = ten.Remove(owners, ten.Length - 2 - owners)
                 .Replace("\"schemaVersion\":10", "\"schemaVersion\":9");
@@ -42,9 +42,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = BranchFixture(2, out OptionalBranchEditPreview preview);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
-            byte[] ten = fixture.Session.GetCurrentBytes();
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(ten,
-                fixture.Context).IsValid, Is.True);
+            byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(fixture.Session.GetCurrentBytes()));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(ten,
+                fixture.Profile.Canonical).IsValid, Is.True);
             Assert.That(Encoding.UTF8.GetString(ten), Does.Contain("\"Kind\":6"));
 
             byte[] nine = FrozenSchemaWithDeadEnd(ten, 9);
