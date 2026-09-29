@@ -22,7 +22,7 @@ It closes the owner-decision portion of the Phase 5 gate identified by:
 - `docs/planning/post-gd60-mvp-execution-plan.md`
 - `docs/planning/gd63-spatial-and-progression-design-decisions.md`
 
-Phase 5 still requires implementation, configuration, deterministic tests, integration review, and gameplay validation. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
+PR #213 implements the remaining approved Phase 5B2 branch runtime behavior after the merged Phase 5B1 party/HP prerequisite and has passed automated and owner manual qualification. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
 
 All numeric weights, thresholds, confidence-band limits, normalization curves, influence multipliers, and other tuning values remain configuration-owned and must not be invented in runtime code.
 
@@ -30,7 +30,7 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
-PR #208 merged this design lock at `ad026a29b1f8020a7ab8c682ac3c98da1ebf341c`. Phase 5A is complete in merged PR #209. Schema 10 owns durable optional-branch/corridor-content/shared-knowledge state, research-gated construction/removal, and required-route regression protection. Phase 5B is the next gameplay packet and remains responsible for route choice, traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production decision tuning. The [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md) now records owner-approved initial configuration and implementation authority and is pending final external review; Phase 5B gameplay implementation remains unstarted. PR #210 is also merged and makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
+PR #208 merged this design lock. PR #209 supplies schema 10 branch/corridor/knowledge state. The production contract merged in PR #211, and PR #212 (`ff797d7249d0ab50025a0e506d4c0c0c922f15ab`) supplies the authoritative transient party and HP prerequisite. PR #213 implements Decision 30 v2, traversal, corridor encounters and survivor learning through one detached atomic run commit and has passed automated and owner manual qualification; no migration or schema change is added.
 
 At the verified preparation baseline:
 
@@ -40,7 +40,7 @@ At the verified preparation baseline:
 - Save schema was 9 at that preparation baseline.
 - PR #207 added no migration or new persisted gameplay authority.
 - Run-event mana, durable Core Level progression, research mana effects, active soft-cap tuning, and authoritative clock-cheat enforcement remain deferred.
-- Phase 5A had not yet been implemented at that preparation baseline; Phase 5B runtime route choice remains unimplemented at the current PR #210 baseline.
+- Phase 5A had not yet been implemented at that preparation baseline; that historical state is superseded by Phase 5B1 and the current Phase 5B2 implementation.
 
 Repository documentation that describes PR #207 as unmerged, offline passive mana as future work, or Phase 4 as unimplemented is stale and conflicts with this recorded baseline.
 
@@ -771,34 +771,29 @@ The approved resolver order is:
 
    No new durable `PartyId` is required solely for Phase 5 branch selection because the MVP party is associated with its run identity. Implementation must reconcile with the repository's existing stable `RunId`, canonical `FloorInstanceId`, and persisted `OptionalBranchId` contracts rather than create parallel identity authorities.
 
-   Derive the stable signed 32-bit hash using the repository's explicit convention:
+   Manual Phase 5B2 qualification exposed pathological correlation between sequential `RunId` values under the original Decision 30 v1 polynomial hash, repeatedly producing marginal skips before precise branch knowledge could be learned. The owner-approved Decision 30 v2 correction preserves the identity tuple and replaces only its roll derivation. The active rule source ID is `run.branch_decision.rule.phase5b.v2`; v1 polynomial hashing is superseded and is not active production authority.
+
+   For each identity field in the exact order above:
 
    ```text
-   hash = 17
-
-   for each decision-identity field in the exact order above:
-       hash = unchecked(hash * 31 + StableStringHash(field))
+   fieldBytes = UTF8(field)
+   append UInt32BigEndian(fieldBytes.Length)
+   append fieldBytes
    ```
 
-   `StableStringHash` is exactly:
+   Hash the complete concatenated byte stream with SHA-256. Read the first four digest bytes as one unsigned 32-bit big-endian word:
 
    ```text
-   if value is null or empty:
-       return 0
-
-   hash = 23
-
-   for each character in ordinal string order:
-       hash = unchecked(hash * 31 + character)
-
-   return hash
+   word =
+       digest[0] << 24
+       | digest[1] << 16
+       | digest[2] << 8
+       | digest[3]
    ```
-
-   Convert the final signed 32-bit hash to an unsigned 32-bit value and derive:
 
    ```text
    DecisionRoll =
-       ((uint)hash) / 4294967296.0
+       word / 4294967296.0
    ```
 
    The roll domain is `0 <= DecisionRoll < 1`. Resolve the marginal choice exactly as:
@@ -815,7 +810,7 @@ The approved resolver order is:
 10. **Commit one route choice.**  
     Enter or skip. Phase 5 adds no discretionary mid-branch reversal. Completing the optional dead end automatically returns the party to the required route without a second branch decision.
 
-Numeric weight values, threshold values, input normalization curves, survivability bands, and modifiers are configuration-owned. The formula structure, term signs, normalized input domains, confidence-boundary semantics, linear marginal mapping, decision-identity fields and order, stable hash algorithm, roll conversion, and equality behavior are locked design.
+Numeric weight values, threshold values, input normalization curves, survivability bands, and modifiers are configuration-owned. The formula structure, term signs, normalized input domains, confidence-boundary semantics, linear marginal mapping, decision-identity fields and order, Decision 30 v2 length-prefixed UTF-8 SHA-256 algorithm, roll conversion, and equality behavior are locked design. This transient roll correction changes no save representation: schema remains 10 and no migration is required.
 
 ### Decision 31: Player-facing reporting
 
@@ -907,7 +902,7 @@ Phase 5 implementation must preserve:
 - canonical ordering
 - decision-specific deterministic seeded variation only where approved
 - the exact ordered decision identity `BranchDecisionRuleSourceId`, `RunId`, `FloorInstanceId`, `OptionalBranchId`
-- the explicit stable-string hash and ordered tuple-fold algorithm in Decision 30
+- the active Decision 30 v2 algorithm: length-prefixed UTF-8 encoding of the exact ordered identity, SHA-256 over the concatenated stream, and the first four digest bytes as one unsigned 32-bit big-endian word
 - the unsigned 32-bit `[0, 1)` roll conversion and strict-less-than marginal comparison in Decision 30
 - no use of runtime `GetHashCode` as deterministic seed authority
 - no dependence on global RNG state
@@ -965,7 +960,7 @@ The following remain configuration-owned and are not fixed by this design lock:
 - knowledge confidence thresholds
 - stale-information trust modifiers
 
-The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That implementation prerequisite is pending final external review and does not activate Phase 5B gameplay.
+The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That prerequisite merged in PR #211. Phase 5B1 and PR #213 Phase 5B2 implement its approved runtime authorities; Phase 5B2 has passed automated and owner manual qualification.
 
 Runtime code must consume approved configuration.
 

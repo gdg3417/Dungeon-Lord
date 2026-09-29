@@ -388,6 +388,21 @@ namespace DungeonBuilder.M0
             }
         }
 
+        public DetachedCanonicalWriteResult CommitPhaseFiveBRun(SaveData current,
+            Gameplay.RunSimulation.RunSimulationService simulation, string postureId)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null || current == null)
+                return new DetachedCanonicalWriteResult(false, "branch.run.invalid_state", false, false, null, null, null, null);
+            var result = CreateWriteAuthority().CommitPhaseFiveBRun(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, simulation, postureId, CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix));
+            if (result.IsSuccess)
+            {
+                _undo = null; _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
+
         public DetachedCanonicalWriteResult ExecuteCanonicalMutation(SaveData current,
             DetachedCanonicalMutationRequest request)
         {

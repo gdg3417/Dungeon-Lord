@@ -76,17 +76,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void PopulatedValidatedCanonicalAuthorityContinuesThroughRunResolution()
         {
-            SaveData save = PublishedProductionFixture(out RunSimulationConfig config);
+            var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
+            SaveData save = fixture.Runtime;
+            RunSimulationConfig config = fixture.Configuration;
             var go = new GameObject("Gd66PopulatedCanonicalRun");
             string savePath = null;
             try
             {
                 GameRoot root = go.AddComponent<GameRoot>();
-                var service = new SaveService(new SimpleLogger(false), new SaveConfig
-                { fileName = "gd66-populated-run-" + Guid.NewGuid().ToString("N") + ".json" });
-                savePath = service.SavePath;
+                var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
                 SetRootField(root, "<Save>k__BackingField", save);
-                SetRootField(root, "<SaveService>k__BackingField", service);
+                root.AttachSaveServiceForTests(service);
                 SetRootField(root, "_runSimulationService", new RunSimulationService(config));
                 SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
                 bool loggingEnabled = Debug.unityLogger.logEnabled;
@@ -102,9 +104,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 }
 
                 Assert.That(ran, Is.True);
-                Assert.That(save.runHistory.LatestOutcome, Is.Not.Null);
-                Assert.That(save.runHistory.RecentOutcomes, Is.Not.Empty);
-                Assert.That(save.runHistory.NextRunSequence, Is.GreaterThan(1));
+                Assert.That(root.Save.runHistory.LatestOutcome, Is.Not.Null);
+                Assert.That(root.Save.runHistory.RecentOutcomes, Is.Not.Empty);
+                Assert.That(root.Save.runHistory.NextRunSequence, Is.GreaterThan(1));
             }
             finally
             {

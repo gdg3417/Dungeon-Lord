@@ -208,6 +208,61 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
         }
 
+        public DetachedCanonicalWriteResult CommitPhaseFiveBRun(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService simulation,
+            string postureId, long savedUtcUnix)
+        {
+            const string invalid = "branch.run.invalid_state";
+            if (fileSystem == null || currentRuntime?.structureRuntime == null || currentRuntime.runHistory == null ||
+                simulation == null || context == null || limits == null || production == null) return Failure(invalid);
+            DetachedCompleteSaveValidationResult owned;
+            try
+            {
+                owned = ValidateSession(session);
+                if (owned?.CurrentTargetValidated != true || !owned.IsValid ||
+                    CanonicalMvpRouteProjection.InspectWithProductionContent(currentRuntime, production).AuthorityState !=
+                        CanonicalMvpRuntimeAuthorityState.ValidatedCanonical ||
+                    !CanonicalEqual(currentRuntime.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
+            }
+            catch { return Failure(invalid); }
+            try
+            {
+                if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
+                    return Failure("branch.run.stale_session");
+            }
+            catch { return Failure(AtomicSaveFailedReason); }
+            SaveData candidate;
+            try
+            {
+                candidate = UnityEngine.JsonUtility.FromJson<SaveData>(UnityEngine.JsonUtility.ToJson(currentRuntime));
+                if (currentRuntime.researchPending == null) candidate.researchPending = null;
+                if (currentRuntime.researchProgress == null) candidate.researchProgress = null;
+                if (currentRuntime.lastOfflineSummary == null) candidate.lastOfflineSummary = null;
+                DungeonBuilder.M0.Gameplay.RunSimulation.RunTransientEvidence.Retain(currentRuntime, candidate);
+                candidate.validatedCanonicalSpatialState = owned.State;
+                candidate.canonicalSpatialAuthority = owned.State.Authority; candidate.spatialFloors = owned.State.Floors;
+                candidate.corridorContent = owned.CorridorContent; candidate.sharedBranchKnowledge = owned.BranchKnowledge;
+                candidate.lastSavedUtcUnix = savedUtcUnix;
+                simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId);
+            }
+            catch (Exception error)
+            {
+                string reason = error.Message;
+                return Failure(reason == DungeonBuilder.M0.Gameplay.RunSimulation.BranchRunWorkload.WorkloadExceeded ||
+                    reason == DungeonBuilder.M0.Gameplay.RunSimulation.BranchDecisionResolver.InvalidConfiguration ||
+                    reason == DungeonBuilder.M0.Gameplay.RunSimulation.PhaseFiveBRouteProjection.InvalidRoute ? reason : invalid);
+            }
+            var snapshot = DetachedRecognizedSaveStateSnapshot.Capture(candidate, limits);
+            if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
+            var result = PrepareAndPersist(activePath, fileSystem, session,
+                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment,
+                    owned.CorridorContent, candidate.sharedBranchKnowledge), false);
+            if (result.IsSuccess)
+                DungeonBuilder.M0.Gameplay.RunSimulation.RunTransientEvidence.Retain(candidate, result.RuntimeProjection);
+            return result;
+        }
+
         internal DetachedCanonicalWriteResult SaveQaMana(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             SaveData currentRuntime, bool fillToCapacity)

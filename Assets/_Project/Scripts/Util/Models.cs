@@ -492,6 +492,7 @@ namespace DungeonBuilder.M0
         // Properties are transient: Unity and the strict public-field save contract omit them.
         public Gameplay.RunSimulation.RunParty Party { get; internal set; }
         public Gameplay.RunSimulation.RunEncounterEvent[] EncounterEvents { get; internal set; }
+        public Gameplay.RunSimulation.BranchOutcomeEvidence[] BranchOutcomes { get; internal set; }
         public string RunId;
         public long TickStarted;
         public bool Success;

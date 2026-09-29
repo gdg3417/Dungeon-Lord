@@ -702,8 +702,10 @@ namespace DungeonBuilder.M0
                 if (previous == null) continue;
                 run.Party = previous.Party;
                 run.EncounterEvents = previous.EncounterEvents;
+                run.BranchOutcomes = previous.BranchOutcomes;
             }
             Save = published;
+            CurrentHeat = Save.structureRuntime?.Heat ?? 0d;
             StructuralConstructionPreview = null;
             StructuralRenovationPreview = null;
             StructuralDeletionPreview = null;
@@ -1793,7 +1795,9 @@ namespace DungeonBuilder.M0
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
                 return false;
             }
-            if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent))
+            bool hasOptionalBranch = authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
+                Save.validatedCanonicalSpatialState.Floors.Any(f => f.Layout.Edges.Any(e => e.Classification == RouteClassification.Optional));
+            if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent) && !hasOptionalBranch)
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
                 return false;
@@ -1810,6 +1814,18 @@ namespace DungeonBuilder.M0
 
         private bool SimulateResolvedRoute(string postureId, MvpOrderedRouteRoom[] route)
         {
+            if (CanonicalMvpRouteProjection.IsCanonical(Save))
+            {
+                var result = SaveService?.CommitPhaseFiveBRun(Save, _runSimulationService, postureId);
+                if (result?.IsSuccess != true)
+                {
+                    ApplyRunRejection(result?.Reason != null && result.Reason.StartsWith("branch.", StringComparison.Ordinal)
+                        ? result.Reason : "branch.run.commit_failed");
+                    return false;
+                }
+                SelectLatestRunOutcome(); RefreshRunLine();
+                return true;
+            }
             SaveService?.InvalidateRenovationUndo();
             long tickStarted = Save.totalTicks;
             int sequence = Math.Max(1, Save.runHistory.NextRunSequence);
