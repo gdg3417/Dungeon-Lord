@@ -112,6 +112,60 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var p = Preview(f); Assert.That(p.IsCommittable, Is.EqualTo(completed), p.Reason);
             Assert.That(f.State.Floors, Has.Length.EqualTo(1)); CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
         }
+        [TestCase("none", false)]
+        [TestCase("other", false)]
+        [TestCase("single", true)]
+        [TestCase("mixed", true)]
+        [TestCase("duplicate", true)]
+        public void ResearchPermissionUsesDuplicateSafeCompletedStateSemantics(string scenario, bool expected)
+        {
+            var f = Start(false);
+            string[] ids = scenario == "none" ? Array.Empty<string>() :
+                scenario == "other" ? new[] { "ac_200" } :
+                scenario == "single" ? new[] { "ac_100" } :
+                scenario == "mixed" ? new[] { "ac_200", "ac_100", "ac_300" } :
+                new[] { "ac_100", "ac_100" };
+            f.Runtime.completedResearch = new CompletedResearchState
+            {
+                ProjectIds = ids,
+                LastCompletedProjectId = ids.LastOrDefault(),
+                LastCompletionRuleSourceId = "research.completed.rule.test"
+            };
+            string before = JsonUtility.ToJson(f.Runtime.completedResearch);
+
+            FloorConstructionPreview preview = Preview(f);
+
+            Assert.That(preview.IsCommittable, Is.EqualTo(expected), preview.Reason);
+            Assert.That(f.State.Floors, Has.Length.EqualTo(1));
+            Assert.That(JsonUtility.ToJson(f.Runtime.completedResearch), Is.EqualTo(before));
+        }
+        [Test]
+        public void DuplicateResearchCompletionCannotConstructAutomaticallyOrConstructTwice()
+        {
+            var f = Start(false);
+            f.Runtime.completedResearch = new CompletedResearchState
+            {
+                ProjectIds = new[] { "ac_100", "ac_200", "ac_100" },
+                LastCompletedProjectId = "ac_100",
+                LastCompletionRuleSourceId = "research.completed.rule.test"
+            };
+            string before = JsonUtility.ToJson(f.Runtime.completedResearch);
+            Assert.That(f.State.Floors, Has.Length.EqualTo(1));
+
+            FloorConstructionPreview first = Preview(f);
+            Assert.That(first.IsCommittable, Is.True, first.Reason);
+            Assert.That(f.State.Floors, Has.Length.EqualTo(1));
+            Assert.That(JsonUtility.ToJson(f.Runtime.completedResearch), Is.EqualTo(before));
+            f.Accept(Construct(f, first));
+
+            Assert.That(f.State.Floors.Count(value => value.FloorIndex == 1), Is.EqualTo(1));
+            FloorConstructionPreview repeat = Preview(f);
+            Assert.That(repeat.IsCommittable, Is.False);
+            byte[] durable = f.Session.GetCurrentBytes();
+            Assert.That(Construct(f, repeat).IsSuccess, Is.False);
+            CollectionAssert.AreEqual(durable, f.Session.GetCurrentBytes());
+            Assert.That(JsonUtility.ToJson(f.Runtime.completedResearch), Is.EqualTo(before));
+        }
         [TestCase("node")][TestCase("effect")][TestCase("duplicate_node")][TestCase("duplicate_effect")]
         [TestCase("quoted_value")][TestCase("duplicate_property")]
         public void InvalidResearchConfigurationFailsClosed(string scenario)

@@ -1,6 +1,6 @@
 # Phase 6A2 — Floor 2 construction and inactive editing
 
-Status: implementation and automated qualification complete; external ChatGPT PR review and owner manual qualification have not been performed. Not declared ready to merge.
+Status: implementation and correction automated qualification complete; external ChatGPT re-review and owner manual qualification have not been performed. Not declared ready to merge.
 
 ## Baseline and continuation audit
 
@@ -11,6 +11,13 @@ Status: implementation and automated qualification complete; external ChatGPT PR
 - Read repository guardrails, model policy, Phase 6 lock/execution plan, Specs 28/38, invariant glossary, actual merged #215 implementation and evidence, and production authoring/export, research, investment, detached persistence, editing, run, passive-mana, and Bootstrap authorities.
 - Initial audit: profile/content, lifecycle-aware validation, construction writer, ledger extension, and initial SaveService/GameRoot hooks were partial. Explicit floor targeting, empty-shell room editing, run isolation, usable Bootstrap controls, localization, production export, and Phase 6A2 tests/evidence were incomplete or untested. The continuation finished and reconciled those existing paths.
 - Recommendation: **GPT-6 Sol, High; Complex**. The owner explicitly changed the optimization goal toward usage conservation, with locked architecture and recent consumption evidence justifying the exception to the older Complex default. No model-governance change is included.
+
+## External-review corrections
+
+External review of PR #216 at `e85e7edc1277bfcb5f2e01f99ff6ecbdb0d2ecd2` found two bounded authority defects. The correction used the requested **GPT-5.6 Sol, Medium; Standard** configuration and changed no Phase 6 architecture.
+
+1. The selected production Dungeon Spatial content version was stale at `0.1.0`. Phase 6A2 adds compatible Floor 2 catalog and allowlist records, so the already-approved semantic version policy requires `0.2.0`. The canonical authoring manifest and strict parser selection now require `0.2.0`; canonical export updates only catalog/manifest content-version fields. Catalog schema remains 1, string-table schema remains 1, save schema remains 11, and no migration or stable-ID change is added.
+2. Floor construction permission incorrectly required exactly one raw `ac_100` entry. It now consumes the existing `CompletedResearchStateResolver` duplicate-safe, ordinal, read-only membership semantics: at least one valid `ac_100` grants one permission. Duplicate production node/effect configuration remains invalid, repeated completed IDs do not mutate save state, do not construct automatically, and cannot construct a second Floor 2.
 
 ## New implementation and retained authorities
 
@@ -35,11 +42,11 @@ Both footprints fit, do not overlap, use allowed orientations, and preserve usef
 
 The profile does not duplicate bounds, capacities, or allowlists and is neither a migration compatibility profile nor a canonical starter. Strict bounded JSON/type/property validation, unique profile/floor resolution, production definition checks, orientation/bounds/footprint checks, and no-overlap validation fail closed.
 
-The existing CSV exporter generated the committed catalog. Generated English and manifest remain byte-unchanged. The authoring contract currently pins content version `0.1.0`; that version and content schema/registration remain unchanged. An attempted `0.2.0` export correctly failed the pinned authoring gate and was corrected in authoring before successful regeneration. Generated JSON was not used as writable authority.
+The existing CSV exporter generated the committed catalog. The canonical authoring release advances from `0.1.0` to **`0.2.0`** for the additive compatible Floor 2 definition and allowlist records. The authoring parser remains strict and rejects unsupported selections; external review identified and corrected its stale `0.1.0` pin. Generated `dungeon_spatial_content.json` and `content_manifest.json` now report `0.2.0`; generated `string_table_en.json` remains byte-identical. Content schema/registration remain 1. Generated JSON was not used as writable authority.
 
 ### Research permission
 
-`FloorConstructionResearchAuthority` resolves exactly one production Architecture `ac_100` node with `unlock_type=effect`, target `max_floors`, and effect profile `eff_ac_floor_2_permit`, then exactly one matching `max_floors_set` effect with integer unit/value. Relevant raw property types and duplicate properties/records are checked before deserialization; malformed, contradictory, missing, or duplicated configuration fails closed. The resolved maximum floor count must agree with the profile's production index. Permission requires exactly one completed `ac_100` entry in the existing completed-research owner.
+`FloorConstructionResearchAuthority` resolves exactly one production Architecture `ac_100` node with `unlock_type=effect`, target `max_floors`, and effect profile `eff_ac_floor_2_permit`, then exactly one matching `max_floors_set` effect with integer unit/value. Relevant raw property types and duplicate properties/records are checked before deserialization; malformed, contradictory, missing, or duplicated configuration fails closed. The resolved maximum floor count must agree with the profile's production index. Permission uses the established completed-research authority's ordinal, duplicate-safe membership query: one or more valid `ac_100` entries mean completed, while null, blank, or nonmatching state remains locked. Resolution does not normalize, reorder, deduplicate, or otherwise mutate the saved state.
 
 Completion creates no floor. Reopening a completed-research save with no Floor 2 remains unlocked/unconstructed. No research-completion lifecycle or completion writer is added. The existing player research screen remains the scaffold project, not a production Architecture progression interface; qualification of the permit uses an approved completed-state fixture/existing save. This limitation is not disguised as a new research screen.
 
@@ -77,37 +84,37 @@ Final NUnit XML proves the following results. All three CLI test commands comple
 
 | Suite | Total | Passed | Failed | Skipped | Inconclusive |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Focused EditMode | 1174 | 1174 | 0 | 0 | 0 |
-| Complete EditMode | 1174 | 1174 | 0 | 0 | 0 |
-| Complete PlayMode | 2672 | 2662 | 0 | 10 | 0 |
+| Correction focused EditMode | 271 | 271 | 0 | 0 | 0 |
+| Correction complete EditMode | 1180 | 1180 | 0 | 0 | 0 |
+| Correction complete PlayMode | 2679 | 2669 | 0 | 10 | 0 |
 
-The focused expression deliberately includes the repository's inherited Editor bridge names (`PhaseFour`, `PhaseFiveA`, `PhaseFiveB`) rather than only runtime base-class names; those broad affected-system fixtures cover the current EditMode suite. The new Phase 6A2 fixture contributes **57** cases. All **59** production build-gate cases pass, including `ProductionGate_ValidInstalledSetAndExactBootstrapAssignmentsPass` and `ProductionGate_SuccessPreservesRequiredFilesByteForByte`.
+The correction-focused expression includes the Phase 6A2 Editor bridge, completed-research resolver, production exporter/authoring, inherited production loading bridge, and build gate. The Phase 6A2 fixture now contributes **63** cases. All **59** production build-gate cases pass, including `ProductionGate_ValidInstalledSetAndExactBootstrapAssignmentsPass` and `ProductionGate_SuccessPreservesRequiredFilesByteForByte`.
 
 Local XML SHA-256:
 
-- `TestResults/phase6a2-focused.xml`: `FA6C86324730EE8B34D1C075AA9B1F73AE9F45F08FF2C8F3E28BB02A13DB628A`
-- `TestResults/phase6a2-full-editmode.xml`: `7B947A329E8F6900DEF66967B04F4A06B6A25DCB9933BAC1A2096F6FC2ED91C9`
-- `TestResults/phase6a2-full-playmode.xml`: `7846A94132767C3786A3D5D3273FEB25DF02EFD66B9B9507D7F1C7DD678F4434`
+- `TestResults/phase6a2-correction-focused.xml`: `3FE26579A022F482D80E42A19FCB200AAA9A8D2395E6F729334EA777610B122C`
+- `TestResults/phase6a2-correction-full-editmode.xml`: `862522D7B3FDBCB1B46443DCB81C57513EBE3AB4028C0A623472B47FC76FE53F`
+- `TestResults/phase6a2-correction-full-playmode.xml`: `FE0FF17AFA941516F34981D5706EB48939EA9F33690B2039633CD59A1CB162A0`
 
 Two final canonical export repetitions completed with exit code 0 and preserved all three output hashes exactly:
 
-- Generated catalog: `CE545EEADAA36E3EB50DD227932093164255CC481011DC2166D6E8D7181CD9AB`
+- Generated catalog: `5909423440D0923DB58C5F2433807F9A3E943CBEEDC51C220BAFE9950610BB4B`
 - Generated English: `37ECE030181BB51FF887A75AA41A2293BDECE9EED8D292EF6EC40E48BEEF3262`
-- Generated manifest: `FB48BBBC3975827A295188818C7140BD91447E6D401C3A8CA1554A5402089902`
+- Generated manifest: `D50B6BEC4E378AC486D813A3C01C7CDC2A56C138EDDF50E2EAE224C8C758D227`
 
 `git diff --check` passes. Bootstrap English JSON contains **939** entries, zero duplicate keys (25 added to the baseline 914). No frozen schema/descriptor/migration/compatibility-profile file changed. Unity's incidental `applicationIdentifier` key reordering was restored; there is no intended ProjectSettings, scene, prefab, or generated test-scene change. Generated outputs are deterministic; no unexpected byte changes remain.
 
 Focused command (actual EditMode bridge classes included):
 
 ```powershell
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --filter 'PhaseSixA2FloorConstruction|PhaseSixAActivation|PhaseFour|PhaseFiveA|PhaseFiveB|ProductionSpatialContent|OptionalBranch|Bootstrap|CanonicalMvp' --output 'TestResults/phase6a2-focused.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --filter 'PhaseSixA2FloorConstruction|CompletedResearchStateResolver|ProductionSpatialContentExportTests|PhaseFourContent|ProductionSpatialContentBuildGateTests' --output 'TestResults/phase6a2-correction-focused.xml' --timeout 1200 --no-color
 ```
 
 Complete commands:
 
 ```powershell
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --output 'TestResults/phase6a2-full-editmode.xml' --timeout 1200 --no-color
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode PlayMode --output 'TestResults/phase6a2-full-playmode.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --output 'TestResults/phase6a2-correction-full-editmode.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode PlayMode --output 'TestResults/phase6a2-correction-full-playmode.xml' --timeout 1200 --no-color
 ```
 
 Deterministic production export command:

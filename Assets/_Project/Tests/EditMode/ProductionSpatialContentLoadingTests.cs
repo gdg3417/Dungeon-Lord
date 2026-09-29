@@ -38,7 +38,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(first.Success, Is.True, Join(first));
             Assert.That(second.Success, Is.True, Join(second));
-            Assert.That(first.Value.Manifest.contentVersion, Is.EqualTo("0.1.0"));
+            Assert.That(first.Value.Manifest.contentVersion, Is.EqualTo("0.2.0"));
+            Assert.That(first.Value.Catalog.Metadata.ContentVersion, Is.EqualTo("0.2.0"));
             CollectionAssert.AreEqual(new[] { "dungeon_spatial_content", "string_table" },
                 first.Value.Manifest.requiredSchemas.Select(value => value.schemaId));
             Assert.That(first.Value.Languages, Has.Count.EqualTo(1));

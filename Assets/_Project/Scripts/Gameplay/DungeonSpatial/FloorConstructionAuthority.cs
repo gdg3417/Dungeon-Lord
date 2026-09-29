@@ -269,8 +269,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (research == null || profile == null || profile.RequiredResearchId != research.ResearchId ||
                 profile.FloorIndex < 0 || profile.FloorIndex + 1 != research.MaximumFloorCount)
                 return ConfigurationInvalidReason;
-            return (completed?.ProjectIds ?? Array.Empty<string>()).Count(value =>
-                string.Equals(value, research.ResearchId, StringComparison.Ordinal)) == 1
+            return CompletedResearchStateResolver.HasCompletedProject(completed, research.ResearchId)
                 ? null : ResearchRequiredReason;
         }
     }

@@ -1,7 +1,7 @@
 {
   "schema": "dungeon_spatial_authoring",
   "schemaVersion": 1,
-  "contentVersion": "0.1.0",
+  "contentVersion": "0.2.0",
   "catalogSchemaId": "dungeon_spatial_content",
   "catalogSchemaVersion": 1,
   "stringTableSchemaId": "string_table",

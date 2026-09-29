@@ -2,7 +2,7 @@
     "Metadata": {
         "SchemaId": "dungeon_spatial_content",
         "SchemaVersion": 1,
-        "ContentVersion": "0.1.0"
+        "ContentVersion": "0.2.0"
     },
     "Floors": [
         {

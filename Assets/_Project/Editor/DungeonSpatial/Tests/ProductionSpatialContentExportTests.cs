@@ -489,7 +489,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json => json.Replace("\"schema\": \"string_table\"", "\"schema\": \"test.table\""),
                 ProductionSpatialGeneratedSetDiagnostic.StringTableIdentityMismatch);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"0.2.0\""),
+                json => json.Replace("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"0.3.0\""),
                 ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
                 json => json.Replace("\"language\": \"en\"", "\"language\": \"ja\""),
@@ -510,13 +510,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ProductionSpatialGeneratedSet matching = ReplaceCatalog(Build().Output,
                 catalog => catalog.Metadata.ContentVersion = previousVersion);
             matching = ReplaceJson(matching, ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.1.0\"",
+                json => json.Replace("\"contentVersion\": \"0.2.0\"",
                     "\"contentVersion\": \"" + previousVersion + "\""));
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(matching, Limits()).Success, Is.True);
 
             ProductionSpatialGeneratedSet blankManifest = ReplaceJson(Build().Output,
                 ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"\""));
+                json => json.Replace("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"\""));
             AssertRepeatedExactNoThrow(blankManifest,
                 ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
 
@@ -679,7 +679,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(catalog.Floors.Length + catalog.Rooms.Length + catalog.Corridors.Length + catalog.FixedStructures.Length + catalog.SocketTypes.Length, Is.EqualTo(9));
             Assert.That(catalog.Metadata.SchemaId, Is.EqualTo("dungeon_spatial_content"));
             Assert.That(catalog.Metadata.SchemaVersion, Is.EqualTo(1));
-            Assert.That(catalog.Metadata.ContentVersion, Is.EqualTo("0.1.0"));
+            Assert.That(catalog.Metadata.ContentVersion, Is.EqualTo("0.2.0"));
             Assert.That(catalog.Floors, Has.Length.EqualTo(2)); Assert.That(catalog.Rooms, Has.Length.EqualTo(3));
             Assert.That(catalog.Corridors, Has.Length.EqualTo(1)); Assert.That(catalog.FixedStructures, Has.Length.EqualTo(2));
             Assert.That(catalog.SocketTypes, Has.Length.EqualTo(1));
@@ -781,6 +781,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(floor.CompletionStructureDefinitionId, Is.EqualTo("spatial.fixed.completion_terminal"));
             CollectionAssert.AreEqual(new[] { "spatial.room.basic", "spatial.room.large_chamber", "spatial.room.rectangle" }, floor.AllowedRoomDefinitionIds);
             CollectionAssert.AreEqual(new[] { "spatial.corridor.straight_stone" }, floor.AllowedCorridorDefinitionIds);
+            FloorSpatialConfiguration floorTwo = catalog.Floors.Single(value => value.FloorIndex == 1);
+            Assert.That(floorTwo.FloorDefinitionId, Is.EqualTo("spatial.floor.02"));
+            Assert.That(floorTwo.Bounds.Minimum, Is.EqualTo(new TileCoordinate(0, 0)));
+            Assert.That(floorTwo.Bounds.Width, Is.EqualTo(14));
+            Assert.That(floorTwo.Bounds.Height, Is.EqualTo(14));
+            Assert.That(floorTwo.FinalFloorSpaceCapacity, Is.EqualTo(80));
+            Assert.That(floorTwo.OptionalBranchAllowance, Is.EqualTo(1));
+            Assert.That(floorTwo.EntranceStructureDefinitionId, Is.EqualTo(floor.EntranceStructureDefinitionId));
+            Assert.That(floorTwo.CompletionStructureDefinitionId, Is.EqualTo(floor.CompletionStructureDefinitionId));
+            CollectionAssert.AreEqual(floor.AllowedRoomDefinitionIds, floorTwo.AllowedRoomDefinitionIds);
+            CollectionAssert.AreEqual(floor.AllowedCorridorDefinitionIds, floorTwo.AllowedCorridorDefinitionIds);
             AssertRoom(catalog, "spatial.room.basic", 4, 4, 3, 2, 2, 2, new[] { CardinalOrientation.Zero },
                 new[] { "east:3:1:Ninety", "north:1:3:Zero", "south:1:0:OneEighty", "west:0:1:TwoSeventy" });
             AssertRoom(catalog, "spatial.room.large_chamber", 5, 6, 3, 4, 4, 4, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
@@ -842,10 +853,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.DuplicateSourcePath), Is.True);
         }
 
-        [TestCase("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": 1", DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType)]
+        [TestCase("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": 1", DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType)]
         [TestCase("\"schema\": \"dungeon_spatial_authoring\"", "\"schema\": \"test.schema\"", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
         [TestCase("\"schemaVersion\": 1", "\"schemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
-        [TestCase("\"contentVersion\": \"0.1.0\"", "\"contentVersion\": \"0.2.0\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"0.3.0\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"catalogSchemaId\": \"dungeon_spatial_content\"", "\"catalogSchemaId\": \"test.catalog\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"catalogSchemaVersion\": 1", "\"catalogSchemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"stringTableSchemaId\": \"string_table\"", "\"stringTableSchemaId\": \"test.table\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
