@@ -169,7 +169,7 @@ The domain may later expand optional branches into multi-room routes with monste
 
 ## 10. Exit, descent, and floor progression
 
-Adventurers make the exit-versus-descend decision. Potential authored inputs include party strength, health/injuries, survivors, carried loot, perceived next-floor danger, intent, class behavior, and dungeon pressure. Descending carries reviewed run identity and survivor state forward. Exact fields, coefficients, thresholds, tie-break, and save representation remain the Phase 6 gate.
+Adventurers make the exit-versus-descend decision. The owner-approved inputs, survivability gate, coefficients, thresholds, marginal hash/tie-break, exact transfer semantics, and schema direction are now locked in the [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md). Runtime implementation remains unstarted; schema 10 remains the current writable target until a later deliberate schema-11 implementation PR.
 
 The following are capacity-authoring composition targets, not fixed object-count limits:
 
@@ -220,7 +220,7 @@ Later implementation must preserve deterministic simulation; stable IDs; ordinal
 - **GD66:** final migration mapping, stable textual ID rules, coordinates/orientations, fixtures, fallback/content-missing policy, backup/recovery UX, and atomic recovery design.
 - **Phase 2 only:** separately reviewed schema migration, legacy-state migration, runtime-reader switch, writable-authority transition, rollback, and migration evidence; no version is approved by GD63.
 - Exact floor/room dimensions and capacities; content IDs; connection points; socket/content capacities; construction/renovation/corridor costs; refund percentage, rounding and clamping; environmental modifiers; and workload/device limits.
-- Doorway geometry/validation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 route-choice implementation and configuration-owned tuning, and Phase 6 transfer/save details. The Phase 5 owner-design formula/tie-break gate is approved in the linked design lock.
+- Doorway geometry/validation, editor transactions, inventory/roster consequences, corridor simulation, and Phase 5 route-choice implementation/configuration-owned tuning. Phase 6 transfer/save authority is closed by the [Phase 6A0 lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md); its runtime implementation remains deferred. The Phase 5 owner-design formula/tie-break gate is approved in the linked design lock.
 - Authoritative clock-cheat enforcement for offline mana remains deferred; merged PR #207 implements the approved base efficiency, timestamp boundary, rounding behavior, no-time-cap rule, storage clamp, and result presentation.
 
 These gates must not be guessed in runtime code. Phase 3, 5, 7, and 9 observation gates remain responsible for testing whether the spatial fantasy is understandable and fun.
