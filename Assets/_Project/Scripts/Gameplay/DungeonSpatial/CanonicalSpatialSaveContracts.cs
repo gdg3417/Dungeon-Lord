@@ -87,12 +87,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public ReturnedStructuralContent[] ReturnedContents = Array.Empty<ReturnedStructuralContent>();
     }
 
+    // Zero is deliberately invalid: native schema 11 must explicitly supply the state.
+    public enum FloorActivationState { Active = 1, Inactive = 2 }
+
     [Serializable]
     public sealed class SavedSpatialFloor
     {
         public string FloorInstanceId;
         public string FloorDefinitionId;
         public int FloorIndex;
+        public FloorActivationState ActivationState;
         public FloorSpatialLayout Layout;
         public SavedFixedSpatialStructure[] FixedStructures = Array.Empty<SavedFixedSpatialStructure>();
         public FloorRoomContentState RoomContents;
@@ -171,7 +175,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         DuplicateLifecycleFloor = 47,
         DuplicateReturnedIdentity = 48,
         AssignedAndReturnedIdentity = 49,
-        InvalidReturnedContent = 50
+        InvalidReturnedContent = 50,
+        InvalidFloorActivationState = 51,
+        InactiveFirstFloor = 52,
+        NonContiguousActiveFloors = 53,
+        ActivationInFrozenSchema = 54
     }
 
     public sealed class CanonicalSpatialSaveValidationResult
@@ -217,10 +225,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             bool requireCanonicalOrdering = false) =>
             ValidateCore(state, limits, requireCanonicalOrdering, false, 7);
 
-        internal static CanonicalSpatialSaveValidationResult ValidateFrozenPrePhaseFive(
+        internal static CanonicalSpatialSaveValidationResult ValidateFrozenWithLifecycle(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
             int schemaVersion, bool requireCanonicalOrdering = false) =>
-            schemaVersion == 8 || schemaVersion == 9
+            schemaVersion == 8 || schemaVersion == 9 || schemaVersion == 10
                 ? ValidateCore(state, limits, requireCanonicalOrdering, true, schemaVersion)
                 : new CanonicalSpatialSaveValidationResult(new[]
                     { CanonicalSpatialSaveValidationIssue.InvalidSource });
@@ -247,11 +255,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (SavedSpatialFloor floor in floors)
                 ValidateFloor(floor, instanceIds, issues, schemaVersion);
 
+            if (schemaVersion >= CanonicalSaveSchemaVersions.FloorActivationIntroduction)
+                ValidateActivation(floors, issues);
+            else if (floors.Any(floor => floor != null && (int)floor.ActivationState != 0))
+                issues.Add(CanonicalSpatialSaveValidationIssue.ActivationInFrozenSchema);
+
             if (includeLifecycle) ValidateLifecycleAndOwnership(state, instanceIds, issues);
 
             if (requireCanonicalOrdering && !HasCanonicalOrdering(state))
                 issues.Add(CanonicalSpatialSaveValidationIssue.NonCanonicalOrdering);
             return new CanonicalSpatialSaveValidationResult(issues);
+        }
+
+        private static void ValidateActivation(SavedSpatialFloor[] floors,
+            ICollection<CanonicalSpatialSaveValidationIssue> issues)
+        {
+            int nextActiveIndex = 0;
+            bool inactiveSeen = false;
+            foreach (SavedSpatialFloor floor in floors.Where(value => value != null)
+                .OrderBy(value => value.FloorIndex).ThenBy(value => value.FloorInstanceId, StringComparer.Ordinal))
+            {
+                if (!Enum.IsDefined(typeof(FloorActivationState), floor.ActivationState))
+                    issues.Add(CanonicalSpatialSaveValidationIssue.InvalidFloorActivationState);
+                if (floor.FloorIndex == 0 && floor.ActivationState != FloorActivationState.Active)
+                    issues.Add(CanonicalSpatialSaveValidationIssue.InactiveFirstFloor);
+                if (floor.ActivationState == FloorActivationState.Active)
+                {
+                    if (inactiveSeen || floor.FloorIndex != nextActiveIndex)
+                        issues.Add(CanonicalSpatialSaveValidationIssue.NonContiguousActiveFloors);
+                    nextActiveIndex++;
+                }
+                else inactiveSeen = true;
+            }
         }
 
         private static CanonicalizationFailure TryCanonicalizeCore(DetachedCanonicalSpatialSaveState source,
@@ -373,6 +408,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 FloorInstanceId = floor.FloorInstanceId,
                 FloorDefinitionId = floor.FloorDefinitionId,
                 FloorIndex = floor.FloorIndex,
+                ActivationState = floor.ActivationState,
                 Layout = CopyLayout(floor.Layout),
                 FixedStructures = (floor.FixedStructures ?? Array.Empty<SavedFixedSpatialStructure>()).Select(CopyFixed)
                     .OrderBy(value => value?.FixedStructureInstanceId, StringComparer.Ordinal).ToArray(),

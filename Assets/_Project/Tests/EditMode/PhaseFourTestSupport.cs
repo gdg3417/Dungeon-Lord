@@ -13,8 +13,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             current = null;
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
                 SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine) &&
-                SchemaNineToTenUpgrade.TryPrepare(nine, limits, out current);
+                SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] ten) &&
+                SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out current);
         }
+
+        // Test-only projection for fixtures that intentionally exercise frozen contracts.
+        internal static string FrozenTen(byte[] current) => System.Text.Encoding.UTF8.GetString(current)
+            .Replace("\"schemaVersion\":11", "\"schemaVersion\":10")
+            .Replace(",\"ActivationState\":1", "")
+            .Replace(",\"ActivationState\":2", "");
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
         {

@@ -8,7 +8,7 @@
 
 **Owner approval recorded:** 2026-09-26
 
-**Current writable save schema:** 10
+**Writable schema at the Phase 5B0 baseline:** 10. Phase 6A1 now writes schema 11 with explicit per-floor activation; Phase 5B tuning and run behavior remain unchanged.
 
 ## 1. Purpose and implementation gate
 

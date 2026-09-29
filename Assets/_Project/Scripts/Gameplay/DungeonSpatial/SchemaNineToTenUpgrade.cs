@@ -44,7 +44,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
                 }
                 writer.Token("}"); candidate = writer.Finish();
-                return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, limits).IsValid;
+                return DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(candidate, limits).IsValid;
             }
             catch { candidate = null; return false; }
         }

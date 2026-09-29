@@ -134,6 +134,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            var schemaTen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(
+                trusted, limits.Canonical);
+            if (schemaTen.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaTen,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
             var schemaNine = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
                 trusted, limits.Canonical);
             if (schemaNine.IsValid)
@@ -256,20 +261,29 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                 recovery, transaction); }
+            if (!ExactCompleteSaveAtomicPersistence.Same(durable, candidate))
+                return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason,
+                    transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
+                    recovery, transaction);
             return PublishValidated(durable, currentContext, disposition, recovery, transaction);
         }
 
         private static bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] candidate)
         {
             candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(source, limits).IsValid)
+                return SchemaTenToElevenUpgrade.TryPrepare(source, limits, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(source, limits).IsValid)
-                return SchemaNineToTenUpgrade.TryPrepare(source, limits, out candidate);
+                return SchemaNineToTenUpgrade.TryPrepare(source, limits, out byte[] ten) &&
+                    SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(source, limits).IsValid)
                 return SchemaEightToNineUpgrade.TryPrepare(source, limits, out byte[] nine) &&
-                    SchemaNineToTenUpgrade.TryPrepare(nine, limits, out candidate);
+                    SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] upgradedTen) &&
+                    SchemaTenToElevenUpgrade.TryPrepare(upgradedTen, limits, out candidate);
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
                 SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] upgradedNine) &&
-                SchemaNineToTenUpgrade.TryPrepare(upgradedNine, limits, out candidate);
+                SchemaNineToTenUpgrade.TryPrepare(upgradedNine, limits, out byte[] finalTen) &&
+                SchemaTenToElevenUpgrade.TryPrepare(finalTen, limits, out candidate);
         }
 
         private DetachedSpatialSaveLoadResult PublishValidated(byte[] bytes,

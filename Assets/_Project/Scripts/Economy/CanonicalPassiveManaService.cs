@@ -75,7 +75,8 @@ namespace DungeonBuilder.M0.Economy
                 CanonicalSpatialSaveContracts.Validate(state, limits, requireCanonicalOrdering: true);
             if (!validation.IsValid || state.Floors == null)
                 return false;
-            activeFloorCount = state.Floors.Length;
+            foreach (SavedSpatialFloor floor in state.Floors)
+                if (floor.ActivationState == FloorActivationState.Active) activeFloorCount++;
             return true;
         }
     }

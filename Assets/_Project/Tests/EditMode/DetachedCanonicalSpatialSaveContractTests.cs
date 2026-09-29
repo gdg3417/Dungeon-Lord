@@ -470,7 +470,7 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers()
         {
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(10));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(11));
             var ordinary = new SaveData
             {
                 canonicalSpatialAuthority = NativeMarker(),
@@ -512,6 +512,7 @@ namespace DungeonBuilder.M0.Tests
             return new SavedSpatialFloor
             {
                 FloorInstanceId = floorId, FloorDefinitionId = "spatial.floor.01", FloorIndex = index,
+                ActivationState = FloorActivationState.Active,
                 Layout = new FloorSpatialLayout { FloorId = floorId, Rooms = rooms, Nodes = nodes, Edges = edges },
                 FixedStructures = new[]
                 {

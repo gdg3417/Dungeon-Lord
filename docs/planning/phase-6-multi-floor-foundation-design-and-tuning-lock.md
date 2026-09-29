@@ -6,9 +6,13 @@
 | Status | Owner-approved Phase 6 implementation prerequisite |
 | Prepared against | merged PR #213; `main` `7e94dee13ab0c4252531cf152241426065a9db75` |
 | Scope | Documentation authority only; no runtime implementation |
-| Current writable schema | 10; schema 11 is approved future direction only |
+| Writable schema at design-lock baseline | 10; schema 11 was approved future direction |
 
 This document closes the Phase 6 design and initial-tuning gate for Additional Floor Foundation. It does not implement Floor 2, schema 11, migration, UI, or Phase 6 runtime behavior. Numeric values below are initial **configuration/content-owned tuning seeds**. They must not be copied into runtime constants or frozen as mutable save values. Phase 5 Decision 30 v2 is unchanged.
+
+**Phase 6A1 implementation status (2026-09-28):** Schema 11 is the current writable target. Each persisted floor owns one explicit `ActivationState` (Active or Inactive), the sole writable activation authority. Frozen schemas 7–10 retain their historical shapes; the sequential migration chain maps every schema 10 floor to Active, preserves existing state and extension members, and creates no floors. Validation requires Floor 1 active and deeper active floors to form a contiguous prefix. Online and offline passive mana count only validated Active floors. Production still contains only Floor 1; Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
+
+The following design-lock statements describe the Phase 6A0 baseline. Phase 6A1 implements only its activation-persistence and migration decisions; the locked gameplay and tuning decisions are unchanged.
 
 ## 1. Configuration, save, and schema ownership
 

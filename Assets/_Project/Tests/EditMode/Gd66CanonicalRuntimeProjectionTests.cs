@@ -424,6 +424,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static SavedSpatialFloor MinimalFloor() => new SavedSpatialFloor
         {
             FloorInstanceId = "floor.00", FloorDefinitionId = "spatial.floor.01", FloorIndex = 0,
+            ActivationState = FloorActivationState.Active,
             Layout = new FloorSpatialLayout
             {
                 FloorId = "floor.00", Rooms = new[] { Room("room.00") },

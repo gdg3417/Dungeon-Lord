@@ -254,6 +254,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return new SavedSpatialFloor
             {
                 FloorInstanceId = floorId, FloorDefinitionId = "floor.definition", FloorIndex = 0,
+                ActivationState = FloorActivationState.Active,
                 Layout = new FloorSpatialLayout { FloorId = floorId, Rooms = rooms, Nodes = nodes,
                     Edges = Array.Empty<FloorRouteEdge>() },
                 FixedStructures = Array.Empty<SavedFixedSpatialStructure>(),

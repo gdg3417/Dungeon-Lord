@@ -720,6 +720,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SavedSpatialFloor[] floors = new[] { new SavedSpatialFloor
             {
                     FloorInstanceId = floor, FloorDefinitionId = "spatial.floor.01", FloorIndex = 0,
+                    ActivationState = FloorActivationState.Active,
                     Layout = new FloorSpatialLayout { FloorId = floor, Rooms = rooms,
                         Nodes = nodes.ToArray(), Edges = edges },
                     FixedStructures = new[]

@@ -254,7 +254,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalLayoutContractSelection[] contracts = (data.ContractSelections ??
                 Array.Empty<CanonicalLayoutContractSelection>())
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
-            if (migrations.Length != 1 || starters.Length != 4 || contracts.Length != 4 ||
+            if (migrations.Length != 1 || starters.Length != 5 || contracts.Length != 5 ||
+                starters.Count(value => value.TargetSchemaVersion == 9) != 1 ||
+                contracts.Count(value => value.TargetSchemaVersion == 9) != 1 ||
+                starters.Count(value => value.TargetSchemaVersion == 10) != 1 ||
+                contracts.Count(value => value.TargetSchemaVersion == 10) != 1 ||
                 starters.Count(value => value.TargetSchemaVersion == 8) != 1 ||
                 contracts.Count(value => value.TargetSchemaVersion == 8) != 1) return false;
 
@@ -276,6 +280,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                    migration.MaximumSourceSchemaVersion == legacyMaximum &&
                    migration.TargetSchemaVersion == migrationTarget &&
                    migration.TargetCanonicalLayoutContractVersion == migrationContract.CanonicalLayoutContractVersion &&
+                   contracts.All(value => value.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion) &&
+                   starters.All(value => value.ProfileId == StarterProfileId(value.TargetSchemaVersion) &&
+                       value.ProfileVersion == InitialProfileVersion &&
+                       value.CanonicalLayoutContractVersion == CanonicalLayoutContractVersion &&
+                       string.Equals(migration.GeometryId, value.GeometryId, StringComparison.Ordinal) &&
+                       migration.GeometryVersion == value.GeometryVersion &&
+                       string.Equals(migration.GeometryCanonicalHash, value.GeometryCanonicalHash, StringComparison.Ordinal)) &&
                    migrationStarter.ProfileId == StarterProfileId(migrationTarget) &&
                    currentStarter.ProfileId == StarterProfileId(targetSchemaVersion) &&
                    migrationStarter.ProfileVersion == InitialProfileVersion && currentStarter.ProfileVersion == InitialProfileVersion &&

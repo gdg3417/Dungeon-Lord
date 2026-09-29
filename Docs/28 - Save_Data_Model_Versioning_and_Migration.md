@@ -2,6 +2,10 @@
 
 *Dungeon Builder, locked design specification*
 
+**Phase 6A1 implementation status (2026-09-28):** Schema 11 is the current writable target. Each persisted floor owns one explicit `ActivationState` (Active or Inactive), the sole writable activation authority. Frozen schemas 7–10 retain their historical shapes; the sequential migration chain maps every schema 10 floor to Active, preserves existing state and extension members, and creates no floors. Validation requires Floor 1 active and deeper active floors to form a contiguous prefix. Online and offline passive mana count only validated Active floors. Production still contains only Floor 1; Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
+
+Canonical migration and rewrites use detached validation, atomic persistence, exact durable readback, reopen validation, then live publication. Failure publishes no runtime state; stale-session and qualified Windows persistence boundaries remain in force.
+
 | Status | Locked |
 |----|----|
 | Scope | Primary dungeon, season dungeon, sub dungeons, account layer |

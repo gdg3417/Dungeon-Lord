@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using System.Text;
 using System;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
@@ -215,8 +216,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var first = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(first.LoadOrCreate("phase-four", out _), Is.Not.Null);
             string current = Encoding.UTF8.GetString(first.CanonicalSession.GetCurrentBytes());
-            int schemaTenOwners = current.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
-            byte[] eight = Encoding.UTF8.GetBytes(current.Remove(schemaTenOwners, current.Length - 2 - schemaTenOwners)
+            string frozen = PhaseFourTestSupport.FrozenTen(first.CanonicalSession.GetCurrentBytes());
+            int schemaTenOwners = frozen.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
+            byte[] eight = Encoding.UTF8.GetBytes(frozen.Remove(schemaTenOwners, frozen.Length - 2 - schemaTenOwners)
                 .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(eight, fixture.Limits).IsValid, Is.True);
             fileSystem.Seed(first.SavePath, eight);
@@ -252,7 +254,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":10"));
+                Does.Contain("\"schemaVersion\":11"));
         }
 
         [Test]
@@ -958,6 +960,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 if (level == "ERROR") errors.Add(formatted);
             });
+
+        [TestCase("success")]
+        [TestCase("write")]
+        [TestCase("replace")]
+        [TestCase("readback")]
+        public void SchemaTenLoadUpgradesOnceAndFailuresPublishNoActivationOrRuntime(string failure)
+        {
+            var source = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
+            byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes()));
+            byte[] expected = f.Session.GetCurrentBytes();
+            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            fs.Seed(f.ActivePath, ten);
+            if (failure == "readback")
+            {
+                var baseline = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+                baseline.Seed(f.ActivePath, ten);
+                Assert.That(Coordinator(source).Load(f.ActivePath, Supported(baseline, f.ActivePath)).IsSuccess, Is.True);
+                var operations = baseline.Operations.ToArray();
+                int replacement = Array.FindIndex(operations, op => op.Type ==
+                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
+                int readNumber = operations.Take(replacement).Count(op => op.Type ==
+                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read && op.Paths[0] == f.ActivePath) + 1;
+                fs.EnableTargetedFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,
+                    paths => paths[0] == f.ActivePath, readNumber, false);
+            }
+            else if (failure != "success")
+                fs.EnableTargetedFailure(failure == "write" ? Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write :
+                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, paths => true, 1, false);
+            var result = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
+            fs.DisableFailure();
+            if (failure != "success")
+            {
+                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
+                CollectionAssert.AreEqual(ten, fs.ReadAllBytes(f.ActivePath));
+            }
+            var reopened = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
+            Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
+            Assert.That(reopened.Validation.CurrentTargetValidated, Is.True);
+            Assert.That(reopened.Validation.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));
+            CollectionAssert.AreEqual(expected, reopened.GetValidatedBytes());
+            CollectionAssert.AreEqual(expected, fs.ReadAllBytes(f.ActivePath));
+            var again = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
+            Assert.That(again.IsSuccess, Is.True, again.Reason);
+            CollectionAssert.AreEqual(expected, again.Session.GetCurrentBytes());
+        }
 
         private static DetachedSpatialSaveLoadCoordinator Coordinator(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,

@@ -122,7 +122,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> beforeMembers =
                 CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(before.State, fixture.Limits);
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> afterMembers =
-                CanonicalSpatialSaveSerializer.SerializeMembers(after.State, fixture.Limits);
+                CanonicalSpatialSaveSerializer.SerializeFrozenSchemaSevenMembers(after.State, fixture.Limits);
             CollectionAssert.AreEqual(beforeMembers.Value.Authority, afterMembers.Value.Authority);
             CollectionAssert.AreEqual(beforeMembers.Value.Floors, afterMembers.Value.Floors);
             Assert.That(after.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
@@ -199,6 +199,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(
                 schemaNine, fixture.Limits).IsValid, Is.True);
             Assert.That(SchemaNineToTenUpgrade.TryPrepare(schemaNine, fixture.Limits, out schemaEight), Is.True);
+            Assert.That(SchemaTenToElevenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

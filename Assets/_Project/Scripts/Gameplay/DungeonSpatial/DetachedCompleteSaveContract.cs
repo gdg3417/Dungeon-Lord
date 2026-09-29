@@ -203,6 +203,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
             ParseValidateAndRoundTripCore(bytes, limits, 9, true, null, null);
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaTenAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
+            ParseValidateAndRoundTripCore(bytes, limits, 10, true, null, null);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint)
@@ -252,14 +256,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     !requireLifecycle ? CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(
                         spatialWriter.Finish(), limits) :
-                    requirePhaseFive ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
-                    CanonicalSpatialSaveSerializer.ParseFrozenPrePhaseFive(
+                    schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
+                        ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
+                    CanonicalSpatialSaveSerializer.ParseFrozenWithLifecycle(
                         spatialWriter.Finish(), limits, schemaVersion);
                 CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
                     !requireLifecycle ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
                         parsedSpatial.Value, limits.Spatial, true) :
-                    requirePhaseFive ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
-                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenPrePhaseFive(
+                    schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
+                        ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
+                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(
                         parsedSpatial.Value, limits.Spatial, schemaVersion, true);
                 if (!parsedSpatial.IsValid || structuralValidation == null || !structuralValidation.IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
