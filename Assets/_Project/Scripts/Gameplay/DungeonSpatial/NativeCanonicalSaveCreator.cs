@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text;
 using UnityEngine;
 using DungeonBuilder.M0.Economy;
@@ -61,7 +62,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode source) || source.Kind != ContractJsonKind.Object)
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":11,\"primary\":{");
+                writer.Node(); writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":");
+                writer.Token(CanonicalSaveSchemaVersions.CurrentWritableTarget.ToString(CultureInfo.InvariantCulture));
+                writer.Token(",\"primary\":{");
                 bool first = true;
                 foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames)
                 {

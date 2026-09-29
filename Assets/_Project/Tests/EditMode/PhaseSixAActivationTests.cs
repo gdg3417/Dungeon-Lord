@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using DungeonBuilder.M0.Economy;
@@ -28,6 +29,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),
                 Does.Contain("\"schemaVersion\":11"));
+            var issues = new SpatialIssueCollector(f.Profile.Canonical.Serialized.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(created.Session.GetCurrentBytes(),
+                f.Profile.Canonical.Serialized, issues, out ContractJsonNode root), Is.True);
+            ContractJsonNode schemaVersion = root.Fields.Single(field => field.Key == "schemaVersion").Value;
+            Assert.That(schemaVersion.Kind, Is.EqualTo(ContractJsonKind.Number));
+            Assert.That(schemaVersion.Text, Is.EqualTo(
+                CanonicalSaveSchemaVersions.CurrentWritableTarget.ToString(CultureInfo.InvariantCulture)));
             CollectionAssert.AreEqual(created.Session.GetCurrentBytes(), fs.ReadAllBytes(f.ActivePath));
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fs.ReadAllBytes(f.ActivePath), f.Context).CurrentTargetValidated, Is.True);

@@ -6,9 +6,21 @@
 - Final commit SHA: recorded in the final delivery report after committing this evidence file.
 - Exact starting baseline: `7b7afa1eabbde2f03255fc0de8fdfe4f0e81d869`, merged PR #214 on `main`; PR #213 and #214 were inspected as merged.
 - The branch was created from that exact baseline. No new baseline commits or unrelated initial working-tree changes were incorporated.
-- Recommended configuration: GPT-6 Astra, Low. Task classification: Complex, because canonical schema, frozen compatibility, migration, and publication authority carry persistent-state risk. The recommendation follows `Docs/process/AI_Model_Selection_Policy.md`.
+- Initial implementation recommendation: GPT-6 Astra, Low. Task classification: Complex, because canonical schema, frozen compatibility, migration, and publication authority carry persistent-state risk. The recommendation follows `Docs/process/AI_Model_Selection_Policy.md`.
 - Proposed PR title: **Phase 6A1: Persist schema 11 floor activation authority**.
 - Scope: one migration and activation-authority PR. External review follows publication; no owner manual qualification has been performed for this packet.
+
+## PR #215 focused native-schema authority correction
+
+Reviewed head: `5c35e837a9a0284e2e9044be661c533b92cc075b`; original baseline remains `7b7afa1eabbde2f03255fc0de8fdfe4f0e81d869`. Recommended model: GPT-6 Sol, Medium; task classification: Focused correction. The existing architecture is reviewed, and this correction removes only native creation's duplicate current-schema literal.
+
+`NativeCanonicalSaveCreator` writes the static prefix up to schemaVersion, emits `CanonicalSaveSchemaVersions.CurrentWritableTarget.ToString(CultureInfo.InvariantCulture)` through the existing contract writer, then continues the primary object. With the current authority equal to 11, emitted bytes and field order are unchanged.
+
+The existing native-empty test retains both literal schema-11 constant assertions and its serialized schema-11 assertion. It additionally parses the root schemaVersion, requires a numeric JSON node, and compares its value with the current writable authority. Current-target reopen validation, empty-state validity, explicit Active first-floor allocation, and historical migration/frozen-contract coverage are retained.
+
+`SchemaTenToElevenUpgrade` remains unchanged: its destination is permanently schema 11 because it defines the historical 10 → 11 transition, even if a later schema becomes current. No new authority, activation semantics, mana formula, geometry/hash, tuning, localization, field-order, Floor 2, or gameplay change is introduced.
+
+Correction files are exactly `NativeCanonicalSaveCreator.cs`, `PhaseSixAActivationTests.cs`, and this evidence report. The final results and XML paths below are refreshed from the correction reruns. Totals and expected skips remain unchanged from the reviewed head. The PR description is unchanged because behavior, scope, and totals are unchanged. The correction commit is the commit containing this section; its exact SHA is reported after committing. Only generated test XML evidence is left untracked.
 
 ## Implementation and canonical schema
 
@@ -92,26 +104,26 @@ Unity CLI: 1.0.0-beta.10; Editor: 6000.3.2f1. Tests ran sequentially on the loca
 
 | Run | Total | Passed | Failed | Skipped | Inconclusive | Test duration |
 |---|---:|---:|---:|---:|---:|---:|
-| Final focused EditMode | 160 | 160 | 0 | 0 | 0 | 7.6581356 s |
-| Complete EditMode | 1117 | 1117 | 0 | 0 | 0 | 136.7687564 s |
-| Complete PlayMode | 2615 | 2605 | 0 | 10 | 0 | 134.6008481 s |
+| Final focused EditMode | 160 | 160 | 0 | 0 | 0 | 7.5866763 s |
+| Complete EditMode | 1117 | 1117 | 0 | 0 | 0 | 135.2972634 s |
+| Complete PlayMode | 2615 | 2605 | 0 | 10 | 0 | 135.0150468 s |
 
 The affected-system subset extracted from the final complete EditMode XML passed 783/783. Final focused coverage includes 38 activation cases, four schema-10 load cases, 59 compatibility-profile cases, and 59 build-gate cases.
 
 Local final XML paths:
 
-- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-focused.xml`
-- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-full-editmode.xml`
-- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-full-playmode.xml`
+- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-native-authority-focused.xml`
+- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-native-authority-full-editmode.xml`
+- `C:\Dev\Dungeon-Lord\TestResults\phase6a1-native-authority-full-playmode.xml`
 
 These generated XML files remain local and are not committed. `phase6a1-affected.xml` records an intermediate exploratory run (777 passed / 1 failed) before its outdated schema-selection expectation was corrected; the final complete suite is the authoritative affected-system verdict.
 
 Commands, using `C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe`:
 
 ```powershell
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --filter 'PhaseSixAActivation|SchemaTenLoad|PhaseFourCompatibility|ProductionSpatialContentBuildGateTests' --output 'TestResults/phase6a1-focused.xml' --timeout 600 --no-color
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --output 'TestResults/phase6a1-full-editmode.xml' --timeout 1200 --no-color
-& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode PlayMode --output 'TestResults/phase6a1-full-playmode.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --filter 'PhaseSixAActivation|SchemaTenLoad|PhaseFourCompatibility|ProductionSpatialContentBuildGateTests' --output 'TestResults/phase6a1-native-authority-focused.xml' --timeout 600 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode EditMode --output 'TestResults/phase6a1-native-authority-full-editmode.xml' --timeout 1200 --no-color
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord' --mode PlayMode --output 'TestResults/phase6a1-native-authority-full-playmode.xml' --timeout 1200 --no-color
 ```
 
 All 10 PlayMode skips are expected: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse check on Windows, and the Windows Player-only standalone qualification. No unexpected skips or inconclusive results.
