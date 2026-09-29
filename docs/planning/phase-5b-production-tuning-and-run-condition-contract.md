@@ -510,7 +510,7 @@ A workload breach fails closed, emits stable `WorkloadExceeded` evidence, and pe
 
 ## 16. Schema, atomicity, and determinism boundary
 
-Schema 10 is sufficient for this approved design because ordinary run members and individual HP are transient, detailed decision evidence is transient, durable learning already uses `sharedBranchKnowledge`, coarse wipe danger uses existing run-history evidence, and no persistent ordinary-adventurer identity is introduced. Schema 11 is not authorized.
+Schema 10 is sufficient for this approved Phase 5 design because ordinary run members and individual HP are transient, detailed decision evidence is transient, durable learning already uses `sharedBranchKnowledge`, coarse wipe danger uses existing run-history evidence, and no persistent ordinary-adventurer identity is introduced. Schema 11 is outside this Phase 5 authority; its owner-approved future Phase 6 direction is recorded in the [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md).
 
 If later implementation uncovers an unavoidable persisted-state requirement, work must stop and document the exact requirement for separate save/migration review. Convenience or speculative future use is not evidence.
 

@@ -14,7 +14,7 @@ This document closes the Phase 6 design and initial-tuning gate for Additional F
 
 Configuration/content owns bounds, capacities, construction prices, decision formulas, weights, thresholds, normalization references, allowances, workload limits, and other tunable values. Durable save state owns stable floor identity, `FloorDefinition` reference, layout, fixed structures, content assignments/custody, structural investment, stable allocation/lifecycle state, and other approved durable player progress. It owns one per-floor activation state only when schema 11 is deliberately implemented; that state will be the sole writable activation authority, never duplicated by a writable active-floor-ID list.
 
-Do not save derived/current tuning values merely to freeze gameplay behavior. A later schema-11 implementation must preserve the readable schema-10 compatibility contract and apply its deliberate migration behavior. This document neither changes schema 10 nor authorizes schema 11.
+Do not save derived/current tuning values merely to freeze gameplay behavior. Schema 11 is an owner-approved Phase 6 implementation direction: it includes the explicit per-floor activation state and schema-10 → 11 migration behavior described here. This documentation PR does not implement, activate, or make schema 11 writable. Schema 10 remains the current writable schema until a separately reviewed implementation/migration PR deliberately changes it; that implementation must preserve the readable schema-10 compatibility contract and apply its deliberate migration behavior.
 
 ## 2. Multi-floor run continuity and settlement
 
@@ -99,7 +99,7 @@ At run formation, MVP deterministically assigns a transient party-level depth ob
 | target depth | 0.50 | targets Floor 2 in the Phase 6 two-floor game until reached, then resolves |
 | deepest reasonable | 0.30 | pulls deeper while another active floor exists, subject to survivability |
 
-Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets may influence formation without replacing the transition system.
+These are configuration-owned selection weights. Validation requires each weight to be finite and nonnegative, with a finite total greater than zero. Runtime normalizes the configured collection for deterministic selection; it must not hardcode 20/50/30 probabilities or require future authored weights to sum to `1.0`. Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets may influence formation without replacing the transition system.
 
 Phase 6 approves shared floor-level knowledge, separate from branch knowledge, representing stable floor identity, topology/applicability fingerprint or equivalent, reward/danger known flags and perceptions, shared confidence, and last-confirmed run identity or equivalent evidence. Compatible survivor reports may create/reconfirm/update it. A wipe must not generate precise detailed knowledge from internal simulation; current coarse outside-world wipe/death evidence continues under its own authority. Material topology/content changes invalidate stale applicability.
 
@@ -135,7 +135,7 @@ Exit/descend resolution produces structured deterministic evidence and stable re
 
 Future qualification covers schema/migration when introduced; construction and validity; lifecycle; active-floor mana; snapshot stability; exact HP/member transfer; terminal resolution; deterministic marginal decisions; knowledge; extraction; Heat; atomic failure; stale/concurrent persistence; workloads; reopen; ordering; localization; and invalid-state tests. Manual qualification compares aggregate patterns across deterministic RunIds for dangerous Floor 1/easier Floor 2, easier Floor 1/dangerous Floor 2, loot-heavy Floor 1, a deeper-target objective, meaningful player floor-design changes, and Floor 2 inactive versus active for newly starting runs. The pass criterion is not every party choosing an expected answer: outcomes must be deterministic/reproducible from approved inputs, causes understandable, and meaningful player-controlled dungeon changes able to produce understandable aggregate behavior changes.
 
-This authority does not authorize schema 11, migration, Floor 2 runtime construction/gameplay, editor, Floors 3–5, exclusive content, new monsters/bosses, research UI, run-event mana, durable Core Level, persistent expeditions, concurrent scheduling, party interaction, occupancy, finite shared encounters, cross-floor edges/backtracking, stair encounters/healing, demolition/refunds, mid-run lifecycle changes, final balance, or broader quests/activities.
+This authority does not implement schema 11 or its migration, Floor 2 runtime construction/gameplay, editor, Floors 3–5, exclusive content, new monsters/bosses, research UI, run-event mana, durable Core Level, persistent expeditions, concurrent scheduling, party interaction, occupancy, finite shared encounters, cross-floor edges/backtracking, stair encounters/healing, demolition/refunds, mid-run lifecycle changes, final balance, or broader quests/activities.
 
 ## References
 
