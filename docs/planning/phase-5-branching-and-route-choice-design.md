@@ -22,7 +22,7 @@ It closes the owner-decision portion of the Phase 5 gate identified by:
 - `docs/planning/post-gd60-mvp-execution-plan.md`
 - `docs/planning/gd63-spatial-and-progression-design-decisions.md`
 
-Phase 5B2 implements the remaining approved branch runtime behavior after the merged Phase 5B1 party/HP prerequisite. Integration review and manual gameplay qualification remain outstanding. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
+PR #213 implements the remaining approved Phase 5B2 branch runtime behavior after the merged Phase 5B1 party/HP prerequisite and has passed automated and owner manual qualification. This document does not authorize hardcoded tuning values, speculative systems, save-schema changes, advanced AI, or post-MVP feature expansion.
 
 All numeric weights, thresholds, confidence-band limits, normalization curves, influence multipliers, and other tuning values remain configuration-owned and must not be invented in runtime code.
 
@@ -30,7 +30,7 @@ All numeric weights, thresholds, confidence-band limits, normalization curves, i
 
 This decision lock was prepared and reconciled against merged PR #207, `Phase 4: Add canonical offline passive mana grants`, at `cf9ff2a261f6776bbd9f2d3939ca9db346488ca4`.
 
-PR #208 merged this design lock. PR #209 supplies schema 10 branch/corridor/knowledge state. The production contract merged in PR #211, and PR #212 (`ff797d7249d0ab50025a0e506d4c0c0c922f15ab`) supplies the authoritative transient party and HP prerequisite. This Phase 5B2 packet implements Decision 30, traversal, corridor encounters and survivor learning through one detached atomic run commit. Manual qualification and review remain outstanding; no migration or schema change is added.
+PR #208 merged this design lock. PR #209 supplies schema 10 branch/corridor/knowledge state. The production contract merged in PR #211, and PR #212 (`ff797d7249d0ab50025a0e506d4c0c0c922f15ab`) supplies the authoritative transient party and HP prerequisite. PR #213 implements Decision 30 v2, traversal, corridor encounters and survivor learning through one detached atomic run commit and has passed automated and owner manual qualification; no migration or schema change is added.
 
 At the verified preparation baseline:
 
@@ -960,7 +960,7 @@ The following remain configuration-owned and are not fixed by this design lock:
 - knowledge confidence thresholds
 - stale-information trust modifiers
 
-The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That prerequisite merged in PR #211. Phase 5B1 and Phase 5B2 implement its approved runtime authorities; manual qualification remains outstanding.
+The owner-approved initial production values and semantic choices are recorded in the [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md). They remain configuration-owned rather than formula constants. That prerequisite merged in PR #211. Phase 5B1 and PR #213 Phase 5B2 implement its approved runtime authorities; Phase 5B2 has passed automated and owner manual qualification.
 
 Runtime code must consume approved configuration.
 

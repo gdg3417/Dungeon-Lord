@@ -54,9 +54,19 @@ Final automated results against the completed diff:
 
 The ten PlayMode skips are the same established guards: eight synchronous EditMode-only GameRoot structural fixtures, the non-Windows inverse native-filesystem fixture, and the Windows Player-only standalone qualification fixture. No Phase 5B2 test is skipped. Both bootstrap JSON files parse, the localization table has no duplicate keys, and the new no-decision localization entry is present. The final complete suites supersede earlier qualification counts on this branch.
 
-## Manual qualification still required
+## Owner manual qualification
 
-Manual qualification was interrupted at the branch-entry gate after the v1 polynomial roll produced pathologically correlated marginal skips for sequential RunIds. That finding led to the owner-approved Decision 30 v2 correction; no manual gate is claimed complete. Resume with the normal Bootstrap scene and GitHub Desktop workflow; no shell or new QA outcome-forcing controls are required. Qualify no branch, empty branch, trap-only, loot-only and trap-plus-loot on distinct tiles; SKIP and ENTER; pre-fork injury, corridor injury, lead death/retargeting, expertise mitigation, wipe and reached/unreached loot; automatic return, required continuation and absence of duplicate events/rewards; survivor learning, reconfirmation, content contradiction and deterministic repeated setup; save/reopen and historical aggregate fallback. Repeat presentation checks at 1920×1080 and 1280×720. Windows Development Build, standalone execution and standalone close/reopen remain unqualified. Automated tests do not claim these manual gates passed.
+Manual qualification initially stopped at the branch-entry gate after the v1 polynomial roll produced pathologically correlated marginal skips for sequential RunIds. The owner-approved Decision 30 v2 correction resolved that defect. The owner then completed and passed final manual qualification:
+
+- Decision 30 v2 cold start: the first branch-enabled run skipped and the second run entered.
+- ENTER traversal: corridor trap HP damage, reached loot, automatic return, and no duplicate decision or effects.
+- Later SKIP behavior: zero reached branch assignments.
+- Retreat precedence: no branch decision, localized stopped-before-branch-choice reporting, zero reached assignments, and no fabricated condition or survivability metrics.
+- Save, full Unity close, reopen, durable aggregate/history/topology/content behavior, and no regenerated historical transient party or branch detail; fresh transient detail appears on new runs after reopen.
+- Presentation at 1920×1080 and 1280×720, including scrolling and control reachability.
+- Canonical Windows 64-bit Development Build, standalone execution, standalone branch behavior, and standalone save/close/reopen.
+
+This owner manual evidence is separate from the automated results above. No exact build sizes, timestamps, warning counts, file hashes, or Player.log details are asserted beyond the supplied qualification outcome.
 
 ## Scope and limitations
 

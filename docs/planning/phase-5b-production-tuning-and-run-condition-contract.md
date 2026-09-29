@@ -532,7 +532,7 @@ The merged Phase 5B0 packet was documentation-only. Its final external review pa
 
 ## 19. Phase 5B1 implementation boundary
 
-Phase 5B1 implements the prerequisite transient roster and integer HP encounter authority on the existing required route. Phase 5B2 now implements branch decision, optional traversal, corridor encounters, and knowledge learning. Manual Phase 5B qualification remains outstanding.
+Phase 5B1 implements the prerequisite transient roster and integer HP encounter authority on the existing required route. PR #213 Phase 5B2 implements branch decision, optional traversal, corridor encounters, Decision 30 v2, and knowledge learning, and has passed automated and owner manual qualification.
 
 The version-1 `RunSimulationConfig.PhaseFiveB` object owns the implemented party, class-health/capability/formation, behavior, intelligence, and damage sections. Phase 5B2 extends that same version-1 object with BranchDecision configuration; no second tuning authority exists. Existing room pressure, loot, Heat, and success-threshold configuration remains with its established owner.
 
@@ -556,4 +556,4 @@ Current retreat authority is the existing required-room success-threshold stop p
 
 `SaveService.CommitPhaseFiveBRun` delegates to the existing detached canonical write authority. The writer verifies its session and durable bytes, clones recognized live state, calculates with detached Heat and a local RunParty, proposes history/objectives/knowledge, validates workloads, then captures recognized state. `PrepareLiveReplacement` receives the owned spatial state, investment and corridor content plus the explicit proposed shared knowledge. Existing exact-byte persistence/readback runs before runtime publication. Failure publishes no candidate. Schema remains 10; no migration, persisted HP, detailed branch history or extra owner is added.
 
-Four explicit counters enforce configured per-floor decisions, complete-run decisions, processed corridor assignments and knowledge updates. Pure fixtures exercise future-scale bounds without adding production floors. The existing Bootstrap survival diagnostics display localized branch reasons and outcomes. Automated results and remaining manual qualification are recorded in the Phase 5B2 evidence document; this implementation does not claim Editor UAT or standalone qualification.
+Four explicit counters enforce configured per-floor decisions, complete-run decisions, processed corridor assignments and knowledge updates. Pure fixtures exercise future-scale bounds without adding production floors. The existing Bootstrap survival diagnostics display localized branch reasons and outcomes. Automated and owner manual qualification results are recorded in the Phase 5B2 evidence document, including Editor, Windows Development Build, standalone, and close/reopen qualification.
