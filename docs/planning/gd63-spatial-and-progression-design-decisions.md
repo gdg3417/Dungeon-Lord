@@ -1,7 +1,7 @@
 # GD63 spatial and progression design decisions
 
 
-**Current repository status (2026-09-27):** Phase 5A is complete in merged PR #209, Phase 5B0 authority is merged in PR #211, and Phase 5B1 party/HP authority is merged in PR #212 at `ff797d7249d0ab50025a0e506d4c0c0c922f15ab`. Draft PR #213 contains Phase 5B2 branch decision, traversal, corridor encounters, survivor learning, transient diagnostics, and atomic complete-run publication; it is not merged. Automated qualification for the current PR head passes, while external-review correction closeout and manual Editor/build/standalone qualification remain outstanding. Canonical spatial state remains the writable route/content authority, schema remains 10, and no migration is added. The historical GD63 decisions below remain historical context.
+**Current repository status (2026-09-28):** Phase 5A is complete in merged PR #209, Phase 5B0 authority is merged in PR #211, and Phase 5B1 party/HP authority is merged in PR #212 at `ff797d7249d0ab50025a0e506d4c0c0c922f15ab`. PR #213 is merged at `main` baseline `7e94dee13ab0c4252531cf152241426065a9db75`; automated and owner manual qualification passed for Phase 5B2 branch decision, traversal, corridor encounters, survivor learning, transient diagnostics, and atomic complete-run publication. Canonical spatial state remains the writable route/content authority, schema remains 10, and no migration is added. The historical GD63 decisions below remain historical context.
 **Historical Phase 3 status (2026-09-09), superseded by PR #200:** PR #199 / Phase 3B2B is merged at `adc066de2eac26e48e5a5058c18014a266871c4d`. The narrow local closeout fixes reconstruction against retiring geometry, maps renovation through the actual saved outgoing relationship, and [requalifies bounded retained custody](gd66-save-spatial-migration-limit-sizing-evidence.md#phase-3-retained-custody-requalification-2026-09-09). Closeout review/manual validation was still required, and Phase 4 remained unimplemented at that recorded point.
 **Historical GD66 status (2026-07-31), superseded by later Phase 2 packets:** PR #186 is merged and `main` is at `7f62709c9c73164c549ee31a403c410f8c05c902`. GD65B is closed; GD66 is a candidate for approval in PR #187. Save schema remains 6; production Dungeon Spatial content remains inactive; existing route, economic-structure, and runtime save authorities remain unchanged. No migration or writable-authority transition has occurred, and Phase 2 migration implementation remains blocked until GD66 is approved and merged.
 
@@ -161,7 +161,7 @@ Corridors trade compactness for defensive opportunities. Direct-door layouts cos
 - Automatic return from a completed dead end is allowed and is not a second branch decision. Resolved traps, monsters, and loot do not trigger again on return.
 - No discretionary backtracking and no floor-to-floor backtracking.
 
-The Phase 5 selection policy and deterministic tie-break are approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). The detailed authority locks the formula structure, confidence-boundary behavior, linear marginal mapping, and deterministic identity/hash/roll contract. Phase 5A branch structure and persistence are complete in PR #209, Phase 5B0 tuning authority is merged in PR #211, and Phase 5B1 party/HP authority is merged in PR #212. Draft PR #213 contains Phase 5B2 and has passing automated qualification; correction review, manual gameplay qualification, and merge remain outstanding.
+The Phase 5 selection policy and deterministic tie-break are approved in the [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md). The detailed authority locks the formula structure, confidence-boundary behavior, linear marginal mapping, and deterministic identity/hash/roll contract. Phase 5A branch structure and persistence are complete in PR #209, Phase 5B0 tuning authority is merged in PR #211, Phase 5B1 party/HP authority is merged in PR #212, and PR #213 is merged at `7e94dee13ab0c4252531cf152241426065a9db75` with automated and owner manual qualification passed for Phase 5B2.
 
 ### Post-MVP extensibility
 
@@ -169,7 +169,7 @@ The domain may later expand optional branches into multi-room routes with monste
 
 ## 10. Exit, descent, and floor progression
 
-Adventurers make the exit-versus-descend decision. Potential authored inputs include party strength, health/injuries, survivors, carried loot, perceived next-floor danger, intent, class behavior, and dungeon pressure. Descending carries reviewed run identity and survivor state forward. Exact fields, coefficients, thresholds, tie-break, and save representation remain the Phase 6 gate.
+Adventurers make the exit-versus-descend decision. The owner-approved inputs, survivability gate, coefficients, thresholds, marginal hash/tie-break, exact transfer semantics, and schema direction are now locked in the [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md). Runtime implementation remains unstarted; schema 10 remains the current writable target until a later deliberate schema-11 implementation PR.
 
 The following are capacity-authoring composition targets, not fixed object-count limits:
 
@@ -181,7 +181,7 @@ The following are capacity-authoring composition targets, not fixed object-count
 | 4 | 4–5 | 3–4 |
 | 5 | 5–6 | Remainder within 7–9 combined |
 
-Floor 5 targets approximately 7–9 buildable route pieces combined: approximately 5–6 rooms, with corridors comprising the remainder within that combined target. Entrance Hall and Completion Terminal do not count as buildable route pieces. These are capacity-authoring targets, not hard limits; authored capacity may accommodate fewer large rooms or more small rooms. Floor index does not determine monster level or layout style. Exact floor capacities remain unapproved.
+Floor 5 targets approximately 7–9 buildable route pieces combined: approximately 5–6 rooms, with corridors comprising the remainder within that combined target. Entrance Hall and Completion Terminal do not count as buildable route pieces. These are capacity-authoring targets, not hard limits; authored capacity may accommodate fewer large rooms or more small rooms. Floor index does not determine monster level or layout style. The [Phase 6A0 authority](phase-6-multi-floor-foundation-design-and-tuning-lock.md) approves Floor 2's initial configuration/content-owned 14 x 14 legal rectangular bounds and base `FinalFloorSpaceCapacity = 80`; exact capacities for Floors 3–5 remain later authoring/tuning gates unless separately approved.
 
 ## 11. Monster-family direction and MVP content budget
 
@@ -219,8 +219,8 @@ Later implementation must preserve deterministic simulation; stable IDs; ordinal
 - **GD65:** inactive MVP spatial content contract, final content IDs/footprints, and export/schema/foreign-key validation after GD64 aligns the domain.
 - **GD66:** final migration mapping, stable textual ID rules, coordinates/orientations, fixtures, fallback/content-missing policy, backup/recovery UX, and atomic recovery design.
 - **Phase 2 only:** separately reviewed schema migration, legacy-state migration, runtime-reader switch, writable-authority transition, rollback, and migration evidence; no version is approved by GD63.
-- Exact floor/room dimensions and capacities; content IDs; connection points; socket/content capacities; construction/renovation/corridor costs; refund percentage, rounding and clamping; environmental modifiers; and workload/device limits.
-- Doorway geometry/validation, editor transactions, inventory/roster consequences, corridor simulation, Phase 5 route-choice implementation and configuration-owned tuning, and Phase 6 transfer/save details. The Phase 5 owner-design formula/tie-break gate is approved in the linked design lock.
+- Floor 2's initial 14 x 14 legal bounds and base `FinalFloorSpaceCapacity = 80` are approved configuration/content tuning in the [Phase 6A0 authority](phase-6-multi-floor-foundation-design-and-tuning-lock.md). Exact dimensions/capacities for Floors 3–5, and other still-unapproved room/content definitions, content IDs, connection points, socket/content capacities, construction/renovation/corridor costs, refund percentage, rounding/clamping, environmental modifiers, and workload/device limits remain later authored-data gates.
+- Doorway geometry/validation, editor transactions, inventory/roster consequences, corridor simulation, and Phase 5 route-choice implementation/configuration-owned tuning. Phase 6 transfer/save authority is closed by the [Phase 6A0 lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md); its runtime implementation remains deferred. The Phase 5 owner-design formula/tie-break gate is approved in the linked design lock.
 - Authoritative clock-cheat enforcement for offline mana remains deferred; merged PR #207 implements the approved base efficiency, timestamp boundary, rounding behavior, no-time-cap rule, storage clamp, and result presentation.
 
 These gates must not be guessed in runtime code. Phase 3, 5, 7, and 9 observation gates remain responsible for testing whether the spatial fantasy is understandable and fun.

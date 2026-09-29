@@ -161,9 +161,11 @@ The owner-design gate for branching and route choice is merged in PR #208 and ap
 
 ### Phase 6 — Additional floor foundation
 
+**Design/tuning gate closed:** [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md) is owner-approved against merged PR #213 / `main` `7e94dee13ab0c4252531cf152241426065a9db75`. It records Floor 2 permission/construction/lifecycle, run continuity, terminal decision, transfer, settlement, knowledge, determinism, workload, and schema direction. Runtime implementation remains unstarted; schema 10 remains current writable and schema 11 is direction only.
+
 1. Author Floor 2 unlock and configured larger base capacity without tying floor index to monster level.
 2. Give each active MVP floor exactly one entrance and add terminal semantics and survivor/run-state transfer.
-3. At a non-final-floor terminal, implement the approved choice to exit with defined survivors/loot/run state or descend with defined survivors/run state; define its deterministic selection formula and exact transfer contract at this Phase 6 gate.
+3. At a non-final-floor terminal, implement the already-approved choice to exit with defined survivors/loot/run state or descend with defined survivors/run state, including its locked deterministic selection formula and transfer contract.
 4. Add deterministic multi-floor summary. The final active floor ends at an exit or run-completion terminal.
 
 **Exit:** two floors remain independently valid same-floor graphs; survivors transition without backtracking; save/replay ordering is stable. **Technical gate:** transition, capacity, save, outcome and bounded-work tests. **Fantasy gate:** validate compact first/large second, dangerous first/weak second, boss, training and loot-focused concepts remain possible.
@@ -248,7 +250,7 @@ Approved policy is recorded in the [GD63 decision record](gd63-spatial-and-progr
 | Canonical passive online mana | Merged/qualified PR #205 | Config-owned temporary MVP Core baseline and formula tuning; canonical floors/heat/wallet/capacity; deterministic fractional active ticks; periodic save; no legacy double-award |
 | Doorway geometry and placement validation details | Before Phase 3 implementation | Design/Engineering; deterministic validation cases |
 | Narrow branch selection formula and deterministic tie-break | Approved design and merged Phase 5B0 authority; PR #213 Phase 5B2 implemented and qualified | [Phase 5 branching and route-choice design lock](phase-5-branching-and-route-choice-design.md) and [Phase 5B production tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md); automated and owner manual qualification are recorded in the Phase 5B2 evidence |
-| Exact exit/descent transfer fields, coefficients, thresholds, tie-break and save representation | Phase 6 | Design/Engineering; cross-spec review |
+| Exit/descent transfer fields, coefficients, thresholds, tie-break, and schema direction | Design closed in Phase 6A0; Phase 6 runtime | [Phase 6A0 multi-floor foundation design and tuning lock](phase-6-multi-floor-foundation-design-and-tuning-lock.md); implementation, schema-11 migration review, and qualification remain required |
 | Canonical offline passive mana | Merged/qualified PR #207 | Base 15% config, monotonic durable save boundary, fractional wallet, no-time-cap and storage-clamp policy are implemented; authoritative clock-cheat enforcement and security monitoring remain pre-MVP follow-up |
 | Exact active-floor/content/device workload limits within the maximum five floors | Phases 6/8/9 | Design/QA data decision and device profiling |
 
