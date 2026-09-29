@@ -58,6 +58,7 @@ namespace DungeonBuilder.M0
         public StructuralEditPreview StructuralRenovationPreview { get; private set; }
         public StructuralEditPreview StructuralDeletionPreview { get; private set; }
         public OptionalBranchEditPreview OptionalBranchPreview { get; private set; }
+        public FloorConstructionPreview FloorConstructionPreview { get; private set; }
         public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
         public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
@@ -141,6 +142,36 @@ namespace DungeonBuilder.M0
         public string BuildLine { get; private set; } = "Build: unknown";
         public string StateLine => "State: " + (_sm != null ? _sm.CurrentStateName : "None");
         public int SelectedFloorIndex => _selectedFloorIndex;
+        private string _selectedCanonicalFloorInstanceId;
+        private string _selectedCanonicalRoomInstanceId;
+        public SavedSpatialFloor SelectedCanonicalFloor
+        {
+            get
+            {
+                SavedSpatialFloor[] floors = Save?.validatedCanonicalSpatialState?.Floors ?? Array.Empty<SavedSpatialFloor>();
+                if (_selectedCanonicalFloorInstanceId == null)
+                    _selectedCanonicalFloorInstanceId = floors.OrderBy(value => value.FloorIndex)
+                        .ThenBy(value => value.FloorInstanceId, StringComparer.Ordinal).FirstOrDefault()?.FloorInstanceId;
+                SavedSpatialFloor[] matches = floors.Where(value => value.FloorInstanceId == _selectedCanonicalFloorInstanceId).ToArray();
+                return matches.Length == 1 ? matches[0] : null;
+            }
+        }
+        public string SelectedCanonicalFloorInstanceId => SelectedCanonicalFloor?.FloorInstanceId;
+        public RoomSpatialInstance[] SelectedCanonicalRooms => (SelectedCanonicalFloor?.Layout?.Rooms ??
+            Array.Empty<RoomSpatialInstance>()).OrderBy(value => value.RoomInstanceId, StringComparer.Ordinal).ToArray();
+        public string SelectedCanonicalRoomInstanceId
+        {
+            get
+            {
+                RoomSpatialInstance[] rooms = SelectedCanonicalRooms;
+                if (Save?.validatedCanonicalSpatialState?.Floors?.Length == 1)
+                    return ResolveCanonicalMutationTargetRoomId(Save, RunSimulationConfig, Content?.ProductionSpatialContent,
+                        CanonicalMvpRouteProjection.InspectWithProductionContent(Save, Content?.ProductionSpatialContent).Rooms);
+                if (!rooms.Any(value => value.RoomInstanceId == _selectedCanonicalRoomInstanceId))
+                    _selectedCanonicalRoomInstanceId = rooms.FirstOrDefault()?.RoomInstanceId;
+                return _selectedCanonicalRoomInstanceId;
+            }
+        }
         public int SelectedSlotIndex => _selectedSlotIndex;
         public double PassiveManaPerHourForPresentation => _passiveManaService?
             .ResolveRate(Save, RunSimulationConfig)?.ManaPerHour ?? double.NaN;
@@ -476,6 +507,15 @@ namespace DungeonBuilder.M0
                 architectureResearchNodesJson, architectureResearchTablesJson,
                 out BasicBranchingResearchSnapshot branchingResearch);
             SaveService.ConfigureBasicBranchingResearch(branchingResearch);
+            TextAsset floorConstructionAsset = Resources.Load<TextAsset>(
+                FloorConstructionProfileSnapshot.ProductionResourcePath);
+            FloorConstructionProfileSnapshot.TryParse(floorConstructionAsset,
+                productionSpatialContent, SaveSpatialMigrationLimits.Canonical,
+                out FloorConstructionProfileSnapshot floorConstructionProfiles);
+            FloorConstructionResearchAuthority.TryParse(architectureResearchNodesJson,
+                architectureResearchTablesJson, SaveSpatialMigrationLimits.Canonical,
+                out FloorConstructionResearchSnapshot floorConstructionResearch);
+            SaveService.ConfigureFloorConstruction(floorConstructionProfiles, floorConstructionResearch);
             if (Content.ProductionSpatialContent == null)
             {
                 SaveService.LoadOrCreate(contentVersion, out string invalidSpatialSaveBanner);
@@ -710,6 +750,7 @@ namespace DungeonBuilder.M0
             StructuralRenovationPreview = null;
             StructuralDeletionPreview = null;
             OptionalBranchPreview = null;
+            FloorConstructionPreview = null;
             StructuralConstructionReasonKey = string.Empty;
             overlay?.SynchronizeStructuralConstructionPublication();
             TimeService?.AttachSave(Save);
@@ -722,12 +763,8 @@ namespace DungeonBuilder.M0
         public StructuralEditPreview PreviewStructuralConstruction(
             StructuralConstructionRequest request)
         {
-            CanonicalMvpRouteProjectionResult route = Save == null ? null :
-                CanonicalMvpRouteProjection.InspectWithProductionContent(
-                    Save, Content?.ProductionSpatialContent);
             StructuralConstructionPreview = _explicitSaveDeleteQuiesced || SaveService == null ||
-                Save == null || route?.AuthorityState !=
-                    CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
+                Save == null || SelectedCanonicalFloor == null
                 ? StructuralEditService.InvalidPreview(
                     StructuralEditService.InvalidContextReason, request)
                 : SaveService.PreviewStructuralConstruction(request);
@@ -906,7 +943,7 @@ namespace DungeonBuilder.M0
             if (Save.structureRuntime?.PlacementLocked == true)
                 return StructuralCommitFailure("ui.banner.place_blocked_heat_crisis");
             return SaveService.ExecuteCanonicalMutation(Save,
-                DetachedCanonicalMutationRequest.Unassign(assignmentId));
+                DetachedCanonicalMutationRequest.Unassign(assignmentId, SelectedCanonicalFloorInstanceId));
         }
 
         public bool SetBasicBranchingCompletionForQa(bool completed)
@@ -937,10 +974,45 @@ namespace DungeonBuilder.M0
 
         private bool CanPreviewStructuralRenovation()
         {
-            CanonicalMvpRouteProjectionResult route = Save == null ? null :
-                CanonicalMvpRouteProjection.InspectWithProductionContent(Save, Content?.ProductionSpatialContent);
             return !_explicitSaveDeleteQuiesced && SaveService != null && Save != null &&
-                route?.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical;
+                Save.validatedCanonicalSpatialState != null && SelectedCanonicalFloor != null;
+        }
+
+        public void CycleSelectedCanonicalFloor()
+        {
+            SavedSpatialFloor[] floors = (Save?.validatedCanonicalSpatialState?.Floors ??
+                Array.Empty<SavedSpatialFloor>()).Where(value => value != null)
+                .OrderBy(value => value.FloorIndex).ThenBy(value => value.FloorInstanceId,
+                    StringComparer.Ordinal).ToArray();
+            if (floors.Length == 0) return;
+            int current = Array.FindIndex(floors, value => value.FloorInstanceId == SelectedCanonicalFloorInstanceId);
+            _selectedCanonicalFloorInstanceId = floors[(current + 1 + floors.Length) % floors.Length].FloorInstanceId;
+            _selectedCanonicalRoomInstanceId = null;
+            InvalidateStructuralConstructionPreview();
+            InvalidateStructuralRenovationPreview();
+            InvalidateStructuralDeletionPreview();
+            InvalidateOptionalBranchPreview();
+            overlay?.RefreshStructuralConstructionAuthority();
+        }
+
+        public FloorConstructionPreview PreviewFloorConstruction()
+        {
+            FloorConstructionPreview = _explicitSaveDeleteQuiesced || SaveService == null || Save == null
+                ? new FloorConstructionPreview { Reason = FloorConstructionService.InvalidContextReason }
+                : SaveService.PreviewFloorConstruction(Save);
+            return FloorConstructionPreview;
+        }
+
+        public DetachedCanonicalWriteResult CommitFloorConstruction()
+        {
+            if (FloorConstructionPreview?.IsCommittable != true || SaveService == null || Save == null)
+                return StructuralCommitFailure(FloorConstructionPreview?.Reason ??
+                    FloorConstructionService.InvalidContextReason);
+            DetachedCanonicalWriteResult result = SaveService.CommitFloorConstruction(Save,
+                FloorConstructionPreview);
+            if (!result.IsSuccess) StructuralConstructionReasonKey = result.Reason ??
+                FloorConstructionService.InvalidContextReason;
+            return result;
         }
 
         private DetachedCanonicalWriteResult StructuralCommitFailure(string reason)
@@ -1091,7 +1163,8 @@ namespace DungeonBuilder.M0
         {
             string key = StructuralEditService.InvalidContextReason;
             bool success = false;
-            if (DevPanelEnabled && ProductionSpatialContent != null && CanPreviewStructuralRenovation())
+            if (DevPanelEnabled && ProductionSpatialContent != null && !_explicitSaveDeleteQuiesced &&
+                SaveService != null && Save?.validatedCanonicalSpatialState != null)
             {
                 var result = SaveService.SetQaMana(Save, fillToCapacity);
                 success = result.IsSuccess;
@@ -1151,6 +1224,13 @@ namespace DungeonBuilder.M0
         public void CycleSelectedMvpRoomSlotTarget()
         {
             if (Save == null) return;
+            if (Save.validatedCanonicalSpatialState != null && Save.validatedCanonicalSpatialState.Floors.Length > 1)
+            {
+                RoomSpatialInstance[] rooms = SelectedCanonicalRooms;
+                int selected = Array.FindIndex(rooms, value => value.RoomInstanceId == SelectedCanonicalRoomInstanceId);
+                if (rooms.Length != 0) _selectedCanonicalRoomInstanceId = rooms[(selected + 1) % rooms.Length].RoomInstanceId;
+                return;
+            }
             MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
                 Save, _runSimulationService?.Config, Content?.ProductionSpatialContent);
             int count = layout?.Rooms == null ? 0 : layout.Rooms.Length;
@@ -1251,23 +1331,16 @@ namespace DungeonBuilder.M0
                         return false;
                     }
                 }
-                CanonicalMvpRouteProjectionResult route =
-                    CanonicalMvpRouteProjection.InspectWithProductionContent(
-                        Save, Content?.ProductionSpatialContent);
-                if (route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+                if (Save.validatedCanonicalSpatialState == null ||
+                    (Save.validatedCanonicalSpatialState.Floors.Length != 0 && SelectedCanonicalFloor == null))
                 {
                     bannerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(
                         CanonicalMvpRouteProjection.ContradictoryAuthorityReason);
                     return false;
                 }
-                string targetRoomId = null;
-                if (route.Rooms != null && route.Rooms.Length != 0)
-                {
-                    targetRoomId = ResolveCanonicalMutationTargetRoomId(Save,
-                        _runSimulationService?.Config, Content?.ProductionSpatialContent, route.Rooms);
-                }
+                string targetRoomId = SelectedCanonicalRoomInstanceId;
                 DetachedCanonicalWriteResult written = SaveService.ExecuteCanonicalMutation(Save,
-                    DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId));
+                    DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId, SelectedCanonicalFloorInstanceId));
                 if (!written.IsSuccess)
                 {
                     string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
@@ -1400,14 +1473,11 @@ namespace DungeonBuilder.M0
 
         private RoomContentAssignment[] ActiveContentForPlayer()
         {
-            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
-                Save, Content?.ProductionSpatialContent);
-            if (route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+            if (SelectedCanonicalFloor == null)
                 return Array.Empty<RoomContentAssignment>();
-            string roomId = ResolveCanonicalMutationTargetRoomId(Save, RunSimulationConfig,
-                Content?.ProductionSpatialContent, route.Rooms);
+            string roomId = SelectedCanonicalRoomInstanceId;
             // Canonical floors and assignments already have an ordinal, validated ordering.
-            return Save.validatedCanonicalSpatialState.Floors.SelectMany(floor => floor.RoomContents.Assignments)
+            return SelectedCanonicalFloor.RoomContents.Assignments
                 .Where(value => string.Equals(value.RoomInstanceId, roomId, StringComparison.Ordinal)).ToArray();
         }
 
@@ -1450,16 +1520,14 @@ namespace DungeonBuilder.M0
         {
             string reason;
             bool success = false;
-            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
-                Save, Content?.ProductionSpatialContent);
-            if (SaveService == null || route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+            if (SaveService == null || SelectedCanonicalFloor == null)
                 reason = DetachedCanonicalSpatialMutation.ValidationFailedReason;
             else if (Save.structureRuntime?.PlacementLocked == true)
                 reason = "ui.banner.place_blocked_heat_crisis";
             else
             {
                 DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
-                    DetachedCanonicalMutationRequest.Unassign(SelectedActiveAssignmentId));
+                    DetachedCanonicalMutationRequest.Unassign(SelectedActiveAssignmentId, SelectedCanonicalFloorInstanceId));
                 success = result.IsSuccess;
                 reason = success ? "ui.active_content.success" : result.Reason;
             }
@@ -1472,9 +1540,7 @@ namespace DungeonBuilder.M0
 
         private ReturnedStructuralContent[] ReturnedContentForPlayer()
         {
-            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
-                Save, Content?.ProductionSpatialContent);
-            return route.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
+            return Save?.validatedCanonicalSpatialState != null
                 ? Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents
                 : Array.Empty<ReturnedStructuralContent>();
         }
@@ -1518,18 +1584,15 @@ namespace DungeonBuilder.M0
         {
             string reason;
             bool success = false;
-            CanonicalMvpRouteProjectionResult route = CanonicalMvpRouteProjection.InspectWithProductionContent(
-                Save, Content?.ProductionSpatialContent);
-            if (SaveService == null || route.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical)
+            if (SaveService == null || SelectedCanonicalFloor == null)
                 reason = DetachedCanonicalSpatialMutation.ValidationFailedReason;
             else if (Save.structureRuntime?.PlacementLocked == true)
                 reason = "ui.banner.place_blocked_heat_crisis";
             else
             {
-                string target = ResolveCanonicalMutationTargetRoomId(Save, RunSimulationConfig,
-                    Content?.ProductionSpatialContent, route.Rooms);
+                string target = SelectedCanonicalRoomInstanceId;
                 DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
-                    DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target));
+                    DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target, SelectedCanonicalFloorInstanceId));
                 success = result.IsSuccess;
                 reason = success ? "ui.returned_content.success" : result.IsNoOp
                     ? "ui.returned_content.same_option" : result.Reason;
@@ -1796,7 +1859,8 @@ namespace DungeonBuilder.M0
                 return false;
             }
             bool hasOptionalBranch = authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
-                Save.validatedCanonicalSpatialState.Floors.Any(f => f.Layout.Edges.Any(e => e.Classification == RouteClassification.Optional));
+                Save.validatedCanonicalSpatialState.Floors.Any(f => f.ActivationState == FloorActivationState.Active &&
+                    f.Layout.Edges.Any(e => e.Classification == RouteClassification.Optional));
             if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent) && !hasOptionalBranch)
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;

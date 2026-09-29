@@ -42,6 +42,26 @@ namespace DungeonBuilder.Tests.EditMode
         }
 
         [Test]
+        public void HasCompletedProject_UsesOrdinalDuplicateSafeReadOnlySemantics()
+        {
+            var state = new CompletedResearchState
+            {
+                ProjectIds = new[] { "ac_100", null, " ", "ac_200", "ac_100" },
+                LastCompletedProjectId = "ac_100",
+                LastCompletionRuleSourceId = "research.completed.rule.test"
+            };
+            string before = JsonUtility.ToJson(state);
+
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(null, "ac_100"), Is.False);
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(state, null), Is.False);
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(state, ""), Is.False);
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(state, "AC_100"), Is.False);
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(state, "ac_300"), Is.False);
+            Assert.That(CompletedResearchStateResolver.HasCompletedProject(state, "ac_100"), Is.True);
+            Assert.That(JsonUtility.ToJson(state), Is.EqualTo(before));
+        }
+
+        [Test]
         public void Resolve_CurrentPendingOrProgressProjectAlreadyCompleted_ReportsReadOnlyPreview()
         {
             var state = new CompletedResearchState { ProjectIds = new[] { "research.project.done" } };

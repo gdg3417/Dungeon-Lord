@@ -38,7 +38,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(first.Success, Is.True, Join(first));
             Assert.That(second.Success, Is.True, Join(second));
-            Assert.That(first.Value.Manifest.contentVersion, Is.EqualTo("0.1.0"));
+            Assert.That(first.Value.Manifest.contentVersion, Is.EqualTo("0.2.0"));
+            Assert.That(first.Value.Catalog.Metadata.ContentVersion, Is.EqualTo("0.2.0"));
             CollectionAssert.AreEqual(new[] { "dungeon_spatial_content", "string_table" },
                 first.Value.Manifest.requiredSchemas.Select(value => value.schemaId));
             Assert.That(first.Value.Languages, Has.Count.EqualTo(1));
@@ -100,10 +101,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CompleteLoadUsesOneExactNestedRecordBoundary()
         {
             TextAsset additional = Language("test-language", null);
-            Assert.That(LoadWithLimits(new[] { english }, Limits(41, 32768)).Success, Is.True);
-            AssertWorkloadFailure(new[] { english, additional }, Limits(41, 32768));
-            Assert.That(LoadWithLimits(new[] { english, additional }, Limits(47, 32768)).Success, Is.True);
-            AssertWorkloadFailure(new[] { english, additional }, Limits(46, 32768));
+            Assert.That(LoadWithLimits(new[] { english }, Limits(45, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(45, 32768));
+            Assert.That(LoadWithLimits(new[] { english, additional }, Limits(51, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(50, 32768));
         }
 
         [Test]
@@ -111,13 +112,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             TextAsset additional = Language("test-language", null);
             TextAsset[] languages = { english, additional };
-            int exact = FindMinimumStringLimit(languages, 47);
+            int exact = FindMinimumStringLimit(languages, 51);
 
-            Assert.That(LoadWithLimits(languages, Limits(47, exact)).Success, Is.True);
-            AssertWorkloadFailure(languages, Limits(47, exact - 1));
+            Assert.That(LoadWithLimits(languages, Limits(51, exact)).Success, Is.True);
+            AssertWorkloadFailure(languages, Limits(51, exact - 1));
 
             TextAsset oneMoreCharacter = Language("test-language", table => table.entries[0].text += "x");
-            AssertWorkloadFailure(new[] { english, oneMoreCharacter }, Limits(47, exact));
+            AssertWorkloadFailure(new[] { english, oneMoreCharacter }, Limits(51, exact));
         }
 
         [Test]
@@ -126,7 +127,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset first = Language("test-a", null);
             TextAsset second = Language("test-b", null);
             TextAsset third = Language("test-c", null);
-            TextAsset constrained = Limits(47, 32768);
+            TextAsset constrained = Limits(51, 32768);
 
             ProductionSpatialContentLoadResult forward = LoadWithLimits(
                 new[] { english, first, second, third }, constrained);
@@ -136,7 +137,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 forward.Diagnostics);
             CollectionAssert.AreEqual(forward.Diagnostics, reverse.Diagnostics);
 
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
             TextAsset oversized = Language("test-large", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
             TextAsset malformed = new TextAsset("{\n");
@@ -151,7 +152,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void MixedLanguageFailuresReturnIdenticalDiagnosticsForEveryPermutation()
         {
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
             TextAsset constrained = Limits(128, exactEnglishCharacters);
             TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
@@ -359,7 +360,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void EveryFailedPermutationPreservesPriorPublicationAndSources()
         {
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 41);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
             TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
             TextAsset malformed = new TextAsset("{\n");
@@ -394,7 +395,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset additional = Language("test-language", null);
 
             ProductionSpatialContentLoadResult failure = service.LoadProductionSpatialContent(
-                manifest, catalog, new[] { english, additional }, Limits(41, 32768));
+                manifest, catalog, new[] { english, additional }, Limits(45, 32768));
 
             CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
                 failure.Diagnostics);

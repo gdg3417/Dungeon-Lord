@@ -6,6 +6,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed class StructuralConstructionRequest
     {
+        public string FloorInstanceId;
         public string RoomDefinitionId;
         public TileCoordinate Anchor;
         public CardinalOrientation Orientation;
@@ -118,16 +119,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Anchor = request?.Anchor ?? default, Orientation = request?.Orientation ?? default,
                 Operation = StructuralEditOperation.Construction };
             if (current?.Authority == null || request == null || production == null || compatibility == null ||
-                configuration == null || !limits.IsValid || current.Floors?.Length != 1)
+                configuration == null || !limits.IsValid)
                 return Fail(result, InvalidContextReason);
+            if (!CanonicalEditFloorTarget.TryResolve(current, request.FloorInstanceId, out SavedSpatialFloor sourceFloor))
+                return Fail(result, CanonicalEditFloorTarget.InvalidReason);
             if (!TryFingerprint(current, limits, out string baseline)) return Fail(result, InvalidContextReason);
             result.BaselineFingerprint = baseline;
-            result.Intent = new StructuralConstructionRequest { RoomDefinitionId = request.RoomDefinitionId,
+            result.Intent = new StructuralConstructionRequest { FloorInstanceId = sourceFloor.FloorInstanceId,
+                RoomDefinitionId = request.RoomDefinitionId,
                 Anchor = request.Anchor, Orientation = request.Orientation,
                 TerminalConnectionPointId = request.TerminalConnectionPointId };
 
             SpatialContentCatalog catalog = production.Catalog;
-            SavedSpatialFloor sourceFloor = current.Floors[0];
             FloorSpatialConfiguration floorDefinition = (catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
                 .SingleOrDefault(value => value != null && value.FloorDefinitionId == sourceFloor.FloorDefinitionId &&
                     value.FloorIndex == sourceFloor.FloorIndex);
@@ -147,7 +150,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (result.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile))) return Fail(result, OutOfBoundsReason);
 
             if (!Clone(current, limits, out DetachedCanonicalSpatialSaveState candidate)) return Fail(result, InvalidContextReason);
-            SavedSpatialFloor floor = candidate.Floors[0];
+            SavedSpatialFloor floor = candidate.Floors.Single(value => value.FloorInstanceId == sourceFloor.FloorInstanceId);
             if (!NativeStructuralIdentity.TryAllocateConstructionIdentity(candidate, floor.FloorInstanceId,
                     out NativeRoomConstructionIdentity identity, out string identityReason))
                 return Fail(result, identityReason);
@@ -163,7 +166,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomSpatialInstance previousRoom = floor.Layout.Rooms.SingleOrDefault(value => value?.RoomInstanceId == previousNode?.RoomInstanceId);
             RoomSpatialDefinition previousDefinition = catalog.Rooms.SingleOrDefault(value =>
                 value?.RoomDefinitionId == previousRoom?.RoomDefinitionId);
-            if (completionNode == null || oldTerminalEdge == null || previousRoom == null || previousDefinition == null)
+            bool firstRoom = floor.ActivationState == FloorActivationState.Inactive &&
+                floor.Layout.Rooms.Length == 0 && floor.Layout.Edges.Length == 0;
+            if (firstRoom)
+            {
+                previousNode = floor.Layout.Nodes.SingleOrDefault(value => value.Kind == FloorRouteNodeKind.Entrance);
+                SavedFixedSpatialStructure entrance = floor.FixedStructures.SingleOrDefault(value =>
+                    value.Kind == FixedSpatialStructureKind.Entrance);
+                FixedSpatialStructureDefinition entranceDefinition = catalog.FixedStructures.SingleOrDefault(value =>
+                    value.StructureDefinitionId == entrance?.FixedStructureDefinitionId);
+                if (entrance != null && entranceDefinition != null)
+                {
+                    // Existing room/door geometry accepts an adapter of the authored fixed endpoint.
+                    previousRoom = new RoomSpatialInstance { RoomInstanceId = entrance.FixedStructureInstanceId,
+                        FloorId = floor.FloorInstanceId, Anchor = entrance.Anchor, Orientation = entrance.Orientation };
+                    previousDefinition = new RoomSpatialDefinition { GrossFootprint = entranceDefinition.GrossFootprint,
+                        ConnectionPoints = entranceDefinition.ConnectionPoints };
+                }
+            }
+            if (completionNode == null || previousNode == null || (!firstRoom && oldTerminalEdge == null) ||
+                previousRoom == null || previousDefinition == null)
                 return Fail(result, RequiredRouteReason);
 
             // Validate the detached resulting topology: this edge retires, and the existing
@@ -251,9 +273,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(candidate, limits.Spatial, out candidate))
                 return Fail(result, WorkloadReason);
-            FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(candidate.Floors[0].Layout,
-                floorDefinition, catalog.Rooms, catalog.Corridors, workload, candidate.Floors[0].FixedStructures,
-                catalog.FixedStructures);
+            floor = candidate.Floors.Single(value => value.FloorInstanceId == sourceFloor.FloorInstanceId);
+            FloorLayoutValidationResult validation = FloorLayoutValidator.Validate(floor.Layout,
+                floorDefinition, catalog.Rooms, catalog.Corridors, workload, floor.FixedStructures,
+                catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
             if (!validation.IsValid) return Fail(result, Map(validation.Issues));
             if (!CanonicalSpatialSaveContracts.Validate(candidate, limits.Spatial, true).IsValid ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(candidate, production, configuration,
@@ -266,10 +289,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.Consequences = new[] { new StructuralChange { Kind = StructuralChangeKind.RoomAdded,
                     StableId = roomId, To = request.Anchor }, new StructuralChange { Kind = StructuralChangeKind.FixedStructureMoved,
                     StableId = terminal.FixedStructureInstanceId, From = oldTerminalAnchor, To = terminal.Anchor },
-                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge.EdgeId },
+                new StructuralChange { Kind = StructuralChangeKind.EdgeRemoved, StableId = oldTerminalEdge?.EdgeId },
                 new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = incomingEdge.EdgeId },
                 new StructuralChange { Kind = StructuralChangeKind.EdgeAdded, StableId = outgoingEdge.EdgeId } }
-                .OrderBy(value => value.Kind).ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
+                .Where(value => value.StableId != null).OrderBy(value => value.Kind)
+                .ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
             result.DetachedCandidate = candidate;
             return result;
         }

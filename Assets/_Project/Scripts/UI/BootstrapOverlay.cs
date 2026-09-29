@@ -249,14 +249,14 @@ namespace DungeonBuilder.M0
         public StructuralEditPreview PreviewStructuralMovement()
         {
             StructuralEditPreview preview = _root?.PreviewStructuralMovement(new StructuralMovementRequest
-            { RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedRenovationAnchor });
+            { FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId, RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedRenovationAnchor });
             _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
         }
 
         public StructuralEditPreview PreviewStructuralReplacement()
         {
             StructuralEditPreview preview = _root?.PreviewStructuralReplacement(new StructuralReplacementRequest
-            { RoomInstanceId = _selectedRenovationRoomInstanceId,
+            { FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId, RoomInstanceId = _selectedRenovationRoomInstanceId,
               RoomDefinitionId = _selectedStructuralRoomDefinitionId });
             _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
         }
@@ -274,7 +274,7 @@ namespace DungeonBuilder.M0
         public StructuralEditPreview PreviewStructuralDeletion()
         {
             StructuralEditPreview preview = _root?.PreviewStructuralDeletion(new StructuralDeletionRequest
-                { TargetRoomInstanceId = _selectedRenovationRoomInstanceId });
+                { FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId, TargetRoomInstanceId = _selectedRenovationRoomInstanceId });
             _structuralFeedback = BuildDeletionPreviewPresentation(preview); return preview;
         }
 
@@ -359,9 +359,11 @@ namespace DungeonBuilder.M0
                 string.Join(", ", downstream.Select(value => value.ToString(CultureInfo.InvariantCulture)))));
             if (preview.Consequences.Any(value => value.Kind == StructuralChangeKind.FixedStructureMoved))
                 lines.Add(GetLocalizedString("ui.structural.renovation.terminal_moved"));
-            FloorRouteNode targetNode = preview.DetachedCandidate?.Floors?.SingleOrDefault()?.Layout?.Nodes?
+            SavedSpatialFloor candidateFloor = preview.DetachedCandidate?.Floors?.SingleOrDefault(value =>
+                value.FloorInstanceId == _root?.SelectedCanonicalFloorInstanceId);
+            FloorRouteNode targetNode = candidateFloor?.Layout?.Nodes?
                 .SingleOrDefault(value => value?.RoomInstanceId == preview.TargetRoomInstanceId);
-            FloorRouteEdge[] candidateEdges = preview.DetachedCandidate?.Floors?.SingleOrDefault()?.Layout?.Edges ??
+            FloorRouteEdge[] candidateEdges = candidateFloor?.Layout?.Edges ??
                 Array.Empty<FloorRouteEdge>();
             StructuralChange[] connections = (preview.Consequences ?? Array.Empty<StructuralChange>())
                 .Where(value => value.Kind == StructuralChangeKind.EdgeReconnected)
@@ -432,6 +434,7 @@ namespace DungeonBuilder.M0
         {
             StructuralEditPreview preview = _root?.PreviewStructuralConstruction(new StructuralConstructionRequest
             {
+                FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId,
                 RoomDefinitionId = _selectedStructuralRoomDefinitionId,
                 Anchor = _selectedStructuralAnchor,
                 Orientation = _selectedStructuralOrientation,
@@ -514,12 +517,12 @@ namespace DungeonBuilder.M0
         }
 
         private RoomSpatialInstance ResolveRenovationRoom() =>
-            _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault()?.Layout?.Rooms?
+            _root?.SelectedCanonicalFloor?.Layout?.Rooms?
                 .SingleOrDefault(value => value?.RoomInstanceId == _selectedRenovationRoomInstanceId);
 
         private string[] ResolveRenovationRoomIds()
         {
-            SavedSpatialFloor floor = _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault();
+            SavedSpatialFloor floor = _root?.SelectedCanonicalFloor;
             if (floor == null) return Array.Empty<string>();
             var semantics = new HashSet<string>((floor.RoomContents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>())
                 .Where(value => value != null && value.LegacyRoomOriginKind !=
@@ -559,14 +562,10 @@ namespace DungeonBuilder.M0
         private RoomSpatialDefinition[] ResolveCanonicalStructuralRooms()
         {
             if (_root?.Save?.validatedCanonicalSpatialState?.Floors == null ||
-                _root.ProductionSpatialContent?.Catalog == null ||
-                CanonicalMvpRouteProjection.InspectWithProductionContent(_root.Save,
-                    _root.ProductionSpatialContent).AuthorityState !=
-                    CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) return Array.Empty<RoomSpatialDefinition>();
+                _root.ProductionSpatialContent?.Catalog == null) return Array.Empty<RoomSpatialDefinition>();
             SpatialContentCatalog catalog = _root.ProductionSpatialContent.Catalog;
-            SavedSpatialFloor[] activeFloors = _root.Save.validatedCanonicalSpatialState.Floors;
-            if (activeFloors.Length != 1 || activeFloors[0] == null) return Array.Empty<RoomSpatialDefinition>();
-            SavedSpatialFloor active = activeFloors[0];
+            SavedSpatialFloor active = _root.SelectedCanonicalFloor;
+            if (active == null) return Array.Empty<RoomSpatialDefinition>();
             FloorSpatialConfiguration[] floors = (catalog.Floors ?? Array.Empty<FloorSpatialConfiguration>())
                 .Where(value => value != null && value.FloorDefinitionId == active.FloorDefinitionId &&
                     value.FloorIndex == active.FloorIndex).ToArray();
@@ -736,9 +735,7 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
-                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
-            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
+            MvpDungeonFloorSlotLayout layout = ResolveSelectedEditRoomPresentation(out int selectedRoomIndex);
             return MvpRoomSlotTargetPresenter.BuildSelectedCapacityText(layout, selectedRoomIndex, (key, fallback) => GetLocalizedString(key, fallback));
         }
 
@@ -749,10 +746,35 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
-            MvpDungeonFloorSlotLayout layout = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
-                _root.Save, _root.RunSimulationConfig, _root.ProductionSpatialContent);
-            int selectedRoomIndex = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root.Save, layout);
+            MvpDungeonFloorSlotLayout layout = ResolveSelectedEditRoomPresentation(out int selectedRoomIndex);
             return MvpRoomSlotTargetPresenter.BuildSelectedPlacementFitText(layout, selectedRoomIndex, _selectedMvpPlacementCategoryId, (key, fallback) => GetLocalizedString(key, fallback));
+        }
+
+        // Read-only adapter for existing localized capacity/fit presenters; never an edit authority.
+        private MvpDungeonFloorSlotLayout ResolveSelectedEditRoomPresentation(out int selected)
+        {
+            if (_root?.Save?.validatedCanonicalSpatialState == null)
+            {
+                MvpDungeonFloorSlotLayout legacy = MvpRoomSlotLayoutResolver.ResolveDefaultFloor(
+                    _root?.Save, _root?.RunSimulationConfig, _root?.ProductionSpatialContent);
+                selected = MvpRoomSlotTargetResolver.ResolveClampedSelectedRoomIndex(_root?.Save, legacy);
+                return legacy;
+            }
+            SavedSpatialFloor floor = _root.SelectedCanonicalFloor;
+            RoomSpatialInstance[] rooms = _root.SelectedCanonicalRooms;
+            selected = Array.FindIndex(rooms, value => value.RoomInstanceId == _root.SelectedCanonicalRoomInstanceId);
+            return new MvpDungeonFloorSlotLayout { FloorIndex = floor?.FloorIndex ?? 0,
+                Rooms = rooms.Select((room, index) =>
+                {
+                    CanonicalRoomCapacityResolver.TryResolve(_root.ProductionSpatialContent, room.RoomDefinitionId,
+                        out MvpRoomSlotCapacity capacity, out _);
+                    RoomContentAssignment[] assigned = floor.RoomContents.Assignments.Where(value => value.RoomInstanceId == room.RoomInstanceId).ToArray();
+                    return new MvpDungeonRoomInstance { FloorIndex = floor.FloorIndex, RoomIndex = index,
+                        RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId, Capacity = capacity,
+                        AssignedMonsterOptionIds = assigned.Where(value => value.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).Select(value => value.OptionId).ToArray(),
+                        AssignedTrapOptionIds = assigned.Where(value => value.CategoryId == MvpDungeonPlacementIds.TrapCategoryId).Select(value => value.OptionId).ToArray(),
+                        AssignedLootNodeOptionIds = assigned.Where(value => value.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId).Select(value => value.OptionId).ToArray() };
+                }).ToArray() };
         }
 
         public bool SelectMvpRunPosture(string postureId)
@@ -1760,6 +1782,8 @@ namespace DungeonBuilder.M0
                 true,
                 GUILayout.Width(Mathf.Max(1f, panelRect.width - MinimalMvpActionPanelScrollBarWidth)));
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
+            if (_root.Save?.validatedCanonicalSpatialState != null)
+                DrawFloorConstructionControls(compactLabel, compactButton, buttonHeight);
             GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
@@ -1769,7 +1793,12 @@ namespace DungeonBuilder.M0
                 GUILayout.Label(labels.ComparisonText, wrappedLabel);
             }
             GUILayout.Label(labels.RunPlanPreviewText, wrappedLabel);
-            GUILayout.Label(MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig, (key, fallback) => GetLocalizedString(key, fallback)), wrappedLabel);
+            GUILayout.Label(_root.Save?.validatedCanonicalSpatialState != null
+                ? string.Format(CultureInfo.InvariantCulture, GetLocalizedString("ui.floor.room_selection"),
+                    Array.FindIndex(_root.SelectedCanonicalRooms, value => value.RoomInstanceId == _root.SelectedCanonicalRoomInstanceId) + 1,
+                    _root.SelectedCanonicalRooms.Length)
+                : MvpRoomSlotTargetPresenter.BuildSelectedTargetText(_root.Save, _root.RunSimulationConfig,
+                    (key, fallback) => GetLocalizedString(key, fallback)), wrappedLabel);
             GUILayout.Label(GetSelectedMvpRoomCapacityText(), wrappedLabel);
             if (CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
                 _selectedMvpPlacementCategoryId != MvpDungeonPlacementIds.RoomCategoryId)
@@ -1795,7 +1824,7 @@ namespace DungeonBuilder.M0
             if (StructuralRenovationControlsAvailable)
                 DrawStructuralRenovationControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
-            if (DiagnosticsAllowed && OptionalBranchControlsAvailable)
+            if (OptionalBranchControlsAvailable)
                 DrawOptionalBranchControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
             if (!string.IsNullOrEmpty(_structuralFeedback))
@@ -2091,13 +2120,13 @@ namespace DungeonBuilder.M0
             ReconcileBranchSelection();
             GUILayout.Label(GetLocalizedString("ui.branch.heading"), heading, labelHeight);
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
-                GetLocalizedString("ui.branch.origin.format"), _selectedBranchOriginNodeId ?? string.Empty),
+                GetLocalizedString("ui.branch.origin.format"), Array.IndexOf(ResolveBranchOriginNodeIds(), _selectedBranchOriginNodeId) + 1),
                 label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.branch.origin.next"), button, buttonHeight))
                 CycleBranchOrigin();
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.branch.connection.format"),
-                _selectedBranchConnectionPointId ?? string.Empty), label, labelHeight);
+                Array.IndexOf(ResolveBranchConnectionPointIds(), _selectedBranchConnectionPointId) + 1), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.branch.connection.next"), button, buttonHeight))
                 CycleBranchConnectionPoint();
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
@@ -2127,14 +2156,49 @@ namespace DungeonBuilder.M0
                 if (GUILayout.Button(GetLocalizedString("ui.branch.removal.preview.action"), button, buttonHeight))
                     PreviewOptionalBranchRemoval();
             }
-            if (GUILayout.Button(GetLocalizedString("ui.branch.qa.research.set"), button, buttonHeight))
+            if (DiagnosticsAllowed && GUILayout.Button(GetLocalizedString("ui.branch.qa.research.set"), button, buttonHeight))
                 SetBasicBranchingCompletionForQa(true);
-            if (GUILayout.Button(GetLocalizedString("ui.branch.qa.research.clear"), button, buttonHeight))
+            if (DiagnosticsAllowed && GUILayout.Button(GetLocalizedString("ui.branch.qa.research.clear"), button, buttonHeight))
                 SetBasicBranchingCompletionForQa(false);
         }
 
         private SavedSpatialFloor ResolveActiveSpatialFloor() =>
-            _root?.Save?.validatedCanonicalSpatialState?.Floors?.SingleOrDefault();
+            _root?.SelectedCanonicalFloor;
+
+        private void DrawFloorConstructionControls(GUIStyle label, GUIStyle button, GUILayoutOption buttonHeight)
+        {
+            SavedSpatialFloor selected = _root.SelectedCanonicalFloor;
+            if (selected != null)
+            {
+                string status = selected.ActivationState == FloorActivationState.Active ? "ui.floor.active" : "ui.floor.inactive";
+                GUILayout.Label(string.Format(CultureInfo.InvariantCulture, GetLocalizedString("ui.floor.selection"),
+                    selected.FloorIndex + 1, GetLocalizedString(status)), label);
+                if (GUILayout.Button(GetLocalizedString("ui.floor.next"), button, buttonHeight))
+                    _root.CycleSelectedCanonicalFloor();
+            }
+            FloorConstructionPreview preview = _root.FloorConstructionPreview ?? _root.PreviewFloorConstruction();
+            if (GUILayout.Button(GetLocalizedString("ui.floor.refresh"), button, buttonHeight))
+                preview = _root.PreviewFloorConstruction();
+            string state = preview.Reason == FloorConstructionService.AlreadyConstructedReason ? "ui.floor.inactive"
+                : preview.Reason == FloorConstructionResearchAuthority.ResearchRequiredReason ? "ui.floor.locked"
+                : preview.IsValid || preview.Reason == FloorConstructionService.InsufficientManaReason ? "ui.floor.unconstructed"
+                : "ui.floor.unavailable";
+            SavedSpatialFloor constructed = _root.Save.validatedCanonicalSpatialState.Floors.SingleOrDefault(value => value.FloorDefinitionId == "spatial.floor.02");
+            if (constructed != null) state = constructed.ActivationState == FloorActivationState.Active ? "ui.floor.active" : "ui.floor.inactive";
+            GUILayout.Label(string.Format(CultureInfo.InvariantCulture, GetLocalizedString("ui.floor.progression"),
+                GetLocalizedString(state)), label);
+            if (preview.Profile != null && preview.Reason != FloorConstructionService.AlreadyConstructedReason)
+                GUILayout.Label(string.Format(CultureInfo.InvariantCulture, GetLocalizedString("ui.floor.price"),
+                    preview.Profile.ConstructionMana, GetLocalizedString(preview.IsAffordable ? "ui.floor.affordable" : "ui.floor.unaffordable")), label);
+            bool enabled = GUI.enabled;
+            GUI.enabled = enabled && preview.IsCommittable;
+            if (GUILayout.Button(GetLocalizedString("ui.floor.construct"), button, buttonHeight))
+            {
+                DetachedCanonicalWriteResult result = _root.CommitFloorConstruction();
+                _structuralFeedback = GetLocalizedString(result.IsSuccess ? "ui.floor.success" : "ui.floor.failure");
+            }
+            GUI.enabled = enabled;
+        }
 
         private string[] ResolveBranchOriginNodeIds()
         {

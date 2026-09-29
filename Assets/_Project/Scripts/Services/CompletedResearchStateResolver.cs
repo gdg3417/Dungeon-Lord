@@ -5,6 +5,25 @@ namespace DungeonBuilder.M0
 {
     public static class CompletedResearchStateResolver
     {
+        public static bool HasCompletedProject(CompletedResearchState completedState, string projectId)
+        {
+            string requiredProjectId = SafeId(projectId);
+            if (string.IsNullOrEmpty(requiredProjectId) || completedState?.ProjectIds == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < completedState.ProjectIds.Length; i++)
+            {
+                if (string.Equals(SafeId(completedState.ProjectIds[i]), requiredProjectId, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static CompletedResearchStateSummary Resolve(
             CompletedResearchState completedState,
             ResearchPendingState pendingState = null,

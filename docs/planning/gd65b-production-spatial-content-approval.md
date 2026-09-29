@@ -75,6 +75,8 @@ These constraints do **not** approve an unstated exact ID, coordinate, dimension
 
 “Pending signoff in §14” means no approval evidence exists. Contract/design references identify constraints only.
 
+The approval rows below retain the original Floor 1 release record, including `ContentVersion = "0.1.0"`. Current production status is `ContentVersion = "0.2.0"`: Phase 6A2 adds compatible Floor 2 catalog and allowlist records, so the already-approved semantic version policy requires a minor content release. Catalog schema remains 1, string-table schema remains 1, save schema remains 11, and no save migration is introduced by that content-version advance.
+
 For the identities approved in rows 4–10, the production convention is exactly `spatial.<definition-kind>.<stable-name>`: IDs use lowercase ASCII; periods separate components; multiword stable names use underscores; and identity and ordering use ordinal strings. IDs are not derived from display text and must not contain dimensions, coordinates, capacities, tuning values, schema versions, or content versions. Definition IDs and localization keys remain separate authorities. Existing prototype `placement.option.*` IDs are not production spatial definition IDs, and `test.gd65a.*` fixture IDs are not production authority.
 
 | # | Field | Status | Current authority | Approved value | Missing decision | Downstream systems affected | Recommended owner | Approval evidence location |

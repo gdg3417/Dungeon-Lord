@@ -65,7 +65,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ResearchGateUsesAc300EffectAndFloorBound()
         {
             var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
-            FloorSpatialConfiguration floor = fixture.Production.Catalog.Floors.Single();
+            FloorSpatialConfiguration floor = fixture.Production.Catalog.Floors.Single(value => value.FloorIndex == 0);
             BasicBranchingAllowanceResult locked = BasicBranchingResearchAuthority.Resolve(
                 new CompletedResearchState(), fixture.BranchingResearch, floor);
             Assert.That(locked.IsResolved, Is.True);

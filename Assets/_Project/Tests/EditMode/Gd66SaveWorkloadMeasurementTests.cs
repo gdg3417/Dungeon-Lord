@@ -55,7 +55,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             FillContents(fixture, second, true); FillContents(fixture, third, true);
             SavedSpatialFloor full = fixture.State.Floors[0];
             FloorLayoutValidationResult geometry = FloorLayoutValidator.Validate(full.Layout,
-                fixture.Production.Catalog.Floors.Single(), fixture.Production.Catalog.Rooms,
+                fixture.Production.Catalog.Floors.Single(value => value.FloorIndex == 0), fixture.Production.Catalog.Rooms,
                 fixture.Production.Catalog.Corridors, new SpatialValidationWorkloadLimits(
                     fixture.Profile.Canonical.Spatial.MaximumMaterializedTiles), full.FixedStructures,
                 fixture.Production.Catalog.FixedStructures);

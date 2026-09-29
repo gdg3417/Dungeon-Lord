@@ -2,7 +2,7 @@
     "Metadata": {
         "SchemaId": "dungeon_spatial_content",
         "SchemaVersion": 1,
-        "ContentVersion": "0.1.0"
+        "ContentVersion": "0.2.0"
     },
     "Floors": [
         {
@@ -17,6 +17,30 @@
                 "Height": 12
             },
             "FinalFloorSpaceCapacity": 60,
+            "OptionalBranchAllowance": 1,
+            "AllowedRoomDefinitionIds": [
+                "spatial.room.basic",
+                "spatial.room.large_chamber",
+                "spatial.room.rectangle"
+            ],
+            "AllowedCorridorDefinitionIds": [
+                "spatial.corridor.straight_stone"
+            ],
+            "EntranceStructureDefinitionId": "spatial.fixed.entrance_hall",
+            "CompletionStructureDefinitionId": "spatial.fixed.completion_terminal"
+        },
+        {
+            "FloorDefinitionId": "spatial.floor.02",
+            "FloorIndex": 1,
+            "Bounds": {
+                "Minimum": {
+                    "X": 0,
+                    "Y": 0
+                },
+                "Width": 14,
+                "Height": 14
+            },
+            "FinalFloorSpaceCapacity": 80,
             "OptionalBranchAllowance": 1,
             "AllowedRoomDefinitionIds": [
                 "spatial.room.basic",

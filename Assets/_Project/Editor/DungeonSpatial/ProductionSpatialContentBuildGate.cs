@@ -28,7 +28,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         UnexpectedInternalValidationFailure = 11,
         InvalidBuildSceneComposition = 12,
         InvalidCompatibilityProfile = 13,
-        UnauthorizedActiveCompatibilitySelection = 14
+        UnauthorizedActiveCompatibilitySelection = 14,
+        InvalidFloorConstructionConfiguration = 15
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -105,7 +106,25 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, "AssetDatabaseImport");
 
             ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
-            return loaded.Success ? ValidateCompatibility(compatibility, manifest, catalog, new[] { english }, limits) : loaded;
+            if (!loaded.Success) return loaded;
+            ProductionSpatialBuildGateResult retained = ValidateCompatibility(compatibility, manifest, catalog, new[] { english }, limits);
+            if (!retained.Success) return retained;
+            ProductionSpatialContentLoadResult spatial = ProductionSpatialContentLoader.Load(manifest, catalog, new[] { english }, limits);
+            SaveSpatialMigrationLimitsLoadResult saveLimits = SaveSpatialMigrationLimitsLoader.Load(
+                AssetDatabase.LoadAssetAtPath<TextAsset>(SaveSpatialMigrationLimitsLoader.ProductionPath));
+            const string architecture = "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
+            if (!saveLimits.IsSuccess || !FloorConstructionProfileSnapshot.TryParse(
+                    Resources.Load<TextAsset>(FloorConstructionProfileSnapshot.ProductionResourcePath), spatial.Value,
+                    saveLimits.Profile.Canonical, out FloorConstructionProfileSnapshot profiles) ||
+                !profiles.TryResolve(spatial.Value.Catalog.Floors.Single(value => value.FloorDefinitionId == "spatial.floor.02").FloorIndex,
+                    out FloorConstructionProfile profile) ||
+                !FloorConstructionResearchAuthority.TryParse(AssetDatabase.LoadAssetAtPath<TextAsset>(architecture + "research_nodes.json"),
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(architecture + "tables.json"), saveLimits.Profile.Canonical,
+                    out FloorConstructionResearchSnapshot research) ||
+                FloorConstructionResearchAuthority.Resolve(new CompletedResearchState {
+                    ProjectIds = new[] { research.ResearchId } }, research, profile) != null)
+                return Failure(ProductionSpatialBuildGateReason.InvalidFloorConstructionConfiguration, "FloorConstruction");
+            return Success();
         }
 
         internal static ProductionSpatialBuildGateResult ValidateComposition(string[] attemptedScenes)

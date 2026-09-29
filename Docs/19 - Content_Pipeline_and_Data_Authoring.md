@@ -146,7 +146,7 @@ GD65B0C6 approves `Assets/_Project/Data/Production/DungeonSpatial/` as the sole 
 
 12.2 Format, manifest, and registration
 
-Future generated outputs are deterministic pretty JSON, Unity-imported `TextAsset` files, UTF-8 without BOM, LF-only, and terminated by exactly one newline. They are reproducible committed artifacts, not manually edited output. The domain manifest has `schema = "content_manifest"`, `schemaVersion = 1`, and `contentVersion = "0.1.0"`; its ordinal `requiredSchemas` entries are `dungeon_spatial_content` v1 and `string_table` v1. That collection is the single production schema registry for these files. Bootstrap manifests/schema maps and `Assets/_Project/Data/Schemas/` remain non-authoritative, with no Bootstrap fallback.
+Future generated outputs are deterministic pretty JSON, Unity-imported `TextAsset` files, UTF-8 without BOM, LF-only, and terminated by exactly one newline. They are reproducible committed artifacts, not manually edited output. The domain manifest has `schema = "content_manifest"`, `schemaVersion = 1`, and current `contentVersion = "0.2.0"`; its ordinal `requiredSchemas` entries are `dungeon_spatial_content` v1 and `string_table` v1. The initial Floor 1 production release was `0.1.0`; Phase 6A2 advances only the content release version for additive compatible Floor 2 records. That collection is the single production schema registry for these files. Bootstrap manifests/schema maps and `Assets/_Project/Data/Schemas/` remain non-authoritative, with no Bootstrap fallback.
 
 12.3 Loading, assignment, and validation gates
 

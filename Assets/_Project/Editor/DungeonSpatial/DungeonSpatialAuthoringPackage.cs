@@ -153,6 +153,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
     {
         private const string ManifestPath = "authoring_manifest.json";
         private const string SchemaPath = "authoring_schema.json";
+        private const string SupportedProductionContentVersion = "0.2.0";
         private static readonly string[] ManifestFields = { "schema", "schemaVersion", "contentVersion", "catalogSchemaId", "catalogSchemaVersion", "stringTableSchemaId", "stringTableSchemaVersion", "requiredLanguage", "tables" };
         private static readonly string[] SchemaFields = { "formats", "enums", "tables", "foreignKeys", "childRelationships" };
         private static readonly HashSet<string> ColumnTypes = new HashSet<string>(new[] { "spatialId", "ownerScopedId", "localizationKey", "localizedText", "int32", "enum" }, StringComparer.Ordinal);
@@ -284,7 +285,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             else result.Tables=list.Cast<string>().ToArray();
             foreach(string field in strings) if(string.IsNullOrWhiteSpace((string)root[field])) Add(issues,DungeonSpatialAuthoringDiagnostic.BlankRequiredValue,ManifestPath,column:field);
             if(result.Schema!="dungeon_spatial_authoring" || result.SchemaVersion!=1) Add(issues,DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema,ManifestPath);
-            CheckManifest(result.ContentVersion=="0.1.0","contentVersion",issues);
+            CheckManifest(result.ContentVersion==SupportedProductionContentVersion,"contentVersion",issues);
             CheckManifest(result.CatalogSchemaId=="dungeon_spatial_content" && result.CatalogSchemaVersion==1,"catalogSchemaId",issues);
             CheckManifest(result.StringTableSchemaId=="string_table" && result.StringTableSchemaVersion==1,"stringTableSchemaId",issues);
             CheckManifest(result.RequiredLanguage=="en","requiredLanguage",issues);

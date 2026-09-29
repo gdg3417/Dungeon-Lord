@@ -147,11 +147,15 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                     return Contradictory();
                 if (state.Floors.Length == 0)
                     return Valid(Array.Empty<MvpOrderedRouteRoom>());
-                if (state.Floors.Length != 1 || state.Floors[0] == null ||
-                    state.Floors[0].FloorIndex != 0 ||
-                    state.Floors[0].ActivationState != FloorActivationState.Active)
+                if (state.Floors.Any(value => value == null || value.FloorIndex < 0 || string.IsNullOrWhiteSpace(value.FloorInstanceId)) ||
+                    state.Floors.Select(value => value.FloorIndex).Distinct().Count() != state.Floors.Length ||
+                    state.Floors.Select(value => value.FloorInstanceId).Distinct(StringComparer.Ordinal).Count() != state.Floors.Length ||
+                    state.Floors.Count(value => value.ActivationState == FloorActivationState.Active) != 1 ||
+                    state.Floors.Any(value => value.FloorIndex > 0 && value.ActivationState != FloorActivationState.Inactive))
                     return Contradictory();
-                SavedSpatialFloor floor = state.Floors[0];
+                SavedSpatialFloor floor = state.Floors.SingleOrDefault(value => value.FloorIndex == 0 &&
+                    value.ActivationState == FloorActivationState.Active);
+                if (floor == null) return Contradictory();
                 if (floor.Layout == null || floor.RoomContents == null)
                     return Contradictory();
                 RoomSpatialInstance[] rooms = floor.Layout.Rooms;

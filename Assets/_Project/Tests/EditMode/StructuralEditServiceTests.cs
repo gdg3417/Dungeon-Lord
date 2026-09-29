@@ -424,7 +424,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(r1.IsSuccess, Is.True, r1.Reason);
             SpatialContentCatalog catalog = fixture.Production.Catalog;
             FloorLayoutValidationResult r1Layout = FloorLayoutValidator.Validate(r1.State.Floors[0].Layout,
-                catalog.Floors.Single(), catalog.Rooms, catalog.Corridors,
+                catalog.Floors.Single(value => value.FloorIndex == 0), catalog.Rooms, catalog.Corridors,
                 new SpatialValidationWorkloadLimits(fixture.Limits.Spatial.MaximumMaterializedTiles),
                 r1.State.Floors[0].FixedStructures, catalog.FixedStructures);
             Assert.That(r1Layout.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(26));
@@ -1439,7 +1439,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static FloorLayoutValidationResult Validate(PreviewFixture fixture) =>
             FloorLayoutValidator.Validate(fixture.State.Floors[0].Layout,
-                fixture.Production.Catalog.Floors.Single(), fixture.Production.Catalog.Rooms,
+                fixture.Production.Catalog.Floors.Single(value => value.FloorIndex == 0), fixture.Production.Catalog.Rooms,
                 fixture.Production.Catalog.Corridors,
                 new SpatialValidationWorkloadLimits(fixture.Limits.Spatial.MaximumMaterializedTiles),
                 fixture.State.Floors[0].FixedStructures, fixture.Production.Catalog.FixedStructures);

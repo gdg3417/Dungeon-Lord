@@ -1,0 +1,15 @@
+{
+  "profiles": [
+    {
+      "profileId": "floor.construction.02.v1",
+      "profileVersion": 1,
+      "floorDefinitionId": "spatial.floor.02",
+      "requiredResearchId": "ac_100",
+      "constructionMana": 450,
+      "entranceAnchor": { "X": 1, "Y": 0 },
+      "entranceOrientation": 0,
+      "completionAnchor": { "X": 11, "Y": 12 },
+      "completionOrientation": 0
+    }
+  ]
+}

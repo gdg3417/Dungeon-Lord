@@ -47,7 +47,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 FloorLayoutValidationResult layoutValidation = FloorLayoutValidator.Validate(
                     floor.Layout, floorDefinition, rooms, corridors,
                     new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles),
-                    floor.FixedStructures, catalog.FixedStructures);
+                    floor.FixedStructures, catalog.FixedStructures,
+                    CanonicalEditFloorTarget.Mode(floor));
                 var roomByInstance = new Dictionary<string, RoomSpatialDefinition>(StringComparer.Ordinal);
                 foreach (RoomSpatialInstance room in floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>())
                 {

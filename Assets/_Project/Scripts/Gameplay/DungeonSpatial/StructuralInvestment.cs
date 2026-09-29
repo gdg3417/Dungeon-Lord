@@ -14,12 +14,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal StructuralInvestmentRecord Copy() => (StructuralInvestmentRecord)MemberwiseClone();
     }
 
-    /// <summary>Exactly one record per live room/edge, including zero-investment doorways.</summary>
+    /// <summary>
+    /// Exactly one record per live room/edge plus one non-refundable shell record for each
+    /// constructed deeper floor. Historical Floor 1 saves deliberately have no shell record.
+    /// </summary>
     public static class StructuralInvestment
     {
+        public static string ShellId(string floorInstanceId) => floorInstanceId + ".shell";
         public static string[] Ids(DetachedCanonicalSpatialSaveState state) => state.Floors.SelectMany(f =>
-            f.Layout.Rooms.Select(r => r.RoomInstanceId).Concat(f.Layout.Edges.Select(e => e.EdgeId)))
+            f.Layout.Rooms.Select(r => r.RoomInstanceId).Concat(f.Layout.Edges.Select(e => e.EdgeId))
+                .Concat(OwnsShell(f) ? new[] { ShellId(f.FloorInstanceId) } : Array.Empty<string>()))
             .OrderBy(id => id, StringComparer.Ordinal).ToArray();
+        private static bool OwnsShell(SavedSpatialFloor floor) => floor.FloorIndex > 0 &&
+            floor.ActivationState != 0 && string.Equals(floor.FloorInstanceId,
+                FloorConstructionService.FloorIdentity(floor.FloorIndex), StringComparison.Ordinal);
         public static StructuralInvestmentRecord[] Zero(DetachedCanonicalSpatialSaveState state) =>
             Ids(state).Select(id => new StructuralInvestmentRecord { StructureId = id }).ToArray();
         public static bool Valid(StructuralInvestmentRecord[] records, DetachedCanonicalSpatialSaveState state,
