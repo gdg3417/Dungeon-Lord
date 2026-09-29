@@ -1,6 +1,6 @@
 # Phase 6A2 — Floor 2 construction and inactive editing
 
-Status: implementation and correction automated qualification complete; external ChatGPT re-review and owner manual qualification have not been performed. Not declared ready to merge.
+Status: implementation external re-review, automated qualification, and owner Editor/Windows standalone qualification passed. Final post-documentation external ChatGPT merge review remains pending; not declared ready to merge.
 
 ## Baseline and continuation audit
 
@@ -18,6 +18,18 @@ External review of PR #216 at `e85e7edc1277bfcb5f2e01f99ff6ecbdb0d2ecd2` found t
 
 1. The selected production Dungeon Spatial content version was stale at `0.1.0`. Phase 6A2 adds compatible Floor 2 catalog and allowlist records, so the already-approved semantic version policy requires `0.2.0`. The canonical authoring manifest and strict parser selection now require `0.2.0`; canonical export updates only catalog/manifest content-version fields. Catalog schema remains 1, string-table schema remains 1, save schema remains 11, and no migration or stable-ID change is added.
 2. Floor construction permission incorrectly required exactly one raw `ac_100` entry. It now consumes the existing `CompletedResearchStateResolver` duplicate-safe, ordinal, read-only membership semantics: at least one valid `ac_100` grants one permission. Duplicate production node/effect configuration remains invalid, repeated completed IDs do not mutate save state, do not construct automatically, and cannot construct a second Floor 2.
+
+## Owner qualification
+
+Owner qualification passed after implementation external re-review. A temporary local-only QA helper persisted `ac_100` solely for UAT; it was never committed or pushed, was removed before PR qualification, and `ac_100` remained persisted after its removal and a clean PR-code reload. It did not construct a floor or grant mana.
+
+Editor qualification passed all prescribed steps 1–20: Floor 2 was Locked without `ac_100`, construction was blocked while Locked, then the persisted permit showed the Unlocked/unconstructed state. Insufficient-mana presentation and gating passed. QA mana was filled to 1000; construction charged exactly 450 mana, leaving 550 before later ordinary changes, created one Constructed Inactive Floor 2, and repeat construction neither created a second floor nor charged again. Passive mana remained based on one Active floor; save/close/reopen preserved the shell and Inactive state.
+
+Explicit Floor 2 selection passed. A first Basic Room at `(1,2)`, `Zero` orientation, and east completion connection passed, as did representative monster, trap, and loot placement, unassignment/redeployment, and Floor 1/Floor 2 edit isolation. Normal runs remained Floor 1-only; edited Floor 2 state survived reopen. No Activate/Deactivate control was exposed, and no blocking localization, clipping, raw player-facing ID, or Console-error issue was reported.
+
+Windows 64-bit Development Build qualification passed. The standalone loaded the durable two-floor state with Floor 1 Active and Floor 2 Constructed Inactive; Floor 2 rooms/content persisted, switching floors worked, and Floor 1 remained intact. Run/Observe remained Floor 1-only: no traversal, descend/exit choice, survivor transfer, or other deferred multi-floor behavior appeared, and Floor 2 remained unchanged after a Floor 1 run. Full close/relaunch preserved both floors and Floor 2 edits; no repeated shell charge or duplicate Floor 2 occurred, and no blocking standalone UI, localization, crash, or persistence issue was reported. Qualification was performed remotely through Moonlight; this records the Unity/Game view and standalone behavior tested, not phone-streaming display scaling as native-resolution qualification.
+
+Post-build worktree note: Windows qualification materialized the repository’s documented URP prefilter/runtime and Standalone batching diffs; those generated files were inspected and restored to HEAD. TMP fallback serialization noise was likewise restored. The known local-only `ProjectSettings/UnityConnectSettings.asset` `m_Enabled: 0 -> 1` environment setting remains intentionally outside this PR and was not staged.
 
 ## New implementation and retained authorities
 
@@ -144,16 +156,19 @@ Expected PlayMode skips remain the baseline ten, with no additional skip introdu
 
 - Eight synchronous EditMode-only `Gd66GameRootBootIntegrationTests` cases (`gd66.test.synchronous_edit_mode_fixture`): localized deletion presentation; localized renovation presentation; structural construction through the real root; missing deletion policy; both direct/corridor deletion cases; both replacement cases.
 - `Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed` (`gd66.test.windows_only_inverse`) on this Windows host.
-- `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` (`gd66.test.windows_player_only`), which requires an actual Windows Player and is not claimed as qualified here.
+- `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` (`gd66.test.windows_player_only`) remains an expected automated Editor-run skip; separate owner Windows standalone qualification passed as recorded above.
 
 ## Changed files by responsibility
 
 Production authoring/configuration/localization:
 
+- `ContentAuthoring/DungeonSpatial/authoring_manifest.json`
+- `Assets/_Project/Editor/DungeonSpatial/DungeonSpatialAuthoringPackage.cs`
 - `ContentAuthoring/DungeonSpatial/tables/floors.csv`
 - `ContentAuthoring/DungeonSpatial/tables/floor_allowed_rooms.csv`
 - `ContentAuthoring/DungeonSpatial/tables/floor_allowed_corridors.csv`
 - `Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json` (generated)
+- `Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json` (generated)
 - `Assets/_Project/Resources/floor_construction_profiles.json`
 - `Assets/_Project/Resources/floor_construction_profiles.json.meta`
 - `Assets/_Project/Data/Bootstrap/string_table_en.json`
@@ -170,6 +185,7 @@ Canonical mutation, validation, economy, editing, and publication:
 - `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralEditService.cs`
 - `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralInvestment.cs`
 - `Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralRenovationService.cs`
+- `Assets/_Project/Scripts/Services/CompletedResearchStateResolver.cs`
 - `Assets/_Project/Scripts/Services/SaveService.cs`
 - `Assets/_Project/Scripts/Core/GameRoot.cs`
 
@@ -184,6 +200,7 @@ Build gate and tests:
 - `Assets/_Project/Editor/DungeonSpatial/ProductionSpatialContentBuildGate.cs`
 - `Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSixAEditModeFixtures.cs`
 - `Assets/_Project/Editor/DungeonSpatial/Tests/ProductionSpatialContentExportTests.cs`
+- `Assets/_Project/Tests/EditMode/CompletedResearchStateResolverTests.cs`
 - `Assets/_Project/Tests/EditMode/PhaseSixA2FloorConstructionTests.cs`
 - `Assets/_Project/Tests/EditMode/PhaseSixA2FloorConstructionTests.cs.meta`
 - `Assets/_Project/Tests/EditMode/Gd66SaveWorkloadMeasurementTests.cs`
@@ -193,32 +210,22 @@ Build gate and tests:
 
 Current status/evidence and generated-test hygiene:
 
+- `Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md`
+- `Docs/19 - Content_Pipeline_and_Data_Authoring.md`
 - `Docs/28 - Save_Data_Model_Versioning_and_Migration.md`
 - `Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md`
 - `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md`
 - `docs/planning/phase-6-multi-floor-foundation-design-and-tuning-lock.md`
 - `docs/planning/post-gd60-mvp-execution-plan.md`
+- `docs/planning/gd65b-production-spatial-content-approval.md`
 - `Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md`
 - `README.md`
 - `.gitignore`
 
-## Known limits and proposed later owner qualification
+## Known limits and final review state
 
-No requirement needs schema 12. No activation, lifecycle cascade, additional deeper floor, multi-floor traversal/transfer/settlement/knowledge/report, exclusive content, shell refund, run-event mana, backend/concurrency redesign, or Phase 7 editor is implemented. Research progression UI remains the existing scaffold. Selected floor/room is transient editor presentation, not persisted identity authority; reopen uses deterministic default selection. No new Windows standalone qualification or owner manual play has been performed.
+No requirement needs schema 12. No activation/deactivation, lifecycle cascade, additional deeper floor, multi-floor traversal, descend/exit decision, survivor transfer, multi-floor settlement/reporting/knowledge, Floor-2-exclusive content, shell demolition/refund, run-event mana, backend/concurrency redesign, or Phase 7 editor is implemented. Research progression UI remains the existing scaffold. Selected floor/room is transient editor presentation, not persisted identity authority; reopen uses deterministic default selection.
 
-**PENDING EXTERNAL CHATGPT REVIEW — do not start owner qualification yet.** Proposed later plan:
+Owner Editor and Windows standalone qualification passed as recorded above. **FINAL EXTERNAL CHATGPT MERGE REVIEW PENDING — do not merge yet.**
 
-1. Open an existing Floor 1 save normally, including a schema-10 upgrade fixture if review requests it.
-2. Confirm Floor 2 is Locked without completed `ac_100`.
-3. Through an approved research-state fixture/existing lifecycle qualification, complete `ac_100`; confirm no automatic floor creation and unlocked/unconstructed presentation after reopen.
-4. With sufficient existing mana, construct once; verify exactly 450 spent, one Inactive Floor 2, fixed endpoints only, and repeated construction unavailable/no charge.
-5. Select Floor 2 explicitly and build a first room (tested Basic Room example `(1,2)`, Zero, east), then legal subsequent rooms; move, replace, and delete through existing previews.
-6. Place monsters, traps, and loot; unassign and redeploy on intended rooms/floors. If `ac_300` and topology permit, exercise optional corridor content and branch removal after unassignment.
-7. Select Floor 1 and confirm edits are isolated; switch back and verify Floor 2 retained its state.
-8. Run normally; confirm Floor 1 only, without Floor 2 encounters/branches or multi-floor decisions.
-9. Confirm online/offline passive mana counts one Active floor.
-10. Save, close, reopen, and continue editing; verify both floors' stable identities, layout/content, lifecycle, historical shell investment, and Inactive status independent of selection.
-11. Confirm no Activate/Deactivate control exists, and Floor 1's last required room cannot be deleted.
-12. External review may require Windows standalone parity because this adds a player-triggered persistent transaction. Such qualification remains unperformed and must not be inferred from automated Editor tests.
-
-This packet is not declared ready to merge. Create the PR, stop, obtain external review, then decide owner Unity/standalone qualification.
+This packet is not declared ready to merge. Stop for final external ChatGPT review.
