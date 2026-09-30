@@ -440,7 +440,7 @@ namespace DungeonBuilder.M0
         {
             var result = CreateWriteAuthority().CommitFloorLifecycle(SavePath, _canonicalFileSystem,
                 _canonicalSession, current, action, floorId);
-            if (result.IsSuccess)
+            if (result.IsSuccess && !result.IsNoOp)
             {
                 _undo = null; _canonicalSession = result.Session;
                 CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);

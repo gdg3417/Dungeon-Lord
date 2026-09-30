@@ -41,11 +41,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             PullStrength = definition.PullStrength;
             TargetFloorIndex = definition.TargetFloorIndex;
         }
-        public double Pull(int currentFloorIndex, bool hasNext)
+        public double Pull(int currentFloorIndex, bool hasNext, int deepestActiveFloorIndex)
         {
             if (!hasNext || Mode == "shallow") return 0;
             if (Mode == "deepest_reasonable") return PullStrength;
-            return Mode == "target_depth" && currentFloorIndex < TargetFloorIndex ? PullStrength : 0;
+            return Mode == "target_depth" && currentFloorIndex < TargetFloorIndex &&
+                TargetFloorIndex <= deepestActiveFloorIndex ? PullStrength : 0;
         }
         public static TransientDepthObjective Select(PhaseSixRunConfig c, string runId)
         {

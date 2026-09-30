@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class FloorLifecyclePreview
     {
         public bool IsCommittable { get; internal set; }
+        public bool IsNoOp { get; internal set; }
         public string Reason { get; internal set; }
         internal DetachedCanonicalSaveSessionResult Prepared;
         public ActiveFloorRunSnapshot RunSnapshot { get; internal set; }
@@ -42,6 +43,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     // is invented; Activate All stops at the first A3 blocker.
                     var eligible = FloorActivationEligibilityAuthority.Resolve(candidate, current.completedResearch,
                         floorConstructionProfiles, floorConstructionResearch, production, configuration, limits.Canonical);
+                    if (action == FloorLifecycleAction.ActivateAllEligible && eligible.HasTargetFloor &&
+                        eligible.PrimaryBlocker == FloorActivationEligibilityReasons.TargetAlreadyActive)
+                    {
+                        // The authored prefix is already active. Validate the exact runtime snapshot
+                        // without preparing replacement bytes or changing the current session.
+                        result.RunSnapshot = ActiveFloorRunSnapshot.Create(owned, production, configuration,
+                            limits.Canonical, runLoot);
+                        result.IsCommittable = true; result.IsNoOp = true; result.Reason = null;
+                        return result;
+                    }
                     if (!eligible.IsEligible) { result.Reason = eligible.PrimaryBlocker; return result; }
                     if (action == FloorLifecycleAction.Activate && floorId != eligible.TargetFloorInstanceId) return result;
                     ApplyDetachedActivation(candidate, eligible.TargetFloorInstanceId, true);
@@ -85,6 +96,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // complete runtime materialization are repeated against the current session.
             var preview = PreviewFloorLifecycle(session, current, action, floorId);
             if (!preview.IsCommittable) return Failure(preview.Reason);
+            if (preview.IsNoOp)
+                return new DetachedCanonicalWriteResult(true, null, true, false,
+                    session.GetCurrentBytes(), session, ValidateSession(session), current);
             var result = PrepareAndPersist(activePath, fileSystem, session, preview.Prepared, false);
             if (result.IsSuccess) RunTransientEvidence.Retain(current, result.RuntimeProjection);
             return result;

@@ -14,7 +14,7 @@ Baseline: merged PR #217, `756607cca58aac584f69cdc3b4c27d30b58eefad`. **This is 
 
 Transition identity is `(run.floor_transition_decision.phase6.v1, RunId, CurrentFloorInstanceId, NextFloorInstanceId)`; objective identity is `(run.depth_objective.phase6.v1, RunId)`. Config owns both sources. Length-prefixed UTF-8 fields, SHA-256, and the first unsigned big-endian 32-bit word produce independent deterministic rolls. Equality exits for marginal decisions. A wipe or retreat before Completion makes no transition decision; no next Active floor exits without a roll.
 
-Typed production configuration owns all approved tuning, references, minima, thresholds, uncertainty, objective definitions, and workload limits. Objective selection weights normalize in canonical mode order. Shallow uses Weight 0.20 and PullStrength 0.00; target_depth uses Weight 0.50, PullStrength 0.75, and TargetFloorIndex 1 (Floor 2); deepest_reasonable uses Weight 0.30 and PullStrength 0.50. Selection Weight controls assignment frequency, PullStrength controls the selected objective's normalized deeper pressure, and global ObjectiveWeight controls its relative importance in descent appeal. Runtime owns neither a hidden Floor 2 condition nor objective pull tuning. Validation enforces the exact objective/transition rule sources and the approved five-Active-floor/four-transition scope. Unknown Floor 2 perception uses configured uncertainty without inspecting hidden reward/danger content. Shared branch knowledge is not repurposed.
+Typed production configuration owns all approved tuning, references, minima, thresholds, uncertainty, objective definitions, and workload limits. Objective selection weights normalize in canonical mode order. Shallow uses Weight 0.20 and PullStrength 0.00; target_depth uses Weight 0.50, PullStrength 0.75, and TargetFloorIndex 1 (Floor 2); deepest_reasonable uses Weight 0.30 and PullStrength 0.50. Selection Weight controls assignment frequency, PullStrength controls the selected objective's normalized deeper pressure, and global ObjectiveWeight controls its relative importance in descent appeal. Runtime owns neither a hidden Floor 2 condition nor objective pull tuning. Target-depth pull requires the configured target to be reachable within the immutable Active-prefix snapshot; an absent target provides zero pull even when an earlier next floor exists. Validation enforces the exact objective/transition rule sources and the approved five-Active-floor/four-transition scope. Unknown Floor 2 perception uses configured uncertainty without inspecting hidden reward/danger content. Shared branch knowledge is not repurposed.
 
 Loot stays carried across descent. Extraction, Heat, cooling, attraction, forecast, demand, branch learning, history, sequence, objective evaluation, and durable publication occur once at complete termination. There is no between-floor checkpoint.
 
@@ -24,19 +24,19 @@ Later same-session canonical publications preserve Party, EncounterEvents, Branc
 
 Commit validates the current session and exact durable bytes, re-resolves A3 eligibility, mutates a detached candidate, validates canonical/production state, and materializes the same complete snapshot consumed by gameplay. Exact complete-save atomic replacement, durable readback, and reopen validation occur before live publication; rollback remains available during reopen checks.
 
-Floor 1 stays Active. Deactivation cascades through deeper floors; manual activation changes only its target. Activate All Eligible supports the currently configured Floor 2 progression and stops at its first blocker. Contents, custody, IDs, investment, and mana are preserved. Online/offline passive mana continue to use CanonicalActiveFloorResolver, with one/two/one Active-floor behavior. Loot initialization now precedes startup load/offline publication.
+Floor 1 stays Active. Deactivation cascades through deeper floors; manual activation changes only its target. Activate All Eligible supports the currently configured Floor 2 progression and stops at its first blocker. An already-Active Floor 2 is a validated no-op for Activate All after exact session-byte verification: no durable rewrite, session replacement, or runtime republication occurs. Direct Activate retains the existing already-active blocker. Contents, custody, IDs, investment, and mana are preserved. Online/offline passive mana continue to use CanonicalActiveFloorResolver, with one/two/one Active-floor behavior. Loot initialization now precedes startup load/offline publication.
 
 Schema stays **11**, with **no migration**. No party, ordinary HP, snapshot, transient objective, between-floor state, eligibility cache, duplicate Active-floor list, or floor knowledge is persisted. Bootstrap adds localized lifecycle controls, stable blocker reasons, and minimal transition evidence; English localization adds 29 keys.
 
 ## Validation
 
-- PR-review objective/configuration and evidence-retention corrections: 25/25 passed, zero skips.
-- Focused A4 after review corrections: 61/61 passed, zero skips.
-- Relevant Phase 5B / Phase 6 / route / save / mana / validation regressions: 617/617 passed, zero skips.
-- Full EditMode: 1,264/1,264 passed, zero skips.
-- Full PlayMode: 2,763 total, 2,753 passed, zero failed, 10 expected skips. The skip set is unchanged: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse filesystem check, and the Windows Player-only standalone qualification test.
+- Review 2 targeted objective/lifecycle tests: 4/4 passed; SaveService no-op publication test: 1/1 passed; zero skips.
+- Focused A4: 64/64 passed, zero skips.
+- Relevant Phase 5B / Phase 6 / lifecycle / route / save regressions: 620/620 passed, zero skips.
+- Full EditMode: 1,267/1,267 passed, zero skips.
+- Full PlayMode: 2,766 total, 2,756 passed, zero failed, 10 expected skips. The skip set exactly matches the previous run: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse filesystem check, and the Windows Player-only standalone qualification test.
 - Production/configuration/localization/floor-layout/build-gate validation: 62/62 passed. English localization has 968 entries, 29 A4 additions, and zero duplicate keys.
-- Windows x86_64 Development Build: passed with wrapper exit 0 under Unity 6000.3.2f1, Bootstrap-only scene, a 162.8 MB Unity report / 170,911,938-byte output tree, zero build errors, and the established unavailable Unity Cloud native-symbol credentials warning.
+- Windows x86_64 Development Build: passed with wrapper exit 0 under Unity 6000.3.2f1, Bootstrap-only scene, a 162.8 MB Unity report / 170,912,558-byte output tree, zero build errors, and the established unavailable Unity Cloud native-symbol credentials warning.
 - Final `git diff --check`: passed with no whitespace errors.
 - No owner manual qualification has been performed. External review and correction of blockers must precede asking the owner to qualify the stable Editor and Windows build/standalone behavior.
 

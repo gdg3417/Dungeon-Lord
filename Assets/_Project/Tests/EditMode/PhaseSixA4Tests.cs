@@ -88,6 +88,70 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ActivateAllAlreadyActiveIsValidatedNoOpAndReactivatesAfterDeactivation()
+        {
+            var f = Eligible(); var writer = Writer(f);
+            f.Accept(writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.ActivateAllEligible, null));
+            byte[] activeBytes = f.FileSystem.ReadAllBytes(f.ActivePath);
+            string live = JsonUtility.ToJson(f.Runtime);
+            int operations = f.FileSystem.Operations.Count();
+            var preview = writer.PreviewFloorLifecycle(f.Session, f.Runtime,
+                FloorLifecycleAction.ActivateAllEligible, null);
+            Assert.That(preview.IsCommittable, Is.True, preview.Reason);
+            Assert.That(preview.IsNoOp, Is.True);
+            Assert.That(preview.RunSnapshot.Floors.Count, Is.EqualTo(2));
+            var repeated = writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.ActivateAllEligible, null);
+            Assert.That(repeated.IsSuccess, Is.True, repeated.Reason);
+            Assert.That(repeated.IsNoOp, Is.True);
+            Assert.That(repeated.RuntimeProjection, Is.SameAs(f.Runtime));
+            Assert.That(repeated.Session, Is.SameAs(f.Session));
+            Assert.That(f.FileSystem.Operations.Count(), Is.EqualTo(operations + 1), "Only the stale-session read is allowed.");
+            CollectionAssert.AreEqual(activeBytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(live), "Mana, investment, layout, content, and IDs stay unchanged.");
+            Assert.That(CanonicalActiveFloorResolver.TryResolve(f.Runtime, f.Profile.Canonical.Spatial, out int count), Is.True);
+            Assert.That(count, Is.EqualTo(2));
+            var direct = writer.PreviewFloorLifecycle(f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f));
+            Assert.That(direct.IsCommittable, Is.False);
+            Assert.That(direct.Reason, Is.EqualTo(FloorActivationEligibilityReasons.TargetAlreadyActive));
+            f.Accept(writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Deactivate, FloorTwo(f)));
+            Assert.That(CanonicalActiveFloorResolver.TryResolve(f.Runtime, f.Profile.Canonical.Spatial, out count), Is.True);
+            Assert.That(count, Is.EqualTo(1));
+            f.Accept(writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.ActivateAllEligible, null));
+            Assert.That(CanonicalActiveFloorResolver.TryResolve(f.Runtime, f.Profile.Canonical.Spatial, out count), Is.True);
+            Assert.That(count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ActivateAllNoOpThroughSaveServiceDoesNotRepublishOrReplaceSession()
+        {
+            var f = Eligible();
+            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
+            service.ConfigureRunLoot(Loot()); service.ConfigureStructuralEconomy(f.Economy);
+            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            int publications = 0; service.CanonicalRuntimePublished += _ => publications++;
+            var first = service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.ActivateAllEligible, null);
+            Assert.That(first.IsSuccess, Is.True, first.Reason);
+            Assert.That(publications, Is.EqualTo(1));
+            var activeSession = service.CanonicalSession;
+            byte[] bytes = f.FileSystem.ReadAllBytes(f.ActivePath);
+            int replaces = f.FileSystem.Operations.Count(o =>
+                o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
+            var repeated = service.CommitFloorLifecycle(first.RuntimeProjection, FloorLifecycleAction.ActivateAllEligible, null);
+            Assert.That(repeated.IsSuccess, Is.True, repeated.Reason);
+            Assert.That(repeated.IsNoOp, Is.True);
+            Assert.That(service.CanonicalSession, Is.SameAs(activeSession));
+            Assert.That(publications, Is.EqualTo(1));
+            Assert.That(f.FileSystem.Operations.Count(o =>
+                o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace), Is.EqualTo(replaces));
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
+        [Test]
         public void SnapshotCopiesEveryFloorAndConfiguration()
         {
             var f = Eligible();
@@ -287,19 +351,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
             foreach (var definition in c.Objectives) definition.Weight = definition.Mode == "target_depth" ? 1 : 0;
             var target = TransientDepthObjective.Select(c, "run.config-owned-objective");
 
-            Assert.That(shallow.Pull(0, true), Is.Zero);
-            Assert.That(target.Pull(0, true), Is.EqualTo(.75));
-            Assert.That(target.Pull(1, true), Is.Zero);
-            Assert.That(target.Pull(0, false), Is.Zero);
-            Assert.That(deepest.Pull(0, true), Is.EqualTo(.5));
-            Assert.That(deepest.Pull(0, false), Is.Zero);
+            Assert.That(shallow.Pull(0, true, 1), Is.Zero);
+            Assert.That(target.Pull(0, true, 1), Is.EqualTo(.75));
+            Assert.That(target.Pull(1, false, 1), Is.Zero);
+            Assert.That(target.Pull(0, false, 1), Is.Zero);
+            Assert.That(deepest.Pull(0, true, 1), Is.EqualTo(.5));
+            Assert.That(deepest.Pull(1, false, 1), Is.Zero);
 
             targetDefinition.PullStrength = .25;
             targetDefinition.TargetFloorIndex = 2;
             Assert.That(PhaseSixRunConfigValidation.IsValid(c), Is.True);
             target = TransientDepthObjective.Select(c, "run.config-owned-objective");
-            Assert.That(target.Pull(1, true), Is.EqualTo(.25));
-            Assert.That(target.Pull(2, true), Is.Zero);
+            Assert.That(target.Pull(0, true, 1), Is.Zero, "The configured target is outside the Active snapshot.");
+            Assert.That(target.Pull(0, true, 2), Is.EqualTo(.25));
+            Assert.That(target.Pull(1, true, 2), Is.EqualTo(.25));
+            Assert.That(target.Pull(2, false, 2), Is.Zero);
+            Assert.That(target.Pull(1, false, 2), Is.Zero);
+        }
+
+        [Test]
+        public void ObjectiveApplicabilityUsesImmutableSnapshotDepth()
+        {
+            var f = Eligible();
+            f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.ActivateAllEligible, null));
+            var snapshot = Snapshot(f);
+            int deepest = snapshot.Floors.Last().FloorIndex;
+            var c = Config().PhaseSix;
+            var target = c.Objectives.Single(x => x.Mode == "target_depth");
+            target.TargetFloorIndex = 2;
+            foreach (var definition in c.Objectives) definition.Weight = definition.Mode == "target_depth" ? 1 : 0;
+            var selected = TransientDepthObjective.Select(c, "run.snapshot-depth");
+            f.State.Floors[1].ActivationState = FloorActivationState.Inactive;
+            Assert.That(deepest, Is.EqualTo(1));
+            Assert.That(selected.Pull(snapshot.Floors[0].FloorIndex, true, deepest), Is.Zero);
         }
 
         [TestCase(0)] [TestCase(1)]
