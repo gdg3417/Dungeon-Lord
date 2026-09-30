@@ -38,18 +38,26 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     {
         public string Mode;
         public double Weight;
+        public double PullStrength = double.NaN;
+        public int TargetFloorIndex = -1;
     }
 
     public static class PhaseSixRunConfigValidation
     {
         public const string Invalid = "run.phase6.invalid_configuration";
+        public const string TransitionRuleSource = "run.floor_transition_decision.phase6.v1";
+        public const string ObjectiveRuleSource = "run.depth_objective.phase6.v1";
+        public const int MaximumSupportedActiveFloors = 5;
+        public const int MaximumSupportedTransitions = 4;
         internal static bool Finite(double x) => !double.IsNaN(x) && !double.IsInfinity(x);
         internal static bool Unit(double x) => Finite(x) && x >= 0 && x <= 1;
         public static bool IsValid(PhaseSixRunConfig c)
         {
-            if (c == null || c.TransitionRuleSourceId != "run.floor_transition_decision.phase6.v1" ||
-                string.IsNullOrWhiteSpace(c.ObjectiveRuleSourceId) || c.ObjectiveRuleSourceId == c.TransitionRuleSourceId ||
-                c.MaximumActiveFloors < 1 || c.MaximumTransitions < 0 || c.MaximumTransitions < c.MaximumActiveFloors - 1)
+            if (c == null || c.TransitionRuleSourceId != TransitionRuleSource ||
+                c.ObjectiveRuleSourceId != ObjectiveRuleSource ||
+                c.MaximumActiveFloors < 1 || c.MaximumActiveFloors > MaximumSupportedActiveFloors ||
+                c.MaximumTransitions < 0 || c.MaximumTransitions > MaximumSupportedTransitions ||
+                c.MaximumTransitions < c.MaximumActiveFloors - 1)
                 return false;
             if (!new[] { c.ConditionHealthWeight, c.SurvivorFractionWeight, c.PerceivedDangerWeight,
                 c.UncertaintyWeight, c.SurvivabilityThreatPenalty, c.UnknownInformationUncertainty }.All(Unit) ||
@@ -68,8 +76,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 c.ProfileMinimums.Select(x => x.ProfileId).Distinct(StringComparer.Ordinal).Count() != profiles.Length) return false;
             string[] modes = { "shallow", "target_depth", "deepest_reasonable" };
             return c.Objectives != null && c.Objectives.Length == modes.Length &&
-                c.Objectives.All(x => x != null && modes.Contains(x.Mode) && Finite(x.Weight) && x.Weight >= 0) &&
+                c.Objectives.All(x => x != null && modes.Contains(x.Mode) && Finite(x.Weight) && x.Weight >= 0 && Unit(x.PullStrength)) &&
                 c.Objectives.Select(x => x.Mode).Distinct(StringComparer.Ordinal).Count() == modes.Length &&
+                c.Objectives.Single(x => x.Mode == "shallow").PullStrength == 0 &&
+                c.Objectives.Single(x => x.Mode == "shallow").TargetFloorIndex == -1 &&
+                c.Objectives.Single(x => x.Mode == "deepest_reasonable").TargetFloorIndex == -1 &&
+                c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex > 0 &&
+                c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex < c.MaximumActiveFloors &&
                 Finite(c.Objectives.Sum(x => x.Weight)) && c.Objectives.Sum(x => x.Weight) > 0;
         }
     }

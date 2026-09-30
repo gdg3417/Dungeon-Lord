@@ -44,15 +44,21 @@
   "Objectives": [
     {
       "Mode": "shallow",
-      "Weight": 0.2
+      "Weight": 0.2,
+      "PullStrength": 0.0,
+      "TargetFloorIndex": -1
     },
     {
       "Mode": "target_depth",
-      "Weight": 0.5
+      "Weight": 0.5,
+      "PullStrength": 0.75,
+      "TargetFloorIndex": 1
     },
     {
       "Mode": "deepest_reasonable",
-      "Weight": 0.3
+      "Weight": 0.3,
+      "PullStrength": 0.5,
+      "TargetFloorIndex": -1
     }
   ],
   "MaximumActiveFloors": 5,

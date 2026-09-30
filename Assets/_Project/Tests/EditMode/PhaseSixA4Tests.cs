@@ -27,8 +27,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void LockedProductionConfigurationIsValid()
         {
-            Assert.That(PhaseSixRunConfigValidation.IsValid(Config().PhaseSix), Is.True);
-            Assert.That(Config().PhaseSix.TotalAppealWeight, Is.EqualTo(5.75));
+            var phaseSix = Config().PhaseSix;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(phaseSix), Is.True);
+            Assert.That(phaseSix.TotalAppealWeight, Is.EqualTo(5.75));
+            var shallow = phaseSix.Objectives.Single(x => x.Mode == "shallow");
+            var target = phaseSix.Objectives.Single(x => x.Mode == "target_depth");
+            var deepest = phaseSix.Objectives.Single(x => x.Mode == "deepest_reasonable");
+            Assert.That(shallow.Weight, Is.EqualTo(.2)); Assert.That(shallow.PullStrength, Is.Zero);
+            Assert.That(target.Weight, Is.EqualTo(.5)); Assert.That(target.PullStrength, Is.EqualTo(.75));
+            Assert.That(target.TargetFloorIndex, Is.EqualTo(1));
+            Assert.That(deepest.Weight, Is.EqualTo(.3)); Assert.That(deepest.PullStrength, Is.EqualTo(.5));
             Assert.That(LootRollResolver.Resolve(Loot(), Config().LootTableId, 0).success, Is.True);
             Assert.That(Snapshot(Eligible()), Is.Not.Null);
         }
@@ -269,6 +277,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.LootExtractionSummary.TotalExtractedWorldValue, Is.Zero);
         }
 
+        [Test]
+        public void ObjectivePullStrengthAndTargetDepthAreConfigOwned()
+        {
+            var c = Config().PhaseSix;
+            var shallow = new TransientDepthObjective(c.Objectives.Single(x => x.Mode == "shallow"), c.ObjectiveRuleSourceId);
+            var targetDefinition = c.Objectives.Single(x => x.Mode == "target_depth");
+            var deepest = new TransientDepthObjective(c.Objectives.Single(x => x.Mode == "deepest_reasonable"), c.ObjectiveRuleSourceId);
+            foreach (var definition in c.Objectives) definition.Weight = definition.Mode == "target_depth" ? 1 : 0;
+            var target = TransientDepthObjective.Select(c, "run.config-owned-objective");
+
+            Assert.That(shallow.Pull(0, true), Is.Zero);
+            Assert.That(target.Pull(0, true), Is.EqualTo(.75));
+            Assert.That(target.Pull(1, true), Is.Zero);
+            Assert.That(target.Pull(0, false), Is.Zero);
+            Assert.That(deepest.Pull(0, true), Is.EqualTo(.5));
+            Assert.That(deepest.Pull(0, false), Is.Zero);
+
+            targetDefinition.PullStrength = .25;
+            targetDefinition.TargetFloorIndex = 2;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(c), Is.True);
+            target = TransientDepthObjective.Select(c, "run.config-owned-objective");
+            Assert.That(target.Pull(1, true), Is.EqualTo(.25));
+            Assert.That(target.Pull(2, true), Is.Zero);
+        }
+
         [TestCase(0)] [TestCase(1)]
         public void RetreatBeforeCompletionHasNoDecisionAtThatFloor(int retreatFloor)
         {
@@ -464,7 +497,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("duplicate_objective")] [TestCase("negative_weight")] [TestCase("zero_objectives")]
         [TestCase("nan")] [TestCase("infinite")] [TestCase("zero_appeal")] [TestCase("minimum_one")]
         [TestCase("duplicate_minimum")] [TestCase("unknown_mode")] [TestCase("bad_thresholds")]
-        [TestCase("zero_reference")] [TestCase("workload")]
+        [TestCase("zero_reference")] [TestCase("workload")] [TestCase("too_many_floors")]
+        [TestCase("too_many_transitions")] [TestCase("objective_source")] [TestCase("transition_source")]
+        [TestCase("missing_target")] [TestCase("invalid_target")] [TestCase("nan_pull")]
+        [TestCase("negative_pull")] [TestCase("large_pull")] [TestCase("shallow_pull")]
         public void InvalidTransitionConfigurationFailsClosed(string defect)
         {
             var c = Config().PhaseSix;
@@ -482,6 +518,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 case "bad_thresholds": c.ExitThreshold = c.DescendThreshold; break;
                 case "zero_reference": c.CarriedLootReference = 0; break;
                 case "workload": c.MaximumTransitions = 0; break;
+                case "too_many_floors": c.MaximumActiveFloors = 6; break;
+                case "too_many_transitions": c.MaximumTransitions = 5; break;
+                case "objective_source": c.ObjectiveRuleSourceId = "run.depth_objective.unsupported"; break;
+                case "transition_source": c.TransitionRuleSourceId = "run.floor_transition_decision.unsupported"; break;
+                case "missing_target": c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex = -1; break;
+                case "invalid_target": c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex = c.MaximumActiveFloors; break;
+                case "nan_pull": c.Objectives[0].PullStrength = double.NaN; break;
+                case "negative_pull": c.Objectives[1].PullStrength = -.01; break;
+                case "large_pull": c.Objectives[2].PullStrength = 1.01; break;
+                case "shallow_pull": c.Objectives.Single(x => x.Mode == "shallow").PullStrength = .01; break;
             }
             Assert.That(PhaseSixRunConfigValidation.IsValid(c), Is.False);
             Assert.Throws<ArgumentException>(() => TransientDepthObjective.Select(c, "run-1"));
@@ -529,6 +575,66 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(deactivation.IsSuccess, Is.True, deactivation.Reason);
             Assert.That(online.ResolveRate(published, f.Configuration).ActiveFloorCount, Is.EqualTo(1));
             Assert.That(published.structureRuntime.ManaReserve, Is.EqualTo(calculated.WalletAfter));
+        }
+
+        [Test]
+        public void SameSessionOfflinePublicationRetainsAllTransientRunEvidenceButReopenDoesNotFabricateIt()
+        {
+            var f = Eligible();
+            AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
+            ForceDescent(f.Configuration, true);
+            f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Activate, FloorTwo(f)));
+            f.Accept(Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                new RunSimulationService(f.Configuration, Loot()), RunPostureResolver.BalancedId,
+                Math.Max(1, f.Runtime.lastSavedUtcUnix)));
+            var before = f.Runtime.runHistory.LatestOutcome;
+            Assert.That(before.Party, Is.Not.Null); Assert.That(before.EncounterEvents, Is.Not.Empty);
+            Assert.That(before.BranchOutcomes, Is.Not.Null); Assert.That(before.FloorTransitions, Is.Not.Empty);
+            Assert.That(before.DepthObjective, Is.Not.Null);
+            string serialized = JsonUtility.ToJson(f.Runtime);
+            Assert.That(serialized, Does.Not.Contain("\"Party\""));
+            Assert.That(serialized, Does.Not.Contain("\"EncounterEvents\""));
+            Assert.That(serialized, Does.Not.Contain("\"BranchOutcomes\""));
+            Assert.That(serialized, Does.Not.Contain("\"FloorTransitions\""));
+            Assert.That(serialized, Does.Not.Contain("\"DepthObjective\""));
+
+            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
+            service.ConfigureRunLoot(Loot()); service.ConfigureStructuralEconomy(f.Economy);
+            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            var go = new GameObject("PhaseSixA4TransientEvidenceRetention");
+            try
+            {
+                var root = go.AddComponent<GameRoot>();
+                typeof(GameRoot).GetProperty("Save").SetValue(root, f.Runtime);
+                root.AttachSaveServiceForTests(service);
+                var passive = PhaseFourTestSupport.PassiveMana(f.Profile.Canonical);
+                var online = new CanonicalPassiveManaService(passive, f.Economy, new FormulaEngine(), f.Profile.Canonical.Spatial, 1);
+                var calculated = new CanonicalOfflinePassiveManaService(passive, online).Resolve(f.Runtime, f.Configuration,
+                    Math.Max(1, f.Runtime.lastSavedUtcUnix) + 3600);
+                var committed = service.CommitOfflinePassiveMana(f.Runtime, calculated);
+                Assert.That(committed.Persisted, Is.True, committed.Reason.ToString());
+                var after = root.Save.runHistory.LatestOutcome;
+                Assert.That(after.Party, Is.SameAs(before.Party));
+                Assert.That(after.EncounterEvents, Is.SameAs(before.EncounterEvents));
+                Assert.That(after.BranchOutcomes, Is.SameAs(before.BranchOutcomes));
+                Assert.That(after.FloorTransitions, Is.SameAs(before.FloorTransitions));
+                Assert.That(after.DepthObjective, Is.SameAs(before.DepthObjective));
+
+                var reopened = DetachedCanonicalSaveSession.Open(f.FileSystem.ReadAllBytes(f.ActivePath), f.Context, f.Profile);
+                Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
+                var validation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                    f.FileSystem.ReadAllBytes(f.ActivePath), f.Context);
+                Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(validation, f.Production,
+                    out SaveData durableSave, out string reason), Is.True, reason);
+                var durable = durableSave.runHistory.LatestOutcome ?? durableSave.runHistory.RecentOutcomes.Last();
+                Assert.That(durable.Party, Is.Null); Assert.That(durable.EncounterEvents, Is.Null);
+                Assert.That(durable.BranchOutcomes, Is.Null); Assert.That(durable.FloorTransitions, Is.Null);
+                Assert.That(durable.DepthObjective, Is.Null);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
         }
 
         [Test]

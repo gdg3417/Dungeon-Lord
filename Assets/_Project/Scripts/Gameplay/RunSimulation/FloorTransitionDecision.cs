@@ -32,9 +32,21 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     {
         public string Mode { get; }
         public string RuleSourceId { get; }
-        internal TransientDepthObjective(string mode, string rule) { Mode = mode; RuleSourceId = rule; }
-        public double Pull(int currentFloorIndex, bool hasNext) => !hasNext || Mode == "shallow" ? 0 :
-            Mode == "deepest_reasonable" || (Mode == "target_depth" && currentFloorIndex == 0) ? 1 : 0;
+        public double PullStrength { get; }
+        public int TargetFloorIndex { get; }
+        internal TransientDepthObjective(DepthObjectiveWeight definition, string rule)
+        {
+            Mode = definition.Mode;
+            RuleSourceId = rule;
+            PullStrength = definition.PullStrength;
+            TargetFloorIndex = definition.TargetFloorIndex;
+        }
+        public double Pull(int currentFloorIndex, bool hasNext)
+        {
+            if (!hasNext || Mode == "shallow") return 0;
+            if (Mode == "deepest_reasonable") return PullStrength;
+            return Mode == "target_depth" && currentFloorIndex < TargetFloorIndex ? PullStrength : 0;
+        }
         public static TransientDepthObjective Select(PhaseSixRunConfig c, string runId)
         {
             if (!PhaseSixRunConfigValidation.IsValid(c)) throw new ArgumentException(PhaseSixRunConfigValidation.Invalid);
@@ -45,9 +57,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 if (entry.Weight <= 0) continue;
                 last = entry; cumulative += entry.Weight / total;
-                if (roll < cumulative) return new TransientDepthObjective(entry.Mode, c.ObjectiveRuleSourceId);
+                if (roll < cumulative) return new TransientDepthObjective(entry, c.ObjectiveRuleSourceId);
             }
-            return new TransientDepthObjective(last.Mode, c.ObjectiveRuleSourceId);
+            return new TransientDepthObjective(last, c.ObjectiveRuleSourceId);
         }
     }
 

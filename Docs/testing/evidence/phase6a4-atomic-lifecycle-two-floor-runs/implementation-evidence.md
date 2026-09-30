@@ -21,11 +21,13 @@ Loot and casualty evidence accumulate across floors. Extraction, attraction, for
 
 ## Determinism and configuration
 
-Production `run_simulation_config.json` owns the approved Phase Six weights, references, thresholds, behavior minima, uncertainty, objective entries, rule sources, and workload limits. Validation rejects malformed/nonfinite/negative/duplicate/unsupported/zero-total values as applicable. Appeal derives its total weight from configuration; objective selection normalizes configured weights in ordinal mode order.
+Production `run_simulation_config.json` owns the approved Phase Six weights, references, thresholds, behavior minima, uncertainty, objective entries, rule sources, and workload limits. Objective definitions own selection `Weight`, normalized `PullStrength`, and an applicable zero-based `TargetFloorIndex`: shallow is `0.20 / 0.00`, target_depth is `0.50 / 0.75 / 1` (Floor 2), and deepest_reasonable is `0.30 / 0.50`. Selection Weight controls assignment frequency, PullStrength controls the active objective's normalized deeper pressure, and the separate global ObjectiveWeight controls that pressure's importance in descent appeal. Runtime reads both target and pull from the selected definition. Validation rejects malformed/nonfinite/out-of-range/negative/duplicate/unsupported/zero-total values, missing or contradictory targets, unsupported rule sources, more than five Active floors, and more than four transitions. Appeal derives its total weight from configuration; objective selection normalizes configured weights in ordinal mode order.
 
 Transition identity is `(RuleSourceId, RunId, CurrentFloorInstanceId, NextFloorInstanceId)` using configured `run.floor_transition_decision.phase6.v1`. Objective identity is `(RuleSourceId, RunId)` using configured `run.depth_objective.phase6.v1`. Each field is UTF-8 with unsigned 32-bit big-endian byte length, followed by SHA-256; the first unsigned big-endian word divided by 4294967296.0 gives [0,1). These are independent of Phase 5B branch rolls and call order. Marginal equality exits; appeal equality exits at ExitThreshold and descends at DescendThreshold. Survivability equality proceeds to appeal. No next floor exits without a marginal roll.
 
 Transition perception is explicit and separate from actual snapshotted content. A4 supplies unknown reward/danger and configured uncertainty. Hidden Floor 2 content cannot affect Floor 1's unknown-perception decision; it can affect later Floor 2 encounters after descent. Durable shared floor knowledge is unimplemented, and sharedBranchKnowledge remains branch-specific.
+
+`RunTransientEvidence.Retain` is the single same-session retention helper for Party, EncounterEvents, BranchOutcomes, FloorTransitions, and DepthObjective. `GameRoot.PublishCanonicalRuntime` invokes it before replacing the live Save reference, matching records by RunId and TickStarted. A later offline/canonical publication therefore retains complete A4 diagnostics in memory. Those properties remain unserialized, and canonical reopen does not fabricate them.
 
 ## Lifecycle and persistence
 
@@ -41,6 +43,12 @@ Local XML reports are under TestResults and are not committed artifacts.
 
 | Run | Total | Passed | Failed | Skipped |
 |---|---:|---:|---:|---:|
+| PR-review objective/configuration and evidence-retention corrections | 25 | 25 | 0 | 0 |
+| Complete focused A4 after review corrections | 61 | 61 | 0 | 0 |
+| Relevant Phase 5B / Phase 6 / route / save / mana / validation regressions after review corrections | 617 | 617 | 0 | 0 |
+| Full EditMode after review corrections | 1264 | 1264 | 0 | 0 |
+| Full PlayMode after review corrections | 2763 | 2753 | 0 | 10 |
+| Explicit production/configuration/localization/layout/build-gate validation after review corrections | 62 | 62 | 0 | 0 |
 | Targeted startup/offline publication | 1 | 1 | 0 | 0 |
 | Complete focused A4 | 49 | 49 | 0 | 0 |
 | Initial relevant regression suite | 556 | 555 | 1 | 0 |
@@ -58,13 +66,13 @@ The initial regression failure was a stale A2 expectation that any second Active
 
 The initial full EditMode failures were four older canonical-run fixtures that omitted loot configuration. They now use the existing Phase 5B service helper with production loot inputs; all four targeted cases pass. No production redesign was required.
 
-The initial full PlayMode failures were eight tests sharing one legacy `BuildConfig` fixture that omitted the new required typed Phase Six configuration. The fixture now uses the validated A4 test configuration. The eight targeted cases, the 126-case containing regression class, and the final full PlayMode suite pass. The ten final skips are the established set: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse filesystem check, and the Windows Player-only standalone qualification test.
+The initial full PlayMode failures were eight tests sharing one legacy `BuildConfig` fixture that omitted the new required typed Phase Six configuration. The fixture now uses the validated A4 test configuration. The eight targeted cases, the 126-case containing regression class, and the final full PlayMode suite pass. The ten final skips after review corrections are unchanged from the prior qualified set: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse filesystem check, and the Windows Player-only standalone qualification test.
 
 English localization parses with 968 entries, including 29 new keys and zero duplicate keys. Production run configuration JSON parses, typed Phase Six validation passes, and the combined production spatial build-gate, Bootstrap configuration, localization/string-table, and floor-layout validation selection passed 79/79 in the final EditMode run.
 
 Final `git diff --check` passes. Git emits line-ending conversion advisories for existing working-copy settings but reports no whitespace errors.
 
-The Windows x86_64 Development Build passed with wrapper exit 0 under Unity 6000.3.2f1. `BuildWindowsDevelopment` produced a Development Build for `StandaloneWindows64` with only `Assets/_Project/Scenes/Bootstrap.unity`, result Succeeded, 170,667,976 bytes, 0 errors, and 1 warning. The warning is the established missing Unity Cloud access token for native-symbol upload; the log also reports the pre-existing empty `Assets/_Project/Tests 1/Tests 1.asmdef`. The production spatial preprocessor/build gate passed. Output: `Builds/Development/Windows/Dungeon Lord.exe`; report SHA-256 `32A81FF640867D6590FD808A9272B92903619751053B4CF49479C843B23340A2`; provenance SHA-256 `90EA8CE171BB1979F2833466B188BD80D6240FD60D7AACC524066C2EBDE0C867`.
+The post-review Windows x86_64 Development Build passed with wrapper exit 0 under Unity 6000.3.2f1. `BuildWindowsDevelopment` produced a Development Build for `StandaloneWindows64` with only `Assets/_Project/Scenes/Bootstrap.unity`, result Success, a 162.8 MB Unity report / 170,911,938-byte output tree, 0 build errors, and the established warning that Unity Cloud native-symbol upload credentials are unavailable. The production spatial preprocessor/build gate passed. Output: `Builds/Development/Windows/Dungeon Lord.exe`; executable SHA-256 `ABC8179E345B70C9D7CA423C54E02739ED9B9ADCA668C2C745FFB81AADC05CC6`; provenance SHA-256 `A3E9B1507E47B3EC7DCF930549B5F084B9804AEB60AE8578D1E187D819F7E9AD`.
 
 No owner manual Unity Editor, Development Build gameplay, standalone, or close/reopen qualification has been performed for A4. External review must finish and blockers must be corrected before asking the owner to qualify a stable branch.
 

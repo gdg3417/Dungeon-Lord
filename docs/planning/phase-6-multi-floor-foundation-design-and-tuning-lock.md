@@ -101,13 +101,13 @@ Validation requires every reference value to be finite and positive. Unknown rew
 
 At run formation, MVP deterministically assigns a transient party-level depth objective from stable run identity and an explicit configuration-owned rule source; it must not reuse branch/transition marginal rolls.
 
-| Mode | Weight | Behavior |
-| --- | ---: | --- |
-| shallow | 0.20 | no deeper pull |
-| target depth | 0.50 | targets Floor 2 in the Phase 6 two-floor game until reached, then resolves |
-| deepest reasonable | 0.30 | pulls deeper while another active floor exists, subject to survivability |
+| Mode | Selection Weight | PullStrength | TargetFloorIndex | Behavior |
+| --- | ---: | ---: | ---: | --- |
+| shallow | 0.20 | 0.00 | not applicable | no deeper pull |
+| target depth | 0.50 | 0.75 | 1 (Floor 2) | pulls toward the configured target while it remains ahead and another Active floor exists; resolves at or beyond the target |
+| deepest reasonable | 0.30 | 0.50 | not applicable | pulls deeper while another Active floor exists, subject to survivability |
 
-These are configuration-owned selection weights. Validation requires each weight to be finite and nonnegative, with a finite total greater than zero. Runtime normalizes the configured collection for deterministic selection; it must not hardcode 20/50/30 probabilities or require future authored weights to sum to `1.0`. Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets may influence formation without replacing the transition system.
+Each objective definition is configuration-owned. `SelectionWeight` controls deterministic assignment frequency and is normalized at runtime in canonical mode order. `PullStrength` controls the selected objective's normalized deeper pressure through `ObjectiveTerm = CurrentDepthObjectivePull`. The separate global `ObjectiveWeight` controls how important that pressure is relative to reward, survivability, danger, uncertainty, and carried-loot preservation. Validation requires selection weights and pull strengths to be finite and in their supported domains, a finite positive selection-weight total, shallow to have zero pull, and target depth to name a valid deeper zero-based FloorIndex. Runtime must not hardcode 20/50/30 probabilities, a Floor 2 condition, or objective pull magnitude. Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets are not implemented by A4.
 
 Phase 6 approves shared floor-level knowledge, separate from branch knowledge, representing stable floor identity, topology/applicability fingerprint or equivalent, reward/danger known flags and perceptions, shared confidence, and last-confirmed run identity or equivalent evidence. Compatible survivor reports may create/reconfirm/update it. A wipe must not generate precise detailed knowledge from internal simulation; current coarse outside-world wipe/death evidence continues under its own authority. Material topology/content changes invalidate stale applicability.
 

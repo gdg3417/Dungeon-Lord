@@ -14,9 +14,11 @@ Baseline: merged PR #217, `756607cca58aac584f69cdc3b4c27d30b58eefad`. **This is 
 
 Transition identity is `(run.floor_transition_decision.phase6.v1, RunId, CurrentFloorInstanceId, NextFloorInstanceId)`; objective identity is `(run.depth_objective.phase6.v1, RunId)`. Config owns both sources. Length-prefixed UTF-8 fields, SHA-256, and the first unsigned big-endian 32-bit word produce independent deterministic rolls. Equality exits for marginal decisions. A wipe or retreat before Completion makes no transition decision; no next Active floor exits without a roll.
 
-Typed production configuration owns all approved tuning, references, minima, thresholds, uncertainty, objective weights, and workload limits. Objective weights normalize in canonical mode order. Unknown Floor 2 perception uses configured uncertainty without inspecting hidden reward/danger content. Shared branch knowledge is not repurposed.
+Typed production configuration owns all approved tuning, references, minima, thresholds, uncertainty, objective definitions, and workload limits. Objective selection weights normalize in canonical mode order. Shallow uses Weight 0.20 and PullStrength 0.00; target_depth uses Weight 0.50, PullStrength 0.75, and TargetFloorIndex 1 (Floor 2); deepest_reasonable uses Weight 0.30 and PullStrength 0.50. Selection Weight controls assignment frequency, PullStrength controls the selected objective's normalized deeper pressure, and global ObjectiveWeight controls its relative importance in descent appeal. Runtime owns neither a hidden Floor 2 condition nor objective pull tuning. Validation enforces the exact objective/transition rule sources and the approved five-Active-floor/four-transition scope. Unknown Floor 2 perception uses configured uncertainty without inspecting hidden reward/danger content. Shared branch knowledge is not repurposed.
 
 Loot stays carried across descent. Extraction, Heat, cooling, attraction, forecast, demand, branch learning, history, sequence, objective evaluation, and durable publication occur once at complete termination. There is no between-floor checkpoint.
+
+Later same-session canonical publications preserve Party, EncounterEvents, BranchOutcomes, FloorTransitions, and DepthObjective through the single `RunTransientEvidence.Retain` helper using RunId/TickStarted identity. These fields remain transient: durable serialization omits them, and reopen does not reconstruct them from current tuning.
 
 ## Lifecycle, compatibility, and UI
 
@@ -28,13 +30,13 @@ Schema stays **11**, with **no migration**. No party, ordinary HP, snapshot, tra
 
 ## Validation
 
-- Targeted startup regression: 1/1 passed, zero skips.
-- Focused A4: 49/49 passed, zero skips.
-- Relevant regression cases in final EditMode: 556/556 passed, zero skips. The obsolete A2 second-Active-floor rejection assertion was updated.
-- Full EditMode: 1,252/1,252 passed, zero skips. Four older canonical-run fixtures now supply loot through the existing Phase 5B helper.
-- Full PlayMode: 2,751 total, 2,741 passed, zero failed, 10 expected skips. One legacy config fixture now supplies the required typed Phase Six test config; its 8 affected cases and 126-case containing regression class pass.
-- Production/configuration/localization/floor-layout/build-gate validation: 79/79 passed in the final EditMode run. English localization has 968 entries, 29 additions, and zero duplicate keys.
-- Windows x86_64 Development Build: passed with wrapper exit 0, Bootstrap-only scene, 170,667,976 bytes, 0 errors, and 1 warning for unavailable Unity Cloud native-symbol upload credentials.
+- PR-review objective/configuration and evidence-retention corrections: 25/25 passed, zero skips.
+- Focused A4 after review corrections: 61/61 passed, zero skips.
+- Relevant Phase 5B / Phase 6 / route / save / mana / validation regressions: 617/617 passed, zero skips.
+- Full EditMode: 1,264/1,264 passed, zero skips.
+- Full PlayMode: 2,763 total, 2,753 passed, zero failed, 10 expected skips. The skip set is unchanged: eight synchronous EditMode-only GameRoot fixtures, the non-Windows inverse filesystem check, and the Windows Player-only standalone qualification test.
+- Production/configuration/localization/floor-layout/build-gate validation: 62/62 passed. English localization has 968 entries, 29 A4 additions, and zero duplicate keys.
+- Windows x86_64 Development Build: passed with wrapper exit 0 under Unity 6000.3.2f1, Bootstrap-only scene, a 162.8 MB Unity report / 170,911,938-byte output tree, zero build errors, and the established unavailable Unity Cloud native-symbol credentials warning.
 - Final `git diff --check`: passed with no whitespace errors.
 - No owner manual qualification has been performed. External review and correction of blockers must precede asking the owner to qualify the stable Editor and Windows build/standalone behavior.
 

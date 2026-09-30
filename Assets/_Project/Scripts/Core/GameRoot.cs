@@ -733,18 +733,7 @@ namespace DungeonBuilder.M0
             if (published == null || _explicitSaveDeleteQuiesced) return;
             // Durable readback replaces SaveData. Retain same-session transient evidence by run identity;
             // never reconstruct a historical roster from current tuning or serialize individual members.
-            RunOutcomeRecord[] previousRuns = Save?.runHistory?.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>();
-            foreach (RunOutcomeRecord run in (published.runHistory?.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>())
-                .Concat(new[] { published.runHistory?.LatestOutcome }))
-            {
-                if (run == null) continue;
-                RunOutcomeRecord previous = previousRuns.Concat(new[] { Save?.runHistory?.LatestOutcome })
-                    .FirstOrDefault(p => p != null && p.RunId == run.RunId && p.TickStarted == run.TickStarted);
-                if (previous == null) continue;
-                run.Party = previous.Party;
-                run.EncounterEvents = previous.EncounterEvents;
-                run.BranchOutcomes = previous.BranchOutcomes;
-            }
+            RunTransientEvidence.Retain(Save, published);
             Save = published;
             CurrentHeat = Save.structureRuntime?.Heat ?? 0d;
             StructuralConstructionPreview = null;
