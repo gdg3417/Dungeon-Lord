@@ -83,6 +83,7 @@ namespace DungeonBuilder.M0
         private CardinalOrientation _selectedStructuralOrientation;
         private string _selectedStructuralTerminalConnectionPointId;
         private string _structuralFeedback = string.Empty;
+        private string _lifecycleFeedback = string.Empty;
         private string _selectedRenovationRoomInstanceId;
         private string _selectedBranchOriginNodeId;
         private string _selectedBranchConnectionPointId;
@@ -118,6 +119,7 @@ namespace DungeonBuilder.M0
         public CardinalOrientation SelectedStructuralOrientation => _selectedStructuralOrientation;
         public string SelectedStructuralTerminalConnectionPointId => _selectedStructuralTerminalConnectionPointId;
         public string StructuralFeedback => _structuralFeedback;
+        public string LifecycleFeedback => _lifecycleFeedback;
         public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
         public bool StructuralRenovationControlsAvailable => ResolveRenovationRoomIds().Length != 0;
         public bool OptionalBranchControlsAvailable => ResolveBranchOriginNodeIds().Length != 0;
@@ -167,6 +169,17 @@ namespace DungeonBuilder.M0
         {
             _structuralFeedback = string.Empty;
             RefreshStructuralConstructionAuthority();
+        }
+
+        public DetachedCanonicalWriteResult CommitFloorLifecycle(FloorLifecycleAction action)
+        {
+            var changed = _root.CommitFloorLifecycle(action);
+            string key = changed.IsSuccess ? "ui.floor.lifecycle_success" :
+                string.IsNullOrEmpty(changed.Reason) ? "floor.lifecycle.invalid_state" : changed.Reason;
+            _lifecycleFeedback = GetLocalizedString(key,
+                GetLocalizedString("floor.lifecycle.invalid_state"));
+            RefreshOverlayText();
+            return changed;
         }
 
         public string[] SelectableStructuralRoomDefinitionIds => ResolveCanonicalStructuralRooms()
@@ -1783,7 +1796,7 @@ namespace DungeonBuilder.M0
                 GUILayout.Width(Mathf.Max(1f, panelRect.width - MinimalMvpActionPanelScrollBarWidth)));
             GUILayout.Label(labels.Title, compactLabel, labelHeight);
             if (_root.Save?.validatedCanonicalSpatialState != null)
-                DrawFloorConstructionControls(compactLabel, compactButton, buttonHeight);
+                DrawFloorConstructionControls(compactLabel, compactButton, wrappedLabel, buttonHeight);
             GUILayout.Label(labels.CategoryLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.SelectedStructureLabel, compactLabel, labelHeight);
             GUILayout.Label(labels.PostureLabel, compactLabel, labelHeight);
@@ -2165,7 +2178,8 @@ namespace DungeonBuilder.M0
         private SavedSpatialFloor ResolveActiveSpatialFloor() =>
             _root?.SelectedCanonicalFloor;
 
-        private void DrawFloorConstructionControls(GUIStyle label, GUIStyle button, GUILayoutOption buttonHeight)
+        private void DrawFloorConstructionControls(GUIStyle label, GUIStyle button,
+            GUIStyle wrappedLabel, GUILayoutOption buttonHeight)
         {
             SavedSpatialFloor selected = _root.SelectedCanonicalFloor;
             if (selected != null)
@@ -2181,11 +2195,10 @@ namespace DungeonBuilder.M0
                 string key = action == FloorLifecycleAction.Activate ? "ui.floor.activate" :
                     action == FloorLifecycleAction.Deactivate ? "ui.floor.deactivate" : "ui.floor.activate_all";
                 if (GUILayout.Button(GetLocalizedString(key), button, buttonHeight))
-                {
-                    var changed = _root.CommitFloorLifecycle(action);
-                    _structuralFeedback = GetLocalizedString(changed.IsSuccess ? "ui.floor.lifecycle_success" : changed.Reason);
-                }
+                    CommitFloorLifecycle(action);
             }
+            if (!string.IsNullOrEmpty(_lifecycleFeedback))
+                GUILayout.Label(_lifecycleFeedback, wrappedLabel);
             FloorConstructionPreview preview = _root.FloorConstructionPreview ?? _root.PreviewFloorConstruction();
             if (GUILayout.Button(GetLocalizedString("ui.floor.refresh"), button, buttonHeight))
                 preview = _root.PreviewFloorConstruction();

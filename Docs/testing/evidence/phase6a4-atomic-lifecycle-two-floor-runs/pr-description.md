@@ -2,6 +2,10 @@ Constructed Floor 2 could be inspected for eligibility but could not be safely a
 
 Baseline: merged PR #217, `756607cca58aac584f69cdc3b4c27d30b58eefad`. **This is not Phase 6 closeout.**
 
+Owner manual Editor qualification stopped at head `269d2d3760f592aabbc08c023afa49485777a421` when eligible constructed-Inactive Floor 2 did not activate or show a result. The underlying candidate failed strict spatial round-trip with `NonCanonicalBytes` (`gd66.transaction.candidate_invalid`): Unity's detached JSON clone changed NativeCanonical null migration metadata to empty strings, and `SerializeMembers` omitted the normalization already used by full spatial serialization. Member serialization now calls that same normalization before emission. Validators, atomic persistence, snapshot preflight, schema 11, and ownership remain unchanged. Migrated-only lifecycle fixtures missed this native-save shape. Read-only owner-save preparation/preview now passes; the owner save was never written and temporary diagnostics were removed.
+
+Lifecycle feedback has independent persistent state immediately below its buttons. Native/migrated GameRoot integration covers activation/deactivation/reactivation, readback/reopen, no unrelated state changes, feedback, and Activate All no-op. Invalid-layout failure stays readable and blocked. Eight missing exact technical-save localization keys were added and all lifecycle reasons are covered. The existing `floor.activation.layout_invalid` authority/table mapping was already correct and is preserved. Owner manual qualification remains incomplete and must resume after external re-review.
+
 ## Runtime and activation safety
 
 - `CanonicalRunnableFloorProjection` provides the shared per-floor runtime interpretation. A3 eligibility and A4 runtime share `RequiredFloorTraversal`: traversal stops at the first reached Completion and never executes rooms beyond it.
@@ -30,6 +34,8 @@ Schema stays **11**, with **no migration**. No party, ordinary HP, snapshot, tra
 
 ## Validation
 
+Current correction: focused A4/save tests 172/172; relevant regressions and full EditMode 1,271/1,271; full PlayMode 2,770 total with 2,760 passed, zero failed, and the same ten expected skips; explicit production/configuration/localization/build-gate selection 173/173 and layout/migration-localization selection 82/82. English Bootstrap table has 976 unique entries. Windows x86_64 Development Build passed (Unity 6000.3.2f1, Bootstrap-only Development Build, zero errors, one established Unity Cloud symbol-upload warning); scoped git diff --check passed. Owner manual qualification stopped at the earlier activation failure and has not resumed. Historical results on prior reviewed heads follow.
+
 - Review 2 targeted objective/lifecycle tests: 4/4 passed; SaveService no-op publication test: 1/1 passed; zero skips.
 - Focused A4: 64/64 passed, zero skips.
 - Relevant Phase 5B / Phase 6 / lifecycle / route / save regressions: 620/620 passed, zero skips.
@@ -38,7 +44,7 @@ Schema stays **11**, with **no migration**. No party, ordinary HP, snapshot, tra
 - Production/configuration/localization/floor-layout/build-gate validation: 62/62 passed. English localization has 968 entries, 29 A4 additions, and zero duplicate keys.
 - Windows x86_64 Development Build: passed with wrapper exit 0 under Unity 6000.3.2f1, Bootstrap-only scene, a 162.8 MB Unity report / 170,912,558-byte output tree, zero build errors, and the established unavailable Unity Cloud native-symbol credentials warning.
 - Final `git diff --check`: passed with no whitespace errors.
-- No owner manual qualification has been performed. External review and correction of blockers must precede asking the owner to qualify the stable Editor and Windows build/standalone behavior.
+- At that earlier automated checkpoint owner manual qualification had not yet begun; it subsequently stopped on the activation failure described above. Corrected Editor and Windows standalone manual qualification remain pending after external re-review.
 
 ## Accepted limits and A5 boundary
 

@@ -67,6 +67,173 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Serializable] private sealed class InvestmentEnvelope { public StructuralInvestmentRecord[] Values; }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ConstructedFloorActivationPublishesThroughGameRootAndShowsLocalFeedback(bool nativeAuthority)
+        {
+            var f = Eligible();
+            AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId);
+            AddContent(f, 1, MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId);
+            if (nativeAuthority)
+            {
+                // Native saves have no migration metadata. Unity's detached JSON clone
+                // materializes those null strings as empty strings, unlike migrated fixtures.
+                f.State.Authority.CreationKind = CanonicalSpatialCreationKind.NativeCanonical;
+                f.State.Authority.MigrationTransactionId = null;
+                f.State.Authority.MigrationDescriptorFingerprint = null;
+                f = f.Rebase(f.State);
+            }
+            f.Reopen();
+            var before = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            Assert.That(before.IsValid, Is.True, before.Reason);
+            string originalSpatial = JsonUtility.ToJson(before.State);
+            string originalInvestment = JsonUtility.ToJson(new InvestmentEnvelope { Values = before.Investment });
+            double originalMana = f.Runtime.structureRuntime.ManaReserve;
+            var go = new GameObject("PhaseSixA4GameRootActivation"); go.SetActive(false);
+            try
+            {
+                var root = StructuralConstructionGameRootTests.PurchaseRoot(go, f);
+                ConfigureLifecycle(root, f);
+                var overlay = go.AddComponent<BootstrapOverlay>(); overlay.Bind(root);
+                root.CycleSelectedCanonicalFloor();
+                Assert.That(root.SelectedCanonicalFloor.FloorIndex, Is.EqualTo(1));
+                Assert.That(root.SelectedCanonicalFloor.ActivationState, Is.EqualTo(FloorActivationState.Inactive));
+                Assert.That(root.Save.completedResearch.ProjectIds, Does.Contain("ac_100"));
+                Assert.That(root.SaveService.PreviewFloorLifecycle(root.Save, FloorLifecycleAction.Activate,
+                    FloorTwo(f)).IsCommittable, Is.True);
+                var result = overlay.CommitFloorLifecycle(FloorLifecycleAction.Activate);
+                Assert.That(result.IsSuccess, Is.True, result.Reason);
+                Assert.That(root.Save.validatedCanonicalSpatialState.Floors.Single(x => x.FloorIndex == 1)
+                    .ActivationState, Is.EqualTo(FloorActivationState.Active));
+                Assert.That(CanonicalActiveFloorResolver.TryResolve(root.Save, f.Profile.Canonical.Spatial,
+                    out int activeCount), Is.True);
+                Assert.That(activeCount, Is.EqualTo(2));
+                Assert.That(overlay.LifecycleFeedback,
+                    Is.EqualTo(root.Content.GetString("ui.floor.lifecycle_success", "")));
+                foreach (var action in new[] { FloorLifecycleAction.Deactivate, FloorLifecycleAction.Activate })
+                {
+                    var next = overlay.CommitFloorLifecycle(action);
+                    Assert.That(next.IsSuccess, Is.True, next.Reason);
+                    byte[] durable = f.FileSystem.ReadAllBytes(f.ActivePath);
+                    CollectionAssert.AreEqual(durable, root.SaveService.CanonicalSession.GetCurrentBytes());
+                    Assert.That(DetachedCanonicalSaveSession.Open(durable, f.Context, f.Profile).IsSuccess, Is.True);
+                    var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(durable, f.Context);
+                    Assert.That(reopened.IsValid, Is.True, reopened.Reason);
+                    Assert.That(reopened.State.Floors.Single(x => x.FloorIndex == 0).ActivationState,
+                        Is.EqualTo(FloorActivationState.Active));
+                    Assert.That(CanonicalActiveFloorResolver.TryResolve(root.Save, f.Profile.Canonical.Spatial,
+                        out activeCount), Is.True);
+                    Assert.That(activeCount, Is.EqualTo(action == FloorLifecycleAction.Activate ? 2 : 1));
+                    Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(originalMana));
+                    Assert.That(JsonUtility.ToJson(new InvestmentEnvelope { Values = reopened.Investment }),
+                        Is.EqualTo(originalInvestment));
+                    // Compare every canonical identity/content/geometry/custody field after
+                    // removing only the intended lifecycle difference on the detached readback.
+                    reopened.State.Floors.Single(x => x.FloorIndex == 1).ActivationState = FloorActivationState.Inactive;
+                    Assert.That(JsonUtility.ToJson(reopened.State), Is.EqualTo(originalSpatial));
+                }
+                overlay.SynchronizeStructuralConstructionPublication();
+                overlay.RefreshStructuralConstructionAuthority();
+                Assert.That(overlay.LifecycleFeedback, Is.Not.Empty);
+                var repeated = overlay.CommitFloorLifecycle(FloorLifecycleAction.ActivateAllEligible);
+                Assert.That(repeated.IsSuccess, Is.True, repeated.Reason);
+                Assert.That(repeated.IsNoOp, Is.True);
+                Assert.That(overlay.LifecycleFeedback,
+                    Is.EqualTo(root.Content.GetString("ui.floor.lifecycle_success", "")));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void IncompleteConstructedFloorShowsExactReadableBlockerThroughGameRoot()
+        {
+            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            f.Runtime.completedResearch = new CompletedResearchState { ProjectIds = new[] { "ac_100" } };
+            var go = new GameObject("PhaseSixA4GameRootBlockedActivation"); go.SetActive(false);
+            try
+            {
+                var root = StructuralConstructionGameRootTests.PurchaseRoot(go, f);
+                ConfigureLifecycle(root, f);
+                Assert.That(root.PreviewFloorConstruction().IsCommittable, Is.True);
+                Assert.That(root.CommitFloorConstruction().IsSuccess, Is.True);
+                root.CycleSelectedCanonicalFloor();
+                var overlay = go.AddComponent<BootstrapOverlay>(); overlay.Bind(root);
+                Assert.That(root.SelectedCanonicalFloor.ActivationState, Is.EqualTo(FloorActivationState.Inactive));
+                byte[] before = f.FileSystem.ReadAllBytes(f.ActivePath);
+                var result = overlay.CommitFloorLifecycle(FloorLifecycleAction.Activate);
+                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.Reason, Is.EqualTo(FloorActivationEligibilityReasons.ActivationLayoutInvalid));
+                Assert.That(root.SelectedCanonicalFloor.ActivationState, Is.EqualTo(FloorActivationState.Inactive));
+                Assert.That(overlay.LifecycleFeedback,
+                    Is.EqualTo(root.Content.GetString(result.Reason, "")));
+                Assert.That(overlay.LifecycleFeedback, Is.Not.Empty.And.Not.EqualTo(result.Reason));
+                overlay.SynchronizeStructuralConstructionPublication();
+                overlay.RefreshStructuralConstructionAuthority();
+                Assert.That(overlay.LifecycleFeedback, Is.Not.Empty);
+                var all = overlay.CommitFloorLifecycle(FloorLifecycleAction.ActivateAllEligible);
+                Assert.That(all.IsSuccess, Is.False);
+                Assert.That(all.Reason, Is.EqualTo(result.Reason));
+                Assert.That(overlay.LifecycleFeedback,
+                    Is.EqualTo(root.Content.GetString(all.Reason, "")));
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        [Test]
+        public void EveryFloorLifecycleReasonHasReadableEnglishLocalization()
+        {
+            var f = Eligible();
+            var go = new GameObject("PhaseSixA4LifecycleLocalization"); go.SetActive(false);
+            try
+            {
+                var root = StructuralConstructionGameRootTests.PurchaseRoot(go, f);
+                string[] reasons = {
+                    FloorActivationEligibilityReasons.InvalidContext,
+                    FloorActivationEligibilityReasons.CanonicalStateInvalid,
+                    FloorActivationEligibilityReasons.TargetConfigurationInvalid,
+                    FloorActivationEligibilityReasons.TargetIdentityInvalid,
+                    FloorActivationEligibilityReasons.TargetNotConstructed,
+                    FloorActivationEligibilityReasons.TargetAlreadyActive,
+                    FloorActivationEligibilityReasons.ResearchConfigurationInvalid,
+                    FloorActivationEligibilityReasons.ResearchRequired,
+                    FloorActivationEligibilityReasons.ShallowerFloorInactive,
+                    FloorActivationEligibilityReasons.ActivationLayoutInvalid,
+                    FloorActivationEligibilityReasons.RequiredRouteMissingRoom,
+                    FloorActivationEligibilityReasons.ProductionSemanticsInvalid,
+                    "floor.lifecycle.invalid_state", "floor.lifecycle.first_floor_required",
+                    "floor.lifecycle.stale_session",
+                    DetachedCanonicalWriteAuthority.AtomicSaveFailedReason,
+                    DetachedCanonicalWriteAuthority.RecoveryRequiredReason,
+                    DetachedCanonicalSpatialMutation.ValidationFailedReason,
+                    CanonicalMvpRouteProjection.ContradictoryAuthorityReason,
+                    DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
+                    DetachedWholeSaveCandidateSerializer.WorkloadExceededReason,
+                    DetachedWholeSaveCandidateSerializer.UnknownMemberUnpreservableReason,
+                    RawSavePayloadClassifier.UnreadableReason
+                };
+                Assert.That(FloorActivationEligibilityReasons.ActivationLayoutInvalid,
+                    Is.EqualTo("floor.activation.layout_invalid"));
+                foreach (string reason in reasons)
+                {
+                    string localized = root.Content.GetString(reason, reason);
+                    Assert.That(localized, Is.Not.Empty.And.Not.EqualTo(reason), reason);
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+
+        private static void ConfigureLifecycle(GameRoot root, Fixture f)
+        {
+            root.SaveService.ConfigureRunLoot(Loot());
+            root.SaveService.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+        }
+
         [Test]
         public void CommitReresolvesPermissionAndPublishesNothingWhenBlocked()
         {
