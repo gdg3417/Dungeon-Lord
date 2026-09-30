@@ -60,6 +60,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             return new RunSimulationConfig
             { PhaseFiveB = PhaseFiveBTestConfig.Create(),
+                PhaseSix = DungeonBuilder.M0.Tests.EditMode.PhaseSixA4Tests.Config().PhaseSix,
                 BaseSuccessChance = 0.6d,
                 HeatPenaltyPerPoint = 0.004d,
                 ManaReserveBonusPerPoint = 0.01d,

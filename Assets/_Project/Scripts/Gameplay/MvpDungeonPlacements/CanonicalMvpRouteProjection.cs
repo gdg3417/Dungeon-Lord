@@ -141,153 +141,26 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
             DetachedCanonicalSpatialSaveState state, RunSimulationConfig config,
             ProductionSpatialContentSnapshot production)
         {
-            try
-            {
-                if (!MarkerIsValid(state?.Authority) || state.Floors == null)
-                    return Contradictory();
-                if (state.Floors.Length == 0)
-                    return Valid(Array.Empty<MvpOrderedRouteRoom>());
-                if (state.Floors.Any(value => value == null || value.FloorIndex < 0 || string.IsNullOrWhiteSpace(value.FloorInstanceId)) ||
-                    state.Floors.Select(value => value.FloorIndex).Distinct().Count() != state.Floors.Length ||
-                    state.Floors.Select(value => value.FloorInstanceId).Distinct(StringComparer.Ordinal).Count() != state.Floors.Length ||
-                    state.Floors.Count(value => value.ActivationState == FloorActivationState.Active) != 1 ||
-                    state.Floors.Any(value => value.FloorIndex > 0 && value.ActivationState != FloorActivationState.Inactive))
-                    return Contradictory();
-                SavedSpatialFloor floor = state.Floors.SingleOrDefault(value => value.FloorIndex == 0 &&
-                    value.ActivationState == FloorActivationState.Active);
-                if (floor == null) return Contradictory();
-                if (floor.Layout == null || floor.RoomContents == null)
-                    return Contradictory();
-                RoomSpatialInstance[] rooms = floor.Layout.Rooms;
-                FloorRouteNode[] nodes = floor.Layout.Nodes;
-                FloorRouteEdge[] edges = floor.Layout.Edges;
-                CanonicalRoomSemantics[] semanticValues = floor.RoomContents.RoomSemantics;
-                RoomContentAssignment[] assignments = floor.RoomContents.Assignments;
-                if (rooms == null || nodes == null || edges == null || semanticValues == null ||
-                    assignments == null) return Contradictory();
-
-                var roomById = new Dictionary<string, RoomSpatialInstance>(StringComparer.Ordinal);
-                foreach (RoomSpatialInstance room in rooms)
-                    if (room == null || string.IsNullOrWhiteSpace(room.RoomInstanceId) ||
-                        roomById.ContainsKey(room.RoomInstanceId)) return Contradictory();
-                    else roomById.Add(room.RoomInstanceId, room);
-                var nodeById = new Dictionary<string, FloorRouteNode>(StringComparer.Ordinal);
-                var roomNodeIds = new HashSet<string>(StringComparer.Ordinal);
-                FloorRouteNode entrance = null, completion = null;
-                foreach (FloorRouteNode node in nodes)
-                {
-                    if (node == null || string.IsNullOrWhiteSpace(node.NodeId) ||
-                        nodeById.ContainsKey(node.NodeId)) return Contradictory();
-                    nodeById.Add(node.NodeId, node);
-                    if (node.Kind == FloorRouteNodeKind.Entrance)
-                    { if (entrance != null) return Contradictory(); entrance = node; }
-                    if (node.Kind == FloorRouteNodeKind.Completion)
-                    { if (completion != null) return Contradictory(); completion = node; }
-                    if (node.Kind == FloorRouteNodeKind.Room &&
-                        (string.IsNullOrWhiteSpace(node.RoomInstanceId) ||
-                         !roomNodeIds.Add(node.RoomInstanceId))) return Contradictory();
-                    if (node.Kind != FloorRouteNodeKind.Entrance &&
-                        node.Kind != FloorRouteNodeKind.Room &&
-                        node.Kind != FloorRouteNodeKind.Completion &&
-                        node.Kind != FloorRouteNodeKind.DeadEnd) return Contradictory();
-                }
-                if (entrance == null || completion == null ||
-                    roomNodeIds.Count != roomById.Count ||
-                    roomNodeIds.Any(id => !roomById.ContainsKey(id))) return Contradictory();
-
-                var semantics = new Dictionary<string, LegacyRoomOriginKind>(StringComparer.Ordinal);
-                foreach (CanonicalRoomSemantics value in semanticValues)
-                    if (value == null || string.IsNullOrWhiteSpace(value.RoomInstanceId) ||
-                        semantics.ContainsKey(value.RoomInstanceId)) return Contradictory();
-                    else semantics.Add(value.RoomInstanceId, value.LegacyRoomOriginKind);
-                if (semantics.Count != roomById.Count ||
-                    semantics.Keys.Any(id => !roomById.ContainsKey(id))) return Contradictory();
-
-                var outgoing = new Dictionary<string, FloorRouteEdge>(StringComparer.Ordinal);
-                var incoming = new Dictionary<string, int>(StringComparer.Ordinal);
-                var edgeIds = new HashSet<string>(StringComparer.Ordinal);
-                int requiredEdgeCount = 0;
-                foreach (FloorRouteEdge edge in edges)
-                {
-                    if (edge == null || string.IsNullOrWhiteSpace(edge.EdgeId) ||
-                        !edgeIds.Add(edge.EdgeId) ||
-                        string.IsNullOrWhiteSpace(edge.SourceNodeId) ||
-                        string.IsNullOrWhiteSpace(edge.DestinationNodeId) ||
-                        !nodeById.ContainsKey(edge.SourceNodeId) ||
-                        !nodeById.ContainsKey(edge.DestinationNodeId)) return Contradictory();
-                    if (edge.Classification == RouteClassification.Optional) continue;
-                    if (edge.Classification != RouteClassification.Required ||
-                        outgoing.ContainsKey(edge.SourceNodeId)) return Contradictory();
-                    requiredEdgeCount++;
-                    outgoing.Add(edge.SourceNodeId, edge);
-                    incoming.TryGetValue(edge.DestinationNodeId, out int count);
-                    incoming[edge.DestinationNodeId] = count + 1;
-                }
-                int requiredNodeCount = nodes.Count(node => node.Kind != FloorRouteNodeKind.DeadEnd);
-                if (requiredEdgeCount != requiredNodeCount - 1 || incoming.ContainsKey(entrance.NodeId) ||
-                    outgoing.ContainsKey(completion.NodeId)) return Contradictory();
-                foreach (FloorRouteNode node in nodes.Where(value =>
-                    value.Kind != FloorRouteNodeKind.DeadEnd))
-                    if (node != entrance && (!incoming.TryGetValue(node.NodeId, out int count) ||
-                        count != 1) || node != completion && !outgoing.ContainsKey(node.NodeId))
-                        return Contradictory();
-
-                var result = new List<MvpOrderedRouteRoom>();
-                var visitedNodes = new HashSet<string>(StringComparer.Ordinal);
-                var visitedRooms = new HashSet<string>(StringComparer.Ordinal);
-                FloorRouteNode current = entrance;
-                while (current != null)
-                {
-                    if (!visitedNodes.Add(current.NodeId)) return Contradictory();
-                    if (current.Kind == FloorRouteNodeKind.Completion) break;
-                    if (current.Kind == FloorRouteNodeKind.Room)
-                    {
-                        if (!roomById.TryGetValue(current.RoomInstanceId ?? string.Empty,
-                            out RoomSpatialInstance room) || !visitedRooms.Add(room.RoomInstanceId) ||
-                            !semantics.TryGetValue(room.RoomInstanceId, out LegacyRoomOriginKind origin) ||
-                            !RoomDefinitionIsAllowed(floor, room, production)) return Contradictory();
-                        RoomContentAssignment[] owned = assignments.Where(value => value != null &&
-                            string.Equals(value.RoomInstanceId, room.RoomInstanceId,
-                                StringComparison.Ordinal)).OrderBy(value => CategoryRank(value.CategoryId))
-                            .ThenBy(value => value.Sequence).ThenBy(value => value.AssignmentId,
-                                StringComparer.Ordinal).ToArray();
-                        if (owned.Any(value => CategoryRank(value.CategoryId) == int.MaxValue))
-                            return Contradictory();
-                        result.Add(new MvpOrderedRouteRoom
-                        {
-                            FloorIndex = floor.FloorIndex, RoomIndex = result.Count,
-                            RoomInstanceId = room.RoomInstanceId,
-                            Assignments = owned.Select(value => new RunRoomAssignment {
-                                AssignmentId = value.AssignmentId, CategoryId = value.CategoryId,
-                                OptionId = value.OptionId, Sequence = value.Sequence }).ToArray(),
-                            RoomOptionId = MvpDungeonPlacementIds.BasicRoomOptionId,
-                            IncludeRoomPlacement = origin !=
-                                LegacyRoomOriginKind.ImplicitCompatibilityContainer,
-                            AssignedMonsterOptionIds = Options(owned,
-                                CanonicalSpatialSaveContracts.MonsterCategoryId),
-                            AssignedTrapOptionIds = Options(owned,
-                                CanonicalSpatialSaveContracts.TrapCategoryId),
-                            AssignedLootNodeOptionIds = Options(owned,
-                                CanonicalSpatialSaveContracts.LootNodeCategoryId),
-                            Capacity = ResolveCapacity(room, config, production),
-                            HasActiveContent = owned.Length != 0
-                        });
-                    }
-                    if (!outgoing.TryGetValue(current.NodeId, out FloorRouteEdge next) ||
-                        !nodeById.TryGetValue(next.DestinationNodeId, out current))
-                        return Contradictory();
-                }
-                if (current != completion || outgoing.ContainsKey(completion.NodeId) ||
-                    visitedRooms.Count != roomById.Count || assignments.Any(value => value == null ||
-                        !roomById.ContainsKey(value.RoomInstanceId ?? string.Empty)))
-                    return Contradictory();
-                return Valid(result.ToArray());
-            }
-            catch
-            {
-                // Projection is a trust boundary. Malformed state is classified, never surfaced.
+            if (!MarkerIsValid(state?.Authority) || state.Floors == null) return Contradictory();
+            if (state.Floors.Length == 0) return Valid(Array.Empty<MvpOrderedRouteRoom>());
+            if (state.Floors.Any(f => f == null || f.FloorIndex < 0 || string.IsNullOrWhiteSpace(f.FloorInstanceId) ||
+                    (f.ActivationState != FloorActivationState.Active && f.ActivationState != FloorActivationState.Inactive)) ||
+                state.Floors.Select(f => f.FloorIndex).Distinct().Count() != state.Floors.Length ||
+                state.Floors.Select(f => f.FloorInstanceId).Distinct(StringComparer.Ordinal).Count() != state.Floors.Length)
                 return Contradictory();
+            var active = state.Floors.Where(f => f != null && f.ActivationState == FloorActivationState.Active)
+                .OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal).ToArray();
+            if (active.Length == 0) return Contradictory();
+            CanonicalMvpRouteProjectionResult first = null;
+            for (int i = 0; i < active.Length; i++)
+            {
+                if (active[i].FloorIndex != i) return Contradictory();
+                var result = CanonicalRunnableFloorProjection.Resolve(active[i], config, production);
+                if (result.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) return Contradictory();
+                if (i == 0) first = result;
             }
+            // Compatibility consumers inspect Floor 1 only. Real runs consume the full snapshot.
+            return first;
         }
 
         private static MvpRoomSlotCapacity ResolveCapacity(RoomSpatialInstance room,

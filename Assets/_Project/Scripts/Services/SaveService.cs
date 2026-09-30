@@ -433,6 +433,21 @@ namespace DungeonBuilder.M0
             return result;
         }
 
+        public FloorLifecyclePreview PreviewFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId) =>
+            CreateWriteAuthority().PreviewFloorLifecycle(_canonicalSession, current, action, floorId);
+
+        public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId)
+        {
+            var result = CreateWriteAuthority().CommitFloorLifecycle(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, action, floorId);
+            if (result.IsSuccess)
+            {
+                _undo = null; _canonicalSession = result.Session;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
+
         public FloorConstructionPreview PreviewFloorConstruction(SaveData current)
         {
             if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
@@ -558,11 +573,14 @@ namespace DungeonBuilder.M0
             return validated.IsValid && validated.CurrentTargetValidated && state != null;
         }
 
+        private LootConfig _runLoot;
+        public void ConfigureRunLoot(LootConfig value) => _runLoot = value;
+
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
                 _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition,
-                _branchingResearch, _floorConstructionProfiles, _floorConstructionResearch);
+                _branchingResearch, _floorConstructionProfiles, _floorConstructionResearch, _runLoot);
 
         private bool HasOwnedRecoveryEvidence()
         {

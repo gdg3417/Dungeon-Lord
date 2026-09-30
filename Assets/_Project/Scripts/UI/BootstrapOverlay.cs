@@ -2176,6 +2176,16 @@ namespace DungeonBuilder.M0
                 if (GUILayout.Button(GetLocalizedString("ui.floor.next"), button, buttonHeight))
                     _root.CycleSelectedCanonicalFloor();
             }
+            foreach (var action in new[] { FloorLifecycleAction.Activate, FloorLifecycleAction.Deactivate, FloorLifecycleAction.ActivateAllEligible })
+            {
+                string key = action == FloorLifecycleAction.Activate ? "ui.floor.activate" :
+                    action == FloorLifecycleAction.Deactivate ? "ui.floor.deactivate" : "ui.floor.activate_all";
+                if (GUILayout.Button(GetLocalizedString(key), button, buttonHeight))
+                {
+                    var changed = _root.CommitFloorLifecycle(action);
+                    _structuralFeedback = GetLocalizedString(changed.IsSuccess ? "ui.floor.lifecycle_success" : changed.Reason);
+                }
+            }
             FloorConstructionPreview preview = _root.FloorConstructionPreview ?? _root.PreviewFloorConstruction();
             if (GUILayout.Button(GetLocalizedString("ui.floor.refresh"), button, buttonHeight))
                 preview = _root.PreviewFloorConstruction();

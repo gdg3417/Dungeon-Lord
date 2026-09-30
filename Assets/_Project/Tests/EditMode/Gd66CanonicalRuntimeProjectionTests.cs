@@ -89,7 +89,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
                 SetRootField(root, "<Save>k__BackingField", save);
                 root.AttachSaveServiceForTests(service);
-                SetRootField(root, "_runSimulationService", new RunSimulationService(config));
+                SetRootField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(config));
                 SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
                 bool loggingEnabled = Debug.unityLogger.logEnabled;
                 bool ran;

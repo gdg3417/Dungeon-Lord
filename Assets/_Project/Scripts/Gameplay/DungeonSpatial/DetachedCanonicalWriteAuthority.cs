@@ -33,7 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     /// Complete-save writer. It prepares detached state, atomically persists exact session
     /// bytes, verifies durable readback, and only then creates a new runtime projection.
     /// </summary>
-    public sealed class DetachedCanonicalWriteAuthority
+    public sealed partial class DetachedCanonicalWriteAuthority
     {
         public const string AtomicSaveFailedReason = "gd66.write.atomic_save_failed";
         public const string RecoveryRequiredReason = "gd66.transaction.recovery_failed";
@@ -41,6 +41,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly ProductionSpatialContentSnapshot production;
         private readonly SpatialLayoutCompatibilitySnapshot compatibility;
         private readonly RunSimulationConfig configuration;
+        private readonly LootConfig runLoot;
         private readonly DetachedCurrentTargetValidationContext context;
         private readonly SaveSpatialMigrationLimitsProfile limits;
         private readonly StructuralContentRemovalPolicySnapshot removalPolicy;
@@ -58,9 +59,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             IReadOnlyList<FormulaModifier> economyModifiers = null, ContentAcquisitionEconomySnapshot acquisition = null,
             BasicBranchingResearchSnapshot branchingResearch = null,
             FloorConstructionProfileSnapshot floorConstructionProfiles = null,
-            FloorConstructionResearchSnapshot floorConstructionResearch = null)
+            FloorConstructionResearchSnapshot floorConstructionResearch = null, LootConfig runLoot = null)
         {
-            this.production = production; this.compatibility = compatibility;
+            this.production = production; this.compatibility = compatibility; this.runLoot = runLoot;
             this.configuration = configuration; this.context = context; this.limits = limits;
             this.removalPolicy = removalPolicy;
             this.economy = economy;
@@ -209,25 +210,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult prepared =
                 session.PrepareLiveReplacement(snapshot, mutation.State, investment,
                     mutation.CorridorContent, mutation.BranchKnowledge);
-            if (!prepared.IsSuccess || prepared.Update == null) return Failure(prepared.Reason ??
-                DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            byte[] candidate = prepared.Update.GetBytes();
-            DetachedCompleteSaveValidationResult validated =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
-            if (!validated.IsValid || !validated.CurrentTargetValidated)
-                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            DetachedCanonicalSaveSessionResult reopened =
-                DetachedCanonicalSaveSession.Open(candidate, context, limits);
-            if (!reopened.IsSuccess)
-                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            if (!CanonicalMvpRouteProjection.TryPublishValidated(validated,
-                    production, out SaveData runtime, out string publishReason))
-                return Failure(publishReason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
-            string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
-                limits.Canonical.Serialized.MaximumCollectionRecords);
-            if (persistenceReason != null) return Failure(persistenceReason);
-            return new DetachedCanonicalWriteResult(true, null, false,
-                mutation.ApplyExplicitRoomEffect, candidate, reopened.Session, validated, runtime);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, mutation.ApplyExplicitRoomEffect);
         }
 
         internal DetachedCanonicalWriteResult UndoRenovation(string activePath,
@@ -300,7 +283,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.canonicalSpatialAuthority = owned.State.Authority; candidate.spatialFloors = owned.State.Floors;
                 candidate.corridorContent = owned.CorridorContent; candidate.sharedBranchKnowledge = owned.BranchKnowledge;
                 candidate.lastSavedUtcUnix = savedUtcUnix;
-                simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId);
+                simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
             }
             catch (Exception error)
             {
@@ -391,8 +374,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!CanonicalMvpRouteProjection.TryPublishValidated(validated,
                     production, out SaveData runtime, out string publishReason))
                 return Failure(publishReason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (validated.State.Floors.Count(f => f.ActivationState == FloorActivationState.Active) > 1)
+            {
+                try { DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot.Create(
+                    validated, production, configuration, limits.Canonical, runLoot); }
+                catch { return Failure("floor.lifecycle.invalid_state"); }
+            }
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
-                limits.Canonical.Serialized.MaximumCollectionRecords);
+                limits.Canonical.Serialized.MaximumCollectionRecords, durable =>
+                {
+                    var readValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(durable, context);
+                    var readSession = DetachedCanonicalSaveSession.Open(durable, context, limits);
+                    if (!readValidation.IsValid || !readValidation.CurrentTargetValidated || !readSession.IsSuccess ||
+                        !CanonicalMvpRouteProjection.TryPublishValidated(readValidation, production, out SaveData readRuntime, out _)) return false;
+                    validated = readValidation; reopened = readSession; runtime = readRuntime;
+                    return true;
+                });
             return persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
                     reopened.Session, validated, runtime)

@@ -498,7 +498,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SetField(root, "<Save>k__BackingField", fixture.Runtime);
                 saveService = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
                 root.AttachSaveServiceForTests(saveService);
-                SetField(root, "_runSimulationService", new RunSimulationService(fixture.Configuration));
+                SetField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(fixture.Configuration));
                 SetField(root, "_structureSimulationPass",
                     new StructureSimulationPass(new HeatSystem(), LegacyStructureConfig()));
                 var content = new ContentService();

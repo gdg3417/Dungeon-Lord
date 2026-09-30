@@ -5,39 +5,42 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
+    [Serializable]
     public sealed class PhaseFiveBRequiredRoom
     {
-        public MvpOrderedRouteRoom Room { get; internal set; }
-        public string FloorInstanceId { get; internal set; }
-        public string NodeId { get; internal set; }
+        public MvpOrderedRouteRoom Room;
+        public string FloorInstanceId;
+        public string NodeId;
     }
 
+    [Serializable]
     public sealed class PhaseFiveBRoutePlan
     {
-        public PhaseFiveBRequiredRoom[] RequiredRooms { get; internal set; }
-        public PhaseFiveBFork[] Forks { get; internal set; }
+        public PhaseFiveBRequiredRoom[] RequiredRooms;
+        public PhaseFiveBFork[] Forks;
     }
 
+    [Serializable]
     public sealed class PhaseFiveBFork
     {
-        public int FloorIndex { get; internal set; }
-        public int RoomIndex { get; internal set; }
-        public string FloorInstanceId { get; internal set; }
-        public string RoomInstanceId { get; internal set; }
-        public string OriginNodeId { get; internal set; }
-        public string OptionalBranchId { get; internal set; }
-        public string EdgeId { get; internal set; }
-        public string DeadEndNodeId { get; internal set; }
-        public string Fingerprint { get; internal set; }
-        public TileCoordinate[] Tiles { get; internal set; }
-        public CorridorContentAssignment[] Assignments { get; internal set; }
-        public BranchKnowledgeRecord Knowledge { get; internal set; }
-        public bool Applicable { get; internal set; }
-        public double RemainingRequiredDanger { get; internal set; }
-        public PhaseFiveBRequiredRoom[] RequiredSuffix { get; internal set; }
+        public int FloorIndex;
+        public int RoomIndex;
+        public string FloorInstanceId;
+        public string RoomInstanceId;
+        public string OriginNodeId;
+        public string OptionalBranchId;
+        public string EdgeId;
+        public string DeadEndNodeId;
+        public string Fingerprint;
+        public TileCoordinate[] Tiles;
+        public CorridorContentAssignment[] Assignments;
+        public BranchKnowledgeRecord Knowledge;
+        public bool Applicable;
+        public double RemainingRequiredDanger;
+        public PhaseFiveBRequiredRoom[] RequiredSuffix;
     }
 
-    // Read-only derived view. Required-route order still comes exclusively from CanonicalMvpRouteProjection.
+    // Read-only derived view. Required-route order comes exclusively from CanonicalRunnableFloorProjection.
     public static class PhaseFiveBRouteProjection
     {
         public const string InvalidRoute = "branch.run.invalid_route";
@@ -45,7 +48,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             SaveData runtime, ProductionSpatialContentSnapshot production, RunSimulationConfig config)
         {
             if (owned?.CurrentTargetValidated != true || !owned.IsValid || production == null) throw new ArgumentException(InvalidRoute);
-            var projection = CanonicalMvpRouteProjection.InspectWithProductionContent(runtime, production);
+            if (CanonicalMvpRouteProjection.InspectWithProductionContent(runtime, production).AuthorityState !=
+                CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) throw new ArgumentException(InvalidRoute);
+            var floor = owned.State.Floors.Single(f => f.FloorIndex == 0);
+            return ResolveFloor(owned, floor, production, config);
+        }
+
+        public static PhaseFiveBRoutePlan ResolveFloor(DetachedCompleteSaveValidationResult owned,
+            SavedSpatialFloor selectedFloor, ProductionSpatialContentSnapshot production, RunSimulationConfig config)
+        {
+            var projection = CanonicalRunnableFloorProjection.Resolve(selectedFloor, config, production);
             if (projection.AuthorityState != CanonicalMvpRuntimeAuthorityState.ValidatedCanonical) throw new ArgumentException(InvalidRoute);
             var required = projection.Rooms.Select(room => {
                 var floor = owned.State.Floors.Single(f => f.FloorIndex == room.FloorIndex);
@@ -53,8 +65,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return new PhaseFiveBRequiredRoom { Room = room, FloorInstanceId = floor.FloorInstanceId, NodeId = node.NodeId };
             }).ToArray();
             var result = new System.Collections.Generic.List<PhaseFiveBFork>();
-            foreach (var floor in owned.State.Floors.Where(f => f.ActivationState == FloorActivationState.Active)
-                .OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
+            foreach (var floor in new[] { selectedFloor })
             {
                 var edges = floor.Layout.Edges.Where(e => e.Classification == RouteClassification.Optional)
                     .OrderBy(e => e.OptionalBranchId, StringComparer.Ordinal).ToArray();

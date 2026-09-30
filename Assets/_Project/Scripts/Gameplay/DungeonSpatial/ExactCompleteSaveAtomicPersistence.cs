@@ -9,7 +9,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal static class ExactCompleteSaveAtomicPersistence
     {
         internal static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
-            byte[] original, byte[] candidate, int maximumEvidence)
+            byte[] original, byte[] candidate, int maximumEvidence, Func<byte[], bool> validateReadback = null)
         {
             if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
                 return DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
@@ -37,7 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, rollback) ||
                     !fileSystem.IsPathContainedWithoutRedirection(directory, staging))
                     return DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
-                if (Same(activeBefore, candidate)) return null;
+                if (Same(activeBefore, candidate)) return validateReadback == null || validateReadback(activeBefore) ? null : DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
                 if (!Same(activeBefore, original))
                     return DetachedCanonicalWriteAuthority.RecoveryRequiredReason;
                 fileSystem.WriteAllBytesDurable(rollback, original);
@@ -50,7 +50,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     fileSystem.ReplaceSameDirectoryAtomic(staging, activePath);
                     fileSystem.FlushDirectory(directory);
-                    if (!Same(fileSystem.ReadAllBytes(activePath), candidate)) throw new IOException();
+                    byte[] durable = fileSystem.ReadAllBytes(activePath);
+                    if (!Same(durable, candidate) || (validateReadback != null && !validateReadback(durable))) throw new IOException();
                 }
                 catch
                 {

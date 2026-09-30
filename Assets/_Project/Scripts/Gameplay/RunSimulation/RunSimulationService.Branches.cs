@@ -9,20 +9,19 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     public sealed partial class RunSimulationService
     {
         internal void CalculatePhaseFiveBRun(SaveData candidate, DetachedCompleteSaveValidationResult owned,
-            ProductionSpatialContentSnapshot production, string postureId)
+            ProductionSpatialContentSnapshot production, string postureId, CanonicalSpatialSerializationLimits limits)
         {
             if (!PhaseFiveBConfigValidation.IsValid(_config.PhaseFiveB)) throw new ArgumentException(BranchDecisionResolver.InvalidConfiguration);
-            var plan = PhaseFiveBRouteProjection.Resolve(owned, candidate, production, _config);
-            var forks = plan.Forks;
-            var workload = new BranchRunWorkload(_config.PhaseFiveB.BranchDecision);
-            var traversal = new BranchTraversal { Forks = forks, Workload = workload };
+            var snapshot = ActiveFloorRunSnapshot.Create(owned, production, _config, limits, _lootConfig, _lootTableId, candidate, postureId);
             int sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
-            var route = plan.RequiredRooms.Select(r => r.Room).ToArray();
-            var outcome = SimulateRoute(candidate.structureRuntime, candidate.totalTicks, sequence, postureId, route,
-                forks.Length == 0 ? null : traversal);
-            outcome.BranchOutcomes = traversal.Evidence.ToArray();
+            var outcome = SimulateSnapshotCore(sequence,
+                snapshot, out BranchTraversal traversal);
+            if (outcome.RunHeatApplicationSummary?.RuleResolved == true)
+                candidate.structureRuntime.Heat = outcome.RunHeatApplicationSummary.HeatAfter;
+            var workload = traversal.Workload;
+            var capturedConfig = snapshot.Configuration;
             int seed = outcome.LootExtractionSummary?.DeterministicSeed ?? sequence;
-            var cooling = LootHeatCoolingResolver.Resolve(_config, outcome.LootExtractionSummary, candidate.structureRuntime.Heat, seed);
+            var cooling = LootHeatCoolingResolver.Resolve(capturedConfig, outcome.LootExtractionSummary, candidate.structureRuntime.Heat, seed);
             outcome.LootHeatCoolingSummary = cooling;
             if (cooling.RuleResolved && cooling.AppliedHeatDelta != 0d)
             {
@@ -31,11 +30,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 candidate.structureRuntime.Heat = heat.NewHeat;
                 cooling.HeatAfterCooling = heat.NewHeat; cooling.AppliedHeatDelta = heat.NewHeat - cooling.HeatBeforeCooling;
             }
-            candidate.sharedBranchKnowledge = BranchKnowledgeLearning.Propose(owned.BranchKnowledge, traversal.Evidence,
-                outcome.Party.ActiveCount > 0, outcome.RunId, _config.PhaseFiveB.BranchDecision, workload);
-            candidate.runHistory.AppendOutcome(outcome, _config.MaxRunHistoryEntries);
+            candidate.sharedBranchKnowledge = BranchKnowledgeLearning.Propose(snapshot.BranchKnowledge, traversal.Evidence,
+                outcome.Party.ActiveCount > 0, outcome.RunId, capturedConfig.PhaseFiveB.BranchDecision, workload);
+            candidate.runHistory.AppendOutcome(outcome, capturedConfig.MaxRunHistoryEntries);
             candidate.runHistory.NextRunSequence = checked(sequence + 1);
-            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, _config, production);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, capturedConfig, production);
         }
 
         internal sealed class BranchTraversal

@@ -14,6 +14,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public long Sequence;
     }
 
+    [Serializable]
     public sealed class MvpOrderedRouteRoom
     {
         // Canonical projection retains persisted ordering evidence, never writes it back.

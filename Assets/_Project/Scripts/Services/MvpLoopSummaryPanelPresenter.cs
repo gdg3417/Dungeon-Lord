@@ -115,7 +115,7 @@ namespace DungeonBuilder.M0
         private static string ResolveRun(MvpPlayerLoopSummary summary, Func<string, string, string> localize)
         {
             if (summary == null || !summary.RuleResolved || !summary.HasRunOutcome) return Localize(localize, ValueNoRunKey);
-            string outcome = Localize(localize, summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
+            string outcome = Localize(localize, summary.FinalRouteOutcomeKey == "run.route.floor_exit" ? "run.route.floor_exit" : summary.RunSucceeded ? RunSucceededKey : RunFailedKey);
             string partyList = BuildPartyList(summary, localize);
             string casualtyLine = BuildCasualtyLine(summary, localize);
             string outcomeLine = string.IsNullOrEmpty(partyList) ? outcome : string.Format(Localize(localize, RunOutcomeLineFormatKey), outcome, partyList);

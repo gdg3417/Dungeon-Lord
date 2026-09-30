@@ -483,6 +483,7 @@ namespace DungeonBuilder.M0
             SaveService.ConfigureCanonical(SaveSpatialMigrationLimits, Content.ProductionSpatialContent,
                 Content.SpatialLayoutCompatibilityProfiles, parsedRunConfig,
                 canonicalLegacyConfiguration);
+            SaveService.ConfigureRunLoot(TryParseLootConfig(lootConfigJson != null ? lootConfigJson.text : null));
             StructuralContentRemovalPolicySnapshot removalPolicy = null;
             if (structuralContentRemovalPolicyJson != null)
                 StructuralContentRemovalPolicyAuthority.TryParse(structuralContentRemovalPolicyJson.bytes,
@@ -993,6 +994,16 @@ namespace DungeonBuilder.M0
             InvalidateStructuralDeletionPreview();
             InvalidateOptionalBranchPreview();
             overlay?.RefreshStructuralConstructionAuthority();
+        }
+
+        public DetachedCanonicalWriteResult CommitFloorLifecycle(FloorLifecycleAction action)
+        {
+            if (_explicitSaveDeleteQuiesced || SaveService == null || Save == null)
+                return StructuralCommitFailure("floor.lifecycle.invalid_state");
+            var result = SaveService.CommitFloorLifecycle(Save, action, SelectedCanonicalFloorInstanceId);
+            if (!result.IsSuccess) StructuralConstructionReasonKey = result.Reason;
+            overlay?.RefreshStructuralConstructionAuthority();
+            return result;
         }
 
         public FloorConstructionPreview PreviewFloorConstruction()
@@ -1852,8 +1863,11 @@ namespace DungeonBuilder.M0
             route = authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical
                 ? authority.Rooms
                 : MvpOrderedRoomRouteResolver.Resolve(Save, _runSimulationService.Config);
+            bool hasMultipleActiveFloors = SaveSpatialMigrationLimits != null &&
+                CanonicalActiveFloorResolver.TryResolve(Save, SaveSpatialMigrationLimits.Canonical.Spatial, out int activeFloorCount) &&
+                activeFloorCount > 1;
             if (authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
-                route.Length == 0)
+                route.Length == 0 && !hasMultipleActiveFloors)
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
                 return false;
@@ -1861,7 +1875,7 @@ namespace DungeonBuilder.M0
             bool hasOptionalBranch = authority.AuthorityState == CanonicalMvpRuntimeAuthorityState.ValidatedCanonical &&
                 Save.validatedCanonicalSpatialState.Floors.Any(f => f.ActivationState == FloorActivationState.Active &&
                     f.Layout.Edges.Any(e => e.Classification == RouteClassification.Optional));
-            if (route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent) && !hasOptionalBranch)
+            if (!hasMultipleActiveFloors && route.Length > 1 && !Array.Exists(route, room => room != null && room.HasActiveContent) && !hasOptionalBranch)
             {
                 rejectionReasonKey = RunSimulationService.RouteNoEncounterKey;
                 return false;

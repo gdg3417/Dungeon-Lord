@@ -275,6 +275,7 @@ namespace DungeonBuilder.M0
     public sealed class RunSimulationConfig
     {
         public Gameplay.RunSimulation.PhaseFiveBConfig PhaseFiveB;
+        public Gameplay.RunSimulation.PhaseSixRunConfig PhaseSix;
         public double BaseSuccessChance;
         public double HeatPenaltyPerPoint;
         public double ManaReserveBonusPerPoint;
@@ -493,6 +494,8 @@ namespace DungeonBuilder.M0
         public Gameplay.RunSimulation.RunParty Party { get; internal set; }
         public Gameplay.RunSimulation.RunEncounterEvent[] EncounterEvents { get; internal set; }
         public Gameplay.RunSimulation.BranchOutcomeEvidence[] BranchOutcomes { get; internal set; }
+        public Gameplay.RunSimulation.FloorTransitionEvidence[] FloorTransitions { get; internal set; }
+        public Gameplay.RunSimulation.TransientDepthObjective DepthObjective { get; internal set; }
         public string RunId;
         public long TickStarted;
         public bool Success;
