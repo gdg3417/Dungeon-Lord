@@ -1,7 +1,7 @@
 **Cross Spec Glossary of Invariants**
 
 
-**Phase 6A5A current implementation status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` and passed external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A5A advances the writable save schema to 12 with one explicit 11-to-12 migration that adds empty `sharedFloorKnowledge` while preserving schema 11 state. Floor knowledge remains separate from `sharedBranchKnowledge`, learns only from completed floors with final survivors, is captured in the pre-run snapshot, and becomes inapplicable after material floor changes; activation alone does not invalidate it. A4 unknown transition perception remains in force. Richer knowledge-backed transition explanation and aggregate multi-floor reporting are deferred to A5B. Phase 6 remains open.
+**Phase 6 final implementation status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`. Phase 6 is complete. Writable schema 12 includes `sharedFloorKnowledge`; lifecycle activation alone does not invalidate knowledge, while material gameplay-affecting floor changes make it inapplicable until fresh qualifying evidence replaces or reconfirms it. Knowledge-backed transitions and coarse durable aggregate reporting are complete; detailed transition causes remain same-session/transient.
 
 **Historical Phase 6A3 implementation status (2026-09-29):** Floor 2 activation eligibility is a deterministic derived read-only result, not a second activation owner or persisted cache. It consumes the sole writable per-floor `ActivationState`, canonical prefix/order validation, duplicate-safe `ac_100` completion, production semantics, and independent `ActivationValid` layout validation. Eligibility additionally requires the same-floor required Entrance-to-Completion route to contain at least one room. Stable reason codes are identifiers rather than player-facing text. No activation mutation, passive-mana change, player control, or multi-floor run support is added; the existing run projection continues to reject a second Active floor.
 
@@ -117,7 +117,7 @@ Offline rebound may move at most one Heat State step and may not cross Heat Tier
 
 INV-12 Dungeon Editing Save Safety
 
-Tile placement and movement during edit mode must trigger immediate saves.
+During the Phase 7 production editor, each accepted discrete draft mutation is queued for ordered persistence to separate non-authoritative draft storage; continuous pointer/drag frames are transient. Presentation may optimistically display a pending mutation, but it becomes a durably completed draft command only after its required durability acknowledgement/barrier. The acknowledged durable sequence is a predecessor-complete prefix; recovery restores that prefix and may lose only a not-yet-acknowledged presented suffix after abrupt termination. Failed persistence leaves canonical state unchanged, requires explicit localization-backed recoverable failure presentation, and blocks Save Changes. Save Changes first requires all included mutations to be durable, then performs final validation/economics and one separate atomic canonical commit; failure applies nothing and preserves the durable draft.
 
 INV-13 Offline Crafting Constraints
 

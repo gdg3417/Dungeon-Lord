@@ -21,7 +21,7 @@ The sole production authority is `Assets/_Project/Resources/structural_economy.j
 | Replacement factor | 0.10 of old room base price |
 | Deletion refund | 0.75, rounded down |
 | Mana storage capacity | 1000 |
-| Session renovation undo | 30 seconds |
+| Session renovation undo | 30 seconds (historical Bootstrap capability; superseded as a final Phase 7 production-editor requirement by transactional draft editing) |
 
 These are provisional tuning seeds. Basic Room's design target is 5–10 minutes of baseline early progression after a productive starter dungeon, initially 7.5 minutes. Runtime prices consume authored mana values, never elapsed real-world minutes.
 
@@ -56,6 +56,8 @@ Retirement follows the existing inverse-tail lifecycle: the old terminal relatio
 Schemas 1–6 retain their frozen migration into schema 7, then explicitly transition 7 → 8 → 9. Schema 8 upgrades directly to 9 without passing through legacy projection. All old structures receive zero paid investment; unrelated recognized and extension state, balance, identities, counters, assignments, custody and run history are preserved. The schema 8 boundary parser remains explicit. Current schema 9 load is a no-op; migration refuses already-current input. Schema 7/8 starter/contract records remain intact and schema 9 adds its own selection with the same approved geometry.
 
 ## Transactions and undo
+
+Phase 4A implemented and qualified the legacy session renovation undo. Phase 7A0 preserves that history but supersedes it for the final production graphical editor: a durable non-authoritative whole-dungeon draft, discard/review flow, and final atomic commit provide experimentation before canonical economics apply. Existing Bootstrap behavior may remain during capability migration; its player-facing production equivalent is retired only after production parity and smoke evidence.
 
 The write authority refreshes spatial validity and then computes current price/affordability using current live ManaReserve. Displayed economy results are never commit authority. Structural staleness still uses the unchanged spatial fingerprint. Exact balance succeeds. Insufficient funds return `structural.economy.insufficient_mana` before persistence, without publishing geometry, mana, ledger or allocator changes.
 
