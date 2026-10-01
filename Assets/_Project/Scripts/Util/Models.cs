@@ -791,6 +791,8 @@ namespace DungeonBuilder.M0
         public int ConfiguredRoomCount = 0;
         public int ClearedRoomCount = 0;
         public RunRoomResolutionSummary[] RoomResolutions = Array.Empty<RunRoomResolutionSummary>();
+        // Same-session explanation only; never serialized into run history.
+        public Gameplay.RunSimulation.FloorTransitionEvidence[] FloorTransitions { get; internal set; }
         public double ManaReserve = 0d;
         public int LootGeneratedWorldValue = 0;
         public int LootExtractedWorldValue = 0;

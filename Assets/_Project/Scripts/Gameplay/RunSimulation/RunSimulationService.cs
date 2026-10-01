@@ -210,7 +210,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     snapshot.Floors[floorOrdinal].FloorInstanceId, next, generatedValue + (traversal?.Value ?? 0),
                     objective.Pull(snapshot.Floors[floorOrdinal].FloorIndex, next != null,
                         snapshot.Floors[snapshot.Floors.Count - 1].FloorIndex),
-                    FloorTransitionPerception.Unknown(_config.PhaseSix));
+                    FloorTransitionPerceptionResolver.Resolve(snapshot, floorOrdinal + 1, party));
                 transitions.Add(transition);
                 if (!transition.Descend) { deliberateExit = next != null; break; }
             }

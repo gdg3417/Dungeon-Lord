@@ -89,7 +89,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 c.Objectives.Single(x => x.Mode == "shallow").TargetFloorIndex == -1 &&
                 c.Objectives.Single(x => x.Mode == "deepest_reasonable").TargetFloorIndex == -1 &&
                 c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex > 0 &&
-                c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex < c.MaximumActiveFloors &&
+                (c.Objectives.Single(x => x.Mode == "target_depth").TargetFloorIndex < c.MaximumActiveFloors ||
+                    c.Objectives.Single(x => x.Mode == "target_depth").Weight == 0) &&
                 Finite(c.Objectives.Sum(x => x.Weight)) && c.Objectives.Sum(x => x.Weight) > 0;
         }
     }
