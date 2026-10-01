@@ -6,6 +6,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
 {
+    [Serializable]
     public sealed class MvpRoomSlotCapacity
     {
         public string RoomOptionId;

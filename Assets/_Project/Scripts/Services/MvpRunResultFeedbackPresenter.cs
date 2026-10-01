@@ -125,6 +125,7 @@ namespace DungeonBuilder.M0
                 return string.Empty;
             }
 
+            if (afterRunSummary.FinalRouteOutcomeKey == "run.route.floor_exit") return Localize(localize, "run.reason.floor_exit");
             if (!afterRunSummary.RunSucceeded)
             {
                 return Localize(localize, OutcomeCueFailedKey);
@@ -187,6 +188,7 @@ namespace DungeonBuilder.M0
 
         private static string ResolveInterpretationKey(MvpPlayerLoopSummary summary)
         {
+            if (summary.FinalRouteOutcomeKey == "run.route.floor_exit") return "run.reason.floor_exit";
             if (!summary.RunSucceeded)
             {
                 return FailedKey;

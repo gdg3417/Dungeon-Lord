@@ -1,4 +1,69 @@
 {
+  "PhaseSix": {
+  "TransitionRuleSourceId": "run.floor_transition_decision.phase6.v1",
+  "ObjectiveRuleSourceId": "run.depth_objective.phase6.v1",
+  "ConditionHealthWeight": 0.65,
+  "SurvivorFractionWeight": 0.35,
+  "PerceivedDangerWeight": 0.7,
+  "UncertaintyWeight": 0.3,
+  "SurvivabilityThreatPenalty": 0.6,
+  "ProfileMinimums": [
+    {
+      "ProfileId": "adventurer.behavior_profile.cautious",
+      "MinimumSurvivability": 0.75
+    },
+    {
+      "ProfileId": "adventurer.behavior_profile.greedy",
+      "MinimumSurvivability": 0.5
+    },
+    {
+      "ProfileId": "adventurer.behavior_profile.curious",
+      "MinimumSurvivability": 0.55
+    },
+    {
+      "ProfileId": "adventurer.behavior_profile.goal_oriented",
+      "MinimumSurvivability": 0.65
+    },
+    {
+      "ProfileId": "adventurer.behavior_profile.gambler",
+      "MinimumSurvivability": 0.4
+    }
+  ],
+  "RewardWeight": 1.0,
+  "SurvivabilityMarginWeight": 1.25,
+  "ObjectiveWeight": 1.0,
+  "DangerAppealWeight": 1.0,
+  "UncertaintyAppealWeight": 0.75,
+  "CarriedLootPreservationWeight": 0.75,
+  "ExitThreshold": -0.1,
+  "DescendThreshold": 0.1,
+  "RewardReference": 12.0,
+  "DangerReference": 9.0,
+  "CarriedLootReference": 12.0,
+  "UnknownInformationUncertainty": 1.0,
+  "Objectives": [
+    {
+      "Mode": "shallow",
+      "Weight": 0.2,
+      "PullStrength": 0.0,
+      "TargetFloorIndex": -1
+    },
+    {
+      "Mode": "target_depth",
+      "Weight": 0.5,
+      "PullStrength": 0.75,
+      "TargetFloorIndex": 1
+    },
+    {
+      "Mode": "deepest_reasonable",
+      "Weight": 0.3,
+      "PullStrength": 0.5,
+      "TargetFloorIndex": -1
+    }
+  ],
+  "MaximumActiveFloors": 5,
+  "MaximumTransitions": 4
+},
   "PhaseFiveB": {
   "BranchDecision": {
     "RuleSourceId": "run.branch_decision.rule.phase5b.v2",

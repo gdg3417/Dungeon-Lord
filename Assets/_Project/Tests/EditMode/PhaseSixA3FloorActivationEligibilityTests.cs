@@ -327,7 +327,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void FloorOneAndCurrentRunProjectionRemainUnchangedAndRejectSecondActiveFloor()
+        public void FloorOneRemainsUnchangedAndA4ProjectsSecondActiveFloorIndependently()
         {
             Fixture fixture = Eligible();
             SavedSpatialFloor first = fixture.State.Floors.Single(value => value.FloorIndex == 0);
@@ -338,7 +338,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Two(fixture).ActivationState = FloorActivationState.Active;
             Assert.That(CanonicalMvpRouteProjection.InspectWithProductionContent(
                 fixture.Runtime, fixture.Production).AuthorityState,
-                Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ContradictoryCanonical));
+                Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
         }
 
         [Test]
@@ -384,7 +384,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return fixture;
         }
 
-        private static Fixture Eligible()
+        internal static Fixture Eligible()
         {
             Fixture fixture = Constructed();
             BuildRoom(fixture);
@@ -414,14 +414,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static SavedSpatialFloor Two(Fixture fixture) => fixture.State.Floors.Single(value =>
             value.FloorInstanceId == FloorId);
 
-        private static FloorConstructionProfileSnapshot Profiles(Fixture fixture)
+        internal static FloorConstructionProfileSnapshot Profiles(Fixture fixture)
         {
             Assert.That(FloorConstructionProfileSnapshot.TryParse(File.ReadAllBytes(ProfilePath),
                 fixture.Production, fixture.Profile.Canonical, out FloorConstructionProfileSnapshot value), Is.True);
             return value;
         }
 
-        private static FloorConstructionResearchSnapshot Research(Fixture fixture)
+        internal static FloorConstructionResearchSnapshot Research(Fixture fixture)
         {
             Assert.That(FloorConstructionResearchAuthority.TryParse(
                 File.ReadAllText(ResearchPath + "research_nodes.json"),

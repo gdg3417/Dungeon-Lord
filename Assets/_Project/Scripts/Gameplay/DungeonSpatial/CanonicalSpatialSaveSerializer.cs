@@ -101,6 +101,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!CanonicalSpatialSaveContracts.TryCanonicalize(source, limits.Spatial, out canonical))
                     return new SpatialContractResult<SerializedMembers>(null,
                         new[] { SpatialContractIssue.StructuralValidationFailed });
+                // Match full serialization after detached clones turn native null strings into empty strings.
+                NormalizeNativeAuthorityForCanonicalBytes(canonical.Authority);
                 var authorityWriter = new ContractJsonWriter(limits.Serialized);
                 Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
                 var floorsWriter = new ContractJsonWriter(limits.Serialized);

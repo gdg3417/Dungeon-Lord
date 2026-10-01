@@ -228,7 +228,7 @@ namespace DungeonBuilder.M0
                 return Localize(localize, MvpLoopSummaryPanelPresenter.ValueNoRunKey);
             }
 
-            return Localize(localize, summary.RunSucceeded ? MvpLoopSummaryPanelPresenter.RunSucceededKey : MvpLoopSummaryPanelPresenter.RunFailedKey);
+            return Localize(localize, summary.FinalRouteOutcomeKey == "run.route.floor_exit" ? "run.route.floor_exit" : summary.RunSucceeded ? MvpLoopSummaryPanelPresenter.RunSucceededKey : MvpLoopSummaryPanelPresenter.RunFailedKey);
         }
 
         private static string BuildPartyLine(MvpPlayerLoopSummary summary, Func<string, string, string> localize)

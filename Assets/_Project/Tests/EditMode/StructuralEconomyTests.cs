@@ -612,7 +612,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 typeof(GameRoot).GetProperty("Save").SetValue(root, paid.RuntimeProjection);
                 typeof(GameRoot).GetProperty("SaveService").SetValue(root, service);
                 typeof(GameRoot).GetField("_runSimulationService", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .SetValue(root, new RunSimulationService(f.Configuration));
+                    .SetValue(root, PhaseFiveBBranchIntegrationTests.Service(f.Configuration));
                 Assert.That(service.RenovationUndoRemainingSeconds, Is.GreaterThan(0));
                 Assert.That(activeLoop ? root.SimulateMvpActiveLoopOnce(out _) : root.SimulateRunOnce(), Is.True);
                 Assert.That(service.RenovationUndoRemainingSeconds, Is.Zero);

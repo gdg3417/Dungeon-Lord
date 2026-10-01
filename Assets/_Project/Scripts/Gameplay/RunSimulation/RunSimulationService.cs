@@ -33,7 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route)
             => SimulateRoute(runtime, tickStarted, runSequence, postureId, route, null);
 
-        internal RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal)
+        internal RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal, ActiveFloorRunSnapshot snapshot = null, TransientDepthObjective selectedObjective = null)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
             route = (route ?? Array.Empty<MvpOrderedRouteRoom>()).OrderBy(r => r.FloorIndex).ThenBy(r => r.RoomIndex).ToArray();
@@ -44,7 +44,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             // Preserve the existing zero/one-room compatibility outcome when there are no
             // assignments to execute. SimulateOnce now uses the same authoritative roster and HP
             // model, so this path cannot reintroduce aggregate casualty authority.
-            if (traversal == null && (route.Length == 0 || (route.Length == 1 && route[0].OrderedAssignments().Length == 0)))
+            if (snapshot == null && traversal == null && (route.Length == 0 || (route.Length == 1 && route[0].OrderedAssignments().Length == 0)))
             {
                 MvpPlacementEffectsSummary effects = route.Length == 1
                     ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config)
@@ -62,6 +62,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
             var events = new List<RunEncounterEvent>();
+            var transitions = new List<FloorTransitionEvidence>();
+            var objective = selectedObjective;
+            bool deliberateExit = false;
+            int configuredRoomCount = snapshot == null ? route.Length : snapshot.Floors.Sum(f => f.MaterializePlan().RequiredRooms.Length);
+
 
             RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
             double heatAtStart = runtime.Heat;
@@ -77,7 +82,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             bool lootResolverSuccess = true;
             int lootResolverErrorCode = (int)LootRollResolverErrorCode.None;
             MvpPlacementEffectsSummary configuredEffects = EmptyPlacementEffects();
-            for (int i = 0; i < route.Length; i++) AddPlacementEffects(configuredEffects, MvpPlacementEffectsResolver.ResolvePlacements(route[i].ToOrderedPlacements(), _config));
+            if (snapshot == null)
+                foreach (var room in route) AddPlacementEffects(configuredEffects, MvpPlacementEffectsResolver.ResolvePlacements(room.ToOrderedPlacements(), _config));
+            else
+                foreach (var floor in snapshot.Floors)
+                    foreach (var room in floor.MaterializePlan().RequiredRooms)
+                        AddPlacementEffects(configuredEffects, MvpPlacementEffectsResolver.ResolvePlacements(room.Room.ToOrderedPlacements(), _config));
             MvpPlacementEffectsSummary reachedEffects = EmptyPlacementEffects();
             MvpPlacementEffectsSummary clearedRewardEffects = EmptyPlacementEffects();
             RunCompositionOutcomeSummary finalComposition = BuildCompositionOutcomeSummary(reachedEffects, manaAtStart);
@@ -85,13 +95,23 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             double finalChance = _config.BaseSuccessChance;
             double finalHeatPenalty = 0d, finalManaBonus = 0d, finalCrisisPenalty = 0d;
 
+            // The coordinator advances between separate floor plans; the same party, loot,
+            // events and branch workload survive. Settlement stays outside both loops.
+            for (int floorOrdinal = 0; floorOrdinal < (snapshot?.Floors.Count ?? 1); floorOrdinal++)
+            {
+                if (snapshot != null)
+                {
+                    var floorPlan = snapshot.Floors[floorOrdinal].MaterializePlan();
+                    route = floorPlan.RequiredRooms.Select(r => r.Room).ToArray();
+                    traversal.Forks = floorPlan.Forks;
+                }
             for (int i = 0; i < route.Length; i++)
             {
                 MvpOrderedRouteRoom routeRoom = route[i];
                 MvpPlacementEffectsSummary localEffects = MvpPlacementEffectsResolver.ResolvePlacements(routeRoom.ToOrderedPlacements(), _config);
                 int entrants = currentSurvivors;
                 // Preserve the pre-Phase-5B one-room loot identity; multi-room identity is unchanged.
-                int roomSeed = route.Length == 1 ? seed : DeriveRoomSeed(seed, routeRoom.FloorIndex, routeRoom.RoomIndex);
+                int roomSeed = route.Length == 1 && routeRoom.FloorIndex == 0 ? seed : DeriveRoomSeed(seed, routeRoom.FloorIndex, routeRoom.RoomIndex);
                 RunRoomAssignment[] assignments = routeRoom.OrderedAssignments();
                 if (assignments.Length == 0 && !(traversal != null && route.Length == 1))
                 {
@@ -184,6 +204,17 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (stopped) break;
             }
 
+                if (snapshot == null || party.IsWiped || rooms.LastOrDefault()?.StoppedRoute == true) break;
+                string next = floorOrdinal + 1 < snapshot.Floors.Count ? snapshot.Floors[floorOrdinal + 1].FloorInstanceId : null;
+                var transition = FloorTransitionDecision.Resolve(_config.PhaseSix, party,
+                    snapshot.Floors[floorOrdinal].FloorInstanceId, next, generatedValue + (traversal?.Value ?? 0),
+                    objective.Pull(snapshot.Floors[floorOrdinal].FloorIndex, next != null,
+                        snapshot.Floors[snapshot.Floors.Count - 1].FloorIndex),
+                    FloorTransitionPerception.Unknown(_config.PhaseSix));
+                transitions.Add(transition);
+                if (!transition.Descend) { deliberateExit = next != null; break; }
+            }
+
             if (traversal != null)
             {
                 generatedItems.AddRange(traversal.Items); generatedValue += traversal.Value;
@@ -198,6 +229,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 RunOutcomeRecord empty = BuildNoEncounterRouteOutcome(runtime, tickStarted, runSequence, posture, heatAtStart, manaAtStart, partyRoll, rooms, configuredEffects, reachedEffects);
                 empty.Party = party; empty.EncounterEvents = events.ToArray();
+                empty.FloorTransitions = transitions.ToArray(); empty.DepthObjective = objective;
+                if (snapshot != null)
+                {
+                    empty.Success = !deliberateExit;
+                    empty.ReasonKey = deliberateExit ? "run.reason.floor_exit" : "run.reason.success";
+                    empty.FinalRouteOutcomeKey = deliberateExit ? "run.route.floor_exit" : RouteClearedKey;
+                    empty.FeedbackTagKeys = BuildFeedbackTagKeys(runtime, true, finalComposition);
+                }
+                empty.ConfiguredRoomCount = configuredRoomCount;
                 return empty;
             }
 
@@ -224,26 +264,26 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             int clearedCount = rooms.FindAll(room => room.Cleared).Count;
             bool partyWiped = currentSurvivors <= 0;
-            bool allRoomsReached = rooms.Count == route.Length;
+            bool allRoomsReached = rooms.Count == configuredRoomCount;
             bool allReachedRoomsCleared = rooms.Count > 0 && rooms.TrueForAll(room => room.Cleared);
-            bool fullClear = !partyWiped && allRoomsReached && allReachedRoomsCleared;
-            string routeKey = partyWiped ? RouteWipedKey : fullClear ? RouteClearedKey :
+            bool fullClear = !deliberateExit && !partyWiped && allRoomsReached && allReachedRoomsCleared;
+            string routeKey = partyWiped ? RouteWipedKey : deliberateExit ? "run.route.floor_exit" : fullClear ? RouteClearedKey :
                 rooms[rooms.Count - 1].RoomIndex == 0 ? RouteStoppedRoomOneKey :
                 rooms[rooms.Count - 1].RoomIndex == 1 ? RouteStoppedRoomTwoKey : RouteRetreatedKey;
             return new RunOutcomeRecord {
-                Party = party, EncounterEvents = events.ToArray(),
+                Party = party, EncounterEvents = events.ToArray(), FloorTransitions = transitions.ToArray(), DepthObjective = objective,
                 RunId = RunId(runSequence), TickStarted = tickStarted, Success = fullClear,
                 Score = fullClear ? _config.BaseScoreOnSuccess + (int)Math.Round(aggregateComposition.EffectiveManaReserve * _config.ScorePerManaPoint) : 0,
-                ReasonKey = partyWiped ? PartyWipedReasonKey : fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),
+                ReasonKey = partyWiped ? PartyWipedReasonKey : deliberateExit ? "run.reason.floor_exit" : fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),
                 HeatAtStart = heatAtStart, ManaAtStart = manaAtStart, CrisisActiveAtStart = runtime.IsHeatCrisisActive, HasBreakdown = true,
                 BaseChance = _config.BaseSuccessChance, HeatPenaltyApplied = finalHeatPenalty,
                 ManaBonusApplied = finalManaBonus, CrisisPenaltyApplied = finalCrisisPenalty, FinalChance = finalChance,
-                SuccessThresholdUsed = _config.SuccessThreshold, FeedbackTagKeys = BuildFeedbackTagKeys(runtime, fullClear, aggregateComposition),
+                SuccessThresholdUsed = _config.SuccessThreshold, FeedbackTagKeys = BuildFeedbackTagKeys(runtime, fullClear || deliberateExit, aggregateComposition),
                 LootSummary = loot, SurvivalSummary = survival, LootExtractionSummary = extraction, LootBreakdown = breakdown,
                 AdventurerAttractionSummary = attraction, AdventurerInterestForecastSummary = forecast, AdventurerDemandBudgetSummary = demand,
                 RunHeatDeltaSummary = heatDelta, RunHeatApplicationSummary = heatApplication, CompositionOutcomeSummary = finalComposition,
                 RunPostureId = posture?.Id, RoomResolutions = rooms.ToArray(), HighestRoomReached = rooms[rooms.Count - 1].RoomIndex,
-                ReachedRoomCount = rooms.Count, ConfiguredRoomCount = route.Length, ClearedRoomCount = clearedCount, FinalRouteOutcomeKey = routeKey,
+                ReachedRoomCount = rooms.Count, ConfiguredRoomCount = configuredRoomCount, ClearedRoomCount = clearedCount, FinalRouteOutcomeKey = routeKey,
                 ConfiguredRoutePlacementEffects = configuredEffects, ReachedRoutePlacementEffects = reachedEffects,
                 ClearedRewardPlacementEffects = clearedRewardEffects
             };

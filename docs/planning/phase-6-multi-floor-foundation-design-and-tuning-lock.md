@@ -1,6 +1,8 @@
 # Phase 6A0: Multi-floor foundation design and tuning lock
 
-**Implementation reconciliation (2026-09-29):** Phase 6A1 persisted schema 11 activation authority. Phase 6A2 merged as PR #216 at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f` after external review, automated qualification, Editor qualification, and Windows standalone qualification passed; it implements Floor 2 permission, shell construction, and explicit floor-targeted inactive editing. Phase 6A3 adds only deterministic read-only Floor 2 activation eligibility, consuming existing canonical, research, production-semantic, and `ActivationValid` layout authorities and requiring a required route through at least one room. The locked decisions below remain unchanged. No activation/deactivation mutation or multi-floor run support is implemented. See [Phase 6A2 evidence](../../Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md).
+**Phase 6A4 implementation status (2026-09-29):** A4 implements safe usable two-floor lifecycle and runtime from the merged PR #217 baseline / `756607cca58aac584f69cdc3b4c27d30b58eefad`. Eligible constructed Floor 2 can be activated, deactivated, or included through Activate All Eligible at zero mana cost. Detached lifecycle candidates must materialize the same immutable active-prefix run snapshot consumed by gameplay before exact atomic persistence, durable readback, reopen validation, and live publication. One shared per-floor runnable projection stops at the first Completion Terminal; separate floor-local Phase 5B plans preserve one RunParty and exact surviving HP across deterministic EXIT/DESCEND decisions. Complete-run settlement occurs once. Online/offline passive mana use the existing Active-floor resolver; writable schema remains 11 with no migration. Durable shared floor knowledge and richer aggregate multi-floor reporting remain unimplemented and deferred to A5 or an equivalent reviewed packet. Phase 6 remains open; A5 owns those features, final qualification, and closeout. Automated qualification is recorded in the [A4 evidence](../../Docs/testing/evidence/phase6a4-atomic-lifecycle-two-floor-runs/implementation-evidence.md); external review and owner manual qualification remain pending.
+
+**Historical implementation reconciliation (2026-09-29):** Phase 6A1 persisted schema 11 activation authority. Phase 6A2 merged as PR #216 at `45ac7da34bb4527b9b45fcaeb9ec5ec01d816e7f` after external review, automated qualification, Editor qualification, and Windows standalone qualification passed; it implements Floor 2 permission, shell construction, and explicit floor-targeted inactive editing. Phase 6A3 adds only deterministic read-only Floor 2 activation eligibility, consuming existing canonical, research, production-semantic, and `ActivationValid` layout authorities and requiring a required route through at least one room. The locked decisions below remain unchanged. No activation/deactivation mutation or multi-floor run support is implemented. See [Phase 6A2 evidence](../../Docs/testing/evidence/phase6a2-floor2-construction-inactive-editing/implementation-evidence.md).
 
 | Field | Authority |
 | --- | --- |
@@ -12,7 +14,7 @@
 
 This document closes the Phase 6 design and initial-tuning gate for Additional Floor Foundation. It does not implement Floor 2, schema 11, migration, UI, or Phase 6 runtime behavior. Numeric values below are initial **configuration/content-owned tuning seeds**. They must not be copied into runtime constants or frozen as mutable save values. Phase 5 Decision 30 v2 is unchanged.
 
-**Phase 6A1 implementation status (2026-09-28):** Schema 11 is the current writable target. Each persisted floor owns one explicit `ActivationState` (Active or Inactive), the sole writable activation authority. Frozen schemas 7–10 retain their historical shapes; the sequential migration chain maps every schema 10 floor to Active, preserves existing state and extension members, and creates no floors. Validation requires Floor 1 active and deeper active floors to form a contiguous prefix. Online and offline passive mana count only validated Active floors. Production still contains only Floor 1; Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
+**Historical Phase 6A1 implementation status (2026-09-28):** Schema 11 is the current writable target. Each persisted floor owns one explicit `ActivationState` (Active or Inactive), the sole writable activation authority. Frozen schemas 7–10 retain their historical shapes; the sequential migration chain maps every schema 10 floor to Active, preserves existing state and extension members, and creates no floors. Validation requires Floor 1 active and deeper active floors to form a contiguous prefix. Online and offline passive mana count only validated Active floors. Production still contains only Floor 1; Floor 2 construction, lifecycle actions, and multi-floor runs remain deferred.
 
 The following design-lock statements describe the Phase 6A0 baseline. Phase 6A1 implements only its activation-persistence and migration decisions; the locked gameplay and tuning decisions are unchanged.
 
@@ -99,13 +101,13 @@ Validation requires every reference value to be finite and positive. Unknown rew
 
 At run formation, MVP deterministically assigns a transient party-level depth objective from stable run identity and an explicit configuration-owned rule source; it must not reuse branch/transition marginal rolls.
 
-| Mode | Weight | Behavior |
-| --- | ---: | --- |
-| shallow | 0.20 | no deeper pull |
-| target depth | 0.50 | targets Floor 2 in the Phase 6 two-floor game until reached, then resolves |
-| deepest reasonable | 0.30 | pulls deeper while another active floor exists, subject to survivability |
+| Mode | Selection Weight | PullStrength | TargetFloorIndex | Behavior |
+| --- | ---: | ---: | ---: | --- |
+| shallow | 0.20 | 0.00 | not applicable | no deeper pull |
+| target depth | 0.50 | 0.75 | 1 (Floor 2) | pulls toward the configured target while it remains ahead and another Active floor exists; resolves at or beyond the target |
+| deepest reasonable | 0.30 | 0.50 | not applicable | pulls deeper while another Active floor exists, subject to survivability |
 
-These are configuration-owned selection weights. Validation requires each weight to be finite and nonnegative, with a finite total greater than zero. Runtime normalizes the configured collection for deterministic selection; it must not hardcode 20/50/30 probabilities or require future authored weights to sum to `1.0`. Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets may influence formation without replacing the transition system.
+Each objective definition is configuration-owned. `SelectionWeight` controls deterministic assignment frequency and is normalized at runtime in canonical mode order. `PullStrength` controls the selected objective's normalized deeper pressure through `ObjectiveTerm = CurrentDepthObjectivePull`. The separate global `ObjectiveWeight` controls how important that pressure is relative to reward, survivability, danger, uncertainty, and carried-loot preservation. Validation requires selection weights and pull strengths to be finite and in their supported domains, a finite positive selection-weight total, shallow to have zero pull, and target depth to name a valid deeper zero-based FloorIndex. Runtime must not hardcode 20/50/30 probabilities, a Floor 2 condition, or objective pull magnitude. Resolved or impossible objectives provide no pull. Future quests, activities, bosses, rescue goals, and item targets are not implemented by A4.
 
 Phase 6 approves shared floor-level knowledge, separate from branch knowledge, representing stable floor identity, topology/applicability fingerprint or equivalent, reward/danger known flags and perceptions, shared confidence, and last-confirmed run identity or equivalent evidence. Compatible survivor reports may create/reconfirm/update it. A wipe must not generate precise detailed knowledge from internal simulation; current coarse outside-world wipe/death evidence continues under its own authority. Material topology/content changes invalidate stale applicability.
 
@@ -153,3 +155,9 @@ This authority does not implement schema 11 or its migration, Floor 2 runtime co
 - [System Spec 28](../../Docs/28%20-%20Save_Data_Model_Versioning_and_Migration.md)
 - [Phase 5 branching authority](phase-5-branching-and-route-choice-design.md)
 - [Phase 5B tuning and run-condition contract](phase-5b-production-tuning-and-run-condition-contract.md)
+
+## Phase 6A4 implementation boundary
+
+The locked formula and numeric tuning above are unchanged. Production `run_simulation_config.json` owns typed Phase Six tuning and objective weights. The stable configured objective-selection source is `run.depth_objective.phase6.v1`; its length-prefixed UTF-8 SHA-256 identity is `(RuleSourceId, RunId)`, independent of branch and transition identities. Objective entries are ordered by mode and their configured weights are normalized. The transition source remains `run.floor_transition_decision.phase6.v1`, with identity `(RuleSourceId, RunId, CurrentFloorInstanceId, NextFloorInstanceId)`.
+
+A4 supplies unknown next-floor perception using configured uncertainty and does not inspect hidden floor content to infer reward or danger. The complete snapshot retains real content for later simulation, separately from transition perception. Shared floor knowledge remains approved design only, deferred to A5 along with richer aggregate explanation, final qualification, and Phase 6 closeout. No ordinary party HP, objective, snapshot, or between-floor checkpoint is persisted.

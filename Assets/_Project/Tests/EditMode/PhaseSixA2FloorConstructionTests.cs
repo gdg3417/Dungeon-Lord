@@ -342,7 +342,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(offline.ApplicableOnlineManaPerHour, Is.EqualTo(rate.ManaPerHour));
             Two(f).ActivationState = FloorActivationState.Active;
             Assert.That(CanonicalMvpRouteProjection.InspectWithProductionContent(f.Runtime, f.Production).AuthorityState,
-                Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ContradictoryCanonical));
+                Is.EqualTo(CanonicalMvpRuntimeAuthorityState.ValidatedCanonical));
+            Assert.That(JsonUtility.ToJson(new Route { Rooms = CanonicalMvpRouteProjection.InspectWithProductionContent(f.Runtime, f.Production).Rooms }), Is.EqualTo(route));
+            Assert.That(CanonicalActiveFloorResolver.TryResolve(f.Runtime, f.Profile.Canonical.Spatial, out active), Is.True);
+            Assert.That(active, Is.EqualTo(2));
         }
         [Serializable] private sealed class Route { public MvpOrderedRouteRoom[] Rooms; }
 

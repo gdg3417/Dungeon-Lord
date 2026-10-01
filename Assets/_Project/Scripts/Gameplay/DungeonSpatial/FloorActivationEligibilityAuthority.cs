@@ -163,50 +163,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        private static bool HasRequiredRouteRoom(FloorSpatialLayout layout)
-        {
-            FloorRouteNode[] nodes = layout?.Nodes ?? Array.Empty<FloorRouteNode>();
-            FloorRouteNode[] entrances = nodes.Where(value => value != null &&
-                value.Kind == FloorRouteNodeKind.Entrance).ToArray();
-            FloorRouteNode[] completions = nodes.Where(value => value != null &&
-                value.Kind == FloorRouteNodeKind.Completion).ToArray();
-            if (entrances.Length != 1 || completions.Length != 1) return false;
-
-            var nodeById = nodes.Where(value => value != null).ToDictionary(
-                value => value.NodeId, StringComparer.Ordinal);
-            FloorRouteEdge[] edges = (layout.Edges ?? Array.Empty<FloorRouteEdge>())
-                .Where(value => value != null && value.Classification == RouteClassification.Required)
-                .OrderBy(value => value.SourceNodeId, StringComparer.Ordinal)
-                .ThenBy(value => value.DestinationNodeId, StringComparer.Ordinal)
-                .ThenBy(value => value.EdgeId, StringComparer.Ordinal).ToArray();
-            var visited = new HashSet<string>(StringComparer.Ordinal);
-            var queue = new Queue<RouteStep>();
-            queue.Enqueue(new RouteStep(entrances[0].NodeId, false));
-            while (queue.Count > 0)
-            {
-                RouteStep current = queue.Dequeue();
-                if (string.Equals(current.NodeId, completions[0].NodeId,
-                        StringComparison.Ordinal)) return current.HasRoom;
-                string key = current.NodeId + (current.HasRoom ? "\u0001" : "\u0000");
-                if (!visited.Add(key)) continue;
-                foreach (FloorRouteEdge edge in edges.Where(value =>
-                    string.Equals(value.SourceNodeId, current.NodeId, StringComparison.Ordinal)))
-                {
-                    if (!nodeById.TryGetValue(edge.DestinationNodeId, out FloorRouteNode destination))
-                        continue;
-                    queue.Enqueue(new RouteStep(destination.NodeId,
-                        current.HasRoom || destination.Kind == FloorRouteNodeKind.Room));
-                }
-            }
-            return false;
-        }
-
-        private readonly struct RouteStep
-        {
-            internal RouteStep(string nodeId, bool hasRoom)
-            { NodeId = nodeId; HasRoom = hasRoom; }
-            internal string NodeId { get; }
-            internal bool HasRoom { get; }
-        }
+        private static bool HasRequiredRouteRoom(FloorSpatialLayout layout) =>
+            RequiredFloorTraversal.TryResolve(layout, out FloorRouteNode[] route) &&
+            route.Any(node => node.Kind == FloorRouteNodeKind.Room);
     }
 }

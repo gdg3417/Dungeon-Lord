@@ -31,7 +31,10 @@ namespace DungeonBuilder.M0
                     b.Decision.ExpectedSurvivability, localize(b.Reason, b.Reason),
                     b.ReachedAssignments.Length, localize(b.KnowledgeOutcome, b.KnowledgeOutcome));
             });
-            return string.Join("\n", members.Concat(events).Concat(branches));
+            var transitions = (outcome.FloorTransitions ?? Array.Empty<Gameplay.RunSimulation.FloorTransitionEvidence>())
+                .Select(t => string.Format(localize("ui.run.floor.transition_format", "ui.run.floor.transition_format"),
+                    t.CurrentFloorInstanceId, t.NextFloorInstanceId, localize(t.Reason, t.Reason)));
+            return string.Join("\n", members.Concat(events).Concat(branches).Concat(transitions));
         }
     }
 }
