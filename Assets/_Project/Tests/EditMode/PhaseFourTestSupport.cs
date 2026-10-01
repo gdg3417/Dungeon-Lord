@@ -14,14 +14,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
                 SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine) &&
                 SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] ten) &&
-                SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out current);
+                SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out byte[] eleven) &&
+                SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out current);
         }
 
         // Test-only projection for fixtures that intentionally exercise frozen contracts.
-        internal static string FrozenTen(byte[] current) => System.Text.Encoding.UTF8.GetString(current)
-            .Replace("\"schemaVersion\":11", "\"schemaVersion\":10")
-            .Replace(",\"ActivationState\":1", "")
-            .Replace(",\"ActivationState\":2", "");
+        internal static string FrozenTen(byte[] current)
+        {
+            string value = System.Text.Encoding.UTF8.GetString(current);
+            int owner = value.LastIndexOf(",\"sharedFloorKnowledge\":", System.StringComparison.Ordinal);
+            if (owner >= 0)
+            {
+                int start = value.IndexOf('{', owner), depth = 0, end = -1;
+                bool quoted = false, escaped = false;
+                for (int index = start; index < value.Length; index++)
+                {
+                    char character = value[index];
+                    if (quoted)
+                    {
+                        if (escaped) escaped = false;
+                        else if (character == '\\') escaped = true;
+                        else if (character == '"') quoted = false;
+                    }
+                    else if (character == '"') quoted = true;
+                    else if (character == '{') depth++;
+                    else if (character == '}' && --depth == 0) { end = index + 1; break; }
+                }
+                if (start < owner || end < start) throw new System.ArgumentException("Invalid schema 12 test fixture");
+                value = value.Remove(owner, end - owner);
+            }
+            return value.Replace("\"schemaVersion\":12", "\"schemaVersion\":10")
+                .Replace("\"schemaVersion\":11", "\"schemaVersion\":10")
+                .Replace(",\"ActivationState\":1", "")
+                .Replace(",\"ActivationState\":2", "");
+        }
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
         {

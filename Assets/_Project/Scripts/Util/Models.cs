@@ -1511,6 +1511,7 @@ namespace DungeonBuilder.M0
         [NonSerialized] internal DetachedCanonicalSpatialSaveState validatedCanonicalSpatialState;
         [NonSerialized] public CorridorContentAuthority corridorContent;
         [NonSerialized] public SharedBranchKnowledgeAuthority sharedBranchKnowledge;
+        [NonSerialized] public SharedFloorKnowledgeAuthority sharedFloorKnowledge;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

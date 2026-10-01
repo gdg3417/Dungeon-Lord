@@ -94,6 +94,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 PhaseFiveSaveContracts.Write(writer, PhaseFiveSaveContracts.EmptyCorridor());
                 writer.Token(","); writer.String(PhaseFiveSaveContracts.KnowledgeOwnerName); writer.Token(":");
                 PhaseFiveSaveContracts.Write(writer, PhaseFiveSaveContracts.EmptyKnowledge());
+                writer.Token(","); writer.String(PhaseSixFloorKnowledge.OwnerName); writer.Token(":");
+                PhaseSixFloorKnowledge.Write(writer, PhaseSixFloorKnowledge.Empty());
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,

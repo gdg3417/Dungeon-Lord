@@ -41,6 +41,9 @@
   "DangerReference": 9.0,
   "CarriedLootReference": 12.0,
   "UnknownInformationUncertainty": 1.0,
+  "InitialObservationConfidence": 0.75,
+  "ReconfirmationConfidenceIncrease": 0.125,
+  "ConfidenceClamp": 1.0,
   "Objectives": [
     {
       "Mode": "shallow",

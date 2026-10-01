@@ -254,11 +254,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalLayoutContractSelection[] contracts = (data.ContractSelections ??
                 Array.Empty<CanonicalLayoutContractSelection>())
                 .Where(value => value?.Lifecycle == CompatibilityProfileLifecycle.Active).ToArray();
-            if (migrations.Length != 1 || starters.Length != 5 || contracts.Length != 5 ||
+            if (migrations.Length != 1 || starters.Length != 6 || contracts.Length != 6 ||
                 starters.Count(value => value.TargetSchemaVersion == 9) != 1 ||
                 contracts.Count(value => value.TargetSchemaVersion == 9) != 1 ||
                 starters.Count(value => value.TargetSchemaVersion == 10) != 1 ||
                 contracts.Count(value => value.TargetSchemaVersion == 10) != 1 ||
+                starters.Count(value => value.TargetSchemaVersion == 11) != 1 ||
+                contracts.Count(value => value.TargetSchemaVersion == 11) != 1 ||
+                starters.Count(value => value.TargetSchemaVersion == 12) != 1 ||
+                contracts.Count(value => value.TargetSchemaVersion == 12) != 1 ||
                 starters.Count(value => value.TargetSchemaVersion == 8) != 1 ||
                 contracts.Count(value => value.TargetSchemaVersion == 8) != 1) return false;
 

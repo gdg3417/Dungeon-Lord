@@ -200,6 +200,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 schemaNine, fixture.Limits).IsValid, Is.True);
             Assert.That(SchemaNineToTenUpgrade.TryPrepare(schemaNine, fixture.Limits, out schemaEight), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
+            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

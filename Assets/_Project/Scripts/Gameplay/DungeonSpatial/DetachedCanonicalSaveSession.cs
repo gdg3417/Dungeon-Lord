@@ -179,26 +179,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public DetachedCanonicalSaveSessionResult PrepareSpatialOnlyReplacement(
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null) =>
-            PrepareReplacement(null, replacement, investment, null, null);
+            PrepareReplacement(null, replacement, investment, null, null, null);
 
         public DetachedCanonicalSaveSessionResult PrepareLiveReplacement(
             DetachedRecognizedSaveStateSnapshotResult recognizedState,
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null,
             CorridorContentAuthority corridorContent = null,
-            SharedBranchKnowledgeAuthority branchKnowledge = null)
+            SharedBranchKnowledgeAuthority branchKnowledge = null,
+            SharedFloorKnowledgeAuthority floorKnowledge = null)
         {
             if (recognizedState == null || !recognizedState.IsSuccess)
                 return Failure(recognizedState?.Reason ??
                     DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
             return PrepareReplacement(recognizedState.Snapshot, replacement, investment,
-                corridorContent, branchKnowledge);
+                corridorContent, branchKnowledge, floorKnowledge);
         }
 
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment,
             CorridorContentAuthority corridorContent,
-            SharedBranchKnowledgeAuthority branchKnowledge)
+            SharedBranchKnowledgeAuthority branchKnowledge,
+            SharedFloorKnowledgeAuthority floorKnowledge)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -225,7 +227,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     string name = recognizedNames[nameIndex];
                     if (name == PhaseFiveSaveContracts.CorridorOwnerName ||
-                        name == PhaseFiveSaveContracts.KnowledgeOwnerName) continue;
+                        name == PhaseFiveSaveContracts.KnowledgeOwnerName ||
+                        name == PhaseSixFloorKnowledge.OwnerName) continue;
                     byte[] valueBytes;
                     if (IsFrozenLegacySpatialMember(name) || recognizedState == null)
                     {
@@ -237,7 +240,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                const int canonicalMemberCount = 6;
+                const int canonicalMemberCount = 7;
                 int canonicalStart = primary.Fields.Count - canonicalMemberCount;
                 for (int index = 0; index < canonicalStart; index++)
                 {
@@ -262,6 +265,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 writer.Token(","); writer.String(PhaseFiveSaveContracts.KnowledgeOwnerName); writer.Token(":");
                 if (branchKnowledge != null) PhaseFiveSaveContracts.Write(writer, branchKnowledge);
                 else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 5].Value);
+                writer.Token(","); writer.String(PhaseSixFloorKnowledge.OwnerName); writer.Token(":");
+                if (floorKnowledge != null) PhaseSixFloorKnowledge.Write(writer, floorKnowledge);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 6].Value);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)
@@ -332,7 +338,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             Contains(RawSavePayloadClassifier.RecognizedSaveDataMemberNames, name) &&
             !IsFrozenLegacySpatialMember(name) &&
             name != PhaseFiveSaveContracts.CorridorOwnerName &&
-            name != PhaseFiveSaveContracts.KnowledgeOwnerName;
+            name != PhaseFiveSaveContracts.KnowledgeOwnerName &&
+            name != PhaseSixFloorKnowledge.OwnerName;
 
         private static bool IsFrozenLegacySpatialMember(string name) =>
             name == "mvpDungeonPlacements" || name == "mvpDungeonFloorLayout" ||

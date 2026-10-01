@@ -1,6 +1,7 @@
 using DungeonBuilder.M0.Gameplay.DungeonLayout;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.Structures;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using System;
 
 namespace DungeonBuilder.M0
@@ -8,7 +9,7 @@ namespace DungeonBuilder.M0
     public static class SaveMigration
     {
         // Schema 7 is reached live only through the GD66 raw-before-legacy boundary.
-        public const int LatestSchemaVersion = 11;
+        public const int LatestSchemaVersion = CanonicalSaveSchemaVersions.CurrentWritableTarget;
         public const int LegacyCompatibilitySchemaVersion = 6;
         public const int DefaultFloorCount = 5;
         public const int DefaultSlotsPerFloor = 6;

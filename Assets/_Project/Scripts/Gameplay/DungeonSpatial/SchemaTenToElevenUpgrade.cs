@@ -30,7 +30,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 writer.Token("}");
                 byte[] prepared = writer.Finish();
-                if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(prepared, limits).IsValid)
+                if (!DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(prepared, limits).IsValid)
                     return false;
                 candidate = prepared;
                 return true;

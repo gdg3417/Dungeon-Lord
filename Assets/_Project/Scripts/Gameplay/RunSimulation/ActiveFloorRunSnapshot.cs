@@ -15,9 +15,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly string spatial;
         public string FloorInstanceId { get; }
         public int FloorIndex { get; }
-        internal RunnableFloorSnapshot(SavedSpatialFloor floor, PhaseFiveBRoutePlan value)
+        public string KnowledgeFingerprint { get; }
+        internal RunnableFloorSnapshot(SavedSpatialFloor floor, PhaseFiveBRoutePlan value, string fingerprint)
         {
             FloorInstanceId = floor.FloorInstanceId; FloorIndex = floor.FloorIndex;
+            KnowledgeFingerprint = fingerprint;
             plan = JsonUtility.ToJson(value); spatial = JsonUtility.ToJson(floor);
         }
         public PhaseFiveBRoutePlan MaterializePlan() => JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
@@ -29,19 +31,22 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly string configuration;
         private readonly string loot;
         private readonly string knowledge;
+        private readonly string floorKnowledge;
         private readonly string initialRuntime;
         public long TickStarted { get; }
         public string PostureId { get; }
         public DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState InitialRuntime =>
             JsonUtility.FromJson<DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState>(initialRuntime);
         public SharedBranchKnowledgeAuthority BranchKnowledge => JsonUtility.FromJson<SharedBranchKnowledgeAuthority>(knowledge);
+        public SharedFloorKnowledgeAuthority FloorKnowledge => JsonUtility.FromJson<SharedFloorKnowledgeAuthority>(floorKnowledge);
         public LootConfig LootConfiguration => loot == null ? null : JsonUtility.FromJson<LootConfig>(loot);
         public string LootTableId { get; }
         public IReadOnlyList<RunnableFloorSnapshot> Floors { get; }
         public RunSimulationConfig Configuration => JsonUtility.FromJson<RunSimulationConfig>(configuration);
-        private ActiveFloorRunSnapshot(RunnableFloorSnapshot[] floors, RunSimulationConfig config, LootConfig lootConfig, string lootTableId, SharedBranchKnowledgeAuthority branchKnowledge, SaveData executionInputs, string postureId)
+        private ActiveFloorRunSnapshot(RunnableFloorSnapshot[] floors, RunSimulationConfig config, LootConfig lootConfig, string lootTableId, SharedBranchKnowledgeAuthority branchKnowledge, SharedFloorKnowledgeAuthority sharedFloorKnowledge, SaveData executionInputs, string postureId)
         { Floors = Array.AsReadOnly(floors); configuration = JsonUtility.ToJson(config);
           knowledge = JsonUtility.ToJson(branchKnowledge);
+          floorKnowledge = JsonUtility.ToJson(sharedFloorKnowledge);
           initialRuntime = JsonUtility.ToJson(executionInputs.structureRuntime); TickStarted = executionInputs.totalTicks; PostureId = postureId;
           loot = lootConfig == null ? null : JsonUtility.ToJson(lootConfig); LootTableId = lootTableId ?? config.LootTableId; }
 
@@ -85,11 +90,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (plan.Forks.Length > config.PhaseFiveB.BranchDecision.MaximumDecisionsPerFloor ||
                     plan.Forks.Any(f => f.Assignments.Length > config.PhaseFiveB.BranchDecision.MaximumAssignmentsPerBranch))
                     throw new ArgumentException(BranchRunWorkload.WorkloadExceeded);
-                floors.Add(new RunnableFloorSnapshot(floor, plan));
+                if (!FloorKnowledgeApplicability.TryCompute(state, owned.CorridorContent, limits,
+                    floor.FloorInstanceId, out string fingerprint))
+                    throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
+                floors.Add(new RunnableFloorSnapshot(floor, plan, fingerprint));
             }
             if (floors.Sum(f => f.MaterializePlan().Forks.Length) > config.PhaseFiveB.BranchDecision.MaximumDecisionsPerRun)
                 throw new ArgumentException(BranchRunWorkload.WorkloadExceeded);
-            return new ActiveFloorRunSnapshot(floors.ToArray(), config, lootConfig, lootTableId, owned.BranchKnowledge, executionInputs, postureId);
+            return new ActiveFloorRunSnapshot(floors.ToArray(), config, lootConfig, lootTableId, owned.BranchKnowledge, owned.FloorKnowledge, executionInputs, postureId);
         }
     }
 }
