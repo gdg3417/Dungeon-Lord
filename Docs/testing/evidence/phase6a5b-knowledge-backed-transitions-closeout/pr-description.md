@@ -50,6 +50,7 @@ Assets/_Project/Scripts/Util/Models.cs
 Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs
 Assets/_Project/Tests/EditMode/PhaseSixA5BTests.cs
 Assets/_Project/Tests/EditMode/PhaseSixA5BTests.cs.meta
+README.md
 docs/planning/phase-6-multi-floor-foundation-design-and-tuning-lock.md
 docs/planning/post-gd60-mvp-execution-plan.md
 Docs/testing/evidence/phase6a5b-knowledge-backed-transitions-closeout/implementation-evidence.md
