@@ -19,7 +19,9 @@ GLOBAL LOCKS:
 
 \- Offline heat rebound is constrained strictly within the current Heat Tier.
 
-\- In the Phase 7 production editor, each discrete completed draft command triggers immediate durable non-authoritative draft persistence; canonical mutation occurs only at final atomic Save Changes.
+\- In the Phase 7 production editor, accepted draft mutations may be presented while ordered draft persistence is pending; only the acknowledged predecessor-complete durable prefix is crash-recoverable. Required pending/failed writes block final atomic Save Changes.
+
+\- Before authoritative room-local positions become writable, schema-12 assignments migrate through reviewed, versioned/frozen authored migration-placement profiles. Profiles use canonical assignment ordering and content/config-owned slots; invalid profiles fail closed without changing original bytes or inventing fallback placement.
 
 \- Offline crafting is deterministic only and may not unlock progression without verification.
 
@@ -3676,7 +3678,7 @@ Localization keys are stored alongside content tables and exported with the cont
 
 Layout Editing Save Rule
 
-Each discrete completed Phase 7 draft command triggers immediate durable persistence to separate non-authoritative draft storage; Save Changes is the sole canonical atomic-commit boundary.
+Each accepted Phase 7 draft command queues ordered persistence to separate non-authoritative draft storage; it becomes durably completed only on acknowledgement. Recovery restores the acknowledged durable prefix, and Save Changes is blocked until the final draft is durable before its sole canonical atomic-commit boundary.
 
 *Dungeon Builder, locked design specification*
 
@@ -3757,8 +3759,8 @@ Save writes occur at fixed intervals plus key actions.
 - Tile placement or move while in edit mode
 
   **Layout Editing Save Behavior**\
-  While the player is in the Phase 7 production editor, each discrete completed draft command is a key action and triggers immediate durable draft persistence.\
-  This ensures layout experimentation cannot be silently lost while canonical state, resources, custody, investment, and active runs remain unchanged until final atomic Save Changes.\
+  While the player is in the Phase 7 production editor, each accepted discrete draft command is a key action queued for ordered draft persistence and becomes durably completed only after acknowledgement.\
+  Presentation may precede acknowledgement; recovery restores the acknowledged durable prefix, persistence failure blocks Save Changes, and canonical state, resources, custody, investment, and active runs remain unchanged until final atomic Save Changes.\
   Outside of edit mode, interval saves still apply for performance reasons.
 
 ### 5.3 Player feedback

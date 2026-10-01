@@ -117,7 +117,7 @@ Offline rebound may move at most one Heat State step and may not cross Heat Tier
 
 INV-12 Dungeon Editing Save Safety
 
-During the Phase 7 production editor, each discrete completed draft command must be durably persisted immediately to separate non-authoritative draft storage. Continuous pointer/drag frames are transient. This protects player work without mutating canonical gameplay state, spending resources, changing custody/investment, or affecting current runs. Final revalidation, economics/resource calculation, and one atomic canonical commit occur only on Save Changes; a failed commit applies nothing and preserves the draft.
+During the Phase 7 production editor, each accepted discrete draft mutation is queued for ordered persistence to separate non-authoritative draft storage; continuous pointer/drag frames are transient. Presentation may optimistically display a pending mutation, but it becomes a durably completed draft command only after its required durability acknowledgement/barrier. The acknowledged durable sequence is a predecessor-complete prefix; recovery restores that prefix and may lose only a not-yet-acknowledged presented suffix after abrupt termination. Failed persistence leaves canonical state unchanged, requires explicit localization-backed recoverable failure presentation, and blocks Save Changes. Save Changes first requires all included mutations to be durable, then performs final validation/economics and one separate atomic canonical commit; failure applies nothing and preserves the durable draft.
 
 INV-13 Offline Crafting Constraints
 

@@ -184,7 +184,7 @@ Validity is lifecycle-sensitive:
 
 **Approved design lock:** Durable local, non-authoritative draft storage separate from canonical gameplay state.
 
-The draft must never be consumed by simulation, passive mana, active-floor authority, run resolution, or canonical gameplay systems.
+The draft must never be consumed by simulation, passive mana, active-floor authority, run resolution, or canonical gameplay systems. Presentation may optimistically show an accepted mutation while its ordered draft persistence is pending, but that mutation is not durably completed until it crosses the required persistence acknowledgement/barrier. The durable command sequence advances only in accepted command order; no later command may become recoverably durable before a required predecessor.
 
 ## Decision 17 - Recovery after crash/interruption
 
@@ -194,7 +194,7 @@ Player choices:
 - Resume Editing
 - Discard Draft
 
-Recovery never implicitly commits or activates a draft.
+Recovery never implicitly commits or activates a draft. It restores the last acknowledged durable command prefix only; an abrupt termination before acknowledgement may lose only the presented, not-yet-durable suffix and must never reconstruct a later command without its predecessors.
 
 ## Decision 18 - Stale recovered draft
 
@@ -224,11 +224,12 @@ Examples:
 **Approved design lock:** Drafting reserves and spends nothing.
 
 At Save Changes:
-1. Revalidate final draft.
-2. Recalculate authoritative economic consequences.
-3. Check current usable resources.
-4. If valid and affordable, apply all changes atomically.
-5. If invalid or unaffordable, apply nothing and preserve the draft.
+1. Require every accepted mutation included in the final draft to cross its required draft durability acknowledgement; pending or failed draft persistence blocks Save Changes.
+2. Revalidate the resulting durable final draft.
+3. Recalculate authoritative economic consequences.
+4. Check current usable resources.
+5. If valid and affordable, apply all changes atomically.
+6. If invalid or unaffordable, apply nothing and preserve the draft.
 
 The player may create an aspirational draft they cannot yet afford.
 
@@ -776,9 +777,11 @@ The previously proposed separate decisions for color-independent editor validity
 
 Each completed draft mutation is promptly persisted to the separate durable non-authoritative draft store. The canonical dungeon does not change merely because a placement, movement, removal, corridor edit, or content edit was completed in the editor.
 
-Canonical gameplay state changes only when the player explicitly chooses Save Changes and the complete whole-dungeon transaction passes current validation, affordability, persistence, and publication requirements.
+Presentation may show an accepted mutation before its queued persistence acknowledges it, but only the acknowledged ordered prefix is durably protected and recoverable. If persistence fails, canonical state remains unchanged; the editor enters an explicit recoverable, localization-backed persistence-failure state, must not claim the newest edit is durably protected, and must block Save Changes until the required durability condition is satisfied. Where platform lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence.
 
-**Specification reconciliation:** This direction intentionally supersedes the older rule that tile placement/movement in Edit Mode immediately saves canonical gameplay state. The preservation intent of that rule is retained by immediately protecting the draft from ordinary interruption/crash loss instead.
+Canonical gameplay state changes only when the player explicitly chooses Save Changes and the complete whole-dungeon transaction passes current validation, affordability, required draft durability, persistence, and publication requirements.
+
+**Specification reconciliation:** This direction intentionally supersedes the older rule that tile placement/movement in Edit Mode immediately saves canonical gameplay state. The preservation intent is retained by ordered acknowledged draft durability: the recovered prefix is protected from ordinary interruption/crash loss, while a presented suffix before acknowledgement is not claimed crash-safe.
 
 ## Decision 83 - Legacy 30-second renovation undo
 
@@ -803,7 +806,7 @@ Examples of persistence boundaries include:
 
 Pointer movement, drag interpolation, camera movement, hover/preview state, and other transient interaction frames are not separate durable writes.
 
-Draft persistence may be ordered/asynchronous relative to presentation so the UI is not forced to block rendering for every write, but ordering must preserve the authoritative sequence of accepted draft commands and recovery must never reconstruct a later command without its required predecessors.
+Draft persistence may be ordered/asynchronous relative to presentation so the UI is not forced to block rendering for every write. A mutation is durably completed only after its ordered write crosses the required durability acknowledgement/barrier. The durable sequence must preserve accepted command order; a later command cannot become recoverably durable while a predecessor is pending or failed. Presentation before acknowledgement is not a crash-safety claim. Recovery restores the acknowledged durable prefix, and Save Changes cannot begin canonical commit while required draft persistence is pending or failed.
 
 
 ---
@@ -920,6 +923,8 @@ On application resume:
 4. If the baseline no longer matches, do not silently overlay or rebase the draft. Route through the existing stale-draft recovery behavior instead.
 
 Backgrounding alone never commits or discards the draft.
+
+Where lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence. If that flush cannot acknowledge a presented mutation before abrupt termination, recovery may omit only that not-yet-durable suffix while retaining an internally consistent acknowledged prefix.
 
 
 # Group 20 - HUD Reconciliation, Production Navigation, Responsive Layout, Floor Rendering, and Dense Presentation
@@ -1089,6 +1094,16 @@ After the lifecycle transaction succeeds, the production UI updates in place:
 
 A lifecycle change does not automatically switch floors, enter Edit Mode, start a run, or open Analysis.
 
+## Decision 108 - Versioned legacy placement migration profiles
+
+**Approved design lock:** The transition from schema-12 non-positional room assignments to authoritative room-local positioning uses versioned, authored migration-placement profiles.
+
+Migration compatibility data owns deterministic room-local legacy placement slots. A profile is frozen and versioned for its specific source-schema migration so later ordinary content or balance changes cannot alter how the same schema-12 save bytes migrate. Profiles are authored for each applicable production room definition/orientation and provide sufficient deterministic valid slots for every currently valid production content-capacity envelope.
+
+Assignments map to slots through existing canonical assignment ordering. Assignment identity, room identity, category, option, Sequence, custody, historical structural investment, structural layout, and all unrelated canonical dungeon state are preserved. Collection iteration, runtime randomness, Unity random state, device performance, frame timing, animation, and call order are not migration inputs. The mapping spends/refunds no mana and makes no unrelated canonical change.
+
+Slot coordinates and occupancy compatibility data are content/config-owned migration data, never runtime-embedded gameplay-tuning constants. The implementation packet must review and freeze the actual profile data before the positional schema becomes writable. Missing, malformed, insufficient, overlapping, incompatible, or otherwise invalid profile data fails closed before canonical publication: original save bytes/state remain untouched, with no deletion, custody return, invented replacement, partial positional publication, or improvised fallback position. The migration remains deterministic, canonically ordered, versioned, idempotent at its migration boundary, and compatible with complete-save atomic persistence/recovery. Automated qualification covers every maximum-valid current production room assignment envelope.
+
 
 # Known specification/repository conflicts requiring deliberate Phase 7A0 reconciliation
 
@@ -1167,7 +1182,7 @@ This PR explicitly amends/supersedes the affected Spec 20 wording. The conflict 
 
 # Resolution, supersedence, and implementation sequence
 
-Owner Decisions 1–107 are resolved for the current Phase 7A0 scope. The only deferred items are the explicitly identified non-goals and later implementation details that do not alter those decisions. This document is promoted by its reviewed documentation PR; no Phase 7 implementation is authorized by documentation alone.
+Owner Decisions 1–108 are resolved for the current Phase 7A0 scope. The only deferred items are the explicitly identified non-goals and later implementation details that do not alter those decisions. This document is promoted by its reviewed documentation PR; no Phase 7 implementation is authorized by documentation alone.
 
 ## Explicit Phase 7A0 supersedences
 
@@ -1180,7 +1195,7 @@ Owner Decisions 1–107 are resolved for the current Phase 7A0 scope. The only d
 
 The packet count may be adjusted by review evidence, but these boundaries must remain intact.
 
-1. **Positional canonical foundation.** Depends on schema 12 and Phase 6 lifecycle/snapshot authorities. Add the intentional room-local positional domain/save extension and explicit migration; preserve stable assignment IDs and canonical order; define deterministic transforms, data-driven multi-tile/category occupancy, and invalid-state failure. Do not deliver production graphical UI. Acceptance includes migration/reopen/ordering/invalid-state coverage and verification that material positional changes participate in the floor-knowledge applicability input while activation alone still does not.
+1. **Positional canonical foundation.** Depends on schema 12, Phase 6 lifecycle/snapshot authorities, and reviewed/frozen versioned authored migration-placement profiles. Add the intentional room-local positional domain/save extension and explicit migration; preserve stable assignment IDs, canonical order, ownership, investment, and layout; define deterministic transforms, data-driven multi-tile/category occupancy, and invalid-state failure. Do not deliver production graphical UI or invent slots at runtime. Acceptance includes profile validation, migration/reopen/idempotence/max-envelope/ordering/invalid-state coverage and verification that material positional changes participate in the floor-knowledge applicability input while activation alone still does not.
 2. **Deterministic intraroom mechanics.** Depends on packet 1. Establish bounded deterministic room-local traversal, interaction and configured monster-start semantics sufficient to prove valid placement changes gameplay, with presentation non-authoritative. Do not broaden into full tactical AI or production-editor polish. Acceptance includes reproducibility, snapshot isolation, mobile-safe workload, and placement-sensitive behavior tests.
 3. **Transactional editor authority and production Dungeon presentation.** Depends on packets 1–2. Deliver the whole-dungeon durable draft, recovery/stale-baseline rules, side-effect-free previews, final atomic commit economics, and Normal/Edit production presentation consuming existing authorities. Do not retire Bootstrap controls yet. Acceptance includes draft crash/reopen, no canonical effects before commit, atomic failure preservation, localized reasons, responsive/safe-area/accessibility checks, and editor/production smoke evidence.
 4. **Production capability migration and closeout.** Depends on packet 3 and each applicable player capability reaching parity. Retire normal-player Bootstrap controls only after parity and smoke evidence; retain diagnostics only behind development-only inaccessible-in-release paths. Qualify the full build → run → inspect → revise → rerun loop, including lifecycle presentation and aggregate Analysis boundaries. Do not claim fun is proven; later Phase 9 owns balancing/comprehension validation.
