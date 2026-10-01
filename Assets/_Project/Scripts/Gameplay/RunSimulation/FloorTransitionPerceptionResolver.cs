@@ -37,8 +37,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 !record.RewardKnown && !record.DangerKnown)
                 return FloorTransitionPerception.Unknown(config);
             double effective = Math.Max(0d, Math.Min(1d, record.Confidence * intelligenceInterpretationFactor));
-            double rewardUncertainty = record.RewardKnown ? 1d - effective : 1d;
-            double dangerUncertainty = record.DangerKnown ? 1d - effective : 1d;
+            double rewardUncertainty = record.RewardKnown
+                ? 1d - effective : config.UnknownInformationUncertainty;
+            double dangerUncertainty = record.DangerKnown
+                ? 1d - effective : config.UnknownInformationUncertainty;
             return new FloorTransitionPerception(record.RewardKnown,
                 record.RewardKnown ? record.PerceivedRewardScore : 0d,
                 record.DangerKnown, record.DangerKnown ? record.PerceivedDangerScore : 0d,

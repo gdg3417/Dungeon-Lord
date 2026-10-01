@@ -4,7 +4,7 @@ Status: final planned Phase 6 implementation packet; implementation, automated q
 
 ## Implementation and design authority
 
-The Phase 6 design/tuning lock now states the owner-approved interpretation formula. A pure resolver selects the actual next floor's record from the immutable pre-run shared knowledge snapshot and compares the record's A5A applicability fingerprint to the snapshotted next-floor fingerprint. Missing, stale, or unusable records are fully unknown; no hidden floor content is read. A known score is passed unchanged. For each known component, effective confidence is `clamp(shared confidence × immutable party intelligence interpretation factor, 0, 1)`; unknown components contribute uncertainty 1; overall uncertainty is the mean of the two component uncertainties. Trap expertise is excluded. Phase 5B branch interpretation and A0/A4 transition weights, thresholds, objective, identity, roll, and comparisons remain unchanged.
+The Phase 6 design/tuning lock now states the owner-approved interpretation formula. A pure resolver selects the actual next floor's record from the immutable pre-run shared knowledge snapshot and compares the record's A5A applicability fingerprint to the snapshotted next-floor fingerprint. Missing, stale, or unusable records are fully unknown; no hidden floor content is read. A known score is passed unchanged. For each known component, effective confidence is `clamp(shared confidence × immutable party intelligence interpretation factor, 0, 1)`; each unknown component contributes the configuration-owned `UnknownInformationUncertainty`; overall uncertainty is the mean of the two component uncertainties. Production retains `UnknownInformationUncertainty = 1.0`. Trap expertise is excluded. Phase 5B branch interpretation and A0/A4 transition weights, thresholds, objective, identity, roll, and comparisons remain unchanged.
 
 The PR #219 unresolved P1 finding was confirmed in the inline review thread on `DetachedCompleteSaveContract.cs`: contextual validation used `MaximumActiveFloors` to limit durable records. Contextual validation now uses `PhaseSixRunConfigValidation.MaximumSupportedActiveFloors`, matching the schema parser's fixed five-floor workload ceiling. A regression covers two records with Floor 2 Inactive, a valid config allowing one Active floor, contextual validation, session reopen, preservation of both records, one-floor runtime simulation, and rejection beyond the fixed ceiling. A zero-weight target-depth objective may remain configured when its target is currently unavailable, allowing a valid one-Active-floor configuration without changing production tuning or selecting that objective.
 
@@ -65,6 +65,25 @@ Executable prefix for every command: `C:/Users/gdg34/AppData/Local/Unity/bin/uni
 | `--mode PlayMode --output TestResults/phase6a5b-review-full-playmode.xml --timeout 1200 --no-color` | 2800 | 2790 | 0 | 10 |
 
 An attempted `--mode EditMode --filter MvpRouteResultPresenter` selected zero tests; it is not counted as qualification. The 89-case reporting selection and full suites cover presenter/localization behavior. The ten PlayMode skips are the same established eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem case, and one Windows Player-only standalone case. No new skip or suppression was added. The correction modified tests and documentation only; the successful Windows Development Build from the initial A5B packet was not rerun.
+
+### Late P1 configuration-ownership correction
+
+Final external review found that partial knowledge embedded `1d` for an unknown reward or danger component while fully unknown perception already consumed `PhaseSixRunConfig.UnknownInformationUncertainty`. The resolver now uses that injected configuration value for each unknown component. Known-component confidence math, perceived scores, intelligence factors, transition tuning, identity, and roll behavior are unchanged. Production `run_simulation_config.json` remains `UnknownInformationUncertainty = 1.0`, so production outcomes are unchanged.
+
+`UnknownComponentsUseConfiguredUncertaintyWhileKnownComponentsRemainConfidenceDerived` proves production `1.0`, alternate valid test value `0.4`, reward-known/danger-unknown and reward-unknown/danger-known means, both-known independence from the unknown value, configured fallback for missing/stale knowledge, and repeated deterministic results. The prior owner Editor/standalone UAT remains applicable because this correction changes only valid non-production configurations that previously conflicted with injected tuning ownership.
+
+All commands below exited 0; counts are from NUnit XML:
+
+| Command suffix after `unity.exe test C:/Dev/Dungeon-Lord` | Total | Passed | Failed | Skipped |
+| --- | ---: | ---: | ---: | ---: |
+| `--mode EditMode --filter PhaseSixA5B --output TestResults/phase6a5b-p1-focused.xml --timeout 600 --no-color` | 9 | 9 | 0 | 0 |
+| `--mode EditMode --filter PhaseSixA --output TestResults/phase6a5b-p1-phasesix.xml --timeout 600 --no-color` | 223 | 223 | 0 | 0 |
+| `--mode EditMode --filter PhaseFiveB --output TestResults/phase6a5b-p1-phasefiveb.xml --timeout 600 --no-color` | 107 | 107 | 0 | 0 |
+| `--mode PlayMode --filter BootstrapOverlayPagingTests --output TestResults/phase6a5b-p1-overlay.xml --timeout 600 --no-color` | 89 | 89 | 0 | 0 |
+| `--mode EditMode --output TestResults/phase6a5b-p1-full-editmode.xml --timeout 1200 --no-color` | 1302 | 1302 | 0 | 0 |
+| `--mode PlayMode --output TestResults/phase6a5b-p1-full-playmode.xml --timeout 1200 --no-color` | 2801 | 2791 | 0 | 10 |
+
+Windows x86_64 Development Build command: `unity.exe build C:/Dev/Dungeon-Lord --target StandaloneWindows64 --execute-method DungeonBuilder.M0.EditorTools.DevelopmentBuildUtility.BuildWindowsDevelopment --log-file C:/Dev/Dungeon-Lord/TestResults/phase6a5b-p1-windows-development-build.log --provenance-path C:/Dev/Dungeon-Lord/Builds/Development/Windows/build-provenance.json --allow-dirty-build --no-tail`. Result: wrapper exit 0; Unity 6000.3.2f1 reported `Build Finished, Result: Success`, Development Build, StandaloneWindows64 x86_64, 162.8 MB, with the established Unity Cloud symbol-upload credential warning. No new test skip or suppression was added.
 
 Files changed by this correction since reviewed HEAD `2a6c334c026935e3495421611571a16961c284c4`: `Assets/_Project/Tests/EditMode/PhaseSixA5BTests.cs`, `docs/planning/phase-6-multi-floor-foundation-design-and-tuning-lock.md`, this implementation evidence, `manual-uat.md`, and `pr-description.md`. The pre-existing owner-controlled `ProjectSettings/UnityConnectSettings.asset` diff remains excluded.
 

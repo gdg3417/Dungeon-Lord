@@ -165,6 +165,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void UnknownComponentsUseConfiguredUncertaintyWhileKnownComponentsRemainConfidenceDerived()
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            var production = PhaseSixA4Tests.Config().PhaseSix;
+            var record = Record(f, 1);
+            double factor = f.Configuration.PhaseFiveB.IntelligenceBands[0].InterpretationFactor;
+            double effective = Math.Min(1d, record.Confidence * factor);
+            Assert.That(production.UnknownInformationUncertainty, Is.EqualTo(1d));
+            Assert.That(FloorTransitionPerception.Unknown(production).Uncertainty, Is.EqualTo(1d));
+
+            var alternate = PhaseSixA4Tests.Config().PhaseSix;
+            alternate.UnknownInformationUncertainty = .4d;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(alternate), Is.True);
+            Assert.That(FloorTransitionPerception.Unknown(alternate).Uncertainty, Is.EqualTo(.4d));
+
+            record.DangerKnown = false; record.PerceivedDangerScore = 0d;
+            var rewardOnly = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, factor, alternate);
+            Assert.That(rewardOnly.Uncertainty,
+                Is.EqualTo((1d - effective + .4d) / 2d).Within(1e-12));
+
+            record.RewardKnown = false; record.PerceivedRewardScore = 0d;
+            record.DangerKnown = true; record.PerceivedDangerScore = 3d;
+            var dangerOnly = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, factor, alternate);
+            Assert.That(dangerOnly.Uncertainty,
+                Is.EqualTo((.4d + 1d - effective) / 2d).Within(1e-12));
+
+            record.RewardKnown = true; record.PerceivedRewardScore = 2d;
+            var bothAlternate = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, factor, alternate);
+            var bothProduction = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, factor, production);
+            Assert.That(bothAlternate.Uncertainty, Is.EqualTo(1d - effective).Within(1e-12));
+            Assert.That(bothAlternate.Uncertainty, Is.EqualTo(bothProduction.Uncertainty));
+
+            Assert.That(FloorTransitionPerceptionResolver.Resolve(record, "stale", factor,
+                alternate).Uncertainty, Is.EqualTo(.4d));
+            Assert.That(FloorTransitionPerceptionResolver.Resolve(null, record.ApplicabilityFingerprint,
+                factor, alternate).Uncertainty, Is.EqualTo(.4d));
+            var repeated = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, factor, alternate);
+            Assert.That(repeated.Uncertainty, Is.EqualTo(bothAlternate.Uncertainty));
+            Assert.That(repeated.RewardScore, Is.EqualTo(bothAlternate.RewardScore));
+            Assert.That(repeated.DangerScore, Is.EqualTo(bothAlternate.DangerScore));
+        }
+
+        [Test]
         public void DurableKnowledgeSurvivesOneActiveFloorLimitAndReopen()
         {
             var f = PhaseSixA4Tests.Eligible();
