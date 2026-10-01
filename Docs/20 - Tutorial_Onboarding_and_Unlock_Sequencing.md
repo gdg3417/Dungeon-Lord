@@ -20,7 +20,7 @@ The tutorial is skippable. If skipped, a recommended next steps panel persists u
 
 2.3 Trust first
 
-Heat and reserve mana are visible immediately, to avoid surprise mechanics. Default tooltips remain plain language.
+Heat is persistently visible immediately. Reserve mana remains understandable and discoverable through an appropriate resource/detail/advanced surface, so it cannot become a surprise mechanic. Default tooltips remain plain language.
 
 3\. MVP First Session Goals
 
@@ -36,7 +36,7 @@ The first intended clever moment is achieved through a layout change that meanin
 
 4.1 Always visible in MVP
 
-Total mana, reserved mana, and heat are visible immediately.
+The persistent Normal/Inspect/Run HUD shows Total Mana, Usable Mana, Mana/hour, and Heat. Reserve mana is available through deliberate expansion, contextual resource information, or an advanced/detail surface.
 
 4.2 Research visibility
 
@@ -74,7 +74,7 @@ The heat meter includes an action that shows the last three causes of heat chang
 
 7.2 Reserve display
 
-In default view, reserve mana is displayed as a single number. Reserve breakdown by source appears only in advanced views.
+Reserve mana is available in a deliberate resource/detail/advanced surface; its breakdown by source appears only in advanced views. It is not a required persistent default-HUD metric.
 
 8\. Failure Recovery Messaging
 

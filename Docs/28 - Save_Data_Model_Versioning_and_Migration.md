@@ -2,7 +2,7 @@
 
 *Dungeon Builder, locked design specification*
 
-**Phase 6A5A current implementation status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` and passed external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A5A advances the writable save schema to 12 with one explicit 11-to-12 migration that adds empty `sharedFloorKnowledge` while preserving schema 11 state. Floor knowledge remains separate from `sharedBranchKnowledge`, learns only from completed floors with final survivors, is captured in the pre-run snapshot, and becomes inapplicable after material floor changes; activation alone does not invalidate it. A4 unknown transition perception remains in force. Richer knowledge-backed transition explanation and aggregate multi-floor reporting are deferred to A5B. Phase 6 remains open.
+**Phase 6 final implementation status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete and schema 12 is the writable baseline. `sharedFloorKnowledge` is durable, lifecycle activation alone does not invalidate it, and material gameplay-affecting floor changes make it inapplicable until fresh qualifying evidence replaces or reconfirms it. Coarse reporting is durable; detailed transition causes remain same-session/transient.
 
 **A5A schema contract:** Schema 11 remains a frozen readable source. The 11-to-12 upgrade accepts only strictly valid schema 11 bytes, copies every existing root and primary member in order, changes the version token, and appends exactly one empty `sharedFloorKnowledge` tail owner after `sharedBranchKnowledge`. Schemas 7 through 10 continue through their existing steps and then through 11-to-12. Native schema 12 creation also writes one empty floor-knowledge owner. Floor records are sorted by stable floor ID and carry an applicability fingerprint, explicit reward/danger known flags and observed scores, shared confidence, and a last-confirmed run ID. Invalid or duplicate records fail the current-target reader; stale but structurally valid fingerprints remain stored and inapplicable until new survivor evidence replaces them. Run settlement writes this owner with branch knowledge, Heat, history, and sequence in one exact complete-save transaction.
 
@@ -88,7 +88,7 @@ Save writes occur at fixed intervals plus key actions.
 
 - Any premium currency spend
 
-During edit mode, tile placement or movement triggers an immediate save, as required by INV-12; interval saves and other key actions remain additional safety boundaries.
+During the Phase 7 production editor, each discrete completed draft command triggers immediate durable persistence to separate non-authoritative draft storage, as required by INV-12. Pointer/drag frames are not individual writes. Canonical state changes only through final Save Changes revalidation and one atomic commit; interval saves and other key actions remain additional canonical safety boundaries.
 
 ## 5.3 Player feedback
 

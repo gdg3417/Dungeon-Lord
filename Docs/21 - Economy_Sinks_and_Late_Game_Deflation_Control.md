@@ -64,7 +64,7 @@ Loot table edits do not trigger renovation costs. Loot table edits change reserv
 
 6.3 Experimentation grace window
 
-Renovations are reversible without cost if the player undoes the change within 30 seconds. This supports experimentation without punishing curiosity.
+For the final Phase 7 production graphical editor, experimentation occurs in a non-authoritative transactional draft and final commit review; a 30-second cost-free canonical renovation undo is not required. The Phase 4/Bootstrap legacy undo remains historical implementation evidence and may remain temporarily while production capability migration is incomplete, but it is not the final production-editor contract.
 
 7\. Deflation Control Levers
 

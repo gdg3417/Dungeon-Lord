@@ -1,8 +1,8 @@
 # SPEC LOCK SUMMARY (AUTHORITATIVE)
 
-**Phase 6 current repository status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` after external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A4 supports atomic Floor 2 lifecycle and safe two-floor runs. A5A is the current durable floor-knowledge packet: it advances the writable target to schema 12 through an explicit 11-to-12 migration and adds a separate `sharedFloorKnowledge` authority with survivor-gated learning and run-snapshot isolation. A4 unknown transition perception remains in force. Aggregate reporting, richer transition explanation, and Phase 6 closeout remain A5B work.
+**Phase 6 final repository status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Schema 12 is writable and owns durable `sharedFloorKnowledge` with survivor-gated learning and run-snapshot isolation. Atomic lifecycle, contiguous Active-floor prefix semantics, immutable run-start snapshots, knowledge-backed transition perception, and coarse durable reporting are complete. Detailed transition causes remain same-session/transient.
 
-**Historical repository status (2026-09-26), superseded by the Phase 6 current status above:** Phase 3 is closed through merged PR #200, Phase 4 is complete through PR #207, the Phase 5 design lock is merged in PR #208, and Phase 5A is complete in PR #209. Current main is PR #210 at `75781a4cfb7a7e837c855608f9a0753139a1bf77`; canonical spatial state is active writable route/content authority, and current writable schema 10 owns optional-branch topology, `corridorContent`, and `sharedBranchKnowledge`. `DeadEnd = 6` and schema-10 optional-branch persistence are implemented. Phase 5B is the next gameplay packet; route choice, optional traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production tuning remain unimplemented. Owner-approved initial configuration and implementation authority is recorded in the [Phase 5B production tuning and run-condition contract](../docs/planning/phase-5b-production-tuning-and-run-condition-contract.md), pending final external review. PR #210 makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
+**Historical repository status (2026-09-26), superseded by the Phase 6 current status above:** Phase 3 is closed through merged PR #200, Phase 4 is complete through PR #207, the Phase 5 design lock is merged in PR #208, and Phase 5A is complete in PR #209. Current main is PR #210 at `75781a4cfb7a7e837c855608f9a0753139a1bf77`; canonical spatial state is active writable route/content authority, and current writable schema 10 owns optional-branch topology, `corridorContent`, and `sharedBranchKnowledge`. `DeadEnd = 6` and schema-10 optional-branch persistence are implemented. Phase 5B is the next gameplay packet; route choice, optional traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production tuning remain unimplemented. Owner-approved initial configuration and implementation authority is recorded in the [Phase 5B production tuning and run-condition contract](../Docs/planning/phase-5b-production-tuning-and-run-condition-contract.md), pending final external review. PR #210 makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
 
 **Historical Phase 2B3 status (2026-08-02), superseded by later Phase 2 packets:** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
 
@@ -19,7 +19,7 @@ GLOBAL LOCKS:
 
 \- Offline heat rebound is constrained strictly within the current Heat Tier.
 
-\- Tile placement and movement in edit mode trigger immediate saves.
+\- In the Phase 7 production editor, each discrete completed draft command triggers immediate durable non-authoritative draft persistence; canonical mutation occurs only at final atomic Save Changes.
 
 \- Offline crafting is deterministic only and may not unlock progression without verification.
 
@@ -33,7 +33,7 @@ VERSION STATUS:
 
 \- Spec 38: **locked candidate for planning**. Its approved spatial direction and INV-15 are authoritative, while numeric tuning and the policy gates explicitly listed in Spec 38 and the phased roadmap remain unresolved.
 
-\- Spec 38 implementation is authorized only through the [post-GD60 phased roadmap](../docs/planning/post-gd60-mvp-execution-plan.md) after each relevant named gate is resolved.
+\- Spec 38 implementation is authorized only through the [post-GD60 phased roadmap](../Docs/planning/post-gd60-mvp-execution-plan.md) after each relevant named gate is resolved.
 
 \- GD61 authorizes documentation and implementation planning only; it authorizes no runtime implementation, schema migration, tuning values, or player-facing behavior.
 
@@ -2592,7 +2592,7 @@ Adventurers are finite and simulated at a high level. In MVP, ordinary adventure
 
 Ordinary-adventurer lifecycle effects persist across dungeon runs at the pooled or cohort level: progression, gear distribution, retirement, death, circulation, and regional counts may remain durable without giving every ordinary adventurer an individual save identity. Death removes ordinary adventurers from the region with a short cooldown before reappearance elsewhere. Named characters or heroes are the future path for durable individual identity, history, relationships, rivalries, grudges, and disproportionate party-profile influence; that system is not implemented by Phase 5.
 
-**Phase 5 owner clarification:** The pooled/cohort versus durable-individual identity distinction above clarifies the original locked v1 lifecycle language. See the [Phase 5 branching and route-choice design lock](../docs/planning/phase-5-branching-and-route-choice-design.md).
+**Phase 5 owner clarification:** The pooled/cohort versus durable-individual identity distinction above clarifies the original locked v1 lifecycle language. See the [Phase 5 branching and route-choice design lock](../Docs/planning/phase-5-branching-and-route-choice-design.md).
 
 ## 4. Loot and Economy
 
@@ -2832,7 +2832,7 @@ Core gameplay data is loaded from externalized tables so that balance and conten
 
 Normalized UTF-8 text tables and machine-readable schemas committed to Git are the canonical production authoring authority. Flat and relational records use CSV; package metadata and schema definitions use JSON. Each production value has exactly one writable owner. Generated runtime data, workbooks, cloud editors, code records, duplicate assets, fixtures, caches, and unreviewed imports are not authoring authority.
 
-The approved Dungeon Spatial package is implemented at `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree, and is the single logical writable production content and English-localization authority. Its exact contract is [GD65B production authoring source contract](../docs/planning/gd65b-production-authoring-source-contract.md). Historically, the GD65B2A documentation packet approved the path and contract without itself creating package or authoring files; GD65B2B subsequently implemented them.
+The approved Dungeon Spatial package is implemented at `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree, and is the single logical writable production content and English-localization authority. Its exact contract is [GD65B production authoring source contract](../Docs/planning/gd65b-production-authoring-source-contract.md). Historically, the GD65B2A documentation packet approved the path and contract without itself creating package or authoring files; GD65B2B subsequently implemented them.
 
 3.2 Solo authoring
 
@@ -2992,7 +2992,7 @@ The tutorial is skippable. If skipped, a recommended next steps panel persists u
 
 2.3 Trust first
 
-Heat and reserve mana are visible immediately, to avoid surprise mechanics. Default tooltips remain plain language.
+Heat is persistently visible immediately. Reserve mana remains understandable and discoverable through an appropriate resource/detail/advanced surface, so it cannot become a surprise mechanic. Default tooltips remain plain language.
 
 3\. MVP First Session Goals
 
@@ -3008,7 +3008,7 @@ The first intended clever moment is achieved through a layout change that meanin
 
 4.1 Always visible in MVP
 
-Total mana, reserved mana, and heat are visible immediately.
+Total mana, usable mana, mana per hour, and heat are persistently visible in the Phase 7 Normal/Inspect/Run HUD. Reserve mana remains discoverable through an appropriate resource/detail/advanced surface.
 
 4.2 Research visibility
 
@@ -3046,7 +3046,7 @@ The heat meter includes an action that shows the last three causes of heat chang
 
 7.2 Reserve display
 
-In default view, reserve mana is displayed as a single number. Reserve breakdown by source appears only in advanced views.
+Reserve mana is available in a deliberate resource/detail/advanced surface; breakdown by source appears only in advanced views. It is not a required persistent default-HUD metric.
 
 8\. Failure Recovery Messaging
 
@@ -3140,7 +3140,7 @@ Loot table edits do not trigger renovation costs. Loot table edits change reserv
 
 6.3 Experimentation grace window
 
-Renovations are reversible without cost if the player undoes the change within 30 seconds. This supports experimentation without punishing curiosity.
+For the final Phase 7 production graphical editor, experimentation occurs in a non-authoritative transactional draft and final commit review; a 30-second cost-free canonical renovation undo is not required. The Phase 4/Bootstrap legacy undo remains historical implementation evidence and may remain temporarily while production capability migration is incomplete, but it is not the final production-editor contract.
 
 7\. Deflation Control Levers
 
@@ -3532,7 +3532,7 @@ The default audience includes idle veterans, strategy players, city and base bui
 
 3.1 Key metrics
 
-The main HUD shows 3 to 5 key metrics. MVP candidate set includes: total mana, usable mana, reserve mana, mana per hour, and heat state.
+The Phase 7 Normal/Inspect/Run HUD shows four key metrics: total mana, usable mana, mana per hour, and heat. Reserve mana remains available through deliberate detail/advanced disclosure.
 
 3.2 Panel details
 
@@ -3676,7 +3676,7 @@ Localization keys are stored alongside content tables and exported with the cont
 
 Layout Editing Save Rule
 
-Tile placement or movement while in edit mode always triggers an immediate save.
+Each discrete completed Phase 7 draft command triggers immediate durable persistence to separate non-authoritative draft storage; Save Changes is the sole canonical atomic-commit boundary.
 
 *Dungeon Builder, locked design specification*
 
@@ -3757,8 +3757,8 @@ Save writes occur at fixed intervals plus key actions.
 - Tile placement or move while in edit mode
 
   **Layout Editing Save Behavior**\
-  While the player is in dungeon edit mode, any tile placement or movement is considered a key action and triggers an immediate save.\
-  This ensures layout experimentation cannot be silently lost due to crashes or interruptions.\
+  While the player is in the Phase 7 production editor, each discrete completed draft command is a key action and triggers immediate durable draft persistence.\
+  This ensures layout experimentation cannot be silently lost while canonical state, resources, custody, investment, and active runs remain unchanged until final atomic Save Changes.\
   Outside of edit mode, interval saves still apply for performance reasons.
 
 ### 5.3 Player feedback

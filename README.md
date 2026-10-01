@@ -1,6 +1,6 @@
 # Dungeon-Lord
 
-**Phase 6A5B current qualification status (2026-10-01):** Final planned Phase 6 PR #220 implements knowledge-backed transitions, localized aggregate reporting, and the schema-12 durable-knowledge validation correction. Automated tests and owner Editor/Windows standalone UAT passed; no known blocking Phase 6 finding remains. Production content remains Floors 1 and 2, and writable schema remains 12. PR #220 awaits final external merge review; Phase 6 closes on merge. See [A5B qualification evidence](Docs/testing/evidence/phase6a5b-knowledge-backed-transitions-closeout/implementation-evidence.md).
+**Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. It implements knowledge-backed transitions, localized aggregate reporting, and the schema-12 durable-knowledge validation correction. Production content remains Floors 1 and 2, writable schema remains 12, durable reporting is coarse, and detailed transition causes remain same-session/transient. See [A5B qualification evidence](Docs/testing/evidence/phase6a5b-knowledge-backed-transitions-closeout/implementation-evidence.md).
 
 **Historical Phase 6A5A implementation status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` and passed external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A5A advances the writable save schema to 12 with one explicit 11-to-12 migration that adds empty `sharedFloorKnowledge` while preserving schema 11 state. Floor knowledge remains separate from `sharedBranchKnowledge`, learns only from completed floors with final survivors, is captured in the pre-run snapshot, and becomes inapplicable after material floor changes; activation alone does not invalidate it. At that historical point A4 unknown transition perception remained in force and richer knowledge-backed explanation was deferred to A5B.
 
@@ -38,12 +38,12 @@ Normal play still depends on the temporary Bootstrap overlay and simple MVP scre
 
 VS4 first-session MVP smoke documentation:
 
-- [VS4 first-session MVP smoke test runbook](docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
-- [VS4 first-session MVP smoke test evidence template](docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
+- [VS4 first-session MVP smoke test runbook](Docs/testing/runbooks/vs4-first-session-mvp-smoke-test-runbook.md)
+- [VS4 first-session MVP smoke test evidence template](Docs/testing/evidence/vs/vs4-first-session-mvp-smoke-test-evidence-template.md)
 
 ## Historical GD65B implementation gate
 
-The authoritative execution sequence is the [post-GD60 MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
+The authoritative execution sequence is the [post-GD60 MVP execution plan](Docs/planning/post-gd60-mvp-execution-plan.md). The spatial contract is [System Spec 38](Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md).
 
 GD65B0C7 approves exactly rows 66–70 and 72 and closes the register at 72 of 72 `APPROVED`. The sole production workload-limit configuration authority, `Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json`, will provide `MaximumTopLevelRecords = 128`, `MaximumNestedRecords = 512`, `MaximumMaterializedTiles = 4096`, `MaximumIssues = 256`, and `MaximumStringCharacters = 32768` to export, pre-build, runtime-load validation, and canonicalization. These are configuration-owned workload safety bounds—not gameplay, floor-count, floor-space, schema, save, or permanent post-MVP ceilings—and missing or invalid configuration fails closed without a hardcoded or test-default fallback. The 4,096 tile bound applies to one materialized footprint or floor boundary, never cumulative dungeon capacity or Floor 1 capacity 60.
 
@@ -52,4 +52,4 @@ The **Production Spatial Content Pipeline EditMode Suite** now covers all six GD
 
 ## Dungeon Spatial authoring source
 
-[GD65B2A](docs/planning/gd65b-production-authoring-source-contract.md) historically approved `ContentAuthoring/DungeonSpatial/` as the single logical writable authority for normalized CSV records, package metadata, machine-readable schema, and production English spatial localization. Generated Unity JSON remains deterministic derived output; `validation_limits.json` remains separately authored configuration authority. GD65B2B implemented that source package and its strict editor-only projection boundary; deterministic generated-set construction followed in PR #182, recoverable publication in PR #183, and export invocation plus committed outputs in PR #184. Workbooks, Google Sheets, CMSs, and web editors may only propose normalized, validated, Git-reviewable changes and are never production authority or runtime/build dependencies.
+[GD65B2A](Docs/planning/gd65b-production-authoring-source-contract.md) historically approved `ContentAuthoring/DungeonSpatial/` as the single logical writable authority for normalized CSV records, package metadata, machine-readable schema, and production English spatial localization. Generated Unity JSON remains deterministic derived output; `validation_limits.json` remains separately authored configuration authority. GD65B2B implemented that source package and its strict editor-only projection boundary; deterministic generated-set construction followed in PR #182, recoverable publication in PR #183, and export invocation plus committed outputs in PR #184. Workbooks, Google Sheets, CMSs, and web editors may only propose normalized, validated, Git-reviewable changes and are never production authority or runtime/build dependencies.
