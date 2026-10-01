@@ -34,8 +34,12 @@ The build succeeded under Unity 6000.3.2f1 with only `Assets/_Project/Scenes/Boo
 
 The external-review correction changes only EditMode tests and this evidence text. No runtime, save, migration, configuration, content, localization, or build code changed, so the Windows Development Build was not rerun for the correction.
 
-## Review and qualification boundary
+## Final review and owner qualification
 
-External review and owner Editor/Windows manual qualification are pending. Follow [manual-uat.md](manual-uat.md) after external review. A5B retains knowledge-backed transition perception/explanation policy, richer aggregate multi-floor reporting, and Phase 6 closeout. Phase 6 is not complete.
+External review passed. Owner Editor/manual UAT passed at the exact qualified implementation HEAD `7d5655c7c7411295b68e30d5b4340dce0f77ba0f`. Normal and 1280x720 resolution smoke checks passed, as did save-close-reopen and Windows standalone UAT with close/reopen persistence. No corruption, recovery warning, or player-facing regression was reported.
+
+Owner UAT covered schema-11 to schema-12 migration and existing-state preservation; one-floor survivor learning, compatible reconfirmation, material-change invalidation, and wipe privacy; Floor 2 EXIT privacy and true DESCEND; party identity and exact HP continuity with one final settlement; lifecycle applicability; and a later material Floor 2 change followed by a survivor run. Observed durable knowledge had two distinct floor records: Floor 1 reconfirmed confidence `0.875` and Floor 2 changed/applicable knowledge at initial confidence `0.75`, both associated with the qualifying run. The final floor completed successfully.
+
+This qualification-status update changes documentation only. No new runtime test or Windows build was required. Phase 6 remains open. A5B retains knowledge-backed transition perception/explanation, richer aggregate multi-floor reporting, and Phase 6 closeout.
 
 `ProjectSettings/UnityConnectSettings.asset` is intentionally excluded from all staged and committed changes. Unity build execution may leave a local-only settings diff; this packet does not restore or stage that file.
