@@ -1,0 +1,17 @@
+# Phase 6A5B owner UAT (pending)
+
+Use the development setup with a valid two-floor dungeon and the Windows x86_64 Development Build. Record the save used, run ID, observed result, and pass/fail for each step. A deterministic fixture or development setup may be used for the controlled knowledge and intelligence comparisons; no owner terminal commands are required. Do not mark Phase 6 closed until Editor and standalone results are recorded here after review.
+
+| Step | Action | Expected result and pass criterion |
+| --- | --- | --- |
+| A1 | In Editor, start a controlled save with Floor 2 Active and no applicable Floor 2 knowledge; complete Floor 1 repeatedly. | The next-floor report says reward and danger are unknown, uncertainty affects the choice, and no hidden Floor 2 value appears. Each result has a comprehensible localized reason. Pass if all are true. |
+| B1 | Descend, complete Floor 2 with survivors, and inspect knowledge before and after final settlement. | No mid-run knowledge publication occurs. Both reached completed floors publish applicable records only after settlement. Pass if publication is atomic. |
+| B2 | Start the next run with the same floor layout. | Floor 2's stored perceived scores are used and the report describes known information. Pass if perception is knowledge backed. |
+| C1 | Using one fixed save and RunId, select Poor, Standard, then Good intelligence with the same shared knowledge; repeat each run. | Scores stay equal; uncertainty decreases in that order; repeats have the same decisions and explanation. Pass if all are true. Numeric factors need not appear in normal UI. |
+| D1 | Complete Floor 2 again with survivors, then start another run. | A5A reconfirmation raises confidence to its configured clamp; later uncertainty falls for the same intelligence. Pass if both changes occur only after settlement. |
+| E1 | Make a material Floor 2 room/corridor content change and run again. | Old knowledge is inapplicable and next-floor perception is unknown until relearned. Pass if no hidden value is shown. |
+| F1 | Without a material change, deactivate and reactivate Floor 2, then run again. | Applicable knowledge remains usable. Pass if lifecycle state alone does not erase it. |
+| G1 | Keep Floor 2 knowledge, use a valid one-Active-floor configuration/state, save, close, and reopen. | Save opens with both floor records intact; only Floor 1 is simulated and Active. Pass if all hold and no recovery warning appears. |
+| H1 | Reproduce clear descent, clear exit, survivability refusal, marginal descend/exit, wipe, retreat, and final-floor completion using controlled setups. | The completed-run result distinguishes each relevant route and major cause, floor reach, survivors/deaths, and loot. No raw hash, roll, localization key, or internal reason code appears. Pass if each observed case is understandable. |
+| I1 | Save, close, and reopen after a multi-floor run. | Durable knowledge and coarse history (reach, rooms, survivors, loot, outcome) remain. Exact transient cause is absent if no transient evidence survives; no reason is invented. Pass if history remains accurate. |
+| J1 | Repeat essential B/H/I smoke at normal Editor resolution, 1280x720, and Windows standalone Development Build; close and reopen standalone. | Controls and result text are legible, transitions and persistence work, and there is no crash or recovery warning. Pass if all three environments qualify. |

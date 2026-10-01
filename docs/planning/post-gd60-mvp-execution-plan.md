@@ -1,7 +1,9 @@
 # Post-GD60 MVP Execution Plan
 
+**Phase 6A5B implementation status (2026-10-01):** Final planned Phase 6 packet in progress from merged PR #219 / `5e8eeadbdd8c4c7c22309d1e709e7603a85dbdd8`. It integrates knowledge-backed transitions and localized aggregate explanation, corrects contextual schema-12 knowledge validation, and retains schema 12. External review and owner Editor/Windows qualification remain pending; Phase 6 is open.
 
-**Phase 6A5A current implementation status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` and passed external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A5A advances the writable save schema to 12 with one explicit 11-to-12 migration that adds empty `sharedFloorKnowledge` while preserving schema 11 state. Floor knowledge remains separate from `sharedBranchKnowledge`, learns only from completed floors with final survivors, is captured in the pre-run snapshot, and becomes inapplicable after material floor changes; activation alone does not invalidate it. A4 unknown transition perception remains in force. Richer knowledge-backed transition explanation and aggregate multi-floor reporting are deferred to A5B. Phase 6 remains open.
+
+**Historical Phase 6A5A implementation status (2026-09-30):** PR #218 / Phase 6A4 is merged at `2505c679afd5172dc82dd08b44aedf3add96001c` and passed external review, automated validation, owner Editor qualification, and Windows Development Build qualification. A5A advances the writable save schema to 12 with one explicit 11-to-12 migration that adds empty `sharedFloorKnowledge` while preserving schema 11 state. Floor knowledge remains separate from `sharedBranchKnowledge`, learns only from completed floors with final survivors, is captured in the pre-run snapshot, and becomes inapplicable after material floor changes; activation alone does not invalidate it. A4 unknown transition perception remains in force. Richer knowledge-backed transition explanation and aggregate multi-floor reporting are deferred to A5B. Phase 6 remains open.
 
 **Historical Phase 6A3 implementation status (2026-09-29):** A pure read-only Floor 2 activation-eligibility authority consumes schema-11 canonical validation, the existing duplicate-safe `ac_100` permission authority, production semantic validation, and an independent `ActivationValid` layout evaluation. Eligibility requires a complete same-floor required Entrance-to-Completion route through at least one room. Stable reason codes and blocker precedence are exposed without writing activation or any save/runtime state. Activation/deactivation mutation, player controls, and multi-floor runs remain deferred; the current run projection still rejects a second Active floor.
 
@@ -15,9 +17,9 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 6A4 merged and qualified; Phase 6A5A implements durable floor knowledge; Phase 6 remains open** |
+| Status | **Phase 6A5A merged; Phase 6A5B final packet awaits review and owner qualification; Phase 6 remains open** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Phase 6A5A starts from merged PR #218 / `main` `2505c679afd5172dc82dd08b44aedf3add96001c` |
+| Current implementation baseline | Phase 6A5B starts from merged PR #219 / `main` `5e8eeadbdd8c4c7c22309d1e709e7603a85dbdd8` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-09-30 |
@@ -293,3 +295,7 @@ PR #182 completed deterministic in-memory construction and strict complete-set r
 ## Historical GD65B3B implementation status
 
 **Historical PR #184–#185 status, reconciled by PR #186:** PR #184 / GD65B3B merged at `04515d5c7c5a35d869bb725cd76d2a7c317403ee`, and PR #185 subsequently completed strict inactive loading and explicit composition. The former PR #184 evidence gaps are fully reconciled in `docs/testing/evidence/gd65b/validation-evidence.md`. GD65B5 implementation and required validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b`; PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The catalog remains inactive, runtime/save authority is unchanged, and save schema remains 6.
+
+## Phase 6A5B final planned implementation packet
+
+A5B integrates applicable pre-run shared floor knowledge into next-floor perception, applies immutable party intelligence to confidence-derived uncertainty only, preserves the A0/A4 transition decision, and adds localized aggregate floor reach and same-session causal explanation. It corrects schema-12 contextual floor-knowledge validation to use the fixed supported floor ceiling rather than the current Active-floor tuning limit. Writable schema stays 12, with no migration or detailed durable transition history. This packet is the final planned Phase 6 implementation PR; Phase 6 remains open pending external review and owner Editor and Windows Development Build qualification.

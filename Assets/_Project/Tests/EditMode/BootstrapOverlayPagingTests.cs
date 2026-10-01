@@ -2392,6 +2392,7 @@ namespace DungeonBuilder.Tests.EditMode
             map[MvpRouteResultPresenter.RouteFormatKey] = "Route result: {0}";
             map[MvpRouteResultPresenter.DepthFormatKey] = "Depth reached: {0}.";
             map[MvpRouteResultPresenter.RoomNumberFormatKey] = "Room {0}";
+            map[MvpRouteResultPresenter.FloorReachFormatKey] = "Reached Floor {0}";
             map[RunSimulationService.RouteClearedKey] = "Full route cleared.";
             map[RunSimulationService.RouteStoppedRoomOneKey] = "Route stopped in Room 1.";
             map[RunSimulationService.RouteStoppedRoomTwoKey] = "Route stopped in Room 2.";

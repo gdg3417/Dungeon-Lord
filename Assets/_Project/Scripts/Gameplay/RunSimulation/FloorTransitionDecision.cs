@@ -64,7 +64,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         }
     }
 
-    // Explicit perception input; never accepts canonical layout/content. A4 supplies Unknown.
+    // Explicit perception input; never accepts canonical layout/content.
     public sealed class FloorTransitionPerception
     {
         public bool RewardKnown { get; }
@@ -91,6 +91,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public double? Likelihood { get; internal set; }
         public int[] MemberHealth { get; internal set; }
         public int[] FormationOrdinals { get; internal set; }
+        public bool RewardKnown { get; internal set; }
+        public bool DangerKnown { get; internal set; }
+        public double Uncertainty { get; internal set; }
     }
 
     public static class FloorTransitionDecision
@@ -108,7 +111,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 throw new ArgumentException(PhaseSixRunConfigValidation.Invalid);
             var e = new FloorTransitionEvidence { RunId = party.RunId, CurrentFloorInstanceId = currentFloor,
                 NextFloorInstanceId = nextFloor, MemberHealth = party.Members.OrderBy(m => m.MemberOrdinal).Select(m => m.CurrentHealth).ToArray(),
-                FormationOrdinals = party.Formation.Select(m => m.MemberOrdinal).ToArray(), Reason = "run.floor.exit_final" };
+                FormationOrdinals = party.Formation.Select(m => m.MemberOrdinal).ToArray(), Reason = "run.floor.exit_final",
+                RewardKnown = perception.RewardKnown, DangerKnown = perception.DangerKnown,
+                Uncertainty = perception.Uncertainty };
             if (nextFloor == null) return e;
             double reward = perception.RewardKnown ? Clamp(perception.RewardScore / c.RewardReference) : 0;
             double danger = perception.DangerKnown ? Clamp(perception.DangerScore / c.DangerReference) : 0;

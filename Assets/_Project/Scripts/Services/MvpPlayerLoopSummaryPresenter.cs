@@ -120,6 +120,7 @@ namespace DungeonBuilder.M0
                 ConfiguredRoomCount = latestRun?.ConfiguredRoomCount ?? 0,
                 ClearedRoomCount = latestRun?.ClearedRoomCount ?? 0,
                 RoomResolutions = latestRun?.RoomResolutions ?? Array.Empty<RunRoomResolutionSummary>(),
+                FloorTransitions = latestRun?.FloorTransitions,
                 ManaReserve = currentMana,
                 LootGeneratedWorldValue = generatedWorldValue,
                 LootExtractedWorldValue = extractedWorldValue,

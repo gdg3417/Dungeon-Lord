@@ -154,7 +154,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     result.State, context.Production, context.Configuration, context.Limits.Spatial))
                 return Failure();
             if (!PhaseSixFloorKnowledge.Validate(result.FloorKnowledge, result.State,
-                    context.Configuration?.PhaseSix?.MaximumActiveFloors ?? 0)) return Failure();
+                    DungeonBuilder.M0.Gameplay.RunSimulation.PhaseSixRunConfigValidation.MaximumSupportedActiveFloors)) return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 context.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
