@@ -1,6 +1,6 @@
 # Phase 6A5B implementation evidence
 
-Status: final planned Phase 6 implementation packet; external review and owner manual qualification pending. Starting baseline: merged PR #219, `5e8eeadbdd8c4c7c22309d1e709e7603a85dbdd8`. Phase 6 remains open.
+Status: final planned Phase 6 implementation packet; implementation, automated qualification, and owner Editor/Windows standalone qualification passed. Starting baseline: merged PR #219, `5e8eeadbdd8c4c7c22309d1e709e7603a85dbdd8`. No known blocking Phase 6 finding remains. PR #220 awaits final external merge review; Phase 6 closes on merge.
 
 ## Implementation and design authority
 
@@ -47,7 +47,7 @@ The zero-weight `target_depth` case is now tested directly: production target/we
 | Pre-run snapshot, survivor-gated and wipe-safe learning | A5A `ChangedObservedContentStartsNewConfidenceAndSnapshotCopiesKnowledge`, `SurvivorLearningReconfirmsClampsAndOnlyPublishesAfterCompleteRun`, `DescendedTwoFloorRunPublishesApplicableKnowledgeForBothCompletedFloors`, `ExitBeforeFloorTwoDoesNotLearnItsHiddenSnapshot`, `FinalWipeDoesNotCreatePreciseFloorKnowledge`, `FinalWipeDoesNotUpdateExistingApplicableFloorKnowledge` |
 | Atomic settlement, stale/concurrent save rejection, canonical durable records | A5A `RecordsRoundTripInStableFloorOrderAndBranchKnowledgeStaysSeparate`, `MalformedFloorKnowledgeRejectsBeforePublication`, `StaleSessionAndFailedReplaceLeaveKnowledgeAndSettlementUnchanged`, `ConcurrentBytesAndFailedReadbackCannotPublishKnowledge` |
 
-The [revised owner UAT](manual-uat.md) gives sequential Editor/standalone actions, a six-case aggregate comparison matrix, lifecycle/material-change and save/reopen steps, expected results, and an explicit owner return packet. Conditions without a current manual selector (objective identity, intelligence factor, marginal RunId, active-floor config value) cite deterministic automated tests. Editor qualification uses PR HEAD `69de4c316ba12f9f4d7e44b5e9a6108af87a9e88` or its final documentation-only descendant. Standalone qualification may use the existing Development Build from `2a6c334c026935e3495421611571a16961c284c4`; intervening changes were tests/docs only, so no executable rebuild is required or claimed. The unknown baseline uses the existing Dev Panel **Delete Save**, then a Play-mode restart because the current GameRoot quiesces after deletion and normal fresh-save bootstrap runs on the next start. Phase 6 remains open pending owner UAT.
+The [owner UAT](manual-uat.md) retains sequential Editor/standalone instructions, the six-case aggregate comparison matrix, and the actual owner-reported PASS results. Conditions without a current manual selector (objective identity, intelligence factor, marginal RunId, active-floor config value) cite deterministic automated tests. The standalone build from `2a6c334c026935e3495421611571a16961c284c4` is accepted for qualification: subsequent commits changed tests/docs only, so no executable rebuild is required or claimed. The planned Dev Panel **Delete Save** fresh baseline was intentionally omitted because it would erase the research prerequisite for Floor 2. Unknown player-facing presentation passed via material-change fingerprint invalidation; separate absent/no-record behavior remains proven by A4/A5B tests. Phase 6 awaits PR #220 merge.
 
 ### PR #220 correction rerun (2026-10-01)
 
@@ -68,7 +68,7 @@ An attempted `--mode EditMode --filter MvpRouteResultPresenter` selected zero te
 
 Files changed by this correction since reviewed HEAD `2a6c334c026935e3495421611571a16961c284c4`: `Assets/_Project/Tests/EditMode/PhaseSixA5BTests.cs`, `docs/planning/phase-6-multi-floor-foundation-design-and-tuning-lock.md`, this implementation evidence, `manual-uat.md`, and `pr-description.md`. The pre-existing owner-controlled `ProjectSettings/UnityConnectSettings.asset` diff remains excluded.
 
-The [manual UAT](manual-uat.md) is prepared for Editor and Windows standalone. The owner must record actual results after external review. Production gameplay content remains Floors 1 and 2. No persistent detailed transition cause, Phase 7 editor work, broader balance pass, or Floors 3–5 production content is included.
+The owner-reported [manual UAT](manual-uat.md) passed in Editor and Windows standalone. It records material invalidation/relearning, lifecycle persistence, known/unknown reporting, survivability refusal, readable Editor resolutions, and qualitative aggregate comparisons. Per-run aggregate tallies were not retained and are not reconstructed; exact deterministic behavior is qualified by the named automated tests above. Production gameplay content remains Floors 1 and 2. No persistent detailed transition cause, Phase 7 editor work, broader balance pass, or Floors 3–5 production content is included. No known Phase 6 blocker remains before final external merge review.
 
 ## Changed-file inventory
 
