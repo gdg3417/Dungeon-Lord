@@ -2,7 +2,7 @@
 
 **Phase 6 final repository status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Schema 12 is writable and owns durable `sharedFloorKnowledge` with survivor-gated learning and run-snapshot isolation. Atomic lifecycle, contiguous Active-floor prefix semantics, immutable run-start snapshots, knowledge-backed transition perception, and coarse durable reporting are complete. Detailed transition causes remain same-session/transient.
 
-**Historical repository status (2026-09-26), superseded by the Phase 6 current status above:** Phase 3 is closed through merged PR #200, Phase 4 is complete through PR #207, the Phase 5 design lock is merged in PR #208, and Phase 5A is complete in PR #209. Current main is PR #210 at `75781a4cfb7a7e837c855608f9a0753139a1bf77`; canonical spatial state is active writable route/content authority, and current writable schema 10 owns optional-branch topology, `corridorContent`, and `sharedBranchKnowledge`. `DeadEnd = 6` and schema-10 optional-branch persistence are implemented. Phase 5B is the next gameplay packet; route choice, optional traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production tuning remain unimplemented. Owner-approved initial configuration and implementation authority is recorded in the [Phase 5B production tuning and run-condition contract](../Docs/planning/phase-5b-production-tuning-and-run-condition-contract.md), pending final external review. PR #210 makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
+**Historical repository status (2026-09-26), superseded by the Phase 6 current status above:** Phase 3 is closed through merged PR #200, Phase 4 is complete through PR #207, the Phase 5 design lock is merged in PR #208, and Phase 5A is complete in PR #209. Current main is PR #210 at `75781a4cfb7a7e837c855608f9a0753139a1bf77`; canonical spatial state is active writable route/content authority, and current writable schema 10 owns optional-branch topology, `corridorContent`, and `sharedBranchKnowledge`. `DeadEnd = 6` and schema-10 optional-branch persistence are implemented. Phase 5B is the next gameplay packet; route choice, optional traversal, branch encounter resolution, branch-specific outcomes, run-driven knowledge learning, and production tuning remain unimplemented. Owner-approved initial configuration and implementation authority is recorded in the [Phase 5B production tuning and run-condition contract](../docs/planning/phase-5b-production-tuning-and-run-condition-contract.md), pending final external review. PR #210 makes `Docs/process/AI_Model_Selection_Policy.md` canonical.
 
 **Historical Phase 2B3 status (2026-08-02), superseded by later Phase 2 packets:** Phase 2B3 adds detached, inactive canonical-spatial byte serialization, pinned migration-descriptor and identity contracts, pure relative sidecar naming, and migration-journal validation. Live save schema remains **6**. No whole-save serializer or raw interception exists; no migration or filesystem transaction executes; no canonical spatial reader, writer, or runtime authority is active. The next dependency is raw-envelope classification and lossless whole-save candidate construction using these pinned contracts, before any filesystem execution or activation.
 
@@ -33,7 +33,7 @@ VERSION STATUS:
 
 \- Spec 38: **locked candidate for planning**. Its approved spatial direction and INV-15 are authoritative, while numeric tuning and the policy gates explicitly listed in Spec 38 and the phased roadmap remain unresolved.
 
-\- Spec 38 implementation is authorized only through the [post-GD60 phased roadmap](../Docs/planning/post-gd60-mvp-execution-plan.md) after each relevant named gate is resolved.
+\- Spec 38 implementation is authorized only through the [post-GD60 phased roadmap](../docs/planning/post-gd60-mvp-execution-plan.md) after each relevant named gate is resolved.
 
 \- GD61 authorizes documentation and implementation planning only; it authorizes no runtime implementation, schema migration, tuning values, or player-facing behavior.
 
@@ -2592,7 +2592,7 @@ Adventurers are finite and simulated at a high level. In MVP, ordinary adventure
 
 Ordinary-adventurer lifecycle effects persist across dungeon runs at the pooled or cohort level: progression, gear distribution, retirement, death, circulation, and regional counts may remain durable without giving every ordinary adventurer an individual save identity. Death removes ordinary adventurers from the region with a short cooldown before reappearance elsewhere. Named characters or heroes are the future path for durable individual identity, history, relationships, rivalries, grudges, and disproportionate party-profile influence; that system is not implemented by Phase 5.
 
-**Phase 5 owner clarification:** The pooled/cohort versus durable-individual identity distinction above clarifies the original locked v1 lifecycle language. See the [Phase 5 branching and route-choice design lock](../Docs/planning/phase-5-branching-and-route-choice-design.md).
+**Phase 5 owner clarification:** The pooled/cohort versus durable-individual identity distinction above clarifies the original locked v1 lifecycle language. See the [Phase 5 branching and route-choice design lock](../docs/planning/phase-5-branching-and-route-choice-design.md).
 
 ## 4. Loot and Economy
 
@@ -2832,7 +2832,7 @@ Core gameplay data is loaded from externalized tables so that balance and conten
 
 Normalized UTF-8 text tables and machine-readable schemas committed to Git are the canonical production authoring authority. Flat and relational records use CSV; package metadata and schema definitions use JSON. Each production value has exactly one writable owner. Generated runtime data, workbooks, cloud editors, code records, duplicate assets, fixtures, caches, and unreviewed imports are not authoring authority.
 
-The approved Dungeon Spatial package is implemented at `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree, and is the single logical writable production content and English-localization authority. Its exact contract is [GD65B production authoring source contract](../Docs/planning/gd65b-production-authoring-source-contract.md). Historically, the GD65B2A documentation packet approved the path and contract without itself creating package or authoring files; GD65B2B subsequently implemented them.
+The approved Dungeon Spatial package is implemented at `ContentAuthoring/DungeonSpatial/`, outside Unity's `Assets` tree, and is the single logical writable production content and English-localization authority. Its exact contract is [GD65B production authoring source contract](../docs/planning/gd65b-production-authoring-source-contract.md). Historically, the GD65B2A documentation packet approved the path and contract without itself creating package or authoring files; GD65B2B subsequently implemented them.
 
 3.2 Solo authoring
 

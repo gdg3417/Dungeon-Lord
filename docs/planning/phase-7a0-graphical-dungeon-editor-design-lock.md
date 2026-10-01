@@ -1,6 +1,6 @@
 # Phase 7A0 - Graphical Dungeon Editor Design Lock
 
-**Status:** Proposed Phase 7A0 implementation authority; owner decisions resolved and awaiting review/merge through this documentation PR.
+**Status:** Owner-approved Phase 7 implementation prerequisite; implementation remains deferred to reviewed Phase 7 implementation PRs.
 **Purpose:** Record the approved owner decisions, their rationale where useful, implementation constraints, dependencies, deferred work, and explicit supersedences for Phase 7.
 **Implementation remains deferred to later Phase 7 implementation PRs.** This document is reconciled against merged Phase 6A5B / PR #220 at `main` `e9f93b8d742ccaba38c7de32b776970006791d93`; it does not claim that graphical-editor, positional-save, simulation, or production-UI work already exists.
 
