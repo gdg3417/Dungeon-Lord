@@ -282,6 +282,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.validatedCanonicalSpatialState = owned.State;
                 candidate.canonicalSpatialAuthority = owned.State.Authority; candidate.spatialFloors = owned.State.Floors;
                 candidate.corridorContent = owned.CorridorContent; candidate.sharedBranchKnowledge = owned.BranchKnowledge;
+                candidate.sharedFloorKnowledge = owned.FloorKnowledge;
                 candidate.lastSavedUtcUnix = savedUtcUnix;
                 simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
             }
@@ -296,7 +297,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             var result = PrepareAndPersist(activePath, fileSystem, session,
                 session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment,
-                    owned.CorridorContent, candidate.sharedBranchKnowledge), false);
+                    owned.CorridorContent, candidate.sharedBranchKnowledge,
+                    candidate.sharedFloorKnowledge), false);
             if (result.IsSuccess)
                 DungeonBuilder.M0.Gameplay.RunSimulation.RunTransientEvidence.Retain(candidate, result.RuntimeProjection);
             return result;

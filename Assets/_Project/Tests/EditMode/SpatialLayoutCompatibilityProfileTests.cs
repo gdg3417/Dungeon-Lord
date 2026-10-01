@@ -34,8 +34,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(data.GeometryRecords,Has.Length.EqualTo(1));
             Assert.That(data.GeometryRecords[0].Layouts.Select(x=>x.ExpectedOccupiedTileTotal).ToArray(),Is.EqualTo(new[]{26,42}));
             Assert.That(data.MigrationProfiles,Has.Length.EqualTo(1));
-            Assert.That(data.StarterProfiles,Has.Length.EqualTo(5));
-            Assert.That(data.ContractSelections,Has.Length.EqualTo(5));
+            Assert.That(data.StarterProfiles,Has.Length.EqualTo(6));
+            Assert.That(data.ContractSelections,Has.Length.EqualTo(6));
             SpatialMigrationCompatibilityProfile migration=data.MigrationProfiles[0];
             CanonicalStarterLayoutProfile starter=data.StarterProfiles.Single(x=>x.TargetSchemaVersion==7);
             CanonicalLayoutContractSelection contract=data.ContractSelections.Single(x=>x.TargetSchemaVersion==7);
@@ -86,9 +86,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(8,1).Success,Is.True);
             Assert.That(result.Value.SelectStarter(9,1).Success,Is.True);
             Assert.That(result.Value.SelectStarter(10,1).Success,Is.True);
+            Assert.That(result.Value.SelectStarter(11,1).Success,Is.True);
+            Assert.That(result.Value.SelectStarter(12,1).Success,Is.True);
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(11));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
             Assert.That(SaveMigration.LegacyCompatibilitySchemaVersion,Is.EqualTo(6));
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data),Is.True);
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
@@ -130,8 +132,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 10)
                 .TargetSchemaVersion, Is.EqualTo(10));
             Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 11)
-                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.FloorActivationIntroduction));
             Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 11)
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.FloorActivationIntroduction));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 12)
+                .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 12)
                 .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
 
             SpatialLayoutCompatibilityProfilesData schemaEight =
@@ -263,7 +269,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SpatialLayoutCompatibilityProfiles.ResolveMigration(CanonicalAsset(duplicateAndInvalid),spatial,limits,2,10,2).Selection.Code,
                 Is.EqualTo("gd66.profile.duplicate"));
 
-            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveStarter(profiles,spatial,limits,12,2).Selection.Code,
+            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveStarter(profiles,spatial,limits,13,2).Selection.Code,
                 Is.EqualTo("gd66.starter_profile.missing"));
             CanonicalStarterLayoutProfile starter=Starter(CompatibilityProfileLifecycle.Active);
             TextAsset validStarter=ConfigurationAsset(null,new[]{starter},null,true);
@@ -277,7 +283,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SpatialLayoutCompatibilityProfiles.ResolveStarter(ConfigurationAsset(null,new[]{starter,duplicateStarter},null,true),spatial,limits,10,2).Selection.Code,
                 Is.EqualTo("gd66.starter_profile.duplicate"));
 
-            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveContract(profiles,spatial,limits,12).Selection.Code,
+            Assert.That(SpatialLayoutCompatibilityProfiles.ResolveContract(profiles,spatial,limits,13).Selection.Code,
                 Is.EqualTo("gd66.layout_contract.selection_missing"));
             var selections=new[]{new CanonicalLayoutContractSelection{Lifecycle=CompatibilityProfileLifecycle.Active,TargetSchemaVersion=10,CanonicalLayoutContractVersion=1},
                 new CanonicalLayoutContractSelection{Lifecycle=CompatibilityProfileLifecycle.Active,TargetSchemaVersion=10,CanonicalLayoutContractVersion=2}};

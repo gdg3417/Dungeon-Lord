@@ -16,11 +16,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class PhaseSixAActivationTests
     {
         [Test]
-        public void CurrentConstantsAndNativeEmptyCreationUseEleven()
+        public void CurrentConstantsAndNativeEmptyCreationUseTwelve()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(11));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(11));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(f.ActivePath, fs,
                 f.Runtime, f.Compatibility, f.Production,
@@ -28,7 +28,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(created.IsSuccess, Is.True, created.Reason);
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":11"));
+                Does.Contain("\"schemaVersion\":12"));
+            string native = Encoding.UTF8.GetString(created.Session.GetCurrentBytes());
+            Assert.That(native.Split(new[] { "\"sharedFloorKnowledge\"" },
+                StringSplitOptions.None).Length, Is.EqualTo(2));
+            Assert.That(created.Validation.FloorKnowledge.Records, Is.Empty);
             var issues = new SpatialIssueCollector(f.Profile.Canonical.Serialized.MaximumDiagnostics);
             Assert.That(ContractJson.TryParse(created.Session.GetCurrentBytes(),
                 f.Profile.Canonical.Serialized, issues, out ContractJsonNode root), Is.True);
@@ -178,7 +182,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((int)frozen.State.Floors[0].ActivationState, Is.Zero);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(ten, f.Context).IsValid, Is.False);
             byte[] smuggled = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
-                .Replace("\"schemaVersion\":11", "\"schemaVersion\":10"));
+                .Replace("\"schemaVersion\":12", "\"schemaVersion\":10"));
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(smuggled, f.Profile.Canonical).IsValid, Is.False);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(smuggled, f.Profile.Canonical, out _), Is.False);
         }
@@ -220,13 +224,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(update.IsSuccess, Is.True, update.Reason);
             byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(update.Update.GetBytes()));
             byte[] before = (byte[])ten.Clone();
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(ten,
+                f.Profile.Canonical).IsValid, Is.True, "Synthetic frozen schema 10 source must remain valid.");
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] first), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] again), Is.True);
             CollectionAssert.AreEqual(first, again);
             CollectionAssert.AreEqual(before, ten);
             Assert.That(PhaseFourTestSupport.FrozenTen(first), Is.EqualTo(Encoding.UTF8.GetString(ten)));
-            var current = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, f.Context);
-            Assert.That(current.CurrentTargetValidated, Is.True);
+            var current = DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(first, f.Profile.Canonical);
+            Assert.That(current.IsValid, Is.True);
             Assert.That(current.State.Floors.Length, Is.EqualTo(f.State.Floors.Length));
             Assert.That(current.State.Floors.All(floor => floor.ActivationState == FloorActivationState.Active), Is.True);
             Assert.That(current.BranchKnowledge.Records.Length, Is.EqualTo(1));
@@ -311,7 +317,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             writer.Token(",\"corridorContent\":{\"Assignments\":[]},\"sharedBranchKnowledge\":{\"Records\":[]}}}");
             byte[] ten = writer.Finish();
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
-            var result = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(eleven, f.Profile.Canonical);
+            var result = DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(eleven, f.Profile.Canonical);
             Assert.That(result.IsValid, Is.True);
             CollectionAssert.AreEqual(state.Floors.Select(floor => floor.FloorInstanceId), result.State.Floors.Select(floor => floor.FloorInstanceId));
             Assert.That(result.State.Floors.Length, Is.EqualTo(count));
@@ -326,13 +332,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             double rate = Online(f).ResolveRate(f.Runtime, f.Configuration).ManaPerHour;
             byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes()));
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
-            var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(eleven, f.Context);
+            var reopened = DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(eleven, f.Profile.Canonical);
             SetRuntimeState(f.Runtime, reopened.State);
             Assert.That(Online(f).ResolveRate(f.Runtime, f.Configuration).ManaPerHour, Is.EqualTo(rate));
         }
 
         [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
-        public void FrozenChainContinuesThroughEachHistoricalStepToEleven(int schema)
+        public void FrozenChainContinuesThroughEachHistoricalStepToTwelve(int schema)
         {
             Fixture f = OneFloor();
             string text = PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes());
@@ -345,6 +351,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (schema <= 8) Assert.That(SchemaEightToNineUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             if (schema <= 9) Assert.That(SchemaNineToTenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
+            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             var result = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, f.Context);
             Assert.That(result.CurrentTargetValidated, Is.True);
             Assert.That(result.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));

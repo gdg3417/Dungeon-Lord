@@ -32,6 +32,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
             candidate.sharedBranchKnowledge = BranchKnowledgeLearning.Propose(snapshot.BranchKnowledge, traversal.Evidence,
                 outcome.Party.ActiveCount > 0, outcome.RunId, capturedConfig.PhaseFiveB.BranchDecision, workload);
+            candidate.sharedFloorKnowledge = FloorKnowledgeLearning.Propose(snapshot, outcome);
             candidate.runHistory.AppendOutcome(outcome, capturedConfig.MaxRunHistoryEntries);
             candidate.runHistory.NextRunSequence = checked(sequence + 1);
             MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, capturedConfig, production);

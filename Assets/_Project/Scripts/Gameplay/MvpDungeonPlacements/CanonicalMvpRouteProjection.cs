@@ -69,6 +69,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.validatedCanonicalSpatialState = validation.State;
                 save.corridorContent = validation.CorridorContent;
                 save.sharedBranchKnowledge = validation.BranchKnowledge;
+                save.sharedFloorKnowledge = validation.FloorKnowledge;
                 reason = null;
                 return true;
             }

@@ -26,6 +26,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public double DangerReference = double.NaN;
         public double CarriedLootReference = double.NaN;
         public double UnknownInformationUncertainty = double.NaN;
+        public double InitialObservationConfidence = double.NaN;
+        public double ReconfirmationConfidenceIncrease = double.NaN;
+        public double ConfidenceClamp = double.NaN;
         public DepthObjectiveWeight[] Objectives;
         public int MaximumActiveFloors;
         public int MaximumTransitions;
@@ -60,7 +63,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 c.MaximumTransitions < c.MaximumActiveFloors - 1)
                 return false;
             if (!new[] { c.ConditionHealthWeight, c.SurvivorFractionWeight, c.PerceivedDangerWeight,
-                c.UncertaintyWeight, c.SurvivabilityThreatPenalty, c.UnknownInformationUncertainty }.All(Unit) ||
+                c.UncertaintyWeight, c.SurvivabilityThreatPenalty, c.UnknownInformationUncertainty,
+                c.InitialObservationConfidence, c.ReconfirmationConfidenceIncrease,
+                c.ConfidenceClamp }.All(Unit) ||
+                c.InitialObservationConfidence <= 0 || c.ConfidenceClamp <= 0 ||
+                c.InitialObservationConfidence > c.ConfidenceClamp ||
                 Math.Abs(c.ConditionHealthWeight + c.SurvivorFractionWeight - 1) > double.Epsilon ||
                 Math.Abs(c.PerceivedDangerWeight + c.UncertaintyWeight - 1) > double.Epsilon) return false;
             if (!new[] { c.RewardWeight, c.SurvivabilityMarginWeight, c.ObjectiveWeight, c.DangerAppealWeight,

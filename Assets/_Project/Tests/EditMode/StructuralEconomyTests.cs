@@ -464,6 +464,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Encoding.UTF8.GetString(nine), Does.Contain("\"ManaReserve\":123.5"));
             Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, f.Profile.Canonical, out byte[] ten), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
+            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(eleven, f.Profile.Canonical, out eleven), Is.True);
             Assert.That(DetachedCanonicalSaveSession.Open(eleven, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);

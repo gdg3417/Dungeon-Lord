@@ -555,7 +555,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string persisted = Encoding.UTF8.GetString(fixture.Session.GetCurrentBytes());
 
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(1d));
-            Assert.That(persisted, Does.Contain("\"schemaVersion\":11"));
+            Assert.That(persisted, Does.Contain("\"schemaVersion\":12"));
             Assert.That(persisted, Does.Not.Contain("MvpBaselineCoreLevel"));
             Assert.That(persisted, Does.Not.Contain("ManaPerHour"));
         }
