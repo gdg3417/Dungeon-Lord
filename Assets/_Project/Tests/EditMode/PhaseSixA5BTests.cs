@@ -50,6 +50,97 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ApplicableKnowledgeChangesProductionTransitionDecisionWithIdenticalIdentity()
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            var config = PhaseSixA4Tests.Config();
+            var party = RunPartyGenerator.Create(config.PhaseFiveB, "run-10");
+            var objective = TransientDepthObjective.Select(config.PhaseSix, party.RunId);
+            double pull = objective.Pull(0, true, 1);
+            var record = Record(f, 1);
+            record.PerceivedRewardScore = config.PhaseSix.RewardReference;
+            record.PerceivedDangerScore = 0d;
+            var unknown = FloorTransitionPerception.Unknown(config.PhaseSix);
+            var known = FloorTransitionPerceptionResolver.Resolve(record,
+                record.ApplicabilityFingerprint, party.IntelligenceInterpretationFactor, config.PhaseSix);
+            string currentFloor = f.State.Floors.Single(x => x.FloorIndex == 0).FloorInstanceId;
+            string nextFloor = record.FloorInstanceId;
+            double carriedLoot = config.PhaseSix.CarriedLootReference;
+            var before = FloorTransitionDecision.Resolve(config.PhaseSix, party, currentFloor, nextFloor,
+                carriedLoot, pull, unknown);
+            var after = FloorTransitionDecision.Resolve(config.PhaseSix, party, currentFloor, nextFloor,
+                carriedLoot, pull, known);
+            Assert.That(objective.Mode, Is.EqualTo("target_depth"));
+            Assert.That(pull, Is.EqualTo(.75d));
+            Assert.That(before.Uncertainty, Is.EqualTo(1d));
+            Assert.That(after.Uncertainty, Is.LessThan(before.Uncertainty));
+            Assert.That(after.ExpectedSurvivability, Is.GreaterThan(before.ExpectedSurvivability));
+            Assert.That(after.Appeal, Is.GreaterThan(before.Appeal));
+            Assert.That(after.Reason, Is.Not.EqualTo(before.Reason));
+            Assert.That(after.Descend, Is.True);
+            Assert.That(before.Reason, Is.EqualTo("run.floor.exit_marginal"));
+            Assert.That(before.Descend, Is.False);
+            Assert.That(after.Reason, Is.EqualTo("run.floor.descend_appeal"));
+            var repeated = FloorTransitionDecision.Resolve(config.PhaseSix, party, currentFloor, nextFloor,
+                carriedLoot, pull, known);
+            Assert.That(repeated.Reason, Is.EqualTo(after.Reason));
+            Assert.That(repeated.Descend, Is.EqualTo(after.Descend));
+            Assert.That(repeated.Appeal, Is.EqualTo(after.Appeal));
+            Assert.That(repeated.Roll, Is.EqualTo(after.Roll));
+        }
+
+        [Test]
+        public void DisabledUnavailableTargetDepthIsValidAndNeverSelected()
+        {
+            var config = PhaseSixA4Tests.Config().PhaseSix;
+            var target = config.Objectives.Single(x => x.Mode == "target_depth");
+            Assert.That(config.MaximumActiveFloors, Is.EqualTo(5));
+            Assert.That(target.TargetFloorIndex, Is.EqualTo(1));
+            Assert.That(target.Weight, Is.EqualTo(.5d));
+            Assert.That(PhaseSixRunConfigValidation.IsValid(config), Is.True);
+            config.MaximumActiveFloors = 2;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(config), Is.True);
+            config.MaximumActiveFloors = 1;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(config), Is.False);
+            target.Weight = 0d;
+            Assert.That(PhaseSixRunConfigValidation.IsValid(config), Is.True);
+            var first = TransientDepthObjective.Select(config, "run-1").Mode;
+            Assert.That(first, Is.Not.EqualTo("target_depth"));
+            bool selectedShallow = false, selectedDeepest = false;
+            for (int index = 1; index <= 64; index++)
+            {
+                string runId = "run-" + index;
+                string mode = TransientDepthObjective.Select(config, runId).Mode;
+                Assert.That(mode, Is.Not.EqualTo("target_depth"));
+                Assert.That(TransientDepthObjective.Select(config, runId).Mode, Is.EqualTo(mode));
+                selectedShallow |= mode == "shallow";
+                selectedDeepest |= mode == "deepest_reasonable";
+            }
+            Assert.That(selectedShallow && selectedDeepest, Is.True);
+        }
+
+        [Test]
+        public void DurableKnowledgeRecordCountUsesFixedSupportedCeiling()
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            int ceiling = PhaseSixRunConfigValidation.MaximumSupportedActiveFloors;
+            var template = Record(f, 0);
+            var records = Enumerable.Range(0, ceiling + 1).Select(index => {
+                var copy = PhaseSixFloorKnowledge.Copy(template);
+                copy.FloorInstanceId = "floor.test." + index;
+                return copy;
+            }).ToArray();
+            var spatial = new DetachedCanonicalSpatialSaveState { Floors = records.Select(record =>
+                new SavedSpatialFloor { FloorInstanceId = record.FloorInstanceId }).ToArray() };
+            Assert.That(PhaseSixFloorKnowledge.Validate(new SharedFloorKnowledgeAuthority {
+                Records = records.Take(ceiling).ToArray() }, spatial, ceiling), Is.True);
+            Assert.That(PhaseSixFloorKnowledge.Validate(new SharedFloorKnowledgeAuthority {
+                Records = records }, spatial, ceiling + 1), Is.True);
+            Assert.That(PhaseSixFloorKnowledge.Validate(new SharedFloorKnowledgeAuthority {
+                Records = records }, spatial, ceiling), Is.False);
+        }
+
+        [Test]
         public void PartialMissingAndStaleKnowledgeNeverInspectHiddenFloor()
         {
             var f = PhaseSixA4Tests.Eligible(); var record = Record(f, 1);
@@ -104,10 +195,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Floors.Count, Is.EqualTo(1));
             Assert.That(new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot())
                 .SimulateSnapshot(1, snapshot).RoomResolutions.All(r => r.FloorIndex == 0), Is.True);
-            Assert.That(PhaseSixFloorKnowledge.Validate(new SharedFloorKnowledgeAuthority {
-                Records = Enumerable.Repeat(records[0],
-                    PhaseSixRunConfigValidation.MaximumSupportedActiveFloors + 1).ToArray() },
-                f.State, PhaseSixRunConfigValidation.MaximumSupportedActiveFloors), Is.False);
         }
 
         [Test]

@@ -164,6 +164,8 @@ This authority does not implement schema 11 or its migration, Floor 2 runtime co
 
 The locked formula and numeric tuning above are unchanged. Production `run_simulation_config.json` owns typed Phase Six tuning and objective weights. The stable configured objective-selection source is `run.depth_objective.phase6.v1`; its length-prefixed UTF-8 SHA-256 identity is `(RuleSourceId, RunId)`, independent of branch and transition identities. Objective entries are ordered by mode and their configured weights are normalized. The transition source remains `run.floor_transition_decision.phase6.v1`, with identity `(RuleSourceId, RunId, CurrentFloorInstanceId, NextFloorInstanceId)`.
 
+Configuration validity for a disabled `target_depth` objective: its target may lie beyond the configured Active-floor bound only when its selection weight is zero. A positive-weight target must be reachable within that bound. The required three-objective schema retains the disabled entry, while deterministic selection skips zero-weight entries and normalizes the remaining positive weights. This permits a valid one-Active-floor configuration without changing production objective weights, target, or gameplay tuning.
+
 A4 supplies unknown next-floor perception using configured uncertainty and does not inspect hidden floor content to infer reward or danger. The complete snapshot retains real content for later simulation, separately from transition perception. Shared floor knowledge remains approved design only, deferred to A5 along with richer aggregate explanation, final qualification, and Phase 6 closeout. No ordinary party HP, objective, snapshot, or between-floor checkpoint is persisted.
 
 ## Phase 6A5B owner-approved knowledge interpretation
