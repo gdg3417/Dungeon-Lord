@@ -2,7 +2,7 @@
 
 Baseline: merged PR #218, `2505c679afd5172dc82dd08b44aedf3add96001c` on `main`. Branch: `codex/phase-6a5a-floor-knowledge`.
 
-The writable save target is schema 12. The frozen schema 11 reader remains available. The single explicit 11-to-12 step accepts only valid frozen 11 bytes, preserves every pre-existing root and primary member in its canonical order, changes the version token, and appends one empty `sharedFloorKnowledge` member after `sharedBranchKnowledge`. It does not infer historical knowledge. Earlier schemas retain their sequential path through 11. New native saves initialize the same empty owner. The current complete-save reader requires the seven-member canonical tail and rejects missing, malformed, duplicate, or out-of-order floor records.
+The writable save target is schema 12. The frozen schema 11 reader remains available. The single explicit 11-to-12 step accepts valid frozen 11 bytes, preserves non-colliding existing root and primary members in canonical order, changes the version token, and appends one empty `sharedFloorKnowledge` member after `sharedBranchKnowledge`. A pre-existing primary extension named `sharedFloorKnowledge` collides with the newly reserved owner and is rejected fail-closed rather than overwritten. It does not infer historical knowledge. Earlier schemas retain their sequential path through 11. New native saves initialize the same empty owner. The current complete-save reader requires the seven-member canonical tail and rejects missing, malformed, duplicate, or out-of-order floor records.
 
 Each floor record owns stable `FloorInstanceId`, canonical applicability SHA-256, explicit reward and danger known flags and perceived scores, explicit shared confidence state/value, and last-confirmed RunId evidence. Records sort by ordinal floor ID. Validation rejects malformed IDs and fingerprints, duplicates, unknown/nonzero score mismatches, nonfinite or negative scores, confidence outside (0,1] when known, and incoherent last-run state. Record reading and writing are bounded by the approved five Active floors. Branch knowledge remains a separate owner.
 
@@ -16,13 +16,13 @@ Run settlement proposes knowledge on the detached candidate and writes it with b
 
 | Gate | Command or filter | Total | Passed | Failed | Skipped |
 |---|---|---:|---:|---:|---:|
-| Focused A5A | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseSixA5A --output TestResults/phase6a5a-focused-final2.xml --timeout 600 --no-color` | 19 | 19 | 0 | 0 |
-| Focused Phase 5B | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseFiveB --output TestResults/phase6a5a-phase5b-editmode.xml --timeout 600 --no-color` | 107 | 107 | 0 | 0 |
-| Focused Phase 6 | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseSixA --output TestResults/phase6a5a-phasesix-editmode.xml --timeout 600 --no-color` | 211 | 211 | 0 | 0 |
-| Complete EditMode | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --output TestResults/phase6a5a-full-editmode-verified.xml --timeout 1200 --no-color` | 1290 | 1290 | 0 | 0 |
-| Complete PlayMode | `unity.exe test C:/Dev/Dungeon-Lord --mode PlayMode --output TestResults/phase6a5a-full-playmode.xml --timeout 1200 --no-color` | 2787 | 2777 | 0 | 10 |
+| Focused A5A review correction | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseSixA5A --output TestResults/phase6a5a-review-focused.xml --timeout 600 --no-color` | 22 | 22 | 0 | 0 |
+| Prior focused Phase 5B (production unchanged in review correction) | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseFiveB --output TestResults/phase6a5a-phase5b-editmode.xml --timeout 600 --no-color` | 107 | 107 | 0 | 0 |
+| Focused Phase 6 review correction | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --filter PhaseSixA --output TestResults/phase6a5a-review-phasesix.xml --timeout 600 --no-color` | 214 | 214 | 0 | 0 |
+| Complete EditMode review correction | `unity.exe test C:/Dev/Dungeon-Lord --mode EditMode --output TestResults/phase6a5a-review-full-editmode.xml --timeout 1200 --no-color` | 1293 | 1293 | 0 | 0 |
+| Complete PlayMode review correction | `unity.exe test C:/Dev/Dungeon-Lord --mode PlayMode --output TestResults/phase6a5a-review-full-playmode.xml --timeout 1200 --no-color` | 2792 | 2782 | 0 | 10 |
 
-The complete suites include production Phase 6 configuration, English localization, save and sequential migration, spatial and production content, and the existing atomic save fault matrix. The ten PlayMode skips are the same platform or mode-specific fixtures recorded in the A4 qualification evidence. The focused A5A suite proves schema source nonmutation, deterministic 11-to-12 output, unknown-member preservation, exact tail ordering, record canonicalization/rejection, applicability, survivor reconfirmation and clamp, wipe and unseen-floor privacy, snapshot isolation, durable reopen, stale and concurrent rejection, and failed persistence/readback atomicity.
+The complete suites include production Phase 6 configuration, English localization, save and sequential migration, spatial and production content, and the existing atomic save fault matrix. The ten PlayMode skips are the same platform or mode-specific fixtures recorded in the A4 qualification evidence. The focused A5A suite proves schema source nonmutation, deterministic 11-to-12 output, non-colliding unknown root/primary preservation and reserved-owner collision rejection, exact tail ordering, record canonicalization/rejection, applicability, positive descended two-floor learning, survivor reconfirmation and clamp, no precise update to existing knowledge on a wipe, unseen-floor privacy, snapshot isolation, durable reopen, stale and concurrent rejection, and failed persistence/readback atomicity.
 
 Windows Development Build command:
 
@@ -31,6 +31,8 @@ Windows Development Build command:
 ```
 
 The build succeeded under Unity 6000.3.2f1 with only `Assets/_Project/Scenes/Bootstrap.unity`, Development Build enabled, 170,690,100 total reported bytes, zero errors, and one unavailable Unity Cloud native-symbol credential warning. The production spatial pre-build gate passed. Automated build success does not substitute for standalone owner UAT.
+
+The external-review correction changes only EditMode tests and this evidence text. No runtime, save, migration, configuration, content, localization, or build code changed, so the Windows Development Build was not rerun for the correction.
 
 ## Review and qualification boundary
 

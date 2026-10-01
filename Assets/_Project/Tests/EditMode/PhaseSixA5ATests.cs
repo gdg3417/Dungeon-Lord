@@ -49,6 +49,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Eligible();
             string source = FrozenEleven(f.Session.GetCurrentBytes());
+            source = source.Replace(",\"canonicalSpatialAuthority\":",
+                ",\"futurePrimaryExtension\":{\"v\":2},\"canonicalSpatialAuthority\":");
             source = source.Substring(0, source.Length - 1) + ",\"futureExtension\":{\"v\":1}}";
             byte[] eleven = Encoding.UTF8.GetBytes(source);
             byte[] original = (byte[])eleven.Clone();
@@ -67,6 +69,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(JsonUtility.ToJson(current.State), Is.EqualTo(JsonUtility.ToJson(frozen.State)));
             Assert.That(JsonUtility.ToJson(current.BranchKnowledge), Is.EqualTo(JsonUtility.ToJson(frozen.BranchKnowledge)));
             Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(first, f.Profile.Canonical, out _), Is.False);
+        }
+
+        [Test]
+        public void ElevenToTwelveRejectsReservedPrimaryOwnerCollisionWithoutChangingSource()
+        {
+            var f = Eligible();
+            string source = FrozenEleven(f.Session.GetCurrentBytes()).Replace(
+                ",\"canonicalSpatialAuthority\":",
+                ",\"sharedFloorKnowledge\":{\"legacy\":true},\"canonicalSpatialAuthority\":");
+            byte[] eleven = Encoding.UTF8.GetBytes(source);
+            byte[] original = (byte[])eleven.Clone();
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(
+                eleven, f.Profile.Canonical).IsValid, Is.True);
+            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(
+                eleven, f.Profile.Canonical, out byte[] candidate), Is.False);
+            Assert.That(candidate, Is.Null);
+            CollectionAssert.AreEqual(original, eleven);
         }
 
         [Test]
@@ -172,6 +191,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void DescendedTwoFloorRunPublishesApplicableKnowledgeForBothCompletedFloors()
+        {
+            var f = Eligible();
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.HiddenCacheOptionId);
+            PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId);
+            PhaseSixA4Tests.ForceDescent(f.Configuration, true);
+            f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Activate, FloorTwo(f)));
+            var before = Snapshot(f);
+            Assert.That(before.Floors.Count, Is.EqualTo(2));
+            Assert.That(before.FloorKnowledge.Records, Is.Empty);
+
+            var result = Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session,
+                f.Runtime, new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()),
+                RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix));
+            f.Accept(result);
+            var run = f.Runtime.runHistory.LatestOutcome;
+            Assert.That(run.Success, Is.True);
+            Assert.That(run.Party.ActiveCount, Is.GreaterThan(0));
+            Assert.That(run.FloorTransitions.Any(value => value.CurrentFloorInstanceId ==
+                before.Floors[0].FloorInstanceId && value.Descend), Is.True);
+            Assert.That(run.FloorTransitions.Any(value => value.CurrentFloorInstanceId ==
+                before.Floors[1].FloorInstanceId), Is.True);
+            Assert.That(run.RoomResolutions.Any(value => value.FloorIndex == 1 && value.Reached), Is.True);
+
+            FloorKnowledgeRecord[] records = f.Runtime.sharedFloorKnowledge.Records;
+            Assert.That(records.Length, Is.EqualTo(2));
+            CollectionAssert.AreEqual(before.Floors.Select(value => value.FloorInstanceId)
+                .OrderBy(value => value, StringComparer.Ordinal),
+                records.Select(value => value.FloorInstanceId));
+            foreach (var floor in before.Floors)
+            {
+                FloorKnowledgeRecord record = records.Single(value =>
+                    value.FloorInstanceId == floor.FloorInstanceId);
+                Assert.That(record.ApplicabilityFingerprint, Is.EqualTo(floor.KnowledgeFingerprint));
+                Assert.That(FloorKnowledgeApplicability.IsApplicable(record, f.State,
+                    f.Runtime.corridorContent, f.Profile.Canonical), Is.True);
+                Assert.That(record.RewardKnown && record.DangerKnown && record.ConfidenceKnown, Is.True);
+                Assert.That(record.Confidence, Is.EqualTo(f.Configuration.PhaseSix.InitialObservationConfidence));
+                Assert.That(record.HasLastConfirmedRun, Is.True);
+                Assert.That(record.LastConfirmedRunId, Is.EqualTo(run.RunId));
+            }
+            Assert.That(records[0].PerceivedRewardScore == records[1].PerceivedRewardScore &&
+                records[0].PerceivedDangerScore == records[1].PerceivedDangerScore, Is.False);
+            string published = JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge);
+            f.Reopen();
+            Assert.That(JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge), Is.EqualTo(published));
+        }
+
+        [Test]
         public void ExitBeforeFloorTwoDoesNotLearnItsHiddenSnapshot()
         {
             var f = Eligible(); PhaseSixA4Tests.ForceDescent(f.Configuration, false);
@@ -232,6 +303,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
             Assert.That(f.Runtime.sharedFloorKnowledge.Records, Is.Empty);
+        }
+
+        [Test]
+        public void FinalWipeDoesNotUpdateExistingApplicableFloorKnowledge()
+        {
+            var f = Eligible();
+            for (int index = 0; index < 2; index++)
+                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId,
+                MvpDungeonPlacementIds.SpikeTrapOptionId);
+            PhaseSixA4Tests.ForceDescent(f.Configuration, false);
+            f.Configuration.PhaseFiveB.MinPartySize = f.Configuration.PhaseFiveB.MaxPartySize = 3;
+            foreach (var profile in f.Configuration.PhaseFiveB.DamageProfiles)
+                if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
+                    profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
+                    profile.MinimumDamage = profile.MaximumDamage = 0;
+            var writer = Writer(f);
+            var simulation = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot());
+            f.Accept(writer.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
+            Assert.That(f.Runtime.runHistory.LatestOutcome.Party.ActiveCount, Is.GreaterThan(0));
+            FloorKnowledgeRecord existing = f.Runtime.sharedFloorKnowledge.Records.Single();
+            Assert.That(FloorKnowledgeApplicability.IsApplicable(existing, f.State,
+                f.Runtime.corridorContent, f.Profile.Canonical), Is.True);
+            string original = JsonUtility.ToJson(PhaseSixFloorKnowledge.Copy(existing));
+            string confirmingRunId = existing.LastConfirmedRunId;
+
+            foreach (var profile in f.Configuration.PhaseFiveB.DamageProfiles)
+                if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
+                    profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
+                    profile.MinimumDamage = profile.MaximumDamage = 100;
+            Assert.That(FloorKnowledgeApplicability.IsApplicable(existing, f.State,
+                f.Runtime.corridorContent, f.Profile.Canonical), Is.True);
+            int sequence = f.Runtime.runHistory.NextRunSequence;
+            Assert.That(simulation.SimulateSnapshot(sequence, Snapshot(f)).Party.IsWiped, Is.True);
+            f.Accept(writer.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
+            Assert.That(f.Runtime.runHistory.LatestOutcome.Party.IsWiped, Is.True);
+            Assert.That(f.Runtime.sharedFloorKnowledge.Records.Single().LastConfirmedRunId,
+                Is.EqualTo(confirmingRunId));
+            Assert.That(JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge.Records.Single()), Is.EqualTo(original));
+            f.Reopen();
+            Assert.That(JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge.Records.Single()), Is.EqualTo(original));
         }
 
         [Test]
