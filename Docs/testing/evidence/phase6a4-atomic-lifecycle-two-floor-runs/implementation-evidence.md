@@ -7,7 +7,7 @@ A4 makes an eligible constructed Floor 2 safely usable through atomic lifecycle 
 
 ## Owner manual qualification interruption and follow-up
 
-Owner Unity Editor qualification at reviewed head `269d2d3760f592aabbc08c023afa49485777a421` stopped when selected constructed-Inactive Floor 2 did not visibly activate after direct Activate or Activate All. No lifecycle result appeared at the distant structural-feedback location, and no red Console error was reported. This was an actual activation failure as well as a feedback defect; manual qualification has not passed and has not been resumed by Codex.
+Owner Unity Editor qualification at reviewed head `269d2d3760f592aabbc08c023afa49485777a421` stopped when selected constructed-Inactive Floor 2 did not visibly activate after direct Activate or Activate All. No lifecycle result appeared at the distant structural-feedback location, and no red Console error was reported. This was an actual activation failure as well as a feedback defect.
 
 Read-only diagnostics of the owner's save confirmed valid schema-11 bytes, successful reopen, ac_100, and an Entrance → room → Completion route with Skeleton and Hidden Cache. The first rejecting stage was `DetachedCompleteSaveContract.ParseValidateAndRoundTripCore` calling `CanonicalSpatialSaveSerializer.Parse` on the assembled canonical members: it returned `NonCanonicalBytes`, surfaced as `gd66.transaction.candidate_invalid`. The original state, detached post-activation canonical validation, member serialization result, and recognized-state capture all passed. Investment, Phase Five, production semantics, and compatibility/current-target validation had not yet been reached.
 
@@ -17,7 +17,7 @@ With the correction, the temporary owner-save diagnostic passed raw complete-sav
 
 Independent localized lifecycle feedback now appears immediately below the three lifecycle buttons and survives structural publication/reconciliation. A reason-coverage test verifies every A4 eligibility/lifecycle/technical-save key has readable English text. `floor.activation.layout_invalid` already matches the authority and table at this head; the alleged longer key is absent and was not introduced. Eight exact technical-save keys, including `gd66.transaction.candidate_invalid`, were added; English now has 976 entries and no duplicate keys.
 
-Current correction qualification is recorded below when complete. Earlier result rows remain historical evidence. A temporary diagnostic-cleanup ordering error caused one compile attempt to fail on dangling diagnostic references; the references were removed and the subsequent clean focused run passed. No debug instrumentation remains in production.
+The NativeCanonical member normalization and dedicated adjacent lifecycle feedback correction was requalified successfully. No debug instrumentation remains in production.
 
 ## Runtime authorities
 
@@ -66,7 +66,13 @@ Current native-save/feedback correction (Unity test XML under TestResults):
 | Explicit production/configuration/localization/build-gate EditMode | 173 | 173 | 0 | 0 |
 | Explicit layout/migration-localization PlayMode | 82 | 82 | 0 | 0 |
 
-The ten PlayMode skip identities are unchanged: eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem test, and one Windows Player-only standalone test. The English Bootstrap table contains 976 unique entries. Windows x86_64 Development Build passed under Unity 6000.3.2f1: wrapper exit 0, Bootstrap scene only, Development Build, 170,671,076-byte output, zero build errors, and one known Unity Cloud symbol-upload credential warning. The final scoped git diff --check passed. Owner Editor qualification stopped on the earlier activation failure; corrected Editor and standalone manual qualification remain pending after external re-review.
+The ten PlayMode skip identities are unchanged: eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem test, and one Windows Player-only standalone test. The English Bootstrap table contains 976 unique entries. Windows x86_64 Development Build passed under Unity 6000.3.2f1: wrapper exit 0, Bootstrap scene only, Development Build, 170,671,076-byte output, zero build errors, and one known Unity Cloud symbol-upload credential warning. The final scoped git diff --check passed.
+
+Owner Editor qualification then passed direct Floor 2 activation, Activate All already-Active no-op, deactivation/reactivation, and Floor 1 deactivation rejection. Lifecycle feedback was visible and localized. Passive mana followed one/two/one Active-floor behavior: two floors produced 228 mana/hour at Notice 95% and one floor produced 171 mana/hour at Notice 95%; lifecycle changes themselves granted or refunded no mana. Floor 2 layout, content, and investment survived lifecycle changes; Active and constructed-Inactive state each survived close/reopen with no save corruption or recovery warning.
+
+Owner gameplay qualification passed the one-floor baseline run, deliberate Floor 1 EXIT with EXIT presentation, and DESCEND. The same RunId and party crossed floors with exact HP continuity, no refill, healing, replacement, or resurrection, and one final settlement. Same-session canonical publication retained Party, EncounterEvents, BranchOutcomes, FloorTransitions, and DepthObjective.
+
+Owner Windows Development Build qualification also passed: lifecycle controls, Floor 2 Active/Inactive behavior, two-floor run behavior, DESCEND evidence, exact HP continuity, one final settlement, and lifecycle save/reopen persistence all worked. There was no crash, assertion, save-recovery warning, or new runtime error. Prototype diagnostics can be difficult to view at some Game-view resolutions and may require a larger Game view or display size; this is a readability limitation, not an A4 correctness failure.
 
 Historical qualification on earlier reviewed heads:
 
@@ -114,7 +120,7 @@ The review 2 Windows x86_64 Development Build passed with wrapper exit 0 under U
 
 The post-review Windows x86_64 Development Build passed with wrapper exit 0 under Unity 6000.3.2f1. `BuildWindowsDevelopment` produced a Development Build for `StandaloneWindows64` with only `Assets/_Project/Scenes/Bootstrap.unity`, result Success, a 162.8 MB Unity report / 170,911,938-byte output tree, 0 build errors, and the established warning that Unity Cloud native-symbol upload credentials are unavailable. The production spatial preprocessor/build gate passed. Output: `Builds/Development/Windows/Dungeon Lord.exe`; executable SHA-256 `ABC8179E345B70C9D7CA423C54E02739ED9B9ADCA668C2C745FFB81AADC05CC6`; provenance SHA-256 `A3E9B1507E47B3EC7DCF930549B5F084B9804AEB60AE8578D1E187D819F7E9AD`.
 
-At the initial automated checkpoint, no owner manual qualification had occurred. Owner Editor qualification subsequently began at 269d2d3 and stopped on the activation defect recorded above. No manual pass is claimed; corrected Editor and Windows Development Build gameplay/standalone close-reopen qualification remain pending after external re-review.
+Owner Editor and Windows Development Build qualification passed after the correction. The documented Game-view diagnostic readability limitation remains accepted and non-blocking.
 
 ## Accepted limits and follow-up
 
