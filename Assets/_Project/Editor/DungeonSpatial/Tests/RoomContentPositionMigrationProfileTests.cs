@@ -48,7 +48,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomContentPositionMigrationProfilesResult result = Parse(profiles.bytes, true);
             AssertSuccess(result);
             Assert.That(RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
-                result.Value, spatial).Success, Is.True);
+                result.Value, spatial, SpatialLimits()).Success, Is.True);
             CollectionAssert.AreEqual(profiles.bytes, result.Value.CanonicalBytes);
             RoomContentPositionMigrationProfilesData data = result.Value.Value;
             Assert.That(data.Schema, Is.EqualTo(RoomContentPositionMigrationProfiles.SchemaId));
@@ -212,6 +212,69 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
         }
 
+        [TestCase(CardinalOrientation.Zero, 1, 0)]
+        [TestCase(CardinalOrientation.Ninety, 2, 1)]
+        [TestCase(CardinalOrientation.OneEighty, 2, 2)]
+        [TestCase(CardinalOrientation.TwoSeventy, 0, 2)]
+        public void SourceBoundaryReservedTilesMatchCanonicalRoomResolver(
+            CardinalOrientation orientation, int expectedX, int expectedY)
+        {
+            var room = new RoomSpatialDefinition
+            {
+                RoomDefinitionId = "spatial.room.synthetic_reserved",
+                GrossFootprint = new RectangularFootprintDefinition(4, 3),
+                ReservedTileOffsets = new[] { new TileCoordinate(1, 0) },
+                AllowedOrientations = new[] { orientation },
+                MonsterCapacity = 0,
+                TrapCapacity = 0,
+                LootCapacity = 0
+            };
+            SpatialValidationWorkloadLimits limits = SpatialLimits();
+            TileCoordinate[] resolved = room.ResolveReservedTiles(new TileCoordinate(0, 0),
+                orientation, limits);
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(expectedX, expectedY) }, resolved);
+
+            bool quarterTurn = orientation == CardinalOrientation.Ninety ||
+                orientation == CardinalOrientation.TwoSeventy;
+            var data = new RoomContentPositionMigrationProfilesData
+            {
+                Schema = RoomContentPositionMigrationProfiles.SchemaId,
+                SchemaVersion = RoomContentPositionMigrationProfiles.ContractVersion,
+                ProfileSetId = RoomContentPositionMigrationProfiles.ProductionProfileSetId,
+                ProfileSetVersion = RoomContentPositionMigrationProfiles.ContractVersion,
+                SourceSaveSchemaVersion =
+                    RoomContentPositionMigrationProfiles.FrozenSourceSaveSchemaVersion,
+                Profiles = new[]
+                {
+                    new RoomContentPositionMigrationProfile
+                    {
+                        ProfileId = "compat.room_content_position.schema_12.synthetic_reserved_" +
+                            (int)orientation,
+                        ProfileVersion = RoomContentPositionMigrationProfiles.ContractVersion,
+                        SourceSaveSchemaVersion =
+                            RoomContentPositionMigrationProfiles.FrozenSourceSaveSchemaVersion,
+                        RoomDefinitionId = room.RoomDefinitionId,
+                        Orientation = orientation,
+                        FrozenFootprint = new RectangularFootprintDefinition(
+                            quarterTurn ? 3 : 4, quarterTurn ? 4 : 3),
+                        FrozenReservedTileOffsets = resolved,
+                        CategoryCapacities = ZeroCapacities(),
+                        OrderedSlots = Array.Empty<RoomContentMigrationSlot>()
+                    }
+                }
+            };
+            data = RoomContentPositionMigrationProfiles.WithComputedIntegrity(data);
+            RoomContentPositionMigrationProfilesResult frozen = ParseData(data);
+            AssertSuccess(frozen);
+
+            SpatialContentCatalog catalog = spatial.Catalog;
+            catalog.Rooms = new[] { room };
+            var sourceBoundary = new ProductionSpatialContentSnapshot(spatial.Manifest,
+                catalog, spatial.Languages);
+            Assert.That(RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                frozen.Value, sourceBoundary, limits).Success, Is.True);
+        }
+
         [Test]
         public void ReservedTilesAndSyntheticMultiTileOccupancyUseExtensibleValidation()
         {
@@ -247,7 +310,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomContentPositionMigrationProfilesResult frozen = Parse(profiles.bytes, true);
             AssertSuccess(frozen);
             Assert.That(RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
-                frozen.Value, spatial).Success, Is.True);
+                frozen.Value, spatial, SpatialLimits()).Success, Is.True);
             byte[] canonicalBefore = frozen.Value.CanonicalBytes;
             string hashBefore = frozen.Value.Value.CanonicalHash;
             Assert.That(frozen.Value.TryGetProfile("spatial.room.basic", CardinalOrientation.Zero,
@@ -267,7 +330,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 mutatedCatalog, spatial.Languages);
             RoomContentPositionMigrationSourceBoundaryConformanceResult mismatch =
                 RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
-                    frozen.Value, mutatedSpatial);
+                    frozen.Value, mutatedSpatial, SpatialLimits());
             Assert.That(mismatch.Success, Is.False);
             Assert.That(mismatch.Diagnostics, Does.Contain(
                 RoomContentPositionMigrationProfileDiagnostic.InvalidCategoryCapacity));
@@ -405,7 +468,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertSuccess(frozen);
             RoomContentPositionMigrationSourceBoundaryConformanceResult conformance =
                 RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
-                    frozen.Value, spatial);
+                    frozen.Value, spatial, SpatialLimits());
             Assert.That(conformance.Success, Is.False);
             Assert.That(conformance.Diagnostics, Does.Contain(expected),
                 string.Join(",", conformance.Diagnostics.Select(value => value.ToString()).ToArray()));
@@ -443,6 +506,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static int Capacity(RoomContentPositionMigrationProfile profile, string category) =>
             profile.CategoryCapacities.Single(value => value.CategoryId == category).MaximumAssignments;
+
+        private SpatialValidationWorkloadLimits SpatialLimits() =>
+            new SpatialValidationWorkloadLimits(structuralLimits.MaximumMaterializedTiles);
+
+        private static RoomContentMigrationCategoryCapacity[] ZeroCapacities() => new[]
+        {
+            new RoomContentMigrationCategoryCapacity
+            {
+                CategoryId = CanonicalSpatialSaveContracts.MonsterCategoryId,
+                MaximumAssignments = 0
+            },
+            new RoomContentMigrationCategoryCapacity
+            {
+                CategoryId = CanonicalSpatialSaveContracts.TrapCategoryId,
+                MaximumAssignments = 0
+            },
+            new RoomContentMigrationCategoryCapacity
+            {
+                CategoryId = CanonicalSpatialSaveContracts.LootNodeCategoryId,
+                MaximumAssignments = 0
+            }
+        };
 
         private RoomContentPositionMigrationProfilesData Data() =>
             JsonUtility.FromJson<RoomContentPositionMigrationProfilesData>(profiles.text);

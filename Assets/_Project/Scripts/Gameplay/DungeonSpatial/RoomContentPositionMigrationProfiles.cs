@@ -394,7 +394,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         /// </summary>
         public static RoomContentPositionMigrationSourceBoundaryConformanceResult
             ValidateSourceBoundaryConformance(RoomContentPositionMigrationProfilesSnapshot frozen,
-                ProductionSpatialContentSnapshot sourceBoundary)
+                ProductionSpatialContentSnapshot sourceBoundary,
+                SpatialValidationWorkloadLimits spatialLimits)
         {
             var diagnostics = new SortedSet<RoomContentPositionMigrationProfileDiagnostic>();
             SpatialContentCatalog catalog = sourceBoundary?.Catalog;
@@ -403,11 +404,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
                 return new RoomContentPositionMigrationSourceBoundaryConformanceResult(diagnostics);
             }
+            if (!spatialLimits.IsValid)
+            {
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.WorkloadExceeded);
+                return new RoomContentPositionMigrationSourceBoundaryConformanceResult(diagnostics);
+            }
 
             RoomContentPositionMigrationProfile[] profiles = frozen.Value.Profiles ??
                 Array.Empty<RoomContentPositionMigrationProfile>();
             foreach (RoomContentPositionMigrationProfile profile in profiles.Where(value => value != null))
-                ValidateSourceBoundaryProfile(profile, catalog, diagnostics);
+                ValidateSourceBoundaryProfile(profile, catalog, spatialLimits, diagnostics);
 
             string[] required = catalog.Rooms.Where(value => value != null)
                 .SelectMany(room => (room.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
@@ -624,7 +630,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static void ValidateSourceBoundaryProfile(RoomContentPositionMigrationProfile profile,
-            SpatialContentCatalog catalog,
+            SpatialContentCatalog catalog, SpatialValidationWorkloadLimits spatialLimits,
             ISet<RoomContentPositionMigrationProfileDiagnostic> diagnostics)
         {
             RoomSpatialDefinition[] matches = catalog.Rooms.Where(value => value != null &&
@@ -648,8 +654,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (profile.FrozenFootprint == null || profile.FrozenFootprint.Width != width ||
                 profile.FrozenFootprint.Height != height)
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
-            if (!(profile.FrozenReservedTileOffsets ?? Array.Empty<TileCoordinate>())
-                .SequenceEqual(TransformReserved(room, profile.Orientation)))
+            if (room.ReservedTileOffsets == null ||
+                !spatialLimits.Allows(room.ReservedTileOffsets.LongLength))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.WorkloadExceeded);
+            else if (!(profile.FrozenReservedTileOffsets ?? Array.Empty<TileCoordinate>())
+                .SequenceEqual(room.ResolveReservedTiles(new TileCoordinate(0, 0),
+                    profile.Orientation, spatialLimits)))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
 
             var expectedCapacities = new Dictionary<string, int>(StringComparer.Ordinal)
@@ -685,26 +695,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
             }
             return true;
-        }
-
-        private static TileCoordinate[] TransformReserved(RoomSpatialDefinition room,
-            CardinalOrientation orientation)
-        {
-            if (room?.GrossFootprint == null) return Array.Empty<TileCoordinate>();
-            return (room.ReservedTileOffsets ?? Array.Empty<TileCoordinate>()).Select(offset =>
-            {
-                switch (orientation)
-                {
-                    case CardinalOrientation.Ninety:
-                        return new TileCoordinate(offset.Y, room.GrossFootprint.Width - 1 - offset.X);
-                    case CardinalOrientation.OneEighty:
-                        return new TileCoordinate(room.GrossFootprint.Width - 1 - offset.X,
-                            room.GrossFootprint.Height - 1 - offset.Y);
-                    case CardinalOrientation.TwoSeventy:
-                        return new TileCoordinate(room.GrossFootprint.Height - 1 - offset.Y, offset.X);
-                    default: return offset;
-                }
-            }).OrderBy(value => value).ToArray();
         }
 
         private static RoomContentPositionMigrationProfilesResult Finish(

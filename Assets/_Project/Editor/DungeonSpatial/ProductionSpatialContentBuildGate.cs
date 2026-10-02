@@ -159,7 +159,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
 
             RoomContentPositionMigrationSourceBoundaryConformanceResult conformance =
                 RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
-                    frozen.Value, spatial);
+                    frozen.Value, spatial,
+                    new SpatialValidationWorkloadLimits(structuralLimits.MaximumMaterializedTiles));
             return conformance.Success
                 ? Success()
                 : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
