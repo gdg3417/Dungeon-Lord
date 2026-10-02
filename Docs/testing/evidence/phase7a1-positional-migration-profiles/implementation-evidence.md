@@ -3,7 +3,7 @@
 ## Scope and baseline
 
 - Original baseline: `b87de8ef3cdb0dbc5eff1f926a11e9dc9073eb97` (merged PR #221).
-- Qualified implementation HEAD: `ad9397bf46f6ffa73b307941bd5231783efb8461` (evidence-only follow-up commit excluded).
+- Qualified correction implementation HEAD: `13af1bb79d914d88f11ec6fabba92481ca55cdb0` (evidence-only follow-up commit excluded).
 - Objective: freeze and validate schema-12 legacy room-content placement compatibility data without activating positional save state.
 - Compatibility asset: `Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json`.
 - Contract: `room_content_position_migration_profiles`, version 1, profile-set version 1.
@@ -12,9 +12,11 @@
 
 ## Architecture
 
-The source-controlled asset directly authors five room/orientation profiles. Strict UTF-8/JSON parsing, workload limits, exact canonical byte validation, per-profile SHA-256 integrity, whole-set SHA-256 integrity, production coverage validation, frozen footprint/reserved-tile/capacity checks, category compatibility, and extensible occupancy-footprint validation all fail closed. An immutable validated snapshot returns detached values. The pure planner accepts one validated profile and legacy assignments, reuses `CanonicalSpatialSaveContracts.CanonicalOrderAssignments`, and returns either a complete detached assignment-to-slot mapping or an empty failure result.
+The source-controlled asset directly authors five room/orientation profiles. `ParseAndValidateFrozen` performs intrinsic historical compatibility validation using only the profile bytes and their frozen schema identity, footprint, reserved tiles, category capacities, slots, occupancy, integrity metadata, and workload limits. Exact canonical byte validation, per-profile SHA-256 integrity, whole-set SHA-256 integrity, frozen bounds/reserved-tile/capacity checks, category compatibility, maximum-envelope validation, and extensible occupancy-footprint validation all fail closed without consulting the mutable production spatial catalog. An immutable validated snapshot returns detached values. The pure planner accepts one validated profile and legacy assignments, reuses `CanonicalSpatialSaveContracts.CanonicalOrderAssignments`, and returns either a complete detached assignment-to-slot mapping or an empty failure result.
 
-The explicit authoring operation uses the same `Canonicalize`, `ComputeProfileHash`, `ComputeSetHash`, and `SerializeCanonical` implementation used by validation. Repeated regeneration produced identical bytes and hashes. Validation never rewrites an asset. Future production tuning changes can make the frozen context fail validation but cannot silently choose different migration coordinates. Only the explicitly listed slots are authorized migration placement area; gross unreserved room tiles are not treated as automatically usable.
+`ValidateSourceBoundaryConformance` is a separate authoring-boundary operation. It compares an already intrinsically validated frozen snapshot with the current schema-12 production catalog for room/orientation coverage, oriented footprint, reserved tiles, and category capacities. `ProductionSpatialContentBuildGate` always performs intrinsic frozen validation, and performs this catalog conformance check only while `CanonicalSaveSchemaVersions.CurrentWritableTarget` equals the frozen source schema 12. Advancing the writable target therefore does not require historical schema-12 profiles to conform to later mutable room tuning.
+
+The explicit authoring operation uses the same `Canonicalize`, `ComputeProfileHash`, `ComputeSetHash`, and `SerializeCanonical` implementation used by validation. Repeated regeneration produced identical bytes and hashes. Validation never rewrites an asset. Future production tuning cannot alter intrinsic validity, canonical bytes, hashes, or assignment-to-slot mapping for identical schema-12 assignments; only an explicit schema-12 source-boundary conformance check reports that current tuning no longer matches the frozen authoring boundary. Only the explicitly listed slots are authorized migration placement area; gross unreserved room tiles are not treated as automatically usable.
 
 Canonical assignment order is:
 
@@ -40,7 +42,7 @@ All five frozen reserved-tile collections are empty, matching current production
 
 ## Exact authored migration slots
 
-Slot order below is the exact compatibility order in the source asset.
+Slot order below is the exact compatibility order in the source asset. The review correction did not change the compatibility asset, any slot identity, or any authored coordinate.
 
 ### Basic Zero
 
@@ -111,7 +113,9 @@ Slot order below is the exact compatibility order in the source asset.
 
 ## Failure and regression coverage
 
-Focused tests cover missing/empty/unreadable input, invalid UTF-8 and framing, malformed/unexpected JSON, wrong contract/profile/source versions, duplicate profile IDs and room/orientation pairs, unknown rooms, unsupported orientations, missing production coverage, frozen-context mismatch, capacity mismatch, insufficient slots, duplicate slot IDs/orders, invalid category compatibility, invalid/overlapping/out-of-footprint/reserved occupancy, integrity mismatch, input-size limits, deterministic canonicalization, input permutation, maximum envelopes, identity preservation, source immutability, and complete-or-failure planning.
+Focused tests cover missing/empty/unreadable input, invalid UTF-8 and framing, malformed/unexpected JSON, wrong contract/profile/source versions, duplicate profile IDs and room/orientation pairs, frozen-context mismatch, invalid frozen capacity data, insufficient slots, duplicate slot IDs/orders, invalid category compatibility, invalid/overlapping/out-of-footprint/reserved occupancy, integrity mismatch, input-size limits, deterministic canonicalization, input permutation, maximum envelopes, identity preservation, source immutability, and complete-or-failure planning. Separate source-boundary conformance tests cover unknown rooms, unsupported orientations, missing production coverage, and category-capacity drift.
+
+The mutable-catalog regression first validates and plans the committed frozen Basic/Zero maximum envelope, then changes the cloned current production catalog's Basic monster capacity. Source-boundary conformance detects `InvalidCategoryCapacity`, while intrinsic validation of the original bytes still succeeds with byte-identical canonical output and the same set hash. The same schema-12 assignments, including permuted input, receive the same slot IDs and coordinates. The build-gate helper rejects that mismatch when given writable target 12 and accepts the intrinsically valid historical profile when given writable target 13, demonstrating that later ordinary tuning cannot change or invalidate the frozen mapping after the source boundary advances.
 
 Save regressions confirm `CanonicalSaveSchemaVersions.CurrentWritableTarget == 12`, `SaveMigration.LatestSchemaVersion == 12`, the public `RoomContentAssignment` shape remains exactly `AssignmentId`, `RoomInstanceId`, `CategoryId`, `OptionId`, and `Sequence`, no schema-12-to-13 upgrade type exists, and `GameRoot`/`SaveService` do not reference the inactive profile owner. Existing schema-11-to-12 and schema-12 serialization/load/save behavior remain covered by the complete regression suites.
 
@@ -119,18 +123,18 @@ Save regressions confirm `CanonicalSaveSchemaVersions.CurrentWritableTarget == 1
 
 | Run | Total | Passed | Failed | Skipped |
 | --- | ---: | ---: | ---: | ---: |
-| Focused A1 EditMode | 13 | 13 | 0 | 0 |
+| Focused A1 EditMode | 15 | 15 | 0 | 0 |
 | Production spatial build-gate fixture | 59 | 59 | 0 | 0 |
-| Full EditMode | 1,315 | 1,315 | 0 | 0 |
+| Full EditMode | 1,317 | 1,317 | 0 | 0 |
 | Full PlayMode | 2,801 | 2,791 | 0 | 10 |
 
-The 10 PlayMode skips are existing environment-qualified cases: eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem fixture, and one Windows-player-only standalone qualification fixture. No A1 test was skipped. Unity emitted benign licensing-client signature/reconnect and shutdown debugger/thread messages; no compile or test error resulted.
+The 10 PlayMode skips are existing environment-qualified cases: eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem fixture, and one Windows-player-only standalone qualification fixture. No A1 test was skipped. Unity emitted benign licensing/reconnect and shutdown debugger/thread messages; no compile or test error resulted.
 
 ## Boundary confirmations
 
 - No live positional migration was activated and no schema 13 migration exists.
 - Historical schema-12 `RoomContentAssignment` and its serialized bytes remain non-positional.
-- Native schema-12 load/save does not require the new asset; only the production build gate validates it.
+- Native schema-12 load/save does not require the new asset. The production build gate validates the frozen asset intrinsically and, only while schema 12 remains writable, validates current source-boundary conformance.
 - Profile failure cannot mutate or rewrite an existing save.
 - No SaveService or GameRoot authority changed.
 - No placement, unassignment, redeployment, custody, mana, investment, layout, lifecycle, or activation behavior changed.
@@ -152,6 +156,6 @@ The 10 PlayMode skips are existing environment-qualified cases: eight synchronou
 
 ## Known limitations and next dependency
 
-A1 intentionally does not publish positions, migrate saves, change floor-knowledge fingerprints, or provide placement UI. Limited owner validation remains: clean import/compile, load an existing schema-12 save, exercise unchanged placement/unassignment/redeployment, save/reopen, confirm schema 12, and confirm no new positional/editor UI. A Windows standalone build is not required because runtime composition and player-facing behavior did not change.
+A1 intentionally does not publish positions, migrate saves, change floor-knowledge fingerprints, or provide placement UI. No owner manual testing was requested or performed for this focused correction. The previously documented limited owner validation remains available after external review: clean import/compile, load an existing schema-12 save, exercise unchanged placement/unassignment/redeployment, save/reopen, confirm schema 12, and confirm no new positional/editor UI. A Windows standalone build is not required because runtime composition and player-facing behavior did not change.
 
 Phase 7A2 remains required. It may begin only after A1 review, qualification, and merge, and must use these frozen profiles for the explicit schema-12-to-positional migration.
