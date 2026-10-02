@@ -119,15 +119,14 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 ProductionSpatialContentWorkloadLimitParser.Parse(limits);
             SaveSpatialMigrationLimitsLoadResult saveLimits = SaveSpatialMigrationLimitsLoader.Load(
                 AssetDatabase.LoadAssetAtPath<TextAsset>(SaveSpatialMigrationLimitsLoader.ProductionPath));
-            RoomContentPositionMigrationProfilesResult positionValidation = saveLimits.IsSuccess &&
-                parsedLimits.Success
-                ? RoomContentPositionMigrationProfiles.ParseAndValidate(positionProfiles, spatial.Value,
-                    parsedLimits.Limits, saveLimits.Profile.Canonical.Serialized, true)
-                : null;
-            if (positionValidation == null || !positionValidation.Success)
-                return Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
-                    positionValidation == null ? "Dependency" : StableDetail(null,
-                        positionValidation.Diagnostics));
+            ProductionSpatialBuildGateResult positionValidation = saveLimits.IsSuccess &&
+                parsedLimits.Success && spatial.Success
+                ? ValidatePositionMigrationProfiles(positionProfiles, spatial.Value,
+                    parsedLimits.Limits, saveLimits.Profile.Canonical.Serialized,
+                    CanonicalSaveSchemaVersions.CurrentWritableTarget)
+                : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
+                    "Dependency");
+            if (!positionValidation.Success) return positionValidation;
             const string architecture = "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
             if (!saveLimits.IsSuccess || !FloorConstructionProfileSnapshot.TryParse(
                     Resources.Load<TextAsset>(FloorConstructionProfileSnapshot.ProductionResourcePath), spatial.Value,
@@ -141,6 +140,30 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                     ProjectIds = new[] { research.ResearchId } }, research, profile) != null)
                 return Failure(ProductionSpatialBuildGateReason.InvalidFloorConstructionConfiguration, "FloorConstruction");
             return Success();
+        }
+
+        internal static ProductionSpatialBuildGateResult ValidatePositionMigrationProfiles(
+            TextAsset positionProfiles, ProductionSpatialContentSnapshot spatial,
+            SpatialContentValidationWorkloadLimits structuralLimits,
+            SpatialSerializedInputLimits serializedLimits, int currentWritableTarget)
+        {
+            RoomContentPositionMigrationProfilesResult frozen =
+                RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(positionProfiles,
+                    structuralLimits, serializedLimits, true);
+            if (!frozen.Success)
+                return Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
+                    "Frozen:" + StableDetail(null, frozen.Diagnostics));
+
+            if (currentWritableTarget != RoomContentPositionMigrationProfiles.FrozenSourceSaveSchemaVersion)
+                return Success();
+
+            RoomContentPositionMigrationSourceBoundaryConformanceResult conformance =
+                RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                    frozen.Value, spatial);
+            return conformance.Success
+                ? Success()
+                : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
+                    "SourceBoundary:" + StableDetail(null, conformance.Diagnostics));
         }
 
         internal static ProductionSpatialBuildGateResult ValidateComposition(string[] attemptedScenes)

@@ -102,6 +102,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RoomContentPositionMigrationProfileDiagnostic[] Diagnostics { get; }
     }
 
+    public sealed class RoomContentPositionMigrationSourceBoundaryConformanceResult
+    {
+        internal RoomContentPositionMigrationSourceBoundaryConformanceResult(
+            IEnumerable<RoomContentPositionMigrationProfileDiagnostic> diagnostics)
+        {
+            Diagnostics = (diagnostics ?? Enumerable.Empty<RoomContentPositionMigrationProfileDiagnostic>())
+                .Distinct().OrderBy(value => (int)value).ToArray();
+        }
+
+        public bool Success => Diagnostics.Length == 0;
+        public RoomContentPositionMigrationProfileDiagnostic[] Diagnostics { get; }
+    }
+
     public sealed class ValidatedRoomContentPositionMigrationProfile
     {
         private readonly RoomContentPositionMigrationProfile value;
@@ -282,16 +295,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             "compat.room_content_position.schema_12";
         private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
 
-        public static RoomContentPositionMigrationProfilesResult ParseAndValidate(
-            TextAsset asset, ProductionSpatialContentSnapshot spatial,
+        public static RoomContentPositionMigrationProfilesResult ParseAndValidateFrozen(
+            TextAsset asset,
             SpatialContentValidationWorkloadLimits structuralLimits,
             SpatialSerializedInputLimits serializedLimits,
-            bool enforceProductionReleasePolicy = false) => ParseAndValidate(
-                asset == null ? null : asset.bytes, spatial, structuralLimits, serializedLimits,
+            bool enforceProductionReleasePolicy = false) => ParseAndValidateFrozen(
+                asset == null ? null : asset.bytes, structuralLimits, serializedLimits,
                 enforceProductionReleasePolicy);
 
-        public static RoomContentPositionMigrationProfilesResult ParseAndValidate(
-            byte[] bytes, ProductionSpatialContentSnapshot spatial,
+        public static RoomContentPositionMigrationProfilesResult ParseAndValidateFrozen(
+            byte[] bytes,
             SpatialContentValidationWorkloadLimits structuralLimits,
             SpatialSerializedInputLimits serializedLimits,
             bool enforceProductionReleasePolicy = false)
@@ -367,12 +380,45 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomContentPositionMigrationProfilesData canonical = Canonicalize(parsed);
             if (!bytes.SequenceEqual(SerializeCanonical(canonical)))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.NoncanonicalInput);
-            Validate(canonical, spatial?.Catalog, structuralLimits, diagnostics,
+            ValidateFrozen(canonical, structuralLimits, diagnostics,
                 enforceProductionReleasePolicy);
             if (diagnostics.Count != 0)
                 return new RoomContentPositionMigrationProfilesResult(null, diagnostics);
             return new RoomContentPositionMigrationProfilesResult(
                 new RoomContentPositionMigrationProfilesSnapshot(canonical), diagnostics);
+        }
+
+        /// <summary>
+        /// Compares an intrinsically validated frozen schema boundary with the production catalog
+        /// being frozen at authoring time. Historical profile validity does not depend on this check.
+        /// </summary>
+        public static RoomContentPositionMigrationSourceBoundaryConformanceResult
+            ValidateSourceBoundaryConformance(RoomContentPositionMigrationProfilesSnapshot frozen,
+                ProductionSpatialContentSnapshot sourceBoundary)
+        {
+            var diagnostics = new SortedSet<RoomContentPositionMigrationProfileDiagnostic>();
+            SpatialContentCatalog catalog = sourceBoundary?.Catalog;
+            if (frozen == null || catalog?.Rooms == null)
+            {
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
+                return new RoomContentPositionMigrationSourceBoundaryConformanceResult(diagnostics);
+            }
+
+            RoomContentPositionMigrationProfile[] profiles = frozen.Value.Profiles ??
+                Array.Empty<RoomContentPositionMigrationProfile>();
+            foreach (RoomContentPositionMigrationProfile profile in profiles.Where(value => value != null))
+                ValidateSourceBoundaryProfile(profile, catalog, diagnostics);
+
+            string[] required = catalog.Rooms.Where(value => value != null)
+                .SelectMany(room => (room.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
+                    .Select(orientation => room.RoomDefinitionId + "\0" + (int)orientation))
+                .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            string[] actual = profiles.Where(value => value != null)
+                .Select(value => value.RoomDefinitionId + "\0" + (int)value.Orientation)
+                .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            if (!actual.SequenceEqual(required, StringComparer.Ordinal))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
+            return new RoomContentPositionMigrationSourceBoundaryConformanceResult(diagnostics);
         }
 
         public static RoomContentPositionMigrationProfilesData Canonicalize(
@@ -446,20 +492,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static bool IsOrdinaryCategory(string categoryId) =>
             CanonicalSpatialSaveContracts.ContentCategoryRank(categoryId) < 3;
 
-        private static void Validate(RoomContentPositionMigrationProfilesData data,
-            SpatialContentCatalog catalog, SpatialContentValidationWorkloadLimits limits,
+        private static void ValidateFrozen(RoomContentPositionMigrationProfilesData data,
+            SpatialContentValidationWorkloadLimits limits,
             ISet<RoomContentPositionMigrationProfileDiagnostic> diagnostics,
             bool enforceProductionReleasePolicy)
         {
-            if (data == null || catalog?.Rooms == null)
+            if (data == null)
             {
-                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidJson);
                 return;
             }
             if (!ValidHash(data.CanonicalHash) || data.CanonicalHash != ComputeSetHash(data))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidHash);
             RoomContentPositionMigrationProfile[] profiles = data.Profiles ??
                 Array.Empty<RoomContentPositionMigrationProfile>();
+            if (profiles.Length == 0)
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
             if (profiles.Any(value => value == null))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidJson);
             if (profiles.Where(value => value != null).GroupBy(value => value.ProfileId,
@@ -471,24 +519,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.DuplicateRoomOrientation);
 
             foreach (RoomContentPositionMigrationProfile profile in profiles.Where(value => value != null))
-                ValidateProfile(profile, catalog, limits, diagnostics, enforceProductionReleasePolicy);
-
-            if (enforceProductionReleasePolicy)
-            {
-                string[] required = catalog.Rooms.Where(value => value != null)
-                    .SelectMany(room => (room.AllowedOrientations ?? Array.Empty<CardinalOrientation>())
-                        .Select(orientation => room.RoomDefinitionId + "\0" + (int)orientation))
-                    .OrderBy(value => value, StringComparer.Ordinal).ToArray();
-                string[] actual = profiles.Where(value => value != null)
-                    .Select(value => value.RoomDefinitionId + "\0" + (int)value.Orientation)
-                    .OrderBy(value => value, StringComparer.Ordinal).ToArray();
-                if (!actual.SequenceEqual(required, StringComparer.Ordinal))
-                    diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
-            }
+                ValidateFrozenProfile(profile, limits, diagnostics, enforceProductionReleasePolicy);
         }
 
-        private static void ValidateProfile(RoomContentPositionMigrationProfile profile,
-            SpatialContentCatalog catalog, SpatialContentValidationWorkloadLimits limits,
+        private static void ValidateFrozenProfile(RoomContentPositionMigrationProfile profile,
+            SpatialContentValidationWorkloadLimits limits,
             ISet<RoomContentPositionMigrationProfileDiagnostic> diagnostics,
             bool enforceProductionReleasePolicy)
         {
@@ -501,54 +536,46 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 profile.CanonicalHash != ComputeProfileHash(profile))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidHash);
 
-            RoomSpatialDefinition[] matches = catalog.Rooms.Where(value => value != null &&
-                value.RoomDefinitionId == profile.RoomDefinitionId).Take(2).ToArray();
-            if (matches.Length != 1)
-            {
-                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
-                return;
-            }
-            RoomSpatialDefinition room = matches[0];
-            if (!Enum.IsDefined(typeof(CardinalOrientation), profile.Orientation) ||
-                room.AllowedOrientations == null || !room.AllowedOrientations.Contains(profile.Orientation))
+            if (!Enum.IsDefined(typeof(CardinalOrientation), profile.Orientation))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnsupportedOrientation);
-            int width = profile.Orientation == CardinalOrientation.Ninety ||
-                profile.Orientation == CardinalOrientation.TwoSeventy
-                    ? room.GrossFootprint?.Height ?? 0 : room.GrossFootprint?.Width ?? 0;
-            int height = profile.Orientation == CardinalOrientation.Ninety ||
-                profile.Orientation == CardinalOrientation.TwoSeventy
-                    ? room.GrossFootprint?.Width ?? 0 : room.GrossFootprint?.Height ?? 0;
-            if (profile.FrozenFootprint == null || profile.FrozenFootprint.Width != width ||
-                profile.FrozenFootprint.Height != height || (long)width * height >
-                limits.MaximumMaterializedTiles)
+            int width = profile.FrozenFootprint?.Width ?? 0;
+            int height = profile.FrozenFootprint?.Height ?? 0;
+            if (width <= 0 || height <= 0 || (long)width * height > limits.MaximumMaterializedTiles)
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
 
-            TileCoordinate[] expectedReserved = TransformReserved(room, profile.Orientation);
             TileCoordinate[] frozenReserved = profile.FrozenReservedTileOffsets ??
                 Array.Empty<TileCoordinate>();
-            if (!frozenReserved.SequenceEqual(expectedReserved) ||
+            if (frozenReserved.LongLength > limits.MaximumMaterializedTiles ||
                 frozenReserved.Distinct().Count() != frozenReserved.Length)
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
+            if (frozenReserved.Any(value => value.X < 0 || value.Y < 0 ||
+                    value.X >= width || value.Y >= height))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.OutOfFootprint);
 
             RoomContentMigrationCategoryCapacity[] capacities = profile.CategoryCapacities ??
                 Array.Empty<RoomContentMigrationCategoryCapacity>();
-            var expectedCapacities = new Dictionary<string, int>(StringComparer.Ordinal)
-            {
-                { CanonicalSpatialSaveContracts.MonsterCategoryId, room.MonsterCapacity },
-                { CanonicalSpatialSaveContracts.TrapCategoryId, room.TrapCapacity },
-                { CanonicalSpatialSaveContracts.LootNodeCategoryId, room.LootCapacity }
+            string[] requiredCategories = {
+                CanonicalSpatialSaveContracts.MonsterCategoryId,
+                CanonicalSpatialSaveContracts.TrapCategoryId,
+                CanonicalSpatialSaveContracts.LootNodeCategoryId
             };
-            if (capacities.Any(value => value == null || !IsOrdinaryCategory(value.CategoryId) ||
-                    value.MaximumAssignments < 0) || capacities.GroupBy(value => value?.CategoryId,
-                    StringComparer.Ordinal).Any(group => group.Count() != 1) ||
-                capacities.Length != expectedCapacities.Count || capacities.Any(value =>
-                    !expectedCapacities.TryGetValue(value.CategoryId, out int expected) ||
-                    expected != value.MaximumAssignments))
+            bool capacitiesValid = !capacities.Any(value => value == null ||
+                    !IsOrdinaryCategory(value.CategoryId) || value.MaximumAssignments < 0) &&
+                !capacities.GroupBy(value => value?.CategoryId, StringComparer.Ordinal)
+                    .Any(group => group.Count() != 1) &&
+                capacities.Select(value => value?.CategoryId).SequenceEqual(requiredCategories,
+                    StringComparer.Ordinal);
+            if (!capacitiesValid)
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidCategoryCapacity);
+            long maximumEnvelope = capacities.Where(value => value != null &&
+                    value.MaximumAssignments >= 0).Sum(value => (long)value.MaximumAssignments);
+            if (maximumEnvelope > limits.MaximumMaterializedTiles)
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.WorkloadExceeded);
 
             RoomContentMigrationSlot[] slots = profile.OrderedSlots ??
                 Array.Empty<RoomContentMigrationSlot>();
-            if (slots.Length != expectedCapacities.Values.Sum())
+            if (slots.LongLength > limits.MaximumMaterializedTiles ||
+                slots.LongLength != maximumEnvelope)
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InsufficientSlots);
             if (slots.Any(value => value == null || !Stable(value.SlotId)))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidStableId);
@@ -591,8 +618,52 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.SlotOverlap);
                 }
             }
-            if (!CanMapMaximumEnvelope(capacities, slots))
+            if (capacitiesValid && maximumEnvelope <= limits.MaximumMaterializedTiles &&
+                !CanMapMaximumEnvelope(capacities, slots))
                 diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InsufficientSlots);
+        }
+
+        private static void ValidateSourceBoundaryProfile(RoomContentPositionMigrationProfile profile,
+            SpatialContentCatalog catalog,
+            ISet<RoomContentPositionMigrationProfileDiagnostic> diagnostics)
+        {
+            RoomSpatialDefinition[] matches = catalog.Rooms.Where(value => value != null &&
+                value.RoomDefinitionId == profile.RoomDefinitionId).Take(2).ToArray();
+            if (matches.Length != 1)
+            {
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
+                return;
+            }
+
+            RoomSpatialDefinition room = matches[0];
+            if (room.AllowedOrientations == null ||
+                !room.AllowedOrientations.Contains(profile.Orientation))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.UnsupportedOrientation);
+            int width = profile.Orientation == CardinalOrientation.Ninety ||
+                profile.Orientation == CardinalOrientation.TwoSeventy
+                    ? room.GrossFootprint?.Height ?? 0 : room.GrossFootprint?.Width ?? 0;
+            int height = profile.Orientation == CardinalOrientation.Ninety ||
+                profile.Orientation == CardinalOrientation.TwoSeventy
+                    ? room.GrossFootprint?.Width ?? 0 : room.GrossFootprint?.Height ?? 0;
+            if (profile.FrozenFootprint == null || profile.FrozenFootprint.Width != width ||
+                profile.FrozenFootprint.Height != height)
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
+            if (!(profile.FrozenReservedTileOffsets ?? Array.Empty<TileCoordinate>())
+                .SequenceEqual(TransformReserved(room, profile.Orientation)))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.FrozenContextMismatch);
+
+            var expectedCapacities = new Dictionary<string, int>(StringComparer.Ordinal)
+            {
+                { CanonicalSpatialSaveContracts.MonsterCategoryId, room.MonsterCapacity },
+                { CanonicalSpatialSaveContracts.TrapCategoryId, room.TrapCapacity },
+                { CanonicalSpatialSaveContracts.LootNodeCategoryId, room.LootCapacity }
+            };
+            RoomContentMigrationCategoryCapacity[] capacities = profile.CategoryCapacities ??
+                Array.Empty<RoomContentMigrationCategoryCapacity>();
+            if (capacities.Length != expectedCapacities.Count || capacities.Any(value => value == null ||
+                    !expectedCapacities.TryGetValue(value.CategoryId, out int expected) ||
+                    expected != value.MaximumAssignments))
+                diagnostics.Add(RoomContentPositionMigrationProfileDiagnostic.InvalidCategoryCapacity);
         }
 
         private static bool CanMapMaximumEnvelope(

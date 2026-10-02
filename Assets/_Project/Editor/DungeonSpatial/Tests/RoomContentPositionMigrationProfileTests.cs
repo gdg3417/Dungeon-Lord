@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using DungeonBuilder.M0.Editor.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using UnityEditor;
@@ -46,6 +47,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             RoomContentPositionMigrationProfilesResult result = Parse(profiles.bytes, true);
             AssertSuccess(result);
+            Assert.That(RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                result.Value, spatial).Success, Is.True);
             CollectionAssert.AreEqual(profiles.bytes, result.Value.CanonicalBytes);
             RoomContentPositionMigrationProfilesData data = result.Value.Value;
             Assert.That(data.Schema, Is.EqualTo(RoomContentPositionMigrationProfiles.SchemaId));
@@ -131,7 +134,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 serializedLimits.MaximumParsedNodes, serializedLimits.MaximumCollectionRecords,
                 serializedLimits.MaximumStringCharacters, serializedLimits.MaximumDiagnostics);
             RoomContentPositionMigrationProfilesResult limited =
-                RoomContentPositionMigrationProfiles.ParseAndValidate(profiles.bytes, spatial,
+                RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(profiles.bytes,
                     structuralLimits, tooSmall, true);
             Assert.That(limited.Diagnostics, Does.Contain(
                 RoomContentPositionMigrationProfileDiagnostic.WorkloadExceeded));
@@ -159,7 +162,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void DuplicateUnknownCoverageCapacitySlotAndOccupancyStatesFailClosed()
+        public void DuplicateCapacitySlotAndOccupancyStatesFailClosedIntrinsically()
         {
             AssertSemantic(data =>
             {
@@ -172,12 +175,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 copy.ProfileId = "compat.room_content_position.schema_12.duplicate";
                 data.Profiles = data.Profiles.Concat(new[] { copy }).ToArray();
             }, RoomContentPositionMigrationProfileDiagnostic.DuplicateRoomOrientation);
-            AssertSemantic(data => data.Profiles[0].RoomDefinitionId = "spatial.room.unknown",
-                RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
-            AssertSemantic(data => data.Profiles[0].Orientation = CardinalOrientation.Ninety,
-                RoomContentPositionMigrationProfileDiagnostic.UnsupportedOrientation);
-            AssertSemantic(data => data.Profiles = data.Profiles.Skip(1).ToArray(),
-                RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
             AssertSemantic(data => data.Profiles[0].OrderedSlots =
                     data.Profiles[0].OrderedSlots.Take(5).ToArray(),
                 RoomContentPositionMigrationProfileDiagnostic.InsufficientSlots);
@@ -198,8 +195,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertSemantic(data => data.Profiles[0].OrderedSlots[1].Anchor =
                     data.Profiles[0].OrderedSlots[0].Anchor,
                 RoomContentPositionMigrationProfileDiagnostic.SlotOverlap);
-            AssertSemantic(data => data.Profiles[0].CategoryCapacities[0].MaximumAssignments++,
+            AssertSemantic(data => data.Profiles[0].CategoryCapacities[0].MaximumAssignments = -1,
                 RoomContentPositionMigrationProfileDiagnostic.InvalidCategoryCapacity);
+        }
+
+        [Test]
+        public void SourceBoundaryConformanceRejectsUnknownOrientationAndCoverageDrift()
+        {
+            AssertSourceBoundaryMutation(data =>
+                    data.Profiles[0].RoomDefinitionId = "spatial.room.unknown",
+                RoomContentPositionMigrationProfileDiagnostic.UnknownRoom);
+            AssertSourceBoundaryMutation(data =>
+                    data.Profiles[0].Orientation = CardinalOrientation.Ninety,
+                RoomContentPositionMigrationProfileDiagnostic.UnsupportedOrientation);
+            AssertSourceBoundaryMutation(data => data.Profiles = data.Profiles.Skip(1).ToArray(),
+                RoomContentPositionMigrationProfileDiagnostic.MissingProductionCoverage);
         }
 
         [Test]
@@ -208,15 +218,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomContentPositionMigrationProfilesData reservedData = SingleBasic();
             reservedData.Profiles[0].FrozenReservedTileOffsets =
                 new[] { new TileCoordinate(1, 1) };
-            SpatialContentCatalog catalog = spatial.Catalog;
-            catalog.Rooms.Single(value => value.RoomDefinitionId == "spatial.room.basic")
-                .ReservedTileOffsets = new[] { new TileCoordinate(1, 1) };
-            var reservedSpatial = new ProductionSpatialContentSnapshot(spatial.Manifest, catalog,
-                spatial.Languages);
             reservedData = RoomContentPositionMigrationProfiles.WithComputedIntegrity(reservedData);
             RoomContentPositionMigrationProfilesResult reserved =
-                RoomContentPositionMigrationProfiles.ParseAndValidate(
-                    RoomContentPositionMigrationProfiles.SerializeCanonical(reservedData), reservedSpatial,
+                RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(
+                    RoomContentPositionMigrationProfiles.SerializeCanonical(reservedData),
                     structuralLimits, serializedLimits);
             Assert.That(reserved.Diagnostics, Does.Contain(
                 RoomContentPositionMigrationProfileDiagnostic.ReservedTileOverlap));
@@ -234,6 +239,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
             multi = RoomContentPositionMigrationProfiles.WithComputedIntegrity(multi);
             Assert.That(ParseData(multi).Diagnostics, Does.Contain(
                 RoomContentPositionMigrationProfileDiagnostic.SlotOverlap));
+        }
+
+        [Test]
+        public void LaterMutableCatalogDriftCannotChangeFrozenBytesHashOrMapping()
+        {
+            RoomContentPositionMigrationProfilesResult frozen = Parse(profiles.bytes, true);
+            AssertSuccess(frozen);
+            Assert.That(RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                frozen.Value, spatial).Success, Is.True);
+            byte[] canonicalBefore = frozen.Value.CanonicalBytes;
+            string hashBefore = frozen.Value.Value.CanonicalHash;
+            Assert.That(frozen.Value.TryGetProfile("spatial.room.basic", CardinalOrientation.Zero,
+                out ValidatedRoomContentPositionMigrationProfile profileBefore), Is.True);
+            RoomContentPositionMigrationProfile basic = frozen.Value.Value.Profiles.Single(value =>
+                value.RoomDefinitionId == "spatial.room.basic" &&
+                value.Orientation == CardinalOrientation.Zero);
+            RoomContentAssignment[] assignments = MaximumAssignments(basic, "room.instance.01");
+            RoomContentPositionMigrationPlanResult planBefore =
+                RoomContentPositionMigrationPlanner.Plan(profileBefore, "room.instance.01", assignments);
+            Assert.That(planBefore.Success, Is.True);
+
+            SpatialContentCatalog mutatedCatalog = spatial.Catalog;
+            mutatedCatalog.Rooms.Single(value =>
+                value.RoomDefinitionId == "spatial.room.basic").MonsterCapacity++;
+            var mutatedSpatial = new ProductionSpatialContentSnapshot(spatial.Manifest,
+                mutatedCatalog, spatial.Languages);
+            RoomContentPositionMigrationSourceBoundaryConformanceResult mismatch =
+                RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                    frozen.Value, mutatedSpatial);
+            Assert.That(mismatch.Success, Is.False);
+            Assert.That(mismatch.Diagnostics, Does.Contain(
+                RoomContentPositionMigrationProfileDiagnostic.InvalidCategoryCapacity));
+
+            RoomContentPositionMigrationProfilesResult frozenAgain = Parse(profiles.bytes, true);
+            AssertSuccess(frozenAgain);
+            CollectionAssert.AreEqual(canonicalBefore, frozenAgain.Value.CanonicalBytes);
+            Assert.That(frozenAgain.Value.Value.CanonicalHash, Is.EqualTo(hashBefore));
+            Assert.That(frozenAgain.Value.TryGetProfile("spatial.room.basic", CardinalOrientation.Zero,
+                out ValidatedRoomContentPositionMigrationProfile profileAfter), Is.True);
+            RoomContentPositionMigrationPlanResult planAfter =
+                RoomContentPositionMigrationPlanner.Plan(profileAfter, "room.instance.01",
+                    assignments.Reverse());
+            Assert.That(planAfter.Success, Is.True);
+            CollectionAssert.AreEqual(planBefore.Entries.Select(EntryIdentity).ToArray(),
+                planAfter.Entries.Select(EntryIdentity).ToArray());
+
+            Assert.That(ProductionSpatialContentBuildGate.ValidatePositionMigrationProfiles(
+                profiles, mutatedSpatial, structuralLimits, serializedLimits, 12).Success, Is.False);
+            Assert.That(ProductionSpatialContentBuildGate.ValidatePositionMigrationProfiles(
+                profiles, mutatedSpatial, structuralLimits, serializedLimits, 13).Success, Is.True);
         }
 
         [Test]
@@ -318,7 +373,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private RoomContentPositionMigrationProfilesResult Parse(byte[] bytes, bool release = false) =>
-            RoomContentPositionMigrationProfiles.ParseAndValidate(bytes, spatial, structuralLimits,
+            RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(bytes, structuralLimits,
                 serializedLimits, release);
 
         private RoomContentPositionMigrationProfilesResult ParseData(
@@ -337,6 +392,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Success, Is.False);
             Assert.That(result.Diagnostics, Does.Contain(expected),
                 string.Join(",", result.Diagnostics.Select(value => value.ToString()).ToArray()));
+        }
+
+        private void AssertSourceBoundaryMutation(
+            Action<RoomContentPositionMigrationProfilesData> mutation,
+            RoomContentPositionMigrationProfileDiagnostic expected)
+        {
+            RoomContentPositionMigrationProfilesData data = Data();
+            mutation(data);
+            data = RoomContentPositionMigrationProfiles.WithComputedIntegrity(data);
+            RoomContentPositionMigrationProfilesResult frozen = ParseData(data, true);
+            AssertSuccess(frozen);
+            RoomContentPositionMigrationSourceBoundaryConformanceResult conformance =
+                RoomContentPositionMigrationProfiles.ValidateSourceBoundaryConformance(
+                    frozen.Value, spatial);
+            Assert.That(conformance.Success, Is.False);
+            Assert.That(conformance.Diagnostics, Does.Contain(expected),
+                string.Join(",", conformance.Diagnostics.Select(value => value.ToString()).ToArray()));
         }
 
         private void AssertFailure(byte[] bytes, RoomContentPositionMigrationProfileDiagnostic expected)
