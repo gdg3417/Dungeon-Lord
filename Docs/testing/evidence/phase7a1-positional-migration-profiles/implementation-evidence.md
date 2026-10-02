@@ -156,6 +156,16 @@ The 10 PlayMode skips are existing environment-qualified cases: eight synchronou
 
 ## Known limitations and next dependency
 
-A1 intentionally does not publish positions, migrate saves, change floor-knowledge fingerprints, or provide placement UI. No owner manual testing was requested or performed for this focused correction. The previously documented limited owner validation remains available after external review: clean import/compile, load an existing schema-12 save, exercise unchanged placement/unassignment/redeployment, save/reopen, confirm schema 12, and confirm no new positional/editor UI. A Windows standalone build is not required because runtime composition and player-facing behavior did not change.
+A1 intentionally does not publish positions, migrate saves, change floor-knowledge fingerprints, or provide placement UI.
+
+## Owner manual Unity qualification
+
+The project owner completed manual qualification in Unity 6000.3.2f1 using an intentionally preserved existing schema-12 save. Clean MVP Validation Reset was not used: the pre-existing constructed Floor 2 was retained because a fresh save cannot currently recreate the required research-unlocked Floor 2 state through player controls.
+
+The project imported and compiled without new errors. The existing schema-12 save loaded normally, the existing Floor 2 state survived load/save/full Unity close/reopen, and ordinary room-content placement remained unchanged. No positional-placement controls, coordinates, graphical-editor controls, or other A1 UI appeared.
+
+Selected room content could be returned to custody with mana unchanged; returned owned content redeployed for free where expected. Invalid placement/redeployment operations remained fail-closed, with no duplicate, lost, or partially applied state. Intentional state changes persisted through reopen, and post-reopen unassignment/redeployment behavior remained identity-safe and correct. No migration error or new relevant Console error was observed.
+
+A Windows standalone build was not required for this inactive packet because it changes neither runtime composition nor player-facing functionality.
 
 Phase 7A2 remains required. It may begin only after A1 review, qualification, and merge, and must use these frozen profiles for the explicit schema-12-to-positional migration.
