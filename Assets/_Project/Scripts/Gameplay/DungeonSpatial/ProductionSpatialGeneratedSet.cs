@@ -382,7 +382,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 elementType == typeof(CompatibilityLayoutGeometryRecord) ||
                 elementType == typeof(SpatialMigrationCompatibilityProfile) ||
                 elementType == typeof(CanonicalStarterLayoutProfile) ||
-                elementType == typeof(CanonicalLayoutContractSelection));
+                elementType == typeof(CanonicalLayoutContractSelection) ||
+                elementType == typeof(RoomContentPositionMigrationProfile));
             return topLevel
                 ? TryAdd(ref topLevelRecords, 1L, limits.MaximumTopLevelRecords)
                 : TryAdd(ref nestedRecords, 1L, limits.MaximumNestedRecords);

@@ -1,0 +1,869 @@
+{
+    "Schema": "room_content_position_migration_profiles",
+    "SchemaVersion": 1,
+    "ProfileSetId": "compat.room_content_position.schema_12",
+    "ProfileSetVersion": 1,
+    "SourceSaveSchemaVersion": 12,
+    "CanonicalHash": "28908184ae1b61653a6bc071aa1c9e465f59960e42bd3b2f8c5a78856b043ffc",
+    "Profiles": [
+        {
+            "ProfileId": "compat.room_content_position.schema_12.basic.zero",
+            "ProfileVersion": 1,
+            "CanonicalHash": "000590a8ffd6c3f368ba7b11722966db406d0ab653bed359f924866c5266c327",
+            "SourceSaveSchemaVersion": 12,
+            "RoomDefinitionId": "spatial.room.basic",
+            "Orientation": 0,
+            "FrozenFootprint": {
+                "Width": 4,
+                "Height": 4
+            },
+            "FrozenReservedTileOffsets": [],
+            "CategoryCapacities": [
+                {
+                    "CategoryId": "placement.category.monster",
+                    "MaximumAssignments": 2
+                },
+                {
+                    "CategoryId": "placement.category.trap",
+                    "MaximumAssignments": 2
+                },
+                {
+                    "CategoryId": "placement.category.loot_node",
+                    "MaximumAssignments": 2
+                }
+            ],
+            "OrderedSlots": [
+                {
+                    "SlotId": "monster.00",
+                    "Order": 0,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.01",
+                    "Order": 1,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.00",
+                    "Order": 2,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.01",
+                    "Order": 3,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.00",
+                    "Order": 4,
+                    "Anchor": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.01",
+                    "Order": 5,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ProfileId": "compat.room_content_position.schema_12.large_chamber.zero",
+            "ProfileVersion": 1,
+            "CanonicalHash": "30f54a8a95ab56bde72a33c4a59b06f3cd9690bd2d5a12b43ec0b1d65958f71f",
+            "SourceSaveSchemaVersion": 12,
+            "RoomDefinitionId": "spatial.room.large_chamber",
+            "Orientation": 0,
+            "FrozenFootprint": {
+                "Width": 5,
+                "Height": 6
+            },
+            "FrozenReservedTileOffsets": [],
+            "CategoryCapacities": [
+                {
+                    "CategoryId": "placement.category.monster",
+                    "MaximumAssignments": 4
+                },
+                {
+                    "CategoryId": "placement.category.trap",
+                    "MaximumAssignments": 4
+                },
+                {
+                    "CategoryId": "placement.category.loot_node",
+                    "MaximumAssignments": 4
+                }
+            ],
+            "OrderedSlots": [
+                {
+                    "SlotId": "monster.00",
+                    "Order": 0,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.01",
+                    "Order": 1,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.02",
+                    "Order": 2,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.03",
+                    "Order": 3,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.00",
+                    "Order": 4,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.01",
+                    "Order": 5,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.02",
+                    "Order": 6,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.03",
+                    "Order": 7,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.00",
+                    "Order": 8,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.01",
+                    "Order": 9,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 4
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.02",
+                    "Order": 10,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 4
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.03",
+                    "Order": 11,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 4
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ProfileId": "compat.room_content_position.schema_12.large_chamber.ninety",
+            "ProfileVersion": 1,
+            "CanonicalHash": "411dd48aa657ad1be37ff45d491066988117583fcd7cb6da4acd7e5dfe41b916",
+            "SourceSaveSchemaVersion": 12,
+            "RoomDefinitionId": "spatial.room.large_chamber",
+            "Orientation": 1,
+            "FrozenFootprint": {
+                "Width": 6,
+                "Height": 5
+            },
+            "FrozenReservedTileOffsets": [],
+            "CategoryCapacities": [
+                {
+                    "CategoryId": "placement.category.monster",
+                    "MaximumAssignments": 4
+                },
+                {
+                    "CategoryId": "placement.category.trap",
+                    "MaximumAssignments": 4
+                },
+                {
+                    "CategoryId": "placement.category.loot_node",
+                    "MaximumAssignments": 4
+                }
+            ],
+            "OrderedSlots": [
+                {
+                    "SlotId": "monster.00",
+                    "Order": 0,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.01",
+                    "Order": 1,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.02",
+                    "Order": 2,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.03",
+                    "Order": 3,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.00",
+                    "Order": 4,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.01",
+                    "Order": 5,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.02",
+                    "Order": 6,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.03",
+                    "Order": 7,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.00",
+                    "Order": 8,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.01",
+                    "Order": 9,
+                    "Anchor": {
+                        "X": 4,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.02",
+                    "Order": 10,
+                    "Anchor": {
+                        "X": 4,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.03",
+                    "Order": 11,
+                    "Anchor": {
+                        "X": 4,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ProfileId": "compat.room_content_position.schema_12.rectangle.zero",
+            "ProfileVersion": 1,
+            "CanonicalHash": "9c6b0c4f1627f35952dd169eff494555414a7e4161d77b4dc20bbb6194fdf5e9",
+            "SourceSaveSchemaVersion": 12,
+            "RoomDefinitionId": "spatial.room.rectangle",
+            "Orientation": 0,
+            "FrozenFootprint": {
+                "Width": 3,
+                "Height": 5
+            },
+            "FrozenReservedTileOffsets": [],
+            "CategoryCapacities": [
+                {
+                    "CategoryId": "placement.category.monster",
+                    "MaximumAssignments": 3
+                },
+                {
+                    "CategoryId": "placement.category.trap",
+                    "MaximumAssignments": 1
+                },
+                {
+                    "CategoryId": "placement.category.loot_node",
+                    "MaximumAssignments": 2
+                }
+            ],
+            "OrderedSlots": [
+                {
+                    "SlotId": "monster.00",
+                    "Order": 0,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.01",
+                    "Order": 1,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.02",
+                    "Order": 2,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.00",
+                    "Order": 3,
+                    "Anchor": {
+                        "X": 0,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.00",
+                    "Order": 4,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.01",
+                    "Order": 5,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 3
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ProfileId": "compat.room_content_position.schema_12.rectangle.ninety",
+            "ProfileVersion": 1,
+            "CanonicalHash": "b2fc1cf785be4466d985a8215493706cfda04f2aa6c7e29e980c55b4891f4496",
+            "SourceSaveSchemaVersion": 12,
+            "RoomDefinitionId": "spatial.room.rectangle",
+            "Orientation": 1,
+            "FrozenFootprint": {
+                "Width": 5,
+                "Height": 3
+            },
+            "FrozenReservedTileOffsets": [],
+            "CategoryCapacities": [
+                {
+                    "CategoryId": "placement.category.monster",
+                    "MaximumAssignments": 3
+                },
+                {
+                    "CategoryId": "placement.category.trap",
+                    "MaximumAssignments": 1
+                },
+                {
+                    "CategoryId": "placement.category.loot_node",
+                    "MaximumAssignments": 2
+                }
+            ],
+            "OrderedSlots": [
+                {
+                    "SlotId": "monster.00",
+                    "Order": 0,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.01",
+                    "Order": 1,
+                    "Anchor": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "monster.02",
+                    "Order": 2,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 1
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.monster"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "trap.00",
+                    "Order": 3,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 2
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.trap"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.00",
+                    "Order": 4,
+                    "Anchor": {
+                        "X": 1,
+                        "Y": 0
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                },
+                {
+                    "SlotId": "loot.01",
+                    "Order": 5,
+                    "Anchor": {
+                        "X": 3,
+                        "Y": 0
+                    },
+                    "AllowedCategoryIds": [
+                        "placement.category.loot_node"
+                    ],
+                    "OccupiedTileOffsets": [
+                        {
+                            "X": 0,
+                            "Y": 0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
