@@ -29,7 +29,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         InvalidBuildSceneComposition = 12,
         InvalidCompatibilityProfile = 13,
         UnauthorizedActiveCompatibilitySelection = 14,
-        InvalidFloorConstructionConfiguration = 15
+        InvalidFloorConstructionConfiguration = 15,
+        InvalidRoomContentPositionMigrationProfiles = 16
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -94,7 +95,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             ProductionSpatialBuildGateResult paths = ValidateRequiredPaths(
                 ProductionSpatialGeneratedSetParser.RequiredPaths
                     .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath,
-                        SpatialLayoutCompatibilityProfiles.ProductionPath }), File.Exists);
+                        SpatialLayoutCompatibilityProfiles.ProductionPath,
+                        RoomContentPositionMigrationProfiles.ProductionPath }), File.Exists);
             if (!paths.Success) return paths;
 
             TextAsset manifest = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.ManifestPath);
@@ -102,7 +104,10 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             TextAsset english = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.EnglishPath);
             TextAsset limits = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialContentPublicationService.LimitsPath);
             TextAsset compatibility = AssetDatabase.LoadAssetAtPath<TextAsset>(SpatialLayoutCompatibilityProfiles.ProductionPath);
-            if (manifest == null || catalog == null || english == null || limits == null || compatibility == null)
+            TextAsset positionProfiles = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                RoomContentPositionMigrationProfiles.ProductionPath);
+            if (manifest == null || catalog == null || english == null || limits == null || compatibility == null ||
+                positionProfiles == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, "AssetDatabaseImport");
 
             ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
@@ -110,8 +115,19 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             ProductionSpatialBuildGateResult retained = ValidateCompatibility(compatibility, manifest, catalog, new[] { english }, limits);
             if (!retained.Success) return retained;
             ProductionSpatialContentLoadResult spatial = ProductionSpatialContentLoader.Load(manifest, catalog, new[] { english }, limits);
+            ProductionSpatialContentWorkloadLimitParseResult parsedLimits =
+                ProductionSpatialContentWorkloadLimitParser.Parse(limits);
             SaveSpatialMigrationLimitsLoadResult saveLimits = SaveSpatialMigrationLimitsLoader.Load(
                 AssetDatabase.LoadAssetAtPath<TextAsset>(SaveSpatialMigrationLimitsLoader.ProductionPath));
+            RoomContentPositionMigrationProfilesResult positionValidation = saveLimits.IsSuccess &&
+                parsedLimits.Success
+                ? RoomContentPositionMigrationProfiles.ParseAndValidate(positionProfiles, spatial.Value,
+                    parsedLimits.Limits, saveLimits.Profile.Canonical.Serialized, true)
+                : null;
+            if (positionValidation == null || !positionValidation.Success)
+                return Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
+                    positionValidation == null ? "Dependency" : StableDetail(null,
+                        positionValidation.Diagnostics));
             const string architecture = "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
             if (!saveLimits.IsSuccess || !FloorConstructionProfileSnapshot.TryParse(
                     Resources.Load<TextAsset>(FloorConstructionProfileSnapshot.ProductionResourcePath), spatial.Value,

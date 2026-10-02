@@ -492,11 +492,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new FloorRoomContentState
             {
                 NextSequence = contents.NextSequence,
-                Assignments = (contents.Assignments ?? Array.Empty<RoomContentAssignment>()).Select(CopyAssignment)
-                    .OrderBy(value => value?.RoomInstanceId, StringComparer.Ordinal)
-                    .ThenBy(value => CategoryRank(value?.CategoryId)).ThenBy(value => value?.Sequence ?? 0L)
-                    .ThenBy(value => value?.AssignmentId, StringComparer.Ordinal)
-                    .ThenBy(value => value?.OptionId, StringComparer.Ordinal).ToArray(),
+                Assignments = CanonicalOrderAssignments((contents.Assignments ??
+                    Array.Empty<RoomContentAssignment>()).Select(CopyAssignment)),
                 RoomSemantics = (contents.RoomSemantics ?? Array.Empty<CanonicalRoomSemantics>()).Select(CopySemantics)
                     .OrderBy(value => value?.RoomInstanceId, StringComparer.Ordinal).ToArray()
             };
@@ -649,7 +646,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool OrdinalEqual(string left, string right) => string.Equals(left, right, StringComparison.Ordinal);
         private static void Add(ICollection<CanonicalSpatialSaveValidationIssue> issues, CanonicalSpatialSaveValidationIssue issue)
         { issues.Add(issue); }
-        private static int CategoryRank(string category) => category == MonsterCategoryId ? 0 : category == TrapCategoryId ? 1 : category == LootNodeCategoryId ? 2 : 3;
+        private static int CategoryRank(string category) => ContentCategoryRank(category);
+        internal static int ContentCategoryRank(string category) => category == MonsterCategoryId ? 0 :
+            category == TrapCategoryId ? 1 : category == LootNodeCategoryId ? 2 : 3;
+        internal static RoomContentAssignment[] CanonicalOrderAssignments(
+            IEnumerable<RoomContentAssignment> assignments) =>
+            (assignments ?? Enumerable.Empty<RoomContentAssignment>()).OrderBy(
+                value => value?.RoomInstanceId, StringComparer.Ordinal)
+                .ThenBy(value => ContentCategoryRank(value?.CategoryId))
+                .ThenBy(value => value?.Sequence ?? 0L)
+                .ThenBy(value => value?.AssignmentId, StringComparer.Ordinal)
+                .ThenBy(value => value?.OptionId, StringComparer.Ordinal).ToArray();
         private static bool IsPersistentId(string value)
         {
             if (string.IsNullOrEmpty(value)) return false;
