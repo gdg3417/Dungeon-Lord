@@ -3,7 +3,7 @@
 ## Scope and baseline
 
 - Original baseline: `b87de8ef3cdb0dbc5eff1f926a11e9dc9073eb97` (merged PR #221).
-- Qualified correction implementation HEAD: `13af1bb79d914d88f11ec6fabba92481ca55cdb0` (evidence-only follow-up commit excluded).
+- Qualified correction implementation HEAD: `bacd10a849057090690ea959da0f7e84edfcf44b` (evidence-only follow-up commit excluded).
 - Objective: freeze and validate schema-12 legacy room-content placement compatibility data without activating positional save state.
 - Compatibility asset: `Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json`.
 - Contract: `room_content_position_migration_profiles`, version 1, profile-set version 1.
@@ -14,7 +14,7 @@
 
 The source-controlled asset directly authors five room/orientation profiles. `ParseAndValidateFrozen` performs intrinsic historical compatibility validation using only the profile bytes and their frozen schema identity, footprint, reserved tiles, category capacities, slots, occupancy, integrity metadata, and workload limits. Exact canonical byte validation, per-profile SHA-256 integrity, whole-set SHA-256 integrity, frozen bounds/reserved-tile/capacity checks, category compatibility, maximum-envelope validation, and extensible occupancy-footprint validation all fail closed without consulting the mutable production spatial catalog. An immutable validated snapshot returns detached values. The pure planner accepts one validated profile and legacy assignments, reuses `CanonicalSpatialSaveContracts.CanonicalOrderAssignments`, and returns either a complete detached assignment-to-slot mapping or an empty failure result.
 
-`ValidateSourceBoundaryConformance` is a separate authoring-boundary operation. It compares an already intrinsically validated frozen snapshot with the current schema-12 production catalog for room/orientation coverage, oriented footprint, reserved tiles, and category capacities. `ProductionSpatialContentBuildGate` always performs intrinsic frozen validation, and performs this catalog conformance check only while `CanonicalSaveSchemaVersions.CurrentWritableTarget` equals the frozen source schema 12. Advancing the writable target therefore does not require historical schema-12 profiles to conform to later mutable room tuning.
+`ValidateSourceBoundaryConformance` is a separate authoring-boundary operation. It compares an already intrinsically validated frozen snapshot with the current schema-12 production catalog for room/orientation coverage, oriented footprint, reserved tiles, and category capacities. Reserved-tile comparison directly reuses `RoomSpatialDefinition.ResolveReservedTiles` with a bounded `SpatialValidationWorkloadLimits` derived from the production `MaximumMaterializedTiles` authority; A1 contains no duplicate orientation transform. `ProductionSpatialContentBuildGate` always performs intrinsic frozen validation, and performs this catalog conformance check only while `CanonicalSaveSchemaVersions.CurrentWritableTarget` equals the frozen source schema 12. Advancing the writable target therefore does not require historical schema-12 profiles to conform to later mutable room tuning.
 
 The explicit authoring operation uses the same `Canonicalize`, `ComputeProfileHash`, `ComputeSetHash`, and `SerializeCanonical` implementation used by validation. Repeated regeneration produced identical bytes and hashes. Validation never rewrites an asset. Future production tuning cannot alter intrinsic validity, canonical bytes, hashes, or assignment-to-slot mapping for identical schema-12 assignments; only an explicit schema-12 source-boundary conformance check reports that current tuning no longer matches the frozen authoring boundary. Only the explicitly listed slots are authorized migration placement area; gross unreserved room tiles are not treated as automatically usable.
 
@@ -42,7 +42,7 @@ All five frozen reserved-tile collections are empty, matching current production
 
 ## Exact authored migration slots
 
-Slot order below is the exact compatibility order in the source asset. The review correction did not change the compatibility asset, any slot identity, or any authored coordinate.
+Slot order below is the exact compatibility order in the source asset. The review corrections did not change the compatibility asset, any slot identity, any authored coordinate, any profile hash, or the whole-set hash. The asset Git blob remains `78e2520cdc286d88df44b71faa23de9aabcf63e5`.
 
 ### Basic Zero
 
@@ -113,7 +113,7 @@ Slot order below is the exact compatibility order in the source asset. The revie
 
 ## Failure and regression coverage
 
-Focused tests cover missing/empty/unreadable input, invalid UTF-8 and framing, malformed/unexpected JSON, wrong contract/profile/source versions, duplicate profile IDs and room/orientation pairs, frozen-context mismatch, invalid frozen capacity data, insufficient slots, duplicate slot IDs/orders, invalid category compatibility, invalid/overlapping/out-of-footprint/reserved occupancy, integrity mismatch, input-size limits, deterministic canonicalization, input permutation, maximum envelopes, identity preservation, source immutability, and complete-or-failure planning. Separate source-boundary conformance tests cover unknown rooms, unsupported orientations, missing production coverage, and category-capacity drift.
+Focused tests cover missing/empty/unreadable input, invalid UTF-8 and framing, malformed/unexpected JSON, wrong contract/profile/source versions, duplicate profile IDs and room/orientation pairs, frozen-context mismatch, invalid frozen capacity data, insufficient slots, duplicate slot IDs/orders, invalid category compatibility, invalid/overlapping/out-of-footprint/reserved occupancy, integrity mismatch, input-size limits, deterministic canonicalization, input permutation, maximum envelopes, identity preservation, source immutability, and complete-or-failure planning. Separate source-boundary conformance tests cover unknown rooms, unsupported orientations, missing production coverage, and category-capacity drift. A parameterized asymmetric reserved-tile regression uses source offset `(1,0)` in a `4 x 3` room and proves Zero `(1,0)`, Ninety `(2,1)`, OneEighty `(2,2)`, and TwoSeventy `(0,2)` agree exactly with `RoomSpatialDefinition.ResolveReservedTiles`.
 
 The mutable-catalog regression first validates and plans the committed frozen Basic/Zero maximum envelope, then changes the cloned current production catalog's Basic monster capacity. Source-boundary conformance detects `InvalidCategoryCapacity`, while intrinsic validation of the original bytes still succeeds with byte-identical canonical output and the same set hash. The same schema-12 assignments, including permuted input, receive the same slot IDs and coordinates. The build-gate helper rejects that mismatch when given writable target 12 and accepts the intrinsically valid historical profile when given writable target 13, demonstrating that later ordinary tuning cannot change or invalidate the frozen mapping after the source boundary advances.
 
@@ -123,9 +123,9 @@ Save regressions confirm `CanonicalSaveSchemaVersions.CurrentWritableTarget == 1
 
 | Run | Total | Passed | Failed | Skipped |
 | --- | ---: | ---: | ---: | ---: |
-| Focused A1 EditMode | 15 | 15 | 0 | 0 |
+| Focused A1 EditMode | 19 | 19 | 0 | 0 |
 | Production spatial build-gate fixture | 59 | 59 | 0 | 0 |
-| Full EditMode | 1,317 | 1,317 | 0 | 0 |
+| Full EditMode | 1,321 | 1,321 | 0 | 0 |
 | Full PlayMode | 2,801 | 2,791 | 0 | 10 |
 
 The 10 PlayMode skips are existing environment-qualified cases: eight synchronous EditMode-only GameRoot fixtures, one non-Windows inverse filesystem fixture, and one Windows-player-only standalone qualification fixture. No A1 test was skipped. Unity emitted benign licensing/reconnect and shutdown debugger/thread messages; no compile or test error resulted.
