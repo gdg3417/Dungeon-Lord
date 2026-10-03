@@ -44,7 +44,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             // Preserve the existing zero/one-room compatibility outcome when there are no
             // assignments to execute. SimulateOnce now uses the same authoritative roster and HP
             // model, so this path cannot reintroduce aggregate casualty authority.
-            if (snapshot == null && traversal == null && (route.Length == 0 || (route.Length == 1 && route[0].OrderedAssignments().Length == 0)))
+            if (snapshot == null && traversal == null && (route.Length == 0 || (route.Length == 1 &&
+                route[0].Spatial == null && route[0].OrderedAssignments().Length == 0)))
             {
                 MvpPlacementEffectsSummary effects = route.Length == 1
                     ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config)
@@ -62,6 +63,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
             RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
             var events = new List<RunEncounterEvent>();
+            var spatialEvents = new List<RunSpatialEvent>();
             var transitions = new List<FloorTransitionEvidence>();
             var objective = selectedObjective;
             bool deliberateExit = false;
@@ -113,8 +115,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 // Preserve the pre-Phase-5B one-room loot identity; multi-room identity is unchanged.
                 int roomSeed = route.Length == 1 && routeRoom.FloorIndex == 0 ? seed : DeriveRoomSeed(seed, routeRoom.FloorIndex, routeRoom.RoomIndex);
                 RunRoomAssignment[] assignments = routeRoom.OrderedAssignments();
-                if (assignments.Length == 0 && !(traversal != null && route.Length == 1))
+                if (assignments.Length == 0 && (routeRoom.Spatial != null || !(traversal != null && route.Length == 1)))
                 {
+                    if (routeRoom.Spatial != null)
+                        localEffects = ResolveSpatialRoom(routeRoom, party, events, spatialEvents,
+                            posture, manaAtStart, out _);
                     AddPlacementEffects(reachedEffects, localEffects);
                     rooms.Add(BuildEmptyRoomSummary(routeRoom, entrants, localEffects, roomSeed, generatedValue + (traversal?.Value ?? 0)));
                     if (traversal != null)
@@ -126,7 +131,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     continue;
                 }
 
-                hasActiveEncounter = true;
+                bool localActiveEncounter = routeRoom.Spatial == null;
                 RunCompositionOutcomeSummary composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
                 finalHeatPenalty = runtime.Heat * _config.HeatPenaltyPerPoint;
                 finalManaBonus = composition.EffectiveManaReserve * _config.ManaReserveBonusPerPoint;
@@ -137,7 +142,20 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var executed = new List<MvpDungeonPlacementEntry>();
                 if (routeRoom.IncludeRoomPlacement)
                     executed.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, routeRoom.RoomOptionId, 0));
-                foreach (RunRoomAssignment assignment in assignments)
+                if (routeRoom.Spatial != null)
+                {
+                    localEffects = ResolveSpatialRoom(routeRoom, party, events, spatialEvents,
+                        posture, manaAtStart, out pressure);
+                    composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
+                    localActiveEncounter = localEffects.ContributingOptionIds.Any(id =>
+                        MvpDungeonPlacementIds.TryGetCategoryForOption(id, out string category) &&
+                        category != MvpDungeonPlacementIds.RoomCategoryId);
+                    finalManaBonus = composition.EffectiveManaReserve * _config.ManaReserveBonusPerPoint;
+                    finalChance = Math.Max(0d, Math.Min(1d, _config.BaseSuccessChance - finalHeatPenalty +
+                        finalManaBonus - finalCrisisPenalty + composition.SuccessChanceDelta));
+                    cleared = (!localActiveEncounter || finalChance >= _config.SuccessThreshold) && !party.IsWiped;
+                }
+                else foreach (RunRoomAssignment assignment in assignments)
                 {
                     if (party.IsWiped) break;
                     if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) continue;
@@ -145,7 +163,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment,
                         routeRoom.FloorIndex, routeRoom.RoomIndex, pressure));
                 }
-                if (party.IsWiped)
+                if (party.IsWiped && routeRoom.Spatial == null)
                 {
                     // Unreached later assignments cannot contribute loot, attraction, or Heat effects.
                     // Severity remains the one room-level value calculated above.
@@ -153,6 +171,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
                 }
                 AddPlacementEffects(reachedEffects, localEffects);
+                hasActiveEncounter |= localActiveEncounter;
                 currentSurvivors = party.ActiveCount;
                 RunSurvivalSummary roomSurvival = party.DeriveSurvival(cleared);
                 // Room evidence is the delta of the same live roster, not a second casualty roll.
@@ -162,7 +181,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 ApplyCasualtyEvidence(roomSurvival, pressure);
 
                 RunLootSummary roomLoot = null;
-                if (cleared && !party.IsWiped)
+                if (cleared && !party.IsWiped && localActiveEncounter)
                 {
                     AddPlacementEffects(clearedRewardEffects, localEffects);
                     roomLoot = ApplyCompositionToLootSummary(ApplyPostureToLootSummary(BuildLootSummary(roomSeed), posture), composition);
@@ -204,7 +223,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (stopped) break;
             }
 
-                if (snapshot == null || party.IsWiped || rooms.LastOrDefault()?.StoppedRoute == true) break;
+                // One-floor execution historically has no Phase 6 transition event; the snapshot
+                // is now also required there for spatial inputs, without changing that contract.
+                if (snapshot == null || snapshot.Floors.Count == 1 || party.IsWiped || rooms.LastOrDefault()?.StoppedRoute == true) break;
                 string next = floorOrdinal + 1 < snapshot.Floors.Count ? snapshot.Floors[floorOrdinal + 1].FloorInstanceId : null;
                 var transition = FloorTransitionDecision.Resolve(_config.PhaseSix, party,
                     snapshot.Floors[floorOrdinal].FloorInstanceId, next, generatedValue + (traversal?.Value ?? 0),
@@ -229,6 +250,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 RunOutcomeRecord empty = BuildNoEncounterRouteOutcome(runtime, tickStarted, runSequence, posture, heatAtStart, manaAtStart, partyRoll, rooms, configuredEffects, reachedEffects);
                 empty.Party = party; empty.EncounterEvents = events.ToArray();
+                empty.SpatialEvents = spatialEvents.ToArray();
                 empty.FloorTransitions = transitions.ToArray(); empty.DepthObjective = objective;
                 if (snapshot != null)
                 {
@@ -271,7 +293,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 rooms[rooms.Count - 1].RoomIndex == 0 ? RouteStoppedRoomOneKey :
                 rooms[rooms.Count - 1].RoomIndex == 1 ? RouteStoppedRoomTwoKey : RouteRetreatedKey;
             return new RunOutcomeRecord {
-                Party = party, EncounterEvents = events.ToArray(), FloorTransitions = transitions.ToArray(), DepthObjective = objective,
+                Party = party, EncounterEvents = events.ToArray(), SpatialEvents = spatialEvents.ToArray(),
+                FloorTransitions = transitions.ToArray(), DepthObjective = objective,
                 RunId = RunId(runSequence), TickStarted = tickStarted, Success = fullClear,
                 Score = fullClear ? _config.BaseScoreOnSuccess + (int)Math.Round(aggregateComposition.EffectiveManaReserve * _config.ScorePerManaPoint) : 0,
                 ReasonKey = partyWiped ? PartyWipedReasonKey : deliberateExit ? "run.reason.floor_exit" : fullClear ? "run.reason.success" : (runtime.IsHeatCrisisActive ? "run.reason.crisis_failure" : "run.reason.failed_threshold"),

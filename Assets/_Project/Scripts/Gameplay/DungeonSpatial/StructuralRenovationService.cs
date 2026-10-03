@@ -326,6 +326,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return false;
         }
 
+        // Read-only saved-edge adapter over the same endpoint/socket geometry used by renovation.
+        // Match the persisted kind and exact corridor tiles; aligned alternatives are not routes.
+        internal static bool TryResolveSavedConnection(SavedSpatialFloor floor, FloorRouteEdge edge,
+            SpatialContentCatalog catalog, out TileCoordinate sourceLocal, out TileCoordinate destinationLocal)
+        {
+            sourceLocal = destinationLocal = default;
+            var sourceNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.SourceNodeId);
+            var destinationNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.DestinationNodeId);
+            if (sourceNode == null || destinationNode == null ||
+                !TryEndpoint(floor, sourceNode, catalog, out TileEndpoint source) ||
+                !TryEndpoint(floor, destinationNode, catalog, out TileEndpoint destination)) return false;
+            bool physical = edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor;
+            if (!physical && edge.ConnectionKind != FloorRouteConnectionKind.DirectDoorway) return false;
+            var corridor = physical ? catalog.Corridors.SingleOrDefault(c =>
+                c.CorridorDefinitionId == edge.CorridorDefinitionId) : null;
+            if (physical && corridor == null) return false;
+            var pairs = Pairs(source, destination, catalog, corridor, physical).Where(c => !physical ||
+                c.Tiles.SequenceEqual((edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>())
+                    .OrderBy(t => t))).ToArray();
+            if (pairs.Length != 1) return false;
+            sourceLocal = pairs[0].SourcePoint.Offset;
+            destinationLocal = pairs[0].DestinationPoint.Offset;
+            return true;
+        }
+
         private sealed class TileEndpoint
         {
             internal TileCoordinate Anchor; internal CardinalOrientation Orientation;

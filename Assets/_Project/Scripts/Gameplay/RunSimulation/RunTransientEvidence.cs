@@ -17,6 +17,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (match == null) continue;
                 run.Party = match.Party; run.EncounterEvents = match.EncounterEvents; run.BranchOutcomes = match.BranchOutcomes;
                 run.FloorTransitions = match.FloorTransitions; run.DepthObjective = match.DepthObjective;
+                run.SpatialEvents = match.SpatialEvents;
             }
         }
     }

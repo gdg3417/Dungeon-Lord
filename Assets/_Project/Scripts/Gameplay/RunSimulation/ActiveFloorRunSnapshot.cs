@@ -79,6 +79,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 if (floor.FloorIndex != floors.Count) throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
                 var plan = PhaseFiveBRouteProjection.ResolveFloor(owned, floor, production, config);
+                foreach (var room in plan.RequiredRooms)
+                {
+                    room.Room.Spatial = IntraroomSnapshot.Capture(floor, room.NodeId, production.Catalog,
+                        owned.RoomContentOccupancy, limits.Spatial);
+                    IntraroomTraversal.Plan(room.Room);
+                }
                 if (floor.FloorIndex > 0 && plan.RequiredRooms.Length == 0)
                     throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
                 foreach (var assignment in plan.RequiredRooms.SelectMany(r => r.Room.OrderedAssignments())

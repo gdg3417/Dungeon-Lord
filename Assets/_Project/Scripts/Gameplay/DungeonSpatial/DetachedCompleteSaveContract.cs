@@ -151,6 +151,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal SharedBranchKnowledgeAuthority BranchKnowledge { get; }
         internal SharedFloorKnowledgeAuthority FloorKnowledge { get; }
         internal StructuralInvestmentRecord[] Investment { get; set; }
+        internal RoomContentSpatialOccupancySnapshot RoomContentOccupancy { get; set; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -178,7 +179,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     result.LayoutContractVersion, result.State, true,
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
                     result.LastOfflineSummaryExplicitNull, result.CorridorContent,
-                    result.BranchKnowledge, result.FloorKnowledge) { Investment = result.Investment }
+                    result.BranchKnowledge, result.FloorKnowledge) { Investment = result.Investment,
+                        RoomContentOccupancy = context.RoomContentOccupancy }
                 : Failure();
         }
 

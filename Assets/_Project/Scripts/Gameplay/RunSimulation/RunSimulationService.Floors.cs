@@ -20,8 +20,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var objective = TransientDepthObjective.Select(config.PhaseSix, RunId(sequence));
             var result = engine.SimulateRoute(snapshot.InitialRuntime, snapshot.TickStarted, sequence, snapshot.PostureId,
                 first.RequiredRooms.Select(r => r.Room).ToArray(),
-                snapshot.Floors.Count > 1 || first.Forks.Length > 0 ? traversal : null,
-                snapshot.Floors.Count > 1 ? snapshot : null, objective);
+                traversal, snapshot, objective);
             if (result.LootSummary?.ResolverSuccess != true)
                 throw new InvalidOperationException("branch.run.invalid_state");
             result.DepthObjective = objective;

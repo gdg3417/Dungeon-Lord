@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public string CategoryId;
         public string OptionId;
         public long Sequence;
+        public TileCoordinate RoomLocalPosition;
     }
 
     [Serializable]
@@ -22,6 +23,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
         public int FloorIndex;
         public int RoomIndex;
         public string RoomInstanceId;
+        public RunSimulation.IntraroomSnapshot Spatial;
         public string RoomOptionId;
         public bool IncludeRoomPlacement;
         public string[] AssignedMonsterOptionIds = Array.Empty<string>();

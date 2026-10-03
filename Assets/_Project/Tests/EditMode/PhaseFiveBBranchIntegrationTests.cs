@@ -103,7 +103,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fork = branch.Fork; var assignment = fork.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId);
             var loot = LootRollResolver.Resolve(lootConfig, f.Configuration.LootTableId,
                 RunSimulationService.BranchLootSeed(run.RunId, fork.FloorInstanceId, fork.OptionalBranchId, assignment.AssignmentId));
-            Assert.That(run.LootSummary.RollCount, Is.EqualTo(loot.rollCount * 2)); // one required-room roll plus one reached branch roll
+            Assert.That(run.LootSummary.RollCount, Is.EqualTo(loot.rollCount)); // reached branch roll; empty spatial room grants no content roll
+            Assert.That(run.RoomResolutions.Single().GeneratedLootValue, Is.Zero);
             Assert.That(run.ReachedRoutePlacementEffects.ContributingOptionIds.Count(id => id == MvpDungeonPlacementIds.SpikeTrapOptionId), Is.EqualTo(1));
             Assert.That(run.ReachedRoutePlacementEffects.ContributingOptionIds.Count(id => id == MvpDungeonPlacementIds.HiddenCacheOptionId), Is.EqualTo(1));
             Assert.That(branch.Reason, Is.EqualTo("branch.outcome.completed"));
