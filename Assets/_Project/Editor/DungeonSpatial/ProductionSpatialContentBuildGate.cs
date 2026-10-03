@@ -133,7 +133,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             if (!positionValidation.Success) return positionValidation;
             ProductionSpatialBuildGateResult occupancyValidation =
                 ValidateRoomContentSpatialOccupancy(occupancy,
-                    saveLimits.Profile.Canonical.Spatial);
+                    parsedLimits.Limits,
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
             if (!occupancyValidation.Success) return occupancyValidation;
             const string architecture = "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
             if (!saveLimits.IsSuccess || !FloorConstructionProfileSnapshot.TryParse(
@@ -176,9 +178,13 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         }
 
         internal static ProductionSpatialBuildGateResult ValidateRoomContentSpatialOccupancy(
-            TextAsset occupancy, CanonicalSpatialSaveWorkloadLimits limits) =>
-            occupancy != null && RoomContentSpatialOccupancyAuthority.TryParse(occupancy.bytes,
-                limits, out RoomContentSpatialOccupancySnapshot ignored)
+            TextAsset occupancy, SpatialContentValidationWorkloadLimits limits,
+            TextAsset runSimulationConfiguration) =>
+            occupancy != null && BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                runSimulationConfiguration == null ? null : runSimulationConfiguration.text,
+                out RunSimulationConfig configuration) &&
+            RoomContentSpatialOccupancyAuthority.TryParse(occupancy.bytes,
+                limits, configuration, out RoomContentSpatialOccupancySnapshot ignored)
                 ? Success()
                 : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy,
                     "RoomContentSpatialOccupancy");

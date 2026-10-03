@@ -501,7 +501,31 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
             var malformed = new TextAsset("{\"Schema\":\"room_content_spatial_occupancy\"}");
             ProductionSpatialBuildGateResult result =
                 ProductionSpatialContentBuildGate.ValidateRoomContentSpatialOccupancy(malformed,
-                    new CanonicalSpatialSaveWorkloadLimits(100, 100));
+                    new SpatialContentValidationWorkloadLimits(100, 100, 100, 100, 100),
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            Assert.That(result.Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy));
+        }
+
+        [Test]
+        public void IncompleteRoomContentOccupancyFailsInstalledValidationClosed()
+        {
+            TextAsset production = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                RoomContentSpatialOccupancyAuthority.ProductionPath);
+            RoomContentSpatialOccupancyConfiguration value =
+                JsonUtility.FromJson<RoomContentSpatialOccupancyConfiguration>(production.text);
+            value.Records = value.Records.Take(value.Records.Length - 1).ToArray();
+            var incomplete = new TextAsset(JsonUtility.ToJson(value, true) + "\n");
+            ProductionSpatialContentWorkloadLimitParseResult workload =
+                ProductionSpatialContentWorkloadLimitParser.Parse(AssetDatabase.LoadAssetAtPath<TextAsset>(
+                    ProductionSpatialContentPublicationService.LimitsPath));
+
+            ProductionSpatialBuildGateResult result =
+                ProductionSpatialContentBuildGate.ValidateRoomContentSpatialOccupancy(incomplete,
+                    workload.Limits, AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+
             Assert.That(result.Reason,
                 Is.EqualTo(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy));
         }

@@ -46,8 +46,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         internal static RoomContentSpatialOccupancySnapshot Occupancy(
             CanonicalSpatialSerializationLimits limits)
         {
+            ProductionSpatialContentWorkloadLimitParseResult structural =
+                ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<
+                    UnityEngine.TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json"));
+            Assert.That(structural.Success, Is.True);
+            RunSimulationConfig configuration = UnityEngine.JsonUtility.FromJson<RunSimulationConfig>(
+                UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(
+                    "Assets/_Project/Data/Bootstrap/run_simulation_config.json").text);
             Assert.That(RoomContentSpatialOccupancyAuthority.TryParse(File.ReadAllBytes(
-                RoomContentSpatialOccupancyAuthority.ProductionPath), limits.Spatial,
+                RoomContentSpatialOccupancyAuthority.ProductionPath), structural.Limits, configuration,
                 out RoomContentSpatialOccupancySnapshot snapshot), Is.True);
             return snapshot;
         }

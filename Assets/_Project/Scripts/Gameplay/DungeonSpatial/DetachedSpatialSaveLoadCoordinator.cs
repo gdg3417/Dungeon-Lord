@@ -123,7 +123,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (legacy == null) return Failure("gd66.transaction.pinned_input_missing");
                 recoveryContext = new DetachedSpatialMigrationRecoveryContext(compatibility, production,
                     validationInputs, legacyConfiguration, limits.Canonical, limits.Raw, rawVersions,
-                    blankFloor, limits.Whole);
+                    blankFloor, limits.Whole, roomContentOccupancy);
                 currentContext = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical, roomContentOccupancy);
             }

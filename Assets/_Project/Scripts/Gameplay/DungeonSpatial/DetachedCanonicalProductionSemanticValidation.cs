@@ -166,7 +166,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     long localY = (long)value.RoomLocalPosition.Y + offset.Y;
                     if (localX < int.MinValue || localX > int.MaxValue ||
                         localY < int.MinValue || localY > int.MaxValue || ++materialized >
-                        occupancy.Value.MaximumValidationMaterializedTiles ||
+                        occupancy.MaximumValidationMaterializedTiles ||
                         !RoomLocalCoordinateTransform.TryToFloor(
                             new TileCoordinate((int)localX, (int)localY), room.GrossFootprint,
                             roomInstance.Anchor, roomInstance.Orientation, out TileCoordinate tile) ||

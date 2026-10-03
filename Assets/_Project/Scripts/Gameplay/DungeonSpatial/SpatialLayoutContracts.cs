@@ -11,34 +11,95 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CardinalOrientation orientation, out TileCoordinate floorPosition)
         {
             floorPosition = default(TileCoordinate);
-            if (roomFootprint == null || roomFootprint.Width <= 0 || roomFootprint.Height <= 0 ||
-                !Enum.IsDefined(typeof(CardinalOrientation), orientation)) return false;
-            long x;
-            long y;
-            switch (orientation)
-            {
-                case CardinalOrientation.Ninety:
-                    x = (long)roomAnchor.X + roomFootprint.Height - 1 - roomLocalPosition.Y;
-                    y = (long)roomAnchor.Y + roomLocalPosition.X;
-                    break;
-                case CardinalOrientation.OneEighty:
-                    x = (long)roomAnchor.X + roomFootprint.Width - 1 - roomLocalPosition.X;
-                    y = (long)roomAnchor.Y + roomFootprint.Height - 1 - roomLocalPosition.Y;
-                    break;
-                case CardinalOrientation.TwoSeventy:
-                    x = (long)roomAnchor.X + roomLocalPosition.Y;
-                    y = (long)roomAnchor.Y + roomFootprint.Width - 1 - roomLocalPosition.X;
-                    break;
-                default:
-                    x = (long)roomAnchor.X + roomLocalPosition.X;
-                    y = (long)roomAnchor.Y + roomLocalPosition.Y;
-                    break;
-            }
+            if (!TryToOriented(roomLocalPosition, roomFootprint, orientation,
+                    out TileCoordinate oriented)) return false;
+            long x = (long)roomAnchor.X + oriented.X;
+            long y = (long)roomAnchor.Y + oriented.Y;
             if (x < int.MinValue || x > int.MaxValue || y < int.MinValue || y > int.MaxValue)
                 return false;
             floorPosition = new TileCoordinate((int)x, (int)y);
             return true;
         }
+
+        public static bool TryToOriented(TileCoordinate roomLocalPosition,
+            RectangularFootprintDefinition baseFootprint, CardinalOrientation orientation,
+            out TileCoordinate orientedPosition)
+        {
+            orientedPosition = default(TileCoordinate);
+            if (!IsValid(baseFootprint, orientation) || roomLocalPosition.X < 0 ||
+                roomLocalPosition.X >= baseFootprint.Width || roomLocalPosition.Y < 0 ||
+                roomLocalPosition.Y >= baseFootprint.Height) return false;
+            long x;
+            long y;
+            switch (orientation)
+            {
+                case CardinalOrientation.Ninety:
+                    x = (long)baseFootprint.Height - 1 - roomLocalPosition.Y;
+                    y = roomLocalPosition.X;
+                    break;
+                case CardinalOrientation.OneEighty:
+                    x = (long)baseFootprint.Width - 1 - roomLocalPosition.X;
+                    y = (long)baseFootprint.Height - 1 - roomLocalPosition.Y;
+                    break;
+                case CardinalOrientation.TwoSeventy:
+                    x = roomLocalPosition.Y;
+                    y = (long)baseFootprint.Width - 1 - roomLocalPosition.X;
+                    break;
+                default:
+                    x = roomLocalPosition.X;
+                    y = roomLocalPosition.Y;
+                    break;
+            }
+            if (x < int.MinValue || x > int.MaxValue || y < int.MinValue || y > int.MaxValue)
+                return false;
+            orientedPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+
+        public static bool TryFromOriented(TileCoordinate orientedPosition,
+            RectangularFootprintDefinition orientedFootprint, CardinalOrientation orientation,
+            out TileCoordinate roomLocalPosition)
+        {
+            roomLocalPosition = default(TileCoordinate);
+            if (!IsValid(orientedFootprint, orientation) || orientedPosition.X < 0 ||
+                orientedPosition.X >= orientedFootprint.Width || orientedPosition.Y < 0 ||
+                orientedPosition.Y >= orientedFootprint.Height) return false;
+            long baseWidth = orientation == CardinalOrientation.Ninety ||
+                orientation == CardinalOrientation.TwoSeventy
+                ? orientedFootprint.Height : orientedFootprint.Width;
+            long baseHeight = orientation == CardinalOrientation.Ninety ||
+                orientation == CardinalOrientation.TwoSeventy
+                ? orientedFootprint.Width : orientedFootprint.Height;
+            long x;
+            long y;
+            switch (orientation)
+            {
+                case CardinalOrientation.Ninety:
+                    x = orientedPosition.Y;
+                    y = baseHeight - 1 - orientedPosition.X;
+                    break;
+                case CardinalOrientation.OneEighty:
+                    x = baseWidth - 1 - orientedPosition.X;
+                    y = baseHeight - 1 - orientedPosition.Y;
+                    break;
+                case CardinalOrientation.TwoSeventy:
+                    x = baseWidth - 1 - orientedPosition.Y;
+                    y = orientedPosition.X;
+                    break;
+                default:
+                    x = orientedPosition.X;
+                    y = orientedPosition.Y;
+                    break;
+            }
+            if (x < 0 || x >= baseWidth || y < 0 || y >= baseHeight ||
+                x > int.MaxValue || y > int.MaxValue) return false;
+            roomLocalPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+
+        private static bool IsValid(RectangularFootprintDefinition footprint,
+            CardinalOrientation orientation) => footprint != null && footprint.Width > 0 &&
+            footprint.Height > 0 && Enum.IsDefined(typeof(CardinalOrientation), orientation);
     }
 
     [Serializable]

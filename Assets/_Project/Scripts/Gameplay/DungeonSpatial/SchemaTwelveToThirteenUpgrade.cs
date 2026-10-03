@@ -44,7 +44,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 entry.CategoryId != assignment.CategoryId ||
                                 entry.OptionId != assignment.OptionId ||
                                 entry.Sequence != assignment.Sequence) return false;
-                            assignment.RoomLocalPosition = entry.RoomLocalPosition;
+                            if (!RoomLocalCoordinateTransform.TryFromOriented(entry.RoomLocalPosition,
+                                    profile.FrozenFootprint, rooms[0].Orientation,
+                                    out TileCoordinate canonicalPosition)) return false;
+                            assignment.RoomLocalPosition = canonicalPosition;
                         }
                     }
                 }

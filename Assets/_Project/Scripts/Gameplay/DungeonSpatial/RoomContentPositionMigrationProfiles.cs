@@ -131,6 +131,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId => value.RoomDefinitionId;
         public CardinalOrientation Orientation => value.Orientation;
         public int SlotCount => value.OrderedSlots?.Length ?? 0;
+        public RectangularFootprintDefinition FrozenFootprint => value.FrozenFootprint == null
+            ? null : new RectangularFootprintDefinition(
+                value.FrozenFootprint.Width, value.FrozenFootprint.Height);
 
         internal RoomContentPositionMigrationProfile CloneValue() => Clone(value);
 

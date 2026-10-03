@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
@@ -117,6 +119,164 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertFloor(local, footprint, new TileCoordinate(10, 20), CardinalOrientation.OneEighty, 12, 22);
             AssertFloor(local, footprint, new TileCoordinate(10, 20), CardinalOrientation.TwoSeventy, 10, 22);
             AssertFloor(local, footprint, new TileCoordinate(15, 27), CardinalOrientation.Ninety, 17, 28);
+            foreach (CardinalOrientation orientation in Enum.GetValues(typeof(CardinalOrientation)))
+            {
+                Assert.That(RoomLocalCoordinateTransform.TryToOriented(local, footprint, orientation,
+                    out TileCoordinate oriented), Is.True);
+                var orientedFootprint = orientation == CardinalOrientation.Ninety ||
+                    orientation == CardinalOrientation.TwoSeventy
+                    ? new RectangularFootprintDefinition(footprint.Height, footprint.Width)
+                    : new RectangularFootprintDefinition(footprint.Width, footprint.Height);
+                Assert.That(RoomLocalCoordinateTransform.TryFromOriented(oriented, orientedFootprint,
+                    orientation, out TileCoordinate roundTrip), Is.True);
+                Assert.That(roundTrip, Is.EqualTo(local));
+            }
+        }
+
+        [Test]
+        public void CurrentSchemaRecoveryUsesExplicitOccupancyAndFailsClosedWhenItIsMissing()
+        {
+            Fixture fixture = WithOneAssignment(out DetachedCanonicalSpatialSaveState state).Rebase(state);
+            byte[] before = fixture.Session.GetCurrentBytes();
+            byte[] legacy = LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration);
+            var context = new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility,
+                fixture.Production, new Dictionary<string, byte[]>(), legacy,
+                fixture.Profile.Canonical, fixture.Profile.Raw,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
+                fixture.Profile.Whole, fixture.Occupancy);
+
+            DetachedSpatialMigrationOutcome recovered =
+                new DetachedSpatialMigrationTransaction(fixture.FileSystem, context)
+                    .Recover(fixture.ActivePath);
+
+            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
+            Assert.That(recovered.Reason,
+                Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
+            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            DetachedCompleteSaveValidationResult reopened =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, fixture.Context);
+            Assert.That(reopened.IsValid && reopened.CurrentTargetValidated, Is.True);
+            Assert.That(reopened.State.Floors.SelectMany(value => value.RoomContents.Assignments)
+                .Select(IdentityAndPosition), Is.EqualTo(state.Floors.SelectMany(
+                    value => value.RoomContents.Assignments).Select(IdentityAndPosition)));
+
+            var missingFileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string missingPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(), "phase7a2-missing-occupancy.json"));
+            missingFileSystem.Seed(missingPath, before);
+            var missingContext = new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility,
+                fixture.Production, new Dictionary<string, byte[]>(), legacy,
+                fixture.Profile.Canonical, fixture.Profile.Raw,
+                new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
+                fixture.Profile.Whole);
+            DetachedSpatialMigrationOutcome rejected =
+                new DetachedSpatialMigrationTransaction(missingFileSystem, missingContext)
+                    .Recover(missingPath);
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason,
+                Is.EqualTo(DetachedSpatialMigrationTransaction.ContradictoryAuthorityReason));
+            CollectionAssert.AreEqual(before, missingFileSystem.ReadAllBytes(missingPath));
+        }
+
+        [TestCase("spatial.room.basic", CardinalOrientation.Zero, 4, 2, "east")]
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Zero, 4, 1, "north")]
+        [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety, 4, 2, "west")]
+        [TestCase("spatial.room.large_chamber", CardinalOrientation.Zero, 4, 1, "north")]
+        [TestCase("spatial.room.large_chamber", CardinalOrientation.Ninety, 4, 1, "west")]
+        public void MaximumFrozenProfileEnvelopeMigratesFromOrientedSlotsToCanonicalPositions(
+            string roomDefinitionId, CardinalOrientation orientation, int anchorX, int anchorY,
+            string terminalPoint)
+        {
+            Fixture fixture = Fixture.Create(null);
+            DetachedCanonicalMutationResult firstRoom = fixture.Prepare(
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                    MvpDungeonPlacementIds.BasicRoomOptionId, null, null, null));
+            Assert.That(firstRoom.IsSuccess, Is.True, firstRoom.Reason);
+            DetachedCanonicalSpatialSaveState state = firstRoom.State;
+            RoomSpatialInstance target = state.Floors[0].Layout.Rooms.Single();
+            if (roomDefinitionId != "spatial.room.basic")
+            {
+                StructuralEditPreview construction = StructuralEditService.Preview(state,
+                    new StructuralConstructionRequest { RoomDefinitionId = roomDefinitionId,
+                        Anchor = new TileCoordinate(anchorX, anchorY), Orientation = orientation,
+                        TerminalConnectionPointId = terminalPoint }, fixture.Production,
+                    fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+                Assert.That(construction.IsValid, Is.True, string.Join(",", construction.ReasonCodes));
+                state = construction.DetachedCandidate;
+                target = state.Floors[0].Layout.Rooms.Single(value =>
+                    value.RoomDefinitionId == roomDefinitionId);
+            }
+            Assert.That(fixture.PositionProfiles.TryGetProfile(roomDefinitionId, orientation,
+                out ValidatedRoomContentPositionMigrationProfile validated), Is.True);
+            RoomContentPositionMigrationProfile profile = fixture.PositionProfiles.Value.Profiles.Single(
+                value => value.RoomDefinitionId == roomDefinitionId && value.Orientation == orientation);
+            RoomContentAssignment[] assignments = MaximumAssignments(profile, target.RoomInstanceId);
+            RoomContentPositionMigrationPlanResult plan =
+                RoomContentPositionMigrationPlanner.Plan(validated, target.RoomInstanceId, assignments);
+            Assert.That(plan.Success, Is.True, profile.ProfileId);
+            var expectedOriented = plan.Entries.ToDictionary(value => value.AssignmentId,
+                value => value.RoomLocalPosition, StringComparer.Ordinal);
+            RoomSpatialDefinition roomDefinition = fixture.Production.Catalog.Rooms.Single(value =>
+                value.RoomDefinitionId == roomDefinitionId);
+            foreach (RoomContentAssignment assignment in assignments)
+            {
+                Assert.That(RoomLocalCoordinateTransform.TryFromOriented(
+                    expectedOriented[assignment.AssignmentId], profile.FrozenFootprint, orientation,
+                    out TileCoordinate canonical), Is.True);
+                assignment.RoomLocalPosition = canonical;
+            }
+            state.Floors[0].RoomContents.Assignments = assignments;
+            state.Floors[0].RoomContents.NextSequence = assignments.Max(value => value.Sequence) + 1;
+            DetachedCanonicalProductionSemanticValidationResult semantic =
+                DetachedCanonicalProductionSemanticValidation.Validate(state, fixture.Production,
+                    fixture.Configuration, fixture.Profile.Canonical.Spatial, fixture.Occupancy, true);
+            Assert.That(semantic.IsValid, Is.True, string.Join(",", semantic.Issues));
+            DetachedCanonicalSaveSessionResult replacement =
+                fixture.Session.PrepareSpatialOnlyReplacement(state, StructuralInvestment.Zero(state));
+            Assert.That(replacement.IsSuccess, Is.True, replacement.Reason);
+            byte[] current = replacement.Update.GetBytes();
+            byte[] schemaTwelve = PhaseFourTestSupport.FrozenTwelve(current);
+            byte[] protectedSource = (byte[])schemaTwelve.Clone();
+
+            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(schemaTwelve,
+                fixture.Profile.Canonical, fixture.PositionProfiles, out byte[] first), Is.True);
+            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(schemaTwelve,
+                fixture.Profile.Canonical, fixture.PositionProfiles, out byte[] second), Is.True);
+            CollectionAssert.AreEqual(protectedSource, schemaTwelve);
+            CollectionAssert.AreEqual(first, second);
+            DetachedCompleteSaveValidationResult frozen =
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
+                    schemaTwelve, fixture.Profile.Canonical);
+            DetachedCompleteSaveValidationResult upgraded =
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, fixture.Context);
+            Assert.That(frozen.IsValid, Is.True);
+            Assert.That(upgraded.IsValid && upgraded.CurrentTargetValidated, Is.True,
+                upgraded.Reason);
+            RoomContentAssignment[] migrated = upgraded.State.Floors[0].RoomContents.Assignments;
+            Assert.That(migrated, Has.Length.EqualTo(assignments.Length));
+            Assert.That(upgraded.State.LifecycleAndOwnership.ReturnedContents,
+                Has.Length.EqualTo(state.LifecycleAndOwnership.ReturnedContents.Length));
+            foreach (RoomContentAssignment assignment in migrated)
+            {
+                RoomContentAssignment source = assignments.Single(value =>
+                    value.AssignmentId == assignment.AssignmentId);
+                Assert.That(assignment.RoomInstanceId, Is.EqualTo(source.RoomInstanceId));
+                Assert.That(assignment.CategoryId, Is.EqualTo(source.CategoryId));
+                Assert.That(assignment.OptionId, Is.EqualTo(source.OptionId));
+                Assert.That(assignment.Sequence, Is.EqualTo(source.Sequence));
+                Assert.That(RoomLocalCoordinateTransform.TryToOriented(
+                    assignment.RoomLocalPosition, roomDefinition.GrossFootprint, orientation,
+                    out TileCoordinate oriented), Is.True);
+                Assert.That(oriented, Is.EqualTo(expectedOriented[assignment.AssignmentId]));
+            }
+            if (roomDefinitionId == "spatial.room.rectangle" &&
+                orientation == CardinalOrientation.Ninety)
+                Assert.That(migrated.Where(value => value.CategoryId ==
+                    MvpDungeonPlacementIds.MonsterCategoryId).Select(value =>
+                    expectedOriented[value.AssignmentId]), Does.Contain(new TileCoordinate(3, 1)));
         }
 
         [Test]
@@ -169,6 +329,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Does.Contain(DetachedCanonicalProductionSemanticIssue.AssignmentPosition));
         }
 
+        [Test]
+        public void ProductionOccupancyIsCompleteAndMaximumCurrentEnvelopeFitsApprovedWorkload()
+        {
+            ProductionSpatialContentWorkloadLimitParseResult workload =
+                ProductionSpatialContentWorkloadLimitParser.Parse(
+                    UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json"));
+            Assert.That(workload.Success, Is.True);
+            Fixture fixture = Fixture.Create(null);
+            Assert.That(RoomContentSpatialOccupancyAuthority.TryParse(File.ReadAllBytes(
+                RoomContentSpatialOccupancyAuthority.ProductionPath), workload.Limits,
+                fixture.Configuration, out RoomContentSpatialOccupancySnapshot occupancy), Is.True);
+            Assert.That(occupancy.MaximumValidationMaterializedTiles,
+                Is.EqualTo(workload.Limits.MaximumMaterializedTiles));
+            string[] configured = fixture.Configuration.MvpPlacementEffects.Where(value =>
+                    value != null && value.CategoryId != MvpDungeonPlacementIds.RoomCategoryId)
+                .Select(value => value.OptionId).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            string[] covered = occupancy.Value.Records.Select(value => value.OptionId)
+                .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+            CollectionAssert.AreEqual(configured, covered);
+
+            int[] perFloorEnvelopes = fixture.Production.Catalog.Floors.Select(floor =>
+                MaximumMaterializedRoomContentEnvelope(floor, fixture.Production.Catalog.Rooms)).ToArray();
+            CollectionAssert.AreEqual(new[] { 84, 110 }, perFloorEnvelopes);
+            Assert.That(perFloorEnvelopes.Sum(), Is.EqualTo(194));
+            Assert.That(perFloorEnvelopes.All(value =>
+                value <= occupancy.MaximumValidationMaterializedTiles), Is.True);
+        }
+
         private static Fixture WithOneAssignment(out DetachedCanonicalSpatialSaveState state)
         {
             Fixture fixture = Fixture.Create(null);
@@ -209,6 +398,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(newAssignment.Sequence, Is.EqualTo(oldAssignment.Sequence));
         }
 
+        private static RoomContentAssignment[] MaximumAssignments(
+            RoomContentPositionMigrationProfile profile, string roomInstanceId)
+        {
+            var result = new List<RoomContentAssignment>();
+            foreach (RoomContentMigrationCategoryCapacity capacity in profile.CategoryCapacities)
+            {
+                string option = capacity.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId
+                    ? MvpDungeonPlacementIds.SkeletonOptionId
+                    : capacity.CategoryId == MvpDungeonPlacementIds.TrapCategoryId
+                        ? MvpDungeonPlacementIds.SpikeTrapOptionId
+                        : MvpDungeonPlacementIds.BasicLootNodeOptionId;
+                for (int index = 0; index < capacity.MaximumAssignments; index++)
+                    result.Add(new RoomContentAssignment
+                    {
+                        AssignmentId = "p7." + profile.RoomDefinitionId + "." +
+                            (int)profile.Orientation + "." + CategoryToken(capacity.CategoryId) + "." + index,
+                        RoomInstanceId = roomInstanceId, CategoryId = capacity.CategoryId,
+                        OptionId = option, Sequence = index
+                    });
+            }
+            return result.ToArray();
+        }
+
+        private static string CategoryToken(string categoryId) =>
+            categoryId == MvpDungeonPlacementIds.MonsterCategoryId ? "m" :
+            categoryId == MvpDungeonPlacementIds.TrapCategoryId ? "t" : "l";
+
+        private static string IdentityAndPosition(RoomContentAssignment value) =>
+            value.AssignmentId + "|" + value.RoomInstanceId + "|" + value.CategoryId + "|" +
+            value.OptionId + "|" + value.Sequence + "|" + value.RoomLocalPosition.X + "," +
+            value.RoomLocalPosition.Y;
+
+        private static int MaximumMaterializedRoomContentEnvelope(
+            FloorSpatialConfiguration floor, IEnumerable<RoomSpatialDefinition> rooms)
+        {
+            RoomSpatialDefinition[] allowed = rooms.Where(value => value != null &&
+                floor.AllowedRoomDefinitionIds.Contains(value.RoomDefinitionId)).ToArray();
+            var maximum = new int[floor.FinalFloorSpaceCapacity + 1];
+            for (int used = 1; used <= floor.FinalFloorSpaceCapacity; used++)
+            foreach (RoomSpatialDefinition room in allowed)
+            {
+                int tiles = checked(room.GrossFootprint.Width * room.GrossFootprint.Height);
+                if (tiles > used) continue;
+                int assignments = checked(room.MonsterCapacity + room.TrapCapacity + room.LootCapacity);
+                maximum[used] = Math.Max(maximum[used], maximum[used - tiles] + tiles + assignments);
+            }
+            return maximum.Max();
+        }
+
         private static DetachedCanonicalSpatialSaveState Clone(
             DetachedCanonicalSpatialSaveState state, Fixture fixture)
         {
@@ -231,7 +469,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             new RoomContentSpatialOccupancySnapshot(new RoomContentSpatialOccupancyConfiguration
             {
                     Schema = "room_content_spatial_occupancy", SchemaVersion = 1,
-                    MaximumValidationMaterializedTiles = 256,
                     Records = new[]
                 {
                     new RoomContentSpatialOccupancyRecord
@@ -241,7 +478,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         ShareableCategoryIds = Array.Empty<string>()
                     }
                 }
-            });
+            }, 256);
     }
 }
 #endif

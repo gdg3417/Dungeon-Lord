@@ -37,7 +37,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RawSavePayloadClassificationLimits rawLimits = default(RawSavePayloadClassificationLimits),
             RawSaveEnvelopeVersionContract rawVersions = default(RawSaveEnvelopeVersionContract),
             RawLegacyBlankFloorContract blankFloor = null,
-            DetachedWholeSaveLimits wholeSaveLimits = default(DetachedWholeSaveLimits))
+            DetachedWholeSaveLimits wholeSaveLimits = default(DetachedWholeSaveLimits),
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
             Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
             ProductionContent = productionContent ?? throw new ArgumentNullException(nameof(productionContent));
@@ -50,11 +51,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 (byte[])legacyConfigurationBytes.Clone();
             this.rawLimits = rawLimits; this.rawVersions = rawVersions; this.blankFloor = blankFloor;
             this.wholeSaveLimits = wholeSaveLimits;
+            RoomContentOccupancy = roomContentOccupancy;
         }
 
         public SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         public ProductionSpatialContentSnapshot ProductionContent { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
+        internal RoomContentSpatialOccupancySnapshot RoomContentOccupancy { get; }
 
         internal DetachedLegacyValidationResult ValidateLegacy(byte[] bytes)
         {
@@ -1378,7 +1381,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     productionContent, configuration, completeLimits.Spatial)) return true;
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
-                    productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits)).IsValid;
+                    productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits,
+                    recoveryContext.RoomContentOccupancy, false)).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)

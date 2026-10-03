@@ -1,7 +1,6 @@
 {
     "Schema": "room_content_spatial_occupancy",
     "SchemaVersion": 1,
-    "MaximumValidationMaterializedTiles": 66,
     "Records": [
         {
             "CategoryId": "placement.category.loot_node",

@@ -21,15 +21,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public string Schema;
         public int SchemaVersion;
-        public int MaximumValidationMaterializedTiles;
         public RoomContentSpatialOccupancyRecord[] Records = Array.Empty<RoomContentSpatialOccupancyRecord>();
     }
 
     public sealed class RoomContentSpatialOccupancySnapshot
     {
-        internal RoomContentSpatialOccupancySnapshot(RoomContentSpatialOccupancyConfiguration value)
-        { Value = value; }
+        internal RoomContentSpatialOccupancySnapshot(RoomContentSpatialOccupancyConfiguration value,
+            int maximumValidationMaterializedTiles)
+        { Value = value; MaximumValidationMaterializedTiles = maximumValidationMaterializedTiles; }
         internal RoomContentSpatialOccupancyConfiguration Value { get; }
+        internal int MaximumValidationMaterializedTiles { get; }
     }
 
     public static class RoomContentSpatialOccupancyAuthority
@@ -38,21 +39,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json";
         public const string InvalidReason = "content.position.occupancy_configuration_invalid";
 
-        public static bool TryParse(byte[] bytes, CanonicalSpatialSaveWorkloadLimits limits,
+        public static bool TryParse(byte[] bytes, SpatialContentValidationWorkloadLimits limits,
+            RunSimulationConfig configuration,
             out RoomContentSpatialOccupancySnapshot snapshot)
         {
             snapshot = null;
             try
             {
-                if (!limits.IsValid) return false;
+                if (!limits.IsValid || configuration == null) return false;
                 string text = new UTF8Encoding(false, true).GetString(bytes ?? Array.Empty<byte>());
                 RoomContentSpatialOccupancyConfiguration value =
                     JsonUtility.FromJson<RoomContentSpatialOccupancyConfiguration>(text);
                 if (value == null || value.Schema != "room_content_spatial_occupancy" ||
-                    value.SchemaVersion != 1 || value.MaximumValidationMaterializedTiles <= 0 ||
-                    value.MaximumValidationMaterializedTiles >
-                        (long)limits.MaximumRecords + limits.MaximumMaterializedTiles || value.Records == null ||
-                    value.Records.LongLength > limits.MaximumRecords) return false;
+                    value.SchemaVersion != 1 || value.Records == null ||
+                    value.Records.LongLength > limits.MaximumNestedRecords) return false;
                 RoomContentSpatialOccupancyRecord[] canonical = value.Records.OrderBy(
                     item => item?.CategoryId, StringComparer.Ordinal).ThenBy(
                     item => item?.OptionId, StringComparer.Ordinal).ToArray();
@@ -78,10 +78,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 if (canonical.GroupBy(item => item.OptionId, StringComparer.Ordinal)
                     .Any(group => group.Count() != 1)) return false;
+                string[] configuredOrdinaryOptions = (configuration.MvpPlacementEffects ??
+                    Array.Empty<MvpPlacementEffectConfig>()).Where(value => value != null &&
+                        IsOrdinaryCategory(value.CategoryId) &&
+                        MvpDungeonPlacementIds.TryGetCategoryForOption(value.OptionId,
+                            out string category) && category == value.CategoryId)
+                    .Select(value => value.OptionId).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+                string[] occupancyOptions = canonical.Select(value => value.OptionId)
+                    .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+                if (configuredOrdinaryOptions.Distinct(StringComparer.Ordinal).Count() !=
+                        configuredOrdinaryOptions.Length ||
+                    !configuredOrdinaryOptions.SequenceEqual(occupancyOptions, StringComparer.Ordinal))
+                    return false;
                 value.Records = canonical;
                 byte[] canonicalBytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(value, true) + "\n");
                 if (!bytes.SequenceEqual(canonicalBytes)) return false;
-                snapshot = new RoomContentSpatialOccupancySnapshot(value);
+                snapshot = new RoomContentSpatialOccupancySnapshot(value,
+                    limits.MaximumMaterializedTiles);
                 return true;
             }
             catch { return false; }
@@ -101,6 +114,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomContentSpatialOccupancyRecord right) => left != null && right != null &&
             left.ShareableCategoryIds.Contains(right.CategoryId, StringComparer.Ordinal) &&
             right.ShareableCategoryIds.Contains(left.CategoryId, StringComparer.Ordinal);
+
+        private static bool IsOrdinaryCategory(string categoryId) =>
+            categoryId == MvpDungeonPlacementIds.MonsterCategoryId ||
+            categoryId == MvpDungeonPlacementIds.TrapCategoryId ||
+            categoryId == MvpDungeonPlacementIds.LootNodeCategoryId;
 
 #if UNITY_EDITOR
         // Explicit editor-test adapter for pre-Phase-7 fixtures. Player builds have no fallback.
@@ -130,9 +148,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 new RoomContentSpatialOccupancyConfiguration
                 {
                     Schema = "room_content_spatial_occupancy", SchemaVersion = 1,
-                    MaximumValidationMaterializedTiles = int.MaxValue,
                     Records = records
-                });
+                }, int.MaxValue);
         }
 #endif
     }

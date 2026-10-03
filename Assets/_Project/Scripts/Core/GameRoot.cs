@@ -503,7 +503,7 @@ namespace DungeonBuilder.M0
             }
             if (!RoomContentSpatialOccupancyAuthority.TryParse(
                     roomContentSpatialOccupancyJson == null ? null : roomContentSpatialOccupancyJson.bytes,
-                    SaveSpatialMigrationLimits.Canonical.Spatial,
+                    spatialLimits.Limits, parsedRunConfig,
                     out RoomContentSpatialOccupancySnapshot roomContentOccupancy))
             {
                 string reason = RoomContentSpatialOccupancyAuthority.InvalidReason;

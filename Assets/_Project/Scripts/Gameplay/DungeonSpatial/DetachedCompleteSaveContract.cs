@@ -11,12 +11,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ProductionSpatialContentSnapshot production,
             byte[] legacyConfiguration,
             CanonicalSpatialSerializationLimits limits,
-            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
+            bool allowEditorTestOccupancyFallback = true)
         { Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
           Production = production ?? throw new ArgumentNullException(nameof(production));
           RoomContentOccupancy = roomContentOccupancy;
 #if UNITY_EDITOR
-          if (RoomContentOccupancy == null)
+          if (RoomContentOccupancy == null && allowEditorTestOccupancyFallback)
           {
               RunSimulationConfig testConfiguration;
               try { testConfiguration = LegacyGameplayConfigurationContract.Parse(legacyConfiguration); }
