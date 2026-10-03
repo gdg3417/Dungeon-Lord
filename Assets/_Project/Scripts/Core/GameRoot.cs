@@ -39,6 +39,8 @@ namespace DungeonBuilder.M0
         public TextAsset spatialLayoutCompatibilityProfilesJson;
         public TextAsset saveSpatialMigrationLimitsJson;
         public TextAsset structuralContentRemovalPolicyJson;
+        public TextAsset roomContentPositionMigrationProfilesJson;
+        public TextAsset roomContentSpatialOccupancyJson;
 
         [Header("Production Research Content")]
         public TextAsset architectureResearchNodesJson;
@@ -131,6 +133,7 @@ namespace DungeonBuilder.M0
         private int _selectedFloorIndex;
         private int _selectedSlotIndex;
         private int _selectedRunHistoryIndex = -1;
+        private TileCoordinate _selectedRoomLocalContentPosition;
         private long _activeSessionTickCount;
 
         public bool DevPanelEnabled { get; private set; }
@@ -173,6 +176,14 @@ namespace DungeonBuilder.M0
             }
         }
         public int SelectedSlotIndex => _selectedSlotIndex;
+        public TileCoordinate SelectedRoomLocalContentPosition => _selectedRoomLocalContentPosition;
+        public void AdjustSelectedRoomLocalContentPosition(int deltaX, int deltaY)
+        {
+            long x = (long)_selectedRoomLocalContentPosition.X + deltaX;
+            long y = (long)_selectedRoomLocalContentPosition.Y + deltaY;
+            if (x >= int.MinValue && x <= int.MaxValue && y >= int.MinValue && y <= int.MaxValue)
+                _selectedRoomLocalContentPosition = new TileCoordinate((int)x, (int)y);
+        }
         public double PassiveManaPerHourForPresentation => _passiveManaService?
             .ResolveRate(Save, RunSimulationConfig)?.ManaPerHour ?? double.NaN;
 
@@ -479,10 +490,30 @@ namespace DungeonBuilder.M0
             _offlineHeatConfiguration = parsedRunConfig;
             byte[] canonicalLegacyConfiguration =
                 LegacyGameplayConfigurationContract.SerializeCanonical(parsedRunConfig);
+            RoomContentPositionMigrationProfilesResult positionProfiles =
+                RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(
+                    roomContentPositionMigrationProfilesJson == null ? null :
+                        roomContentPositionMigrationProfilesJson.bytes,
+                    spatialLimits.Limits, SaveSpatialMigrationLimits.Canonical.Serialized, true);
+            if (!positionProfiles.Success)
+            {
+                string key = Gd66MigrationReasonRegistry.PlayerLocalizationKey("gd66.profile.invalid");
+                SetBanner(Content.GetString(key, key));
+                return false;
+            }
+            if (!RoomContentSpatialOccupancyAuthority.TryParse(
+                    roomContentSpatialOccupancyJson == null ? null : roomContentSpatialOccupancyJson.bytes,
+                    SaveSpatialMigrationLimits.Canonical.Spatial,
+                    out RoomContentSpatialOccupancySnapshot roomContentOccupancy))
+            {
+                string reason = RoomContentSpatialOccupancyAuthority.InvalidReason;
+                SetBanner(Content.GetString(reason, reason));
+                return false;
+            }
             SaveService = new SaveService(Logger, Content.BuildConfig != null ? Content.BuildConfig.save : null);
             SaveService.ConfigureCanonical(SaveSpatialMigrationLimits, Content.ProductionSpatialContent,
                 Content.SpatialLayoutCompatibilityProfiles, parsedRunConfig,
-                canonicalLegacyConfiguration);
+                canonicalLegacyConfiguration, positionProfiles.Value, roomContentOccupancy);
             SaveService.ConfigureRunLoot(TryParseLootConfig(lootConfigJson != null ? lootConfigJson.text : null));
             StructuralContentRemovalPolicySnapshot removalPolicy = null;
             if (structuralContentRemovalPolicyJson != null)
@@ -1340,7 +1371,11 @@ namespace DungeonBuilder.M0
                 }
                 string targetRoomId = SelectedCanonicalRoomInstanceId;
                 DetachedCanonicalWriteResult written = SaveService.ExecuteCanonicalMutation(Save,
-                    DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId, SelectedCanonicalFloorInstanceId));
+                    DetachedCanonicalMutationRequest.Place(categoryId, optionId, targetRoomId,
+                        SelectedCanonicalFloorInstanceId,
+                        string.Equals(categoryId, MvpDungeonPlacementIds.RoomCategoryId,
+                            StringComparison.Ordinal) ? (TileCoordinate?)null :
+                            _selectedRoomLocalContentPosition));
                 if (!written.IsSuccess)
                 {
                     string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(written.Reason);
@@ -1592,7 +1627,8 @@ namespace DungeonBuilder.M0
             {
                 string target = SelectedCanonicalRoomInstanceId;
                 DetachedCanonicalWriteResult result = SaveService.ExecuteCanonicalMutation(Save,
-                    DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target, SelectedCanonicalFloorInstanceId));
+                    DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target,
+                        SelectedCanonicalFloorInstanceId, _selectedRoomLocalContentPosition));
                 success = result.IsSuccess;
                 reason = success ? "ui.returned_content.success" : result.IsNoOp
                     ? "ui.returned_content.same_option" : result.Reason;

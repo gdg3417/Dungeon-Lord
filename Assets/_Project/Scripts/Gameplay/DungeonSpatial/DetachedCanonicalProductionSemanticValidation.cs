@@ -8,7 +8,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal enum DetachedCanonicalProductionSemanticIssue
     {
         InvalidContext, FloorConfiguration, FloorLayout, RoomDefinition, CorridorDefinition,
-        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity, BranchGeometry
+        FixedStructure, AssignmentOption, AssignmentCategory, RoomCapacity, BranchGeometry,
+        AssignmentPosition, AssignmentOccupancy, AssignmentOverlap
     }
 
     internal sealed class DetachedCanonicalProductionSemanticValidationResult
@@ -23,10 +24,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         internal static DetachedCanonicalProductionSemanticValidationResult Validate(
             DetachedCanonicalSpatialSaveState state, ProductionSpatialContentSnapshot production,
-            RunSimulationConfig configuration, CanonicalSpatialSaveWorkloadLimits limits)
+            RunSimulationConfig configuration, CanonicalSpatialSaveWorkloadLimits limits,
+            RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false)
         {
             var issues = new List<DetachedCanonicalProductionSemanticIssue>();
-            if (state == null || production == null || configuration == null || !limits.IsValid)
+            if (state == null || production == null || configuration == null || !limits.IsValid ||
+                requirePositions && occupancy == null)
                 return Result(DetachedCanonicalProductionSemanticIssue.InvalidContext);
             SpatialContentCatalog catalog = production.Catalog;
             var configured = new HashSet<string>((configuration.MvpPlacementEffects ??
@@ -71,7 +74,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
                         layoutValidation, floor.FixedStructures))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
-                ValidateAssignments(floor, roomByInstance, configured, issues);
+                ValidateAssignments(floor, roomByInstance, configured, limits, occupancy,
+                    requirePositions, issues);
             }
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
         }
@@ -124,15 +128,58 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static void ValidateAssignments(SavedSpatialFloor floor,
             IReadOnlyDictionary<string, RoomSpatialDefinition> rooms, HashSet<string> configured,
+            CanonicalSpatialSaveWorkloadLimits limits,
+            RoomContentSpatialOccupancySnapshot occupancy, bool requirePositions,
             ICollection<DetachedCanonicalProductionSemanticIssue> issues)
         {
             RoomContentAssignment[] assignments = floor.RoomContents?.Assignments ?? Array.Empty<RoomContentAssignment>();
+            var occupied = new Dictionary<TileCoordinate, List<RoomContentSpatialOccupancyRecord>>();
+            var usableByRoom = new Dictionary<string, HashSet<TileCoordinate>>(StringComparer.Ordinal);
+            long materialized = 0L;
             foreach (RoomContentAssignment value in assignments)
             {
                 if (value == null || !MvpDungeonPlacementIds.TryGetCategoryForOption(value.OptionId, out string category))
                 { issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentOption); continue; }
                 if (category != value.CategoryId) issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentCategory);
                 if (!configured.Contains(value.OptionId)) issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentOption);
+                if (!requirePositions) continue;
+                if (!rooms.TryGetValue(value.RoomInstanceId, out RoomSpatialDefinition room) ||
+                    !RoomContentSpatialOccupancyAuthority.TryResolve(occupancy, value.CategoryId,
+                        value.OptionId, out RoomContentSpatialOccupancyRecord rule))
+                { issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentOccupancy); continue; }
+                RoomSpatialInstance roomInstance = (floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>())
+                    .SingleOrDefault(item => item != null && item.RoomInstanceId == value.RoomInstanceId);
+                if (roomInstance == null)
+                { issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentPosition); continue; }
+                if (!usableByRoom.TryGetValue(value.RoomInstanceId, out HashSet<TileCoordinate> usable))
+                {
+                    usable = new HashSet<TileCoordinate>(room.ResolveUsableTiles(roomInstance.Anchor,
+                        roomInstance.Orientation, new SpatialValidationWorkloadLimits(
+                            limits.MaximumMaterializedTiles)));
+                    materialized += usable.Count;
+                    usableByRoom.Add(value.RoomInstanceId, usable);
+                }
+                bool valid = usable.Count != 0;
+                foreach (TileCoordinate offset in rule.OccupiedTileOffsets)
+                {
+                    long localX = (long)value.RoomLocalPosition.X + offset.X;
+                    long localY = (long)value.RoomLocalPosition.Y + offset.Y;
+                    if (localX < int.MinValue || localX > int.MaxValue ||
+                        localY < int.MinValue || localY > int.MaxValue || ++materialized >
+                        occupancy.Value.MaximumValidationMaterializedTiles ||
+                        !RoomLocalCoordinateTransform.TryToFloor(
+                            new TileCoordinate((int)localX, (int)localY), room.GrossFootprint,
+                            roomInstance.Anchor, roomInstance.Orientation, out TileCoordinate tile) ||
+                        !usable.Contains(tile))
+                    { valid = false; continue; }
+                    if (!occupied.TryGetValue(tile, out List<RoomContentSpatialOccupancyRecord> existing))
+                    { existing = new List<RoomContentSpatialOccupancyRecord>(); occupied.Add(tile, existing); }
+                    if (existing.Any(other => !RoomContentSpatialOccupancyAuthority.CategoriesMayShare(
+                            other, rule)))
+                        issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentOverlap);
+                    existing.Add(rule);
+                }
+                if (!valid) issues.Add(DetachedCanonicalProductionSemanticIssue.AssignmentPosition);
             }
             foreach (KeyValuePair<string, RoomSpatialDefinition> room in rooms)
             {

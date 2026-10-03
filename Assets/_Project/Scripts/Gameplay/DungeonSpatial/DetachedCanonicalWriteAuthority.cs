@@ -163,7 +163,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalMutationResult mutation = DetachedCanonicalSpatialMutation.Prepare(owned.State,
                 request, production, compatibility, configuration, limits.Canonical, removalPolicy,
                 owned.CorridorContent, owned.BranchKnowledge, currentRuntime.completedResearch,
-                branchingResearch);
+                branchingResearch, context.RoomContentOccupancy);
             if (mutation.IsNoOp) return new DetachedCanonicalWriteResult(false, mutation.Reason, true,
                 false, null, null, null, null);
             if (!mutation.IsSuccess) return Failure(mutation.Reason);

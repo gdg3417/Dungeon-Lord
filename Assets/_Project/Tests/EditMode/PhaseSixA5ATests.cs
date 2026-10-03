@@ -18,9 +18,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static DetachedCanonicalWriteAuthority Writer(Fixture f) => PhaseSixA4Tests.Writer(f);
         private static string FloorTwo(Fixture f) => PhaseSixA4Tests.FloorTwo(f);
         private static ActiveFloorRunSnapshot Snapshot(Fixture f) => PhaseSixA4Tests.Snapshot(f);
-        private static string FrozenEleven(byte[] bytes) => Encoding.UTF8.GetString(bytes)
-            .Replace("\"schemaVersion\":12", "\"schemaVersion\":11")
-            .Replace(",\"sharedFloorKnowledge\":{\"Records\":[]}", "");
+        private static string FrozenEleven(byte[] bytes)
+        {
+            string value = Encoding.UTF8.GetString(bytes)
+                .Replace("\"schemaVersion\":13", "\"schemaVersion\":11")
+                .Replace("\"schemaVersion\":12", "\"schemaVersion\":11")
+                .Replace(",\"sharedFloorKnowledge\":{\"Records\":[]}", "");
+            return System.Text.RegularExpressions.Regex.Replace(value,
+                ",\"RoomLocalPosition\":\\{\"X\":-?[0-9]+,\"Y\":-?[0-9]+\\}", string.Empty);
+        }
 
         private static FloorKnowledgeRecord Record(Fixture f, int floorIndex)
         {
@@ -63,8 +69,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .Replace("\"schemaVersion\":11", "\"schemaVersion\":12")
                 .Replace("\"sharedBranchKnowledge\":{\"Records\":[]}",
                     "\"sharedBranchKnowledge\":{\"Records\":[]},\"sharedFloorKnowledge\":{\"Records\":[]}")));
-            var current = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, f.Context);
-            Assert.That(current.CurrentTargetValidated, Is.True);
+            var current = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
+                first, f.Profile.Canonical);
+            Assert.That(current.IsValid, Is.True);
             Assert.That(current.FloorKnowledge.Records, Is.Empty);
             Assert.That(JsonUtility.ToJson(current.State), Is.EqualTo(JsonUtility.ToJson(frozen.State)));
             Assert.That(JsonUtility.ToJson(current.BranchKnowledge), Is.EqualTo(JsonUtility.ToJson(frozen.BranchKnowledge)));

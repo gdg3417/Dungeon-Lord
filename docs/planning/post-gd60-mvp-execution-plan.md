@@ -1,5 +1,7 @@
 # Post-GD60 MVP Execution Plan
 
+**Phase 7A2 implementation-candidate status (2026-10-03):** The Phase 7A1 baseline is merged in PR #222 at `5d76f88bdd02ab9083e94f36a091f36ea6d66806`. Phase 7A2 advances the writable save target to schema 13, makes exact room-local content positions canonical, migrates frozen schema-12 assignments through the reviewed A1 profiles, and requires explicit position plus configuration-owned occupancy validation for live placement and redeployment. The existing detached coordinator, canonical session, and atomic persistence authorities remain the only publication path. Automated EditMode, PlayMode, production build-gate, real Windows Editor filesystem migration/reopen, and Windows Development Build qualification pass on the implementation branch. External PR review and owner manual Unity/UAT remain required; this status does not claim merge or owner acceptance. Phase 7A3 intraroom simulation and the production graphical editor remain unimplemented.
+
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
 
@@ -17,12 +19,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 6 complete through merged PR #220 at `e9f93b8d742ccaba38c7de32b776970006791d93`; schema 12 is the writable baseline** |
+| Status | **Phase 7A2 implementation candidate advances writable state to schema 13; external review and owner UAT pending** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Phase 6 closes at merged PR #220 / `main` `e9f93b8d742ccaba38c7de32b776970006791d93` |
+| Current implementation baseline | Phase 7A1 merged PR #222 / `main` `5d76f88bdd02ab9083e94f36a091f36ea6d66806` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-10-01 |
+| Last reconciled | 2026-10-03 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 

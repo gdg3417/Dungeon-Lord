@@ -116,7 +116,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(fixture.Acquisition.TryPrice(MvpDungeonPlacementIds.MonsterCategoryId, optionId, out double price), Is.True);
                 double mana = root.Save.structureRuntime.ManaReserve;
                 string custody = JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership);
-                overlay.PlaceSelectedMvpStructure(); overlay.PlaceSelectedMvpStructure();
+                overlay.PlaceSelectedMvpStructure();
+                root.AdjustSelectedRoomLocalContentPosition(1, 0);
+                overlay.PlaceSelectedMvpStructure();
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - 2 * price));
                 var assignments = root.Save.spatialFloors[0].RoomContents.Assignments;
                 Assert.That(assignments.Length, Is.EqualTo(2));
@@ -191,7 +193,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true },
                 Path.GetDirectoryName(fixture.ActivePath));
             service.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility,
-                fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)));
+                fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)),
+                fixture.PositionProfiles, fixture.Occupancy);
             service.ConfigureStructuralEconomy(fixture.Economy);
             service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
             service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
@@ -248,6 +251,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     spatial + "spatial_layout_compatibility_profiles.json");
                 const string save = "Assets/_Project/Data/Production/Save/";
                 root.saveSpatialMigrationLimitsJson = RequiredAsset(save + "save_spatial_migration_limits.json");
+                root.roomContentPositionMigrationProfilesJson = RequiredAsset(
+                    save + "room_content_position_migration_profiles.json");
+                root.roomContentSpatialOccupancyJson = RequiredAsset(
+                    save + "room_content_spatial_occupancy.json");
                 root.structuralContentRemovalPolicyJson = RequiredAsset(
                     save + "structural_content_removal_policy.json");
                 Assert.That(Resources.Load<TextAsset>("structural_economy"), Is.Not.Null);

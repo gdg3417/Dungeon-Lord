@@ -10,13 +10,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCurrentTargetValidationContext(SpatialLayoutCompatibilitySnapshot compatibility,
             ProductionSpatialContentSnapshot production,
             byte[] legacyConfiguration,
-            CanonicalSpatialSerializationLimits limits)
+            CanonicalSpatialSerializationLimits limits,
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         { Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
           Production = production ?? throw new ArgumentNullException(nameof(production));
+          RoomContentOccupancy = roomContentOccupancy;
+#if UNITY_EDITOR
+          if (RoomContentOccupancy == null)
+          {
+              RunSimulationConfig testConfiguration;
+              try { testConfiguration = LegacyGameplayConfigurationContract.Parse(legacyConfiguration); }
+              catch { testConfiguration = null; }
+              RoomContentOccupancy =
+                  RoomContentSpatialOccupancyAuthority.CreateEditorTestSnapshot(testConfiguration);
+          }
+#endif
           this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
           if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits; }
         internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
+        internal RoomContentSpatialOccupancySnapshot RoomContentOccupancy { get; }
         public CanonicalSpatialSerializationLimits Limits { get; }
         internal RunSimulationConfig Configuration
         { get { try { return LegacyGameplayConfigurationContract.Parse(legacyConfiguration); }
@@ -149,7 +162,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 context.Limits);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
-                context.Configuration, context.Limits.Spatial).IsValid) return Failure();
+                context.Configuration, context.Limits.Spatial, context.RoomContentOccupancy, true).IsValid)
+                return Failure();
             if (!PhaseFiveSaveContracts.Validate(result.CorridorContent, result.BranchKnowledge,
                     result.State, context.Production, context.Configuration, context.Limits.Spatial))
                 return Failure();
@@ -215,6 +229,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaElevenAndRoundTrip(
             byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
             ParseValidateAndRoundTripCore(bytes, limits, 11, true, null, null);
+
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaTwelveAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
+            ParseValidateAndRoundTripCore(bytes, limits, 12, true, null, null);
 
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,

@@ -42,7 +42,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { typeof(ResolvedTileFootprint), new[] { "OccupiedTiles" } },
             { typeof(SavedFixedSpatialStructure), new[] { "FixedStructureInstanceId", "FixedStructureDefinitionId", "FloorInstanceId", "Anchor", "Orientation", "Kind" } },
             { typeof(FloorRoomContentState), new[] { "Assignments", "RoomSemantics", "NextSequence" } },
-            { typeof(RoomContentAssignment), new[] { "AssignmentId", "RoomInstanceId", "CategoryId", "OptionId", "Sequence" } },
+            { typeof(RoomContentAssignment), new[] { "AssignmentId", "RoomInstanceId", "CategoryId", "OptionId", "Sequence", "RoomLocalPosition" } },
             { typeof(CanonicalRoomSemantics), new[] { "RoomInstanceId", "LegacyRoomOriginKind" } },
             { typeof(StructuralLifecycleAndOwnershipState), new[] { "Floors", "ReturnedContents" } },
             { typeof(FloorStructuralIdentityLifecycle), new[] { "FloorInstanceId", "NextNativeRoomOrdinal", "NextNativeEdgeOrdinal" } },
@@ -50,10 +50,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         };
         private static readonly string[] FrozenFloorFields =
             { "FloorInstanceId", "FloorDefinitionId", "FloorIndex", "Layout", "FixedStructures", "RoomContents" };
+        private static readonly string[] FrozenRoomContentAssignmentFields =
+            { "AssignmentId", "RoomInstanceId", "CategoryId", "OptionId", "Sequence" };
 
-        private static string[] FieldsFor(Type type, int schemaVersion) =>
-            type == typeof(SavedSpatialFloor) && schemaVersion < CanonicalSaveSchemaVersions.FloorActivationIntroduction
-                ? FrozenFloorFields : Fields[type];
+        private static string[] FieldsFor(Type type, int schemaVersion)
+        {
+            if (type == typeof(SavedSpatialFloor) &&
+                schemaVersion < CanonicalSaveSchemaVersions.FloorActivationIntroduction)
+                return FrozenFloorFields;
+            if (type == typeof(RoomContentAssignment) &&
+                schemaVersion < CanonicalSaveSchemaVersions.RoomContentPositionIntroduction)
+                return FrozenRoomContentAssignmentFields;
+            return Fields[type];
+        }
 
         public static SpatialContractResult<byte[]> Serialize(DetachedCanonicalSpatialSaveState source,
             CanonicalSpatialSerializationLimits limits) =>
@@ -217,10 +226,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string[] declared = pair.Value.OrderBy(name => name, StringComparer.Ordinal).ToArray();
                 if (!actual.SequenceEqual(declared)) return false;
             }
-            // Frozen contracts omit exactly the schema-11 activation member; all other
-            // serializable fields must still match the explicitly declared contract.
+            // Historical contracts omit only the member introduced at their next schema.
             return FrozenFloorFields.SequenceEqual(Fields[typeof(SavedSpatialFloor)]
-                .Where(name => name != nameof(SavedSpatialFloor.ActivationState)));
+                       .Where(name => name != nameof(SavedSpatialFloor.ActivationState))) &&
+                   FrozenRoomContentAssignmentFields.SequenceEqual(
+                       Fields[typeof(RoomContentAssignment)].Where(name =>
+                           name != nameof(RoomContentAssignment.RoomLocalPosition)));
         }
 
         private static void Write(ContractJsonWriter writer, object value, Type type,

@@ -25,11 +25,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static NativeCanonicalSaveResult Create(string activePath,
             ISpatialMigrationFileSystem fileSystem, SaveData recognizedState,
             SpatialLayoutCompatibilitySnapshot compatibility, ProductionSpatialContentSnapshot production,
-            byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits, ContentAcquisitionEconomySnapshot acquisition)
+            byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits,
+            ContentAcquisitionEconomySnapshot acquisition,
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
             if (fileSystem == null || recognizedState == null || compatibility == null || production == null ||
                 legacyConfiguration == null || limits == null || fileSystem.Exists(activePath))
                 return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+            if (roomContentOccupancy == null)
+                return Failure(RoomContentSpatialOccupancyAuthority.InvalidReason);
             if (acquisition == null) return Failure(ContentAcquisitionEconomySnapshot.InvalidReason);
             try
             {
@@ -99,7 +103,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
-                    legacyConfiguration, limits.Canonical);
+                    legacyConfiguration, limits.Canonical, roomContentOccupancy);
                 DetachedCompleteSaveValidationResult validation =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
                 DetachedCanonicalSaveSessionResult opened = validation.IsValid && validation.CurrentTargetValidated

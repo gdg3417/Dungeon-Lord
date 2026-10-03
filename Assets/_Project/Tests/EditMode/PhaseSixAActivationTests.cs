@@ -16,19 +16,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class PhaseSixAActivationTests
     {
         [Test]
-        public void CurrentConstantsAndNativeEmptyCreationUseTwelve()
+        public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(f.ActivePath, fs,
                 f.Runtime, f.Compatibility, f.Production,
-                    LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile, f.Acquisition);
+                    LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
+                    f.Acquisition, f.Occupancy);
             Assert.That(created.IsSuccess, Is.True, created.Reason);
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":12"));
+                Does.Contain("\"schemaVersion\":13"));
             string native = Encoding.UTF8.GetString(created.Session.GetCurrentBytes());
             Assert.That(native.Split(new[] { "\"sharedFloorKnowledge\"" },
                 StringSplitOptions.None).Length, Is.EqualTo(2));
@@ -182,7 +183,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((int)frozen.State.Floors[0].ActivationState, Is.Zero);
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(ten, f.Context).IsValid, Is.False);
             byte[] smuggled = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
-                .Replace("\"schemaVersion\":12", "\"schemaVersion\":10"));
+                .Replace("\"schemaVersion\":13", "\"schemaVersion\":10"));
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(smuggled, f.Profile.Canonical).IsValid, Is.False);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(smuggled, f.Profile.Canonical, out _), Is.False);
         }
@@ -338,7 +339,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
-        public void FrozenChainContinuesThroughEachHistoricalStepToTwelve(int schema)
+        public void FrozenChainContinuesThroughEachHistoricalStepToThirteen(int schema)
         {
             Fixture f = OneFloor();
             string text = PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes());
@@ -352,6 +353,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (schema <= 9) Assert.That(SchemaNineToTenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
+            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(current, f.Profile.Canonical,
+                f.PositionProfiles, out current), Is.True);
             var result = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, f.Context);
             Assert.That(result.CurrentTargetValidated, Is.True);
             Assert.That(result.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));

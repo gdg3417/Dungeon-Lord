@@ -17,6 +17,8 @@ namespace DungeonBuilder.M0
         private readonly MigrationRunner _migrationRunner = new MigrationRunner();
         private SaveSpatialMigrationLimitsProfile _limits;
         private ProductionSpatialContentSnapshot _production;
+        private RoomContentPositionMigrationProfilesSnapshot _positionMigrationProfiles;
+        private RoomContentSpatialOccupancySnapshot _roomContentOccupancy;
         private StructuralContentRemovalPolicySnapshot _removalPolicy;
         private StructuralEconomySnapshot _economy;
         private ContentAcquisitionEconomySnapshot _acquisition;
@@ -168,15 +170,21 @@ namespace DungeonBuilder.M0
 
         public void ConfigureCanonical(SaveSpatialMigrationLimitsProfile limits,
             ProductionSpatialContentSnapshot production, SpatialLayoutCompatibilitySnapshot compatibility,
-            RunSimulationConfig legacyGameplayConfiguration, byte[] legacyConfiguration)
+            RunSimulationConfig legacyGameplayConfiguration, byte[] legacyConfiguration,
+            RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles = null,
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
             _canonicalConfigured = true;
             _limits = limits; _production = production; _compatibility = compatibility;
             _legacyGameplayConfiguration = legacyGameplayConfiguration;
             _legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
+            _positionMigrationProfiles = positionMigrationProfiles;
+            _roomContentOccupancy = roomContentOccupancy;
             _validationContext = limits == null || production == null || compatibility == null ||
-                legacyConfiguration == null ? null : new DetachedCurrentTargetValidationContext(
-                    compatibility, production, legacyConfiguration, limits.Canonical);
+                legacyConfiguration == null || positionMigrationProfiles == null ||
+                roomContentOccupancy == null ? null : new DetachedCurrentTargetValidationContext(
+                    compatibility, production, legacyConfiguration, limits.Canonical,
+                    roomContentOccupancy);
         }
 
         public void ConfigureStructuralRemovalPolicy(StructuralContentRemovalPolicySnapshot policy) =>
@@ -227,7 +235,8 @@ namespace DungeonBuilder.M0
             {
                 SaveData initial = CreateNew(contentVersion);
                 NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
-                    _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration, _limits, _acquisition);
+                    _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration,
+                    _limits, _acquisition, _roomContentOccupancy);
                 if (!created.IsSuccess)
                 { banner = created.Reason == ContentAcquisitionEconomySnapshot.InvalidReason ? created.Reason :
                     Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
@@ -236,7 +245,8 @@ namespace DungeonBuilder.M0
             }
             var coordinator = new DetachedSpatialSaveLoadCoordinator(_limits, _compatibility, _production,
                 _legacyConfiguration, new Dictionary<string, byte[]>(),
-                new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract());
+                new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract(),
+                _positionMigrationProfiles, _roomContentOccupancy);
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {

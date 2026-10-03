@@ -1371,6 +1371,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     productionContent, configuration, completeLimits.Spatial).IsValid &&
                 PhaseFiveSaveContracts.Validate(eleven.CorridorContent, eleven.BranchKnowledge, eleven.State,
                     productionContent, configuration, completeLimits.Spatial)) return true;
+            var twelve = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(bytes, completeLimits);
+            if (twelve.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(twelve.State,
+                    productionContent, configuration, completeLimits.Spatial).IsValid &&
+                PhaseFiveSaveContracts.Validate(twelve.CorridorContent, twelve.BranchKnowledge, twelve.State,
+                    productionContent, configuration, completeLimits.Spatial)) return true;
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits)).IsValid;

@@ -379,10 +379,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             DetachedWholeSaveResult built = Build(fixture, state);
             if (!built.IsSuccess) return false;
-            return unfinished ? DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                built.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid :
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                    CurrentBytes(built.Candidate.GetBytes(), fixture.Limits), fixture.CurrentContext).IsValid;
+            if (unfinished) return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                built.Candidate.GetBytes(), fixture.UnfinishedContext).IsValid;
+            if (!PhaseFourTestSupport.Upgrade(built.Candidate.GetBytes(), fixture.Limits,
+                    out byte[] current)) return false;
+            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+                current, fixture.CurrentContext).IsValid;
         }
 
         private static DetachedCanonicalSpatialSaveState Clone(DetachedCanonicalSpatialSaveState state,

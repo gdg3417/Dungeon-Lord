@@ -4,6 +4,43 @@ using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public static class RoomLocalCoordinateTransform
+    {
+        public static bool TryToFloor(TileCoordinate roomLocalPosition,
+            RectangularFootprintDefinition roomFootprint, TileCoordinate roomAnchor,
+            CardinalOrientation orientation, out TileCoordinate floorPosition)
+        {
+            floorPosition = default(TileCoordinate);
+            if (roomFootprint == null || roomFootprint.Width <= 0 || roomFootprint.Height <= 0 ||
+                !Enum.IsDefined(typeof(CardinalOrientation), orientation)) return false;
+            long x;
+            long y;
+            switch (orientation)
+            {
+                case CardinalOrientation.Ninety:
+                    x = (long)roomAnchor.X + roomFootprint.Height - 1 - roomLocalPosition.Y;
+                    y = (long)roomAnchor.Y + roomLocalPosition.X;
+                    break;
+                case CardinalOrientation.OneEighty:
+                    x = (long)roomAnchor.X + roomFootprint.Width - 1 - roomLocalPosition.X;
+                    y = (long)roomAnchor.Y + roomFootprint.Height - 1 - roomLocalPosition.Y;
+                    break;
+                case CardinalOrientation.TwoSeventy:
+                    x = (long)roomAnchor.X + roomLocalPosition.Y;
+                    y = (long)roomAnchor.Y + roomFootprint.Width - 1 - roomLocalPosition.X;
+                    break;
+                default:
+                    x = (long)roomAnchor.X + roomLocalPosition.X;
+                    y = (long)roomAnchor.Y + roomLocalPosition.Y;
+                    break;
+            }
+            if (x < int.MinValue || x > int.MaxValue || y < int.MinValue || y > int.MaxValue)
+                return false;
+            floorPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+    }
+
     [Serializable]
     public sealed class FloorSpatialConfiguration
     {
@@ -41,7 +78,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (GrossFootprint == null || ReservedTileOffsets == null || !limits.Allows(ReservedTileOffsets.LongLength))
                 return Array.Empty<TileCoordinate>();
-            return ReservedTileOffsets.Select(offset => TransformOffset(offset, anchor, orientation)).OrderBy(tile => tile).ToArray();
+            var resolved = new List<TileCoordinate>(ReservedTileOffsets.Length);
+            foreach (TileCoordinate offset in ReservedTileOffsets)
+            {
+                if (!RoomLocalCoordinateTransform.TryToFloor(offset, GrossFootprint, anchor,
+                        orientation, out TileCoordinate tile)) return Array.Empty<TileCoordinate>();
+                resolved.Add(tile);
+            }
+            return resolved.OrderBy(tile => tile).ToArray();
         }
 
         public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation,
@@ -53,16 +97,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return gross.OccupiedTiles.Where(tile => !reserved.Contains(tile)).ToArray();
         }
 
-        private TileCoordinate TransformOffset(TileCoordinate offset, TileCoordinate anchor, CardinalOrientation orientation)
-        {
-            switch (orientation)
-            {
-                case CardinalOrientation.Ninety: return new TileCoordinate(anchor.X + GrossFootprint.Height - 1 - offset.Y, anchor.Y + offset.X);
-                case CardinalOrientation.OneEighty: return new TileCoordinate(anchor.X + GrossFootprint.Width - 1 - offset.X, anchor.Y + GrossFootprint.Height - 1 - offset.Y);
-                case CardinalOrientation.TwoSeventy: return new TileCoordinate(anchor.X + offset.Y, anchor.Y + GrossFootprint.Width - 1 - offset.X);
-                default: return new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y);
-            }
-        }
     }
 
     [Serializable]

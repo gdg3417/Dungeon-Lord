@@ -311,7 +311,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -954,7 +954,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             NativeCanonicalSaveResult result = NativeCanonicalSaveCreator.Create(path, fileSystem,
                 recognized, source.Compatibility, source.Production, source.LegacyBytes, profile,
-                PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits));
+                PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
+                PhaseFourTestSupport.Occupancy(source.Limits));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Validation.State.Authority.CreationKind,
@@ -963,7 +964,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":12"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":13"));
             Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
             Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
             Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
@@ -1459,6 +1460,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal DungeonBuilder.M0.Economy.StructuralEconomySnapshot Economy;
             internal DungeonBuilder.M0.Economy.ContentAcquisitionEconomySnapshot Acquisition;
             internal BasicBranchingResearchSnapshot BranchingResearch;
+            internal RoomContentSpatialOccupancySnapshot Occupancy;
+            internal RoomContentPositionMigrationProfilesSnapshot PositionProfiles;
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
@@ -1480,8 +1483,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
                 Assert.That(PhaseFourTestSupport.Upgrade(candidate, source.Limits,
                     out candidate), Is.True);
+                RoomContentSpatialOccupancySnapshot occupancy = PhaseFourTestSupport.Occupancy(source.Limits);
+                RoomContentPositionMigrationProfilesSnapshot positionProfiles =
+                    PhaseFourTestSupport.PositionProfiles(source.Limits);
                 var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
-                    source.Production, source.LegacyBytes, source.Limits);
+                    source.Production, source.LegacyBytes, source.Limits, occupancy);
                 var profile = workloadProfile ?? new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     source.Limits, source.WholeLimits);
@@ -1522,12 +1528,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
                     Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
                     Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
-                    BranchingResearch = branchingResearch };
+                    BranchingResearch = branchingResearch, Occupancy = occupancy,
+                    PositionProfiles = positionProfiles };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>
                 DetachedCanonicalSpatialMutation.Prepare(State, request, Production, Compatibility,
-                    Configuration, Profile.Canonical);
+                    Configuration, Profile.Canonical, null, null, null, null, null, Occupancy);
 
             internal DetachedCanonicalWriteResult Execute(DetachedCanonicalMutationRequest request) =>
                 Authority.Execute(ActivePath, FileSystem, Session, State, Runtime, request);
@@ -1571,7 +1578,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 return new Fixture { Production = Production, Compatibility = Compatibility,
                     Configuration = Configuration, Profile = Profile, Context = Context,
                     Session = opened.Session, State = validation.State, Runtime = runtime,
-                    FileSystem = fs, ActivePath = path, Economy = Economy, RemovalPolicy = RemovalPolicy, Acquisition = Acquisition };
+                    FileSystem = fs, ActivePath = path, Economy = Economy, RemovalPolicy = RemovalPolicy,
+                    Acquisition = Acquisition, Occupancy = Occupancy,
+                    PositionProfiles = PositionProfiles, BranchingResearch = BranchingResearch };
             }
         }
     }

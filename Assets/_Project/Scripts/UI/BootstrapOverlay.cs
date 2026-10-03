@@ -1826,6 +1826,30 @@ namespace DungeonBuilder.M0
             {
                 CycleSelectedMvpRoomSlotTarget();
             }
+            if (CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
+                _selectedMvpPlacementCategoryId != MvpDungeonPlacementIds.RoomCategoryId)
+            {
+                TileCoordinate selectedPosition = _root.SelectedRoomLocalContentPosition;
+                GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
+                    GetLocalizedString("ui.room_content.position.format"),
+                    selectedPosition.X, selectedPosition.Y), wrappedLabel);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button(GetLocalizedString("ui.room_content.position.x_previous"),
+                        compactButton, buttonHeight))
+                    _root.AdjustSelectedRoomLocalContentPosition(-1, 0);
+                if (GUILayout.Button(GetLocalizedString("ui.room_content.position.x_next"),
+                        compactButton, buttonHeight))
+                    _root.AdjustSelectedRoomLocalContentPosition(1, 0);
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button(GetLocalizedString("ui.room_content.position.y_previous"),
+                        compactButton, buttonHeight))
+                    _root.AdjustSelectedRoomLocalContentPosition(0, -1);
+                if (GUILayout.Button(GetLocalizedString("ui.room_content.position.y_next"),
+                        compactButton, buttonHeight))
+                    _root.AdjustSelectedRoomLocalContentPosition(0, 1);
+                GUILayout.EndHorizontal();
+            }
             if (!CanonicalMvpRouteProjection.IsCanonical(_root.Save) &&
                 GUILayout.Button(GetLocalizedString(AddBasicRoomSlotButtonKey), compactButton, buttonHeight))
             {
