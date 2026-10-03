@@ -513,6 +513,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (p.OptionId == MvpDungeonPlacementIds.SkeletonOptionId || p.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
                     p.MinimumDamage = p.MaximumDamage = 100;
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
+            // This fixture requires a reached lethal trap. A3 no longer encounters off-path traps.
+            var spatialRoom = Snapshot(f).Floors.Single(value => value.FloorIndex == wipeFloor)
+                .MaterializePlan().RequiredRooms.Single().Room;
+            var targetFloor = f.State.Floors.Single(value => value.FloorIndex == wipeFloor);
+            var monsterStarts = targetFloor.RoomContents.Assignments.Where(a =>
+                a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).Select(a => a.RoomLocalPosition).ToArray();
+            targetFloor.RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.TrapCategoryId)
+                .RoomLocalPosition = IntraroomTraversal.Plan(spatialRoom).Path.First(tile => !monsterStarts.Contains(tile));
+            f = f.Rebase(f.State);
             var result = new RunSimulationService(f.Configuration, Loot()).SimulateSnapshot(1, Snapshot(f));
             Assert.That(result.Party.IsWiped, Is.True); Assert.That(result.FloorTransitions.Length, Is.EqualTo(wipeFloor));
             Assert.That(result.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteWipedKey));
@@ -653,10 +662,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void OneFloorSnapshotMatchesExistingPhaseFiveBExecution()
+        public void OneFloorSnapshotMatchesDerivedSpatialPlanExecution()
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
-            var plan = PhaseFiveBRouteProjection.Resolve(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context), f.Runtime, f.Production, f.Configuration);
+            var plan = Snapshot(f).Floors[0].MaterializePlan();
             var engine = new RunSimulationService(f.Configuration, Loot());
             var expected = engine.SimulateRoute(JsonUtility.FromJson<Gameplay.Structures.StructureRuntimeState>(JsonUtility.ToJson(f.Runtime.structureRuntime)),
                 f.Runtime.totalTicks, 1, RunPostureResolver.BalancedId, plan.RequiredRooms.Select(r => r.Room).ToArray(),
@@ -856,6 +865,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(before.Party, Is.Not.Null); Assert.That(before.EncounterEvents, Is.Not.Empty);
             Assert.That(before.BranchOutcomes, Is.Not.Null); Assert.That(before.FloorTransitions, Is.Not.Empty);
             Assert.That(before.DepthObjective, Is.Not.Null);
+            Assert.That(before.SpatialEvents, Is.Not.Empty);
             string serialized = JsonUtility.ToJson(f.Runtime);
             Assert.That(serialized, Does.Not.Contain("\"Party\""));
             Assert.That(serialized, Does.Not.Contain("\"EncounterEvents\""));
@@ -885,6 +895,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(after.BranchOutcomes, Is.SameAs(before.BranchOutcomes));
                 Assert.That(after.FloorTransitions, Is.SameAs(before.FloorTransitions));
                 Assert.That(after.DepthObjective, Is.SameAs(before.DepthObjective));
+                Assert.That(after.SpatialEvents, Is.SameAs(before.SpatialEvents));
 
                 var reopened = DetachedCanonicalSaveSession.Open(f.FileSystem.ReadAllBytes(f.ActivePath), f.Context, f.Profile);
                 Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
@@ -895,6 +906,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var durable = durableSave.runHistory.LatestOutcome ?? durableSave.runHistory.RecentOutcomes.Last();
                 Assert.That(durable.Party, Is.Null); Assert.That(durable.EncounterEvents, Is.Null);
                 Assert.That(durable.BranchOutcomes, Is.Null); Assert.That(durable.FloorTransitions, Is.Null);
+                Assert.That(durable.SpatialEvents, Is.Null);
                 Assert.That(durable.DepthObjective, Is.Null);
             }
             finally { UnityEngine.Object.DestroyImmediate(go); }
