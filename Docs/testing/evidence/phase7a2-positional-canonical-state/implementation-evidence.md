@@ -36,6 +36,13 @@ production occupancy, and prove that every saved canonical coordinate resolves b
 frozen physical tile. Rectangle Ninety explicitly covers the later monster slot at oriented
 `(3,1)`.
 
+External re-review subsequently found that the owner UAT checklist still described direct
+stored-coordinate-to-A1-anchor comparison from before this canonical-frame correction. The
+checklist now distinguishes Zero-orientation direct comparison from rotated-room forward
+transformation before comparing to the orientation-specific frozen anchor. This is a
+documentation-only clarification; it makes no production-code, test, configuration, or frozen
+profile change.
+
 The reviewed live occupancy asset also contained an unapproved independent
 `MaximumValidationMaterializedTiles = 66`. No specification or approved sizing evidence owns that
 number. It has been removed. Live occupancy parsing and per-floor positional validation now consume
