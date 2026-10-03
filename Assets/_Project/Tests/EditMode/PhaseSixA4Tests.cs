@@ -414,8 +414,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         internal static void AddContent(Fixture f, int floorIndex, string category, string option)
         {
-            var room = f.State.Floors.Single(x => x.FloorIndex == floorIndex).Layout.Rooms[0];
-            f.Accept(Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime, DetachedCanonicalMutationRequest.Place(category, option, room.RoomInstanceId, f.State.Floors.Single(x => x.FloorIndex == floorIndex).FloorInstanceId)));
+            SavedSpatialFloor floor = f.State.Floors.Single(x => x.FloorIndex == floorIndex);
+            var room = floor.Layout.Rooms[0];
+            int categoryIndex = floor.RoomContents.Assignments.Count(value => value != null &&
+                value.RoomInstanceId == room.RoomInstanceId && value.CategoryId == category);
+            TileCoordinate position = category == MvpDungeonPlacementIds.MonsterCategoryId
+                ? new TileCoordinate(categoryIndex == 0 ? 1 : 2, 1)
+                : category == MvpDungeonPlacementIds.TrapCategoryId
+                    ? new TileCoordinate(categoryIndex == 0 ? 1 : 2, 2)
+                    : new TileCoordinate(categoryIndex == 0 ? 0 : 3,
+                        categoryIndex == 0 ? 0 : 3);
+            f.Accept(Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                DetachedCanonicalMutationRequest.Place(category, option, room.RoomInstanceId,
+                    floor.FloorInstanceId, position)));
         }
         internal static LootConfig Loot() => JsonUtility.FromJson<LootConfig>(File.ReadAllText("Assets/_Project/Data/Bootstrap/loot_config.json"));
         internal static void ForceDescent(RunSimulationConfig c, bool descend)

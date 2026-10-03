@@ -56,7 +56,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         {
             string[] paths = ProductionSpatialGeneratedSetParser.RequiredPaths
                 .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath,
-                    SpatialLayoutCompatibilityProfiles.ProductionPath }).ToArray();
+                    SpatialLayoutCompatibilityProfiles.ProductionPath,
+                    RoomContentPositionMigrationProfiles.ProductionPath,
+                    RoomContentSpatialOccupancyAuthority.ProductionPath }).ToArray();
             byte[][] before = paths.Select(File.ReadAllBytes).ToArray();
             Assert.That(RealValidationWithoutRecovery().Validate(BootstrapOnly()).Success, Is.True);
             for (int index = 0; index < paths.Length; index++)
@@ -429,6 +431,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase("language-null-entry")]
         [TestCase("limits")]
         [TestCase("compatibility")]
+        [TestCase("position-migration")]
+        [TestCase("occupancy")]
         public void MissingAssignmentsAreClassified(string field)
         {
             ProductionSpatialBuildGateResult result = WithCanonicalBootstrapPreview((scene, root) =>
@@ -440,6 +444,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 if (field == "language-null-entry") root.productionSpatialLanguageTables = new TextAsset[] { null };
                 if (field == "limits") root.productionSpatialValidationLimits = null;
                 if (field == "compatibility") root.spatialLayoutCompatibilityProfilesJson = null;
+                if (field == "position-migration") root.roomContentPositionMigrationProfilesJson = null;
+                if (field == "occupancy") root.roomContentSpatialOccupancyJson = null;
                 return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.MissingAssignment));
@@ -450,13 +456,17 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
         [TestCase("english")]
         [TestCase("limits")]
         [TestCase("compatibility")]
+        [TestCase("position-migration")]
+        [TestCase("occupancy")]
         public void ByteIdenticalCopiedRequiredAssignmentsAreRejected(string field)
         {
             string source = field == "manifest" ? ProductionSpatialGeneratedSetParser.ManifestPath :
                 field == "catalog" ? ProductionSpatialGeneratedSetParser.CatalogPath :
                 field == "english" ? ProductionSpatialGeneratedSetParser.EnglishPath :
                 field == "limits" ? ProductionSpatialContentPublicationService.LimitsPath :
-                SpatialLayoutCompatibilityProfiles.ProductionPath;
+                field == "compatibility" ? SpatialLayoutCompatibilityProfiles.ProductionPath :
+                field == "position-migration" ? RoomContentPositionMigrationProfiles.ProductionPath :
+                RoomContentSpatialOccupancyAuthority.ProductionPath;
             string copy = TestRoot + "/copied-" + field + ".json";
             Assert.That(AssetDatabase.CopyAsset(source, copy), Is.True);
             TextAsset copied = Load(copy);
@@ -467,6 +477,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 if (field == "english") root.productionSpatialLanguageTables = new[] { copied };
                 if (field == "limits") root.productionSpatialValidationLimits = copied;
                 if (field == "compatibility") root.spatialLayoutCompatibilityProfilesJson = copied;
+                if (field == "position-migration") root.roomContentPositionMigrationProfilesJson = copied;
+                if (field == "occupancy") root.roomContentSpatialOccupancyJson = copied;
                 return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.WrongAssetAssignment));
@@ -481,6 +493,41 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 return ProductionSpatialContentBuildGate.ValidateOpenSceneComposition(scene);
             });
             Assert.That(result.Reason, Is.EqualTo(ProductionSpatialBuildGateReason.WrongAssetAssignment));
+        }
+
+        [Test]
+        public void MalformedRoomContentOccupancyFailsInstalledValidationClosed()
+        {
+            var malformed = new TextAsset("{\"Schema\":\"room_content_spatial_occupancy\"}");
+            ProductionSpatialBuildGateResult result =
+                ProductionSpatialContentBuildGate.ValidateRoomContentSpatialOccupancy(malformed,
+                    new SpatialContentValidationWorkloadLimits(100, 100, 100, 100, 100),
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            Assert.That(result.Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy));
+        }
+
+        [Test]
+        public void IncompleteRoomContentOccupancyFailsInstalledValidationClosed()
+        {
+            TextAsset production = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                RoomContentSpatialOccupancyAuthority.ProductionPath);
+            RoomContentSpatialOccupancyConfiguration value =
+                JsonUtility.FromJson<RoomContentSpatialOccupancyConfiguration>(production.text);
+            value.Records = value.Records.Take(value.Records.Length - 1).ToArray();
+            var incomplete = new TextAsset(JsonUtility.ToJson(value, true) + "\n");
+            ProductionSpatialContentWorkloadLimitParseResult workload =
+                ProductionSpatialContentWorkloadLimitParser.Parse(AssetDatabase.LoadAssetAtPath<TextAsset>(
+                    ProductionSpatialContentPublicationService.LimitsPath));
+
+            ProductionSpatialBuildGateResult result =
+                ProductionSpatialContentBuildGate.ValidateRoomContentSpatialOccupancy(incomplete,
+                    workload.Limits, AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+
+            Assert.That(result.Reason,
+                Is.EqualTo(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy));
         }
 
         [Test]

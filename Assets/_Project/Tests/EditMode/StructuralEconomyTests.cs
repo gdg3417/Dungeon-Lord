@@ -459,13 +459,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(restored.IsValid, Is.True); Assert.That(restored.Investment.All(r => r.ConstructionMana == 0 && r.RenovationMana == 0), Is.True);
             foreach (SavedSpatialFloor floor in restored.State.Floors)
                 floor.ActivationState = FloorActivationState.Active;
-            CollectionAssert.AreEqual(CanonicalSpatialSaveSerializer.Serialize(f.State, f.Profile.Canonical).Value,
-                CanonicalSpatialSaveSerializer.Serialize(restored.State, f.Profile.Canonical).Value);
+            CollectionAssert.AreEqual(f.State.Floors[0].RoomContents.Assignments.Select(value =>
+                    value.AssignmentId + ":" + value.RoomInstanceId + ":" + value.CategoryId + ":" +
+                    value.OptionId + ":" + value.Sequence).ToArray(),
+                restored.State.Floors[0].RoomContents.Assignments.Select(value =>
+                    value.AssignmentId + ":" + value.RoomInstanceId + ":" + value.CategoryId + ":" +
+                    value.OptionId + ":" + value.Sequence).ToArray());
             Assert.That(Encoding.UTF8.GetString(nine), Does.Contain("\"ManaReserve\":123.5"));
             Assert.That(SchemaNineToTenUpgrade.TryPrepare(nine, f.Profile.Canonical, out byte[] ten), Is.True);
             Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
             Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(eleven, f.Profile.Canonical, out eleven), Is.True);
-            Assert.That(DetachedCanonicalSaveSession.Open(eleven, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(eleven, f.Profile.Canonical,
+                f.PositionProfiles, out byte[] thirteen), Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(thirteen, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }
@@ -826,7 +832,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     dungeonLayout = new DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState(),
                     structureRuntime = new StructureRuntimeState { ManaReserve = mana } },
                 f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, mana));
+                PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, mana), f.Occupancy);
             Assert.That(native.IsSuccess, Is.True, native.Reason);
             f.Session = native.Session; f.State = native.Validation.State; f.Runtime = native.RuntimeProjection;
             f.Reopen(); return f;
@@ -862,7 +868,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
             service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)));
+                Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)),
+                f.PositionProfiles, f.Occupancy);
             service.ConfigureStructuralEconomy(f.Economy, clock); service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
             service.ConfigureContentAcquisitionEconomy(f.Acquisition);
             typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);

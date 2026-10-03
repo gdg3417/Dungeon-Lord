@@ -237,7 +237,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.EqualTo(calculated.WalletAfter));
             Assert.That(write.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(4600));
             string persisted = Encoding.UTF8.GetString(write.GetPersistedBytes());
-            Assert.That(persisted, Does.Contain("\"schemaVersion\":12"));
+            Assert.That(persisted, Does.Contain("\"schemaVersion\":13"));
             Assert.That(persisted, Does.Not.Contain("OfflinePassiveMana"));
             Assert.That(persisted, Does.Not.Contain("BaseOfflineEfficiency"));
         }
@@ -348,7 +348,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         fixture.Profile.Canonical).Value);
                     Assert.That(Encoding.UTF8.GetString(
                         reopenedService.CanonicalSession.GetCurrentBytes()),
-                        Does.Contain("\"schemaVersion\":12"));
+                        Does.Contain("\"schemaVersion\":13"));
                     Assert.That(reopened, Is.SameAs(reopenedRoot.Save));
                 }
                 finally { UnityEngine.Object.DestroyImmediate(reopenedGo); }
@@ -430,7 +430,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
             Assert.That(Encoding.UTF8.GetString(fixture.Session.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":12"));
+                Does.Contain("\"schemaVersion\":13"));
         }
 
         [Test]
@@ -620,7 +620,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Path.GetDirectoryName(fixture.ActivePath));
             service.ConfigureCanonical(fixture.Profile, fixture.Production,
                 fixture.Compatibility, fixture.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration));
+                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration),
+                fixture.PositionProfiles, fixture.Occupancy);
             service.ConfigureStructuralEconomy(fixture.Economy);
             service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
             service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);

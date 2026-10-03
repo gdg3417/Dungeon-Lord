@@ -46,7 +46,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var service = new SaveService(new SimpleLogger(false, (level, message) => { }), null, Path.GetDirectoryName(f.ActivePath));
             service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration));
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
+                f.PositionProfiles, f.Occupancy);
             typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
             foreach (var pair in new[] { new System.Collections.Generic.KeyValuePair<string, object>("_canonicalSession", f.Session),
                 new System.Collections.Generic.KeyValuePair<string, object>("_canonicalFileSystem", f.FileSystem),
@@ -111,7 +112,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(knowledge.Confidence, Is.EqualTo(.75d)); Assert.That(knowledge.LastConfirmedRunId, Is.EqualTo(run.RunId));
             Assert.That(JsonUtility.ToJson(before.runHistory), Is.Not.EqualTo(JsonUtility.ToJson(f.Runtime.runHistory)));
             Assert.That(JsonUtility.ToJson(f.State), Is.EqualTo(topology)); Assert.That(JsonUtility.ToJson(f.Runtime.corridorContent), Is.EqualTo(corridor));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
             string aggregate = JsonUtility.ToJson(run); double heat = f.Runtime.structureRuntime.Heat;
             Assert.That(aggregate, Does.Not.Contain("BranchOutcomes").And.Not.Contain("EncounterEvents").And.Not.Contain("CurrentHealth"));
             f.Reopen(); Assert.That(f.Runtime.runHistory.LatestOutcome.BranchOutcomes, Is.Null);

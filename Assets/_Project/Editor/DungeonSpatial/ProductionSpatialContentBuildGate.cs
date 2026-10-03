@@ -30,7 +30,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
         InvalidCompatibilityProfile = 13,
         UnauthorizedActiveCompatibilitySelection = 14,
         InvalidFloorConstructionConfiguration = 15,
-        InvalidRoomContentPositionMigrationProfiles = 16
+        InvalidRoomContentPositionMigrationProfiles = 16,
+        InvalidRoomContentSpatialOccupancy = 17
     }
 
     public sealed class ProductionSpatialBuildGateResult
@@ -96,7 +97,8 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 ProductionSpatialGeneratedSetParser.RequiredPaths
                     .Concat(new[] { ProductionSpatialContentPublicationService.LimitsPath,
                         SpatialLayoutCompatibilityProfiles.ProductionPath,
-                        RoomContentPositionMigrationProfiles.ProductionPath }), File.Exists);
+                        RoomContentPositionMigrationProfiles.ProductionPath,
+                        RoomContentSpatialOccupancyAuthority.ProductionPath }), File.Exists);
             if (!paths.Success) return paths;
 
             TextAsset manifest = AssetDatabase.LoadAssetAtPath<TextAsset>(ProductionSpatialGeneratedSetParser.ManifestPath);
@@ -106,8 +108,10 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             TextAsset compatibility = AssetDatabase.LoadAssetAtPath<TextAsset>(SpatialLayoutCompatibilityProfiles.ProductionPath);
             TextAsset positionProfiles = AssetDatabase.LoadAssetAtPath<TextAsset>(
                 RoomContentPositionMigrationProfiles.ProductionPath);
+            TextAsset occupancy = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                RoomContentSpatialOccupancyAuthority.ProductionPath);
             if (manifest == null || catalog == null || english == null || limits == null || compatibility == null ||
-                positionProfiles == null)
+                positionProfiles == null || occupancy == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingRequiredProductionFile, "AssetDatabaseImport");
 
             ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(manifest, catalog, new[] { english }, limits);
@@ -127,6 +131,12 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
                     "Dependency");
             if (!positionValidation.Success) return positionValidation;
+            ProductionSpatialBuildGateResult occupancyValidation =
+                ValidateRoomContentSpatialOccupancy(occupancy,
+                    parsedLimits.Limits,
+                    AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            if (!occupancyValidation.Success) return occupancyValidation;
             const string architecture = "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/";
             if (!saveLimits.IsSuccess || !FloorConstructionProfileSnapshot.TryParse(
                     Resources.Load<TextAsset>(FloorConstructionProfileSnapshot.ProductionResourcePath), spatial.Value,
@@ -166,6 +176,18 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentPositionMigrationProfiles,
                     "SourceBoundary:" + StableDetail(null, conformance.Diagnostics));
         }
+
+        internal static ProductionSpatialBuildGateResult ValidateRoomContentSpatialOccupancy(
+            TextAsset occupancy, SpatialContentValidationWorkloadLimits limits,
+            TextAsset runSimulationConfiguration) =>
+            occupancy != null && BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                runSimulationConfiguration == null ? null : runSimulationConfiguration.text,
+                out RunSimulationConfig configuration) &&
+            RoomContentSpatialOccupancyAuthority.TryParse(occupancy.bytes,
+                limits, configuration, out RoomContentSpatialOccupancySnapshot ignored)
+                ? Success()
+                : Failure(ProductionSpatialBuildGateReason.InvalidRoomContentSpatialOccupancy,
+                    "RoomContentSpatialOccupancy");
 
         internal static ProductionSpatialBuildGateResult ValidateComposition(string[] attemptedScenes)
         {
@@ -239,7 +261,9 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 gameRoot.productionSpatialValidationLimits == null || gameRoot.productionSpatialLanguageTables == null ||
                 gameRoot.productionSpatialLanguageTables.Length == 0 ||
                 gameRoot.productionSpatialLanguageTables.Any(asset => asset == null) ||
-                gameRoot.spatialLayoutCompatibilityProfilesJson == null)
+                gameRoot.spatialLayoutCompatibilityProfilesJson == null ||
+                gameRoot.roomContentPositionMigrationProfilesJson == null ||
+                gameRoot.roomContentSpatialOccupancyJson == null)
                 return Failure(ProductionSpatialBuildGateReason.MissingAssignment, "ProductionSpatialContent");
 
             if (!ExactPath(gameRoot.productionSpatialManifest, ProductionSpatialGeneratedSetParser.ManifestPath) ||
@@ -250,7 +274,11 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
                 gameRoot.productionSpatialLanguageTables.Select(AssetDatabase.GetAssetPath)
                     .Distinct(StringComparer.Ordinal).Count() != gameRoot.productionSpatialLanguageTables.Length ||
                 !ExactPath(gameRoot.spatialLayoutCompatibilityProfilesJson,
-                    SpatialLayoutCompatibilityProfiles.ProductionPath))
+                    SpatialLayoutCompatibilityProfiles.ProductionPath) ||
+                !ExactPath(gameRoot.roomContentPositionMigrationProfilesJson,
+                    RoomContentPositionMigrationProfiles.ProductionPath) ||
+                !ExactPath(gameRoot.roomContentSpatialOccupancyJson,
+                    RoomContentSpatialOccupancyAuthority.ProductionPath))
                 return Failure(ProductionSpatialBuildGateReason.WrongAssetAssignment, "ProductionSpatialContent");
 
             ProductionSpatialBuildGateResult loaded = ValidateLoadedAssets(gameRoot.productionSpatialManifest, gameRoot.productionSpatialCatalog,

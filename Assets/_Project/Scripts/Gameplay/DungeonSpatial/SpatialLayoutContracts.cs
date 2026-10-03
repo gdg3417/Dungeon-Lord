@@ -4,6 +4,104 @@ using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    public static class RoomLocalCoordinateTransform
+    {
+        public static bool TryToFloor(TileCoordinate roomLocalPosition,
+            RectangularFootprintDefinition roomFootprint, TileCoordinate roomAnchor,
+            CardinalOrientation orientation, out TileCoordinate floorPosition)
+        {
+            floorPosition = default(TileCoordinate);
+            if (!TryToOriented(roomLocalPosition, roomFootprint, orientation,
+                    out TileCoordinate oriented)) return false;
+            long x = (long)roomAnchor.X + oriented.X;
+            long y = (long)roomAnchor.Y + oriented.Y;
+            if (x < int.MinValue || x > int.MaxValue || y < int.MinValue || y > int.MaxValue)
+                return false;
+            floorPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+
+        public static bool TryToOriented(TileCoordinate roomLocalPosition,
+            RectangularFootprintDefinition baseFootprint, CardinalOrientation orientation,
+            out TileCoordinate orientedPosition)
+        {
+            orientedPosition = default(TileCoordinate);
+            if (!IsValid(baseFootprint, orientation) || roomLocalPosition.X < 0 ||
+                roomLocalPosition.X >= baseFootprint.Width || roomLocalPosition.Y < 0 ||
+                roomLocalPosition.Y >= baseFootprint.Height) return false;
+            long x;
+            long y;
+            switch (orientation)
+            {
+                case CardinalOrientation.Ninety:
+                    x = (long)baseFootprint.Height - 1 - roomLocalPosition.Y;
+                    y = roomLocalPosition.X;
+                    break;
+                case CardinalOrientation.OneEighty:
+                    x = (long)baseFootprint.Width - 1 - roomLocalPosition.X;
+                    y = (long)baseFootprint.Height - 1 - roomLocalPosition.Y;
+                    break;
+                case CardinalOrientation.TwoSeventy:
+                    x = roomLocalPosition.Y;
+                    y = (long)baseFootprint.Width - 1 - roomLocalPosition.X;
+                    break;
+                default:
+                    x = roomLocalPosition.X;
+                    y = roomLocalPosition.Y;
+                    break;
+            }
+            if (x < int.MinValue || x > int.MaxValue || y < int.MinValue || y > int.MaxValue)
+                return false;
+            orientedPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+
+        public static bool TryFromOriented(TileCoordinate orientedPosition,
+            RectangularFootprintDefinition orientedFootprint, CardinalOrientation orientation,
+            out TileCoordinate roomLocalPosition)
+        {
+            roomLocalPosition = default(TileCoordinate);
+            if (!IsValid(orientedFootprint, orientation) || orientedPosition.X < 0 ||
+                orientedPosition.X >= orientedFootprint.Width || orientedPosition.Y < 0 ||
+                orientedPosition.Y >= orientedFootprint.Height) return false;
+            long baseWidth = orientation == CardinalOrientation.Ninety ||
+                orientation == CardinalOrientation.TwoSeventy
+                ? orientedFootprint.Height : orientedFootprint.Width;
+            long baseHeight = orientation == CardinalOrientation.Ninety ||
+                orientation == CardinalOrientation.TwoSeventy
+                ? orientedFootprint.Width : orientedFootprint.Height;
+            long x;
+            long y;
+            switch (orientation)
+            {
+                case CardinalOrientation.Ninety:
+                    x = orientedPosition.Y;
+                    y = baseHeight - 1 - orientedPosition.X;
+                    break;
+                case CardinalOrientation.OneEighty:
+                    x = baseWidth - 1 - orientedPosition.X;
+                    y = baseHeight - 1 - orientedPosition.Y;
+                    break;
+                case CardinalOrientation.TwoSeventy:
+                    x = baseWidth - 1 - orientedPosition.Y;
+                    y = orientedPosition.X;
+                    break;
+                default:
+                    x = orientedPosition.X;
+                    y = orientedPosition.Y;
+                    break;
+            }
+            if (x < 0 || x >= baseWidth || y < 0 || y >= baseHeight ||
+                x > int.MaxValue || y > int.MaxValue) return false;
+            roomLocalPosition = new TileCoordinate((int)x, (int)y);
+            return true;
+        }
+
+        private static bool IsValid(RectangularFootprintDefinition footprint,
+            CardinalOrientation orientation) => footprint != null && footprint.Width > 0 &&
+            footprint.Height > 0 && Enum.IsDefined(typeof(CardinalOrientation), orientation);
+    }
+
     [Serializable]
     public sealed class FloorSpatialConfiguration
     {
@@ -41,7 +139,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (GrossFootprint == null || ReservedTileOffsets == null || !limits.Allows(ReservedTileOffsets.LongLength))
                 return Array.Empty<TileCoordinate>();
-            return ReservedTileOffsets.Select(offset => TransformOffset(offset, anchor, orientation)).OrderBy(tile => tile).ToArray();
+            var resolved = new List<TileCoordinate>(ReservedTileOffsets.Length);
+            foreach (TileCoordinate offset in ReservedTileOffsets)
+            {
+                if (!RoomLocalCoordinateTransform.TryToFloor(offset, GrossFootprint, anchor,
+                        orientation, out TileCoordinate tile)) return Array.Empty<TileCoordinate>();
+                resolved.Add(tile);
+            }
+            return resolved.OrderBy(tile => tile).ToArray();
         }
 
         public TileCoordinate[] ResolveUsableTiles(TileCoordinate anchor, CardinalOrientation orientation,
@@ -53,16 +158,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return gross.OccupiedTiles.Where(tile => !reserved.Contains(tile)).ToArray();
         }
 
-        private TileCoordinate TransformOffset(TileCoordinate offset, TileCoordinate anchor, CardinalOrientation orientation)
-        {
-            switch (orientation)
-            {
-                case CardinalOrientation.Ninety: return new TileCoordinate(anchor.X + GrossFootprint.Height - 1 - offset.Y, anchor.Y + offset.X);
-                case CardinalOrientation.OneEighty: return new TileCoordinate(anchor.X + GrossFootprint.Width - 1 - offset.X, anchor.Y + GrossFootprint.Height - 1 - offset.Y);
-                case CardinalOrientation.TwoSeventy: return new TileCoordinate(anchor.X + offset.Y, anchor.Y + GrossFootprint.Width - 1 - offset.X);
-                default: return new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y);
-            }
-        }
     }
 
     [Serializable]

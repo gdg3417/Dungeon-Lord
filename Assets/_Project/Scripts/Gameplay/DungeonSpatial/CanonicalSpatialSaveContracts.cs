@@ -40,6 +40,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string CategoryId;
         public string OptionId;
         public long Sequence;
+        public TileCoordinate RoomLocalPosition;
     }
 
     [Serializable]
@@ -228,7 +229,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static CanonicalSpatialSaveValidationResult ValidateFrozenWithLifecycle(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
             int schemaVersion, bool requireCanonicalOrdering = false) =>
-            schemaVersion == 8 || schemaVersion == 9 || schemaVersion == 10 || schemaVersion == 11
+            schemaVersion == 8 || schemaVersion == 9 || schemaVersion == 10 || schemaVersion == 11 ||
+            schemaVersion == 12
                 ? ValidateCore(state, limits, requireCanonicalOrdering, true, schemaVersion)
                 : new CanonicalSpatialSaveValidationResult(new[]
                     { CanonicalSpatialSaveValidationIssue.InvalidSource });
@@ -481,7 +483,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Anchor = value.Anchor, Orientation = value.Orientation, Kind = value.Kind };
         private static RoomContentAssignment CopyAssignment(RoomContentAssignment value) => value == null ? null :
             new RoomContentAssignment { AssignmentId = value.AssignmentId, RoomInstanceId = value.RoomInstanceId,
-                CategoryId = value.CategoryId, OptionId = value.OptionId, Sequence = value.Sequence };
+                CategoryId = value.CategoryId, OptionId = value.OptionId, Sequence = value.Sequence,
+                RoomLocalPosition = value.RoomLocalPosition };
         private static CanonicalRoomSemantics CopySemantics(CanonicalRoomSemantics value) => value == null ? null :
             new CanonicalRoomSemantics { RoomInstanceId = value.RoomInstanceId,
                 LegacyRoomOriginKind = value.LegacyRoomOriginKind };

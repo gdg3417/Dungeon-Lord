@@ -298,6 +298,18 @@
       "text": "Select a compatible room before redeploying this item."
     },
     {
+      "key": "content.position.required",
+      "text": "Select an explicit room-local position before placing this content."
+    },
+    {
+      "key": "content.position.invalid",
+      "text": "That room-local position cannot hold the selected content."
+    },
+    {
+      "key": "content.position.occupancy_configuration_invalid",
+      "text": "Room-content footprint configuration is unavailable."
+    },
+    {
       "key": "ui.returned_content.empty",
       "text": "Returned content: none."
     },
@@ -3611,6 +3623,11 @@
     {"key": "ui.branch.qa.research.set", "text": "QA: Complete Basic Branching"},
     {"key": "ui.branch.qa.research.clear", "text": "QA: Clear Basic Branching"},
     {"key": "ui.branch.qa.research.set.success", "text": "Basic Branching completion was established and saved for QA."},
-    {"key": "ui.branch.qa.research.clear.success", "text": "Basic Branching completion was cleared and saved for QA."}
+    {"key": "ui.branch.qa.research.clear.success", "text": "Basic Branching completion was cleared and saved for QA."},
+    {"key": "ui.room_content.position.format", "text": "Room-local content position: ({0}, {1})"},
+    {"key": "ui.room_content.position.x_previous", "text": "Position X -"},
+    {"key": "ui.room_content.position.x_next", "text": "Position X +"},
+    {"key": "ui.room_content.position.y_previous", "text": "Position Y -"},
+    {"key": "ui.room_content.position.y_next", "text": "Position Y +"}
   ]
 }

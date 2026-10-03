@@ -87,10 +87,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(durable, f.FileSystem.ReadAllBytes(f.ActivePath));
             if (Category(option) == MvpDungeonPlacementIds.MonsterCategoryId)
             {
-                f.Accept(f.Execute(request));
+                var second = DetachedCanonicalMutationRequest.Place(Category(option), option, Target(f), null,
+                    new TileCoordinate(3, 1));
+                f.Accept(f.Execute(second));
                 Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(before - 2 * price));
                 Assert.That(f.State.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(2));
-                Unchanged(f, request, DetachedSpatialMigrationPreparer.CapacityReason);
+                Unchanged(f, DetachedCanonicalMutationRequest.Place(Category(option), option, Target(f), null,
+                    new TileCoordinate(3, 2)), DetachedSpatialMigrationPreparer.CapacityReason);
             }
             else Unchanged(f, request, DetachedCanonicalSpatialMutation.NoOpReason);
         }
@@ -106,7 +109,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string[] investment = Investment(f);
             string custody = JsonUtility.ToJson(f.State.LifecycleAndOwnership);
             var oldSession = f.Session; var oldState = f.State; var oldRuntime = f.Runtime;
-            var first = DetachedCanonicalMutationRequest.Place(Category(firstOption), firstOption, Target(f));
+            var first = DetachedCanonicalMutationRequest.Place(Category(firstOption), firstOption, Target(f), null,
+                new TileCoordinate(1, 1));
             f.Accept(f.Execute(first));
             Assert.That(f.Acquisition.TryPrice(Category(firstOption), firstOption, out double firstPrice), Is.True);
             Assert.That(firstPrice, Is.EqualTo(firstOption == MvpDungeonPlacementIds.SkeletonOptionId ? 25 : 20));
@@ -125,7 +129,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(afterFirst, f.FileSystem.ReadAllBytes(f.ActivePath));
             CollectionAssert.AreEqual(afterFirst, f.Session.GetCurrentBytes());
 
-            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption, Target(f))));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption,
+                Target(f), null, new TileCoordinate(2, 1))));
             Assert.That(f.Acquisition.TryPrice(Category(secondOption), secondOption, out double secondPrice), Is.True);
             Assert.That(secondPrice, Is.EqualTo(secondOption == MvpDungeonPlacementIds.SkeletonOptionId ? 25 : 20));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(100 - firstPrice - secondPrice));
@@ -152,7 +157,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(investment, Investment(f));
             Assert.That(JsonUtility.ToJson(f.State.LifecycleAndOwnership), Is.EqualTo(custody));
             Unchanged(f, first, DetachedSpatialMigrationPreparer.CapacityReason);
-            Unchanged(f, DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption, Target(f)),
+            Unchanged(f, DetachedCanonicalMutationRequest.Place(Category(secondOption), secondOption, Target(f),
+                    null, new TileCoordinate(3, 1)),
                 DetachedSpatialMigrationPreparer.CapacityReason);
         }
 
@@ -224,7 +230,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Fixture.Create(null); f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string before = JsonUtility.ToJson(f.Runtime);
             var failed = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem, f.Runtime, f.Compatibility,
-                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile, null);
+                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
+                null, f.Occupancy);
             Assert.That(failed.Reason, Is.EqualTo(ContentAcquisitionEconomySnapshot.InvalidReason));
             Assert.That(failed.IsSuccess, Is.False); Assert.That(f.FileSystem.Exists(f.ActivePath), Is.False);
             Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(before));
@@ -303,7 +310,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var state = f.State;
             state.Floors[0].RoomContents.Assignments = Enumerable.Range(0, capacity.TrapCapacity).Select(i =>
                 new RoomContentAssignment { AssignmentId = "test.full.trap." + i, RoomInstanceId = Target(f),
-                    CategoryId = MvpDungeonPlacementIds.TrapCategoryId, OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Sequence = i }).ToArray();
+                    CategoryId = MvpDungeonPlacementIds.TrapCategoryId,
+                    OptionId = MvpDungeonPlacementIds.SpikeTrapOptionId, Sequence = i,
+                    RoomLocalPosition = new TileCoordinate(i, 0) }).ToArray();
             state.Floors[0].RoomContents.NextSequence = capacity.TrapCapacity;
             f = f.Rebase(state); // Explicit test-only full-capacity fixture.
             Unchanged(f, DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
@@ -322,7 +331,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.Not.EqualTo(owned.AssignmentId));
             CollectionAssert.AreEqual(ledger, Investment(f));
-            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f))));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f), null,
+                new TileCoordinate(2, 1))));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Count(a => a.OptionId == owned.OptionId), Is.EqualTo(2));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Any(a => a.AssignmentId == owned.AssignmentId), Is.True);
@@ -330,7 +340,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCanonicalSpatialMutation.ReturnedItemMissingReason);
             var trap = f.State.LifecycleAndOwnership.ReturnedContents.Single(i => i.CategoryId == MvpDungeonPlacementIds.TrapCategoryId);
             Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, "test.missing.room"));
-            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, Target(f)))); f.Reopen();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, Target(f), null,
+                new TileCoordinate(1, 2)))); f.Reopen();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
             var assigned = f.State.Floors[0].RoomContents.Assignments.Single(a => a.AssignmentId == trap.AssignmentId);
             Assert.That(assigned.CategoryId, Is.EqualTo(trap.CategoryId)); Assert.That(assigned.OptionId, Is.EqualTo(trap.OptionId));
@@ -346,7 +357,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var recognized = new SaveData { contentVersion = "test", createdUtcUnix = 1, lastSavedUtcUnix = 1,
                 structureRuntime = new StructureRuntimeState { ManaReserve = 123 } };
             var result = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem, recognized,
-                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile, f.Acquisition);
+                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
+                f.Profile, f.Acquisition, f.Occupancy);
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(recognized.structureRuntime.ManaReserve, Is.EqualTo(123));
             f.Session = result.Session; f.State = result.Validation.State; f.Runtime = result.RuntimeProjection;
@@ -358,9 +370,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Native();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(40));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":12"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":13"));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, Target(f))));
             f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
@@ -378,7 +390,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var injected = PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, 17); // Test-owned starting tuning.
             var fresh = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem, legacyRuntime, f.Compatibility,
-                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile, injected);
+                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
+                injected, f.Occupancy);
             Assert.That(fresh.IsSuccess, Is.True, fresh.Reason);
             Assert.That(fresh.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(17));
             Assert.That(legacyRuntime.structureRuntime.ManaReserve, Is.Zero);
@@ -392,7 +405,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(result); byte[] before = f.Session.GetCurrentBytes();
             var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
             service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration));
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
+                f.PositionProfiles, f.Occupancy);
             service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
             typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,

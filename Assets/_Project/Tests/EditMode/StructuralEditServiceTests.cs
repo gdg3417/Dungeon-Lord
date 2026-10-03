@@ -1116,6 +1116,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void ReplacementRejectsRetainedContentWhoseRoomLocalPositionWouldBecomeInvalid()
+        {
+            PreviewFixture fixture = CreateR2("spatial.room.large_chamber", new TileCoordinate(4, 1));
+            const string roomId = "compat.floor.00.room.player.0000";
+            fixture.State = Place(fixture, fixture.State, MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, roomId);
+            fixture.State.Floors[0].RoomContents.Assignments.Single().RoomLocalPosition =
+                new TileCoordinate(4, 5);
+            StructuralEditPreview replacement = Replace(fixture, roomId, "spatial.room.rectangle");
+            Assert.That(replacement.IsValid, Is.True);
+            DetachedCanonicalMutationResult rejected = DetachedCanonicalSpatialMutation.Prepare(
+                fixture.State, DetachedCanonicalMutationRequest.Replace(replacement),
+                fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Limits);
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason,
+                Is.EqualTo(DetachedCanonicalSpatialMutation.PositionInvalidReason));
+            Assert.That(fixture.State.Floors[0].RoomContents.Assignments.Single().RoomLocalPosition,
+                Is.EqualTo(new TileCoordinate(4, 5)));
+        }
+
+        [Test]
         public void Deletion_ValidTwoRoomTailPreservesCompletionAndRetiresIdentitiesDeterministically()
         {
             PreviewFixture fixture = CreateR2(); SavedSpatialFloor before = fixture.State.Floors[0];
@@ -1465,6 +1486,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(actual.CategoryId, Is.EqualTo(expected.CategoryId));
             Assert.That(actual.OptionId, Is.EqualTo(expected.OptionId));
             Assert.That(actual.Sequence, Is.EqualTo(expected.Sequence));
+            Assert.That(actual.RoomLocalPosition, Is.EqualTo(expected.RoomLocalPosition));
         }
 
         private static TileCoordinate Add(TileCoordinate a, TileCoordinate b) =>

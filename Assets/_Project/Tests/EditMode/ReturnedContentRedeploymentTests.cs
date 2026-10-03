@@ -123,7 +123,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floor.RoomContents.Assignments = Enumerable.Range(0, capacity.MonsterCapacity).Select(i =>
                 new RoomContentAssignment { AssignmentId = "test.live.monster." + i, RoomInstanceId = Target(f),
                     CategoryId = MvpDungeonPlacementIds.MonsterCategoryId, OptionId = MvpDungeonPlacementIds.GoblinOptionId,
-                    Sequence = i }).ToArray(); // Inline test-only canonical capacity fixture.
+                    Sequence = i, RoomLocalPosition = new TileCoordinate(i, 0) }).ToArray();
+                // Inline test-only canonical capacity fixture.
             floor.RoomContents.NextSequence = capacity.MonsterCapacity;
             Canonicalize(f); byte[] before = Bytes(f);
             var result = f.Prepare(Request(f));
@@ -159,8 +160,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes()
         {
             var f = Owned(); var owned = Item(f);
-            var acquire = DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f));
-            f.Accept(f.Execute(acquire)); f.Accept(f.Execute(acquire));
+            var first = DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f), null,
+                new TileCoordinate(1, 1));
+            var second = DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f), null,
+                new TileCoordinate(2, 1));
+            f.Accept(f.Execute(first)); f.Accept(f.Execute(second));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(2));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.All(a => a.OptionId == owned.OptionId), Is.True);
             byte[] before = f.Session.GetCurrentBytes();
@@ -240,8 +244,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             CollectionAssert.AreEqual(result.GetPersistedBytes(), f.FileSystem.ReadAllBytes(f.ActivePath));
             f.Accept(result); f.Reopen();
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":12"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":13"));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(owned.AssignmentId));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Any(i => i.AssignmentId == owned.AssignmentId), Is.False);
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
@@ -301,7 +305,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 typeof(GameRoot).GetProperty("Save").SetValue(root, f.Runtime);
                 var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
                 service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                    Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)));
+                    Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)),
+                    f.PositionProfiles, f.Occupancy);
                 service.ConfigureContentAcquisitionEconomy(f.Acquisition);
                 typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
                 foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
@@ -318,6 +323,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(root.BannerMessage, Is.EqualTo(content.GetString("ui.returned_content.success", "")));
                 Assert.That(root.Save.spatialFloors[0].RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(returned[0].AssignmentId));
                 Assert.That(root.Save.spatialFloors[0].RoomContents.Assignments.Single().RoomInstanceId, Is.EqualTo(target));
+                root.AdjustSelectedRoomLocalContentPosition(1, 0);
                 Assert.That(overlay.RedeploySelectedReturnedContent(), Is.True); // Next owned trap, never another skeleton.
                 Assert.That(overlay.RedeploySelectedReturnedContent(), Is.False);
                 Assert.That(root.Save.spatialFloors[0].RoomContents.Assignments.Length, Is.EqualTo(2));

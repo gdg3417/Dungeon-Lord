@@ -101,8 +101,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(Json(f.Runtime.structureRuntime), Is.EqualTo(Json(beforeRuntime.structureRuntime)));
             Assert.That(Json(f.Runtime.runHistory), Is.EqualTo(Json(beforeRuntime.runHistory)));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":12"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":13"));
             AssertRejected(f, item.AssignmentId, DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason);
         }
 
@@ -111,7 +111,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Active();
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
-                MvpDungeonPlacementIds.GoblinOptionId, Room(f))));
+                MvpDungeonPlacementIds.GoblinOptionId, Room(f), null, new TileCoordinate(3, 1))));
             var other = Item(f); var target = f.State.Floors[0].RoomContents.Assignments[1];
             long next = f.State.Floors[0].RoomContents.NextSequence;
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(target.AssignmentId)));
@@ -243,7 +243,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(CanonicalRoomCapacityResolver.TryResolve(f.Production, destination.RoomDefinitionId,
                     out var capacity, out _), Is.True);
                 for (int i = 0; i < capacity.MonsterCapacity; i++)
-                    f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(item.CategoryId, item.OptionId, destination.RoomInstanceId)));
+                    f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(item.CategoryId, item.OptionId,
+                        destination.RoomInstanceId, null, new TileCoordinate(i, 0))));
             }
             double mana = f.Runtime.structureRuntime.ManaReserve; string ledger = Investment(f);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(item.AssignmentId))); f.Reopen();
@@ -274,7 +275,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Active();
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
-                MvpDungeonPlacementIds.GoblinOptionId, Room(f))));
+                MvpDungeonPlacementIds.GoblinOptionId, Room(f), null, new TileCoordinate(3, 1))));
             var first = Item(f); var second = f.State.Floors[0].RoomContents.Assignments[1];
             var go = new GameObject("DirectUnassignmentTest");
             try

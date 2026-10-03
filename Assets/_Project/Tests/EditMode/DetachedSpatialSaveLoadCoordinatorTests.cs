@@ -254,7 +254,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":12"));
+                Does.Contain("\"schemaVersion\":13"));
         }
 
         [Test]
@@ -272,7 +272,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
-                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
+                PhaseFourTestSupport.PositionProfiles(fixture.Limits),
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
             string qualified = Path.Combine(canonicalDirectory, "save.json");
             fileSystem.Seed(qualified, fixture.Original);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
@@ -424,7 +426,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
                         Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                         fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
-                    LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+                    LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
+                    PhaseFourTestSupport.PositionProfiles(fixture.Limits),
+                    PhaseFourTestSupport.Occupancy(fixture.Limits));
                 service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(false,
                     SpatialMigrationCapabilityReason.PlatformUnsupported,
                     SpatialMigrationPlatform.Unsupported, null));
@@ -943,7 +947,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
-                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
+                PhaseFourTestSupport.PositionProfiles(fixture.Limits),
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
             var economy = PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits);
             service.ConfigureStructuralEconomy(economy);
             service.ConfigureContentAcquisitionEconomy(
@@ -1021,7 +1027,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return new DetachedSpatialSaveLoadCoordinator(profile, compatibility ?? fixture.Compatibility,
                 fixture.Production, fixture.LegacyBytes, new Dictionary<string, byte[]>(),
                 new RawSaveEnvelopeVersionContract(1, 6),
-                blankFloor ?? Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+                blankFloor ?? Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
+                PhaseFourTestSupport.PositionProfiles(fixture.Limits),
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
         }
 
         private static SpatialMigrationActivationPreflight Supported(

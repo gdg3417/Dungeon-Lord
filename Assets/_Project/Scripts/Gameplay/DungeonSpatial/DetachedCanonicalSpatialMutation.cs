@@ -39,20 +39,48 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal string OptionalBranchId { get; private set; }
         internal TileCoordinate CorridorTile { get; private set; }
         internal string StructuralBaselineFingerprint { get; private set; }
+        public TileCoordinate? RoomLocalPosition { get; private set; }
 
         public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
-            string roomInstanceId = null, string floorInstanceId = null) => new DetachedCanonicalMutationRequest
+            string roomInstanceId, string floorInstanceId,
+            TileCoordinate? roomLocalPosition) => new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.PlaceOrReplace, CategoryId = categoryId,
-              OptionId = optionId, RoomInstanceId = roomInstanceId, FloorInstanceId = floorInstanceId };
+              OptionId = optionId, RoomInstanceId = roomInstanceId, FloorInstanceId = floorInstanceId,
+              RoomLocalPosition = roomLocalPosition };
+
+#if UNITY_EDITOR
+        // Existing pre-Phase-7 tests use an explicit fake coordinate; player builds have no default.
+        public static DetachedCanonicalMutationRequest Place(string categoryId, string optionId,
+            string roomInstanceId = null, string floorInstanceId = null) => Place(categoryId,
+                optionId, roomInstanceId, floorInstanceId,
+                categoryId == MvpDungeonPlacementIds.RoomCategoryId
+                    ? (TileCoordinate?)null : EditorTestPosition(optionId));
+#endif
 
         public static DetachedCanonicalMutationRequest RemoveRoom(string roomInstanceId, string floorInstanceId = null) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RemoveRoom, RoomInstanceId = roomInstanceId, FloorInstanceId = floorInstanceId };
 
-        public static DetachedCanonicalMutationRequest Redeploy(string assignmentId, string roomInstanceId, string floorInstanceId = null) =>
+        public static DetachedCanonicalMutationRequest Redeploy(string assignmentId, string roomInstanceId,
+            string floorInstanceId, TileCoordinate? roomLocalPosition) =>
             new DetachedCanonicalMutationRequest
             { Kind = DetachedCanonicalMutationKind.RedeployReturnedContent,
-              AssignmentId = assignmentId, RoomInstanceId = roomInstanceId, FloorInstanceId = floorInstanceId };
+              AssignmentId = assignmentId, RoomInstanceId = roomInstanceId, FloorInstanceId = floorInstanceId,
+              RoomLocalPosition = roomLocalPosition };
+
+#if UNITY_EDITOR
+        public static DetachedCanonicalMutationRequest Redeploy(string assignmentId, string roomInstanceId,
+            string floorInstanceId = null) => Redeploy(assignmentId, roomInstanceId, floorInstanceId,
+                new TileCoordinate(0, 0));
+
+        private static TileCoordinate EditorTestPosition(string optionId) =>
+            optionId == MvpDungeonPlacementIds.SkeletonOptionId ? new TileCoordinate(1, 1) :
+            optionId == MvpDungeonPlacementIds.GoblinOptionId ? new TileCoordinate(2, 1) :
+            optionId == MvpDungeonPlacementIds.SpikeTrapOptionId ? new TileCoordinate(1, 2) :
+            optionId == MvpDungeonPlacementIds.SnareTrapOptionId ? new TileCoordinate(2, 2) :
+            optionId == MvpDungeonPlacementIds.BasicLootNodeOptionId ? new TileCoordinate(0, 0) :
+            new TileCoordinate(3, 3);
+#endif
 
         public static DetachedCanonicalMutationRequest Unassign(string assignmentId, string floorInstanceId = null) =>
             new DetachedCanonicalMutationRequest
@@ -183,7 +211,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string TargetRoomMissingReason = "content.redeployment.target_room_missing";
         public const string ActiveAssignmentMissingReason = "content.unassignment.active_assignment_missing";
         public const string ReturnNotPermittedReason = "content.unassignment.return_not_permitted";
+        public const string PositionRequiredReason = "content.position.required";
+        public const string PositionInvalidReason = "content.position.invalid";
 
+#if UNITY_EDITOR
         public static DetachedCanonicalMutationResult Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
@@ -193,9 +224,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedBranchKnowledgeAuthority branchKnowledge = null,
             CompletedResearchState completedResearch = null,
             BasicBranchingResearchSnapshot branchingResearch = null)
+            => Prepare(current, request, production, compatibility, configuration, limits,
+                removalPolicy, corridorContent, branchKnowledge, completedResearch,
+                branchingResearch,
+                RoomContentSpatialOccupancyAuthority.CreateEditorTestSnapshot(configuration));
+#endif
+
+        public static DetachedCanonicalMutationResult Prepare(DetachedCanonicalSpatialSaveState current,
+            DetachedCanonicalMutationRequest request, ProductionSpatialContentSnapshot production,
+            SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
+            CanonicalSpatialSerializationLimits limits,
+            StructuralContentRemovalPolicySnapshot removalPolicy,
+            CorridorContentAuthority corridorContent,
+            SharedBranchKnowledgeAuthority branchKnowledge,
+            CompletedResearchState completedResearch,
+            BasicBranchingResearchSnapshot branchingResearch,
+            RoomContentSpatialOccupancySnapshot occupancy)
         {
             if (current?.Authority == null || current.Floors == null || request == null ||
-                production == null || compatibility == null || configuration == null || !limits.IsValid)
+                production == null || compatibility == null || configuration == null || !limits.IsValid ||
+                occupancy == null)
                 return Failure(ValidationFailedReason);
             if (!TryClone(current, limits, out DetachedCanonicalSpatialSaveState proposed))
                 return Failure(ValidationFailedReason);
@@ -211,7 +259,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                  request.Kind == DetachedCanonicalMutationKind.OptionalBranchRemoval) &&
                 (!CanonicalSpatialSaveContracts.Validate(current, limits.Spatial, true).IsValid ||
                  !DetachedCanonicalProductionSemanticValidation.Validate(current, production,
-                     configuration, limits.Spatial).IsValid ||
+                     configuration, limits.Spatial, occupancy, true).IsValid ||
                  !PhaseFiveSaveContracts.Validate(proposedCorridor, proposedKnowledge, current,
                      production, configuration, limits.Spatial)))
                 return Failure(ValidationFailedReason);
@@ -297,7 +345,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     request.AssignmentId, request.FloorInstanceId, request.OptionalBranchId,
                     request.CorridorTile, production);
             else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent)
-                reason = RedeployContent(proposed, request.AssignmentId, request.RoomInstanceId, production, configuration, request.FloorInstanceId);
+                reason = RedeployContent(proposed, request.AssignmentId, request.RoomInstanceId,
+                    production, configuration, request.FloorInstanceId, request.RoomLocalPosition);
             else if (request.Kind == DetachedCanonicalMutationKind.UnassignContent)
             {
                 if (string.IsNullOrWhiteSpace(request.AssignmentId) ||
@@ -324,16 +373,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     production, compatibility, ref roomEffect, request.FloorInstanceId);
             else
                 reason = PlaceContent(proposed, request.CategoryId, request.OptionId,
-                    request.RoomInstanceId, production, compatibility, request.FloorInstanceId);
+                    request.RoomInstanceId, production, compatibility, request.FloorInstanceId,
+                    request.RoomLocalPosition);
             if (reason != null) return reason == NoOpReason
                 ? new DetachedCanonicalMutationResult(null, reason, false) : Failure(reason);
             proposedCorridor = PhaseFiveSaveContracts.Canonicalize(proposedCorridor);
             proposedKnowledge = PhaseFiveSaveContracts.Canonicalize(proposedKnowledge);
+            DetachedCanonicalProductionSemanticValidationResult semantic =
+                DetachedCanonicalProductionSemanticValidation.Validate(proposed, production,
+                    configuration, limits.Spatial, occupancy, true);
+            if (semantic.Issues.Any(issue =>
+                    issue == DetachedCanonicalProductionSemanticIssue.AssignmentPosition ||
+                    issue == DetachedCanonicalProductionSemanticIssue.AssignmentOccupancy ||
+                    issue == DetachedCanonicalProductionSemanticIssue.AssignmentOverlap))
+                return Failure(PositionInvalidReason);
             if (!CanonicalSpatialSaveContracts.TryCanonicalize(proposed, limits.Spatial,
                     out DetachedCanonicalSpatialSaveState canonical) ||
                 !CanonicalSpatialSaveContracts.Validate(canonical, limits.Spatial, true).IsValid ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(canonical, production,
-                    configuration, limits.Spatial).IsValid ||
+                    configuration, limits.Spatial, occupancy, true).IsValid ||
                 !PhaseFiveSaveContracts.Validate(proposedCorridor, proposedKnowledge, canonical,
                     production, configuration, limits.Spatial)) return Failure(ValidationFailedReason);
             return new DetachedCanonicalMutationResult(canonical, null, roomEffect,
@@ -421,8 +479,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static string PlaceContent(DetachedCanonicalSpatialSaveState state, string categoryId,
             string optionId, string requestedRoomId, ProductionSpatialContentSnapshot production,
-            SpatialLayoutCompatibilitySnapshot compatibility, string floorInstanceId)
+            SpatialLayoutCompatibilitySnapshot compatibility, string floorInstanceId,
+            TileCoordinate? roomLocalPosition)
         {
+            if (!roomLocalPosition.HasValue) return PositionRequiredReason;
             if (!MvpDungeonPlacementIds.TryGetCategoryForOption(optionId, out string actualCategory) ||
                 actualCategory != categoryId || (categoryId != MvpDungeonPlacementIds.MonsterCategoryId &&
                 categoryId != MvpDungeonPlacementIds.TrapCategoryId &&
@@ -459,7 +519,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 AssignmentId = room.RoomInstanceId + ".content." + shortCategory + "." +
                     sequence.ToString("D4", CultureInfo.InvariantCulture),
                 RoomInstanceId = room.RoomInstanceId, CategoryId = categoryId,
-                OptionId = optionId, Sequence = sequence
+                OptionId = optionId, Sequence = sequence,
+                RoomLocalPosition = roomLocalPosition.Value
             };
             floor.RoomContents.Assignments = assignments.Concat(new[] { added }).ToArray();
             floor.RoomContents.NextSequence = sequence + 1;
@@ -472,8 +533,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static string RedeployContent(DetachedCanonicalSpatialSaveState state, string assignmentId,
-            string requestedRoomId, ProductionSpatialContentSnapshot production, RunSimulationConfig configuration, string floorInstanceId)
+            string requestedRoomId, ProductionSpatialContentSnapshot production,
+            RunSimulationConfig configuration, string floorInstanceId,
+            TileCoordinate? roomLocalPosition)
         {
+            if (!roomLocalPosition.HasValue) return PositionRequiredReason;
             ReturnedStructuralContent[] returned = state.LifecycleAndOwnership.ReturnedContents;
             ReturnedStructuralContent[] matches = returned.Where(value =>
                 string.Equals(value.AssignmentId, assignmentId, StringComparison.Ordinal)).ToArray();
@@ -505,7 +569,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             floor.RoomContents.Assignments = assignments.Concat(new[] { new RoomContentAssignment
             {
                 AssignmentId = owned.AssignmentId, RoomInstanceId = room.RoomInstanceId,
-                CategoryId = owned.CategoryId, OptionId = owned.OptionId, Sequence = sequence
+                CategoryId = owned.CategoryId, OptionId = owned.OptionId, Sequence = sequence,
+                RoomLocalPosition = roomLocalPosition.Value
             } }).ToArray();
             state.LifecycleAndOwnership.ReturnedContents = returned.Where(value =>
                 value.AssignmentId != owned.AssignmentId).ToArray();

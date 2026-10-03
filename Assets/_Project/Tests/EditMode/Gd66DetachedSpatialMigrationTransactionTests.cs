@@ -2500,7 +2500,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] legacyBytes = null) =>
             new DetachedSpatialMigrationRecoveryContext(fixture.Compatibility, fixture.Production,
                 new Dictionary<string, byte[]>(), legacyBytes ?? fixture.LegacyBytes, fixture.Limits, RawLimits(),
-                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), fixture.WholeLimits);
+                new RawSaveEnvelopeVersionContract(1, 6), BlankFloor(), fixture.WholeLimits,
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
 
         private static RawLegacyBlankFloorContract BlankFloor() => new RawLegacyBlankFloorContract(1,
             Enumerable.Range(0, 4).Select(index => new RawLegacyBlankFloorNodeContract(

@@ -11,11 +11,53 @@ namespace DungeonBuilder.M0.Tests.EditMode
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
         {
             current = null;
-            return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
-                SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine) &&
-                SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] ten) &&
-                SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out byte[] eleven) &&
-                SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out current);
+            if (!SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight))
+            { return false; }
+            if (!SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine))
+            { return false; }
+            if (!SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] ten))
+            { return false; }
+            if (!SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out byte[] eleven))
+            { return false; }
+            if (!SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out byte[] twelve))
+            { return false; }
+            if (!SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits, PositionProfiles(limits),
+                    out current))
+            { return false; }
+            return true;
+        }
+
+        internal static RoomContentPositionMigrationProfilesSnapshot PositionProfiles(
+            CanonicalSpatialSerializationLimits limits)
+        {
+            ProductionSpatialContentWorkloadLimitParseResult structural =
+                ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<
+                    UnityEngine.TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json"));
+            Assert.That(structural.Success, Is.True);
+            RoomContentPositionMigrationProfilesResult parsed =
+                RoomContentPositionMigrationProfiles.ParseAndValidateFrozen(
+                    File.ReadAllBytes(RoomContentPositionMigrationProfiles.ProductionPath),
+                    structural.Limits, limits.Serialized, true);
+            Assert.That(parsed.Success, Is.True, string.Join(",", parsed.Diagnostics));
+            return parsed.Value;
+        }
+
+        internal static RoomContentSpatialOccupancySnapshot Occupancy(
+            CanonicalSpatialSerializationLimits limits)
+        {
+            ProductionSpatialContentWorkloadLimitParseResult structural =
+                ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<
+                    UnityEngine.TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json"));
+            Assert.That(structural.Success, Is.True);
+            RunSimulationConfig configuration = UnityEngine.JsonUtility.FromJson<RunSimulationConfig>(
+                UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(
+                    "Assets/_Project/Data/Bootstrap/run_simulation_config.json").text);
+            Assert.That(RoomContentSpatialOccupancyAuthority.TryParse(File.ReadAllBytes(
+                RoomContentSpatialOccupancyAuthority.ProductionPath), structural.Limits, configuration,
+                out RoomContentSpatialOccupancySnapshot snapshot), Is.True);
+            return snapshot;
         }
 
         // Test-only projection for fixtures that intentionally exercise frozen contracts.
@@ -43,10 +85,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (start < owner || end < start) throw new System.ArgumentException("Invalid schema 12 test fixture");
                 value = value.Remove(owner, end - owner);
             }
-            return value.Replace("\"schemaVersion\":12", "\"schemaVersion\":10")
+            value = System.Text.RegularExpressions.Regex.Replace(value,
+                ",\"RoomLocalPosition\":\\{\"X\":-?[0-9]+,\"Y\":-?[0-9]+\\}", string.Empty);
+            return value.Replace("\"schemaVersion\":13", "\"schemaVersion\":10")
+                .Replace("\"schemaVersion\":12", "\"schemaVersion\":10")
                 .Replace("\"schemaVersion\":11", "\"schemaVersion\":10")
                 .Replace(",\"ActivationState\":1", "")
                 .Replace(",\"ActivationState\":2", "");
+        }
+
+        internal static byte[] FrozenTwelve(byte[] current)
+        {
+            string value = System.Text.Encoding.UTF8.GetString(current).Replace(
+                "\"schemaVersion\":13", "\"schemaVersion\":12");
+            value = System.Text.RegularExpressions.Regex.Replace(value,
+                ",\"RoomLocalPosition\":\\{\"X\":-?[0-9]+,\"Y\":-?[0-9]+\\}", string.Empty);
+            return System.Text.Encoding.UTF8.GetBytes(value);
         }
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)

@@ -420,19 +420,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void SchemaTwelveContractRemainsNonPositionalAndInactive()
+        public void SchemaTwelveContractRemainsFrozenWhileSchemaThirteenActivatesPosition()
         {
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(12));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
-            CollectionAssert.AreEqual(new[] { "AssignmentId", "CategoryId", "OptionId", "RoomInstanceId", "Sequence" },
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
+            CollectionAssert.AreEqual(new[] { "AssignmentId", "CategoryId", "OptionId",
+                    "RoomInstanceId", "RoomLocalPosition", "Sequence" },
                 typeof(RoomContentAssignment).GetFields(BindingFlags.Instance | BindingFlags.Public)
                     .Select(value => value.Name).OrderBy(value => value, StringComparer.Ordinal).ToArray());
             Assert.That(AppDomain.CurrentDomain.GetAssemblies().SelectMany(SafeTypes).Any(value =>
-                value.Name.IndexOf("SchemaTwelveToThirteen", StringComparison.Ordinal) >= 0), Is.False);
+                value.Name.IndexOf("SchemaTwelveToThirteen", StringComparison.Ordinal) >= 0), Is.True);
             string gameRoot = File.ReadAllText("Assets/_Project/Scripts/Core/GameRoot.cs");
             string saveService = File.ReadAllText("Assets/_Project/Scripts/Services/SaveService.cs");
-            Assert.That(gameRoot, Does.Not.Contain(nameof(RoomContentPositionMigrationProfiles)));
-            Assert.That(saveService, Does.Not.Contain(nameof(RoomContentPositionMigrationProfiles)));
+            Assert.That(gameRoot, Does.Contain(nameof(RoomContentPositionMigrationProfiles)));
+            Assert.That(saveService, Does.Contain(nameof(RoomContentPositionMigrationProfiles)));
         }
 
         private RoomContentPositionMigrationProfilesResult Parse(byte[] bytes, bool release = false) =>

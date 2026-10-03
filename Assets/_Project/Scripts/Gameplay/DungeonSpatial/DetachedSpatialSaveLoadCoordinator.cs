@@ -56,12 +56,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly Dictionary<string, byte[]> validationInputs;
         private readonly RawSaveEnvelopeVersionContract rawVersions;
         private readonly RawLegacyBlankFloorContract blankFloor;
+        private readonly RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles;
+        private readonly RoomContentSpatialOccupancySnapshot roomContentOccupancy;
 
         public DetachedSpatialSaveLoadCoordinator(SaveSpatialMigrationLimitsProfile limits,
             SpatialLayoutCompatibilitySnapshot compatibility,
             ProductionSpatialContentSnapshot production, byte[] legacyConfiguration,
             IReadOnlyDictionary<string, byte[]> validationInputs,
-            RawSaveEnvelopeVersionContract rawVersions, RawLegacyBlankFloorContract blankFloor)
+            RawSaveEnvelopeVersionContract rawVersions, RawLegacyBlankFloorContract blankFloor,
+            RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles = null,
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
             this.limits = limits; this.compatibility = compatibility; this.production = production;
             this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
@@ -70,6 +74,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 foreach (KeyValuePair<string, byte[]> pair in validationInputs)
                     this.validationInputs.Add(pair.Key, pair.Value == null ? null : (byte[])pair.Value.Clone());
             this.rawVersions = rawVersions; this.blankFloor = blankFloor;
+            this.positionMigrationProfiles = positionMigrationProfiles;
+            this.roomContentOccupancy = roomContentOccupancy;
         }
 
         public DetachedSpatialSaveLoadResult Load(string activePath)
@@ -117,9 +123,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (legacy == null) return Failure("gd66.transaction.pinned_input_missing");
                 recoveryContext = new DetachedSpatialMigrationRecoveryContext(compatibility, production,
                     validationInputs, legacyConfiguration, limits.Canonical, limits.Raw, rawVersions,
-                    blankFloor, limits.Whole);
+                    blankFloor, limits.Whole, roomContentOccupancy);
                 currentContext = new DetachedCurrentTargetValidationContext(compatibility, production,
-                    legacyConfiguration, limits.Canonical);
+                    legacyConfiguration, limits.Canonical, roomContentOccupancy);
             }
             catch { return Failure("gd66.profile.invalid"); }
 
@@ -133,6 +139,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try { trusted = preflight.FileSystem.ReadAllBytes(activePath); }
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
+
+            var schemaTwelve = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
+                trusted, limits.Canonical);
+            if (schemaTwelve.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaTwelve,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
 
             var schemaEleven = DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(
                 trusted, limits.Canonical);
@@ -237,8 +249,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedSpatialSaveLoadDisposition disposition, DetachedSpatialMigrationOutcome recovery,
             DetachedSpatialMigrationOutcome transaction)
         {
+            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
+                source, limits.Canonical).IsValid ? 12 :
+                CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> frozenContract =
-                compatibility.SelectContract(CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget);
+                compatibility.SelectContract(frozenSchema);
             if (!frozenValidation.IsValid || !frozenContract.Success ||
                 frozenValidation.LayoutContractVersion != frozenContract.Value.CanonicalLayoutContractVersion ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
@@ -273,28 +288,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return PublishValidated(durable, currentContext, disposition, recovery, transaction);
         }
 
-        private static bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] candidate)
+        private bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits,
+            out byte[] candidate)
         {
             candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(source, limits).IsValid)
+                return SchemaTwelveToThirteenUpgrade.TryPrepare(source, limits,
+                    positionMigrationProfiles, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(source, limits).IsValid)
-                return SchemaElevenToTwelveUpgrade.TryPrepare(source, limits, out candidate);
+                return SchemaElevenToTwelveUpgrade.TryPrepare(source, limits, out byte[] twelveFromEleven) &&
+                    SchemaTwelveToThirteenUpgrade.TryPrepare(twelveFromEleven, limits,
+                        positionMigrationProfiles, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaTenAndRoundTrip(source, limits).IsValid)
                 return SchemaTenToElevenUpgrade.TryPrepare(source, limits, out byte[] eleven) &&
-                    SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out candidate);
+                    SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out byte[] twelveFromTen) &&
+                    SchemaTwelveToThirteenUpgrade.TryPrepare(twelveFromTen, limits,
+                        positionMigrationProfiles, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(source, limits).IsValid)
                 return SchemaNineToTenUpgrade.TryPrepare(source, limits, out byte[] ten) &&
                     SchemaTenToElevenUpgrade.TryPrepare(ten, limits, out byte[] upgradedEleven) &&
-                    SchemaElevenToTwelveUpgrade.TryPrepare(upgradedEleven, limits, out candidate);
+                    SchemaElevenToTwelveUpgrade.TryPrepare(upgradedEleven, limits, out byte[] twelveFromNine) &&
+                    SchemaTwelveToThirteenUpgrade.TryPrepare(twelveFromNine, limits,
+                        positionMigrationProfiles, out candidate);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(source, limits).IsValid)
                 return SchemaEightToNineUpgrade.TryPrepare(source, limits, out byte[] nine) &&
                     SchemaNineToTenUpgrade.TryPrepare(nine, limits, out byte[] upgradedTen) &&
                     SchemaTenToElevenUpgrade.TryPrepare(upgradedTen, limits, out byte[] laterEleven) &&
-                    SchemaElevenToTwelveUpgrade.TryPrepare(laterEleven, limits, out candidate);
+                    SchemaElevenToTwelveUpgrade.TryPrepare(laterEleven, limits, out byte[] twelveFromEight) &&
+                    SchemaTwelveToThirteenUpgrade.TryPrepare(twelveFromEight, limits,
+                        positionMigrationProfiles, out candidate);
             return SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight) &&
                 SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] upgradedNine) &&
                 SchemaNineToTenUpgrade.TryPrepare(upgradedNine, limits, out byte[] finalTen) &&
                 SchemaTenToElevenUpgrade.TryPrepare(finalTen, limits, out byte[] finalEleven) &&
-                SchemaElevenToTwelveUpgrade.TryPrepare(finalEleven, limits, out candidate);
+                SchemaElevenToTwelveUpgrade.TryPrepare(finalEleven, limits, out byte[] twelveFromSeven) &&
+                SchemaTwelveToThirteenUpgrade.TryPrepare(twelveFromSeven, limits,
+                    positionMigrationProfiles, out candidate);
         }
 
         private DetachedSpatialSaveLoadResult PublishValidated(byte[] bytes,
@@ -379,7 +408,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !limits.Whole.IsValid || !rawVersions.IsValid || blankFloor == null ||
                 !blankFloor.IsValid) return "gd66.profile.invalid";
             if (compatibility == null || production == null || legacyConfiguration == null ||
-                validationInputs == null) return "gd66.transaction.pinned_input_missing";
+                validationInputs == null || positionMigrationProfiles == null ||
+                roomContentOccupancy == null) return "gd66.transaction.pinned_input_missing";
             try
             {
                 return LegacyGameplayConfigurationContract.Parse(legacyConfiguration) == null

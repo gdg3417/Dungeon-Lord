@@ -882,9 +882,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId,
                 "Monster", "Skeleton", frozenLegacyEvidence);
+            root.AdjustSelectedRoomLocalContentPosition(1, 0);
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.ChillingSigilOptionId,
                 "Trap", "Chilling Sigil", frozenLegacyEvidence);
+            root.AdjustSelectedRoomLocalContentPosition(1, 0);
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.GlitteringHoardOptionId,
                 "Loot node", "Glittering Hoard", frozenLegacyEvidence);
@@ -924,6 +926,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId,
                 "Monster", "Skeleton", frozenLegacyEvidence);
+            root.AdjustSelectedRoomLocalContentPosition(1, 0);
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId,
                 "Monster", "Goblin", frozenLegacyEvidence);
@@ -966,9 +969,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MvpDungeonPlacementIds.GoblinOptionId
             }, route.Rooms[0].AssignedMonsterOptionIds);
 
+            root.AdjustSelectedRoomLocalContentPosition(1, 0);
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId,
                 "Trap", "Spike Trap", frozenLegacyEvidence);
+            root.AdjustSelectedRoomLocalContentPosition(1, 0);
             PlaceAndAssertFeedback(overlay, root,
                 MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SnareTrapOptionId,
                 "Trap", "Snare Trap", frozenLegacyEvidence);
@@ -1148,7 +1153,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
-                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes);
+                LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
+                PhaseFourTestSupport.PositionProfiles(fixture.Limits),
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
             Assert.That(StructuralContentRemovalPolicyAuthority.TryParse(RequiredAsset(
                 StructuralContentRemovalPolicyAuthority.ProductionPath).bytes, out var removalPolicy), Is.True);
             service.ConfigureStructuralRemovalPolicy(removalPolicy);

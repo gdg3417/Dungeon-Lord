@@ -528,7 +528,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
                 Is.Not.EqualTo("mutated"));
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(12));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
                 .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
 
