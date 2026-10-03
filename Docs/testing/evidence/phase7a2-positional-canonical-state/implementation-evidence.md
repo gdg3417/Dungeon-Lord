@@ -127,8 +127,8 @@ The Windows Editor integration uses the real `SaveService`, `Application.persist
 - No Phase 7A3 intraroom navigation, movement, trap triggering, loot reachability, combat AI, or broader run simulation is included.
 - No production graphical editor, dungeon-wide draft transaction, draft recovery, or Bootstrap retirement is included.
 - No owner save was reset, deleted, replaced, or used for automated qualification.
-- The Windows-player-only test remains an intentional Editor skip; player assembly compatibility is covered by the successful Windows Development Build. Owner standalone/manual UAT remains required.
-- Automated qualification does not constitute owner acceptance or merge readiness. External PR review and the checklist in `manual-uat.md` remain open.
+- The Windows-player-only test remains an intentional Editor skip; player assembly compatibility is covered by the successful Windows Development Build. Owner standalone runtime and manual UAT are recorded as passed below.
+- Automated qualification history remains distinct from owner qualification and review evidence. External review corrections and the checklist in `manual-uat.md` are complete; this does not merge the PR.
 
 ## External-review correction qualification
 
@@ -146,6 +146,48 @@ The Windows Editor integration uses the real `SaveService`, `Application.persist
 
 The correction build proves the player assembly compiles without the Editor occupancy fallback.
 The available Windows-player-only qualification fixture exercises native filesystem durability but
-does not yet drive a full schema-13 `SaveService` create/save/close/reopen sequence. That owner
-standalone runtime check remains explicitly pending and is not claimed as passed. Owner manual UAT
-also remains pending.
+does not yet drive a full schema-13 `SaveService` create/save/close/reopen sequence. The owner
+completed that standalone runtime check and manual UAT as recorded below.
+
+## Owner qualification closeout — PASS
+
+The owner completed Editor/manual UAT and Windows standalone runtime qualification using Unity
+6000.3.2f1 and the Windows Development Build. The preserved owner save loaded as schema 13 and
+retained both floors, lifecycle state, structural investment, returned custody, room/content
+identity, and authoritative room-local positions. Representative migrated Basic Room
+Zero-orientation positions matched the frozen A1 slot contract. Full Unity close/reopen succeeded
+without remigration, recovery warning, positional drift, or state loss.
+
+Explicit placement, atomic out-of-bounds and occupied-coordinate rejection,
+unassignment/redeployment custody preservation, no positioning mana charge/refund, floor-knowledge
+material-position invalidation/relearning, activation-only knowledge stability, localized readable
+1280x720 presentation, and absence of new Phase 7A2 errors all passed. The owner observed normal
+configured acquisition mana costs.
+
+The preserved production topology did not permit a manual room-movement preview: all X+/X-/Y+/Y-
+attempts around the current anchor were rejected and no invalid move was committed. The retained
+position replacement case was likewise not manually exercisable: Large Chamber replacement failed
+connection geometry and Rectangle Room replacement failed earlier structural layout validation.
+No replacement was committed. These are not gameplay failures; automated
+movement/content-preservation coverage passed, as did the direct regression
+`ReplacementRejectsRetainedContentWhoseRoomLocalPositionWouldBecomeInvalid`.
+
+No owner-preserved pre-migration schema-12 byte-for-byte backup exists because the save was opened
+before a backup was made. The supplied historical backups were schema 6 and were not substituted.
+Automated schema-12-to-13 migration qualification remains the exact source-byte-preservation and
+migration-contract evidence.
+
+Two existing expected TimeService clock-skew warnings were observed after 327-second and
+361-second pauses: `Time delta looks large: 327 seconds.` and `Time delta looks large: 361
+seconds.` With configured `detectClockSkewSeconds = 300`, both warnings are expected and accepted,
+not Phase 7A2 failures.
+
+For standalone qualification, the owner used an isolated disposable save. The Windows Development
+Build created/loaded canonical schema-13 state, accepted explicit room-local placement, preserved
+assignment identity and `RoomLocalPosition` through full exit/relaunch, and passed a second
+save/full-exit/relaunch without migration replay, recovery failure, positional drift, or a
+player-visible corruption/recovery failure.
+
+No known blocking Phase 7A2 finding remains after automated qualification, external-review
+corrections, Editor UAT, and Windows standalone runtime qualification. The PR remains open and
+unmerged pending the repository's normal merge decision.
