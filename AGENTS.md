@@ -10,8 +10,6 @@
 6. UI/debug/player messages should use localization keys or table references.
 7. New systems must be designed so additional languages can be plugged in without code changes.
 8. Tests may use inline fake config/localization keys only when clearly scoped to tests.
-9. AI-assisted development for this repository must follow Docs/process/AI\_Model\_Selection\_Policy.md.
-10. Implementation and correction prompts must identify the recommended model, reasoning level, task classification, and reason before execution.
-11. Do not silently substitute a different model or reasoning level from the policy defaults. Any exception must be justified by the task classification or by a formally updated policy.
-12. Do not change a model recommendation merely because it is questioned. A recommendation may change only when new task information, a changed optimization goal, repository evidence, task misclassification, or materially changed official model guidance justifies the change.
+9. Implementation and correction prompts must identify the recommended model, reasoning level, task classification, reason, and any availability fallback required by the canonical policy before execution.Implementation and correction prompts must identify the recommended model, reasoning level, task classification, and reason before execution.
+10. Do not change a model recommendation merely because it is questioned. A recommendation may change only when new task information, a changed optimization goal, repository evidence, task misclassification, or materially changed official model guidance justifies the change.
 
