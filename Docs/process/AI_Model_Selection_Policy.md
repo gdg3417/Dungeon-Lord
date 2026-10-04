@@ -1,9 +1,9 @@
 # Dungeon Lord AI Model and Reasoning Selection Policy
 
 Status: Active  
-Version: 1.0  
-Last reviewed: 2026-09-25  
-Scope: ChatGPT project work, Codex Desktop, Codex CLI, ChatGPT Work, implementation prompts, correction prompts, repository reviews, debugging, test-failure investigation, and other AI-assisted development work for Dungeon Lord.
+Version: 2.0  
+Last reviewed: 2026-10-03  
+Scope: ChatGPT project work, ChatGPT Work, Codex Desktop, Codex CLI, Codex Cloud, implementation prompts, correction prompts, repository reviews, debugging, test-failure investigation, and other AI-assisted development work for Dungeon Lord.
 
 ## 1. Purpose
 
@@ -12,306 +12,483 @@ This policy establishes stable rules for selecting OpenAI models and reasoning l
 Its goals are to:
 
 1. Use the lowest-cost configuration that is appropriate for the task.
-2. Preserve higher-cost model usage for work that materially benefits from it.
+2. Preserve high-cost model usage for work that materially benefits from it.
 3. Avoid inconsistent model recommendations between conversations.
-4. Prevent model recommendations from changing merely because the user questions them.
+4. Prevent recommendations from changing merely because the user questions them.
 5. Make model selection explicit and reviewable in every implementation and correction prompt.
-6. Allow the policy to evolve deliberately when model capabilities or official guidance materially change.
+6. Distinguish task difficulty from task risk, ambiguity, and product-surface availability.
+7. Allow the policy to evolve deliberately when model capabilities, product availability, or official guidance materially change.
 
 This file is the canonical repository source for Dungeon Lord AI model-selection guidance.
 
-## 2. Governing principles
+## 2. Product-surface rule
+
+Model availability differs between regular ChatGPT Chat, ChatGPT Work, Codex, the API, and different plans or workspace configurations.
+
+For Dungeon Lord implementation and correction prompts, recommendations are primarily for Codex unless the prompt explicitly says otherwise.
+
+Current Work and Codex preferred models are:
+
+- GPT-6 Luna.
+- GPT-6.1 Sol.
+- GPT-6 Astra.
+
+GPT-6 Sol remains an available fallback but is not the preferred Sol model when GPT-6.1 Sol is available.
+
+GPT-5.6 Sol, Terra, and Luna are previous-generation fallbacks for environments where the preferred GPT-6-family model is unavailable.
+
+Do not assume that a model available in regular Chat is selectable in Work or Codex, or vice versa.
+
+Do not recommend GPT-6 Pro as a Codex model unless Codex explicitly exposes that exact model label. GPT-6 Pro is a regular Chat product label powered by GPT-6 Astra.
+
+When the preferred model is unavailable on the user's product, plan, or workspace, use the documented fallback for that task class rather than inventing a new recommendation.
+
+## 3. Governing principles
 
 Model choice and reasoning level are separate decisions.
 
-A larger task does not automatically require a more capable model.
+Task size alone does not determine model choice.
 
-A short task may still require a more capable model when it carries substantial architectural, save, migration, determinism, lifecycle, or integration risk.
+A large but highly mechanical task may remain appropriate for Luna.
 
-Do not use higher reasoning effort merely because a task is important. Higher reasoning uses more allowance and does not guarantee a better result.
+A short task may require Sol or Astra when it carries substantial architectural, save, migration, determinism, lifecycle, authority, or integration risk.
+
+Distinguish three questions:
+
+1. How well-defined is the task?
+2. How much cross-system reasoning does it require?
+3. How costly would a subtle mistake be?
+
+Use a stronger model when ambiguity, unfamiliarity, or consequence requires stronger judgment.
+
+Use higher reasoning when the model is appropriate but the task requires deeper analysis of a clearly defined problem.
+
+Do not increase reasoning effort merely because a task is important. Higher effort can consume more allowance and does not guarantee a better result.
 
 Before increasing reasoning effort, first verify that:
 
-1. The instructions are clear.
+1. The instructions are complete and internally consistent.
 2. The model has the necessary repository files and context.
-3. Required connected tools or permissions are available.
+3. Required connected tools, permissions, and local files are available.
 4. The task was classified correctly.
-5. The failure was actually a reasoning failure rather than an information, access, or instruction problem.
+5. The failure was actually a reasoning failure rather than an information, access, instruction, environment, or testing problem.
 
-Capability escalation should normally happen before excessive reasoning escalation.
-
-## 3. Task classifications
+## 4. Task classifications
 
 Every Codex implementation or correction recommendation must classify the task as one of the following.
 
 ### Routine
 
-The solution pattern is established, the scope is narrow, integration risk is low, and errors are easy to detect and correct.
+The solution pattern is established, scope is narrow, integration risk is low, and errors are easy to detect and correct.
 
 Examples:
 
 - Documentation edits.
-- Localization-key maintenance.
+- Small localization maintenance.
 - Straightforward test corrections.
-- Small configuration or data changes.
-- Mechanical code changes following an established repository pattern.
+- Small configuration or data edits with an approved value.
+- Mechanical changes following a clear repository precedent.
 - Repetitive cleanup that does not alter architecture or persistent state.
 
 ### Standard
 
-Meaningful implementation is required, but architecture, ownership boundaries, specifications, and acceptance criteria are substantially known.
+Meaningful implementation is required, but architecture, ownership boundaries, specifications, dependencies, and acceptance criteria are substantially known.
 
 Examples:
 
 - Normal bounded feature implementation.
-- Adding validation and tests to an established system.
-- Extending an existing gameplay system using established patterns.
+- Extending an established gameplay system.
+- Adding validation and automated tests to an established authority.
 - Integrating several known components.
 - Most normal bug fixes after the root cause is understood.
 - Most follow-up corrections after PR review.
 
 ### Complex
 
-The task contains meaningful uncertainty, unfamiliar behavior, cross-system interaction, persistent-state risk, difficult debugging, or significant architectural reasoning.
+The task requires substantial cross-system reasoning or is difficult, but the objective and governing constraints are still reasonably well defined.
 
 Examples:
 
-- Save-schema or migration work with compatibility risk.
-- Difficult lifecycle or state-corruption bugs.
-- Determinism failures without a clear root cause.
-- Cross-system regressions whose visible symptom may originate elsewhere.
-- Unfamiliar architecture work.
+- A broad but specified feature spanning several established systems.
+- Performance work with a known bottleneck and clear constraints.
+- Complicated deterministic simulation changes with approved semantics.
+- A difficult migration whose schema contract and intended mapping are already explicit.
+- Integration work across several authorities where ownership is known.
+- Complex UI architecture or editor integration with a locked design.
+
+### Ambiguous or High-Risk
+
+The task contains meaningful uncertainty, unfamiliar architecture, unclear root cause, conflicting evidence, or unusually consequential persistent-state risk.
+
+Examples:
+
+- Save corruption with an unknown source.
+- Migration design where the correct mapping or authority is not yet clear.
+- Hard determinism defects without a root cause.
+- Lifecycle failures that may originate across multiple authorities.
 - Repository-wide forensic investigation.
-- Changes affecting several authoritative state owners at once.
-- High-risk changes where a subtle mistake could affect saves, deterministic simulation, or future extensibility.
+- Architecture decisions with competing valid approaches.
+- Changes where a subtle error could corrupt saves or establish a competing authority.
 
 ### Exceptional
 
-The task remains unusually difficult after appropriate lower settings have been tried, or it has unusually broad consequences that justify the highest available reasoning settings.
+The task remains unusually difficult after an appropriate model and reasoning level have been tried, or it has unusually broad consequences requiring the highest available reasoning settings.
 
 Exceptional classification must include a written task-specific justification.
 
-## 4. Model defaults
+## 5. GPT-6 Luna
 
-### GPT-5.6 Terra
+GPT-6 Luna is the preferred efficiency model for scoped, routine, and frequently repeated work.
 
-Use Terra for Routine work where the implementation approach is already known and consequences of a mistake are limited and readily testable.
+### Luna Low
 
-Default reasoning level: Medium.
+Use for highly mechanical or narrowly scoped work.
 
-Use Terra Low for extremely mechanical work where little interpretation is required.
+Examples:
 
-Typical Terra work includes:
+- Small text edits.
+- Simple extraction or categorization.
+- One-file mechanical changes with exact instructions.
+- Trivial test fixture edits with a known cause and exact expected fix.
+- Formatting or repetitive cleanup.
 
-- Documentation-only changes.
-- Straightforward test fixes.
-- Localization-key maintenance.
-- Simple data or configuration edits.
-- Mechanical one-file or few-file changes with a clear existing precedent.
-- Repetitive cleanup that does not alter architecture or persistent state.
+### Luna Medium
 
-Do not increase Terra to High simply to force Terra through a task that belongs on Sol.
+Use for Routine work that still requires interpretation.
 
-### GPT-5.6 Sol
+Examples:
 
-Sol is the default model for Standard Dungeon Lord feature development.
+- Documentation governance edits whose content is already decided.
+- Small test fixes where the failure and desired behavior are known.
+- Small localization or configuration changes.
+- Straightforward implementation following an exact established pattern.
 
-Default reasoning level: Medium.
+Luna Medium is the default for Routine tasks.
 
-Typical Sol work includes:
+Do not push Luna to very high reasoning merely to compensate for a task that belongs on Sol or Astra.
 
-- Implementing a normal bounded feature PR.
-- Extending established gameplay systems.
-- Adding validation and corresponding automated tests.
-- Integrating multiple existing components where ownership is already understood.
-- Implementing an approved specification using established repository patterns.
-- Normal bug fixes requiring moderate investigation.
-- Most focused correction prompts after review.
+## 6. GPT-6.1 Sol
 
-Sol Low may be used for work that is somewhat more involved than Routine but does not need normal Standard-depth reasoning.
+GPT-6.1 Sol is the preferred workhorse for Dungeon Lord implementation.
 
-Sol High is not the normal escalation path for fundamentally difficult or unfamiliar work. If Sol High is being considered because the task itself is substantially more difficult, first evaluate whether Astra Low is the better fit.
+It should replace GPT-5.6 Sol as the normal default when available.
 
-### GPT-6 Astra
+### GPT-6.1 Sol Medium
 
-Use Astra for Complex work where the problem itself is difficult, unfamiliar, ambiguous, unusually consequential, or requires stronger cross-system reasoning.
+Default for Standard implementation.
 
-Default reasoning level when Astra is warranted: Low.
+Examples:
 
-Typical Astra work includes:
+- Normal bounded gameplay feature PRs.
+- Extending an established system under an approved specification.
+- Adding tests and validation to known authorities.
+- Integrating several existing components.
+- Normal UI implementation with approved behavior.
+- Most focused corrections after review.
 
-- Save migration work with meaningful compatibility risk.
-- Difficult state corruption or lifecycle bugs.
-- Cross-system failures with an unclear source.
-- Hard determinism defects.
-- Unfamiliar architectural problems.
-- Complex regressions.
-- Repository-wide forensic investigation.
-- High-risk architecture changes affecting persistent state or several authoritative systems.
+### GPT-6.1 Sol High
 
-Astra Low is the first Astra setting.
+Use for Complex work where the task is difficult but well specified.
 
-Use Astra Medium only when at least one of the following applies:
+Examples:
 
-1. Astra Low materially missed required behavior or integration risk.
-2. The task remains exceptionally complex even for Astra Low.
-3. Several unresolved architectural questions must be reasoned about together.
-4. Repository evidence or failed implementation demonstrates that additional reasoning depth is justified.
+- Cross-system implementation with known authority boundaries.
+- Complex deterministic simulation work with locked semantics.
+- Difficult performance or workload changes with a known objective.
+- Large editor or UI integration with approved architecture.
+- Migration implementation where the source and target contracts are already explicitly locked.
 
-Astra High, XHigh, Max, or equivalent highest-effort settings are exceptional. They must not be recommended routinely.
+High reasoning on GPT-6.1 Sol is appropriate when more analysis is needed but the problem itself is not fundamentally ambiguous.
 
-Before recommending Astra High or above, state specifically why Astra Low or Medium is insufficient.
+### GPT-6.1 Sol Extra High or Max
 
-Preserving the user's limited model allowance is an explicit project consideration.
+Do not recommend routinely.
 
-### GPT-5.6 Luna
+Use only when representative evidence shows GPT-6.1 Sol High is insufficient and the task remains well defined enough that Sol, rather than Astra, is still the right model family.
 
-Luna is not a default implementation model for this repository.
+The recommendation must state why High is insufficient.
 
-It may be used for focused, repetitive, or low-risk support work such as:
+## 7. GPT-6 Astra
 
-- Information extraction.
-- Categorization.
-- Short text edits.
-- Bulk formatting.
-- Other mechanical tasks that do not require repository-wide judgment.
+GPT-6 Astra is the preferred highest-capability model for ambiguous, unfamiliar, or unusually consequential work.
 
-Do not recommend Luna for gameplay-state changes, saves, migrations, architecture, deterministic behavior, economic rules, or specification interpretation.
+Astra should not be the routine default for normal Dungeon Lord feature implementation because usage conservation is an explicit project requirement.
 
-## 5. Default escalation ladder
+### Astra Low
+
+Use when the primary need is stronger model capability rather than prolonged reasoning.
+
+Examples:
+
+- Difficult debugging with an unclear root cause.
+- Unfamiliar architecture investigation.
+- Cross-system regression analysis.
+- Repository forensics.
+- Review of a risky implementation where subtle integration mistakes are plausible.
+
+Astra Low may be preferable to pushing a weaker model to excessive reasoning.
+
+### Astra Medium
+
+Use when both model capability and deeper reasoning are justified.
+
+Examples:
+
+- High-risk save or migration design with unresolved questions.
+- State-corruption or lifecycle problems spanning multiple authorities.
+- Architecture decisions involving conflicting constraints.
+- Difficult determinism or persistence problems where failure has broad consequences.
+- A Complex task where GPT-6.1 Sol High produced materially incomplete or unsafe reasoning.
+
+### Astra High
+
+Exceptional only.
+
+Use when Astra Medium was insufficient or when the task has unusually broad consequences and requires especially deep analysis.
+
+The recommendation must state why Astra Low or Medium is insufficient.
+
+### Astra Extra High or Max
+
+Not a normal Dungeon Lord recommendation.
+
+Use only after concrete evidence demonstrates that lower Astra settings are inadequate.
+
+A written justification is mandatory.
+
+## 8. GPT-6 Sol
+
+GPT-6 Sol is a fallback, not a normal default, when GPT-6.1 Sol is available.
+
+Use GPT-6 Sol only when:
+
+1. GPT-6.1 Sol is unavailable in the user's current Codex or Work environment.
+2. Workspace configuration prevents GPT-6.1 Sol use.
+3. Compatibility requires GPT-6 Sol.
+4. Project-specific comparison demonstrates a concrete reason to prefer GPT-6 Sol.
+
+For equivalent tasks, use the same general reasoning guidance as GPT-6.1 Sol.
+
+Do not recommend GPT-6 Sol merely because it appears adjacent to GPT-6.1 Sol in a model picker.
+
+## 9. GPT-5.6 fallback models
+
+GPT-5.6 Sol, Terra, and Luna are previous-generation fallbacks.
+
+Do not select them by default when the corresponding preferred GPT-6-family model is available.
+
+Fallback guidance:
+
+- GPT-6 Luna unavailable: use GPT-5.6 Luna for highly mechanical work or GPT-5.6 Terra Medium for Routine implementation.
+- GPT-6.1 Sol unavailable: use GPT-6 Sol when available, otherwise GPT-5.6 Sol.
+- GPT-6 Astra unavailable: use GPT-6.1 Sol High for the best available complex-work fallback, while explicitly noting the availability constraint.
+
+Do not silently substitute a previous-generation model. State when the recommendation is a fallback caused by availability.
+
+## 10. Default escalation ladder
 
 Use this escalation pattern unless repository evidence provides a concrete reason to deviate.
 
-Routine known work:
+Extremely mechanical:
 
-GPT-5.6 Terra, Medium.
+GPT-6 Luna, Low.
+
+Routine:
+
+GPT-6 Luna, Medium.
 
 Standard implementation:
 
-GPT-5.6 Sol, Medium.
+GPT-6.1 Sol, Medium.
 
-Complex, unfamiliar, or high-risk work:
+Complex but well defined:
+
+GPT-6.1 Sol, High.
+
+Ambiguous, unfamiliar, or forensic:
 
 GPT-6 Astra, Low.
 
-Astra Low proves insufficient for a genuine reasoning reason:
+High-risk and ambiguity remains material:
 
 GPT-6 Astra, Medium.
 
-Exceptional unresolved work after appropriate lower settings:
+Exceptional unresolved work:
 
-GPT-6 Astra, High or above, with written justification.
+GPT-6 Astra, High.
 
-Do not normally escalate through:
+Extra High or Max:
 
-Terra Medium -> Terra High -> Sol High -> Astra Medium.
+Only with written justification and concrete evidence that the lower appropriate setting was inadequate.
 
-When the problem has crossed into a higher capability class, move to the appropriate model before repeatedly raising reasoning effort on the lower-capability model.
+Do not mechanically escalate through every reasoning level.
 
-## 6. PR-specific defaults
+A stronger model at lower reasoning may be better than excessive reasoning on a weaker model.
+
+## 11. PR-specific defaults
 
 ### Documentation-only PR
 
-Default: GPT-5.6 Terra, Low or Medium.
+Default: GPT-6 Luna, Medium.
 
-Use Medium when the documentation governs important process, architecture, specifications, or future implementation behavior.
+Use Luna Low only when the text change is purely mechanical and interpretation is negligible.
 
 ### Small mechanical correction PR
 
-Default: GPT-5.6 Terra, Medium.
+Default: GPT-6 Luna, Medium.
 
-Examples include a known test portability correction or a narrow change following an exact established pattern.
+Use Luna Low for an exact one-line or similarly trivial correction.
 
 ### Normal implementation PR
 
-Default: GPT-5.6 Sol, Medium.
+Default: GPT-6.1 Sol, Medium.
 
-This is the normal starting point for most Dungeon Lord feature PRs.
+This is the standard starting point for most Dungeon Lord feature PRs.
 
-### Difficult architecture or persistent-state PR
+### Complex but locked implementation PR
+
+Default: GPT-6.1 Sol, High.
+
+Use when specifications and authority boundaries are clear but integration reasoning is substantial.
+
+### Difficult investigation or unknown systemic defect
 
 Default: GPT-6 Astra, Low.
 
-Examples include difficult migrations, unclear authority interactions, complex lifecycle work, or unfamiliar cross-system architecture.
+### High-risk save, migration, persistence, or architecture design with unresolved questions
 
-### Follow-up correction after PR review
+Default: GPT-6 Astra, Medium.
+
+### Focused follow-up correction after review
 
 If the root cause and required fix are already understood:
 
-GPT-5.6 Terra, Medium, or GPT-5.6 Sol, Medium, depending on scope.
+GPT-6 Luna, Medium, for narrow corrections.
 
-If the review exposed an unknown systemic problem:
+GPT-6.1 Sol, Medium, for meaningful implementation corrections.
+
+If the review exposed a new systemic or ambiguous problem:
 
 GPT-6 Astra, Low.
 
-## 7. Review and debugging rules
+## 12. Phase and feature risk does not automatically determine model
 
-The model used for implementation and the model used for investigation do not have to match.
+Do not select Astra merely because a PR belongs to a late development phase, touches many files, or is important.
 
-A feature may be implemented with Sol Medium and later require Astra Low to investigate an unexpected cross-system regression.
+For example:
 
-A failed implementation does not automatically justify raising reasoning effort.
+- A Phase 7 UI implementation with locked behavior and established architecture may be GPT-6.1 Sol Medium or High.
+- A three-line save fix with unclear corruption risk may require Astra.
+- A large repetitive localization update may remain Luna.
+- A migration implementation with a fully locked source-to-target mapping may be GPT-6.1 Sol High, while designing that mapping may require Astra Medium.
 
-Before escalating, determine whether the failure resulted from:
+Classify the reasoning problem, not the phase number or diff size.
+
+## 13. Investigation and implementation may use different models
+
+The model used to diagnose a problem and the model used to implement the resulting fix do not have to match.
+
+Examples:
+
+- Astra Low may identify the root cause of a cross-system regression.
+- Once the root cause and exact fix are known, GPT-6.1 Sol Medium may implement it.
+- A narrow mechanical follow-up may be delegated to Luna Medium.
+
+Do not continue spending Astra usage on an implementation that has become routine after the hard reasoning is complete.
+
+## 14. Failed implementation does not automatically justify escalation
+
+Before escalating model or reasoning effort, determine whether the failure resulted from:
 
 1. Incomplete instructions.
 2. Missing repository context.
 3. Missing files or permissions.
 4. Incorrect assumptions.
 5. Scope ambiguity.
-6. A genuine reasoning failure.
+6. Environment or tool failure.
+7. Incorrect test setup.
+8. A genuine reasoning failure.
 
 Higher reasoning cannot compensate for missing evidence or access.
 
-## 8. Usage-conservation rules
+## 15. Usage-conservation rules
 
-Use the lowest-cost configuration that is appropriate for the task, not simply the lowest-cost configuration available.
+Usage conservation is a first-class project concern.
 
-Do not spend Astra usage on work that Terra or Sol is expected to perform reliably.
+Use the lowest-cost model and reasoning level that is appropriate for the task.
 
-Do not repeatedly spend allowance retrying an underpowered configuration when evidence shows the task belongs on a higher-capability model.
+Do not spend Astra usage on work that Luna or GPT-6.1 Sol is expected to perform reliably.
 
-One appropriately selected Astra Low run may be preferable to repeated high-effort attempts on a less capable model.
+Do not repeatedly retry an underpowered configuration when evidence shows the task belongs on a stronger model.
 
-When a task is large but conceptually routine, size alone is not a reason to select Astra.
+A single appropriately selected stronger-model run may be more efficient than repeated failed lower-tier attempts.
 
-When a task is small but involves dangerous persistent-state or migration behavior, small size is not a reason to avoid Astra.
+Before a large Work or Codex task, check current usage allowance when practical.
 
-Before a large Work or Codex task, check current usage allowance when practical so model and reasoning choices reflect the user's current limits.
+Do not downgrade below the task's required capability solely because allowance is low. Instead:
 
-## 9. No reactive recommendation changes
+1. Reduce scope.
+2. Split investigation from implementation.
+3. Use a cheaper model for mechanical sub-work.
+4. Reserve the stronger model for the portion that actually requires it.
 
-Select the recommended configuration before presenting the implementation or correction prompt.
+## 16. No reactive recommendation changes
 
-If the user questions the recommendation, explain why the recommendation follows this policy.
+Select the recommended configuration before presenting an implementation or correction prompt.
+
+If the user questions the recommendation, explain why it follows this policy.
 
 Do not change the recommendation merely because the user pushes back.
 
 A recommendation may change only when one or more of the following occurs:
 
 1. New facts about the task are discovered.
-2. The user changes the optimization goal, such as explicitly prioritizing usage conservation or maximum capability.
+2. The user changes the optimization goal.
 3. Evidence shows the original task classification was wrong.
 4. Official OpenAI model guidance materially changes.
-5. Repository evidence materially changes the assessed risk.
+5. Product or plan availability changes.
+6. Repository evidence materially changes the assessed risk.
+7. A representative attempt demonstrates that the selected model or reasoning level is inadequate.
 
 When a recommendation changes, explicitly identify which condition caused the change.
 
 Do not present a revised recommendation as though it had always been the obvious choice.
 
-## 10. Required header for Codex prompts
+## 17. Required header for Codex prompts
 
 Every Dungeon Lord implementation or correction prompt provided to the user must begin with:
 
 Recommended Codex configuration: [model], [reasoning level]
 
-Task classification: [Routine, Standard, Complex, or Exceptional]
+Task classification: [Routine, Standard, Complex, Ambiguous or High-Risk, or Exceptional]
 
-Reason: [one sentence explaining why the classification applies]
+Reason: [one sentence explaining why the classification and configuration apply]
 
-The configuration line is advice to the user. It is not an instruction to Codex to change its own model.
+Fallback if unavailable: [fallback model and reasoning level, or "none required"]
 
-## 11. Relationship to repository authority
+The configuration is advice to the user. It is not an instruction to Codex to change its own model.
+
+If the preferred model is still rolling out or availability is uncertain, say so rather than assuming the user can select it.
+
+## 18. Recommendations for repository review and planning
+
+ChatGPT review and planning are not automatically governed by the same model picker as Codex.
+
+When recommending a ChatGPT configuration, distinguish:
+
+- regular Chat;
+- ChatGPT Work;
+- Codex.
+
+Do not tell the user to select a Work-only or Codex-only model in regular Chat.
+
+For repository implementation work, Codex remains the preferred execution environment.
+
+For long multi-step research or artifact creation, Work may be appropriate.
+
+For conversational planning and review, regular Chat may remain appropriate unless the user explicitly wants Work or another available mode.
+
+## 19. Relationship to repository authority
 
 This policy governs AI model and reasoning recommendations only.
 
@@ -326,9 +503,11 @@ It does not override:
 - Test evidence.
 - User instructions for a specific task.
 
-When model-selection guidance conflicts with implementation authority, the implementation authority governs what must be built. This policy governs which AI configuration should be recommended to perform the work.
+When model-selection guidance conflicts with implementation authority, the implementation authority governs what must be built.
 
-## 12. Policy revision
+This policy governs which AI configuration should be recommended to perform the work.
+
+## 20. Policy revision
 
 This policy is intentionally stable across conversations.
 
@@ -337,46 +516,51 @@ Do not reinterpret it independently in each new chat.
 Review the policy when:
 
 1. A new major OpenAI model becomes available.
-2. A model named here is materially changed, renamed, or retired.
-3. OpenAI publishes materially different model-selection or reasoning guidance.
-4. Available reasoning controls materially change.
-5. Dungeon Lord development experience demonstrates that a default is consistently inappropriate.
+2. A preferred model receives a material successor, such as a new Sol revision.
+3. A model named here is materially changed, renamed, restricted, or retired.
+4. OpenAI publishes materially different model-selection or reasoning guidance.
+5. Available reasoning controls materially change.
+6. Work or Codex availability materially changes.
+7. Dungeon Lord development evidence demonstrates that a default is consistently inappropriate.
 
 When a change is warranted:
 
 1. Verify current official OpenAI guidance.
-2. Propose the policy change explicitly.
-3. Update this file through a focused documentation PR.
-4. Update AGENTS.md only if its enforcement language must change.
-5. Update ChatGPT Project Instructions if their short enforcement copy must change.
-6. Do not silently change project defaults before the repository policy is updated unless the user explicitly directs otherwise.
+2. Compare the change against actual Dungeon Lord development experience.
+3. Propose the policy change explicitly.
+4. Update this file through a focused documentation PR.
+5. Update AGENTS.md only when enforcement language or the canonical path must change.
+6. Update ChatGPT Project Instructions when their short enforcement copy or defaults must change.
+7. Do not silently change project defaults before the repository policy is updated unless the user explicitly directs otherwise.
 
-## 13. Current approved defaults
+## 21. Current approved defaults
 
-| Task type | Default model | Default reasoning |
-| --- | --- | --- |
-| Routine documentation or code work | GPT-5.6 Terra | Medium |
-| Extremely mechanical routine work | GPT-5.6 Terra | Low |
-| Standard Dungeon Lord implementation PR | GPT-5.6 Sol | Medium |
-| Complex or high-risk implementation/investigation | GPT-6 Astra | Low |
-| Complex work where Astra Low is demonstrably insufficient | GPT-6 Astra | Medium |
-| Exceptional unresolved work | GPT-6 Astra | High or above, with written justification |
+| Task type | Preferred model | Reasoning | Fallback |
+| --- | --- | --- | --- |
+| Extremely mechanical | GPT-6 Luna | Low | GPT-5.6 Luna Low |
+| Routine work | GPT-6 Luna | Medium | GPT-5.6 Terra Medium |
+| Standard implementation PR | GPT-6.1 Sol | Medium | GPT-6 Sol Medium, then GPT-5.6 Sol Medium |
+| Complex but well-defined implementation | GPT-6.1 Sol | High | GPT-6 Sol High, then GPT-6 Astra Low |
+| Ambiguous or forensic investigation | GPT-6 Astra | Low | GPT-6.1 Sol High |
+| High-risk unresolved save, migration, persistence, or architecture work | GPT-6 Astra | Medium | GPT-6.1 Sol High |
+| Exceptional unresolved work | GPT-6 Astra | High | No automatic fallback |
+| Extra High or Max | Exception only | Written justification required | None |
 
-## 14. Guidance basis
+## 22. Guidance basis
 
-This version was reviewed against current official OpenAI guidance on 2026-09-25.
+This version was reviewed against official OpenAI guidance available on 2026-10-03.
 
-At that time, OpenAI described:
+At that time:
 
-- GPT-6 Astra as its most capable model for coding, research, analysis, and complex problem-solving, including difficult bugs and unfamiliar problems.
-- GPT-5.6 Sol as a strong balance of capability and efficiency for coding, research, and professional work, including normal feature implementation.
-- GPT-5.6 Terra as a balance of speed, capability, and cost for everyday work, including routine code changes.
-- GPT-5.6 Luna as a fast, economical option for focused or repetitive work.
-- Lower reasoning effort as a useful starting point when speed or allowance conservation matters.
-- Medium reasoning as a balance of response time and deeper reasoning.
-- Higher reasoning as useful for difficult problems, while also noting that higher effort uses more allowance and does not always produce a better result.
-- Astra Low as capable of outperforming Sol High, making Astra Low or Medium an appropriate starting point when a task has exceeded Sol's normal use case.
-- Clear instructions, required files, connected apps, and permissions as prerequisites that cannot be replaced by additional reasoning effort.
-- Model and reasoning selection as choices that should be made before starting a large task and reviewed before increasing effort.
+- GPT-6 Astra was positioned as the state-of-the-art, highest-capability model for ambiguous problems, deep analysis, and ambitious work.
+- GPT-6.1 Sol was positioned for complex work where capability, time, and cost all matter, with near-Astra performance for complex coding and professional work.
+- GPT-6 Luna was positioned as the efficient model for scoped work, triage, frequent tasks, and fine-grained edits.
+- GPT-6 Sol remained available, while GPT-6.1 Sol was identified as the newer preferred Sol model.
+- GPT-6.1 Sol, GPT-6 Sol, and GPT-6 Luna were available in ChatGPT Work and Codex, subject to plan, workspace, and rollout availability.
+- Astra could consume Work and Codex allowance faster than lower-cost models.
+- OpenAI explicitly noted that Astra at Low effort can outperform Sol at High effort.
+- OpenAI advised checking instructions, files, connected apps, permissions, and usage before simply increasing reasoning effort.
+- OpenAI described Luna Low for fine-grained edits, GPT-6.1 Sol Medium for complex technical work, and higher Astra settings for demanding analysis.
+- GPT-6.1 Sol supported Low, Medium, High, Extra High/XHigh, and Max reasoning in supported surfaces.
 
-This guidance basis explains the policy but does not automatically modify it. Future official guidance changes should be incorporated through the revision process above.
+This guidance basis explains the policy but does not automatically modify it. Future official guidance changes must be incorporated through the revision process above.
