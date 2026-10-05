@@ -135,7 +135,7 @@ namespace DungeonBuilder.M0
             moveMode = true; sheet.style.display = DisplayStyle.None;
             feedback = "ui.dungeon.move_hint"; Present();
         }
-        private void CloseSheet() { selected = null; moveMode = false; sheet.style.display = DisplayStyle.None; }
+        private void CloseSheet() { selected = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); }
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || legacy || modal.style.display == DisplayStyle.Flex) return;
@@ -186,11 +186,13 @@ namespace DungeonBuilder.M0
         }
         private void OfferRecovery()
         {
-            ShowModal(recovery != null ? "ui.dungeon.recovery" : recoveryReason,
+            ShowModal(feedback == TransactionalDungeonDraft.DeleteFailedReason ? feedback :
+                recovery != null ? "ui.dungeon.recovery" : recoveryReason,
                 recovery != null ? (Action)Resume : DiscardRecovery,
                 recovery != null ? "ui.dungeon.resume" : "ui.dungeon.discard");
             var cancel = document.rootVisualElement.Q<Button>("cancel");
             cancel.text = Text(recovery != null ? "ui.dungeon.discard" : "ui.dungeon.continue");
+            cancel.style.display = recovery != null ? DisplayStyle.Flex : DisplayStyle.None;
             confirm = recovery != null ? (Action)Resume : DiscardRecovery;
         }
         private void Resume()
@@ -198,8 +200,14 @@ namespace DungeonBuilder.M0
           renderState = draft.ReadModel; RebuildFloor(false); Present(); }
         private void DiscardRecovery()
         {
-            if (!store.Delete(recoveryBytes)) { feedback = TransactionalDungeonDraft.DeleteFailedReason; Present(); return; }
-            recovery = null; recoveryBytes = null; recoveryReason = null; feedback = "ui.dungeon.discarded"; Present();
+            if (!store.Delete(recoveryBytes))
+            {
+                // A failed deletion may have removed part of the recovered chain. Keep
+                // resolution available, but never resume the pre-deletion read model.
+                recovery = null; recoveryBytes = null; recoveryReason = TransactionalDungeonDraft.RecoveryFailedReason;
+                feedback = TransactionalDungeonDraft.DeleteFailedReason; Present(); OfferRecovery(); return;
+            }
+            recovery = null; recoveryBytes = null; recoveryReason = null; feedback = "ui.dungeon.discarded"; CloseModal(); Present();
         }
         private void ShowModal(string key, Action action, string confirmKey)
         {
@@ -207,6 +215,7 @@ namespace DungeonBuilder.M0
             document.rootVisualElement.Q<Label>("modalText").text = Text(key);
             document.rootVisualElement.Q<Button>("confirm").text = Text(confirmKey);
             document.rootVisualElement.Q<Button>("cancel").text = Text("ui.dungeon.continue");
+            document.rootVisualElement.Q<Button>("cancel").style.display = DisplayStyle.Flex;
             modal.style.display = DisplayStyle.Flex;
         }
         private void CloseModal()
@@ -215,7 +224,8 @@ namespace DungeonBuilder.M0
         }
         private void CancelModal()
         {
-            if (recovery != null) { DiscardRecovery(); if (recovery != null) return; }
+            if (recovery == null && (recoveryBytes != null || recoveryReason != null)) { OfferRecovery(); return; }
+            if (recovery != null) { DiscardRecovery(); return; }
             CloseModal();
         }
         private void CanonicalPublished(SaveData save)

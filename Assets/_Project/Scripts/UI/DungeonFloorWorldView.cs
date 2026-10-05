@@ -23,6 +23,7 @@ namespace DungeonBuilder.M0
         public Rect Bounds { get; private set; }
         public int ActiveEntityCount => identities.Count;
         public bool GridVisible => grid != null && grid.gameObject.activeSelf;
+        public bool PreviewVisible => highlight != null && highlight.gameObject.activeSelf;
         public string FloorInstanceId => floor?.FloorInstanceId;
 
         public void Initialize(DungeonPresentationPolicy policy)
@@ -34,7 +35,7 @@ namespace DungeonBuilder.M0
             rooms = Layer("Rooms", 0); fixedStructures = Layer("Fixed", 0);
             corridors = Layer("Corridors", 0); grid = Layer("EditorGrid", -1);
             highlight = Entity("Selection", 3);
-            highlight.gameObject.SetActive(false);
+            ClearPreview();
         }
         private Tilemap Layer(string name, int order)
         {
@@ -62,7 +63,7 @@ namespace DungeonBuilder.M0
             floor = selected; this.production = production; this.occupancy = occupancy;
             rooms.ClearAllTiles(); fixedStructures.ClearAllTiles(); corridors.ClearAllTiles(); grid.ClearAllTiles();
             foreach (Tile tile in ownedTiles) Destroy(tile); ownedTiles.Clear(); identities.Clear();
-            highlight.gameObject.SetActive(false);
+            ClearPreview();
             foreach (var view in pool) view.gameObject.SetActive(false);
             if (selected == null) { Bounds = new Rect(0, 0, 1, 1); return; }
             var limits = new SpatialValidationWorkloadLimits(maximumTiles);
@@ -136,6 +137,7 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
+        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); }
         public void SetEdit(bool edit) { grid.gameObject.SetActive(edit); }
         private void OnDestroy()
         { foreach (Tile tile in ownedTiles) Destroy(tile); if (sprite != null) Destroy(sprite); }

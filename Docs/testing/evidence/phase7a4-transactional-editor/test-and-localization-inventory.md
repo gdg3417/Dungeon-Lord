@@ -1,6 +1,6 @@
 # Phase 7A4 exact test and localization inventory
 
-EditMode adds 63 cases: 37 domain/presenter/storage probes, 23 durability cases and 3 actual-scene cases. Genuine PlayMode adds four shell scenarios; its full suite also discovers the 60 domain/durability cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
+EditMode adds 67 cases: 37 domain/presenter/storage probes, 23 durability cases and 7 actual-scene cases. Genuine PlayMode adds eight shell scenarios; its full suite also discovers the 60 domain/durability cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
 
 ## EditMode cases
 
@@ -68,12 +68,22 @@ EditMode adds 63 cases: 37 domain/presenter/storage probes, 23 durability cases 
 - DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.SafeAreaMappingZoomPanAndBlockedPinchArePureAndClamped — Passed
 - DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.WrongRoomAndAssignmentIdsNeverReassignOrSubstitute — Passed
 
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SelectionCloseEmptyTapFloorDiscardAndCommitClearPreview — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ValidRecoveryDiscardFailureRemovesResumeAndAllowsRetry — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ValidRecoveryResumeKeepsCanonicalAndManaUnchanged — Passed
+
 ## Genuine PlayMode shell cases
 
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellLongerLocalization — Passed
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellNormalEditMoveSaveDiscardAndTextModes — Passed
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellPortraitLandscapeCutoutAndScreenshotEvidence — Passed
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellRealInputSystemChromeAndPinch — Passed
+
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellSelectionPreviewLifetime — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellUnresolvedRecoveryAndDeleteRetry — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellValidRecoveryDiscardAndDeleteRetry — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellValidRecoveryResume — Passed
 
 ## Established skips
 

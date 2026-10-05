@@ -207,6 +207,208 @@ namespace DungeonBuilder.M0.Tests
         }
 
         private static Vector2 ScreenPoint(Vector2 panelPoint) => new Vector2(panelPoint.x, Screen.height - panelPoint.y);
+        [UnityTest]
+        public IEnumerator UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry()
+        {
+            foreach (bool stale in new[] { true, false })
+            {
+                CreateDurableRecovery();
+                var root = GameRoot.Instance;
+                if (stale)
+                {
+                    var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+                    var otherStore = new FileDungeonDraftStore(root.SaveService.SavePath + ".canonical-change",
+                        SpatialMigrationFileSystemSelector.Evaluate(root.SaveService.SavePath).FileSystem, root.SaveSpatialMigrationLimits);
+                    var otherDraft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState,
+                        root.SaveService.DungeonDraftContext, otherStore);
+                    var assignment = floor.RoomContents.Assignments[0];
+                    Assert.That(otherDraft.Move(floor.FloorInstanceId, assignment.RoomInstanceId, assignment.AssignmentId,
+                        new TileCoordinate(2, 1)), Is.True);
+                    Assert.That(otherDraft.FlushNext(), Is.True);
+                    var changed = root.SaveService.CommitDungeonDraft(root.Save, otherDraft);
+                    Assert.That(changed.IsSuccess, Is.True, changed.Reason);
+                }
+                else
+                {
+                    string commit = Directory.GetFiles(Application.persistentDataPath,
+                        filename + ".editor-draft.draft-*.commit").OrderBy(p => p, StringComparer.Ordinal).Last();
+                    File.WriteAllText(commit, "malformed test commit evidence");
+                }
+                byte[] canonical = File.ReadAllBytes(root.SaveService.SavePath);
+                double mana = root.Save.structureRuntime.ManaReserve;
+                yield return RestartShell();
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString(
+                    stale ? TransactionalDungeonDraft.StaleReason : TransactionalDungeonDraft.RecoveryFailedReason, null)));
+                Assert.That(ui.Q<Button>("cancel").style.display.value, Is.EqualTo(DisplayStyle.None));
+                // Even a queued/programmatic cancellation cannot dismiss the sole resolution path.
+                typeof(ProductionDungeonController).GetMethod("CancelModal",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(controller, null);
+                Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                controller.EnterEdit(); Assert.That(controller.IsEditing, Is.False);
+                var fault = InjectDeleteFailure();
+                Click(ui.Q<Button>("confirm")); yield return null;
+                Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString(TransactionalDungeonDraft.DeleteFailedReason, null)));
+                Assert.That(ui.Q<Button>("confirm").enabledSelf, Is.True);
+                Assert.That(ui.Q<Button>("edit").enabledSelf, Is.False);
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                AssertCanonicalUnchanged(canonical, mana);
+                fault.FailDelete = false;
+                Click(ui.Q<Button>("confirm")); yield return null;
+                Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+                Assert.That(ui.Q<Button>("edit").enabledSelf, Is.True);
+                Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+                AssertCanonicalUnchanged(canonical, mana);
+                controller.EnterEdit(); Assert.That(controller.IsEditing, Is.True);
+                Assert.That(controller.Discard(), Is.True);
+                AssertCanonicalUnchanged(canonical, mana);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ValidRecoveryResumeKeepsCanonicalAndManaUnchanged()
+        {
+            CreateDurableRecovery();
+            byte[] canonical = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
+            double mana = GameRoot.Instance.Save.structureRuntime.ManaReserve;
+            yield return RestartShell();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(GameRoot.Instance.Content.GetString("ui.dungeon.resume", null)));
+            Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.IsEditing, Is.True);
+            Assert.That(controller.Draft.AcknowledgedSequence, Is.EqualTo(1));
+            Assert.That(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments[0].RoomLocalPosition,
+                Is.EqualTo(new TileCoordinate(1, 1)));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+            AssertCanonicalUnchanged(canonical, mana);
+            Assert.That(controller.Discard(), Is.True);
+            AssertCanonicalUnchanged(canonical, mana);
+        }
+
+        [UnityTest]
+        public IEnumerator ValidRecoveryDiscardFailureRemovesResumeAndAllowsRetry()
+        {
+            CreateDurableRecovery();
+            byte[] canonical = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
+            double mana = GameRoot.Instance.Save.structureRuntime.ManaReserve;
+            yield return RestartShell();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q<Button>("cancel").text, Is.EqualTo(GameRoot.Instance.Content.GetString("ui.dungeon.discard", null)));
+            var fault = InjectDeleteFailure();
+            Click(ui.Q<Button>("cancel")); yield return null;
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(GameRoot.Instance.Content.GetString("ui.dungeon.discard", null)));
+            Assert.That(controller.IsEditing, Is.False);
+            AssertCanonicalUnchanged(canonical, mana);
+            fault.FailDelete = false;
+            Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(GameRoot.Instance.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+            AssertCanonicalUnchanged(canonical, mana);
+            // Qualify the ordinary valid-recovery Discard path as well.
+            CreateDurableRecovery(); yield return RestartShell();
+            ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Click(ui.Q<Button>("cancel")); yield return null;
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q<Button>("edit").enabledSelf, Is.True);
+            controller.EnterEdit(); Assert.That(controller.IsEditing, Is.True);
+            Assert.That(controller.Discard(), Is.True);
+            AssertCanonicalUnchanged(canonical, mana);
+        }
+
+        [UnityTest]
+        public IEnumerator SelectionCloseEmptyTapFloorDiscardAndCommitClearPreview()
+        {
+            // New-game production saves only contain Floor 1. Construct the existing
+            // configured Floor 2 through its canonical authority for real floor switching.
+            var root = GameRoot.Instance;
+            root.Save.completedResearch = new CompletedResearchState { ProjectIds = new[] { "ac_100" } };
+            var construction = root.SaveService.PreviewFloorConstruction(root.Save);
+            Assert.That(construction.Profile, Is.Not.Null);
+            root.Save.structureRuntime.ManaReserve += construction.Profile.ConstructionMana;
+            construction = root.SaveService.PreviewFloorConstruction(root.Save);
+            var constructed = root.SaveService.CommitFloorConstruction(root.Save, construction);
+            Assert.That(constructed.IsSuccess, Is.True, constructed.Reason);
+            var state = GameRoot.Instance.Save.validatedCanonicalSpatialState;
+            var floor = state.Floors[0]; var room = floor.Layout.Rooms[0];
+            var definition = GameRoot.Instance.ProductionSpatialContent.Catalog.Rooms.Single(r => r.RoomDefinitionId == room.RoomDefinitionId);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(0, 0), definition.GrossFootprint,
+                room.Anchor, room.Orientation, out var start), Is.True);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(1, 1), definition.GrossFootprint,
+                room.Anchor, room.Orientation, out var target), Is.True);
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            controller.TapWorld(start); Assert.That(controller.World.PreviewVisible, Is.True);
+            Click(ui.Q<Button>("closeSheet")); yield return null;
+            Assert.That(controller.World.PreviewVisible, Is.False);
+            Assert.That(ui.Q("contextSheet").style.display.value, Is.EqualTo(DisplayStyle.None));
+            controller.TapWorld(start); controller.TapWorld(new TileCoordinate(-100, -100));
+            Assert.That(controller.World.PreviewVisible, Is.False);
+            controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove();
+            controller.TapWorld(new TileCoordinate(-100, -100));
+            Assert.That(controller.IsMoving, Is.True); Assert.That(controller.World.PreviewVisible, Is.True);
+            Assert.That(controller.World.GetComponentsInChildren<SpriteRenderer>().Single(r => r.name == "Selection").color,
+                Is.EqualTo(controller.presentationPolicy.InvalidColor));
+            controller.SelectFloor(state.Floors[1].FloorInstanceId);
+            Assert.That(controller.IsMoving, Is.False); Assert.That(controller.World.PreviewVisible, Is.False);
+            controller.SelectFloor(floor.FloorInstanceId); controller.TapWorld(start);
+            Assert.That(controller.Discard(), Is.True); Assert.That(controller.World.PreviewVisible, Is.False);
+            controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove(); controller.TapWorld(target);
+            yield return null;
+            Assert.That(controller.World.PreviewVisible, Is.True);
+            Assert.That(controller.Commit(), Is.True); Assert.That(controller.World.PreviewVisible, Is.False);
+        }
+
+        private void CreateDurableRecovery()
+        {
+            var root = GameRoot.Instance; var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            var assignment = floor.RoomContents.Assignments.Single(a => a.CategoryId == CanonicalSpatialSaveContracts.MonsterCategoryId);
+            var draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState,
+                root.SaveService.DungeonDraftContext, root.SaveService.CreateDungeonDraftStore());
+            Assert.That(draft.Move(floor.FloorInstanceId, assignment.RoomInstanceId, assignment.AssignmentId, new TileCoordinate(1, 1)), Is.True);
+            Assert.That(draft.FlushNext(), Is.True);
+        }
+        private IEnumerator RestartShell()
+        {
+            var document = controller.GetComponent<UIDocument>();
+            var tree = document.visualTreeAsset; var panel = document.panelSettings; var policy = controller.presentationPolicy;
+            UnityEngine.Object.Destroy(controller.gameObject); yield return null;
+            var shell = new GameObject("ProductionDungeonRecoveryTest", typeof(UIDocument));
+            document = shell.GetComponent<UIDocument>(); document.panelSettings = panel; document.visualTreeAsset = tree;
+            controller = shell.AddComponent<ProductionDungeonController>(); controller.presentationPolicy = policy;
+            for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+            Assert.That(controller.World, Is.Not.Null); yield return null;
+        }
+        private sealed class DeleteFailureStore : IDungeonDraftStore
+        {
+            public IDungeonDraftStore Inner;
+            public bool FailDelete = true;
+            public bool OutcomeUnknown => Inner.OutcomeUnknown;
+            public byte[] Read() => Inner.Read();
+            public bool Write(byte[] expected, byte[] next) => Inner.Write(expected, next);
+            public bool Delete(byte[] expected) => !FailDelete && Inner.Delete(expected);
+        }
+        private DeleteFailureStore InjectDeleteFailure()
+        {
+            var field = typeof(ProductionDungeonController).GetField("store",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fault = new DeleteFailureStore { Inner = (IDungeonDraftStore)field.GetValue(controller) };
+            field.SetValue(controller, fault); return fault;
+        }
+        private static void Click(Button button)
+        {
+            // Exercise the registered UITK Clickable, including the generic confirm callback.
+            // Device dispatch is separately qualified by the real Input System touch scenario.
+            typeof(Clickable).GetMethod("SimulateSingleClick", System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(button.clickable, new object[] { null, 0 });
+        }
+        private static void AssertCanonicalUnchanged(byte[] bytes, double mana)
+        {
+            CollectionAssert.AreEqual(bytes, File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath));
+            Assert.That(GameRoot.Instance.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+        }
         private void Touch(int id, Vector2 position, InputTouchPhase phase) => InputSystem.QueueStateEvent(simulatedTouch,
             new TouchState { touchId = id, position = position, phase = phase });
     }

@@ -14,15 +14,17 @@ Save Changes rechecks durability, current baseline/session and durable replay, v
 
 Stable IDs, ordinal ordering, bounded production workload limits, exact coordinates and configuration-owned geometry/occupancy remain authoritative. All new player text uses **41 stable Bootstrap localization entries** and existing localization/label/mana/heat presentation seams. Longer test-localized labels exercise wrapping. No Unity Localization or Japanese translation was added. Safe-area chrome, centralized physical interaction-target conversion (48 Android dp / 44 iOS points) and three text modes are tested; device qualification and owner usability remain outstanding.
 
+External review corrections preserve an accessible Discard resolution surface for stale/fail-closed recovery and restore it after failed evidence deletion. Successful deletion alone unlocks Edit; failed deletion removes Resume from the pre-deletion snapshot. Closing selection, empty-world selection, floor switching and successful Save/Discard clear the world marker, while active invalid Move feedback remains. Four new actual-scene regressions run in both EditMode and genuine PlayMode; the draft protocol is unchanged.
+
 ## Automated validation
 
-- Final Phase 7A4 EditMode: **63 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 3 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 4/4, including real Input System two-touch injection and chrome-origin blocking.
-- Canonical save/load/session/complete-save focused integration: **160/160**. Full-suite relevant coverage: A2 **44 passed, 1 established skip**; A3 **36/36**; Phase 4 **736/736**; Phase 6 **223/223**.
-- Full EditMode: **1,472 total — 1,471 passed, 0 failed, 1 skipped**.
-- Full PlayMode: **2,915 total — 2,905 passed, 0 failed, 10 skipped**.
+- Final Phase 7A4 EditMode: **67 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 7 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 8/8, including real Input System two-touch injection and chrome-origin blocking.
+- Canonical save/load/session/complete-save focused integration: **160/160**, also verified as passing in the current full EditMode rerun. Full-suite relevant coverage: A2 **44 passed, 1 established skip**; A3 **36/36**; Phase 4 **736/736**; Phase 6 **223/223**.
+- Full EditMode: **1,476 total — 1,475 passed, 0 failed, 1 skipped**.
+- Full PlayMode: **2,919 total — 2,909 passed, 0 failed, 10 skipped**.
 - Both exact skipped-test sets match the retained Phase 7A3 baseline. No skip, ignore or failure reclassification was added.
-- Explicit production gates: **274/274** (build gate 65, export 112, recovery 57, loading 37, actual scene 3). Real production pre-build gate also passed in the player build.
-- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,638,812 bytes.
+- Explicit production gates: **278/278** (build gate 65, export 112, recovery 57, loading 37, actual scene 7). Real production pre-build gate also passed in the player build.
+- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,639,460 bytes.
 - `git diff --check`: passed. Owner Packages and ProjectSettings remain unchanged.
 
 Validation used the established isolated checkout with the same baseline and intentional changes; owner saves were not used. XML, build logs/report and four inspected representative portrait/landscape/tablet/long-localization PNGs are retained in established ignored evidence locations. Repository-owned capture uses Unity APIs with bounded stable-state warm-up; no visual-regression dependency or strict pixel-golden gate was introduced. See the repository Phase 7A4 evidence for exact test/localization/skip inventories, earlier failures, final protocol and owner UAT instructions.

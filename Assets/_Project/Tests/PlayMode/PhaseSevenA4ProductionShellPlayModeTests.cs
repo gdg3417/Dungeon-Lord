@@ -58,6 +58,22 @@ namespace DungeonBuilder.M0.Tests.PlayMode
             yield return Invoke("LongerLocalizationWrapsWithoutLosingCriticalActions");
         }
 
+        [UnityTest]
+        public IEnumerator ProductionShellUnresolvedRecoveryAndDeleteRetry()
+        { yield return Invoke("UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry"); }
+
+        [UnityTest]
+        public IEnumerator ProductionShellValidRecoveryResume()
+        { yield return Invoke("ValidRecoveryResumeKeepsCanonicalAndManaUnchanged"); }
+
+        [UnityTest]
+        public IEnumerator ProductionShellValidRecoveryDiscardAndDeleteRetry()
+        { yield return Invoke("ValidRecoveryDiscardFailureRemovesResumeAndAllowsRetry"); }
+
+        [UnityTest]
+        public IEnumerator ProductionShellSelectionPreviewLifetime()
+        { yield return Invoke("SelectionCloseEmptyTapFloorDiscardAndCommitClearPreview"); }
+
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);
     }

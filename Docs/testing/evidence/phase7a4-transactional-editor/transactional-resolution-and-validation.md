@@ -59,7 +59,7 @@ The scene composition defect was a missing serialized PanelSettings reference. A
 
 Same-room Move then tile tap changes only the existing assignment's exact configured starting/placement position. Identity, room, category, option, sequence and custody are preserved; charge/refund is zero. Draft state never becomes simulation, passive mana, lifecycle or wallet authority. Existing active runs retain their immutable snapshot; later snapshots consume the committed position.
 
-## Validation results
+## Initial qualification results before external UI review
 
 Validation uses the established isolated checkout at `C:/Users/gdg34/.codex/worktrees/phase7a4-validation/Dungeon-Lord`, with the intentional source changes copied into the same exact baseline. Owner save files and unrelated ProjectSettings are not used or copied back. The connected Unity CLI is `C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe`; Unity remains 6000.3.2f1.
 
@@ -91,6 +91,9 @@ Four inspected screenshot artifacts: `phase7a4-edit-large-1080x1920.png`, `phase
 
 Exact case names, stable localization keys/English entries, and complete unchanged skip sets are in [test and localization inventory](test-and-localization-inventory.md). `git diff --check` passes. Packages, Unity version and owner ProjectSettings remain unchanged. No required automated/build gate remains unrun; external review and owner UAT remain outstanding.
 
+## External-review UI correction qualification
+
+Both production UI findings and their corrections are documented in [the companion evidence](external-review-ui-state-corrections.md). The persistence protocol above is unchanged. Current reruns pass: actual scene 7/7, complete A4 EditMode 67/67, genuine shell PlayMode 8/8; full EditMode 1,476 total / 1,475 passed / 0 failed / 1 skipped; full PlayMode 2,919 total / 2,909 passed / 0 failed / 10 skipped. Both exact skipped-test sets match Phase 7A3. All 160 canonical integration cases pass in the full rerun. Explicit production gates pass 278/278. Windows Development Build succeeds with 0 errors, 1 cloud symbol-upload credential warning and 171,639,460 bytes. Reports use the ignored `phase7a4-review-*` XML/JSON/log paths. Schema remains 13; no migration, packages or owner ProjectSettings changes. Owner UAT remains outstanding.
 ## Remaining owner qualification
 
 External review and [owner UAT](owner-uat.md) remain required after automated/build gates and blocking review findings. No visual/gameplay-experience qualification, low-end mobile performance, Android/iOS build, real-device multi-touch feel, Japanese translation or complete accessibility hierarchy is claimed. The existing canonical filesystem platform qualification remains unchanged. Primitive art, Bootstrap coexistence and the single reposition mutation are intentional scope limits.
