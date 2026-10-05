@@ -5,7 +5,7 @@ Run after external code review and resolution of blocking findings. Automated te
 ## Preparation
 
 - Open Bootstrap with Unity 6000.3.2f1, or use the qualified Windows Development Build noted in the validation evidence.
-- Complete Windows player: `Builds/Phase7A4-Review-2026-10-05/Windows/Dungeon Lord.exe` (retain its adjacent Data folder and DLLs). Build report: `TestResults/phase7a4-review-windows-build-report.json`.
+- Complete Windows player: `Builds/Phase7A4-DeleteReview-2026-10-05/Windows/Dungeon Lord.exe` (retain its adjacent Data folder and DLLs). Build report: `TestResults/phase7a4-delete-windows-build-report.json`.
 - Retained Development tools exposes existing Bootstrap capabilities to acquire/place content and unlock existing Floor 2 when eligible. Return to Dungeon for graphical testing. No graphical construction/acquisition parity is claimed.
 - Prepare an existing room with a monster, trap and loot assignment, including at least one invalid overlap target. Use only existing production Floors 1/2.
 
@@ -37,3 +37,7 @@ Real Android/iOS touch feel, platform filesystem qualification and native hit-ta
 ## External-review correction checks
 
 After the blocking findings are resolved and reviewed, confirm that Close and an empty-world tap remove the marker, floor switching removes the previous marker, and successful Save/Discard leaves no selection preview. While actively choosing a Move target, invalid red feedback should remain visible. Reopen a disposable durable draft and exercise both Resume and Discard. Stale/fail-closed evidence must retain a visible Discard resolution action; deletion failure must show the localized retry instruction rather than strand Edit Mode. Automated failure injection qualifies that failure path, but owner interaction/readability still needs review.
+
+## Explicit-delete lifecycle correction check
+
+Use only a disposable profile for this destructive development action. Create a durable draft and a pending edit, then invoke the existing Bootstrap dev-panel Save Delete. Confirm the production world/chrome quiesces without repeated console errors or further editor interaction. Restart through normal boot and confirm a fresh save with no old draft recovery offer. Automated fault tests cover failed owned-draft cleanup and the established quiesce-on-failure behavior; do not force storage faults against owner data.

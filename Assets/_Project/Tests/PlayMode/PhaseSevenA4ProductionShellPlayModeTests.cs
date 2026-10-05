@@ -74,6 +74,14 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator ProductionShellSelectionPreviewLifetime()
         { yield return Invoke("SelectionCloseEmptyTapFloorDiscardAndCommitClearPreview"); }
 
+        [UnityTest]
+        public IEnumerator ProductionShellExplicitDeleteQuiescenceAndFreshBoot()
+        { yield return Invoke("ExplicitDeleteQuiescesProductionShellAndFreshBootHasNoDraft"); }
+
+        [UnityTest]
+        public IEnumerator ProductionShellFailedExplicitDeleteQuiescence()
+        { yield return Invoke("FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites"); }
+
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);
     }

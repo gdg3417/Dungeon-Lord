@@ -94,6 +94,17 @@ Exact case names, stable localization keys/English entries, and complete unchang
 ## External-review UI correction qualification
 
 Both production UI findings and their corrections are documented in [the companion evidence](external-review-ui-state-corrections.md). The persistence protocol above is unchanged. Current reruns pass: actual scene 7/7, complete A4 EditMode 67/67, genuine shell PlayMode 8/8; full EditMode 1,476 total / 1,475 passed / 0 failed / 1 skipped; full PlayMode 2,919 total / 2,909 passed / 0 failed / 10 skipped. Both exact skipped-test sets match Phase 7A3. All 160 canonical integration cases pass in the full rerun. Explicit production gates pass 278/278. Windows Development Build succeeds with 0 errors, 1 cloud symbol-upload credential warning and 171,639,460 bytes. Reports use the ignored `phase7a4-review-*` XML/JSON/log paths. Schema remains 13; no migration, packages or owner ProjectSettings changes. Owner UAT remains outstanding.
+## Latest explicit-delete re-review qualification
+
+PR #226 remains open and unmerged. Both remaining findings are corrected; GameRoot lifecycle and the accepted draft protocol are unchanged. See [explicit-delete correction evidence](external-review-explicit-delete-corrections.md) for root causes, ordering, exact regressions and preserved qualification history.
+
+- Explicit-delete focus: 9/9; A4 durability/delete: 29/29; affected service/actual-scene EditMode: 65/65; lifecycle/shell PlayMode: 88 total, 80 passed, 0 failed, 8 established skips. Actual scene: 9/9; complete A4 EditMode: 75/75; genuine shell PlayMode: 10/10.
+- Full EditMode: 1,484 total, 1,483 passed, 0 failed, 1 skipped. Full PlayMode: 2,927 total, 2,917 passed, 0 failed, 10 skipped. Exact skip sets match Phase 7A3; all 160 canonical integration cases pass in the full EditMode rerun.
+- Explicit production gates: 280/280 (65 build, 112 export, 57 recovery, 37 loading, 9 actual scene). Windows x86_64 Development Build: Succeeded, Bootstrap-only, Unity 6000.3.2f1, 0 errors, 1 cloud symbol-upload credential warning, 171,640,435 bytes.
+- Schema 13; no migration, packages, localization entries, scene/asset serialization, GameRoot, FileDungeonDraftStore or unrelated ProjectSettings changes. Diff whitespace checks pass. Ignored builds, XML/logs and screenshots are excluded from the commit.
+- The controller stops canonical-dependent presentation/input and pending persistence when Save disappears, including before the next Update at Pause/Quit. Successful explicit deletion removes and verifies all owned draft evidence before canonical cleanup. Cleanup failure reports failure and preserves canonical data/evidence; existing root quiesce remains binding.
+- Owner visual/gameplay UAT remains outstanding; no merge readiness is claimed. The required build and screenshots are retained at the updated ignored paths in owner UAT instructions.
+
 ## Remaining owner qualification
 
 External review and [owner UAT](owner-uat.md) remain required after automated/build gates and blocking review findings. No visual/gameplay-experience qualification, low-end mobile performance, Android/iOS build, real-device multi-touch feel, Japanese translation or complete accessibility hierarchy is claimed. The existing canonical filesystem platform qualification remains unchanged. Primitive art, Bootstrap coexistence and the single reposition mutation are intentional scope limits.

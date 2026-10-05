@@ -1,6 +1,17 @@
 # Phase 7A4 owner report
 
-## Latest external-review correction qualification
+## Latest explicit-delete re-review qualification
+
+PR #226 remains open and unmerged. Both remaining findings are corrected; GameRoot lifecycle and the accepted draft protocol are unchanged. See [explicit-delete correction evidence](external-review-explicit-delete-corrections.md) for root causes, ordering, exact regressions and preserved qualification history.
+
+- Explicit-delete focus: 9/9; A4 durability/delete: 29/29; affected service/actual-scene EditMode: 65/65; lifecycle/shell PlayMode: 88 total, 80 passed, 0 failed, 8 established skips. Actual scene: 9/9; complete A4 EditMode: 75/75; genuine shell PlayMode: 10/10.
+- Full EditMode: 1,484 total, 1,483 passed, 0 failed, 1 skipped. Full PlayMode: 2,927 total, 2,917 passed, 0 failed, 10 skipped. Exact skip sets match Phase 7A3; all 160 canonical integration cases pass in the full EditMode rerun.
+- Explicit production gates: 280/280 (65 build, 112 export, 57 recovery, 37 loading, 9 actual scene). Windows x86_64 Development Build: Succeeded, Bootstrap-only, Unity 6000.3.2f1, 0 errors, 1 cloud symbol-upload credential warning, 171,640,435 bytes.
+- Schema 13; no migration, packages, localization entries, scene/asset serialization, GameRoot, FileDungeonDraftStore or unrelated ProjectSettings changes. Diff whitespace checks pass. Ignored builds, XML/logs and screenshots are excluded from the commit.
+- The controller stops canonical-dependent presentation/input and pending persistence when Save disappears, including before the next Update at Pause/Quit. Successful explicit deletion removes and verifies all owned draft evidence before canonical cleanup. Cleanup failure reports failure and preserves canonical data/evidence; existing root quiesce remains binding.
+- Owner visual/gameplay UAT remains outstanding; no merge readiness is claimed. The required build and screenshots are retained at the updated ignored paths in owner UAT instructions.
+
+## Earlier production UI review correction qualification
 
 PR #226 remains open and unmerged. Both blocking production UI findings are corrected without changing the transactional draft protocol. See [external-review correction evidence](external-review-ui-state-corrections.md) for root causes, exact tests, earlier fixture failures and final results.
 
@@ -58,15 +69,18 @@ Stable IDs, ordinal ordering, bounded production workload limits, exact coordina
 
 External review corrections preserve an accessible Discard resolution surface for stale/fail-closed recovery and restore it after failed evidence deletion. Successful deletion alone unlocks Edit; failed deletion removes Resume from the pre-deletion snapshot. Closing selection, empty-world selection, floor switching and successful Save/Discard clear the world marker, while active invalid Move feedback remains. Four new actual-scene regressions run in both EditMode and genuine PlayMode; the draft protocol is unchanged.
 
+The explicit-delete re-review corrections guard the production controller when the established GameRoot delete lifecycle clears Save, including failed deletion. It disables canonical-dependent UI/world input and lifecycle draft flushing without changing GameRoot behavior. SaveService explicitly deletes and verifies the draft store's owned legacy/candidate/commit evidence before canonical cleanup, reusing bounded FileDungeonDraftStore.Delete(null). Failed draft cleanup reports failure and preserves canonical data/evidence; unrelated files remain untouched. Six deterministic deletion cases and two actual-scene scenarios (also genuine PlayMode) qualify ordering, failure truthfulness, quiescence, no post-delete writes and fresh boot without stale draft recovery.
+
 ## Automated validation
 
-- Final Phase 7A4 EditMode: **67 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 7 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 8/8, including real Input System two-touch injection and chrome-origin blocking.
+- Final Phase 7A4 EditMode: **75 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 6 explicit-delete integration cases, 9 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 10/10, including real Input System two-touch injection and chrome-origin blocking.
+- Affected lifecycle/scene EditMode: **65/65** (56 SaveService/coordinator, 9 scene). Lifecycle/shell PlayMode: **88 total, 80 passed, 0 failed, 8 established skips** (56 coordinator, 14 GameRoot passed/8 skipped, 10 shell). Explicit-delete focus: **9/9**; full A4 durability/delete fixture: **29/29**.
 - Canonical save/load/session/complete-save focused integration: **160/160**, also verified as passing in the current full EditMode rerun. Full-suite relevant coverage: A2 **44 passed, 1 established skip**; A3 **36/36**; Phase 4 **736/736**; Phase 6 **223/223**.
-- Full EditMode: **1,476 total — 1,475 passed, 0 failed, 1 skipped**.
-- Full PlayMode: **2,919 total — 2,909 passed, 0 failed, 10 skipped**.
+- Full EditMode: **1,484 total — 1,483 passed, 0 failed, 1 skipped**.
+- Full PlayMode: **2,927 total — 2,917 passed, 0 failed, 10 skipped**.
 - Both exact skipped-test sets match the retained Phase 7A3 baseline. No skip, ignore or failure reclassification was added.
-- Explicit production gates: **278/278** (build gate 65, export 112, recovery 57, loading 37, actual scene 7). Real production pre-build gate also passed in the player build.
-- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,639,460 bytes.
+- Explicit production gates: **280/280** (build gate 65, export 112, recovery 57, loading 37, actual scene 9). Real production pre-build gate also passed in the player build.
+- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,640,435 bytes.
 - `git diff --check`: passed. Owner Packages and ProjectSettings remain unchanged.
 
 Validation used the established isolated checkout with the same baseline and intentional changes; owner saves were not used. XML, build logs/report and four inspected representative portrait/landscape/tablet/long-localization PNGs are retained in established ignored evidence locations. Repository-owned capture uses Unity APIs with bounded stable-state warm-up; no visual-regression dependency or strict pixel-golden gate was introduced. See the repository Phase 7A4 evidence for exact test/localization/skip inventories, earlier failures, final protocol and owner UAT instructions.

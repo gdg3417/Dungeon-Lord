@@ -42,6 +42,8 @@ namespace DungeonBuilder.M0
         private Rect lastSafe;
         private Vector2 lastResolution;
         private Action confirm;
+        private bool quiesced;
+        public bool IsQuiesced => quiesced;
         public bool IsEditing => draft != null && !draft.IsClosed;
         public bool IsMoving => moveMode;
         public TransactionalDungeonDraft Draft => draft;
@@ -53,6 +55,7 @@ namespace DungeonBuilder.M0
         private void Update()
         {
             if (root == null) root = GameRoot.Instance;
+            if (!HasCanonicalRuntime()) return;
             if (!initialized)
             {
                 if (root?.Save?.validatedCanonicalSpatialState == null || root.SaveService.DungeonDraftContext == null) return;
@@ -63,6 +66,24 @@ namespace DungeonBuilder.M0
                 PresentHud();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
+        }
+
+        private bool HasCanonicalRuntime()
+        {
+            if (quiesced) return false;
+            if (root?.Save != null) return true;
+            if (initialized)
+            {
+                quiesced = true; gesture.Cancel(); pointerDown = false; confirm = null;
+                draft = recovery = null; recoveryBytes = null; recoveryReason = null;
+                selected = null; moveMode = false;
+                world?.ClearPreview();
+                if (world != null) world.gameObject.SetActive(false);
+                if (worldCamera != null) worldCamera.enabled = false;
+                if (document != null) document.enabled = false;
+                enabled = false;
+            }
+            return false;
         }
 
         private void Initialize()
@@ -92,7 +113,7 @@ namespace DungeonBuilder.M0
             pixelsPerPhysicalUnit = DungeonPhysicalUnits.PixelsPerUnit();
             Button("edit", EnterEdit); Button("save", ReviewSave); Button("discard", ReviewDiscard);
             Button("move", BeginMove); Button("closeSheet", CloseSheet); Button("reset", () => { autoFit = true; viewport.Reset(); ApplyCamera(); });
-            Button("retry", () => { draft?.FlushNext(); Present(); });
+            Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
             Button("large", () => SetTextSize(DungeonTextSize.Large));
@@ -124,6 +145,7 @@ namespace DungeonBuilder.M0
         private void Button(string name, Action action) => document.rootVisualElement.Q<Button>(name).clicked += action;
         public void EnterEdit()
         {
+            if (!HasCanonicalRuntime()) return;
             if (IsEditing || recoveryBytes != null || recoveryReason != null) return;
             draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState, draftContext, store);
             feedback = null; selected = null; moveMode = false; CloseSheet();
@@ -131,6 +153,7 @@ namespace DungeonBuilder.M0
         }
         public void BeginMove()
         {
+            if (!HasCanonicalRuntime()) return;
             if (!IsEditing || selected == null) return;
             moveMode = true; sheet.style.display = DisplayStyle.None;
             feedback = "ui.dungeon.move_hint"; Present();
@@ -138,7 +161,7 @@ namespace DungeonBuilder.M0
         private void CloseSheet() { selected = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); }
         public void TapWorld(TileCoordinate cell)
         {
-            if (!initialized || legacy || modal.style.display == DisplayStyle.Flex) return;
+            if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
             if (moveMode && selected != null && IsEditing)
             {
                 bool valid = world.TryRoomLocal(selected, cell, out var local) &&
@@ -166,11 +189,13 @@ namespace DungeonBuilder.M0
         }
         private void ReviewSave()
         {
+            if (!HasCanonicalRuntime()) return;
             if (draft?.CanSave != true) return;
             ShowModal("ui.dungeon.commit_review", () => Commit(), "ui.dungeon.save");
         }
         public bool Commit()
         {
+            if (!HasCanonicalRuntime()) return false;
             var result = root.SaveService.CommitDungeonDraft(root.Save, draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
             feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet();
@@ -180,6 +205,7 @@ namespace DungeonBuilder.M0
         { if (draft == null) return; if (!draft.HasChanges) Discard(); else ShowModal("ui.dungeon.discard_review", () => Discard(), "ui.dungeon.discard"); }
         public bool Discard()
         {
+            if (!HasCanonicalRuntime()) return false;
             if (draft == null || !draft.Discard()) { feedback = draft?.Reason; Present(); return false; }
             draft = null; feedback = "ui.dungeon.discarded"; CloseSheet();
             renderState = draftContext.Copy(root.Save.validatedCanonicalSpatialState); RebuildFloor(false); Present(); return true;
@@ -196,10 +222,12 @@ namespace DungeonBuilder.M0
             confirm = recovery != null ? (Action)Resume : DiscardRecovery;
         }
         private void Resume()
-        { draft = recovery; recovery = null; recoveryBytes = null; recoveryReason = null;
+        { if (!HasCanonicalRuntime()) return;
+          draft = recovery; recovery = null; recoveryBytes = null; recoveryReason = null;
           renderState = draft.ReadModel; RebuildFloor(false); Present(); }
         private void DiscardRecovery()
         {
+            if (!HasCanonicalRuntime()) return;
             if (!store.Delete(recoveryBytes))
             {
                 // A failed deletion may have removed part of the recovered chain. Keep
@@ -230,6 +258,7 @@ namespace DungeonBuilder.M0
         }
         private void CanonicalPublished(SaveData save)
         {
+            if (!HasCanonicalRuntime()) return;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
             { renderState = draftContext.Copy(save.validatedCanonicalSpatialState); RebuildFloor(false); }
             if (IsEditing && draftContext.Fingerprint(save.validatedCanonicalSpatialState) != draft.BaselineFingerprint)
@@ -239,7 +268,7 @@ namespace DungeonBuilder.M0
 
         private void RebuildFloor(bool reset)
         {
-            if (!initialized) return;
+            if (!initialized || !HasCanonicalRuntime()) return;
             if (reset) autoFit = true;
             if (IsEditing) renderState = draft.ReadModel;
             var selectedValue = renderState.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
@@ -259,11 +288,11 @@ namespace DungeonBuilder.M0
             SetTextSize(textSize);
         }
         public void SelectFloor(string id)
-        { if (!renderState.Floors.Any(f => f.FloorInstanceId == id)) return;
+        { if (!HasCanonicalRuntime() || !renderState.Floors.Any(f => f.FloorInstanceId == id)) return;
           selectedFloor = id; CloseSheet(); RebuildFloor(true); Present(); Layout(); }
         private void Present()
         {
-            if (!initialized) return;
+            if (!initialized || !HasCanonicalRuntime()) return;
             var ui = document.rootVisualElement;
             PresentHud();
             ui.Q<Label>("mode").text = Text(IsEditing ? "ui.dungeon.edit_mode" : "ui.dungeon.normal");
@@ -291,6 +320,7 @@ namespace DungeonBuilder.M0
         }
         private void PresentHud()
         {
+            if (!HasCanonicalRuntime()) return;
             lastWallet = root.Save.structureRuntime.ManaReserve; lastHeat = root.Save.structureRuntime.Heat; lastTick = root.Save.totalTicks;
             var ui = document.rootVisualElement;
             var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture);
@@ -406,7 +436,8 @@ namespace DungeonBuilder.M0
         private void OnApplicationPause(bool paused) { if (paused) Flush(); }
         private void OnApplicationQuit() { Flush(); }
         private void Flush()
-        { while (draft != null && draft.Durability == DraftDurability.Pending) if (!draft.FlushNext()) break; }
+        { if (!HasCanonicalRuntime()) return;
+          while (draft != null && draft.Durability == DraftDurability.Pending) if (!draft.FlushNext()) break; }
         private void OnDestroy()
         {
             if (bootstrapCamera != null) bootstrapCamera.cullingMask = bootstrapCameraMask;

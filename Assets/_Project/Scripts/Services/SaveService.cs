@@ -648,6 +648,10 @@ namespace DungeonBuilder.M0
                     var owned = migration.Where(value => value.IsRecognized).Select(value => value.Path).Concat(
                         ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
                             _canonicalFileSystem, maximum)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+                    // Keep canonical data/evidence intact if bounded owned-draft cleanup
+                    // cannot prove deletion. The draft store owns discovery and containment.
+                    if (!CreateDungeonDraftStore().Delete(null))
+                        throw new IOException(TransactionalDungeonDraft.DeleteFailedReason);
                     foreach (string path in owned)
                     {
                         if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, path))
@@ -656,7 +660,8 @@ namespace DungeonBuilder.M0
                     }
                     if (_canonicalFileSystem.Exists(SavePath)) _canonicalFileSystem.DeleteFile(SavePath);
                     _canonicalFileSystem.FlushDirectory(directory);
-                    if (SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(SavePath,
+                    if (_canonicalFileSystem.Exists(SavePath) ||
+                        SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(SavePath,
                             _canonicalFileSystem, maximum) ||
                         ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
                             _canonicalFileSystem, maximum).Count != 0)

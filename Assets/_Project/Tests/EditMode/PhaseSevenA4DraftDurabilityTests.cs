@@ -13,6 +13,92 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class PhaseSevenA4DraftDurabilityTests
     {
+        private static SaveService DeleteService(Fixture f)
+        {
+            byte[] legacy = (byte[])typeof(DetachedCurrentTargetValidationContext).GetField("legacyConfiguration",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(f.Context);
+            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
+                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
+            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration, legacy, f.PositionProfiles, f.Occupancy);
+            service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
+            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string banner), Is.Not.Null, banner);
+            return service;
+        }
+        private static SaveService CommittedDeleteDraft(Fixture f)
+        {
+            var service = DeleteService(f); var draft = TransactionalDungeonDraft.Create(f.State, Context(f), service.CreateDungeonDraftStore());
+            Assert.That(Move(draft, f, 1), Is.True); Assert.That(draft.FlushNext(), Is.True);
+            return service;
+        }
+        [Test]
+        public void ExplicitDeleteRemovesDraftLegacyAndCanonicalEvidenceBeforeFreshBoot()
+        {
+            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            string ordinary = f.ActivePath + ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
+            string migration = Path.Combine(Path.GetDirectoryName(f.ActivePath), Path.GetFileNameWithoutExtension(f.ActivePath) + ".gd66-invalid-id.journal.json");
+            string unrelated = f.ActivePath + ".editor-draft-not-owned.keep";
+            foreach (string path in new[] { ordinary, migration, f.ActivePath + ".editor-draft", unrelated }) f.FileSystem.Seed(path, new byte[] { 7 });
+            Assert.That(service.DeleteSave(out string banner), Is.True, banner);
+            foreach (string path in new[] { ordinary, migration, f.ActivePath, f.ActivePath + ".editor-draft" })
+                Assert.That(f.FileSystem.Exists(path), Is.False, path);
+            Assert.That(f.FileSystem.Paths.Any(p => p.StartsWith(f.ActivePath + ".editor-draft.draft-", StringComparison.Ordinal)), Is.False);
+            Assert.That(f.FileSystem.Exists(unrelated), Is.True);
+            Assert.That(SaveService.HasOwnedRecoveryEvidence(f.ActivePath, f.FileSystem, f.Profile.Canonical.Serialized.MaximumCollectionRecords), Is.False);
+            var deletes = f.FileSystem.Operations.Where(o => o.Type == Operation.Delete).ToArray();
+            int firstCanonical = Array.FindIndex(deletes, o => o.Paths[0] == ordinary || o.Paths[0] == migration || o.Paths[0] == f.ActivePath);
+            Assert.That(firstCanonical, Is.GreaterThan(0));
+            Assert.That(deletes.Skip(firstCanonical).Any(o => o.Paths[0].StartsWith(f.ActivePath + ".editor-draft", StringComparison.Ordinal)), Is.False);
+            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string freshBanner), Is.Not.Null, freshBanner);
+            Assert.That(service.CreateDungeonDraftStore().Read(), Is.Null);
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(bool afterMutation)
+        {
+            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            byte[] canonical = f.FileSystem.ReadAllBytes(f.ActivePath);
+            string unrelated = f.ActivePath + ".editor-draft-not-owned.keep"; f.FileSystem.Seed(unrelated, new byte[] { 8 });
+            string ordinary = f.ActivePath + ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
+            f.FileSystem.Seed(ordinary, new byte[] { 9 });
+            f.FileSystem.EnableTargetedFailure(Operation.Delete, p => p[0].StartsWith(f.ActivePath + ".editor-draft.draft-", StringComparison.Ordinal), 1, afterMutation);
+            Assert.That(service.DeleteSave(out string banner), Is.False); Assert.That(banner, Is.EqualTo("Failed to delete save."));
+            CollectionAssert.AreEqual(canonical, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(f.FileSystem.Exists(ordinary), Is.True); Assert.That(f.FileSystem.Exists(unrelated), Is.True);
+            Assert.That(f.FileSystem.Paths.Any(p => p.StartsWith(f.ActivePath + ".editor-draft.draft-", StringComparison.Ordinal)), Is.True);
+            f.FileSystem.DisableFailure(); Assert.That(service.DeleteSave(out banner), Is.True, banner);
+        }
+        [Test]
+        public void ExplicitDeleteDraftContainmentFailureDeletesNothing()
+        {
+            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            string[] paths = f.FileSystem.Paths.OrderBy(p => p, StringComparer.Ordinal).ToArray();
+            f.FileSystem.EnableTargetedFailure(Operation.Containment, p => p.Length == 2 &&
+                p[1].StartsWith(f.ActivePath + ".editor-draft", StringComparison.Ordinal), 1, false);
+            Assert.That(service.DeleteSave(out _), Is.False);
+            CollectionAssert.AreEqual(paths, f.FileSystem.Paths.OrderBy(p => p, StringComparer.Ordinal));
+        }
+        [Test]
+        public void ExplicitDeleteOversizedDraftEvidenceFailsClosedBeforeCanonicalDeletion()
+        {
+            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = DeleteService(f);
+            int maximum = (f.Profile.Raw.MaximumArrayElements + 1) * 2;
+            string prefix = f.ActivePath + ".editor-draft.draft-" + new string('a', 32) + ".";
+            for (int i = 0; i <= maximum; i++) f.FileSystem.Seed(prefix + i.ToString("D6") + ".candidate", new byte[] { 1 });
+            string[] before = f.FileSystem.Paths.OrderBy(p => p, StringComparer.Ordinal).ToArray();
+            Assert.That(service.DeleteSave(out _), Is.False);
+            CollectionAssert.AreEqual(before, f.FileSystem.Paths.OrderBy(p => p, StringComparer.Ordinal));
+        }
+        [Test]
+        public void ExplicitDeleteDraftFlushFailureCannotClaimTotalDeletion()
+        {
+            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            byte[] canonical = f.FileSystem.ReadAllBytes(f.ActivePath);
+            f.FileSystem.EnableFailure(Operation.Flush, 1);
+            Assert.That(service.DeleteSave(out _), Is.False);
+            CollectionAssert.AreEqual(canonical, f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.FileSystem.DisableFailure(); Assert.That(service.DeleteSave(out string banner), Is.True, banner);
+        }
         private static FileDungeonDraftStore Store(Fixture f) => new FileDungeonDraftStore(f.ActivePath + ".editor-draft", f.FileSystem, f.Profile);
         private static DungeonDraftContext Context(Fixture f) => PhaseSevenA4TransactionalEditorTests.Context(f);
         private static bool Move(TransactionalDungeonDraft draft, Fixture f, int x) => PhaseSevenA4TransactionalEditorTests.Move(draft, f, x, 1);

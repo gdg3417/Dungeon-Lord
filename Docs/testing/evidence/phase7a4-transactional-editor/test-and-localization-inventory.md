@@ -1,6 +1,6 @@
 # Phase 7A4 exact test and localization inventory
 
-EditMode adds 67 cases: 37 domain/presenter/storage probes, 23 durability cases and 7 actual-scene cases. Genuine PlayMode adds eight shell scenarios; its full suite also discovers the 60 domain/durability cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
+EditMode adds 75 cases: 37 domain/presenter/storage probes, 23 durability cases, six explicit-delete integration cases and nine actual-scene cases. Genuine PlayMode adds ten shell scenarios; its full suite also discovers the 66 domain/durability/delete cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
 
 ## EditMode cases
 
@@ -153,3 +153,16 @@ Exactly 41 new Bootstrap English entries. No existing entry was changed; runtime
 | ui.dungeon.text_size | Text size |
 | ui.dungeon.text_small | Small |
 | ui.dungeon.unavailable | Unavailable |
+
+## Explicit-delete re-review regression inventory
+
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftContainmentFailureDeletesNothing — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(False) — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(True) — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFlushFailureCannotClaimTotalDeletion — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteOversizedDraftEvidenceFailsClosedBeforeCanonicalDeletion — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteRemovesDraftLegacyAndCanonicalEvidenceBeforeFreshBoot — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ExplicitDeleteQuiescesProductionShellAndFreshBootHasNoDraft — Passed
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellExplicitDeleteQuiescenceAndFreshBoot — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellFailedExplicitDeleteQuiescence — Passed

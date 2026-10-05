@@ -208,6 +208,114 @@ namespace DungeonBuilder.M0.Tests
 
         private static Vector2 ScreenPoint(Vector2 panelPoint) => new Vector2(panelPoint.x, Screen.height - panelPoint.y);
         [UnityTest]
+        public IEnumerator ExplicitDeleteQuiescesProductionShellAndFreshBootHasNoDraft()
+        { yield return ExplicitDeleteShell(false); }
+
+        [UnityTest]
+        public IEnumerator FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites()
+        { yield return ExplicitDeleteShell(true); }
+
+        private IEnumerator ExplicitDeleteShell(bool failDraftDelete)
+        {
+            var root = GameRoot.Instance;
+            var fileField = typeof(SaveService).GetField("_canonicalFileSystem",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var files = new DeleteTrackingFileSystem { Inner = (ISpatialMigrationFileSystem)fileField.GetValue(root.SaveService) };
+            fileField.SetValue(root.SaveService, files);
+            typeof(ProductionDungeonController).GetField("store", System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.NonPublic).SetValue(controller, root.SaveService.CreateDungeonDraftStore());
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
+            var definition = root.ProductionSpatialContent.Catalog.Rooms.Single(r => r.RoomDefinitionId == room.RoomDefinitionId);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(0, 0), definition.GrossFootprint,
+                room.Anchor, room.Orientation, out var start), Is.True);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(1, 1), definition.GrossFootprint,
+                room.Anchor, room.Orientation, out var first), Is.True);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(2, 1), definition.GrossFootprint,
+                room.Anchor, room.Orientation, out var pending), Is.True);
+            controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove(); controller.TapWorld(first);
+            yield return null;
+            Assert.That(controller.Draft.AcknowledgedSequence, Is.EqualTo(1));
+            controller.BeginMove(); controller.TapWorld(pending);
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Pending));
+            string active = root.SaveService.SavePath;
+            byte[] canonical = File.ReadAllBytes(active);
+            string unrelated = active + ".editor-draft-not-owned.keep"; File.WriteAllText(unrelated, "unrelated test file");
+            files.FailDraftDelete = failDraftDelete;
+            if (failDraftDelete) LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex(
+                "Delete save failed\\. Exception: " + System.Text.RegularExpressions.Regex.Escape(TransactionalDungeonDraft.DeleteFailedReason)));
+            else LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Save deleted by dev command\\."));
+            Assert.That(root.TryDeleteSaveFromDevPanel(out string banner), Is.EqualTo(!failDraftDelete), banner);
+            Assert.That(root.Save, Is.Null); Assert.That(root.TimeService, Is.Null);
+            Assert.That(File.Exists(unrelated), Is.True);
+            if (failDraftDelete) CollectionAssert.AreEqual(canonical, File.ReadAllBytes(active));
+            else
+            {
+                Assert.That(File.Exists(active), Is.False);
+                Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+            }
+            int mutations = files.Mutations;
+            string[] paths = Directory.GetFiles(Application.persistentDataPath, filename + "*").OrderBy(p => p, StringComparer.Ordinal).ToArray();
+            // Qualify Update directly on success and the pre-Update lifecycle boundary
+            // on failure, where the same established missing-Save state applies.
+            if (!failDraftDelete) yield return null;
+            InvokeController("OnApplicationPause", true); InvokeController("OnApplicationQuit");
+            controller.EnterEdit(); controller.TapWorld(first); controller.BeginMove();
+            Assert.That(controller.Commit(), Is.False); Assert.That(controller.Discard(), Is.False);
+            for (int i = 0; i < 12; i++) yield return null;
+            Assert.That(controller.IsQuiesced, Is.True); Assert.That(controller.enabled, Is.False);
+            Assert.That(controller.GetComponent<UIDocument>().enabled, Is.False);
+            Assert.That(controller.World.gameObject.activeSelf, Is.False);
+            Assert.That(controller.Draft, Is.Null); Assert.That(controller.IsMoving, Is.False);
+            Assert.That(files.Mutations, Is.EqualTo(mutations));
+            CollectionAssert.AreEqual(paths, Directory.GetFiles(Application.persistentDataPath, filename + "*").OrderBy(p => p, StringComparer.Ordinal));
+            root.ApplyPauseState(true); root.ApplyPauseState(false); root.ApplyApplicationQuit();
+            UnityEngine.Object.Destroy(controller.gameObject); controller = null;
+            yield return null;
+            Assert.That(files.Mutations, Is.EqualTo(mutations));
+            LogAssert.NoUnexpectedReceived();
+            if (!failDraftDelete)
+            {
+                UnityEngine.Object.Destroy(root.gameObject); yield return null;
+                UnityEngine.Object.Destroy(disposableConfig); disposableConfig = null;
+                SceneManager.sceneLoaded += Isolate;
+                yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+                SceneManager.sceneLoaded -= Isolate;
+                for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+                Assert.That(GameRoot.Instance.Save, Is.Not.Null); Assert.That(GameRoot.Instance.TimeService, Is.Not.Null);
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+                GameRoot.Instance.enabled = false;
+                yield return null;
+                Assert.That(controller.IsQuiesced, Is.False);
+                Assert.That(GameRoot.Instance.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Assert.That(ui.Q<Button>("edit").enabledSelf, Is.True);
+            }
+        }
+        private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(controller, args);
+        private sealed class DeleteTrackingFileSystem : ISpatialMigrationFileSystem
+        {
+            public ISpatialMigrationFileSystem Inner;
+            public bool FailDraftDelete;
+            public int Mutations;
+            public bool Exists(string path) => Inner.Exists(path);
+            public byte[] ReadAllBytes(string path) => Inner.ReadAllBytes(path);
+            public System.Collections.Generic.IReadOnlyList<string> EnumerateFiles(string directory, string pattern, int maximum) => Inner.EnumerateFiles(directory, pattern, maximum);
+            public bool IsPathContainedWithoutRedirection(string directory, string path) => Inner.IsPathContainedWithoutRedirection(directory, path);
+            public void WriteAllBytesDurable(string path, byte[] bytes) { Mutations++; Inner.WriteAllBytesDurable(path, bytes); }
+            public void ReplaceSameDirectoryAtomic(string source, string target) { Mutations++; Inner.ReplaceSameDirectoryAtomic(source, target); }
+            public void MoveSameDirectoryAtomic(string source, string target) { Mutations++; Inner.MoveSameDirectoryAtomic(source, target); }
+            public void FlushDirectory(string directory) { Mutations++; Inner.FlushDirectory(directory); }
+            public void DeleteFile(string path)
+            {
+                Mutations++;
+                if (FailDraftDelete && path.Contains(".editor-draft.draft-")) throw new IOException("test draft-delete failure");
+                Inner.DeleteFile(path);
+            }
+        }
+        [UnityTest]
         public IEnumerator UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry()
         {
             foreach (bool stale in new[] { true, false })
