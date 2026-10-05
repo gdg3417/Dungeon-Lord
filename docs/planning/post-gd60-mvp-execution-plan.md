@@ -2,7 +2,7 @@
 
 **Phase 7A2 merged and qualified baseline (2026-10-03):** PR #223 merged at `1a38bacb32b54fbd9152ac8121bb9a054a652b10`. Writable schema 13 owns exact canonical base-local content positions and configuration-owned occupancy. Automated EditMode, PlayMode, production build-gate, real Windows migration/reopen, Windows Development Build, and owner Editor/standalone UAT passed, including the external-review corrections. The detached coordinator, canonical session, and atomic persistence authorities remain the only publication path. See the [A2 owner qualification](../../Docs/testing/evidence/phase7a2-positional-canonical-state/manual-uat.md).
 
-**Phase 7A3 implementation status (2026-10-03):** Deterministic intraroom mechanics are implemented on `codex/phase-7a3-deterministic-intraroom-mechanics`; focused, full EditMode/PlayMode, production pipeline gates, and Windows Development Build qualification passed. The implementation awaits PR review and is not merged. Positions and derived room geometry/occupancy participate in immutable run-start snapshots, with transient spatial evidence and the existing run coordinator/damage/settlement authorities. Schema remains 13 with no migration. Production graphical editing, visual run presentation, and Phase 7 closeout remain unimplemented.
+**Current Phase 7 status (2026-10-04):** PR #224 / Phase 7A3 is merged and qualified. Positions and derived room geometry/occupancy participate in immutable run-start snapshots, with transient spatial evidence and the existing run coordinator/damage/settlement authorities. Schema remains 13. The current repository baseline includes PR #225 model-selection governance at `64d31257f06d1dafbf49593ade88f32b808bd556`. Phase 7A4 transactional editor authority and the production Dungeon foundation are the active implementation area; visual run presentation and Phase 7 closeout remain deferred.
 
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
@@ -21,9 +21,9 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 7A2 merged and qualified; Phase 7A3 automated qualification passed; awaiting PR review; schema 13** |
+| Status | **Phase 7A3 / PR #224 merged and qualified; Phase 7A4 transactional editor and production Dungeon active; schema 13** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Phase 7A2 merged PR #223 / `main` `1a38bacb32b54fbd9152ac8121bb9a054a652b10` |
+| Current implementation baseline | Phase 7A3 / PR #224 plus PR #225 governance / `64d31257f06d1dafbf49593ade88f32b808bd556` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
 | Last reconciled | 2026-10-03 |

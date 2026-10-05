@@ -146,6 +146,22 @@ namespace DungeonBuilder.M0
 
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
+        public DungeonDraftContext DungeonDraftContext => _canonicalConfigured && _limits != null
+            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits)
+            : null;
+        public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
+            ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
+        public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false, TransactionalDungeonDraft.InvalidReason,
+                    false, false, null, null, null, null);
+            var result = CreateWriteAuthority().CommitDungeonDraft(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, draft);
+            if (result.IsSuccess)
+            { _undo = null; _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
+            return result;
+        }
 #if UNITY_EDITOR
         internal SaveSpatialMigrationLimitsProfile CanonicalLimitsForTests => _limits;
         internal StructuralEconomySnapshot StructuralEconomyForTests => _economy;

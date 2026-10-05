@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68aea22f8f14ca849a65a5efbc4b159e, type: 3}
+  m_Name: Presentation
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.M0.DungeonPresentationPolicy
+  SmallText: 16
+  DefaultText: 20
+  LargeText: 26
+  AndroidMinimumDp: 48
+  IOSMinimumPoints: 44
+  DesktopMinimumPixels: 48
+  AndroidBaselineDpi: 160
+  IOSPointsPerInch: 163
+  FallbackDpi: 160
+  Padding: 12
+  TapSlopPhysicalUnits: 8
+  FitMargin: 1.15
+  MinimumViewSize: 2
+  MaximumZoomFactor: 4
+  EntitySize: 0.65
+  TileSize: 0.92
+  PreviewSize: 0.98
+  CameraDepth: -10
+  RoomColor: {r: 0.24, g: 0.31, b: 0.39, a: 1}
+  FixedColor: {r: 0.38, g: 0.4, b: 0.32, a: 1}
+  CorridorColor: {r: 0.35, g: 0.3, b: 0.24, a: 1}
+  MonsterColor: {r: 0.68, g: 0.83, b: 0.98, a: 1}
+  TrapColor: {r: 1, g: 0.72, b: 0.35, a: 1}
+  LootColor: {r: 0.74, g: 0.94, b: 0.56, a: 1}
+  ValidColor: {r: 0.45, g: 0.92, b: 0.75, a: 1}
+  InvalidColor: {r: 1, g: 0.47, b: 0.48, a: 1}
+  GridColor: {r: 0.12, g: 0.16, b: 0.2, a: 1}
