@@ -13,11 +13,24 @@ namespace DungeonBuilder.M0.EditorTools
     public static class ProductionDungeonAssetAuthoring
     {
         public const string DirectoryPath = "Assets/_Project/UI/ProductionDungeon/";
+        public const string ThemePath = DirectoryPath + "DungeonTheme.tss";
+        public static void ValidateTheme(PanelSettings panel)
+        {
+            var theme = panel != null ? panel.themeStyleSheet : null;
+            if (theme == null) throw new InvalidOperationException("production.dungeon.theme_missing");
+            if (!EditorUtility.IsPersistent(theme) || AssetDatabase.GetAssetPath(theme) != ThemePath ||
+                AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(ThemePath) != theme ||
+                !File.Exists(ThemePath) || !File.Exists(ThemePath + ".meta") ||
+                File.ReadAllText(ThemePath).Trim() != "@import url(\"unity-theme://default\");")
+                throw new InvalidOperationException("production.dungeon.theme_not_runtime_asset");
+        }
         [MenuItem("Dungeon Lord/Production Dungeon/Author scene assets")]
         public static void Author()
         {
             AssetDatabase.Refresh();
             var scene = EditorSceneManager.OpenScene("Assets/_Project/Scenes/Bootstrap.unity");
+            var theme = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(ThemePath);
+            if (theme == null) throw new InvalidOperationException("production.dungeon.theme_missing");
             var policy = AssetDatabase.LoadAssetAtPath<DungeonPresentationPolicy>(DirectoryPath + "Presentation.asset");
             if (policy == null) { policy = ScriptableObject.CreateInstance<DungeonPresentationPolicy>(); AssetDatabase.CreateAsset(policy, DirectoryPath + "Presentation.asset"); }
             var panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(DirectoryPath + "Panel.asset");
@@ -27,6 +40,9 @@ namespace DungeonBuilder.M0.EditorTools
                 panel.scale = 1;
                 AssetDatabase.CreateAsset(panel, DirectoryPath + "Panel.asset");
             }
+            panel.themeStyleSheet = theme;
+            ValidateTheme(panel);
+            EditorUtility.SetDirty(panel);
             var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(DirectoryPath + "Dungeon.uxml");
             if (tree == null) throw new InvalidOperationException("production.dungeon.uxml_missing");
             AssetDatabase.SaveAssets();
@@ -52,8 +68,10 @@ namespace DungeonBuilder.M0.EditorTools
             EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
             EditorSceneManager.OpenScene("Assets/_Project/Scenes/Bootstrap.unity");
-            if (UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().GetComponent<UIDocument>().panelSettings == null)
+            var reopenedPanel = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().GetComponent<UIDocument>().panelSettings;
+            if (reopenedPanel == null)
                 throw new InvalidOperationException("production.dungeon.panel_not_saved");
+            ValidateTheme(reopenedPanel);
         }
     }
 }

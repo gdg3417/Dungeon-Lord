@@ -105,6 +105,17 @@ PR #226 remains open and unmerged. Both remaining findings are corrected; GameRo
 - The controller stops canonical-dependent presentation/input and pending persistence when Save disappears, including before the next Update at Pause/Quit. Successful explicit deletion removes and verifies all owned draft evidence before canonical cleanup. Cleanup failure reports failure and preserves canonical data/evidence; existing root quiesce remains binding.
 - Owner visual/gameplay UAT remains outstanding; no merge readiness is claimed. The required build and screenshots are retained at the updated ignored paths in owner UAT instructions.
 
+## Latest owner-UAT theme correction qualification
+
+Owner UAT stopped on an unresolved runtime PanelSettings theme. The generated theme in the validation checkout had masked a dangling committed GUID. The panel now resolves project-owned DungeonTheme.tss/meta, importing Unity's built-in runtime theme. Authoring validates before save and after reopen; no warning suppression is used. See [theme correction evidence](owner-uat-theme-correction.md) for the reproduction, root cause and render assertions.
+
+- Theme focus 1/1; genuine shell PlayMode 11/11; complete A4 EditMode 76/76. Full EditMode: 1,485 total, 1,484 passed, 0 failed, 1 skipped. Full PlayMode: 2,928 total, 2,918 passed, 0 failed, 10 skipped. Exact skip sets match A3; 160/160 canonical integration cases pass.
+- Production gates 281/281, including 10 actual-scene cases. Windows x86_64 Development Build: Succeeded, Bootstrap-only, Unity 6000.3.2f1, 0 errors, 1 cloud symbol-upload credential warning, 171,640,420 bytes. The build packed-asset log includes DungeonTheme.tss.
+- Missing-theme warning is absent in the monitored runtime load and current test/build evidence. Fresh actual-shell Normal screenshot visibly renders mode, all four HUD metrics, Edit dungeon, Focus floor and text-size controls. Remaining owner visual/gameplay UAT is not completed by that targeted rendering check.
+- Schema 13; no migration, packages, localization, runtime authority/protocol or unrelated ProjectSettings changes. Bootstrap/UXML/USS remain unchanged. New assets are the TSS and its normal Unity-generated meta.
+- Correction/commit whitespace checks pass. Whole working-tree check reports six pre-existing TMP fallback-font trailing-whitespace lines. That owner modification and an untracked test-folder meta remain untouched and excluded. Ignored screenshots, XML/logs and builds are excluded.
+- New player: Builds/Phase7A4-ThemeUAT-2026-10-06/Windows/Dungeon Lord.exe. Report: TestResults/phase7a4-theme-windows-build-report.json; screenshots: TestResults/phase7a4-theme-screenshots. PR #226 is updated without merging; owner UAT resumes after review.
+
 ## Remaining owner qualification
 
 External review and [owner UAT](owner-uat.md) remain required after automated/build gates and blocking review findings. No visual/gameplay-experience qualification, low-end mobile performance, Android/iOS build, real-device multi-touch feel, Japanese translation or complete accessibility hierarchy is claimed. The existing canonical filesystem platform qualification remains unchanged. Primitive art, Bootstrap coexistence and the single reposition mutation are intentional scope limits.

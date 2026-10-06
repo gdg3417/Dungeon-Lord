@@ -1,6 +1,17 @@
 # Phase 7A4 owner report
 
-## Latest explicit-delete re-review qualification
+## Latest owner-UAT theme correction qualification
+
+Owner UAT stopped on an unresolved runtime PanelSettings theme. The generated theme in the validation checkout had masked a dangling committed GUID. The panel now resolves project-owned DungeonTheme.tss/meta, importing Unity's built-in runtime theme. Authoring validates before save and after reopen; no warning suppression is used. See [theme correction evidence](owner-uat-theme-correction.md) for the reproduction, root cause and render assertions.
+
+- Theme focus 1/1; genuine shell PlayMode 11/11; complete A4 EditMode 76/76. Full EditMode: 1,485 total, 1,484 passed, 0 failed, 1 skipped. Full PlayMode: 2,928 total, 2,918 passed, 0 failed, 10 skipped. Exact skip sets match A3; 160/160 canonical integration cases pass.
+- Production gates 281/281, including 10 actual-scene cases. Windows x86_64 Development Build: Succeeded, Bootstrap-only, Unity 6000.3.2f1, 0 errors, 1 cloud symbol-upload credential warning, 171,640,420 bytes. The build packed-asset log includes DungeonTheme.tss.
+- Missing-theme warning is absent in the monitored runtime load and current test/build evidence. Fresh actual-shell Normal screenshot visibly renders mode, all four HUD metrics, Edit dungeon, Focus floor and text-size controls. Remaining owner visual/gameplay UAT is not completed by that targeted rendering check.
+- Schema 13; no migration, packages, localization, runtime authority/protocol or unrelated ProjectSettings changes. Bootstrap/UXML/USS remain unchanged. New assets are the TSS and its normal Unity-generated meta.
+- Correction/commit whitespace checks pass. Whole working-tree check reports six pre-existing TMP fallback-font trailing-whitespace lines. That owner modification and an untracked test-folder meta remain untouched and excluded. Ignored screenshots, XML/logs and builds are excluded.
+- New player: Builds/Phase7A4-ThemeUAT-2026-10-06/Windows/Dungeon Lord.exe. Report: TestResults/phase7a4-theme-windows-build-report.json; screenshots: TestResults/phase7a4-theme-screenshots. PR #226 is updated without merging; owner UAT resumes after review.
+
+## Earlier explicit-delete re-review qualification
 
 PR #226 remains open and unmerged. Both remaining findings are corrected; GameRoot lifecycle and the accepted draft protocol are unchanged. See [explicit-delete correction evidence](external-review-explicit-delete-corrections.md) for root causes, ordering, exact regressions and preserved qualification history.
 
@@ -71,19 +82,21 @@ External review corrections preserve an accessible Discard resolution surface fo
 
 The explicit-delete re-review corrections guard the production controller when the established GameRoot delete lifecycle clears Save, including failed deletion. It disables canonical-dependent UI/world input and lifecycle draft flushing without changing GameRoot behavior. SaveService explicitly deletes and verifies the draft store's owned legacy/candidate/commit evidence before canonical cleanup, reusing bounded FileDungeonDraftStore.Delete(null). Failed draft cleanup reports failure and preserves canonical data/evidence; unrelated files remain untouched. Six deterministic deletion cases and two actual-scene scenarios (also genuine PlayMode) qualify ordering, failure truthfulness, quiescence, no post-delete writes and fresh boot without stale draft recovery.
 
+Owner UAT exposed a dangling PanelSettings theme reference masked by an uncommitted generated theme in the validation checkout. The panel now references committed DungeonTheme.tss plus its meta, importing Unity's default runtime theme through its documented unity-theme URI. Authoring validates the expected persistent runtime theme before saving and after scene reopen. A new actual-scene/genuine PlayMode regression checks dependency ownership, warning absence, exact localized text, resolved fonts/colors/bounds and visible ancestors. A fresh Normal screenshot confirms HUD/actions render. The accepted runtime/draft/delete/recovery behavior is unchanged; broader owner UAT remains outstanding.
+
 ## Automated validation
 
-- Final Phase 7A4 EditMode: **75 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 6 explicit-delete integration cases, 9 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 10/10, including real Input System two-touch injection and chrome-origin blocking.
-- Affected lifecycle/scene EditMode: **65/65** (56 SaveService/coordinator, 9 scene). Lifecycle/shell PlayMode: **88 total, 80 passed, 0 failed, 8 established skips** (56 coordinator, 14 GameRoot passed/8 skipped, 10 shell). Explicit-delete focus: **9/9**; full A4 durability/delete fixture: **29/29**.
+- Final Phase 7A4 EditMode: **76 passed, 0 failed, 0 skipped** (37 domain/presenter/probe cases, 23 durability cases, 6 explicit-delete integration cases, 10 actual-scene cases). Retained probes: 5/5; corrected original reproduction: 1/1. Genuine shell PlayMode: 11/11, including real Input System two-touch injection and chrome-origin blocking.
+- Affected lifecycle/scene coverage is reverified in the full reruns: EditMode **66/66** (56 SaveService/coordinator, 10 scene); PlayMode **89 total, 81 passed, 0 failed, 8 established skips** (56 coordinator, 14 GameRoot passed/8 skipped, 11 shell). Retained explicit-delete focus: **9/9**; current full A4 durability/delete fixture: **29/29**.
 - Canonical save/load/session/complete-save focused integration: **160/160**, also verified as passing in the current full EditMode rerun. Full-suite relevant coverage: A2 **44 passed, 1 established skip**; A3 **36/36**; Phase 4 **736/736**; Phase 6 **223/223**.
-- Full EditMode: **1,484 total — 1,483 passed, 0 failed, 1 skipped**.
-- Full PlayMode: **2,927 total — 2,917 passed, 0 failed, 10 skipped**.
+- Full EditMode: **1,485 total — 1,484 passed, 0 failed, 1 skipped**.
+- Full PlayMode: **2,928 total — 2,918 passed, 0 failed, 10 skipped**.
 - Both exact skipped-test sets match the retained Phase 7A3 baseline. No skip, ignore or failure reclassification was added.
-- Explicit production gates: **280/280** (build gate 65, export 112, recovery 57, loading 37, actual scene 9). Real production pre-build gate also passed in the player build.
-- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,640,435 bytes.
-- `git diff --check`: passed. Owner Packages and ProjectSettings remain unchanged.
+- Explicit production gates: **281/281** (build gate 65, export 112, recovery 57, loading 37, actual scene 10). Real production pre-build gate also passed in the player build.
+- Required `DevelopmentBuildUtility.BuildWindowsDevelopment`: **Succeeded**, StandaloneWindows64 Development, Bootstrap-only, Unity 6000.3.2f1; **0 build errors, 1 warning** for unavailable native-symbol cloud-upload credentials. Complete build size: 171,640,420 bytes.
+- Correction/commit `git diff --check`: passed. Whole owner working-tree check reports six pre-existing TMP fallback-font whitespace lines; that unrelated file and a test-folder meta are preserved/excluded. Packages and ProjectSettings remain unchanged.
 
-Validation used the established isolated checkout with the same baseline and intentional changes; owner saves were not used. XML, build logs/report and four inspected representative portrait/landscape/tablet/long-localization PNGs are retained in established ignored evidence locations. Repository-owned capture uses Unity APIs with bounded stable-state warm-up; no visual-regression dependency or strict pixel-golden gate was introduced. See the repository Phase 7A4 evidence for exact test/localization/skip inventories, earlier failures, final protocol and owner UAT instructions.
+Validation used the established isolated checkout with the same baseline and intentional changes; owner saves were not used. XML, build logs/report and five inspected/retained portrait/landscape/tablet/long-localization and fresh Normal PNGs are retained in established ignored evidence locations. Repository-owned capture uses Unity APIs with bounded stable-state warm-up; no visual-regression dependency or strict pixel-golden gate was introduced. See the repository Phase 7A4 evidence for exact test/localization/skip inventories, earlier failures, final protocol and owner UAT instructions.
 
 ## Scope and remaining qualification
 

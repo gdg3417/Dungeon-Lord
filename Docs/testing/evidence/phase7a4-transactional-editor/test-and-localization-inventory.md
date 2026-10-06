@@ -1,6 +1,6 @@
 # Phase 7A4 exact test and localization inventory
 
-EditMode adds 75 cases: 37 domain/presenter/storage probes, 23 durability cases, six explicit-delete integration cases and nine actual-scene cases. Genuine PlayMode adds ten shell scenarios; its full suite also discovers the 66 domain/durability/delete cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
+EditMode adds 76 cases: 37 domain/presenter/storage probes, 23 durability cases, six explicit-delete integration cases and ten actual-scene cases. Genuine PlayMode adds eleven shell scenarios; its full suite also discovers the 66 domain/durability/delete cases. Existing production-content consumer coverage was extended without removing its authority restrictions.
 
 ## EditMode cases
 
@@ -166,3 +166,8 @@ Exactly 41 new Bootstrap English entries. No existing entry was changed; runtime
 - DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites — Passed
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellExplicitDeleteQuiescenceAndFreshBoot — Passed
 - DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellFailedExplicitDeleteQuiescence — Passed
+
+## Owner-UAT theme regression inventory
+
+- DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene — Passed
+- DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellRuntimeThemeAndVisibleLocalizedText — Passed

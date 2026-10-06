@@ -22,9 +22,14 @@ namespace DungeonBuilder.M0.Tests
         private TextAsset disposableConfig;
         private ProductionDungeonController controller;
         private Touchscreen simulatedTouch;
+        private bool missingThemeWarning;
+        private void RecordThemeWarning(string message, string stack, LogType type)
+        { if (message.Contains("No Theme Style Sheet set to PanelSettings")) missingThemeWarning = true; }
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            missingThemeWarning = false;
+            Application.logMessageReceived += RecordThemeWarning;
             if (!Application.isPlaying) yield return new EnterPlayMode();
             if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
             filename = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
@@ -57,6 +62,7 @@ namespace DungeonBuilder.M0.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            Application.logMessageReceived -= RecordThemeWarning;
             SceneManager.sceneLoaded -= Isolate;
             if (simulatedTouch != null) InputSystem.RemoveDevice(simulatedTouch);
             simulatedTouch = null;
@@ -67,6 +73,64 @@ namespace DungeonBuilder.M0.Tests
             yield return null;
             if (filename != null)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
+        }
+        [UnityTest]
+        public IEnumerator RuntimeThemeAndLocalizedTextRenderInActualScene()
+        {
+            var invalidPanel = ScriptableObject.CreateInstance<PanelSettings>();
+            var transientTheme = ScriptableObject.CreateInstance<ThemeStyleSheet>();
+            try
+            {
+                Assert.Throws<InvalidOperationException>(() => DungeonBuilder.M0.EditorTools.ProductionDungeonAssetAuthoring.ValidateTheme(invalidPanel));
+                invalidPanel.themeStyleSheet = transientTheme;
+                Assert.Throws<InvalidOperationException>(() => DungeonBuilder.M0.EditorTools.ProductionDungeonAssetAuthoring.ValidateTheme(invalidPanel));
+            }
+            finally { UnityEngine.Object.Destroy(invalidPanel); UnityEngine.Object.Destroy(transientTheme); }
+            var document = controller.GetComponent<UIDocument>();
+            Assert.That(document.panelSettings, Is.Not.Null);
+            DungeonBuilder.M0.EditorTools.ProductionDungeonAssetAuthoring.ValidateTheme(document.panelSettings);
+            Assert.That(document.panelSettings.themeStyleSheet, Is.Not.Null);
+            var dependencies = UnityEditor.AssetDatabase.GetDependencies("Assets/_Project/Scenes/Bootstrap.unity", true);
+            Assert.That(dependencies, Does.Contain(DungeonBuilder.M0.EditorTools.ProductionDungeonAssetAuthoring.ThemePath));
+            Assert.That(dependencies.Any(path => path.StartsWith("Assets/UI Toolkit/UnityThemes/", StringComparison.Ordinal)), Is.False);
+            Assert.That(new UnityEditor.SerializedObject(document.panelSettings).FindProperty("m_DisableNoThemeWarning").boolValue, Is.False);
+            var root = GameRoot.Instance;
+            var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation,
+                key => root.Content.GetString(key, key), System.Globalization.CultureInfo.CurrentCulture);
+            var expected = new System.Collections.Generic.Dictionary<string, string> {
+                { "mode", root.Content.GetString("ui.dungeon.normal", "ui.dungeon.normal") },
+                { "totalMana", hud.TotalMana }, { "usableMana", hud.UsableMana },
+                { "manaRate", hud.ManaPerHour }, { "heat", hud.Heat },
+                { "edit", root.Content.GetString("ui.dungeon.edit", "ui.dungeon.edit") },
+                { "reset", root.Content.GetString("ui.dungeon.reset", "ui.dungeon.reset") },
+                { "small", root.Content.GetString("ui.dungeon.text_small", "ui.dungeon.text_small") },
+                { "default", root.Content.GetString("ui.dungeon.text_default", "ui.dungeon.text_default") },
+                { "large", root.Content.GetString("ui.dungeon.text_large", "ui.dungeon.text_large") } };
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1080, 1920);
+            controller.ApplySafeArea(new Rect(0, 0, 1080, 1920), new Vector2(1080, 1920));
+            for (int i = 0; i < 8; i++) yield return null;
+            foreach (var pair in expected)
+            {
+                var text = document.rootVisualElement.Q<TextElement>(pair.Key);
+                Assert.That(text.text, Is.EqualTo(pair.Value), pair.Key);
+                Assert.That(text.panel, Is.Not.Null, pair.Key);
+                Assert.That(text.worldBound.width, Is.GreaterThan(0), pair.Key);
+                Assert.That(text.worldBound.height, Is.GreaterThan(0), pair.Key);
+                Assert.That(text.resolvedStyle.color.a, Is.GreaterThan(0), pair.Key);
+                Assert.That(text.resolvedStyle.fontSize, Is.GreaterThan(0), pair.Key);
+                Assert.That(text.resolvedStyle.unityFont != null || text.resolvedStyle.unityFontDefinition.fontAsset != null ||
+                    text.resolvedStyle.unityFontDefinition.font != null, Is.True, pair.Key + " font source");
+                for (VisualElement element = text; element != null; element = element.parent)
+                {
+                    Assert.That(element.resolvedStyle.display, Is.Not.EqualTo(DisplayStyle.None), pair.Key);
+                    Assert.That(element.resolvedStyle.visibility, Is.EqualTo(Visibility.Visible), pair.Key);
+                    Assert.That(element.resolvedStyle.opacity, Is.GreaterThan(0), pair.Key);
+                }
+            }
+            Assert.That(missingThemeWarning, Is.False);
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-theme-normal-1080x1920.png");
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
         }
         [UnityTest]
         public IEnumerator ActualSceneNormalEditMoveInvalidSaveDiscardAndTextModes()

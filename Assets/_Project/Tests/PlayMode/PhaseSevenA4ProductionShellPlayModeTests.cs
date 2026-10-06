@@ -35,6 +35,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ProductionShellRuntimeThemeAndVisibleLocalizedText()
+        { yield return Invoke("RuntimeThemeAndLocalizedTextRenderInActualScene"); }
+
+        [UnityTest]
         public IEnumerator ProductionShellNormalEditMoveSaveDiscardAndTextModes()
         {
             yield return Invoke("ActualSceneNormalEditMoveInvalidSaveDiscardAndTextModes");
