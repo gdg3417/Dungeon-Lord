@@ -1,5 +1,7 @@
 # Phase 7A5 implementation contract
 
+Owner UAT subsequently found missing legal-floor-space visibility and discoverable valid anchors. [The focused correction](owner-uat-floor-guidance-correction.md) adds a configured complete Edit grid/boundary and read-only PreviewMovement guidance. It changes presentation and actionable English copy only; the draft, replay, economics and publication contracts below remain intact.
+
 Starting baseline: `52c1eb00af241c4be9f8b117e96294a71dce82bb`, merged PR #226. Recommended configuration: GPT-6.1 Sol / High, Complex; the supplied policy recommendation was retained. No Astra delegation or model substitution was used.
 
 ## Intent and presentation

@@ -50,6 +50,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest]
         public IEnumerator PhaseSevenA5LongLocalization()
         { yield return Invoke("PhaseSevenA5LongLocalizedRoomSheetInvalidReasonAndEconomicsRemainReadable"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidancePortraitLandscape()
+        { yield return Invoke("PhaseSevenA5MoveGuidancePortraitLandscapeAndCurrentDraft"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidanceNoAlternative()
+        { yield return Invoke("PhaseSevenA5MoveGuidanceNoAlternativeIsLocalized"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidanceLongTextRecovery()
+        { yield return Invoke("PhaseSevenA5MoveGuidanceLongTextAndInvalidRecovery"); }
 
         [UnityTest]
         public IEnumerator ProductionShellNormalEditMoveSaveDiscardAndTextModes()

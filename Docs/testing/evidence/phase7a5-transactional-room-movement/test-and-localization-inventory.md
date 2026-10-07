@@ -1,5 +1,17 @@
 # Phase 7A5 test and localization inventory
 
+The original inventory below is retained. The owner-UAT correction adds seven domain cases and three actual-scene cases, each of the latter also running through genuine PlayMode wrappers. Exact new domain methods in PhaseSevenA5TransactionalRoomMovement are:
+
+- MoveGuidanceEditGridUsesExactlySelectedAuthoredFloorBounds(0)
+- MoveGuidanceEditGridUsesExactlySelectedAuthoredFloorBounds(1)
+- MoveGuidanceCustomGridBoundsAndWorkloadAreConfigurationOwned
+- MoveGuidanceIsExactlyAuthoritativeOrderedAlternativesWithoutMutation
+- MoveGuidanceUsesLastValidDraftProjectionAfterChangesAndInvalidIntent
+- MoveGuidanceNoAlternativeHasEmptyResultAndBoundedWork
+- MoveGuidanceRefusesOverBudgetEnvelopeBeforeCandidateEnumeration
+
+New actual-scene methods are PhaseSevenA5MoveGuidancePortraitLandscapeAndCurrentDraft, PhaseSevenA5MoveGuidanceNoAlternativeIsLocalized and PhaseSevenA5MoveGuidanceLongTextAndInvalidRecovery. The existing explicit-delete/fresh-boot test now waits explicitly for async scene completion and asserts its disposable filename; its original deletion/recovery assertions remain. [Correction evidence](owner-uat-floor-guidance-correction.md) records all results, localization copy, bounded work, the test-isolation incident and remaining comprehension UAT. No original A5 domain/economy/durability assertion changed.
+
 Final XML reports: `TestResults/phase7a5-final-editmode.xml` and `TestResults/phase7a5-final-playmode.xml`. All names below come from NUnit XML, not source-name guesses.
 
 ## Exact unchanged skips

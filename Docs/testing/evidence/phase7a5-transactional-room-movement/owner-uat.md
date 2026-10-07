@@ -1,5 +1,7 @@
 # Phase 7A5 owner UAT
 
+Start with the **twelve-step comprehension recheck** in [floor-grid/guidance correction](owner-uat-floor-guidance-correction.md), using its newly qualified Windows player. Original owner UAT found placement unusable without guessing. If that focused recheck fails, stop and report before continuing this full sequence. If it passes, resume the economics/recovery/save/reopen/Windows checks below.
+
 Automated qualification does not prove usability, fun, mobile performance or native mobile persistence. Perform this after external review using the final branch/commit in the qualification report. Use a backed-up prepared save or disposable test profile. A reset is not required; a fresh save needs existing Bootstrap construction/acquisition controls to prepare an eligible native movable room. Do not delete the owner save for this test. Normal Bootstrap movement has been retired; construction and acquisition remain available.
 
 1. Check out `codex/phase-7a5-transactional-room-movement-economics` at the exact reviewed commit, preserving unrelated local changes.

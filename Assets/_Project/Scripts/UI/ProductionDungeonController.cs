@@ -27,6 +27,7 @@ namespace DungeonBuilder.M0
         private readonly DungeonViewportGesture gesture = new DungeonViewportGesture();
         private IDungeonDraftStore store;
         private DungeonDraftContext draftContext;
+        private SpatialContentValidationWorkloadLimits floorPresentationLimits;
         private TransactionalDungeonDraft draft, recovery;
         private byte[] recoveryBytes;
         private string recoveryReason, feedback;
@@ -97,6 +98,9 @@ namespace DungeonBuilder.M0
 
         private void Initialize()
         {
+            var floorLimits = ProductionSpatialContentWorkloadLimitParser.Parse(root.productionSpatialValidationLimits);
+            if (!floorLimits.Success) throw new InvalidOperationException(StructuralEditService.WorkloadReason);
+            floorPresentationLimits = floorLimits.Limits;
             document = GetComponent<UIDocument>();
             if (presentationPolicy == null || document.visualTreeAsset == null || document.panelSettings == null)
                 throw new InvalidOperationException("production.dungeon.assets_missing");
@@ -158,16 +162,25 @@ namespace DungeonBuilder.M0
             if (IsEditing || recoveryBytes != null || recoveryReason != null) return;
             draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState, draftContext, store);
             feedback = null; selected = null; moveMode = false; CloseSheet();
-            RebuildFloor(false); Present();
+            RebuildFloor(true); Present();
         }
         public void BeginMove()
         {
             if (!HasCanonicalRuntime()) return;
             if (!IsEditing || selected == null && selectedRoomId == null) return;
             moveMode = true; sheet.style.display = DisplayStyle.None;
-            feedback = selectedRoomId != null ? "ui.dungeon.room_move_hint" : "ui.dungeon.move_hint"; Present();
+            world.ClearMoveGuidance();
+            if (selectedRoomId != null)
+            {
+                world.ClearPreview();
+                var guidance = StructuralRenovationService.GetMovementGuidance(draft.ReadModel, selectedFloor, selectedRoomId, draftContext, floorPresentationLimits);
+                world.PresentMoveGuidance(guidance.ValidAnchors);
+                feedback = guidance.Reason ?? (guidance.ValidAnchors.Length == 0 ? "ui.dungeon.room_move_none" : "ui.dungeon.room_move_hint");
+            }
+            else feedback = "ui.dungeon.move_hint";
+            Present();
         }
-        private void CloseSheet() { selected = null; selectedRoomId = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); }
+        private void CloseSheet() { selected = null; selectedRoomId = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
@@ -175,6 +188,7 @@ namespace DungeonBuilder.M0
             {
                 if (draft.MoveRoom(selectedFloor, selectedRoomId, cell))
                 {
+                    moveMode = false;
                     RebuildFloor(false);
                     feedback = draft.StructuralReason; moveMode = false; OpenSheet();
                     if (draft.IsStructurallyValid) world.SelectRoomFootprint(selectedRoomId);
@@ -198,6 +212,7 @@ namespace DungeonBuilder.M0
                 return;
             }
             selected = world.Select(cell); selectedRoomId = selected == null && IsEditing ? world.SelectRoom(cell) : null;
+            world.ClearMoveGuidance();
             if (selected == null && selectedRoomId == null) CloseSheet();
             else { OpenSheet(); if (selectedRoomId != null) world.SelectRoomFootprint(selectedRoomId); else world.Preview(cell, true); }
             Present();
@@ -259,7 +274,7 @@ namespace DungeonBuilder.M0
         private void Resume()
         { if (!HasCanonicalRuntime()) return;
           draft = recovery; recovery = null; recoveryBytes = null; recoveryReason = null;
-          renderState = draft.ReadModel; RebuildFloor(false); Present(); }
+          renderState = draft.ReadModel; RebuildFloor(true); Present(); }
         private void DiscardRecovery()
         {
             if (!HasCanonicalRuntime()) return;
@@ -309,7 +324,7 @@ namespace DungeonBuilder.M0
             var selectedValue = renderState.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
             if (selectedValue == null) { selectedValue = renderState.Floors.FirstOrDefault(); selectedFloor = selectedValue?.FloorInstanceId; }
             world.Render(selectedValue, root.ProductionSpatialContent, draftContext.Occupancy,
-                root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles, IsEditing);
+                root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles, floorPresentationLimits.MaximumMaterializedTiles, IsEditing);
             world.PresentRoomIntents(draft?.InvalidMovements);
             RefreshEconomy();
             viewport.Configure(world.Bounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);

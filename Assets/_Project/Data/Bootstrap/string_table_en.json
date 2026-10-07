@@ -32,7 +32,8 @@
     {"key": "ui.dungeon.legacy", "text": "Development tools"},
     {"key": "ui.dungeon.move", "text": "Move"},
     {"key": "ui.dungeon.move_hint", "text": "Tap a target tile in this room."},
-    {"key": "ui.dungeon.room_move_hint", "text": "Tap the requested anchor for this room. Its required-route descendants move with it."},
+    {"key": "ui.dungeon.room_move_hint", "text": "Choose a highlighted diamond anchor for this room. The outlined grid is the legal floor area; required-route descendants move with the room."},
+    {"key": "ui.dungeon.room_move_none", "text": "No valid alternative move location is available for this room in the current draft."},
     {"key": "ui.dungeon.room_movement_consequences", "text": "Final structural changes: {0} rooms moved; {1} connections updated; {2} Completion Terminals moved. Contents keep their room-local arrangement."},
     {"key": "ui.dungeon.room_selected", "text": "{0} · Room {1}"},
     {"key": "ui.dungeon.room_move_retired", "text": "Move rooms in the Dungeon's graphical Edit Mode."},
@@ -3209,19 +3210,19 @@
     },
     {
       "key": "structural.edit.out_of_bounds",
-      "text": "The room footprint is outside the floor bounds."
+      "text": "The moved structures would extend outside the outlined floor grid. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.room_overlap",
-      "text": "The room overlaps another room."
+      "text": "The moved room would overlap another room. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.fixed_structure_overlap",
-      "text": "The room overlaps a required structure."
+      "text": "The moved room would overlap a required structure. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.corridor_overlap",
-      "text": "The room overlaps an existing corridor."
+      "text": "The moved room would overlap an existing corridor. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.capacity_exceeded",
@@ -3229,7 +3230,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "No direct doorway is available for this placement."
+      "text": "This anchor cannot connect the room to the required route. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3249,7 +3250,7 @@
     },
     {
       "key": "structural.edit.required_route_disconnected",
-      "text": "The required route would be disconnected."
+      "text": "This placement would disconnect the required route. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.completion_unreachable",

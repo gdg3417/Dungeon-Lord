@@ -1,5 +1,7 @@
 # Phase 7A5 owner report
 
+Owner UAT on the original reviewed implementation found a blocking comprehension failure: legal empty floor space and valid room anchors were not discoverable. The focused correction and current qualification are recorded in [floor-grid/guidance correction](owner-uat-floor-guidance-correction.md). Run its twelve-step comprehension recheck before resuming the full UAT below. Original qualification/history is retained; passing automation did not establish usability.
+
 Branch: `codex/phase-7a5-transactional-room-movement-economics`. Parent/starting baseline: `52c1eb00af241c4be9f8b117e96294a71dce82bb`. The final HEAD, commit list and open PR identity are reported with delivery; the exact PR body is retained in [proposed PR description](proposed-pr-description.md). The PR must remain unmerged. Main is checked again before delivery.
 
 ## Repository and preserved owner state

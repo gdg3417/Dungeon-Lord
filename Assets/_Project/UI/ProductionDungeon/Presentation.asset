@@ -29,6 +29,9 @@ MonoBehaviour:
   EntitySize: 0.65
   TileSize: 0.92
   PreviewSize: 0.98
+  GridTileSize: 0.96
+  FloorBoundaryWidth: 0.04
+  MoveAnchorSize: 0.45
   CameraDepth: -10
   RoomColor: {r: 0.24, g: 0.31, b: 0.39, a: 1}
   FixedColor: {r: 0.38, g: 0.4, b: 0.32, a: 1}
@@ -39,3 +42,5 @@ MonoBehaviour:
   ValidColor: {r: 0.45, g: 0.92, b: 0.75, a: 1}
   InvalidColor: {r: 1, g: 0.47, b: 0.48, a: 1}
   GridColor: {r: 0.12, g: 0.16, b: 0.2, a: 1}
+  EditorGridColor: {r: 0.18, g: 0.23, b: 0.28, a: 1}
+  FloorBoundaryColor: {r: 0.35, g: 0.48, b: 0.58, a: 1}

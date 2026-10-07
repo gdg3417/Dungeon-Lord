@@ -20,6 +20,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string RoomDefinitionId;
     }
 
+    public sealed class StructuralMovementGuidance
+    {
+        public TileCoordinate[] ValidAnchors { get; internal set; } = Array.Empty<TileCoordinate>();
+        public int ExaminedAnchorCount { get; internal set; }
+        public string Reason { get; internal set; }
+    }
+
     /// <summary>
     /// Pure Phase 3B1 renovation preparation. It edits only a serialized detached clone and leaves
     /// persistence/publication to DetachedCanonicalWriteAuthority.
@@ -70,6 +77,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TileCoordinate delta = Delta(target.Anchor, request.Anchor);
             return Apply(preview, candidate, floor, floorDefinition, production, configuration, limits,
                 workload, path, targetIndex, delta, null);
+        }
+
+        // Read-only, discrete targeting guidance. Each configured anchor delegates to the
+        // same movement and final semantic authorities used by the draft; no UI rules.
+        // The current anchor is omitted consistently because it is not an alternative.
+        public static StructuralMovementGuidance GetMovementGuidance(DetachedCanonicalSpatialSaveState current,
+            string floorInstanceId, string roomInstanceId, DungeonDraftContext context, SpatialContentValidationWorkloadLimits floorLimits)
+        {
+            var result = new StructuralMovementGuidance();
+            if (context?.Limits == null) { result.Reason = StructuralEditService.InvalidContextReason; return result; }
+            var request = new StructuralMovementRequest { FloorInstanceId = floorInstanceId, RoomInstanceId = roomInstanceId };
+            var initial = new StructuralEditPreview();
+            if (!TryContext(current, request, context.Production, context.Compatibility, context.Configuration,
+                    context.Limits.Canonical, initial, out _, out var floor, out var definition,
+                    out var workload, out var path, out int targetIndex))
+            { result.Reason = initial.ReasonCodes.FirstOrDefault(); return result; }
+            var bounds = definition.Bounds;
+            if (bounds == null || !bounds.IsValid || !floorLimits.IsValid || bounds.TileCount > floorLimits.MaximumMaterializedTiles)
+            { result.Reason = StructuralEditService.WorkloadReason; return result; }
+            var origin = Room(floor, path.Nodes[targetIndex]).Anchor;
+            var anchors = new List<TileCoordinate>();
+            // X then Y is TileCoordinate canonical order. Long loop endpoints avoid overflow.
+            for (long x = bounds.Minimum.X; x < (long)bounds.Minimum.X + bounds.Width; x++)
+                for (long y = bounds.Minimum.Y; y < (long)bounds.Minimum.Y + bounds.Height; y++)
+                {
+                    var anchor = new TileCoordinate((int)x, (int)y);
+                    if (anchor.Equals(origin)) continue;
+                    result.ExaminedAnchorCount++;
+                    request.Anchor = anchor;
+                    var preview = PreviewMovement(current, request, context.Production, context.Compatibility,
+                        context.Configuration, context.Limits.Canonical);
+                    if (preview.IsValid && context.Validate(preview.DetachedCandidate)) anchors.Add(anchor);
+                }
+            result.ValidAnchors = anchors.ToArray();
+            return result;
         }
 
         public static StructuralEditPreview PreviewReplacement(DetachedCanonicalSpatialSaveState current,

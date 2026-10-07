@@ -15,6 +15,118 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class PhaseSevenA5TransactionalRoomMovementTests
     {
+        private static SpatialContentValidationWorkloadLimits GuidanceLimits => ProductionSpatialContentWorkloadLimitParser.Parse(
+            UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits;
+        [TestCase(0)]
+        [TestCase(1)]
+        public void MoveGuidanceEditGridUsesExactlySelectedAuthoredFloorBounds(int floorIndex)
+        {
+            var f = Room(); var floor = f.State.Floors[0];
+            var definition = f.Production.Catalog.Floors.Single(value => value.FloorIndex == floorIndex);
+            floor.FloorDefinitionId = definition.FloorDefinitionId; floor.FloorIndex = floorIndex;
+            var policy = ScriptableObject.CreateInstance<DungeonPresentationPolicy>();
+            var obj = new GameObject("GridBoundsTest"); var view = obj.AddComponent<DungeonFloorWorldView>();
+            try
+            {
+                view.Initialize(policy); view.Render(floor, f.Production, f.Occupancy, f.Profile.Canonical.Spatial.MaximumMaterializedTiles, GuidanceLimits.MaximumMaterializedTiles, true);
+                Assert.That(view.GridTileCount, Is.EqualTo(definition.Bounds.TileCount));
+                Assert.That(view.Bounds, Is.EqualTo(new Rect(definition.Bounds.Minimum.X, definition.Bounds.Minimum.Y, definition.Bounds.Width, definition.Bounds.Height)));
+                var grid = obj.transform.Find("EditorGrid").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                for (int x = definition.Bounds.Minimum.X; x < definition.Bounds.Minimum.X + definition.Bounds.Width; x++)
+                    for (int y = definition.Bounds.Minimum.Y; y < definition.Bounds.Minimum.Y + definition.Bounds.Height; y++)
+                        Assert.That(grid.HasTile(new Vector3Int(x, y, 0)), Is.True);
+                Assert.That(grid.HasTile(new Vector3Int(definition.Bounds.Minimum.X - 1, definition.Bounds.Minimum.Y, 0)), Is.False);
+                view.Render(floor, f.Production, f.Occupancy, f.Profile.Canonical.Spatial.MaximumMaterializedTiles, GuidanceLimits.MaximumMaterializedTiles, false);
+                Assert.That(view.GridVisible, Is.False); Assert.That(view.GridTileCount, Is.Zero);
+                Assert.That(view.Bounds, Is.Not.EqualTo(view.LegalBounds));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(obj); UnityEngine.Object.DestroyImmediate(policy); }
+        }
+
+        [Test]
+        public void MoveGuidanceCustomGridBoundsAndWorkloadAreConfigurationOwned()
+        {
+            var f = Room(); var catalog = f.Production.Catalog;
+            catalog.Floors[0].Bounds = new RectangularFloorBounds(new TileCoordinate(-2, -3), 7, 9);
+            var production = new ProductionSpatialContentSnapshot(f.Production.Manifest, catalog, f.Production.Languages);
+            var policy = ScriptableObject.CreateInstance<DungeonPresentationPolicy>();
+            var obj = new GameObject("CustomGridBoundsTest"); var view = obj.AddComponent<DungeonFloorWorldView>();
+            try
+            {
+                view.Initialize(policy); view.Render(f.State.Floors[0], production, f.Occupancy, f.Profile.Canonical.Spatial.MaximumMaterializedTiles, 63, true);
+                Assert.That(view.GridTileCount, Is.EqualTo(catalog.Floors[0].Bounds.TileCount)); Assert.That(view.Bounds, Is.EqualTo(new Rect(-2, -3, 7, 9)));
+                Assert.Throws<InvalidOperationException>(() => view.Render(f.State.Floors[0], production, f.Occupancy, f.Profile.Canonical.Spatial.MaximumMaterializedTiles, 62, true));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(obj); UnityEngine.Object.DestroyImmediate(policy); }
+        }
+
+        [Test]
+        public void MoveGuidanceIsExactlyAuthoritativeOrderedAlternativesWithoutMutation()
+        {
+            var f = Room(); var ctx = Context(f); var floor = f.State.Floors[0]; var room = floor.Layout.Rooms[0];
+            var fingerprint = ctx.Fingerprint(f.State); var disk = f.Session.GetCurrentBytes(); var wallet = f.Runtime.structureRuntime.ManaReserve;
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var guidance = StructuralRenovationService.GetMovementGuidance(f.State, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits);
+            timer.Stop(); TestContext.WriteLine("Configured guidance: " + guidance.ExaminedAnchorCount + " previews, " + timer.ElapsedMilliseconds + " ms");
+            var bounds = f.Production.Catalog.Floors[0].Bounds;
+            Assert.That(guidance.Reason, Is.Null); Assert.That(guidance.ExaminedAnchorCount, Is.EqualTo(bounds.TileCount - 1));
+            CollectionAssert.AreEqual(guidance.ValidAnchors.OrderBy(value => value).ToArray(), guidance.ValidAnchors);
+            CollectionAssert.AreEqual(guidance.ValidAnchors, StructuralRenovationService.GetMovementGuidance(f.State, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits).ValidAnchors);
+            Assert.That(guidance.ValidAnchors, Does.Contain(new TileCoordinate(0, 3)));
+            foreach (var invalid in new[] { room.Anchor, new TileCoordinate(0, 0), new TileCoordinate(-1, 3), new TileCoordinate(1, 3) })
+                Assert.That(guidance.ValidAnchors.Contains(invalid), Is.False);
+            for (int x = bounds.Minimum.X; x < bounds.Minimum.X + bounds.Width; x++)
+                for (int y = bounds.Minimum.Y; y < bounds.Minimum.Y + bounds.Height; y++)
+                {
+                    var anchor = new TileCoordinate(x, y);
+                    var preview = StructuralRenovationService.PreviewMovement(f.State, new StructuralMovementRequest { FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = room.RoomInstanceId, Anchor = anchor }, f.Production, f.Compatibility, f.Configuration, f.Profile.Canonical);
+                    Assert.That(guidance.ValidAnchors.Contains(anchor), Is.EqualTo(!anchor.Equals(room.Anchor) && preview.IsValid && ctx.Validate(preview.DetachedCandidate)), anchor.ToString());
+                }
+            Assert.That(ctx.Fingerprint(f.State), Is.EqualTo(fingerprint)); CollectionAssert.AreEqual(disk, f.Session.GetCurrentBytes());
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+        }
+
+        [Test]
+        public void MoveGuidanceUsesLastValidDraftProjectionAfterChangesAndInvalidIntent()
+        {
+            var f = Room(); var ctx = Context(f); var floor = f.State.Floors[0]; var room = floor.Layout.Rooms[0]; var store = new Store();
+            var d = TransactionalDungeonDraft.Create(f.State, ctx, store); Move(d, f, 0, 3); Flush(d);
+            var valid = StructuralRenovationService.GetMovementGuidance(d.ReadModel, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits);
+            Assert.That(valid.ValidAnchors, Does.Contain(room.Anchor)); Assert.That(valid.ValidAnchors.Contains(new TileCoordinate(0, 3)), Is.False);
+            Move(d, f, -1, -1); Flush(d); var evidence = store.Read(); var commands = d.CommandCount;
+            var invalid = StructuralRenovationService.GetMovementGuidance(d.ReadModel, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits);
+            CollectionAssert.AreEqual(valid.ValidAnchors, invalid.ValidAnchors); CollectionAssert.AreEqual(evidence, store.Read()); Assert.That(d.CommandCount, Is.EqualTo(commands));
+            var recovered = TransactionalDungeonDraft.Recover(store.Read(), f.State, ctx, store, out var reason); Assert.That(recovered, Is.Not.Null, reason);
+            CollectionAssert.AreEqual(valid.ValidAnchors, StructuralRenovationService.GetMovementGuidance(recovered.ReadModel, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits).ValidAnchors);
+            Assert.That(recovered.MoveRoom(floor.FloorInstanceId, room.RoomInstanceId, invalid.ValidAnchors[0]), Is.True); Flush(recovered);
+            Assert.That(recovered.IsStructurallyValid, Is.True);
+        }
+
+        [Test]
+        public void MoveGuidanceNoAlternativeHasEmptyResultAndBoundedWork()
+        {
+            var f = Room(); var catalog = f.Production.Catalog;
+            catalog.Floors[0].Bounds = new RectangularFloorBounds(new TileCoordinate(0, 0), 4, 8); catalog.Floors[0].FinalFloorSpaceCapacity = 32;
+            var production = new ProductionSpatialContentSnapshot(f.Production.Manifest, catalog, f.Production.Languages);
+            var ctx = new DungeonDraftContext(production, f.Configuration, f.Occupancy, f.Profile, f.Compatibility);
+            Assert.That(ctx.Validate(f.State), Is.True);
+            var floor = f.State.Floors[0]; var room = floor.Layout.Rooms[0];
+            var result = StructuralRenovationService.GetMovementGuidance(f.State, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits);
+            Assert.That(result.Reason, Is.Null); Assert.That(result.ValidAnchors, Is.Empty); Assert.That(result.ExaminedAnchorCount, Is.EqualTo(31));
+        }
+
+        [Test]
+        public void MoveGuidanceRefusesOverBudgetEnvelopeBeforeCandidateEnumeration()
+        {
+            var f = Room(); var catalog = f.Production.Catalog; var max = GuidanceLimits.MaximumMaterializedTiles;
+            catalog.Floors[0].Bounds = new RectangularFloorBounds(new TileCoordinate(0, 0), max, 2);
+            var production = new ProductionSpatialContentSnapshot(f.Production.Manifest, catalog, f.Production.Languages);
+            var ctx = new DungeonDraftContext(production, f.Configuration, f.Occupancy, f.Profile, f.Compatibility);
+            var floor = f.State.Floors[0]; var room = floor.Layout.Rooms[0];
+            var result = StructuralRenovationService.GetMovementGuidance(f.State, floor.FloorInstanceId, room.RoomInstanceId, ctx, GuidanceLimits);
+            Assert.That(result.ValidAnchors, Is.Empty); Assert.That(result.ExaminedAnchorCount, Is.Zero); Assert.That(result.Reason, Is.Not.Null);
+        }
+
         internal static Fixture Room(string definition = "spatial.room.basic")
         {
             var f = PhaseSevenA4TransactionalEditorTests.Content();

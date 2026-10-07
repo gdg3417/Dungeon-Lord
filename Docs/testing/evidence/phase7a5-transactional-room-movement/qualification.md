@@ -1,5 +1,7 @@
 # Phase 7A5 qualification
 
+This report retains the original implementation qualification at `84f2654181eae2bdeb906dea8f9e46bd7ea1d29f`. Subsequent owner UAT exposed a blocking floor-space/movement-guidance comprehension issue. The correction's exact commands/results, new Windows build, copy, bounded work and owner recheck are in [floor-grid/guidance correction](owner-uat-floor-guidance-correction.md). The original Windows player is historical evidence and must not be used for the corrected UAT.
+
 Repository `gdg3417/Dungeon-Lord`; branch `codex/phase-7a5-transactional-room-movement-economics`; starting baseline `52c1eb00af241c4be9f8b117e96294a71dce82bb`. Local main and remote main were verified at that exact commit before editing. The prior owner branch was `codex/phase-7a4-transactional-editor-production-dungeon`, HEAD `7dc72528ae01188e38b1bffaca1612cdc105b984`; its tracked tree exactly matched the merge baseline. Staged changes were empty. The two unrelated owner files listed below were preserved while creating the dedicated branch from the merge commit.
 
 Validation checkout: `C:/Dev/Dungeon-Lord/Temp/phase7a5-validation`, detached from the exact baseline with only intentional A5 source/assets/meta files copied in. Owner saves and unrelated changes were not used. CLI verified at `C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe`, version `1.0.0-beta.10`; project/editor version `6000.3.2f1`. All tests used the established CLI. XML verdicts were inspected individually; a CLI return alone is not the acceptance criterion.
