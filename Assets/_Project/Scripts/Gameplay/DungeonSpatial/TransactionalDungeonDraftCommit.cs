@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using DungeonBuilder.M0.Economy;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
@@ -11,6 +12,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (draft == null || currentRuntime?.structureRuntime == null || fileSystem == null)
                 return Failure(TransactionalDungeonDraft.InvalidReason);
+            var draftContext = new DungeonDraftContext(production, configuration, context.RoomContentOccupancy, limits, compatibility);
+            if (!draft.MatchesRuleContext(draftContext)) return Failure(TransactionalDungeonDraft.IncompatibleReason);
             var owned = ValidateSession(session);
             if (owned?.CurrentTargetValidated != true || !owned.IsValid ||
                 !CanonicalEqual(currentRuntime.validatedCanonicalSpatialState, owned.State))
@@ -22,16 +25,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(TransactionalDungeonDraft.StaleReason);
             }
             catch { return Failure(AtomicSaveFailedReason); }
-            if (!draft.PrepareCommit(owned.State, out var final, out string reason)) return Failure(reason);
-            // Reconcile only the supported position command set. No structural pricing or acquisition.
-            // Existing content identities, custody and structural investment are preserved by replay.
-            // Capture current wallet/lifecycle/history, never their older values at draft creation.
+            if (!draft.PrepareCommit(owned.State, draftContext, out var recovered, out string reason)) return Failure(reason);
+            var final = recovered.ReadModel;
             if (!DetachedCanonicalProductionSemanticValidation.Validate(final, production, configuration,
                     limits.Canonical.Spatial, context.RoomContentOccupancy, true).IsValid)
                 return Failure(TransactionalDungeonDraft.InvalidReason);
-            var snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
+            var priced = StructuralEconomyService.PreviewFinalMovement(owned.State, final, owned.Investment,
+                recovered.NormalizedMovementTargets(), currentRuntime.structureRuntime.ManaReserve, economy, economyModifiers);
+            if (!priced.IsAffordable) return Failure(priced.Reason);
+            var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
-            var prepared = session.PrepareLiveReplacement(snapshot, final, owned.Investment,
+            var prepared = session.PrepareLiveReplacement(snapshot, final, priced.Investment,
                 owned.CorridorContent, owned.BranchKnowledge);
             var result = PrepareAndPersist(activePath, fileSystem, session, prepared, false);
             if (result.IsSuccess) draft.Committed();

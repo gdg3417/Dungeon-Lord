@@ -39,6 +39,28 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("RuntimeThemeAndLocalizedTextRenderInActualScene"); }
 
         [UnityTest]
+        public IEnumerator PhaseSevenA5RoomMovementProductionParity()
+        { yield return Invoke("PhaseSevenA5GraphicalRoomInvalidCorrectionEconomyAndAtomicSave"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5InvalidRecovery()
+        { yield return Invoke("PhaseSevenA5InvalidRecoveryRestoresFootprintReasonAndDiscard"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5ExperimentationAndInsufficientMana()
+        { yield return Invoke("PhaseSevenA5ExperimentationOriginRecoveryAndInsufficientManaKeepDraft"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5LongLocalization()
+        { yield return Invoke("PhaseSevenA5LongLocalizedRoomSheetInvalidReasonAndEconomicsRemainReadable"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidancePortraitLandscape()
+        { yield return Invoke("PhaseSevenA5MoveGuidancePortraitLandscapeAndCurrentDraft"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidanceNoAlternative()
+        { yield return Invoke("PhaseSevenA5MoveGuidanceNoAlternativeIsLocalized"); }
+        [UnityTest]
+        public IEnumerator PhaseSevenA5MoveGuidanceLongTextRecovery()
+        { yield return Invoke("PhaseSevenA5MoveGuidanceLongTextAndInvalidRecovery"); }
+
+        [UnityTest]
         public IEnumerator ProductionShellNormalEditMoveSaveDiscardAndTextModes()
         {
             yield return Invoke("ActualSceneNormalEditMoveInvalidSaveDiscardAndTextModes");

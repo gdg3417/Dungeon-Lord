@@ -18,6 +18,7 @@
         <ui:VisualElement name="viewport" class="viewport" />
         <ui:ScrollView name="bottomChrome" class="bottom-chrome" mode="Vertical">
             <ui:Label name="status" />
+            <ui:Label name="economics" />
             <ui:VisualElement name="contextSheet" class="sheet">
                 <ui:Label name="selectedName" class="mode" />
                 <ui:VisualElement class="row"><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.close" /></ui:VisualElement>

@@ -5,7 +5,7 @@
   "entries": [
     {"key": "ui.dungeon.capacity", "text": "Floor space: {0} used · {1} remaining"},
     {"key": "ui.dungeon.close", "text": "Close"},
-    {"key": "ui.dungeon.commit_review", "text": "Save all repositioned content across the dungeon? Spending: 0 mana. Refunds: 0 mana. Net change: 0 mana. Current runs keep their original dungeon."},
+    {"key": "ui.dungeon.commit_review", "text": "Save all dungeon changes? Structural costs are recalculated using your current mana. Content repositioning is free. Current runs keep their original dungeon."},
     {"key": "ui.dungeon.committed", "text": "Changes saved."},
     {"key": "ui.dungeon.continue", "text": "Continue editing"},
     {"key": "ui.dungeon.discard", "text": "Discard draft"},
@@ -32,6 +32,12 @@
     {"key": "ui.dungeon.legacy", "text": "Development tools"},
     {"key": "ui.dungeon.move", "text": "Move"},
     {"key": "ui.dungeon.move_hint", "text": "Tap a target tile in this room."},
+    {"key": "ui.dungeon.room_move_hint", "text": "Choose a highlighted diamond anchor for this room. The outlined grid is the legal floor area; required-route descendants move with the room."},
+    {"key": "ui.dungeon.room_move_none", "text": "No valid alternative move location is available for this room in the current draft."},
+    {"key": "ui.dungeon.room_movement_consequences", "text": "Final structural changes: {0} rooms moved; {1} connections updated; {2} Completion Terminals moved. Contents keep their room-local arrangement."},
+    {"key": "ui.dungeon.room_selected", "text": "{0} · Room {1}"},
+    {"key": "ui.dungeon.room_move_retired", "text": "Move rooms in the Dungeon's graphical Edit Mode."},
+    {"key": "ui.dungeon.draft.context_stale", "text": "The room movement rules have changed. Discard this draft and start editing again."},
     {"key": "ui.dungeon.normal", "text": "Dungeon"},
     {"key": "ui.dungeon.recovery", "text": "A protected local draft was recovered. Resume Editing or discard it. Your committed dungeon has not changed."},
     {"key": "ui.dungeon.reset", "text": "Focus floor"},
@@ -3204,19 +3210,19 @@
     },
     {
       "key": "structural.edit.out_of_bounds",
-      "text": "The room footprint is outside the floor bounds."
+      "text": "The moved structures would extend outside the outlined floor grid. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.room_overlap",
-      "text": "The room overlaps another room."
+      "text": "The moved room would overlap another room. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.fixed_structure_overlap",
-      "text": "The room overlaps a required structure."
+      "text": "The moved room would overlap a required structure. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.corridor_overlap",
-      "text": "The room overlaps an existing corridor."
+      "text": "The moved room would overlap an existing corridor. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.capacity_exceeded",
@@ -3224,7 +3230,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "No direct doorway is available for this placement."
+      "text": "This anchor cannot connect the room to the required route. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3244,7 +3250,7 @@
     },
     {
       "key": "structural.edit.required_route_disconnected",
-      "text": "The required route would be disconnected."
+      "text": "This placement would disconnect the required route. Press Move and choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.completion_unreachable",

@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    [Serializable]
     public sealed class StructuralMovementRequest
     {
         public string FloorInstanceId;
@@ -17,6 +18,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string FloorInstanceId;
         public string RoomInstanceId;
         public string RoomDefinitionId;
+    }
+
+    public sealed class StructuralMovementGuidance
+    {
+        public TileCoordinate[] ValidAnchors { get; internal set; } = Array.Empty<TileCoordinate>();
+        public int ExaminedAnchorCount { get; internal set; }
+        public string Reason { get; internal set; }
     }
 
     /// <summary>
@@ -69,6 +77,41 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TileCoordinate delta = Delta(target.Anchor, request.Anchor);
             return Apply(preview, candidate, floor, floorDefinition, production, configuration, limits,
                 workload, path, targetIndex, delta, null);
+        }
+
+        // Read-only, discrete targeting guidance. Each configured anchor delegates to the
+        // same movement and final semantic authorities used by the draft; no UI rules.
+        // The current anchor is omitted consistently because it is not an alternative.
+        public static StructuralMovementGuidance GetMovementGuidance(DetachedCanonicalSpatialSaveState current,
+            string floorInstanceId, string roomInstanceId, DungeonDraftContext context, SpatialContentValidationWorkloadLimits floorLimits)
+        {
+            var result = new StructuralMovementGuidance();
+            if (context?.Limits == null) { result.Reason = StructuralEditService.InvalidContextReason; return result; }
+            var request = new StructuralMovementRequest { FloorInstanceId = floorInstanceId, RoomInstanceId = roomInstanceId };
+            var initial = new StructuralEditPreview();
+            if (!TryContext(current, request, context.Production, context.Compatibility, context.Configuration,
+                    context.Limits.Canonical, initial, out _, out var floor, out var definition,
+                    out var workload, out var path, out int targetIndex))
+            { result.Reason = initial.ReasonCodes.FirstOrDefault(); return result; }
+            var bounds = definition.Bounds;
+            if (bounds == null || !bounds.IsValid || !floorLimits.IsValid || bounds.TileCount > floorLimits.MaximumMaterializedTiles)
+            { result.Reason = StructuralEditService.WorkloadReason; return result; }
+            var origin = Room(floor, path.Nodes[targetIndex]).Anchor;
+            var anchors = new List<TileCoordinate>();
+            // X then Y is TileCoordinate canonical order. Long loop endpoints avoid overflow.
+            for (long x = bounds.Minimum.X; x < (long)bounds.Minimum.X + bounds.Width; x++)
+                for (long y = bounds.Minimum.Y; y < (long)bounds.Minimum.Y + bounds.Height; y++)
+                {
+                    var anchor = new TileCoordinate((int)x, (int)y);
+                    if (anchor.Equals(origin)) continue;
+                    result.ExaminedAnchorCount++;
+                    request.Anchor = anchor;
+                    var preview = PreviewMovement(current, request, context.Production, context.Compatibility,
+                        context.Configuration, context.Limits.Canonical);
+                    if (preview.IsValid && context.Validate(preview.DetachedCandidate)) anchors.Add(anchor);
+                }
+            result.ValidAnchors = anchors.ToArray();
+            return result;
         }
 
         public static StructuralEditPreview PreviewReplacement(DetachedCanonicalSpatialSaveState current,
@@ -349,6 +392,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             sourceLocal = pairs[0].SourcePoint.Offset;
             destinationLocal = pairs[0].DestinationPoint.Offset;
             return true;
+        }
+
+        // A movement translates a suffix. Its unique net contribution is the difference
+        // between this room's displacement and its required predecessor's displacement.
+        // This telescoping basis eliminates experimentation and downstream consequences.
+        // It owns no prices and is bounded by the already validated canonical record count.
+        internal static string[] NormalizeMovementTargets(DetachedCanonicalSpatialSaveState before,
+            DetachedCanonicalSpatialSaveState after, IEnumerable<string> directedTargets)
+        {
+            var directed = new HashSet<string>(directedTargets, StringComparer.Ordinal);
+            var result = new List<string>();
+            foreach (var floor in before.Floors.OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
+            {
+                if (!floor.Layout.Rooms.Any(r => directed.Contains(r.RoomInstanceId))) continue;
+                if (!TryPath(floor, out var path)) return null;
+                var final = after.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId);
+                TileCoordinate priorDelta = default;
+                foreach (var node in path.Nodes.Skip(1).Take(path.Nodes.Length - 2))
+                {
+                    var oldRoom = Room(floor, node); var finalRoom = Room(final, node);
+                    if (finalRoom == null || finalRoom.RoomDefinitionId != oldRoom.RoomDefinitionId ||
+                        finalRoom.Orientation != oldRoom.Orientation) return null;
+                    TileCoordinate delta = Delta(oldRoom.Anchor, finalRoom.Anchor);
+                    if (!delta.Equals(priorDelta))
+                    {
+                        if (!directed.Contains(oldRoom.RoomInstanceId)) return null;
+                        result.Add(oldRoom.RoomInstanceId);
+                    }
+                    priorDelta = delta;
+                }
+                var oldTerminal = floor.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
+                var finalTerminal = final.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
+                if (!Delta(oldTerminal.Anchor, finalTerminal.Anchor).Equals(priorDelta)) return null;
+            }
+            // Pricing/investment order is canonical stable identity, independent of gesture order.
+            return result.OrderBy(value => value, StringComparer.Ordinal).ToArray();
         }
 
         private sealed class TileEndpoint

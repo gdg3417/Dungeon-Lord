@@ -1,0 +1,45 @@
+# Phase 7A5 implementation contract
+
+Owner UAT subsequently found missing legal-floor-space visibility and discoverable valid anchors. [The focused correction](owner-uat-floor-guidance-correction.md) adds a configured complete Edit grid/boundary and read-only PreviewMovement guidance. It changes presentation and actionable English copy only; the draft, replay, economics and publication contracts below remain intact.
+
+Starting baseline: `52c1eb00af241c4be9f8b117e96294a71dce82bb`, merged PR #226. Recommended configuration: GPT-6.1 Sol / High, Complex; the supplied policy recommendation was retained. No Astra delegation or model substitution was used.
+
+## Intent and presentation
+
+Room selection is presentation-only and stable by RoomInstanceId. Exact content occupancy takes precedence over an invalid attempted room footprint, then a valid movable room footprint; room ties use ordinal identity. Implicit compatibility containers and rooms outside the required movement route are not offered as room targets. Empty room tiles open the existing contextual sheet; Move then one anchor tap completes an intent. No drag, rotation or nearest-placement repair was added.
+
+The journal has explicit ContentReposition and RoomMovement discriminators with separate zero-or-one payload arrays. RoomMovement retains floor identity, room identity and exact anchor. Replay calls StructuralRenovationService.PreviewMovement. Valid candidates must also pass unchanged canonical and production occupancy validation. Invalid movement keeps the last valid projection and an independent presentation overlay containing affected identity, definition, orientation, requested anchor and authoritative stable reason. Invalid geometry never enters a canonical save object. Localization resolves the reason when presenting it.
+
+Every completed structural attempt is appended, including invalid attempts. A later movement of the same room replaces its unresolved overlay in the derived presentation, never its earlier journal records. Other rooms' unresolved attempts remain blocking. Content reposition continues against the valid projection. Repeated recovery reproduces the same command order, valid projection and invalid reasons. Discard changes only owned draft evidence.
+
+## Durable compatibility
+
+The expanded journal format is **3**, with material RuleIdentity. Content-only sessions continue writing the exact **format 2 / candidate-and-commit RecordVersion 1** protocol to preserve A4 byte budgets and compatibility. The first structural command upgrades the journal vocabulary to 3 and subsequent immutable candidate/commit records to **RecordVersion 2**. Version 2 records explicitly bind journal version and rule identity in addition to predecessor and candidate SHA-256. Historical records remain byte-for-byte unchanged. Recovery parses historical DTOs exactly, expands content payloads only in memory, accepts only a contiguous predecessor-complete chain, and permits only the explicit 2-to-3 transition. Downgrades, identity changes, holes, malformed records and unsupported versions fail closed. Candidate bytes alone remain non-authoritative.
+
+Evidence enumeration, aggregate evidence bytes, journal commands, JSON parsing and replay retain existing configured bounds. The store preflights the complete next prefix against the aggregate recovery-byte budget before mutation, so a known workload refusal leaves earlier acknowledged evidence recoverable and reports Failed rather than Unknown. No file timestamp/newest-file heuristic, rebase, merge or destructive history compaction exists. A4 pending/failed/unknown and post-commit deletion semantics remain intact.
+
+## Material rule identity
+
+SHA-256 covers a deterministic BinaryWriter-framed sequence of existing canonical input digests: production manifest and catalog; compatibility canonical bytes; sorted distinct configured placement OptionIds (the RunSimulationConfig input actually read by production spatial semantic validation); canonical occupancy configuration and its materialization limit; all raw JSON limits, canonical serialized limits, canonical record/tile limits, and whole-save candidate/recognized-copy/unknown-member limits. Production catalog includes room/floor/corridor geometry, sockets, connections, orientations and capacity/bounds rules. Language tables, localized copy, timestamps, object identities and economy prices are excluded. Economy configuration is intentionally recalculated at review and commit. The identity owns no configuration.
+
+Matching baseline and identity permit structural replay. Material drift returns the stable context-stale result before reinterpretation. Legacy content-only format 2 remains subject to its original strict semantic validation without retroactively requiring the structural identity. Canonical baseline drift retains its separate stale result.
+
+## Final structural economics
+
+Existing movement translates a deterministic required-route suffix. For each room, normalization computes its displacement from canonical start to final draft, then subtracts the displacement of its required predecessor (the entrance contribution is zero). A nonzero difference is an independent final suffix contribution and must name a room explicitly targeted in the journal. Equal adjacent displacement is a downstream consequence. The Completion Terminal must carry the final suffix displacement. Paid target IDs are sorted ordinally before pricing.
+
+This telescoping basis is unique for the existing suffix movement model: experimentation cancels, return-to-origin contributes zero, and equivalent final geometry has the same basis regardless of equivalent entry order. Two independently moved rooms with different adjacent displacements receive two configured movement charges. A room translated only by an upstream move receives no separate charge or investment. A deliberate counter-move may remain a paid independent contribution even when that room's absolute final anchor equals its original anchor, because it counters a changed upstream suffix. This is final structural intent, not a fee per changed world coordinate.
+
+Normalization lives beside the existing renovation path authority and owns no tuning. StructuralEconomyService delegates each paid target to its existing configured formula/rounding path, sums those costs, and adds the exact cost only to that target's existing RenovationMana. No acquisition fee, second ledger or parallel pricing formula was added. An unaffordable valid draft remains recoverable and correctable. Invalid drafts expose no economic candidate. Preview shows configured cost, current/resulting mana, affordability and final room/connection/terminal consequences. Wallet ticks refresh informative balances without replay/validation; discrete edit/recovery/review boundaries recompute cost.
+
+## Atomic publication and unaffected authorities
+
+Commit requires a complete acknowledged prefix, re-reads durable predecessor evidence, verifies current canonical baseline and current material context, replays strict renovation/production validation, normalizes final targets, and prices against the current owned investment and current runtime ManaReserve. CaptureWithMana creates the recognized-state snapshot; PrepareLiveReplacement supplies final geometry and investment while preserving corridor content and branch knowledge. The existing PrepareAndPersist complete-save validation, atomic persistence, durable readback and runtime/session publication path is the sole writer. Failure preserves canonical geometry, wallet and investment together and leaves the draft for retry/correction. Successful publication alone triggers qualified draft cleanup.
+
+Drafts never reserve/spend mana, mutate custody/passive state/lifecycle, or feed simulation. Existing run-start snapshots remain immutable; subsequent runs use committed geometry. Existing FloorKnowledgeApplicability fingerprints naturally reject knowledge after material committed movement; drafting, invalid intent and discard do not affect applicability. Activation-only behavior is unchanged.
+
+Normal-player Bootstrap room movement is retired after production scene smoke parity; movement remains only under the existing development diagnostics policy. Replacement, deletion, construction, lifecycle, content, Research and Run capabilities remain. New copy is owned by the existing Bootstrap string table. No localization package was added.
+
+Writable canonical schema remains **13**. No canonical migration, investment-schema change, packages or owner ProjectSettings change. Non-goals remain construction/replacement/deletion/rotation production UI, corridor/branch authoring, cross-room content moves, lifecycle/acquisition/custody production UI, Research/Analysis/More, run visuals, tactical/intraroom changes, legacy undo and broad Bootstrap retirement.
+
+Qualification commands, intermediate failures, exact skips and build artifacts are recorded in [qualification](qualification.md). Owner usability is outstanding; follow [owner UAT](owner-uat.md).
