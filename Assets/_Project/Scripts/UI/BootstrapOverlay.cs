@@ -122,6 +122,8 @@ namespace DungeonBuilder.M0
         public string LifecycleFeedback => _lifecycleFeedback;
         public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
         public bool StructuralRenovationControlsAvailable => ResolveRenovationRoomIds().Length != 0;
+        public bool StructuralMovementControlsAvailable => StructuralRenovationControlsAvailable &&
+            DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true);
         public bool OptionalBranchControlsAvailable => ResolveBranchOriginNodeIds().Length != 0;
         public string SelectedRenovationRoomInstanceId => _selectedRenovationRoomInstanceId;
 
@@ -261,6 +263,12 @@ namespace DungeonBuilder.M0
 
         public StructuralEditPreview PreviewStructuralMovement()
         {
+            if (!StructuralMovementControlsAvailable)
+            {
+                _structuralFeedback = GetLocalizedString("ui.dungeon.room_move_retired");
+                return StructuralRenovationService.InvalidMovement("ui.dungeon.room_move_retired", new StructuralMovementRequest {
+                    FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId, RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedRenovationAnchor });
+            }
             StructuralEditPreview preview = _root?.PreviewStructuralMovement(new StructuralMovementRequest
             { FloorInstanceId = _root?.SelectedCanonicalFloorInstanceId, RoomInstanceId = _selectedRenovationRoomInstanceId, Anchor = _selectedRenovationAnchor });
             _structuralFeedback = BuildRenovationPreviewPresentation(preview); return preview;
@@ -276,6 +284,8 @@ namespace DungeonBuilder.M0
 
         public DetachedCanonicalWriteResult CommitStructuralRenovation()
         {
+            if (_root?.StructuralRenovationPreview?.Operation == StructuralEditOperation.Movement && !StructuralMovementControlsAvailable)
+            { _structuralFeedback = GetLocalizedString("ui.dungeon.room_move_retired"); return null; }
             if (_root?.StructuralRenovationPreview == null || !_root.StructuralRenovationPreview.IsValid)
             { _structuralFeedback = LocalizeStructuralReason(_root?.StructuralConstructionReasonKey); return null; }
             DetachedCanonicalWriteResult result = _root.CommitStructuralRenovation();
@@ -2362,21 +2372,24 @@ namespace DungeonBuilder.M0
                 Array.IndexOf(ResolveRenovationRoomIds(), _selectedRenovationRoomInstanceId) + 1), label, labelHeight);
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.target.next"), button, buttonHeight))
                 CycleRenovationTarget();
-            GUILayout.Label(RenovationAnchorDisplay, label, labelHeight);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
-                AdjustRenovationAnchor(-1, 0);
-            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
-                AdjustRenovationAnchor(1, 0);
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
-                AdjustRenovationAnchor(0, -1);
-            if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
-                AdjustRenovationAnchor(0, 1);
-            GUILayout.EndHorizontal();
-            if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.move.preview.action"), button, buttonHeight))
-                PreviewStructuralMovement();
+            if (StructuralMovementControlsAvailable)
+            {
+                GUILayout.Label(RenovationAnchorDisplay, label, labelHeight);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.decrease"), button, buttonHeight))
+                    AdjustRenovationAnchor(-1, 0);
+                if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.x.increase"), button, buttonHeight))
+                    AdjustRenovationAnchor(1, 0);
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.decrease"), button, buttonHeight))
+                    AdjustRenovationAnchor(0, -1);
+                if (GUILayout.Button(GetLocalizedString("ui.structural.anchor.y.increase"), button, buttonHeight))
+                    AdjustRenovationAnchor(0, 1);
+                GUILayout.EndHorizontal();
+                if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.move.preview.action"), button, buttonHeight))
+                    PreviewStructuralMovement();
+            }
             GUILayout.Label(string.Format(CultureInfo.InvariantCulture,
                 GetLocalizedString("ui.structural.renovation.replacement.format"),
                 ResolveStructuralRoomDisplayName(ResolveSelectedStructuralRoom())), label, labelHeight);
@@ -2385,7 +2398,8 @@ namespace DungeonBuilder.M0
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.replace.preview.action"), button, buttonHeight))
                 PreviewStructuralReplacement();
             bool enabled = GUI.enabled;
-            GUI.enabled = enabled && _root.StructuralRenovationPreview?.IsValid == true;
+            GUI.enabled = enabled && _root.StructuralRenovationPreview?.IsValid == true &&
+                (_root.StructuralRenovationPreview.Operation != StructuralEditOperation.Movement || StructuralMovementControlsAvailable);
             if (GUILayout.Button(GetLocalizedString("ui.structural.renovation.commit.action"), button, buttonHeight))
                 CommitStructuralRenovation();
             GUI.enabled = enabled;

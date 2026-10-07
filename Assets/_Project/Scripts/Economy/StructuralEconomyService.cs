@@ -28,6 +28,39 @@ namespace DungeonBuilder.M0.Economy
         public const string InsufficientReason = "structural.economy.insufficient_mana";
         public const string UndoUnavailableReason = "structural.economy.undo_unavailable";
 
+        // Normalization owns geometry/intent only. All configured factors, formula rounding
+        // and investment allocation remain in this existing economic authority.
+        internal static StructuralEconomyPreview PreviewFinalMovement(DetachedCanonicalSpatialSaveState current,
+            DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
+            string[] normalizedTargets, double balance, StructuralEconomySnapshot config,
+            IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            var result = new StructuralEconomyPreview { Operation = StructuralEditOperation.Movement,
+                CurrentMana = balance, ResultingMana = balance, Reason = InvalidReason };
+            if (normalizedTargets == null || current == null || candidate == null ||
+                !StructuralEconomySnapshot.Nonnegative(balance) || !StructuralInvestment.Valid(investment, current, int.MaxValue) ||
+                !StructuralInvestment.Valid(investment, candidate, int.MaxValue) ||
+                !normalizedTargets.SequenceEqual(normalizedTargets.Distinct(StringComparer.Ordinal)
+                    .OrderBy(value => value, StringComparer.Ordinal))) return result;
+            var next = investment.Select(value => value.Copy()).ToArray();
+            foreach (string target in normalizedTargets)
+            {
+                // Evaluate each independent target with the existing configured formula.
+                // Resolve price independently of affordability, including costs above capacity.
+                var priced = Prepare(current, candidate, investment, 0,
+                    config, StructuralEditOperation.Movement, target, modifiers, true);
+                if (!priced.IsAffordable) return result;
+                result.BaseCost += priced.BaseCost; result.Cost += priced.Cost;
+                var record = next.Single(value => value.StructureId == target);
+                record.RenovationMana += priced.Cost;
+            }
+            result.ResultingMana = balance - result.Cost;
+            if (!StructuralEconomySnapshot.Nonnegative(result.Cost)) return result;
+            if (balance < result.Cost) { result.Reason = InsufficientReason; return result; }
+            if (balance - result.ResultingMana != result.Cost || !StructuralInvestment.Valid(next, candidate, int.MaxValue)) return result;
+            result.Investment = next; result.Reason = null; return result;
+        }
+
         public static StructuralEconomyPreview Preview(StructuralEditPreview spatial,
             DetachedCanonicalSpatialSaveState current, StructuralInvestmentRecord[] investment,
             double balance, StructuralEconomySnapshot config, IReadOnlyList<FormulaModifier> modifiers = null)
@@ -62,7 +95,7 @@ namespace DungeonBuilder.M0.Economy
         internal static StructuralEconomyPreview Prepare(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
             double balance, StructuralEconomySnapshot config, StructuralEditOperation operation,
-            string target, IReadOnlyList<FormulaModifier> modifiers = null)
+            string target, IReadOnlyList<FormulaModifier> modifiers = null, bool priceOnly = false)
         {
             var result = new StructuralEconomyPreview { Operation = operation, CurrentMana = balance,
                 ResultingMana = balance, Reason = InvalidReason };
@@ -171,6 +204,7 @@ namespace DungeonBuilder.M0.Economy
                     if (!StructuralEconomySnapshot.Nonnegative(result.BaseCost)) return result;
                     result.Cost = new FormulaEngine().Evaluate(new FormulaInput(result.BaseCost, modifiers)).Value;
                     if (!StructuralEconomySnapshot.Nonnegative(result.Cost)) return result;
+                    if (priceOnly) { result.Reason = null; return result; }
                     result.ResultingMana = balance - result.Cost;
                     if (balance < result.Cost) { result.Reason = InsufficientReason; return result; }
                     // Reject balances too large to represent the exact configured charge in the existing double wallet.

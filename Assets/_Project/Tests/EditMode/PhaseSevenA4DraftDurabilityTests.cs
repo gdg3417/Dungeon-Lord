@@ -208,7 +208,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var draft = TransactionalDungeonDraft.Create(f.State, Context(f), store);
             Move(draft, f, 1); Assert.That(draft.FlushNext(), Is.True); Move(draft, f, 2); Assert.That(draft.FlushNext(), Is.True);
             string commitPath = Entry(f, 2, "commit");
-            var commit = JsonUtility.FromJson<DungeonDraftCommitRecord>(Encoding.UTF8.GetString(f.FileSystem.ReadAllBytes(commitPath)));
+            // Content-only evidence remains the exact A4 record shape. Preserve that shape
+            // so these corruptions test their intended binding, not extra unknown fields.
+            var commit = DungeonDraftFormat.Exact<DungeonDraftV1Commit>(f.FileSystem.ReadAllBytes(commitPath));
             switch (corruption)
             {
                 case "missing-predecessor-commit": f.FileSystem.RemoveSeededEvidence(Entry(f, 1, "commit")); break;
@@ -217,7 +219,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 case "wrong-hash": commit.CandidateHash = new string('f', 64); break;
                 case "wrong-identity": commit.DraftId = new string('a', 32); break;
                 case "malformed-commit": f.FileSystem.Seed(commitPath, Encoding.UTF8.GetBytes("{")); break;
-                case "duplicate-field": f.FileSystem.Seed(commitPath, Encoding.UTF8.GetBytes(JsonUtility.ToJson(commit).Replace("\"Version\":1", "\"Version\":1,\"Version\":1"))); break;
+                case "duplicate-field": f.FileSystem.Seed(commitPath, Encoding.UTF8.GetBytes(JsonUtility.ToJson(commit).Replace("\"Version\":" + commit.Version, "\"Version\":" + commit.Version + ",\"Version\":" + commit.Version))); break;
                 case "conflicting-session": f.FileSystem.Seed(commitPath.Replace(commit.DraftId, new string('b', 32)), f.FileSystem.ReadAllBytes(commitPath)); break;
             }
             if (corruption.StartsWith("wrong-")) f.FileSystem.Seed(commitPath, Encoding.UTF8.GetBytes(JsonUtility.ToJson(commit)));

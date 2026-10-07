@@ -1,0 +1,50 @@
+# Phase 7A5 owner report
+
+Branch: `codex/phase-7a5-transactional-room-movement-economics`. Parent/starting baseline: `52c1eb00af241c4be9f8b117e96294a71dce82bb`. The final HEAD, commit list and open PR identity are reported with delivery; the exact PR body is retained in [proposed PR description](proposed-pr-description.md). The PR must remain unmerged. Main is checked again before delivery.
+
+## Repository and preserved owner state
+
+The starting gate found the owner on the A4 branch at `7dc72528ae01188e38b1bffaca1612cdc105b984`, with no staged changes and a tracked tree identical to the required merge baseline. Local main and origin/main were exactly the required baseline. A dedicated A5 branch was created from that commit without resetting/stashing/cleaning the owner tree.
+
+Two unrelated files are preserved and excluded: modified `Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset`, and untracked `Assets/_Project/Tests/ProductionDungeon.meta`. Exact hashes and whitespace-check treatment are in [qualification](qualification.md). They are not copied into validation, staged, committed or normalized.
+
+## Changed responsibilities
+
+- Draft protocol/presentation: TransactionalDungeonDraft, FileDungeonDraftStore, new DungeonDraftFormat and DungeonDraftRuleIdentity (with new script metas). Explicit movement payloads, invalid overlays, exact legacy DTOs, context identity, ordered recovery and aggregate-byte preflight.
+- Structural/economic authority: StructuralRenovationService retains PreviewMovement and adds the unique final suffix normalization; StructuralEconomyService prices normalized targets through its existing formula path. TransactionalDungeonDraftCommit and SaveService connect current resources/investment to the existing complete-save publication path.
+- Production UI: ProductionDungeonController, DungeonFloorWorldView and Dungeon.uxml add room selection, tap targeting, invalid footprint/reason, correction, economic review and final consequences. BootstrapOverlay retires only normal-player movement. Bootstrap English string table adds five keys and updates the whole-dungeon review copy; existing reason/economic/localization ownership remains.
+- Qualification: new A5 domain fixture and Editor wrapper/metas; A4 durability/compatibility fixtures retain their assertions and historical corruption shape; actual production-scene tests and genuine PlayMode forwarding add four A5 flows. Evidence, exact inventories, qualification history and owner UAT are scoped to this packet.
+
+## Exact implementation
+
+Expanded journal format **3**, candidate/commit **RecordVersion 2**. Content-only sessions retain exact A4 journal **2**, records **1**. The first structural intent upgrades explicitly; existing predecessor bytes stay immutable. Exact historical parsing, candidate/predecessor SHA-256 binding, acknowledged complete prefix, bounded discovery and unknown outcomes remain required. A known aggregate-budget refusal occurs before mutation and leaves the previous acknowledged prefix recoverable.
+
+Invalid movement stores an intent with exact FloorInstanceId/RoomInstanceId/anchor in the append-only journal. Replay derives a separate non-authoritative overlay with definition/orientation/attempted footprint and authoritative stable reason, while keeping the last valid spatial projection. A later same-room valid intent supersedes only the derived unresolved overlay. Other invalid room/floor state remains blocking. Localized text is resolved at presentation, never persisted as authority. Content-first, then invalid-room, then valid-room hit precedence is explicit; room ties are ordinal identity.
+
+Rule identity hashes existing canonical production manifest/catalog, compatibility bytes, sorted configured placement OptionIds, validated occupancy bytes/tile limit, all raw/serialized/spatial/whole-save limits. Catalog includes material geometry/connections/sockets/orientations/capacity/bounds. Localization and economic prices are excluded. Qualified identity drift is incompatible, canonical baseline drift is stale; unsupported/unqualifiable evidence remains fail-closed under the existing bounded recovery contract. Legacy v2 retains its original semantic validation without a retroactive structural identity requirement.
+
+Final economics uses canonical start to valid final draft. Each room's displacement minus its required predecessor's displacement is its independent final suffix contribution. Only nonzero, explicitly player-directed contributions are paid; ordinal target identity fixes pricing/investment order. Equal downstream displacement is a consequence, not a separate renovation. Experimentation cancels; overall canonical-origin return costs zero. Multiple independent contributions delegate separately to configured StructuralEconomyService formulas and existing rounding, then sum. The rule is explained and tested in [implementation](implementation.md), including deliberate counter-movement relative to a changed upstream suffix.
+
+Current canonical investment is copied, then only each paid target receives its exact final cost in RenovationMana. No intermediate investment, acquisition charge or second ledger exists. Valid unaffordable drafts remain editable/recoverable. Save recalculates current configured prices, wallet and ledger; drafting never reserves or spends mana.
+
+Commit uses durable rerecovery, strict canonical/production validation, current owned session/disk freshness and material context, final normalization and affordability. CaptureWithMana → PrepareLiveReplacement → existing PrepareAndPersist complete-save validation/atomic persistence/readback → session/runtime publication publishes final geometry, exact investment and wallet together. Failure publishes none; qualified draft cleanup follows success. Existing recognized/corridor/knowledge state is preserved by the established snapshot/session path.
+
+Draft/invalid/discard state never affects active runs, passive state, custody or floor lifecycle. Existing immutable start snapshots persist through successful commit; subsequent runs use committed geometry. Existing material floor-knowledge fingerprints naturally make prior knowledge inapplicable after committed movement. No explicit invalidate flag was added.
+
+Bootstrap movement is available only under the existing development diagnostics policy; replacement, deletion, construction, lifecycle, content acquisition/custody, Research and Run are retained. No drag or room rotation was added. Validation/replay/normalization/hashing occur at discrete boundaries; wallet ticks update informative balances without replaying structure.
+
+## Save and qualification
+
+Writable schema **13**, no migrations, packages or owner ProjectSettings changes, no investment-schema changes. Existing canonical schema-13 saves remain compatible. Format-3 drafts need the new reader; A4 v2 evidence remains explicitly recoverable.
+
+Final automated results: **A4/A5 matrix 125/125**, **A5 domain 45/45**, **A4 durability 29/29**, **A4 domain 37/37**, **production scene 14/14**, **structural renovation 77/77**, **structural economy 77/77**, **A2 positional 13/13**, **A3 intraroom 36/36**, **save/session/complete-save 160/160**, **floor knowledge fixtures 31/31**. Localization/long-text and Bootstrap retirement cases pass. Final full **EditMode 1,534 total / 1,533 passed / 0 failed / 1 skipped**, **PlayMode 2,977 total / 2,967 passed / 0 failed / 10 skipped**. Exact skip sets match A4; no new/changed skips. Explicit final **production gates 285/285**: build 65, export 112, recovery 57, loading 37, actual scene 14.
+
+Required Windows Development Build **Succeeded**, Unity 6000.3.2f1, StandaloneWindows64, Development=true, Bootstrap-only, **0 errors / 1 unchanged Unity Cloud native-symbol credential warning**, **171,651,663 report bytes**, **171,891,223 complete retained folder bytes**. Player: `Builds/Phase7A5-2026-10-06/Windows/Dungeon Lord.exe`; report: `TestResults/phase7a5-windows-build-report.json`; log: `Temp/phase7a5-windows-development-build.log`. Other disclosed log diagnostics are the empty Tests 1.asmdef, licensing token refresh followed by successful entitlement/license resolution, and Mono/debugger shutdown messages. None were suppressed. Isolated Unity-generated settings were inspected/restored before build and after retaining the player; owner settings remain unchanged.
+
+Final XML: `TestResults/phase7a5-final-editmode.xml`, `phase7a5-final-playmode.xml`, `phase7a5-final-production-gates.xml`. Focused matrix: `TestResults/phase7a5-final-bounded-matrix.xml`; explicit save integration: `TestResults/phase7a5-canonical-save-integration.xml`. All 23 intentional source/asset/meta files match the qualified checkout byte-for-byte (`TestResults/phase7a5-qualified-source-hashes.json`). Intentional/staged/commit diff checks pass; the owner TMP's six pre-existing whitespace findings remain excluded.
+
+Every focused/full command, total/pass/fail/skip count and artifact is in [qualification](qualification.md). That report retains failed intermediate attempts and root causes; [test/localization inventory](test-and-localization-inventory.md) includes exact A5 names and unchanged skip sets. Owner UAT has **not** passed. Automated results do not prove usability, fun, native mobile qualification or low-end performance.
+
+Follow the exact [35-step owner UAT sequence](owner-uat.md) with the reviewed commit and complete qualified Windows player. A prepared native movable room with representative monster/trap/loot is required; a reset is optional, and owner saves must be backed up. External review and that UAT remain review/acceptance work, not automated blockers hidden by skips.
+
+Non-goals remain construction/replacement/deletion/rotation/corridor/branch production authoring, Floor 2 construction or lifecycle production UI, acquisition/cross-room/custody production UI, Research/Analysis/More, run visualization/tactical/intraroom changes, new tuning, canonical migration, legacy editor undo, packages, unrelated polish and broad Bootstrap retirement.

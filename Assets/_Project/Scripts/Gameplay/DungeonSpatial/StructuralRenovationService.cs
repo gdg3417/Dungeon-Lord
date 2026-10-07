@@ -5,6 +5,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    [Serializable]
     public sealed class StructuralMovementRequest
     {
         public string FloorInstanceId;
@@ -349,6 +350,42 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             sourceLocal = pairs[0].SourcePoint.Offset;
             destinationLocal = pairs[0].DestinationPoint.Offset;
             return true;
+        }
+
+        // A movement translates a suffix. Its unique net contribution is the difference
+        // between this room's displacement and its required predecessor's displacement.
+        // This telescoping basis eliminates experimentation and downstream consequences.
+        // It owns no prices and is bounded by the already validated canonical record count.
+        internal static string[] NormalizeMovementTargets(DetachedCanonicalSpatialSaveState before,
+            DetachedCanonicalSpatialSaveState after, IEnumerable<string> directedTargets)
+        {
+            var directed = new HashSet<string>(directedTargets, StringComparer.Ordinal);
+            var result = new List<string>();
+            foreach (var floor in before.Floors.OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
+            {
+                if (!floor.Layout.Rooms.Any(r => directed.Contains(r.RoomInstanceId))) continue;
+                if (!TryPath(floor, out var path)) return null;
+                var final = after.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId);
+                TileCoordinate priorDelta = default;
+                foreach (var node in path.Nodes.Skip(1).Take(path.Nodes.Length - 2))
+                {
+                    var oldRoom = Room(floor, node); var finalRoom = Room(final, node);
+                    if (finalRoom == null || finalRoom.RoomDefinitionId != oldRoom.RoomDefinitionId ||
+                        finalRoom.Orientation != oldRoom.Orientation) return null;
+                    TileCoordinate delta = Delta(oldRoom.Anchor, finalRoom.Anchor);
+                    if (!delta.Equals(priorDelta))
+                    {
+                        if (!directed.Contains(oldRoom.RoomInstanceId)) return null;
+                        result.Add(oldRoom.RoomInstanceId);
+                    }
+                    priorDelta = delta;
+                }
+                var oldTerminal = floor.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
+                var finalTerminal = final.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
+                if (!Delta(oldTerminal.Anchor, finalTerminal.Anchor).Equals(priorDelta)) return null;
+            }
+            // Pricing/investment order is canonical stable identity, independent of gesture order.
+            return result.OrderBy(value => value, StringComparer.Ordinal).ToArray();
         }
 
         private sealed class TileEndpoint

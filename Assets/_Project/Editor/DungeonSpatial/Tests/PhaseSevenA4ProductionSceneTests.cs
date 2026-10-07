@@ -169,6 +169,121 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments[0].RoomLocalPosition,
                 Is.EqualTo(new TileCoordinate(1, 1)));
         }
+
+        [UnityTest]
+        public IEnumerator PhaseSevenA5GraphicalRoomInvalidCorrectionEconomyAndAtomicSave()
+        {
+            var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
+            var content = JsonUtility.ToJson(floor.RoomContents);
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            controller.EnterEdit();
+            // Content occupancy has explicit precedence over its containing room.
+            controller.TapWorld(room.Anchor); Assert.That(controller.SelectedRoomInstanceId, Is.Null);
+            controller.TapWorld(new TileCoordinate(room.Anchor.X + 1, room.Anchor.Y + 1));
+            Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(room.RoomInstanceId));
+            Assert.That(ui.Q<Label>("selectedName").text, Does.Contain("Room"));
+            string roomName = root.ProductionSpatialContent.Languages.Single(t => t.language == "en").entries.Single(e =>
+                e.key == root.ProductionSpatialContent.Catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId).LocalizationKey).text;
+            Assert.That(ui.Q<Label>("selectedName").text, Does.Contain(roomName));
+            controller.BeginMove(); Assert.That(controller.IsMoving, Is.True);
+            controller.TapWorld(new TileCoordinate(0, 0)); yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1)); Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.GreaterThan(0));
+            Assert.That(ui.Q<Label>("status").text, Does.Contain(root.Content.GetString(StructuralEditService.FixedOverlapReason, null)));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.False); Assert.That(ui.Q("economics").style.display.value, Is.EqualTo(DisplayStyle.None));
+            AssertCanonicalUnchanged(before, mana);
+            controller.TapWorld(new TileCoordinate(1, 1));
+            Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(room.RoomInstanceId));
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.GreaterThan(0));
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(20, 20)); yield return null;
+            Assert.That(controller.Draft.StructuralReason, Is.EqualTo(StructuralEditService.OutOfBoundsReason));
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.GreaterThan(0)); Assert.That(controller.World.Bounds.Contains(new Vector2(20, 20)), Is.True);
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(room.Anchor.X, room.Anchor.Y + 1));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.False); yield return null;
+            Assert.That(controller.Draft.IsStructurallyValid, Is.True); Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.Zero); Assert.That(ui.Q("economics").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            var price = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft); Assert.That(price.Cost, Is.GreaterThan(0));
+            Assert.That(ui.Q<Label>("economics").text, Does.Contain(StructuralEconomyPresenter.FormatTransactionAmount(price.Cost)));
+            AssertCanonicalUnchanged(before, mana);
+            var final = controller.Draft.ReadModel.Floors[0];
+            Assert.That(JsonUtility.ToJson(final.RoomContents), Is.EqualTo(content));
+            Assert.That(controller.Commit(), Is.True); yield return null;
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - price.Cost));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0].Anchor, Is.EqualTo(final.Layout.Rooms[0].Anchor));
+            Assert.That(controller.World.ActiveEntityCount, Is.EqualTo(floor.RoomContents.Assignments.Length));
+            Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator PhaseSevenA5InvalidRecoveryRestoresFootprintReasonAndDiscard()
+        {
+            var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            controller.EnterEdit(); controller.TapWorld(new TileCoordinate(room.Anchor.X + 1, room.Anchor.Y + 1)); controller.BeginMove();
+            controller.TapWorld(new TileCoordinate(0, 0)); yield return null;
+            yield return RestartShell(); var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.IsEditing, Is.True); Assert.That(controller.Draft.InvalidMovements.Single().RequestedAnchor, Is.EqualTo(new TileCoordinate(0, 0)));
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.GreaterThan(0)); Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+            Assert.That(ui.Q<Label>("status").text, Does.Contain(root.Content.GetString(StructuralEditService.FixedOverlapReason, null)));
+            AssertCanonicalUnchanged(before, mana); Assert.That(controller.Discard(), Is.True); yield return null;
+            Assert.That(controller.World.InvalidFootprintTileCount, Is.Zero); AssertCanonicalUnchanged(before, mana);
+        }
+
+        [UnityTest]
+        public IEnumerator PhaseSevenA5ExperimentationOriginRecoveryAndInsufficientManaKeepDraft()
+        {
+            var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath);
+            var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0]; double mana = root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); controller.TapWorld(new TileCoordinate(room.Anchor.X + 1, room.Anchor.Y + 1)); controller.BeginMove();
+            controller.TapWorld(new TileCoordinate(0, 3)); yield return null;
+            double cost = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost;
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(0, 4)); yield return null;
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost, Is.EqualTo(cost));
+            controller.BeginMove(); controller.TapWorld(room.Anchor); yield return null;
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost, Is.Zero); Assert.That(controller.Draft.HasChanges, Is.False);
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(0, 3)); yield return null;
+            yield return RestartShell(); var ui = controller.GetComponent<UIDocument>().rootVisualElement; Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.Draft.ReadModel.Floors[0].Layout.Rooms[0].Anchor, Is.EqualTo(new TileCoordinate(0, 3))); AssertCanonicalUnchanged(before, mana);
+            root.Save.structureRuntime.ManaReserve = 0;
+            Assert.That(controller.Commit(), Is.False); Assert.That(controller.Draft.CanSave, Is.True);
+            Assert.That(ui.Q<Label>("economics").text, Does.Contain("Current mana: 0."));
+            Assert.That(ui.Q<Label>("status").text, Does.Contain(root.Content.GetString(DungeonBuilder.M0.Economy.StructuralEconomyService.InsufficientReason, null)));
+            CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(controller.Discard(), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator PhaseSevenA5LongLocalizedRoomSheetInvalidReasonAndEconomicsRemainReadable()
+        {
+            var root = GameRoot.Instance;
+            var strings = (System.Collections.Generic.Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.Content);
+            strings["ui.dungeon.room_selected"] = "An expanded localized room description for the selected {0}, numbered {1}, with additional explanatory words";
+            strings["ui.structural.economy.cost"] = "Expanded localized movement pricing description: configured base {0} and final structural cost {1}";
+            strings["ui.dungeon.room_movement_consequences"] = "Expanded final movement explanation: {0} rooms moved together; {1} route connections updated; {2} Completion Terminals moved. Each content keeps its exact room-local arrangement.";
+            strings[StructuralEditService.FixedOverlapReason] = "An expanded localized explanation of the requested room overlapping an existing fixed structure. Choose another anchor to correct this draft.";
+            controller.SetTextSize(DungeonTextSize.Large); controller.EnterEdit(); controller.TapWorld(new TileCoordinate(1, 3));
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q<Label>("selectedName").text.Length, Is.GreaterThan(80));
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(0, 0)); yield return null;
+            controller.TapWorld(new TileCoordinate(1, 1));
+            for (int i = 0; i < 8; i++) yield return null;
+            Assert.That(ui.Q<Label>("status").worldBound.height, Is.GreaterThan(controller.presentationPolicy.LargeText));
+            Assert.That(ui.Q<Button>("move").worldBound.height, Is.GreaterThan(0));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a5-invalid-long-text.png");
+            yield return null; yield return null;
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(0, 3)); yield return null;
+            for (int i = 0; i < 8; i++) yield return null;
+            Assert.That(ui.Q<Label>("economics").text, Does.Contain("Expanded localized movement"));
+            Assert.That(ui.Q<Label>("economics").text, Does.Contain("Expanded final movement"));
+            Assert.That(ui.Q<Label>("economics").worldBound.height, Is.GreaterThan(controller.presentationPolicy.LargeText));
+            Assert.That(ui.Q<Button>("save").worldBound.height, Is.GreaterThan(0));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a5-valid-long-text.png");
+            yield return null; yield return null;
+            Assert.That(controller.Discard(), Is.True);
+        }
         [UnityTest]
         public IEnumerator RepresentativeLayoutsKeepChromeInsideSafeRootAndCaptureEvidence()
         {

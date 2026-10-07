@@ -37,7 +37,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
             return f.Rebase(placed.State);
         }
-        internal static DungeonDraftContext Context(Fixture f) => new DungeonDraftContext(f.Production, f.Configuration, f.Occupancy, f.Profile);
+        internal static DungeonDraftContext Context(Fixture f) => new DungeonDraftContext(f.Production, f.Configuration, f.Occupancy, f.Profile, f.Compatibility);
         internal static bool Move(TransactionalDungeonDraft draft, Fixture f, int x, int y) => draft.Move(
             f.State.Floors[0].FloorInstanceId, f.State.Floors[0].RoomContents.Assignments[0].RoomInstanceId,
             f.State.Floors[0].RoomContents.Assignments[0].AssignmentId, new TileCoordinate(x, y));
@@ -273,9 +273,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Content(); var store = new Store(); var draft = TransactionalDungeonDraft.Create(f.State, Context(f), store);
             Move(draft, f, 1, 1); draft.FlushNext(); string json = Encoding.UTF8.GetString(store.Read());
+            int format = DungeonDraftFormat.Parse(store.Read()).FormatVersion;
             byte[] bytes = kind == "oversized" ? new byte[f.Profile.Raw.MaximumInputBytes + 1] : Encoding.UTF8.GetBytes(
-                kind == "version" ? json.Replace("\"FormatVersion\":2", "\"FormatVersion\":3") :
-                kind == "duplicate" ? json.Replace("\"FormatVersion\":2", "\"FormatVersion\":2,\"FormatVersion\":2") :
+                kind == "version" ? json.Replace("\"FormatVersion\":" + format, "\"FormatVersion\":" + (TransactionalDungeonDraft.CurrentFormatVersion + 1)) :
+                kind == "duplicate" ? json.Replace("\"FormatVersion\":" + format, "\"FormatVersion\":" + format + ",\"FormatVersion\":" + format) :
                 kind == "sequence" ? json.Replace("\"Sequence\":1", "\"Sequence\":2") :
                 kind == "target" ? json.Replace("\"X\":1", "\"X\":99") : "{");
             Assert.That(TransactionalDungeonDraft.Recover(bytes, f.State, Context(f), store, out _), Is.Null);

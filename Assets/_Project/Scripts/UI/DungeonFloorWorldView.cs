@@ -10,7 +10,10 @@ namespace DungeonBuilder.M0
     /// <summary>Presentation only. Tilemaps and sprite views never supply placement or simulation state.</summary>
     public sealed class DungeonFloorWorldView : MonoBehaviour
     {
-        private Tilemap rooms, fixedStructures, corridors, grid;
+        private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom;
+        private DungeonDraftInvalidMovement[] invalidIntents = Array.Empty<DungeonDraftInvalidMovement>();
+        private int maximumTiles;
+        public int InvalidFootprintTileCount { get; private set; }
         private readonly List<SpriteRenderer> pool = new List<SpriteRenderer>();
         private readonly List<RoomContentAssignment> identities = new List<RoomContentAssignment>();
         private SavedSpatialFloor floor;
@@ -19,6 +22,7 @@ namespace DungeonBuilder.M0
         private RoomContentSpatialOccupancySnapshot occupancy;
         private Sprite sprite;
         private readonly List<Tile> ownedTiles = new List<Tile>();
+        private Tile roomSelectionTile, invalidIntentTile;
         private SpriteRenderer highlight;
         public Rect Bounds { get; private set; }
         public int ActiveEntityCount => identities.Count;
@@ -34,6 +38,7 @@ namespace DungeonBuilder.M0
             gameObject.AddComponent<Grid>();
             rooms = Layer("Rooms", 0); fixedStructures = Layer("Fixed", 0);
             corridors = Layer("Corridors", 0); grid = Layer("EditorGrid", -1);
+            invalidRooms = Layer("InvalidRoomIntents", 1); selectedRoom = Layer("RoomSelection", 1);
             highlight = Entity("Selection", 3);
             ClearPreview();
         }
@@ -61,11 +66,13 @@ namespace DungeonBuilder.M0
             RoomContentSpatialOccupancySnapshot occupancy, int maximumTiles, bool edit)
         {
             floor = selected; this.production = production; this.occupancy = occupancy;
+            this.maximumTiles = maximumTiles; invalidIntents = Array.Empty<DungeonDraftInvalidMovement>(); invalidRooms.ClearAllTiles(); InvalidFootprintTileCount = 0;
             rooms.ClearAllTiles(); fixedStructures.ClearAllTiles(); corridors.ClearAllTiles(); grid.ClearAllTiles();
             foreach (Tile tile in ownedTiles) Destroy(tile); ownedTiles.Clear(); identities.Clear();
             ClearPreview();
             foreach (var view in pool) view.gameObject.SetActive(false);
             if (selected == null) { Bounds = new Rect(0, 0, 1, 1); return; }
+            roomSelectionTile = Tile(policy.ValidColor, policy.TileSize); invalidIntentTile = Tile(policy.InvalidColor, policy.TileSize);
             var limits = new SpatialValidationWorkloadLimits(maximumTiles);
             var visible = new HashSet<TileCoordinate>();
             Tile roomTile = Tile(policy.RoomColor, policy.TileSize);
@@ -121,6 +128,60 @@ namespace DungeonBuilder.M0
                             assignment.RoomLocalPosition.Y + offset.Y), out var tile) && tile.Equals(cell)) return assignment;
             return null;
         }
+        public void PresentRoomIntents(DungeonDraftInvalidMovement[] values)
+        {
+            invalidIntents = (values ?? Array.Empty<DungeonDraftInvalidMovement>()).Where(v => v.FloorInstanceId == floor?.FloorInstanceId)
+                .OrderBy(v => v.RoomInstanceId, StringComparer.Ordinal).ToArray();
+            invalidRooms.ClearAllTiles();
+            InvalidFootprintTileCount = 0;
+            if (floor == null || invalidIntents.Length == 0) return;
+            var tile = invalidIntentTile;
+            var cells = new HashSet<TileCoordinate>();
+            foreach (var value in invalidIntents)
+                foreach (var cell in Footprint(value.RoomDefinitionId, value.RequestedAnchor, value.Orientation))
+                    if (cells.Add(cell))
+                    {
+                        invalidRooms.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+                        float minX = Mathf.Min(Bounds.xMin, cell.X), minY = Mathf.Min(Bounds.yMin, cell.Y);
+                        Bounds = Rect.MinMaxRect(minX, minY, Mathf.Max(Bounds.xMax, cell.X + 1f), Mathf.Max(Bounds.yMax, cell.Y + 1f));
+                    }
+            InvalidFootprintTileCount = cells.Count;
+        }
+        private TileCoordinate[] Footprint(string definitionId, TileCoordinate anchor, CardinalOrientation orientation)
+        {
+            var definition = production.Catalog.Rooms.Single(d => d.RoomDefinitionId == definitionId);
+            return definition.TryResolveGrossTiles(anchor, orientation, new SpatialValidationWorkloadLimits(maximumTiles), out var footprint)
+                ? footprint.OccupiedTiles : Array.Empty<TileCoordinate>();
+        }
+        // Interaction precedence: exact content occupancy, then invalid room attempt, then
+        // valid room footprint. Room ties resolve by ordinal stable identity, never objects.
+        public string SelectRoom(TileCoordinate cell)
+        {
+            if (floor == null) return null;
+            foreach (var value in invalidIntents)
+                if (Footprint(value.RoomDefinitionId, value.RequestedAnchor, value.Orientation).Contains(cell)) return value.RoomInstanceId;
+            foreach (var room in floor.Layout.Rooms.OrderBy(r => r.RoomInstanceId, StringComparer.Ordinal))
+            {
+                var semantics = floor.RoomContents.RoomSemantics.SingleOrDefault(s => s.RoomInstanceId == room.RoomInstanceId);
+                if (semantics == null || semantics.LegacyRoomOriginKind == LegacyRoomOriginKind.ImplicitCompatibilityContainer) continue;
+                var node = floor.Layout.Nodes.Single(n => n.RoomInstanceId == room.RoomInstanceId);
+                if (!floor.Layout.Edges.Any(e => e.Classification == RouteClassification.Required && e.DestinationNodeId == node.NodeId) ||
+                    !floor.Layout.Edges.Any(e => e.Classification == RouteClassification.Required && e.SourceNodeId == node.NodeId)) continue;
+                if (Footprint(room.RoomDefinitionId, room.Anchor, room.Orientation).Contains(cell)) return room.RoomInstanceId;
+            }
+            return null;
+        }
+        public void SelectRoomFootprint(string roomId)
+        {
+            selectedRoom.ClearAllTiles(); if (roomId == null || floor == null) return;
+            // The attempted footprint already identifies an invalid selected room. Do not
+            // paint its last valid projection over the invalid overlap being corrected.
+            if (invalidIntents.Any(value => value.RoomInstanceId == roomId)) return;
+            var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == roomId);
+            var tile = roomSelectionTile;
+            foreach (var cell in Footprint(room.RoomDefinitionId, room.Anchor, room.Orientation))
+                selectedRoom.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+        }
         public bool TryRoomLocal(RoomContentAssignment assignment, TileCoordinate cell, out TileCoordinate local)
         {
             local = default;
@@ -137,7 +198,7 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
-        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); }
+        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); }
         public void SetEdit(bool edit) { grid.gameObject.SetActive(edit); }
         private void OnDestroy()
         { foreach (Tile tile in ownedTiles) Destroy(tile); if (sprite != null) Destroy(sprite); }

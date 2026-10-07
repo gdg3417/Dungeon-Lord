@@ -147,8 +147,18 @@ namespace DungeonBuilder.M0
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
         public DungeonDraftContext DungeonDraftContext => _canonicalConfigured && _limits != null
-            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits)
+            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits, _compatibility)
             : null;
+        public StructuralEconomyPreview PreviewDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
+        {
+            if (draft == null || !draft.HasStructuralIntent || !draft.IsStructurallyValid || _canonicalSession == null ||
+                !draft.MatchesRuleContext(DungeonDraftContext) ||
+                draft.BaselineFingerprint != DungeonDraftContext?.Fingerprint(current?.validatedCanonicalSpatialState)) return null;
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
+            if (!owned.IsValid) return null;
+            return StructuralEconomyService.PreviewFinalMovement(owned.State, draft.ReadModel, owned.Investment,
+                draft.NormalizedMovementTargets(), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
+        }
         public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
         public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
