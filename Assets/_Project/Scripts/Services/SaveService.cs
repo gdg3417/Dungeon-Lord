@@ -146,6 +146,22 @@ namespace DungeonBuilder.M0
 
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
+        public DungeonDraftContext DungeonDraftContext => _canonicalConfigured && _limits != null
+            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits)
+            : null;
+        public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
+            ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
+        public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
+        {
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
+                return new DetachedCanonicalWriteResult(false, TransactionalDungeonDraft.InvalidReason,
+                    false, false, null, null, null, null);
+            var result = CreateWriteAuthority().CommitDungeonDraft(SavePath, _canonicalFileSystem,
+                _canonicalSession, current, draft);
+            if (result.IsSuccess)
+            { _undo = null; _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
+            return result;
+        }
 #if UNITY_EDITOR
         internal SaveSpatialMigrationLimitsProfile CanonicalLimitsForTests => _limits;
         internal StructuralEconomySnapshot StructuralEconomyForTests => _economy;
@@ -632,6 +648,10 @@ namespace DungeonBuilder.M0
                     var owned = migration.Where(value => value.IsRecognized).Select(value => value.Path).Concat(
                         ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
                             _canonicalFileSystem, maximum)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+                    // Keep canonical data/evidence intact if bounded owned-draft cleanup
+                    // cannot prove deletion. The draft store owns discovery and containment.
+                    if (!CreateDungeonDraftStore().Delete(null))
+                        throw new IOException(TransactionalDungeonDraft.DeleteFailedReason);
                     foreach (string path in owned)
                     {
                         if (!_canonicalFileSystem.IsPathContainedWithoutRedirection(directory, path))
@@ -640,7 +660,8 @@ namespace DungeonBuilder.M0
                     }
                     if (_canonicalFileSystem.Exists(SavePath)) _canonicalFileSystem.DeleteFile(SavePath);
                     _canonicalFileSystem.FlushDirectory(directory);
-                    if (SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(SavePath,
+                    if (_canonicalFileSystem.Exists(SavePath) ||
+                        SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(SavePath,
                             _canonicalFileSystem, maximum) ||
                         ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(SavePath,
                             _canonicalFileSystem, maximum).Count != 0)

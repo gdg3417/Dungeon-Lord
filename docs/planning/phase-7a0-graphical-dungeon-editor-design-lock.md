@@ -184,7 +184,7 @@ Validity is lifecycle-sensitive:
 
 **Approved design lock:** Durable local, non-authoritative draft storage separate from canonical gameplay state.
 
-The draft must never be consumed by simulation, passive mana, active-floor authority, run resolution, or canonical gameplay systems. Presentation may optimistically show an accepted mutation while its ordered draft persistence is pending, but that mutation is not durably completed until it crosses the required persistence acknowledgement/barrier. The durable command sequence advances only in accepted command order; no later command may become recoverably durable before a required predecessor.
+The draft must never be consumed by simulation, passive mana, active-floor authority, run resolution, or canonical gameplay systems. Presentation may optimistically show an accepted pending candidate. The live acknowledged prefix advances only after the required persistence operation reports success. A failure with uncertain outcome enters durability-unknown, preserves evidence, leaves live acknowledgement unchanged, and blocks Save Changes without canonical or resource mutation. Committed draft records must preserve accepted command order and bind draft identity, relevant canonical baseline, sequence, predecessor and candidate identity/hash. No later command may become recoverably committed without its required predecessors.
 
 ## Decision 17 - Recovery after crash/interruption
 
@@ -194,7 +194,7 @@ Player choices:
 - Resume Editing
 - Discard Draft
 
-Recovery never implicitly commits or activates a draft. It restores the last acknowledged durable command prefix only; an abrupt termination before acknowledgement may lose only the presented, not-yet-durable suffix and must never reconstruct a later command without its predecessors.
+Recovery never implicitly commits or activates canonical gameplay. It determines the recoverably committed draft prefix from complete, internally consistent transaction evidence, independently of the prior process's observed acknowledgement. It may resolve durability-unknown as committed when explicit commit evidence and matching candidates prove the complete predecessor chain. Candidate bytes alone, a newest-file heuristic, or a successful later read alone are insufficient. If only the predecessor is proven, recover it; if no uniquely trusted prefix can be proven, fail closed and preserve evidence. A presented unacknowledged suffix may be lost, but is not required to be destroyed if its committed state is conclusively established. Recovery never fills holes or automatically rebases stale drafts.
 
 ## Decision 18 - Stale recovered draft
 
@@ -224,7 +224,7 @@ Examples:
 **Approved design lock:** Drafting reserves and spends nothing.
 
 At Save Changes:
-1. Require every accepted mutation included in the final draft to cross its required draft durability acknowledgement; pending or failed draft persistence blocks Save Changes.
+1. Require every included mutation to be live-acknowledged or recovered from a proven committed prefix; pending, failed or durability-unknown draft persistence blocks Save Changes.
 2. Revalidate the resulting durable final draft.
 3. Recalculate authoritative economic consequences.
 4. Check current usable resources.
@@ -777,7 +777,7 @@ The previously proposed separate decisions for color-independent editor validity
 
 Each completed draft mutation is promptly persisted to the separate durable non-authoritative draft store. The canonical dungeon does not change merely because a placement, movement, removal, corridor edit, or content edit was completed in the editor.
 
-Presentation may show an accepted mutation before its queued persistence acknowledges it, but only the acknowledged ordered prefix is durably protected and recoverable. If persistence fails, canonical state remains unchanged; the editor enters an explicit recoverable, localization-backed persistence-failure state, must not claim the newest edit is durably protected, and must block Save Changes until the required durability condition is satisfied. Where platform lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence.
+Presentation may show an accepted mutation before its queued persistence acknowledges it. The live UI claims protection only for its positively acknowledged prefix. If persistence fails or its outcome is unknown, canonical state remains unchanged; the editor preserves evidence, enters an explicit localization-backed failure state, and blocks Save Changes. Restart recovery may independently resolve an unknown outcome using conclusive commit evidence as specified in Decision 17. Where platform lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence.
 
 Canonical gameplay state changes only when the player explicitly chooses Save Changes and the complete whole-dungeon transaction passes current validation, affordability, required draft durability, persistence, and publication requirements.
 
@@ -806,7 +806,7 @@ Examples of persistence boundaries include:
 
 Pointer movement, drag interpolation, camera movement, hover/preview state, and other transient interaction frames are not separate durable writes.
 
-Draft persistence may be ordered/asynchronous relative to presentation so the UI is not forced to block rendering for every write. A mutation is durably completed only after its ordered write crosses the required durability acknowledgement/barrier. The durable sequence must preserve accepted command order; a later command cannot become recoverably durable while a predecessor is pending or failed. Presentation before acknowledgement is not a crash-safety claim. Recovery restores the acknowledged durable prefix, and Save Changes cannot begin canonical commit while required draft persistence is pending or failed.
+Draft persistence may be ordered/asynchronous relative to presentation so the UI is not forced to block rendering for every write. Live acknowledgement requires reported persistence success; presentation before acknowledgement is not a crash-safety claim. Recoverable commit records preserve accepted command order and every predecessor. A durability-unknown live outcome preserves evidence without advancing acknowledgement. Recovery resolves the committed prefix under Decision 17, without reconstructing historical API returns. Save Changes cannot begin canonical commit while required draft persistence is pending, failed or unknown.
 
 
 ---
@@ -924,7 +924,7 @@ On application resume:
 
 Backgrounding alone never commits or discards the draft.
 
-Where lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence. If that flush cannot acknowledge a presented mutation before abrupt termination, recovery may omit only that not-yet-durable suffix while retaining an internally consistent acknowledged prefix.
+Where lifecycle permits, backgrounding or controlled shutdown flushes pending draft persistence. If confirmation is lost, the live session makes no new protection claim. Restart recovery retains a proven committed predecessor-complete prefix and may resolve the unknown suffix as committed only from explicit transaction evidence; otherwise it recovers the proven predecessor or fails closed. Backgrounding never commits or discards canonical gameplay.
 
 
 # Group 20 - HUD Reconciliation, Production Navigation, Responsive Layout, Floor Rendering, and Dense Presentation

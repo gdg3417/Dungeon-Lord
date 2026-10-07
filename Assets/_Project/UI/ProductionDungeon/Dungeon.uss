@@ -1,0 +1,25 @@
+:root {
+    --space: 8px;
+    --panel: rgb(21, 29, 40);
+    --ink: rgb(236, 242, 249);
+    --button: rgb(48, 67, 87);
+}
+.safe-root { position: absolute; flex-direction: column; color: var(--ink); }
+.top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); flex-shrink: 1; }
+.top-chrome { max-height: 40%; }
+.bottom-chrome { max-height: 45%; }
+.viewport { flex-grow: 1; flex-shrink: 1; }
+.hud { flex-direction: row; flex-wrap: wrap; }
+.metric { flex-basis: 45%; flex-grow: 1; }
+.landscape .metric { flex-basis: 22%; }
+.row { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.floor-scroll { flex-grow: 1; flex-shrink: 1; }
+.sheet { display: none; background-color: var(--button); padding: var(--space); }
+.mode { -unity-font-style: bold; }
+Label { white-space: normal; flex-shrink: 1; }
+Button { white-space: normal; flex-shrink: 1; margin: 2px; padding: var(--space); background-color: var(--button); color: var(--ink); border-width: 1px; border-color: rgb(105, 135, 159); }
+Button:disabled { color: rgb(160, 170, 184); background-color: rgb(35, 44, 56); }
+.selected-floor { border-width: 2px; border-color: rgb(127, 213, 227); }
+.legacy { align-self: flex-end; }
+.modal { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(6, 11, 17, 0.96); justify-content: center; padding: var(--space); }
+.modal-content { background-color: var(--panel); padding: var(--space); max-height: 100%; }

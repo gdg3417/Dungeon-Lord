@@ -1,0 +1,48 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Dungeon.uss" />
+    <ui:VisualElement name="safeRoot" class="safe-root" picking-mode="Ignore">
+        <ui:ScrollView name="topChrome" class="top-chrome" mode="Vertical">
+            <ui:Label name="mode" class="mode" />
+            <ui:VisualElement name="hud" class="hud">
+                <ui:Label name="totalMana" class="metric" />
+                <ui:Label name="usableMana" class="metric" />
+                <ui:Label name="manaRate" class="metric" />
+                <ui:Label name="heat" class="metric" />
+            </ui:VisualElement>
+            <ui:VisualElement name="navigation" class="row">
+                <ui:ScrollView mode="Horizontal" class="floor-scroll"><ui:VisualElement name="floors" class="row" /></ui:ScrollView>
+                <ui:Button name="reset" tooltip="ui.dungeon.reset" />
+            </ui:VisualElement>
+            <ui:Label name="capacity" />
+        </ui:ScrollView>
+        <ui:VisualElement name="viewport" class="viewport" />
+        <ui:ScrollView name="bottomChrome" class="bottom-chrome" mode="Vertical">
+            <ui:Label name="status" />
+            <ui:VisualElement name="contextSheet" class="sheet">
+                <ui:Label name="selectedName" class="mode" />
+                <ui:VisualElement class="row"><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.close" /></ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="row">
+                <ui:Button name="edit" tooltip="ui.dungeon.edit" />
+                <ui:VisualElement name="editActions" class="row">
+                    <ui:Button name="save" tooltip="ui.dungeon.save" />
+                    <ui:Button name="discard" tooltip="ui.dungeon.discard" />
+                    <ui:Button name="retry" tooltip="ui.dungeon.retry" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="row text-controls">
+                <ui:Label tooltip="ui.dungeon.text_size" />
+                <ui:Button name="small" tooltip="ui.dungeon.text_small" />
+                <ui:Button name="default" tooltip="ui.dungeon.text_default" />
+                <ui:Button name="large" tooltip="ui.dungeon.text_large" />
+            </ui:VisualElement>
+        </ui:ScrollView>
+        <ui:Button name="legacy" class="legacy" tooltip="ui.dungeon.legacy" />
+        <ui:VisualElement name="modal" class="modal">
+            <ui:ScrollView mode="Vertical" class="modal-content">
+                <ui:Label name="modalText" />
+                <ui:VisualElement class="row"><ui:Button name="confirm" tooltip="ui.dungeon.save" /><ui:Button name="cancel" tooltip="ui.dungeon.continue" /></ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
