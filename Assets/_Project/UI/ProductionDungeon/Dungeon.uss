@@ -53,6 +53,7 @@
 .editing #mode { color: var(--cool); }
 .capacity-bar { padding: 4px 12px; background-color: rgb(20,38,47); flex-shrink: 0; color: rgb(180,224,231); }
 .row { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.sheet-top { flex-shrink: 0; }
 .sheet-header { justify-content: space-between; flex-shrink: 0; }
 .sheet-header > Label { flex-grow: 1; }
 .category-row { flex-direction: row; align-items: center; flex-shrink: 0; }

@@ -115,7 +115,7 @@ namespace DungeonBuilder.M0.Tests
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var room=floor.Layout.Rooms[0];
             Assert.That(controller.IsEditing,Is.False); Assert.That(controller.World.GridVisible,Is.False);
             Assert.That(ui.Q("floorSummary").resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex));
-            Assert.That(ui.Q<Label>("floorInfo").text,Does.Contain("1 rooms"));
+            Assert.That(ui.Q<Label>("floorInfo").text,Does.Contain("Rooms: 1"));
             var center=controller.Viewport.Center; float size=controller.Viewport.Size;
             controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2));
             for(int i=0;i<8;i++) yield return null;

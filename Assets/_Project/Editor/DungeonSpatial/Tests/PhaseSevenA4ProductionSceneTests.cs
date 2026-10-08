@@ -722,6 +722,9 @@ namespace DungeonBuilder.M0.Tests
             }
             foreach (string id in new[] { "save", "discard", "reset" })
                 Assert.That(ui.Q<Button>(id).worldBound.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax));
+            Assert.That(ui.Q("constructionCategories").worldBound.yMax,
+                Is.LessThanOrEqualTo(ui.Q("status").worldBound.yMin + 1),
+                "Wrapped HUD must not shrink the sheet header over its status line");
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-long-localization-1080x1920.png");
             yield return null; yield return null;
             Assert.That(controller.Discard(), Is.True);

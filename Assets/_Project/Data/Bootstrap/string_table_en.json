@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "language": "en",
   "entries": [
-    {"key": "ui.dungeon.corridor.info", "text": "{0} corridor tiles · {1}"},
+    {"key": "ui.dungeon.corridor.info", "text": "Corridor tiles: {0} · {1}"},
     {"key": "ui.dungeon.route.required", "text": "Required route"},
     {"key": "ui.dungeon.route.optional", "text": "Optional route"},
     {"key": "ui.dungeon.focus_room", "text": "Focus Room"},
@@ -13,7 +13,7 @@
     {"key": "ui.dungeon.floor.active", "text": "Active"},
     {"key": "ui.dungeon.floor.inactive", "text": "Inactive"},
     {"key": "ui.dungeon.floor.blocked", "text": " · Blocked"},
-    {"key": "ui.dungeon.floor.info", "text": "{0} · {1} rooms\nRequired route: {2}\nFloor space: {3} used · {4} remaining"},
+    {"key": "ui.dungeon.floor.info", "text": "{0} · Rooms: {1}\nRequired route: {2}\nFloor space: {3} used · {4} remaining"},
     {"key": "ui.dungeon.route.ready", "text": "Ready"},
     {"key": "ui.dungeon.route.incomplete", "text": "Incomplete"},
     {"key": "ui.dungeon.room.info", "text": "Monsters: {0} / {1}\nTraps: {2} / {3}\nLoot: {4} / {5}"},
