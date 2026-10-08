@@ -54,6 +54,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string PredecessorCommit;
         public string CandidateHash;
     }
+    [Serializable]
+    internal sealed class DungeonDraftV2Candidate
+    {
+        public int Version;
+        public string DraftId;
+        public string Baseline;
+        public long Sequence;
+        public string PredecessorCommit;
+        public int JournalFormatVersion;
+        public string RuleIdentity;
+        public DungeonDraftV3Command[] Commands;
+    }
 
     /// <summary>
     /// Immutable, bounded delta journal. A candidate never commits itself. Each separate commit
@@ -62,7 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     /// </summary>
     public sealed class FileDungeonDraftStore : IDungeonDraftStore
     {
-        private const int RecordVersion = 2;
+        private const int RecordVersion = 3;
         private readonly string path, directory, prefix;
         private readonly ISpatialMigrationFileSystem files;
         private readonly SaveSpatialMigrationLimitsProfile limits;
@@ -119,7 +131,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string stem = Stem(intended.DraftId, sequence);
                 string candidatePath = stem + ".candidate", commitPath = stem + ".commit";
                 if (files.Exists(commitPath)) return false;
-                var candidate = new DungeonDraftCandidate { Version = RecordVersion, DraftId = intended.DraftId,
+                int recordVersion = intended.FormatVersion == 4 ? RecordVersion : 2;
+                var candidate = new DungeonDraftCandidate { Version = recordVersion, DraftId = intended.DraftId,
                     Baseline = intended.BaselineFingerprint, Sequence = sequence,
                     PredecessorCommit = evidence.CommitHash ?? string.Empty,
                     JournalFormatVersion = intended.FormatVersion, RuleIdentity = intended.RuleIdentity,
@@ -128,8 +141,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ? Encode(new DungeonDraftV1Candidate { Version = 1, DraftId = candidate.DraftId,
                         Baseline = candidate.Baseline, Sequence = sequence, PredecessorCommit = candidate.PredecessorCommit,
                         Commands = candidate.Commands.Select(DungeonDraftV2Command.From).ToArray() })
+                    : intended.FormatVersion == 3 ? Encode(new DungeonDraftV2Candidate { Version = 2,
+                        DraftId = candidate.DraftId, Baseline = candidate.Baseline, Sequence = sequence,
+                        PredecessorCommit = candidate.PredecessorCommit, JournalFormatVersion = 3,
+                        RuleIdentity = candidate.RuleIdentity, Commands = candidate.Commands.Select(DungeonDraftV3Command.From).ToArray() })
                     : Encode(candidate);
-                var commit = new DungeonDraftCommitRecord { Version = RecordVersion, DraftId = candidate.DraftId,
+                var commit = new DungeonDraftCommitRecord { Version = recordVersion, DraftId = candidate.DraftId,
                     Baseline = candidate.Baseline, Sequence = sequence, PredecessorCommit = candidate.PredecessorCommit,
                     CandidateHash = SpatialContractSha256.Compute(payload),
                     JournalFormatVersion = candidate.JournalFormatVersion, RuleIdentity = candidate.RuleIdentity };
@@ -241,8 +258,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     candidate.Baseline != baseline || candidate.PredecessorCommit != predecessor ||
                     candidate.Commands == null || candidate.Commands.Length != (expected == 0 ? 0 : 1) ||
                     (expected > 0 && (candidate.Commands[0] == null || !candidate.Commands[0].HasExactPayload ||
-                        candidate.Commands[0].Sequence != expected || candidate.JournalFormatVersion == 2 &&
-                        candidate.Commands[0].Kind != DungeonDraftCommandKind.ContentReposition)) ||
+                        candidate.Commands[0].Sequence != expected || !Permits(candidate.JournalFormatVersion, candidate.Commands[0]))) ||
                     !CompatibleVocabulary(format, ruleIdentity, candidate.JournalFormatVersion, candidate.RuleIdentity))
                     throw new IOException();
                 format = candidate.JournalFormatVersion; ruleIdentity = candidate.RuleIdentity;
@@ -297,21 +313,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !Hex(journal.BaselineFingerprint, 64) || journal.Commands == null ||
                 journal.Commands.Length > limits.Raw.MaximumArrayElements || journal.PrefixSequence != journal.Commands.Length ||
                 journal.Commands.Where((command, index) => command == null || !command.HasExactPayload ||
-                    command.Sequence != index + 1L || journal.FormatVersion == 2 && command.Kind != DungeonDraftCommandKind.ContentReposition).Any())
+                    command.Sequence != index + 1L || !Permits(journal.FormatVersion, command)).Any())
                 throw new IOException();
         }
 
         private static bool CompatibleVocabulary(int previous, string previousRules, int next, string nextRules) =>
             next == 2 ? previous == 2 && string.IsNullOrEmpty(nextRules) :
-            next == TransactionalDungeonDraft.CurrentFormatVersion && Hex(nextRules, 64) &&
-                (previous == 2 || previous == next && previousRules == nextRules);
+            (next == 3 || next == 4) && Hex(nextRules, 64) &&
+                (previous == 2 || previous >= 3 && previous <= next && previousRules == nextRules);
+
+        private static bool Permits(int format, DungeonDraftCommand command) =>
+            format == 2 ? command.Kind == DungeonDraftCommandKind.ContentReposition :
+            format == 3 ? command.Kind != DungeonDraftCommandKind.RoomConstruction : format == 4;
 
         private DungeonDraftCandidate ParseCandidate(byte[] bytes)
         {
             // Probe the discriminator only; exact parsing of the selected historical DTO
             // rejects unknown/missing/reordered fields and binds original bytes to the commit.
             var probe = JsonUtility.FromJson<DungeonDraftCandidate>(new UTF8Encoding(false, true).GetString(bytes));
-            if (probe?.Version == RecordVersion) return Parse<DungeonDraftCandidate>(bytes);
+            if (probe?.Version == RecordVersion)
+            {
+                var value = Parse<DungeonDraftCandidate>(bytes);
+                if (value.JournalFormatVersion != 4) throw new IOException();
+                return value;
+            }
+            if (probe?.Version == 2)
+            {
+                var value = Parse<DungeonDraftV2Candidate>(bytes);
+                if (value.JournalFormatVersion != 3) throw new IOException();
+                return new DungeonDraftCandidate { Version = 2, DraftId = value.DraftId, Baseline = value.Baseline,
+                    Sequence = value.Sequence, PredecessorCommit = value.PredecessorCommit, JournalFormatVersion = 3,
+                    RuleIdentity = value.RuleIdentity, Commands = value.Commands?.Select(command => command?.Expand()).ToArray() };
+            }
             var old = Parse<DungeonDraftV1Candidate>(bytes);
             if (old.Version != 1) throw new IOException();
             return new DungeonDraftCandidate { Version = 1, DraftId = old.DraftId, Baseline = old.Baseline,
@@ -321,7 +354,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private DungeonDraftCommitRecord ParseCommit(byte[] bytes)
         {
             var probe = JsonUtility.FromJson<DungeonDraftCommitRecord>(new UTF8Encoding(false, true).GetString(bytes));
-            if (probe?.Version == RecordVersion) return Parse<DungeonDraftCommitRecord>(bytes);
+            if (probe?.Version == 2 || probe?.Version == RecordVersion)
+            {
+                var value = Parse<DungeonDraftCommitRecord>(bytes);
+                if (value.JournalFormatVersion != (value.Version == 2 ? 3 : 4)) throw new IOException();
+                return value;
+            }
             var old = Parse<DungeonDraftV1Commit>(bytes);
             if (old.Version != 1) throw new IOException();
             return new DungeonDraftCommitRecord { Version = 1, DraftId = old.DraftId, Baseline = old.Baseline,

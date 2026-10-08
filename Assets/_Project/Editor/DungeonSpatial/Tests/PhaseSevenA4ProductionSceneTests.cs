@@ -31,12 +31,18 @@ namespace DungeonBuilder.M0.Tests
         {
             missingThemeWarning = false;
             Application.logMessageReceived += RecordThemeWarning;
-            if (!Application.isPlaying) yield return new EnterPlayMode();
+            if (!Application.isPlaying)
+            {
+                // Entering play can reload the domain and clear fixture fields/callbacks.
+                // Start from an empty scene so no root can boot before isolation is armed.
+                UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+                    UnityEditor.SceneManagement.NewSceneMode.Single);
+                yield return new EnterPlayMode();
+            }
             if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
             filename = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
             SceneManager.sceneLoaded += Isolate;
             yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
-            SceneManager.sceneLoaded -= Isolate;
             for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
@@ -70,7 +76,6 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator TearDown()
         {
             Application.logMessageReceived -= RecordThemeWarning;
-            SceneManager.sceneLoaded -= Isolate;
             if (simulatedTouch != null) InputSystem.RemoveDevice(simulatedTouch);
             simulatedTouch = null;
             if (controller != null) UnityEngine.Object.Destroy(controller.gameObject);
@@ -78,9 +83,273 @@ namespace DungeonBuilder.M0.Tests
             if (GameRoot.Instance != null) UnityEngine.Object.Destroy(GameRoot.Instance.gameObject);
             if (disposableConfig != null) UnityEngine.Object.Destroy(disposableConfig);
             yield return null;
+            SceneManager.sceneLoaded -= Isolate;
             if (filename != null)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery()
+        {
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var before = File.ReadAllBytes(root.SaveService.SavePath);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); Click(ui.Q<Button>("roomsCategory"));
+            Assert.That(ui.Q("constructionCategories").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(ui.Q("roomChoices").Query<Button>().ToList().Count, Is.GreaterThan(0));
+            Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            Assert.That(controller.World.MoveGuidanceAnchors, Is.Not.Empty);
+            var anchor = controller.World.MoveGuidanceAnchors.First();
+            controller.TapWorld(anchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            Assert.That(controller.World.ConstructionPreviewTileCount, Is.GreaterThan(0));
+            Assert.That(controller.Draft.CommandCount, Is.Zero);
+            var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft, controller.ConstructionPreview.DetachedCandidate);
+            Assert.That(ui.Q<Label>("constructionSummary").text, Does.Contain(StructuralEconomyPresenter.FormatTransactionAmount(quote.Cost))
+                .And.Contain(StructuralEconomyPresenter.FormatTransactionAmount(quote.ResultingMana)));
+            Assert.That(ui.Q<Label>("draftSummary").text, Does.Contain("Current draft:"));
+            root.Save.structureRuntime.ManaReserve = 0; root.Save.totalTicks++; yield return null; yield return null;
+            Assert.That(ui.Q<Label>("constructionAffordability").text, Is.EqualTo(root.Content.GetString("ui.dungeon.construction.unaffordable_draft", null)));
+            Assert.That(ui.Q<Button>("confirmPlacement").enabledSelf, Is.True, "Affordability gates Save, not draft confirmation");
+            root.Save.structureRuntime.ManaReserve = mana; root.Save.totalTicks++; yield return null;
+            Assert.That(ui.Q<Label>("constructionInfo").text, Does.Contain(root.Content.GetString("ui.structural.connection.direct", null))
+                .Or.Contain(root.Content.GetString("ui.structural.connection.corridor", null)));
+            AssertCanonicalUnchanged(before, mana);
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            Assert.That(controller.Draft.ReadModel.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            AssertCanonicalUnchanged(before, mana);
+            var store = root.SaveService.CreateDungeonDraftStore();
+            var recovered = TransactionalDungeonDraft.Recover(store.Read(), root.Save.validatedCanonicalSpatialState,
+                root.SaveService.DungeonDraftContext, store, out var reason);
+            Assert.That(recovered, Is.Not.Null, reason);
+            Assert.That(recovered.ReadModel.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            double charge = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost;
+            root.Save.structureRuntime.ManaReserve = mana = charge;
+            Click(ui.Q<Button>("save")); Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.IsEditing, Is.False);
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - charge));
+            Assert.That(store.Read(), Is.Null);
+            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":13"));
+            controller.EnterEdit(); controller.TapWorld(new TileCoordinate(1, 3)); yield return null; yield return null;
+            Assert.That(controller.SelectedRoomInstanceId, Is.Not.Null);
+            Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Room selection restores the A5 contextual actions after collapsed construction");
+            Assert.That(ui.Q<Button>("move").enabledSelf, Is.True);
+            Assert.That(controller.Discard(), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible()
+        {
+            var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic");
+            controller.TapWorld(new TileCoordinate(-1, -1));
+            Assert.That(controller.ConstructionPreview.IsValid, Is.False);
+            var strings = (System.Collections.Generic.Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.Content);
+            strings[controller.ConstructionPreview.ReasonCodes.First()] = "配置できません。 This expanded localized reason explains that the proposed room footprint is outside the legal floor bounds. Choose another visible anchor or cancel this placement.";
+            controller.TapWorld(new TileCoordinate(-1, -1));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
+            controller.SetTextSize(DungeonTextSize.Large); for (int i = 0; i < 16; i++) yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.Zero);
+            Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
+            Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
+            AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
+            Assert.That(ui.Q<Button>("confirmPlacement").text, Is.EqualTo(root.Content.GetString("ui.dungeon.construction.keep_invalid", null)));
+            AssertReachable(ui.Q<Button>("save")); AssertReachable(ui.Q<Button>("discard"));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-ui-invalid-long-720x1280.png");
+            yield return null; yield return null;
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            Assert.That(controller.Draft.InvalidConstructions.Length, Is.EqualTo(1));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+            int commandCount = controller.Draft.CommandCount;
+            controller.SelectConstructionRoom("spatial.room.basic"); controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+            Assert.That(ui.Q<Label>("constructionInfo").text, Does.Contain(root.Content.GetString("ui.dungeon.construction.cost_blocked", null)));
+            Click(ui.Q<Button>("cancelPlacement")); Assert.That(controller.Draft.CommandCount, Is.EqualTo(commandCount));
+            if (ui.Q("contextDetails").style.display.value != DisplayStyle.None) Click(ui.Q<Button>("collapseDetails"));
+            yield return null;
+            Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q("constructionCategories").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(ui.Q("constructionBlockers").Query<Button>().ToList().Count, Is.EqualTo(1));
+            Assert.That(ui.Q<Button>("discard").enabledSelf, Is.True);
+            Click(ui.Q("constructionBlockers").Query<Button>().ToList().Single());
+            controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            Assert.That(controller.Draft.InvalidConstructions, Is.Empty);
+            Assert.That(controller.Draft.CanSave, Is.True);
+            AssertCanonicalUnchanged(before, mana);
+            Assert.That(controller.Discard(), Is.True); AssertCanonicalUnchanged(before, mana);
+        }
+
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionOutOfBoundsIntentBoundsRecoverCameraAndSave()
+        {
+            var root = GameRoot.Instance;
+            var legalBounds = controller.World.LegalBounds;
+            controller.EnterEdit();
+            int gridTileCount = controller.World.GridTileCount;
+            Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            Assert.That(controller.World.MoveGuidanceAnchors, Is.Not.Empty);
+            var validAnchor = controller.World.MoveGuidanceAnchors.First();
+            controller.TapWorld(validAnchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            var setupQuote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft,
+                controller.ConstructionPreview.DetachedCandidate);
+            Assert.That(setupQuote.Cost, Is.GreaterThan(0));
+            // Seed the disposable runtime before the draft starts so all draft actions preserve this exact balance.
+            root.Save.structureRuntime.ManaReserve = setupQuote.Cost;
+            var canonicalBefore = File.ReadAllBytes(root.SaveService.SavePath);
+            double manaBefore = root.Save.structureRuntime.ManaReserve;
+            var attemptedAnchor = default(TileCoordinate);
+            bool foundOutOfBoundsEdgePlacement = false;
+            int minX = Mathf.RoundToInt(legalBounds.xMin), minY = Mathf.RoundToInt(legalBounds.yMin);
+            int maxX = Mathf.RoundToInt(legalBounds.xMax), maxY = Mathf.RoundToInt(legalBounds.yMax);
+            for (int y = minY; y < maxY && !foundOutOfBoundsEdgePlacement; y++)
+                for (int x = minX; x < maxX; x++)
+                {
+                    if (x != minX && x != maxX - 1 && y != minY && y != maxY - 1) continue;
+                    var candidate = new TileCoordinate(x, y);
+                    controller.TapWorld(candidate);
+                    if (controller.ConstructionPreview?.ReasonCodes.Contains(StructuralEditService.OutOfBoundsReason) != true) continue;
+                    attemptedAnchor = candidate; foundOutOfBoundsEdgePlacement = true; break;
+                }
+            Assert.That(foundOutOfBoundsEdgePlacement, Is.True, "The existing preview authority identifies an out-of-bounds room placement from a legal floor-edge anchor");
+            Assert.That(controller.ConstructionPreview.IsValid, Is.False);
+            Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.OutOfBoundsReason));
+            Assert.That(legalBounds.Contains(new Vector2(attemptedAnchor.X + 0.5f, attemptedAnchor.Y + 0.5f)), Is.True);
+            var attemptedCells = controller.ConstructionPreview.OccupiedTiles.ToArray();
+            Assert.That(attemptedCells.Any(cell => cell.X < legalBounds.xMin || cell.Y < legalBounds.yMin ||
+                cell.X >= legalBounds.xMax || cell.Y >= legalBounds.yMax), Is.True);
+            Click(controller.GetComponent<UIDocument>().rootVisualElement.Q<Button>("confirmPlacement"));
+            yield return null;
+            Assert.That(controller.Draft.InvalidConstructions.Length, Is.EqualTo(1));
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            Assert.That(controller.Draft.CanSave, Is.False);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            yield return RestartShell();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Recovered draft offers Resume Draft");
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+
+            Assert.That(controller.Draft.InvalidConstructions.Length, Is.EqualTo(1));
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            var invalidMap = controller.World.transform.Find("InvalidConstructionIntents").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            foreach (var cell in attemptedCells)
+                Assert.That(invalidMap.GetTile(new Vector3Int(cell.X, cell.Y, 0)), Is.Not.Null);
+            Assert.That(attemptedCells.Any(cell => !legalBounds.Contains(new Vector2(cell.X + 0.5f, cell.Y + 0.5f))), Is.True);
+            Assert.That(controller.World.Bounds.Contains(attemptedCells
+                .Select(cell => new Vector2(cell.X + 0.5f, cell.Y + 0.5f)).First(point => !legalBounds.Contains(point))), Is.True);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            Assert.That(controller.World.transform.Find("EditorGrid").GetComponent<UnityEngine.Tilemaps.Tilemap>()
+                .GetTile(new Vector3Int((int)legalBounds.xMin, (int)legalBounds.yMin, 0)), Is.Not.Null);
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            simulatedTouch = InputSystem.AddDevice<Touchscreen>();
+            var camera = controller.GetComponentInChildren<Camera>();
+            var accessibleCell = attemptedCells.First(cell => !legalBounds.Contains(new Vector2(cell.X + 0.5f, cell.Y + 0.5f)));
+            Vector2 screenPoint = camera.WorldToScreenPoint(new Vector3(accessibleCell.X + 0.5f, accessibleCell.Y + 0.5f, 0));
+            Assert.That(camera.pixelRect.Contains(screenPoint), Is.True, "Recovered invalid footprint is inside the configured camera viewport");
+            Assert.That(controller.IsChrome(screenPoint, 1), Is.False, "Invalid footprint can be reached from the production viewport");
+            Touch(1, screenPoint, InputTouchPhase.Began); yield return null; yield return null;
+            Touch(1, screenPoint, InputTouchPhase.Ended); yield return null; yield return null;
+            Assert.That(controller.IsConstructing, Is.True, "Viewport input selects the recovered invalid intent for correction");
+            Assert.That(controller.ConstructionPreview.IsValid, Is.False);
+
+            Assert.That(controller.World.MoveGuidanceAnchors, Does.Contain(validAnchor));
+            controller.TapWorld(validAnchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            Assert.That(controller.Draft.InvalidConstructions, Is.Empty);
+            Assert.That(controller.Draft.IsStructurallyValid, Is.True);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft);
+            Assert.That(quote.Cost, Is.EqualTo(setupQuote.Cost));
+            Assert.That(quote.IsAffordable, Is.True);
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+            Click(ui.Q<Button>("save")); Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.IsEditing, Is.False);
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(0));
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionLayoutsLocalizationAndResume()
+        {
+            var root = GameRoot.Instance;
+            var strings = (System.Collections.Generic.Dictionary<string, string>)typeof(ContentService)
+                .GetField("_stringMap", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.Content);
+            strings["ui.dungeon.construction.properties"] = "建設する部屋の詳細を確認してください：{0}、寸法 {1} × {2}、モンスター {3}、トラップ {4}、戦利品 {5}。 This expanded localization checks wrapping and scrolling.";
+            strings["ui.dungeon.construction.preview"] = "配置を確認してください。 Confirm Placement records this proposed room in the recoverable draft. Save Changes publishes the complete valid dungeon and charges its final cost.";
+            controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.rectangle");
+            Assert.That(controller.SelectConstructionOrientation(CardinalOrientation.Ninety), Is.True);
+            Assert.That(controller.SelectTerminalConnection("north"), Is.True);
+            if (controller.World.MoveGuidanceAnchors.Length == 0) Assert.That(controller.SelectConstructionOrientation(CardinalOrientation.Zero), Is.True);
+            Assert.That(controller.World.MoveGuidanceAnchors, Is.Not.Empty);
+            controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            foreach (var size in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(1080, 1920), new Vector2Int(1920, 1080) })
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                for (int i = 0; i < 12; i++) yield return null;
+                controller.ApplySafeArea(new Rect(32, 40, Screen.width - 64, Screen.height - 120), new Vector2(Screen.width, Screen.height));
+                foreach (var textSize in new[] { DungeonTextSize.Small, DungeonTextSize.Default, DungeonTextSize.Large })
+                {
+                    controller.SetTextSize(textSize); for (int i = 0; i < 8; i++) yield return null;
+                    foreach (string id in new[] { "roomsCategory", "collapseDetails", "save", "discard", "confirmPlacement", "cancelPlacement" })
+                    {
+                        var rect = ui.Q(id).worldBound;
+                        Assert.That(rect.width, Is.GreaterThan(0), id); Assert.That(rect.height, Is.GreaterThan(0), id);
+                        Assert.That(rect.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax + 1), id);
+                        AssertReachable(ui.Q<Button>(id));
+                    }
+                    Assert.That(ui.Q<Button>("confirmPlacement").GetFirstAncestorOfType<ScrollView>(), Is.Null);
+                    Assert.That(ui.Q<Button>("cancelPlacement").GetFirstAncestorOfType<ScrollView>(), Is.Null);
+                    Assert.That(ui.Q("placementActions").worldBound.yMax, Is.LessThanOrEqualTo(ui.Q("draftSummary").worldBound.yMin + 1));
+                    Assert.That(ui.Q<Label>("capacity").worldBound.yMax, Is.LessThanOrEqualTo(ui.Q("viewport").worldBound.yMin + 1));
+                    TestContext.WriteLine(size + " " + textSize + " safe=" + controller.SafeRoot.worldBound + " top=" + ui.Q("topChrome").worldBound + " bottom=" + ui.Q("bottomChrome").worldBound + " viewport=" + ui.Q("viewport").worldBound);
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-ui-layout-" + size.x + "x" + size.y + "-" + textSize + ".png");
+                    yield return null; yield return null;
+                    Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f));
+                    Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
+                    Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                    ui.Q<ScrollView>("contextDetails").scrollOffset = new Vector2(0, 10000); yield return null;
+                    Assert.That(ui.Q<Button>("confirmPlacement").worldBound.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax + 1));
+                    AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
+                    Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
+                    Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.None));
+                    AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
+                    Assert.That(ui.Q<Label>("constructionInfo").text, Does.Contain("建設"));
+                    Assert.That(controller.World.GridTileCount, Is.EqualTo(root.ProductionSpatialContent.Catalog.Floors[0].Bounds.TileCount));
+                }
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-ui-corrected-large-" + size.x + "x" + size.y + ".png");
+                yield return null; yield return null;
+            }
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            int commands = controller.Draft.CommandCount;
+            yield return RestartShell(); ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(root.Content.GetString("ui.dungeon.resume", null)));
+            Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(commands));
+            Assert.That(controller.Draft.ReadModel.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            Assert.That(controller.Discard(), Is.True);
+        }
+
         [UnityTest]
         public IEnumerator RuntimeThemeAndLocalizedTextRenderInActualScene()
         {
@@ -451,6 +720,35 @@ namespace DungeonBuilder.M0.Tests
 
         // Invoked by the PlayMode qualification adapter; EditMode coroutines do not
         // advance the MonoBehaviour device-read loop reliably.
+        public IEnumerator InputSystemConstructionTapPreviewsWithoutAcknowledgingUntilConfirm()
+        {
+            Assert.That(Application.isPlaying, Is.True);
+            var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); controller.OpenRooms(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            for (int i = 0; i < 10; i++) yield return null;
+            simulatedTouch = InputSystem.AddDevice<Touchscreen>();
+            var anchor = controller.World.MoveGuidanceAnchors.First();
+            var camera = controller.transform.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            Vector2 point = camera.WorldToScreenPoint(new Vector3(anchor.X + 0.5f, anchor.Y + 0.5f, 0));
+            Assert.That(controller.IsChrome(point, 1), Is.False);
+            Touch(1, point, InputTouchPhase.Began); yield return null; yield return null;
+            Touch(1, point, InputTouchPhase.Ended); yield return null; yield return null;
+            Assert.That(controller.ConstructionPreview, Is.Not.Null); Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            Assert.That(controller.ConstructionPreview.Anchor, Is.EqualTo(anchor)); Assert.That(controller.Draft.CommandCount, Is.Zero);
+            var options = controller.GetComponent<UIDocument>().rootVisualElement.Q("constructionOptions");
+            var option = options.Query<Button>().ToList().First();
+            root.Save.totalTicks++; yield return null; yield return null;
+            Assert.That(options.Query<Button>().ToList().First(), Is.SameAs(option), "Wallet/HUD ticks preserve option input lifetime");
+            AssertCanonicalUnchanged(before, mana);
+            var confirmButton = controller.GetComponent<UIDocument>().rootVisualElement.Q<Button>("confirmPlacement");
+            AssertReachable(confirmButton);
+            Vector2 confirmPoint = ScreenPoint(confirmButton.worldBound.center);
+            Touch(1, confirmPoint, InputTouchPhase.Began); yield return null; yield return null;
+            Touch(1, confirmPoint, InputTouchPhase.Ended); yield return null; yield return null;
+            Assert.That(controller.Draft.AcknowledgedSequence, Is.EqualTo(1)); AssertCanonicalUnchanged(before, mana);
+            Assert.That(controller.Discard(), Is.True);
+        }
+
         public IEnumerator InputSystemChromeOriginDoesNotLeakAndTwoTouchesZoomWithoutDraftWrites()
         {
             controller.EnterEdit();
@@ -555,10 +853,8 @@ namespace DungeonBuilder.M0.Tests
                 UnityEngine.Object.Destroy(root.gameObject); yield return null;
                 UnityEngine.Object.Destroy(disposableConfig); disposableConfig = null;
                 int callbacksBefore = isolationCallbacks;
-                SceneManager.sceneLoaded += Isolate;
                 var reload = SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
                 while (!reload.isDone) yield return null;
-                SceneManager.sceneLoaded -= Isolate;
                 Assert.That(isolationCallbacks, Is.EqualTo(callbacksBefore + 1), "Fresh scene callback applied isolation");
                 for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
                 Assert.That(GameRoot.Instance.Save, Is.Not.Null); Assert.That(GameRoot.Instance.TimeService, Is.Not.Null);
@@ -792,6 +1088,14 @@ namespace DungeonBuilder.M0.Tests
             typeof(Clickable).GetMethod("SimulateSingleClick", System.Reflection.BindingFlags.Instance |
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
                 .Invoke(button.clickable, new object[] { null, 0 });
+        }
+        private void AssertReachable(Button button)
+        {
+            Assert.That(button.worldBound.width, Is.GreaterThan(0), button.name);
+            Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.min), Is.True, button.name);
+            Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.max - Vector2.one), Is.True, button.name);
+            var picked = button.panel.Pick(button.worldBound.center);
+            Assert.That(picked == button || button.Contains(picked), Is.True, button.name + " must receive pointer input without scrolling");
         }
         private static void AssertCanonicalUnchanged(byte[] bytes, double mana)
         {

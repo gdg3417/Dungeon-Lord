@@ -35,13 +35,43 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public long PrefixSequence;
         public DungeonDraftV2Command[] Commands;
     }
+    [Serializable]
+    internal sealed class DungeonDraftV3Command
+    {
+        public long Sequence;
+        public DungeonDraftCommandKind Kind;
+        public DungeonDraftContentReposition[] ContentRepositions;
+        public StructuralMovementRequest[] RoomMovements;
+        internal DungeonDraftCommand Expand() => new DungeonDraftCommand { Sequence = Sequence, Kind = Kind,
+            ContentRepositions = ContentRepositions, RoomMovements = RoomMovements };
+        internal static DungeonDraftV3Command From(DungeonDraftCommand command)
+        {
+            if (command == null || !command.HasExactPayload || command.Kind == DungeonDraftCommandKind.RoomConstruction)
+                throw new ArgumentException();
+            return new DungeonDraftV3Command { Sequence = command.Sequence, Kind = command.Kind,
+                ContentRepositions = command.ContentRepositions, RoomMovements = command.RoomMovements };
+        }
+    }
+    [Serializable]
+    internal sealed class DungeonDraftV3Journal
+    {
+        public int FormatVersion;
+        public string DraftId;
+        public string BaselineFingerprint;
+        public string RuleIdentity;
+        public long PrefixSequence;
+        public DungeonDraftV3Command[] Commands;
+    }
     internal static class DungeonDraftFormat
     {
         internal static byte[] Encode(DungeonDraftJournal journal) => journal == null ? null :
             journal.FormatVersion == 2 ? Bytes(new DungeonDraftV2Journal { FormatVersion = 2,
                 DraftId = journal.DraftId, BaselineFingerprint = journal.BaselineFingerprint,
                 PrefixSequence = journal.PrefixSequence, Commands = journal.Commands.Select(DungeonDraftV2Command.From).ToArray() })
-                : Bytes(journal);
+                : journal.FormatVersion == 3 ? Bytes(new DungeonDraftV3Journal { FormatVersion = 3,
+                    DraftId = journal.DraftId, BaselineFingerprint = journal.BaselineFingerprint,
+                    RuleIdentity = journal.RuleIdentity, PrefixSequence = journal.PrefixSequence,
+                    Commands = journal.Commands.Select(DungeonDraftV3Command.From).ToArray() }) : Bytes(journal);
         internal static byte[] Bytes(object value) => Encoding.UTF8.GetBytes(JsonUtility.ToJson(value));
         internal static T Exact<T>(byte[] bytes) where T : class
         {
@@ -59,6 +89,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     BaselineFingerprint = old.BaselineFingerprint, PrefixSequence = old.PrefixSequence,
                     Commands = old.Commands?.Select(value => value?.Expand()).ToArray() };
             }
+            if (version?.FormatVersion == 3)
+            {
+                var old = Exact<DungeonDraftV3Journal>(bytes);
+                return new DungeonDraftJournal { FormatVersion = 3, DraftId = old.DraftId,
+                    BaselineFingerprint = old.BaselineFingerprint, RuleIdentity = old.RuleIdentity,
+                    PrefixSequence = old.PrefixSequence, Commands = old.Commands?.Select(value => value?.Expand()).ToArray() };
+            }
             if (version?.FormatVersion != TransactionalDungeonDraft.CurrentFormatVersion) throw new ArgumentException();
             return Exact<DungeonDraftJournal>(bytes);
         }
@@ -74,5 +111,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public TileCoordinate RequestedAnchor { get; internal set; }
         public string Reason { get; internal set; }
         internal DungeonDraftInvalidMovement Copy() => (DungeonDraftInvalidMovement)MemberwiseClone();
+    }
+    public sealed class DungeonDraftInvalidConstruction
+    {
+        public string IntentId { get; internal set; }
+        public StructuralConstructionRequest Request { get; internal set; }
+        public string Reason { get; internal set; }
+        internal DungeonDraftInvalidConstruction Copy() => new DungeonDraftInvalidConstruction { IntentId = IntentId,
+            Request = JsonUtility.FromJson<StructuralConstructionRequest>(JsonUtility.ToJson(Request)), Reason = Reason };
     }
 }

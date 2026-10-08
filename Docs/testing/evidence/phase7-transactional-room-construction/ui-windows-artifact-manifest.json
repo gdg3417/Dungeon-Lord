@@ -1,0 +1,1502 @@
+[
+  {
+    "File": "Windows/build-report.json",
+    "Bytes": 428,
+    "SHA256": "3819BC21F77A2EDA0DBE0BDA16486FC69D8DABCF9552791AB4D05A9A6EE3C3F5"
+  },
+  {
+    "File": "Windows/Dungeon Lord.exe",
+    "Bytes": 667648,
+    "SHA256": "ABC8179E345B70C9D7CA423C54E02739ED9B9ADCA668C2C745FFB81AADC05CC6"
+  },
+  {
+    "File": "Windows/UnityCrashHandler64.exe",
+    "Bytes": 1674664,
+    "SHA256": "8694A5B053EE6F5E093B1BBED806AA7F4375F58696F0046DB4B9A1B85BE64D0F"
+  },
+  {
+    "File": "Windows/UnityPlayer.dll",
+    "Bytes": 83434928,
+    "SHA256": "0B3CA5A98C9D9424FF7D3B311D50C5A2AFB1282AD5D095E5535F29AED6B00874"
+  },
+  {
+    "File": "Windows/WinPixEventRuntime.dll",
+    "Bytes": 58368,
+    "SHA256": "81ADCFD8253C3489BE720DA7E30F16004DC9A1F02A8B418C6C3AEF4993032E6D"
+  },
+  {
+    "File": "Windows/D3D12/D3D12Core.dll",
+    "Bytes": 4725304,
+    "SHA256": "625BD40005B1C3708695D5256ECF230D278E6B8EDBA5A88AF70F3D91324F3052"
+  },
+  {
+    "File": "Windows/D3D12/d3d12SDKLayers.dll",
+    "Bytes": 4930104,
+    "SHA256": "C0730CC70D3250D3DE19C04C17845BA9E70EECAF502D684D1409195EBC5B5959"
+  },
+  {
+    "File": "Windows/Dungeon Lord_BurstDebugInformation_DoNotShip/Data/Plugins/x86_64/lib_burst_generated.txt",
+    "Bytes": 239303,
+    "SHA256": "EBE8DB2362F4240299B297D8D54EEB9FD9A495401F06A853650F6FF7F382C016"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/app.info",
+    "Bytes": 20,
+    "SHA256": "C6F6B8692E8DBCF31C1FC3527E08CA5CBD73975A7D2B289495F22337A0C4FDD4"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/boot.config",
+    "Bytes": 388,
+    "SHA256": "B51A994330C130FE2FAE1B1047A1E02CBA38398801A26B7A70F267E04B16C2A2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/globalgamemanagers",
+    "Bytes": 234484,
+    "SHA256": "E14CEA72146E4EE7D73CCF94F09E5AE8197FDCE14775E88E469A08CA8F5DBB07"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/globalgamemanagers.assets",
+    "Bytes": 1253060,
+    "SHA256": "40ED10050431ED0769D8EEDB88D9F55BE79C7829E0107D79FE718685C9834FFE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/globalgamemanagers.assets.resS",
+    "Bytes": 5718240,
+    "SHA256": "9D5CD592A38D46BD823A36366B1F5B84CF0A2B3ACE58DEC6A6374CA0D50FE6EC"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/level0",
+    "Bytes": 5004,
+    "SHA256": "AE9E36AAE0B41E0FC3C942D2A0DE33B701F573FE52A09BE9B6E6E0F7F4F9AF10"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/resources.assets",
+    "Bytes": 368536,
+    "SHA256": "E09CF9927D23F31702F1D9F87E7B0A8F2F9AE30EAB5029371426AE1B5A6D7878"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/resources.assets.resS",
+    "Bytes": 356784,
+    "SHA256": "164E7FBE39A196C082676775029119270B43A920710B1A3D3D7FE60A7AF73421"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/RuntimeInitializeOnLoads.json",
+    "Bytes": 3401,
+    "SHA256": "420BB379597076EA1BB825617166AB5B1AD4DA571D4BD64AA0FEF02B7D808107"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/ScriptingAssemblies.json",
+    "Bytes": 4577,
+    "SHA256": "2826DD565997E27E3A14F4AD9C335A617573927B3BBA74FE2155818F9A61AC84"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/sharedassets0.assets",
+    "Bytes": 1397092,
+    "SHA256": "1CE4EFA8AA4DAAF38389167315421951BE2ABC73F5D55F7434B9EB6F5FB58CAA"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/sharedassets0.assets.resS",
+    "Bytes": 1716240,
+    "SHA256": "83E1429EB68DCEA8E3A6225A4B5842EFF27CD02E6886C410EA385ACB9F64C7DE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Assembly-CSharp.dll",
+    "Bytes": 1393664,
+    "SHA256": "F1CA330918685F03543ECE6633B97D18528B04AD8AD09FB99F3F6A5E4D9F5CB6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Assembly-CSharp.pdb",
+    "Bytes": 523896,
+    "SHA256": "2E4100071DCA5E66F3C97CE40164C8745C81FA431C85397CF0937174BA5A3E92"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Mono.Security.dll",
+    "Bytes": 241152,
+    "SHA256": "095361BDEC0D4CEDEB86E32584F51E02AE9F74F0BCF105FE34347C12EE09544E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/mscorlib.dll",
+    "Bytes": 4632064,
+    "SHA256": "C18CE37D14AC391AD399BBE0A6C784937895B6B2A5F7187D5D275B6C04C4BF50"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/netstandard.dll",
+    "Bytes": 90112,
+    "SHA256": "6AE62E082DC494A2433984177F60CA4DB5FAE69B1F360A8B33754172B310B8C5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.ComponentModel.Composition.dll",
+    "Bytes": 257024,
+    "SHA256": "84B56A5E6893447F11823E8D35951AA28C4B6FEA9EFF73460174B4B063562033"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Configuration.dll",
+    "Bytes": 124928,
+    "SHA256": "15CCFF56F202331AEB5E28E24138EF5496B6072DB48582ED5C08CE1D519F5D65"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Core.dll",
+    "Bytes": 1113088,
+    "SHA256": "D7ACDD810B2BE97861665B5EBD8D8FCC9C38B613AE0EBF9A2CA961305BE97B49"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Data.DataSetExtensions.dll",
+    "Bytes": 29696,
+    "SHA256": "8C47BF3E74D016131D0AE8EEFE2B7668E46BB4F672CB6239CC6F2F4368B74A36"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Data.dll",
+    "Bytes": 2125312,
+    "SHA256": "5B3EADB7E34F34648516B3DF01AA05C0BC9A4B55F51367CE355E70E13CDF1CCD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.dll",
+    "Bytes": 2641920,
+    "SHA256": "335DA294B98BC7A2B7B1BEF3AD47C2023C366660E800F1FBD23E52F525A59464"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Drawing.dll",
+    "Bytes": 489984,
+    "SHA256": "9A20D5903CF2FBFB1673568D50FA0205150B9268ADDBE57E8284BAA06F5137D6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.EnterpriseServices.dll",
+    "Bytes": 44544,
+    "SHA256": "B0E80A549EC87249DC2E637B862A81661D09E57680BBB73793DA1FF74D3E4134"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.IO.Compression.dll",
+    "Bytes": 114688,
+    "SHA256": "86DFF7ECFBEC819D4EBC128B15525B8D0D818350B8A0A510ABD3D7E7468475DA"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.IO.Compression.FileSystem.dll",
+    "Bytes": 18432,
+    "SHA256": "76EEB7A027A1060E57323E4EFD28A9C8597837F6F2FF6B78C7C7D78DDF076A28"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.IO.Hashing.dll",
+    "Bytes": 50488,
+    "SHA256": "AC7AC3E83805B0B621C48B90543DC733C9A89106835278618357D6187E3DA74E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Memory.dll",
+    "Bytes": 4608,
+    "SHA256": "C4F030A2CBA7DA7CDCF493257C24560E203D355904AEE490D645A935842F834A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Net.Http.dll",
+    "Bytes": 122880,
+    "SHA256": "FBC291E820BE4628CA2CCF67D2D93809CAC12135726639BE39D11FF39796274D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Numerics.dll",
+    "Bytes": 119296,
+    "SHA256": "B890A4CA4551337FD57C917DC7AB5E08556155ED0F1AE3F86D82EAD4E9990A88"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Runtime.CompilerServices.Unsafe.dll",
+    "Bytes": 18024,
+    "SHA256": "01748200F2400C742AA689F1F5101BD6298EFDFD92C00C18F4FA473847235BA9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Runtime.dll",
+    "Bytes": 12288,
+    "SHA256": "E0A7334B7BA419AAAB6BD3BB6992D693E689341A9178172C9BF99C2AA6A085BD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Runtime.Serialization.dll",
+    "Bytes": 934400,
+    "SHA256": "5AE1E07F3DA222777BD1442666BDBC8188550680A5CBE1E2E66B59E7749D91F0"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Security.dll",
+    "Bytes": 320000,
+    "SHA256": "D2AEE18D6CEEBE5D65F38D6CB0E05EDDE11CDEF2DCFE2EEDA3150311E9BC2DDE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.ServiceModel.Internals.dll",
+    "Bytes": 215040,
+    "SHA256": "22C0CCF71190679F48AAF0898D80B5081A3BEBD446CD18A10C6A517031C24D48"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Transactions.dll",
+    "Bytes": 35328,
+    "SHA256": "76AB09BE75F53CCF0A11511E7AD9A651AE1CE9D613B9B76D2430FD9A00E0DBC9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Xml.dll",
+    "Bytes": 3160064,
+    "SHA256": "4337D9C85F5821C50354FB38AA8932AAA189A795235F3BF5903665FE734CD8A8"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/System.Xml.Linq.dll",
+    "Bytes": 136704,
+    "SHA256": "366267298E4279C54A7EE29C39E4255989920EE3B09EFFDDF972C836EF41372B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Animation.Runtime.dll",
+    "Bytes": 98816,
+    "SHA256": "AD099A7EC7185F451A479522ACAF5867BEBE99B1670D0E432953C6442C1217AA"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Animation.Runtime.pdb",
+    "Bytes": 61688,
+    "SHA256": "F9959CA74D63147CD199A262631938DD0D70D462128656AFD7496D8759808605"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Common.Runtime.dll",
+    "Bytes": 63488,
+    "SHA256": "8D3178AB049F183E45A7189011151CC8B857EA6F4200B5D6C3F75EF0FC75B154"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Common.Runtime.pdb",
+    "Bytes": 53500,
+    "SHA256": "8A73B877E3A8447816EA56DAA13C09DACF78F3B473AB8F13C98295C56E7C2531"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.IK.Runtime.dll",
+    "Bytes": 43008,
+    "SHA256": "ED3252132E8E302DF9A36FFAF396261DFB2A67FC9454B47CD8A680E2CF77B05D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.IK.Runtime.pdb",
+    "Bytes": 36488,
+    "SHA256": "4688C58D4F894E0443E379F6F3644DF4E8A0F380E3C3D8426552284F5DC3B440"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.SpriteShape.Runtime.dll",
+    "Bytes": 126464,
+    "SHA256": "9AF75C3E87B12800A35DCB76B96792EB43E118062C8627FC61FEB209F8BF2780"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.SpriteShape.Runtime.pdb",
+    "Bytes": 86644,
+    "SHA256": "C5DB174D424C80E4B73E5DEB514C9E8B92EF43E42E7E9656EBDFED9030042D4B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Tilemap.Extras.dll",
+    "Bytes": 43008,
+    "SHA256": "08157DC3A5922311CC97D72B57D396417067D79E7276DFB120A63697ADD252A5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.2D.Tilemap.Extras.pdb",
+    "Bytes": 34040,
+    "SHA256": "B0D0D89834B558CBF735C290C8EA4C4DB1AED910F5E5D7A9DA5193853704EBB9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Burst.dll",
+    "Bytes": 335360,
+    "SHA256": "30E0F830D52652160255E791E0514B51A19EB13FF6E1A384AF156F0E21315990"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Burst.pdb",
+    "Bytes": 220924,
+    "SHA256": "E97AD59AAE904CBB65D4292B0D104B16930B118BC1488727F8B94A692689253A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Burst.Unsafe.dll",
+    "Bytes": 5632,
+    "SHA256": "9D9C1FF52411DECBEE5D9F0D1CD61EBEAA222077AA77A52101EA3DEBAFAE98E2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Collections.dll",
+    "Bytes": 496640,
+    "SHA256": "A0DF5105FD7DDD20C17F22C58326D4322D021670F8AE65D3677260E305B4FA75"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Collections.LowLevel.ILSupport.dll",
+    "Bytes": 5120,
+    "SHA256": "FF50383F807F9692E4913B97E47D86FEFCB8FAA33D6D48CD3E3FD6FC7FFB448D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Collections.pdb",
+    "Bytes": 313732,
+    "SHA256": "BDCFC6B191463EFCA2DE56B1EF026021E9CBF74033A4E199CE41959A79CCF65B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InputSystem.dll",
+    "Bytes": 1268224,
+    "SHA256": "0CB73194423EBE0A88737294CFDB9BA62716B904DBF6F2E8E4AE7A2AD33F8A70"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InputSystem.ForUI.dll",
+    "Bytes": 16896,
+    "SHA256": "FB9D0367385C289987A73AD35884501ADBC5CC046480D36EC1606B202E18B4B4"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InputSystem.ForUI.pdb",
+    "Bytes": 21500,
+    "SHA256": "C7B2959477B0947F4D546D4C9464B339B34287CFA9717330383C6513725F2433"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InputSystem.pdb",
+    "Bytes": 576492,
+    "SHA256": "CBE773EA8F9B062461A45C15E94DC5EB481A35AF607B0E9F6C33328E4965E931"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InternalAPIEngineBridge.001.dll",
+    "Bytes": 7168,
+    "SHA256": "458177D20D1D228A0A233046BB5E09BB8147374B4EE4BF529E9736A2CC5D5FF7"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InternalAPIEngineBridge.001.pdb",
+    "Bytes": 17856,
+    "SHA256": "BF4CF6CBC471D67C3493D80AA57A944D99C7170801AC8FA19A1A308D16BDB151"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InternalAPIEngineBridge.004.dll",
+    "Bytes": 4608,
+    "SHA256": "4DA16BFF8459145C438890101EF42E5EC107A999C00C86B25E1C62E6FC877E15"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.InternalAPIEngineBridge.004.pdb",
+    "Bytes": 16932,
+    "SHA256": "B1226D075D8B20D6DC94C0F1B7B0E5B2EEBB1BF550630404ABA96B54A70CAAEC"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Mathematics.dll",
+    "Bytes": 886784,
+    "SHA256": "E798072A2485E03EA98BA34C3FCAF48E45C152855EFA59A3DC04BB4DE82E3E3C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Mathematics.pdb",
+    "Bytes": 516336,
+    "SHA256": "1F25E2FEFC3E08F0F3CE7B074D913A93CA4F78B1E4BD2137DAD2186DB49D32D4"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Multiplayer.Center.Common.dll",
+    "Bytes": 10752,
+    "SHA256": "8C9B19AAC8F6E8EE02C32307973AD92B2CD85A8EFBE33FA0197E65DABE2EB799"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Multiplayer.Center.Common.pdb",
+    "Bytes": 18596,
+    "SHA256": "83149687B6EAED985E40CD5114CBCE33FF65AC4FE68931AD04E53C48B5C71681"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.dll",
+    "Bytes": 9216,
+    "SHA256": "7148C15A72F7A7A8B77ADFA1F24E0357274E7E7822FC1499DAE85DA1FB8AA31E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.pdb",
+    "Bytes": 17344,
+    "SHA256": "7AAB855964B290B7853B40166729E5581C141BE636D5586123440C2C522143B1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.Runtime.dll",
+    "Bytes": 1290752,
+    "SHA256": "D69C8391A11B49EED19F85E1D09C9EF840687FA10193E59DBB0742670CF4E1EB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.Runtime.pdb",
+    "Bytes": 480328,
+    "SHA256": "0C87519E16084D256E21AFD5D6167EA9AB3FFA3ECA2811BBF2ABA29BCAD8BF1E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.Runtime.Shared.dll",
+    "Bytes": 5632,
+    "SHA256": "0C781A09E3C55C21849150E43951572B2A88B3F72FF0C8B83E319CA14FDA90A2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.Runtime.Shared.pdb",
+    "Bytes": 17108,
+    "SHA256": "78274D6D3BE1AD315D29D1C0E276CFF3C0C02E2A7690D1D043221A288AE7E68D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.dll",
+    "Bytes": 4608,
+    "SHA256": "91B3638FDFCA9DE4A9F4E45A4E12D2E913611E417FE4FC4D98AD902E8A8E7804"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.pdb",
+    "Bytes": 16848,
+    "SHA256": "5925B9A6906AF4E05A60741EBBC004C4D31C77D84DCB2B93AD0326BA86B6B316"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.GPUDriven.Runtime.dll",
+    "Bytes": 258560,
+    "SHA256": "83438CE810287FACA379756C637265011C7E2A134161784EBCC36571B1740816"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.GPUDriven.Runtime.pdb",
+    "Bytes": 130020,
+    "SHA256": "DC5834DE987D641C0FE59419EE13BFADE1FA5E21AB6D93A02CC0E6DA773A640C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll",
+    "Bytes": 4608,
+    "SHA256": "B3061FBA0741927806CD35419855AC83547794881592819B6127E23B9F783AF9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.pdb",
+    "Bytes": 16832,
+    "SHA256": "85BB1DD77424D4DE55A51E3060358331FA79936897D96D4DE4985AFA007EDF5B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.2D.Runtime.dll",
+    "Bytes": 258560,
+    "SHA256": "C8118F8E6F1783523D9240D95154DB56B893B56D1C58C0C990AA9C01D43022D0"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.2D.Runtime.pdb",
+    "Bytes": 157508,
+    "SHA256": "991D78B1450CF272F04BD071C8F73AE15E2CC7746097095229A6183EB02CA119"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Config.Runtime.dll",
+    "Bytes": 5632,
+    "SHA256": "34F47431ED7FBAE2C831029B3B3A93EB2329963BA68D4E9BC3CB513F48E2A4F2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Config.Runtime.pdb",
+    "Bytes": 17008,
+    "SHA256": "1A88E165F674AA4F39790F80EFC3C2C009D284251681A238336037088091C0AE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Runtime.dll",
+    "Bytes": 799232,
+    "SHA256": "3CAFACA0F48AD1DF240DE5A6F4944DDEEE4750002326FD0CE58143F418178C6C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Runtime.pdb",
+    "Bytes": 324548,
+    "SHA256": "786F9717E33991EBEED1329E413587CB67436775300C1B1990B811881CC913B0"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Shaders.dll",
+    "Bytes": 4608,
+    "SHA256": "7F063CFA4DB5444A1494A1ED252D711ECA1EE7DCA1C3AC929C4D34DFF598BBBB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.RenderPipelines.Universal.Shaders.pdb",
+    "Bytes": 16840,
+    "SHA256": "C608F06E679F00352ED825181CDA1E449C83F53480F48337300D6A711BA9EB46"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.TextMeshPro.dll",
+    "Bytes": 507392,
+    "SHA256": "E8A7CDD5F425E55735B1BE52AB93333D9FCA565D560392DF99831430323E1777"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.TextMeshPro.pdb",
+    "Bytes": 257500,
+    "SHA256": "A62894F59FC3438835F03459B2F6E94D9E7B0F5E33C5F828BB93FF83DA29B45D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Timeline.dll",
+    "Bytes": 147456,
+    "SHA256": "E73993CF7B0D886C0BE4DE9F3D1CDA666F4E54D922B3FD57467C63CA5BD9E73C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.Timeline.pdb",
+    "Bytes": 90596,
+    "SHA256": "FF8EC14F03E7E984768D8CC3FB9BDB1BFC74B829209A9CB21927872A4F2C1844"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.UnifiedRayTracing.Runtime.dll",
+    "Bytes": 111104,
+    "SHA256": "7EE64607A824A4A4962E2F7F402091E149BE77820D87893C8C13598D8D851945"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.UnifiedRayTracing.Runtime.pdb",
+    "Bytes": 60008,
+    "SHA256": "0A029A31C6507A43476C8E88F5F49F8768724A9EFAAD609BDA7C7DB1D7ED08D2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.Antlr3.Runtime.dll",
+    "Bytes": 86016,
+    "SHA256": "ED7CE205F66EAFE39BBB5D084D42E7FE11CB4B386FF208E5D5110891BE0B7B37"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.Core.dll",
+    "Bytes": 673280,
+    "SHA256": "CA5622DFD3FE97377AA372003ACEE79EE6BCDFE4C7ADD21B1F67072EE44F4EB1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.Core.pdb",
+    "Bytes": 336696,
+    "SHA256": "ACA9D0B6524E8DB0902E337C0E61C050A739131B4C01A5E26D2B9B710591A505"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.DocCodeExamples.dll",
+    "Bytes": 7168,
+    "SHA256": "D05EF8768BE7682BF51D3076F599A68F1992FF376E17900CC92BA6C2A6D762E5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.DocCodeExamples.pdb",
+    "Bytes": 17580,
+    "SHA256": "AFEB1EB5BBCEEF60FB06C7248600D1AEE55463318A2912574B960BCCB3C406C0"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.Flow.dll",
+    "Bytes": 433152,
+    "SHA256": "FEEA23F1342ACF2D122B3B942B89C676EADF28D23582FD3CF1081B083E218C07"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.Flow.pdb",
+    "Bytes": 221568,
+    "SHA256": "AA2CB758AF3A800EB8E7C31C281BCB5022ED786A4F3C8F0764042192A4E8E66B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.State.dll",
+    "Bytes": 33792,
+    "SHA256": "E1D449E7A2A56DBA3EA946BA65AA6CE224A85CD365041A35830A52500E562197"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/Unity.VisualScripting.State.pdb",
+    "Bytes": 29944,
+    "SHA256": "C43B27486F06761D49BF03A4DC02B11ED9EF31EF545ACFFF7041AF340580854C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AccessibilityModule.dll",
+    "Bytes": 50088,
+    "SHA256": "ED91ADD45EAF3BE0C7832AABC1EAC18C1F5C132B7F157BE6DF950BD577D5A62D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AccessibilityModule.pdb",
+    "Bytes": 22684,
+    "SHA256": "80718986C5BDF37FD193E47EC22716AFBE8054BF01CC5A4FF36738263E8204E2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AdaptivePerformanceModule.dll",
+    "Bytes": 120240,
+    "SHA256": "67923EDA7A3BC06970EB3F1CD3202D923F8E3A73079EE26D5176692B46032651"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AdaptivePerformanceModule.pdb",
+    "Bytes": 50964,
+    "SHA256": "469AADB9821AAB221B8CC150BCA38779B8EBD9412E5CF607E05E033E431423CE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AIModule.dll",
+    "Bytes": 77224,
+    "SHA256": "FA154E6F32E5DD47CBC3D94B8DD0D67736BDD216924C00833F2B3F0171FAA4EF"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AIModule.pdb",
+    "Bytes": 20628,
+    "SHA256": "0A0E05604E8C445C66C30C3A3C34FDE565E32853B58DE38EBFE352CEE1D8E50D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AMDModule.dll",
+    "Bytes": 21928,
+    "SHA256": "E771307E9B00047E2398D3FB58DD6F1F810B016B52008155A5F9EEEBC30D5CA6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AMDModule.pdb",
+    "Bytes": 11996,
+    "SHA256": "3192CDD8D7EF35BE9CD51191DD298D1F4DF0CBB1CFE2153575FB4BDC15FFBE4D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AndroidJNIModule.dll",
+    "Bytes": 121256,
+    "SHA256": "4EA73E5292141213011A9EF35BE820DCC7D650CAB443F1081AB880C0C7F78449"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AndroidJNIModule.pdb",
+    "Bytes": 50196,
+    "SHA256": "B4780BC4BEF516BACF9865F947B8C33739DC9973AAE359DE665C8E8AE41F021B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AnimationModule.dll",
+    "Bytes": 225192,
+    "SHA256": "90A876EAA9AE4AF9B52BD726ACA755D50971EBF0FAA77F96EB211A2456E4385F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AnimationModule.pdb",
+    "Bytes": 60740,
+    "SHA256": "DCCFA031F81FEFD464BBD83FD3212EDA661A726AB4896A65E691E27B87CF1A8F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ARModule.dll",
+    "Bytes": 25512,
+    "SHA256": "0556B9CDD72584E47E8DEB2338D4A5CC97B21E55D5ED392AC70B1F5D272A83A1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ARModule.pdb",
+    "Bytes": 9976,
+    "SHA256": "D6C7FB25A85F6B2307F4E9E644CE5556CE05B50E127F044217DF928662A70EEF"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AssetBundleModule.dll",
+    "Bytes": 41896,
+    "SHA256": "B2F4B168DBD3238A6C61502E4D99DE78F50F221DC1BB52DA5EA9C0F5CC298AE2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AssetBundleModule.pdb",
+    "Bytes": 14116,
+    "SHA256": "C0754F64FD15D1C7BB4F59B9F2C5847C4468BAFD552D029266B1F5CEBC4F03E8"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AudioModule.dll",
+    "Bytes": 142248,
+    "SHA256": "64ECE77B731F560F51A62E021FF71B6116A04C6AD30C1D8824D9EE2F51745575"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.AudioModule.pdb",
+    "Bytes": 35052,
+    "SHA256": "4B4C24A09BD475DD6497D3C35BBA234716DC0813225118047BB382544998E6A6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClothModule.dll",
+    "Bytes": 36272,
+    "SHA256": "C6F745F03C543E1467050CE068CBE9DA1DB5E28CADEDF3C8E8A11FF5413BF701"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClothModule.pdb",
+    "Bytes": 10560,
+    "SHA256": "E59E94DA61ADDCEA4CA51D8E7223A378BC0C89EEAB2C31642516FFD38F866690"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClusterInputModule.dll",
+    "Bytes": 27560,
+    "SHA256": "0A3CC34F15839FB2D3EAE4A42979D112389924D9DC64A0C2DFBB9B2DD8F72235"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClusterInputModule.pdb",
+    "Bytes": 9360,
+    "SHA256": "86E8B065187A539B9DD811D42C970B61ED4D1246E5C20D0313DC1AB7FC895C6B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClusterRendererModule.dll",
+    "Bytes": 26544,
+    "SHA256": "0704F33F3F16C34FBB74A29CD85361F2A1972B0A1A4A578BAD32AE6922CA0EC5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ClusterRendererModule.pdb",
+    "Bytes": 9968,
+    "SHA256": "9E147938CD3D7BD9CF77B9F25FD2C8F2FA827EC4C063A9D49FB2C21A76E46F55"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ContentLoadModule.dll",
+    "Bytes": 32168,
+    "SHA256": "271DC2D84370BC3A1D75D485847F7A88CA37338BE450E6E5A24585076E81FB45"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ContentLoadModule.pdb",
+    "Bytes": 11140,
+    "SHA256": "0BD680DB1585862F186FE65DC79ACEBBB1D1F9285431F3CA2C864CCD70C456BD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.CoreModule.dll",
+    "Bytes": 1981360,
+    "SHA256": "397F712CEDFB3FE75FAC5A476A84043AC231B8FBD9EEC7CB75941BDC0DA4DB7D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.CoreModule.pdb",
+    "Bytes": 572168,
+    "SHA256": "4A0E0D1D1CDA0398DA07E5DC6B131D991FE0F90BD0F7EE615C45263F0BF7DB25"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.CrashReportingModule.dll",
+    "Bytes": 26536,
+    "SHA256": "41AC0029663E1F855E8C572BBD18A816FCC6B3B1CCDD2C987CC4AF36CB578CD6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.CrashReportingModule.pdb",
+    "Bytes": 9972,
+    "SHA256": "85E30803CC26BF782F523E406C8DD8CCC79B8A7C7563AD5C50C2BA6214220D21"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.DirectorModule.dll",
+    "Bytes": 41384,
+    "SHA256": "C5065683F20566B32313F2C8DC30AC6C4E0998F9CFC59BC27475621A17B6A0F5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.DirectorModule.pdb",
+    "Bytes": 13888,
+    "SHA256": "411D855378B37B3D98859172BA494A2C26BC4CFA8342EA4E8DD31EE34866F494"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.dll",
+    "Bytes": 196528,
+    "SHA256": "74F610C588375C6FCA6A556D91BA076416DCF10C192ACC751D9A4E13FE244CC2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.DSPGraphModule.dll",
+    "Bytes": 31656,
+    "SHA256": "F4CE3C98EBEAF366D5723EA351213FA5FB0F874EAB17AEECED911D07FB377E7E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.DSPGraphModule.pdb",
+    "Bytes": 9568,
+    "SHA256": "0E405D2F7FAAE7C7312474DBA71F0DB6037210B51CB86D90857E0FBF1D976F41"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GameCenterModule.dll",
+    "Bytes": 45488,
+    "SHA256": "F288E5A9BB6C9A3626C96156D612EA211F6B58E37FAB7686E7B7994DC0E15E54"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GameCenterModule.pdb",
+    "Bytes": 17452,
+    "SHA256": "1AA32F55952CCDA8A969FE8B448D2A64DB7EB963DD200860225A53DF48C692F3"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GIModule.dll",
+    "Bytes": 24488,
+    "SHA256": "FA10ACE4100139DD72CB13427755620C07CD369CCD80EFF98C8A33F33DB77405"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GIModule.pdb",
+    "Bytes": 9240,
+    "SHA256": "2C5D171BDCB2B5FE2C4A723A350147A9B6E16DD94331E97F783AC0A73131D948"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.dll",
+    "Bytes": 14256,
+    "SHA256": "C319D01BDDCB459210870F4C207BE41651C73E539CD5B6A809E3F19AD7CC9B9D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.pdb",
+    "Bytes": 9268,
+    "SHA256": "CBB129845E091E0A9EA1F8A8560853357485A4A84D036229981D3CC88D1D3126"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GridModule.dll",
+    "Bytes": 30128,
+    "SHA256": "50D98920F4D06D9331A3AE1F529A8CFEF97A7562D3C7D3B17ABBE851CF212F37"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.GridModule.pdb",
+    "Bytes": 9996,
+    "SHA256": "C6A00DADE80AFBECFE4EF57FF3C6ACDD94DA36DDC1AFB03103E72C751288AE17"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HierarchyCoreModule.dll",
+    "Bytes": 109488,
+    "SHA256": "65FF0DA572855945AD43C2EF4090ED0EB5C38F46C0E733D23CEF4C43991E3C21"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HierarchyCoreModule.pdb",
+    "Bytes": 36404,
+    "SHA256": "B5DCA782AE839A49FF545CCEC7A9DD15A4637707FE4557F25B76FDDC4DBE0175"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HierarchyModule.dll",
+    "Bytes": 102320,
+    "SHA256": "38697D6D777E126D5A6E5ABBA8F9B33DCD725C595E96B0734B16272E4CF6EFA2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HierarchyModule.pdb",
+    "Bytes": 47624,
+    "SHA256": "A8D7895597EEBA13C8C17C6DA6AC61DA1F2D999204198DD90B55A6E187D78C0C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HotReloadModule.dll",
+    "Bytes": 24488,
+    "SHA256": "B4629CF9AE38785FA5806E566C00C73127615A98F16565FB909CBE49CE2180B6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.HotReloadModule.pdb",
+    "Bytes": 9240,
+    "SHA256": "8471D3860FA17C2A17BE7AEBC1E0ED42F737081DBA3A44A7087C651C92FF87E6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.IdentifiersModule.dll",
+    "Bytes": 14768,
+    "SHA256": "E66E3E13068A772CF1F4E8F2441DF353D8234D0B067BD236963D0320CDE6F94D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.IdentifiersModule.pdb",
+    "Bytes": 9504,
+    "SHA256": "077F626B309E905EADB72D787461C4351CB111E8C82C2E5585FB29A3DEE00601"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ImageConversionModule.dll",
+    "Bytes": 31144,
+    "SHA256": "DE28149E20E5EF52F30599FA405026D2DC0017A533827FFB88AFB1CFBFA4EA13"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ImageConversionModule.pdb",
+    "Bytes": 10580,
+    "SHA256": "F747F2437851BD318ADD0040207F5AC9149E80AF7E91C7B549CC081D3277FCE6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.IMGUIModule.dll",
+    "Bytes": 192432,
+    "SHA256": "442F5EAEFD63E15D4EE3A81970259300222F134497CFB8DAFAD14BB26CB2F7A7"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.IMGUIModule.pdb",
+    "Bytes": 78316,
+    "SHA256": "857D765E84E1D8CBEE1F99947F06D1D2A7C8E119E58D65F873DEA6ADA5E8973E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputForUIModule.dll",
+    "Bytes": 57768,
+    "SHA256": "5F385F4A784C31DAD150918141AF7E90FE3B2CDCDC20268533C01F131BF26F1F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputForUIModule.pdb",
+    "Bytes": 26072,
+    "SHA256": "5073B5F1C52AF52D11E7301B09BE3DF5EB84A029C338C4136594CCB256800F30"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputLegacyModule.dll",
+    "Bytes": 45480,
+    "SHA256": "D58BF233C9091FD532428C642FB946E402C0EE67E479EEF519CD3524D200227E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputLegacyModule.pdb",
+    "Bytes": 15348,
+    "SHA256": "34D8EC5F1432D49983BDF246DA203A2B750ED498C77B8AF1F658626345389B59"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputModule.dll",
+    "Bytes": 28080,
+    "SHA256": "B8DF3827B1CC1157F353AEEFDF5BA47C37B05DE9C6DC3F6064E01862478475C2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InputModule.pdb",
+    "Bytes": 10612,
+    "SHA256": "5F22DDF6F81D32B5645BDF5C5EB43D3083241E71693AA1F080A47F5EE1D6BAF3"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InsightsModule.dll",
+    "Bytes": 14248,
+    "SHA256": "EB58601550862AB580EE1D1DAB04BA13B44666F8A45DF21F4D207FD65A072922"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.InsightsModule.pdb",
+    "Bytes": 9564,
+    "SHA256": "9891890CA8508D3492A3C9481D3317627A98FABCAFF11A8F4AB9549D509DF3BB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.JSONSerializeModule.dll",
+    "Bytes": 27048,
+    "SHA256": "2A90967F36100A76E9052114CC661952E150256F2AF0D1D858CE6ABADA83A048"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.JSONSerializeModule.pdb",
+    "Bytes": 9864,
+    "SHA256": "79744F8D16F01B08892BCF70DA8FCBC2E78B7DA629D9EAD4EFC3BEE30E35A628"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.LocalizationModule.dll",
+    "Bytes": 26544,
+    "SHA256": "99D51692F5CFEE611F17266269963C006132DA8236C58A49865647C6158E0B45"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.LocalizationModule.pdb",
+    "Bytes": 9660,
+    "SHA256": "F4D5BCBEB24EE07DD6244D8E0D4EDF153062B2E05AE40E5CC5793413AAA4E94C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.MarshallingModule.dll",
+    "Bytes": 83376,
+    "SHA256": "31B692202EF8B937C0F8790E31A0177E6A6312813F71FD513EDB7E95EF478C3D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.MarshallingModule.pdb",
+    "Bytes": 14252,
+    "SHA256": "A7B73E2A84BFAE7227B2F3BF29D372C25CD942EB320ECAED3089CAB61E556025"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.MultiplayerModule.dll",
+    "Bytes": 18344,
+    "SHA256": "F0138F3F30FBA3F9E0F18E5A04B68C796A2A92FAA105EB1877F608CCDD2547E1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.MultiplayerModule.pdb",
+    "Bytes": 10360,
+    "SHA256": "CD693A1B45AE84F520B5B9B1F9E490D9C1679D591B900176466EC90FBBD664E7"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.NVIDIAModule.dll",
+    "Bytes": 40360,
+    "SHA256": "7A7B3C2EFC9AD04FBB7BE6370E8D4B186EED20E5A2913D99E04A74FBAD5C95AD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.NVIDIAModule.pdb",
+    "Bytes": 16196,
+    "SHA256": "2C98508B02886067B31A3BAF6B6F28849C5D287697481925AC47D9EBCB02AD17"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ParticleSystemModule.dll",
+    "Bytes": 171440,
+    "SHA256": "4ED5CA99E014D960D91F940545AEB4999DC845D89A1D9F9AFDFB41B71353EF79"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ParticleSystemModule.pdb",
+    "Bytes": 40428,
+    "SHA256": "A1B186AB040586037B1984DDA741C682ABA1742CA85B4C7637E2D7B641DBAF20"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.pdb",
+    "Bytes": 12676,
+    "SHA256": "FE0D10EC73308FF9491BC867BB758687E5647686F2753BACE3B974CDB567871F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PerformanceReportingModule.dll",
+    "Bytes": 25000,
+    "SHA256": "5D14C1E837CA29CE63A1D1AB71642B15675C5A3FB9A09A6DC24125C82643F746"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PerformanceReportingModule.pdb",
+    "Bytes": 9448,
+    "SHA256": "8AAAC1C08FC59B12D6E515D0917B3464216E5BAF0E9C40CB82A839C93CE0053C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.Physics2DModule.dll",
+    "Bytes": 572848,
+    "SHA256": "80D63F114233639EA9A2D3BE9C17FABEF0411201CC3A3B02D962675A4D26D172"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.Physics2DModule.pdb",
+    "Bytes": 132160,
+    "SHA256": "377F8424D2A9E1AB54A3C906C34E3C09C348288B0123B86743B195ACED1AB826"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PhysicsBackendPhysXModule.dll",
+    "Bytes": 14248,
+    "SHA256": "7FFD721F10C270CADB778EE19082F2954F10E631914677C65D54FF4ADCE9BFE9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PhysicsBackendPhysXModule.pdb",
+    "Bytes": 9260,
+    "SHA256": "2C51E02E0F5394E33286D958DF9BB36AC53C459DBC3C532890AC4EA622B03CA9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PhysicsModule.dll",
+    "Bytes": 181672,
+    "SHA256": "C90AC913BADDE75BFCFA5DF1E2EDDE04037C8A827EBB1CBC18BA491E4573B389"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PhysicsModule.pdb",
+    "Bytes": 45500,
+    "SHA256": "5352764229F568992E2740359114D57A12887F4CE5F42D07A9C0A6C6840ADE23"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PropertiesModule.dll",
+    "Bytes": 149424,
+    "SHA256": "EFA7524D5156AD64034AC986DD759C40BED2CF01AE3D2980687BA39BD33DFFF2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.PropertiesModule.pdb",
+    "Bytes": 59004,
+    "SHA256": "10DCDCC8B95F729031276EE77BB7CDC342DCD9C300B14BD85631A89CE95FB702"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.RenderAs2DModule.dll",
+    "Bytes": 25520,
+    "SHA256": "3D9F9BC47042F8DA7BCC67C4E3AED5183A54269FDEDB070609B529398E977FFB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.RenderAs2DModule.pdb",
+    "Bytes": 9288,
+    "SHA256": "1BECD8C6B71F6FADA752B8520948480A55610CFD8BBF63556168EB75B89B1EA3"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+    "Bytes": 24488,
+    "SHA256": "74D0BD01C4F18113C7CD0F7900B4F3779B7A43DCD8D0084877FDBFAE46A77992"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.pdb",
+    "Bytes": 9304,
+    "SHA256": "47D17401138F513DAD1E92C57562636FC456855D86AC74A5591CF593AC12D709"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ScreenCaptureModule.dll",
+    "Bytes": 26032,
+    "SHA256": "623B579104E94D868730C8FE08E10C28B45E61C7524D81F469ADB06D61DFBDC8"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ScreenCaptureModule.pdb",
+    "Bytes": 9844,
+    "SHA256": "B713E7D59992ED1B5E1A86975A7349E06F2DA87DBE0DB210D4ADE7D0F9689FF6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ShaderRuntimeModule.dll",
+    "Bytes": 25520,
+    "SHA256": "2FBD733561A7A8E42625FC9BCFFA52E23886DDB478A550AC102A289AE3D1B4E2"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ShaderRuntimeModule.pdb",
+    "Bytes": 9280,
+    "SHA256": "A66B53A121B3AD85EF461E2C0B7B96C8BD0E7FA9C738EEC5247841715E80ED7A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ShaderVariantAnalyticsModule.dll",
+    "Bytes": 24496,
+    "SHA256": "334DDF42D7AADC215CD5D318D4D17FDA6775D77FE8F4B0C8F9853E6CADDF8D56"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.ShaderVariantAnalyticsModule.pdb",
+    "Bytes": 9364,
+    "SHA256": "19308ECCEC535ACEA9D67191ED6DAAF63242446718CB10D674F8BBDFB6162A7A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SharedInternalsModule.dll",
+    "Bytes": 37800,
+    "SHA256": "11B75777B89CD0E8C00C4ABE6810ABF3758CC99A60924D501655B8535005B7E4"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SharedInternalsModule.pdb",
+    "Bytes": 14252,
+    "SHA256": "015EF2AE3758FCB267FBCA33A7FF1955406A539DA57BC8CE21FAEA510CAD5FC7"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SpriteMaskModule.dll",
+    "Bytes": 28592,
+    "SHA256": "985B38ACCC0BB76BF3334A04F87BA97FDCC6001AD8BAD60E14E85EB7B3DC85CB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SpriteMaskModule.pdb",
+    "Bytes": 9572,
+    "SHA256": "0F2BB28F8639106202E6EEBAA39D8C1490303D57A88140604FF14DE4CA068843"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SpriteShapeModule.dll",
+    "Bytes": 31656,
+    "SHA256": "2371C4863C1B07F434FE730DF14FEB53DAC564ECD2E51EDCFBE77DEA625ABB87"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SpriteShapeModule.pdb",
+    "Bytes": 10800,
+    "SHA256": "4EF9AF6CD8AE10E22258DDF2D041E7F6AFB042C5B4E41E443E80A393F97E2A61"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.StreamingModule.dll",
+    "Bytes": 25512,
+    "SHA256": "CD177E3662D7BC48C69DCB10DE752BB53BEFEDEA95A4ED263A206F994DEE7AF8"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.StreamingModule.pdb",
+    "Bytes": 9316,
+    "SHA256": "7BBD8B06A89A3C41D6E54FFA3879766E77CFEF629D18C83521FC4F5418D9184A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SubstanceModule.dll",
+    "Bytes": 29096,
+    "SHA256": "FC1DD4697BBB7D6008445DBB5CD004BA1DFF6E82388964D18E7B9FCF0BE0DA48"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SubstanceModule.pdb",
+    "Bytes": 11444,
+    "SHA256": "96BD400FB4C218AC6DF4FCDE638BF31333EA30BC3B70AEAC66E49C3B780968E0"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SubsystemsModule.dll",
+    "Bytes": 41904,
+    "SHA256": "8FBA94FFDB199A62693F10DF0049BAA9C6212DDA22C331EF5C3A038BCF9FDC8A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.SubsystemsModule.pdb",
+    "Bytes": 15984,
+    "SHA256": "033D0435CCF1E3C569AAF0F6DAA475FA384EF7A3556EBCB38CEF24310F68AF30"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TerrainModule.dll",
+    "Bytes": 133032,
+    "SHA256": "6CD71A3EB61B07AB3A54EDA79BC66EA08B48835485404E7D5BAD52D5F41619CC"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TerrainModule.pdb",
+    "Bytes": 33936,
+    "SHA256": "6F936E01B8BFC2E41D62D14148026F8A534CCC07DDFE675AF200FFDD9F47D0B1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TerrainPhysicsModule.dll",
+    "Bytes": 25520,
+    "SHA256": "D5C289A753C2B82B121ACC5246C0F97416D7870DC2F4A2AA71D45224DAF39423"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TerrainPhysicsModule.pdb",
+    "Bytes": 9704,
+    "SHA256": "0DDE26BBDBA80B33072E5447BE52500ED1D61EB4DBE296FC063F6F9CC30EFDD1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll",
+    "Bytes": 81840,
+    "SHA256": "8C8A46ED5A1771A74282BCAFDC4855187F376B99168B48F160B4A94C92175EFB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextCoreFontEngineModule.pdb",
+    "Bytes": 29276,
+    "SHA256": "D5641DEF0B34202957C1B9BB3198F343048D1ECE94775AA990B5AE6FC3422353"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll",
+    "Bytes": 345520,
+    "SHA256": "625AD3AEFD3E25F1767E31763B68D9D399E667557A6C51A261252B6FA39E49EE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextCoreTextEngineModule.pdb",
+    "Bytes": 159608,
+    "SHA256": "AA14549F62BA7D599F352BF9BD5F24114617483BAB4B3C0D620722328343F2A9"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextRenderingModule.dll",
+    "Bytes": 39344,
+    "SHA256": "5F5516661599B7631ED6DD3CDD46180E62122F1A62AC9FBC8E787267DE7E8D52"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TextRenderingModule.pdb",
+    "Bytes": 15344,
+    "SHA256": "2F8913098DB5FD62D64B82F2A73EAB2FCD0CCED26A828BF0ECE8ECB67FD0EBFA"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TilemapModule.dll",
+    "Bytes": 57768,
+    "SHA256": "2E69957477762D935C0E0C09E45378FC88129F3EEDF66A38A5B3D0A60914B6C1"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TilemapModule.pdb",
+    "Bytes": 18976,
+    "SHA256": "AEDE7160841ED06C0041459759167DE2B1E9662E562434EEDDA8176B6DE8E747"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TLSModule.dll",
+    "Bytes": 31144,
+    "SHA256": "A0285BFAF120C2B1DC445E7751EA2826D905EDED45E75C6DF237B22479C335E5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.TLSModule.pdb",
+    "Bytes": 9260,
+    "SHA256": "7076226FE03F66B39672126D3A3DFBFF70AD7FC94135B842685164A1CFA29B0B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UI.dll",
+    "Bytes": 309248,
+    "SHA256": "13B876849FB3921B8555B0002D27CA626CA3CF3F5B3F33476847424C422A213B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UI.pdb",
+    "Bytes": 187984,
+    "SHA256": "9F7DA4362F2F7B780524E568E713C33C2E3E034CBD671496CFD22B495FBF054C"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UIElementsModule.dll",
+    "Bytes": 2417584,
+    "SHA256": "38B7DBDE27A2B55C807906A50CE70741BBFBB906F42359315BFE5452375F2E2F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UIElementsModule.pdb",
+    "Bytes": 1086920,
+    "SHA256": "B58AB0A449893B20339EDD77E05253556CD2E66F68838CA669E1D963EB1A6B1A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UIModule.dll",
+    "Bytes": 49576,
+    "SHA256": "D07D033EBEFB610469A65270662B850CD98246C16DA28CDFCA641B9DC8D92DFD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UIModule.pdb",
+    "Bytes": 13832,
+    "SHA256": "242A1E4062FD78D0EDFC8EC542CBEE0BB2D2016A3AE339E2C852A55217140131"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UmbraModule.dll",
+    "Bytes": 24488,
+    "SHA256": "76B779B9324753A3C508B86D1093EB31D3353727B10C3A336C85D71F1507B091"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UmbraModule.pdb",
+    "Bytes": 9240,
+    "SHA256": "87763A5A53FA03B3C9B7665B0F6DC006CB01F905679F7E087C745E2EFE3CCD04"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityAnalyticsCommonModule.dll",
+    "Bytes": 35752,
+    "SHA256": "C775C3EDF4172A17DD0D02EDF7CDA04CF6193192DB3937219389B3D2E801ADB3"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityAnalyticsCommonModule.pdb",
+    "Bytes": 13720,
+    "SHA256": "DA9DED957B6F14A78AE404451D172C6671A62700C15E8295E267AA55D8C99926"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityAnalyticsModule.dll",
+    "Bytes": 60848,
+    "SHA256": "DE9A9B29362CE7FBAD330BE11104EA8560DEDD594511D2190283F294EC63DC8E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityAnalyticsModule.pdb",
+    "Bytes": 17964,
+    "SHA256": "D214B4A893A76B10A5D35C14AA7706C2C1CFA7E87485C0152DCACC9E602CD1DE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityConnectModule.dll",
+    "Bytes": 27568,
+    "SHA256": "2113137FF7F76511391E6BE5C3665858E066DF3FF3B89CC7C561A83E0252F42D"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityConnectModule.pdb",
+    "Bytes": 9836,
+    "SHA256": "B39293139AA72972CAE5CD3316EE79B8A54603A37D2B6AFFB47533CF82F5A6DE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityConsentModule.dll",
+    "Bytes": 16304,
+    "SHA256": "C19B60ADEFD274FEDCB85FCEFDBA9C7AE43F316D090B8CA59DE494D896D872D5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityConsentModule.pdb",
+    "Bytes": 9868,
+    "SHA256": "A4F62AB1BB042F0216EB0DB4DD28C00E6EBDE61BEDF2A74BC35D4CD545868C41"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityCurlModule.dll",
+    "Bytes": 26024,
+    "SHA256": "18F0FE14612B0B5B050AB5F147E049D227F1595FC46477B7616D342EC33BBABE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityCurlModule.pdb",
+    "Bytes": 9632,
+    "SHA256": "0C5E4868B9751B3AB86E7265B316A04BE79FFF4B9AA02DC8FCDB39904CC777D6"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll",
+    "Bytes": 28584,
+    "SHA256": "74EADBC80D71284DC03892FC8BA01AD5D0EB49A7FB19A9DE719237DA7D31CAD3"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.pdb",
+    "Bytes": 10812,
+    "SHA256": "EA14338E9494DCA90E9865B6260779094F5C29850F7847A8B84988740CDDBD02"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll",
+    "Bytes": 28072,
+    "SHA256": "902BD1C29E99A000F34237EA1E6C812BB5A8ED436D09A6640D4CC6037373B98E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestAudioModule.pdb",
+    "Bytes": 10616,
+    "SHA256": "1481BA2ED8AAE6725FE7CE0EF836CD9DFF33CB8BCA4836E78840F7FEC447AB1F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestModule.dll",
+    "Bytes": 69040,
+    "SHA256": "2F4A6BFB1588B094CC84E7C02959656F1FA2EFE79B9EDD02B0361526DA4AAE93"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestModule.pdb",
+    "Bytes": 28308,
+    "SHA256": "01E29C5D55972C5C685C4F96DE1E631AF9765F9853320622E4AA74A4DC77FA94"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll",
+    "Bytes": 27560,
+    "SHA256": "BA5D5F44FDE253D77A52ED70C2705FFC567C0A53785763CB3863450131E97600"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestTextureModule.pdb",
+    "Bytes": 10780,
+    "SHA256": "426177C2463BF6D71C666FD9388843DDF6247923FB6B3740A096936750A9222B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll",
+    "Bytes": 36272,
+    "SHA256": "2D1A5D00D2B5328F0BB1466473943BC9CB4CBD5BF803F085F8B6A49AD18C6BE5"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.UnityWebRequestWWWModule.pdb",
+    "Bytes": 13684,
+    "SHA256": "92F7B83285F1123F9FAE30567CF9FEFEF4B727E7C99F25DC3F4DB6FFC4B09649"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VectorGraphicsModule.dll",
+    "Bytes": 252336,
+    "SHA256": "184FF840331046DD3895F0EA9F7900B8DC88241C65A585EB57339EDB0808926F"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VectorGraphicsModule.pdb",
+    "Bytes": 142692,
+    "SHA256": "2EED14627C5D1332D84E902BC3E24FE8AFD5647B287078CF7CA101A25BD220B8"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VehiclesModule.dll",
+    "Bytes": 31152,
+    "SHA256": "99F0A12BF195C6F594102516DDC7B02B383B5D0337B1A1E7C6D9CCE6B68AF2AE"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VehiclesModule.pdb",
+    "Bytes": 10484,
+    "SHA256": "D20C8522754A36C7D8E0496086A6B7E6A30F811B8BC4A921CFD90330F4BC2677"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VFXModule.dll",
+    "Bytes": 78248,
+    "SHA256": "2C097D70B4EAB1968D709F0DCAEC45CC68DD7AD72D9D15E30CC85EBDFEA61445"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VFXModule.pdb",
+    "Bytes": 18748,
+    "SHA256": "CFE5B0B149F5C8A329D29873709055B9577DFF852084A19782C0F51AFA202917"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VideoModule.dll",
+    "Bytes": 49064,
+    "SHA256": "F992DA7E5A2AAA0CA038F22451B35A648C40AA2C09C1812C796F834418429361"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VideoModule.pdb",
+    "Bytes": 14128,
+    "SHA256": "24B00DA07221BA0FC6F2D3D197B87D69CD01685164AC78A3472363ABF4D32763"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VirtualTexturingModule.dll",
+    "Bytes": 42920,
+    "SHA256": "5C9DF40E8D5AC76E5E08148DC2ED2F1CE40CAA37D36BF257F86605F8C180BEEF"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VirtualTexturingModule.pdb",
+    "Bytes": 13488,
+    "SHA256": "FB86218345B4E440AC5BD7E9F5ABB423D1EFAEA2F34EDD18E5099BBC3F4058BD"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VRModule.dll",
+    "Bytes": 31656,
+    "SHA256": "C2FF9801B6988C42DA539ACB33C25C71276406FCCC8DF728399D0BE69F049B59"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.VRModule.pdb",
+    "Bytes": 10368,
+    "SHA256": "433744DB99C3540F0F31930A1E9AD9B34A99800C9EFEF4F6B0CEB22FC43A1D37"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.WindModule.dll",
+    "Bytes": 26536,
+    "SHA256": "52145100BDEB9565CA60D1323BD31F61E7508B99FFB0526E3941EDF1EC25BC0A"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.WindModule.pdb",
+    "Bytes": 9376,
+    "SHA256": "0706067644F6A8917E0806647D74F1D22ACC51A9C9DCBD5BAAD3B2A57950866E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.XRModule.dll",
+    "Bytes": 87976,
+    "SHA256": "9F90BB4AE7F1B1D4EE5A57FE72B5F7ED3A6FA96EE8C226D2095F104288FEE077"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Managed/UnityEngine.XRModule.pdb",
+    "Bytes": 24256,
+    "SHA256": "C621A565A42AC6696DCB77DB9C3B33C2D4104F2F656591D963C677FB784DF22E"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Plugins/x86_64/lib_burst_generated.dll",
+    "Bytes": 693248,
+    "SHA256": "89BE73F6A2A40C6F47128B0F56B3F28E66B062EDB5B57F295F643075F975857B"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Plugins/x86_64/lib_burst_generated.pdb",
+    "Bytes": 4145152,
+    "SHA256": "1D78681291B244EE9686F02FD0B06A67976FE45503653D1A542D07A1BD7CB2AB"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Resources/unity default resources",
+    "Bytes": 5883780,
+    "SHA256": "776D63D5D172CC1903A8086214E540819CA487B790D81F85607755211D604948"
+  },
+  {
+    "File": "Windows/Dungeon Lord_Data/Resources/unity_builtin_extra",
+    "Bytes": 401148,
+    "SHA256": "0D568406EE809D28CF096A203F78BBAC3D108D50E8D831B7E31F5851EED2DEE8"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll",
+    "Bytes": 7828904,
+    "SHA256": "AAA3C777075B85DBB9F07D3779C93BBD48171635551E0E9E50336A830EDADE55"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll",
+    "Bytes": 611240,
+    "SHA256": "D6A2FD1619B67E5631B78C72369849516D674FDA4074ADCD736FCFBB32B6623D"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/browscap.ini",
+    "Bytes": 311984,
+    "SHA256": "4DDD50F31FB968F30BEDEFC253A46DC3F2890192D05CDAA9E0A64A056EEE807E"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/config",
+    "Bytes": 3815,
+    "SHA256": "5776169973A26A387B8B3E5C0F2301A7AB9A6DD7C7D3EFA22A96ABC47FBF8662"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx",
+    "Bytes": 60575,
+    "SHA256": "751861040B69EA63A3827507B7C8DA9C7F549DC181C1C8AF4B7CA78CC97D710A"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/2.0/machine.config",
+    "Bytes": 29066,
+    "SHA256": "E91782A27FA39FC6C1D6EE8B08529F5D35052310D0006034B878EB04B8F2AF30"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/2.0/settings.map",
+    "Bytes": 2622,
+    "SHA256": "49C6160F9D54AF4270A3B4E997FC4A8301F79B9E2070118FA46DDBCBBC44F9A2"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/2.0/web.config",
+    "Bytes": 11635,
+    "SHA256": "CF2B54339E069B9E42F7D6795EECBF562C50C1011F4CA8F65F578FE52D97FF92"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser",
+    "Bytes": 1605,
+    "SHA256": "8A1082057AC5681DCD4E9C227ED7FB8EB42AC1618963B5DE3B65739DD77E2741"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx",
+    "Bytes": 60575,
+    "SHA256": "751861040B69EA63A3827507B7C8DA9C7F549DC181C1C8AF4B7CA78CC97D710A"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.0/machine.config",
+    "Bytes": 33598,
+    "SHA256": "E60AEC2C5115D65B3ACB3C55EA21576DBD770F579166C017125571E46AE560ED"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.0/settings.map",
+    "Bytes": 2622,
+    "SHA256": "CE1DB1AD8A9512073164E3ECCDC193F7EDA036E1A9733CAEC4635DE21B2865C8"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.0/web.config",
+    "Bytes": 18802,
+    "SHA256": "E38BB8CC68FE5B4EDECDFD288D094B9E8CED7629039B2A347682ABA0D8BD7492"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.0/Browsers/Compat.browser",
+    "Bytes": 1605,
+    "SHA256": "8A1082057AC5681DCD4E9C227ED7FB8EB42AC1618963B5DE3B65739DD77E2741"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx",
+    "Bytes": 60575,
+    "SHA256": "751861040B69EA63A3827507B7C8DA9C7F549DC181C1C8AF4B7CA78CC97D710A"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.5/machine.config",
+    "Bytes": 34056,
+    "SHA256": "EE950004B576FB28DC85F4B0435ED04BF96612DE2E8B53BE84D07AFE85A0DE6C"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.5/settings.map",
+    "Bytes": 2622,
+    "SHA256": "CE1DB1AD8A9512073164E3ECCDC193F7EDA036E1A9733CAEC4635DE21B2865C8"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.5/web.config",
+    "Bytes": 18811,
+    "SHA256": "C4CBDDD4FD9347B58CC5A72B36DC4BA1AD2BB699E65869D05CD3FB9865F0D824"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser",
+    "Bytes": 1605,
+    "SHA256": "8A1082057AC5681DCD4E9C227ED7FB8EB42AC1618963B5DE3B65739DD77E2741"
+  },
+  {
+    "File": "Windows/MonoBleedingEdge/etc/mono/mconfig/config.xml",
+    "Bytes": 25817,
+    "SHA256": "0C56E34C69124510FA8C19E7B4C2CA6C1C4FF460AE19F798DD0CA035809E396D"
+  }
+]

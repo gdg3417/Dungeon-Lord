@@ -1,0 +1,85 @@
+[
+  {
+    "File": "TestResults/room-construction-ui-focused-editmode-first.xml",
+    "SHA256": "AD2DB3452B8EADF4CEBB0F96E48DD2DE6E52025566B194BC4B8DA75E47E9958E",
+    "Total": "3",
+    "Passed": "0",
+    "Failed": "3",
+    "Skipped": "0",
+    "Duration": "1.5987491",
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible",
+        "Failure": "  Expected: None\n  But was:  Flex\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible>d__11.MoveNext () [0x0036e] in C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:162\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "Failure": "  Expected: greater than 290.0f\n  But was:  255.0f\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__12.MoveNext () [0x0047b] in C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:208\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery",
+        "Failure": "  Expected: String containing \"Current draft:\"\n  But was:  <string.Empty>\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery>d__10.MoveNext () [0x0023d] in C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:110\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ]
+  },
+  {
+    "File": "TestResults/room-construction-ui-focused-editmode-second.xml",
+    "SHA256": "E06EE78C6E7620F8555DDF1B309072271A1D4B4F4EE2DF84CF6298DB6898F6CB",
+    "Total": "3",
+    "Passed": "2",
+    "Failed": "1",
+    "Skipped": "0",
+    "Duration": "1.7319257",
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "Failure": "  Expected: greater than 290.0f\n  But was:  131.0f\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__12.MoveNext () [0x0047b] in C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:209\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ]
+  },
+  {
+    "File": "TestResults/room-construction-ui-layout-editmode-first.xml",
+    "SHA256": "938E9477D3A6A3889CDEBFA93AA24DB2713EB43E8D085A20E8E7AE2801202807",
+    "Total": "1",
+    "Passed": "0",
+    "Failed": "1",
+    "Skipped": "0",
+    "Duration": "2.9518085",
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "Failure": "  Expected: greater than 290.0f\n  But was:  213.0f\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__12.MoveNext () [0x00625] in C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:212\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ]
+  },
+  {
+    "File": "TestResults/room-construction-ui-regression-editmode.xml",
+    "SHA256": "DE0B392D09F65C28D29F535C4BB296B6D96CF1CC0562706CFDD02FC48E17372D",
+    "Total": "162",
+    "Passed": "162",
+    "Failed": "0",
+    "Skipped": "0",
+    "Duration": "15.3170627",
+    "Failures": []
+  },
+  {
+    "File": "TestResults/room-construction-ui-final-scene-editmode.xml",
+    "SHA256": "5F6AE0C1FC1A41059042A4D298AC0F10D66EA4AC5C6F9966E2FE4A115CE79B03",
+    "Total": "20",
+    "Passed": "20",
+    "Failed": "0",
+    "Skipped": "0",
+    "Duration": "1.3846884",
+    "Failures": []
+  },
+  {
+    "File": "TestResults/room-construction-ui-final-scene-playmode.xml",
+    "SHA256": "8D72655A0069F041C7CA81E9EF3F69197D56808499DA16BDCC4F8913C3B0781A",
+    "Total": "22",
+    "Passed": "22",
+    "Failed": "0",
+    "Skipped": "0",
+    "Duration": "22.0956246",
+    "Failures": []
+  }
+]

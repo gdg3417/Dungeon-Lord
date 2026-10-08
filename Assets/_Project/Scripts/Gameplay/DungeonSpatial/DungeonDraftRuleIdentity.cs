@@ -12,13 +12,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         // Hash framed canonical inputs, never localization, clocks or object identities.
         // Production semantic validation reads only MvpPlacementEffects.OptionId from RunSimulationConfig.
-        internal string RuleIdentity()
+        internal string RuleIdentity(int formatVersion = 3)
         {
-            if (Production == null || Configuration == null || Occupancy == null || Limits == null) return null;
+            if ((formatVersion != 3 && formatVersion != 4) || Production == null || Configuration == null || Occupancy == null || Limits == null) return null;
             using (var stream = new MemoryStream())
             using (var writer = new BinaryWriter(stream))
             {
-                writer.Write(TransactionalDungeonDraft.CurrentFormatVersion);
+                // Frozen A5 material-input contract. The journal/record discriminator binds
+                // vocabulary separately; construction consumes these same exact authorities.
+                writer.Write(3);
                 writer.Write(SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(Production.Manifest)));
                 writer.Write(SpatialContractSha256.Compute(ProductionSpatialGeneratedSetParser.SerializeCanonical(Production.Catalog)));
                 writer.Write(Compatibility == null ? string.Empty : SpatialContractSha256.Compute(Compatibility.CanonicalBytes));

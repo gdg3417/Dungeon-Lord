@@ -555,14 +555,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const string compositionPath = "Assets/_Project/Scripts/Core/GameRoot.cs";
             const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             const string productionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonController.cs";
+            const string constructionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
                 .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath, productionUiPath }, consumers);
-            string productionUi = File.ReadAllText(productionUiPath);
-            Assert.That(productionUi, Does.Not.Contain("LoadProductionSpatialContent("));
-            Assert.That(productionUi, Does.Not.Contain("ConfigureCanonical("));
+            // Construction is a partial of the already approved production controller,
+            // not another runtime publisher or composition root.
+            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath, productionUiPath, constructionUiPath }, consumers);
+            foreach (string path in new[] { productionUiPath, constructionUiPath })
+            {
+                string productionUi = File.ReadAllText(path);
+                Assert.That(productionUi, Does.Contain("sealed partial class ProductionDungeonController"));
+                Assert.That(productionUi, Does.Not.Contain("LoadProductionSpatialContent("));
+                Assert.That(productionUi, Does.Not.Contain("ConfigureCanonical("));
+            }
             string composition = File.ReadAllText(compositionPath);
             Assert.That(Regex.IsMatch(composition,
                 @"Content\.LoadSpatialLayoutCompatibilityProfiles[\s\S]{0,200}Content\.ProductionSpatialContent"),

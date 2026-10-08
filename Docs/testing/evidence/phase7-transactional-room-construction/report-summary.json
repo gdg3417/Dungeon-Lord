@@ -1,0 +1,410 @@
+[
+  {
+    "Report": "TestResults/room-construction-canonical-regression.xml",
+    "SHA256": "A1B31271A3315968DD324119F2EE5B6FBE08C14FCA63F508853CDE29F42AE8C6",
+    "Total": 462,
+    "Passed": 462,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "31.6464778",
+    "StartUTC": "2026-10-08 02:15:00Z",
+    "EndUTC": "2026-10-08 02:15:32Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-clipboard-headless-playmode.xml",
+    "SHA256": "6FDA08DC67CCE4A28E1187C71902766279E8F7BBCCA93B0A535A12C091F8E19E",
+    "Total": 2,
+    "Passed": 0,
+    "Failed": 2,
+    "Skipped": 0,
+    "Duration": "0.3794483",
+    "StartUTC": "2026-10-08 12:21:25Z",
+    "EndUTC": "2026-10-08 12:21:26Z",
+    "Skips": [],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.CopyFullSmokeTextToClipboard_PreservesFullSmokeComposition",
+        "Message": "  Expected string length 2085 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Mana G...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      },
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.F6BuildsAndCopiesFullSmokeTextIncludingOutcomeCueWhenPresent",
+        "Message": "  Expected string length 2718 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Room: ...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-clipboard-playmode.xml",
+    "SHA256": "85A9D37127855DFE248F6295DF4139392F0C668CD999178A08E3C74D9DBA287C",
+    "Total": 2,
+    "Passed": 0,
+    "Failed": 2,
+    "Skipped": 0,
+    "Duration": "0.4144464",
+    "StartUTC": "2026-10-08 12:19:36Z",
+    "EndUTC": "2026-10-08 12:19:37Z",
+    "Skips": [],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.CopyFullSmokeTextToClipboard_PreservesFullSmokeComposition",
+        "Message": "  Expected string length 2085 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Mana G...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      },
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.F6BuildsAndCopiesFullSmokeTextIncludingOutcomeCueWhenPresent",
+        "Message": "  Expected string length 2718 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Room: ...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-draft-economy.xml",
+    "SHA256": "F0DDF63B0437F525E31C078E7302D2B043E3AB89496EE727A743A9DCD503B36C",
+    "Total": 203,
+    "Passed": 203,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "14.3034254",
+    "StartUTC": "2026-10-08 02:13:36Z",
+    "EndUTC": "2026-10-08 02:13:50Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-draft-regression.xml",
+    "SHA256": "FAFE506A2D23AC5A36FF29B7567AA60D3DEDA8D2F8BF574AE31AAA11B091B514",
+    "Total": 124,
+    "Passed": 123,
+    "Failed": 1,
+    "Skipped": 0,
+    "Duration": "14.0309866",
+    "StartUTC": "2026-10-08 02:09:56Z",
+    "EndUTC": "2026-10-08 02:10:10Z",
+    "Skips": [],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery",
+        "Message": "  Expected: 13\n  But was:  1\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-durability.xml",
+    "SHA256": "8AB26F1906B7C89CE24F6901942D5ECCA21BB3DE90C6AD63D8E929FC2D247188",
+    "Total": 72,
+    "Passed": 72,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "8.6605018",
+    "StartUTC": "2026-10-08 02:17:33Z",
+    "EndUTC": "2026-10-08 02:17:42Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-final-economy-loading-starter-failure.xml",
+    "SHA256": "D235C22C907E77CE3CE175BCB444832C247E6C7EFFC9F14D8CDABFF36B49257E",
+    "Total": 169,
+    "Passed": 168,
+    "Failed": 1,
+    "Skipped": 0,
+    "Duration": "7.8010165",
+    "StartUTC": "2026-10-08 02:45:28Z",
+    "EndUTC": "2026-10-08 02:45:36Z",
+    "Skips": [],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.BootstrapUnmigratedActiveFloorStarterSetupRemainsAvailable",
+        "Message": "  Expected: True\n  But was:  False\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-final-economy-loading.xml",
+    "SHA256": "FD15284BD58F855A711BF2BEAE0AF300937D9C6E44B82F76356528FD2BB6ED3D",
+    "Total": 170,
+    "Passed": 170,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "7.7030915",
+    "StartUTC": "2026-10-08 03:10:05Z",
+    "EndUTC": "2026-10-08 03:10:13Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-final-focused-context-failure.xml",
+    "SHA256": "F31F31FDCED5DCFA399194CC8477CF147D55F182788E87860A9D4254C0AC5877",
+    "Total": 53,
+    "Passed": 52,
+    "Failed": 1,
+    "Skipped": 0,
+    "Duration": "6.9974791",
+    "StartUTC": "2026-10-08 02:25:53Z",
+    "EndUTC": "2026-10-08 02:26:00Z",
+    "Skips": [],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed(\"context\")",
+        "Message": "  Expected: <System.IO.IOException>\n  But was:  null\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-final-focused.xml",
+    "SHA256": "3FEE613EA2C0A5884819BF48C630FA1CEDBB5559B67276860BAD2EC4FB86A4EB",
+    "Total": 53,
+    "Passed": 53,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "7.1105025",
+    "StartUTC": "2026-10-08 02:29:10Z",
+    "EndUTC": "2026-10-08 02:29:17Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-final-scene-playmode.xml",
+    "SHA256": "769ACC9FE4D66077C7B3332E7FC922E86D88E434A19C2CFEBF72E4AA298ADBD8",
+    "Total": 22,
+    "Passed": 22,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "21.8444956",
+    "StartUTC": "2026-10-08 11:52:54Z",
+    "EndUTC": "2026-10-08 11:53:16Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-focused.xml",
+    "SHA256": "240CDD07305CFD8B9A86C5E69C6F4E037B5773308CA4CB5E973F35EAFAA517AC",
+    "Total": 23,
+    "Passed": 23,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "4.18212",
+    "StartUTC": "2026-10-08 01:59:37Z",
+    "EndUTC": "2026-10-08 01:59:41Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-full-editmode-first.xml",
+    "SHA256": "D106CC786D5FEC7B874BBC0282BCF9489AAB066F696231E54D2FB820582CF669",
+    "Total": 1598,
+    "Passed": 1596,
+    "Failed": 1,
+    "Skipped": 1,
+    "Duration": "17.4513229",
+    "StartUTC": "2026-10-08 02:38:27Z",
+    "EndUTC": "2026-10-08 02:38:44Z",
+    "Skips": [
+      {
+        "Name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "Reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers",
+        "Message": "  Expected: equivalent to < \"Assets/_Project/Scripts/Core/GameRoot.cs\", \"Assets/_Project/Scripts/UI/BootstrapOverlay.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonController.cs\" >\n  But was:  < \"Assets/_Project/Scripts/Core/GameRoot.cs\", \"Assets/_Project/Scripts/UI/BootstrapOverlay.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonController.cs\" >\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-full-editmode.xml",
+    "SHA256": "ED946614251D810A47803333F72F99007F366489EAA216D3D87C64EFEE7834A6",
+    "Total": 1600,
+    "Passed": 1599,
+    "Failed": 0,
+    "Skipped": 1,
+    "Duration": "18.0811167",
+    "StartUTC": "2026-10-08 11:58:50Z",
+    "EndUTC": "2026-10-08 11:59:08Z",
+    "Skips": [
+      {
+        "Name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "Reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-full-playmode-first.xml",
+    "SHA256": "89200C5FE34D68530C24C8B30427EC70C886E77382C910FA63D8D927A3132415",
+    "Total": 3044,
+    "Passed": 3032,
+    "Failed": 2,
+    "Skipped": 10,
+    "Duration": "224.5660924",
+    "StartUTC": "2026-10-08 12:14:34Z",
+    "EndUTC": "2026-10-08 12:18:19Z",
+    "Skips": [
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "Reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "Reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.CopyFullSmokeTextToClipboard_PreservesFullSmokeComposition",
+        "Message": "  Expected string length 2085 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Mana G...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      },
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.F6BuildsAndCopiesFullSmokeTextIncludingOutcomeCueWhenPresent",
+        "Message": "  Expected string length 2718 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Room: ...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-full-playmode.xml",
+    "SHA256": "89200C5FE34D68530C24C8B30427EC70C886E77382C910FA63D8D927A3132415",
+    "Total": 3044,
+    "Passed": 3032,
+    "Failed": 2,
+    "Skipped": 10,
+    "Duration": "224.5660924",
+    "StartUTC": "2026-10-08 12:14:34Z",
+    "EndUTC": "2026-10-08 12:18:19Z",
+    "Skips": [
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "Reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "Reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "Name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "Reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "Failures": [
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.CopyFullSmokeTextToClipboard_PreservesFullSmokeComposition",
+        "Message": "  Expected string length 2085 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Mana G...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      },
+      {
+        "Name": "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.F6BuildsAndCopiesFullSmokeTextIncludingOutcomeCueWhenPresent",
+        "Message": "  Expected string length 2718 but was 0. Strings differ at index 0.\n  Expected: \"MVP Loop Summary\\nCurrent Dungeon: Dungeon composition: Room: ...\"\n  But was:  <string.Empty>\n  -----------^\n"
+      }
+    ]
+  },
+  {
+    "Report": "TestResults/room-construction-inactive-floor.xml",
+    "SHA256": "CF2BD21C5B0BBF0FB4A9E545FE1691546A36086FF51B7A0E6DE17C764D0DAD3B",
+    "Total": 1,
+    "Passed": 1,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "0.6961933",
+    "StartUTC": "2026-10-08 02:31:25Z",
+    "EndUTC": "2026-10-08 02:31:26Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-production-gates.xml",
+    "SHA256": "841813CE71E053F612A8170F09EFD0E9EEC56A88C34820A0E5063EEE430DB8B7",
+    "Total": 291,
+    "Passed": 291,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "3.1919198",
+    "StartUTC": "2026-10-08 12:24:38Z",
+    "EndUTC": "2026-10-08 12:24:41Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-scene-editmode.xml",
+    "SHA256": "5C493F5A755E25AC8D9F517F51F064F31A1BFC25AB3104A3D2DB770ED4496958",
+    "Total": 20,
+    "Passed": 20,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "1.4043635",
+    "StartUTC": "2026-10-08 02:20:31Z",
+    "EndUTC": "2026-10-08 02:20:32Z",
+    "Skips": [],
+    "Failures": []
+  },
+  {
+    "Report": "TestResults/room-construction-scene-playmode.xml",
+    "SHA256": "03F8AA7F920EA5794F72469E9B77E91692F5EEAFB8CF1FA4F662ED87693C913C",
+    "Total": 21,
+    "Passed": 21,
+    "Failed": 0,
+    "Skipped": 0,
+    "Duration": "19.6407673",
+    "StartUTC": "2026-10-08 02:24:14Z",
+    "EndUTC": "2026-10-08 02:24:34Z",
+    "Skips": [],
+    "Failures": []
+  }
+]

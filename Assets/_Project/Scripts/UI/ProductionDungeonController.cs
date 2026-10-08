@@ -12,7 +12,7 @@ using UnityEngine.EventSystems;
 namespace DungeonBuilder.M0
 {
     [RequireComponent(typeof(UIDocument))]
-    public sealed class ProductionDungeonController : MonoBehaviour
+    public sealed partial class ProductionDungeonController : MonoBehaviour
     {
         public DungeonPresentationPolicy presentationPolicy;
         private GameRoot root;
@@ -73,6 +73,7 @@ namespace DungeonBuilder.M0
                 // Wallet ticks update informative balances without replaying geometry or
                 // normalization. Edit/recovery/review boundaries recalculate configured cost.
                 PresentHud(); PresentEconomy();
+                if (IsConstructing) PresentConstructionInformation();
             }
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
@@ -126,6 +127,7 @@ namespace DungeonBuilder.M0
             pixelsPerPhysicalUnit = DungeonPhysicalUnits.PixelsPerUnit();
             Button("edit", EnterEdit); Button("save", ReviewSave); Button("discard", ReviewDiscard);
             Button("move", BeginMove); Button("closeSheet", CloseSheet); Button("reset", () => { autoFit = true; viewport.Reset(); ApplyCamera(); });
+            InitializeConstruction();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -169,6 +171,7 @@ namespace DungeonBuilder.M0
             if (!HasCanonicalRuntime()) return;
             if (!IsEditing || selected == null && selectedRoomId == null) return;
             moveMode = true; sheet.style.display = DisplayStyle.None;
+            ClearConstructionSelection();
             world.ClearMoveGuidance();
             if (selectedRoomId != null)
             {
@@ -180,10 +183,12 @@ namespace DungeonBuilder.M0
             else feedback = "ui.dungeon.move_hint";
             Present();
         }
-        private void CloseSheet() { selected = null; selectedRoomId = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
+        private void CloseSheet() { ClearConstructionSelection(); selected = null; selectedRoomId = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
+            if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
+            if (IsEditing && TrySelectInvalidConstruction(cell)) return;
             if (moveMode && selectedRoomId != null && IsEditing)
             {
                 if (draft.MoveRoom(selectedFloor, selectedRoomId, cell))
@@ -219,6 +224,7 @@ namespace DungeonBuilder.M0
         }
         private void OpenSheet()
         {
+            detailsCollapsed = false;
             sheet.style.display = DisplayStyle.Flex;
             if (selectedRoomId != null)
             {
@@ -326,6 +332,7 @@ namespace DungeonBuilder.M0
             world.Render(selectedValue, root.ProductionSpatialContent, draftContext.Occupancy,
                 root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles, floorPresentationLimits.MaximumMaterializedTiles, IsEditing);
             world.PresentRoomIntents(draft?.InvalidMovements);
+            world.PresentConstructionIntents(draft?.InvalidConstructions);
             RefreshEconomy();
             viewport.Configure(world.Bounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
             ApplyCamera();
@@ -341,7 +348,7 @@ namespace DungeonBuilder.M0
         }
         public void SelectFloor(string id)
         { if (!HasCanonicalRuntime() || !renderState.Floors.Any(f => f.FloorInstanceId == id)) return;
-          selectedFloor = id; CloseSheet(); RebuildFloor(true); Present(); Layout(); }
+          selectedFloor = id; ClearConstructionSelection(); CloseSheet(); RebuildFloor(true); Present(); Layout(); }
         private void Present()
         {
             if (!initialized || !HasCanonicalRuntime()) return;
@@ -374,6 +381,7 @@ namespace DungeonBuilder.M0
                     validation.Capacity.RemainingFloorSpaceCapacity);
             }
             world.SetEdit(IsEditing);
+            PresentConstruction();
         }
         private void PresentHud()
         {
@@ -396,24 +404,24 @@ namespace DungeonBuilder.M0
             var terminals = before.Floors.SelectMany(f => f.FixedStructures).Where(s => s.Kind == FixedSpatialStructureKind.CompletionTerminal)
                 .ToDictionary(s => s.FixedStructureInstanceId, StringComparer.Ordinal);
             movementConsequences = Format("ui.dungeon.room_movement_consequences",
-                after.Floors.SelectMany(f => f.Layout.Rooms).Count(r => !r.Anchor.Equals(rooms[r.RoomInstanceId].Anchor)),
-                after.Floors.SelectMany(f => f.Layout.Edges).Count(e => JsonUtility.ToJson(e) != JsonUtility.ToJson(edges[e.EdgeId])),
+                after.Floors.SelectMany(f => f.Layout.Rooms).Count(r => rooms.TryGetValue(r.RoomInstanceId, out var old) && !r.Anchor.Equals(old.Anchor)),
+                after.Floors.SelectMany(f => f.Layout.Edges).Count(e => !edges.TryGetValue(e.EdgeId, out var old) || JsonUtility.ToJson(e) != JsonUtility.ToJson(old)),
                 after.Floors.SelectMany(f => f.FixedStructures).Count(s => terminals.TryGetValue(s.FixedStructureInstanceId, out var old) && !s.Anchor.Equals(old.Anchor)));
+            int constructed = after.Floors.SelectMany(f => f.Layout.Rooms).Count(r => !rooms.ContainsKey(r.RoomInstanceId));
+            if (constructed != 0) movementConsequences = Format("ui.dungeon.construction.review", constructed) + "\n" + movementConsequences;
         }
         private void PresentEconomy()
         {
-            if (economicPreview != null && (economicPreview.Reason == null ||
-                economicPreview.Reason == StructuralEconomyService.InsufficientReason))
-            {
-                economicPreview.CurrentMana = root.Save.structureRuntime.ManaReserve;
-                economicPreview.ResultingMana = economicPreview.CurrentMana - economicPreview.Cost;
-                economicPreview.Reason = economicPreview.CurrentMana < economicPreview.Cost
-                    ? StructuralEconomyService.InsufficientReason : null;
-            }
+            root.SaveService.RefreshDraftPreviewBalance(economicPreview, root.Save.structureRuntime.ManaReserve);
             var economics = document.rootVisualElement.Q<Label>("economics");
             economics.style.display = IsEditing && economicPreview != null && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
-            economics.text = economicPreview == null ? string.Empty : StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
+            economics.text = economicPreview == null ? string.Empty : Text("ui.dungeon.construction.current_draft") + "\n" + StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
             if (movementConsequences != null) economics.text += "\n" + movementConsequences;
+            var summary = document.rootVisualElement.Q<Label>("draftSummary");
+            summary.style.display = IsEditing && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
+            summary.text = economicPreview == null ? Text("ui.dungeon.construction.draft_empty") : Format("ui.dungeon.construction.draft_quote",
+                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.Cost),
+                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.ResultingMana));
         }
         public void SetTextSize(DungeonTextSize size)
         {

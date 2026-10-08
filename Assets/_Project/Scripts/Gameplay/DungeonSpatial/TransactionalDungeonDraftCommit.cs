@@ -30,7 +30,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!DetachedCanonicalProductionSemanticValidation.Validate(final, production, configuration,
                     limits.Canonical.Spatial, context.RoomContentOccupancy, true).IsValid)
                 return Failure(TransactionalDungeonDraft.InvalidReason);
-            var priced = StructuralEconomyService.PreviewFinalMovement(owned.State, final, owned.Investment,
+            var priced = StructuralEconomyService.PreviewFinalDraft(owned.State, final, owned.Investment,
                 recovered.NormalizedMovementTargets(), currentRuntime.structureRuntime.ManaReserve, economy, economyModifiers);
             if (!priced.IsAffordable) return Failure(priced.Reason);
             var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);

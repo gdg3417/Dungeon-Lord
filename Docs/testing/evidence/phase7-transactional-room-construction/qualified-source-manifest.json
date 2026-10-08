@@ -1,0 +1,127 @@
+[
+  {
+    "File": "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "SHA256": "D2A8285E52A5A1A7B75CC2EA0C32EAE9BA808B9BC26D0801E2EF9D00B2AB4319",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+    "SHA256": "C9C480AB6268E66AFBDC980CE2DD0A479F5173796DC20CCFC54B918E08C63BB8",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Economy/StructuralEconomyService.cs",
+    "SHA256": "B48B8B9E11A8B498041FBA23107053341D6256E5592915DCB5D065047923F30D",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftFormat.cs",
+    "SHA256": "B96F4FA1317B3B0BD09F5FA7206EB955C91E7C1DE7C4593CB628DC65BA8D1900",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftRuleIdentity.cs",
+    "SHA256": "2740AB67A24AD505442F1F0B4B29E653DFBE21CF32B1093BDD9677A52A3527E3",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FileDungeonDraftStore.cs",
+    "SHA256": "67E828B343EFE41A43A23BB51E5F490918BB25A077D8612FB66089025FA6B146",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralEditService.cs",
+    "SHA256": "66A0382EFF3E9C4E17082E897536437927316055167319A4861A4D8AE92798DF",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralRenovationService.cs",
+    "SHA256": "8F061D37540DD643FC9AF9D401D1FB6A964DCD8F8CE496F23F58388A2D7A0AF5",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraft.cs",
+    "SHA256": "6E3CEA9ED843A5F5916655DFA3CE5E23FA0E7DB72C27CE796222BA8CC289E642",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftCommit.cs",
+    "SHA256": "E872C9B29514ED9AEFDCFE59E089B452D68FE7FA323990096B54D5F6D665D3BC",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/Services/SaveService.cs",
+    "SHA256": "FAC17C73FB06380AF738E4F4F64408700AC53E664DC3189687384BC659404432",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/BootstrapOverlay.cs",
+    "SHA256": "867427CFFDA711B16D27A7C1F345526E3227A97ECCCA4BDF055EA4854B1DDAA7",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs",
+    "SHA256": "3A7965BAB31BAAFA4BD30855E5077A3CA007DA704E320464D7F7C711C75804AE",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "SHA256": "7DDCD214AE840564CCCDC173B2B128AE840AB4C83F8A9C53AB8B1E1C9DC0323B",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Tests/EditMode/PhaseSevenA5TransactionalRoomMovementTests.cs",
+    "SHA256": "349B7341453D71F0B1E322AEF4B01D5A59DF431FA7D855A3AE788E4BB0C59440",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Tests/EditMode/ProductionSpatialContentLoadingTests.cs",
+    "SHA256": "7E1370C21859A94497DF6439EA4427E66F0226C0D8043C8A48263A5625BBB328",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "SHA256": "63FD739EB1CF8BA81C9DDEF78F88852772BB2B775ED9E985894E1406978592EC",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "SHA256": "880ADC702CCE3DE009400DF8AB0319B711312CBBCF82C17FC02EEFD01DF14A51",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+    "SHA256": "FDC2332F0D37E1A8B2414815612D1B2500F92EA019F0241E448AB57E814BE6AB",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Editor/DungeonSpatial/Tests/TransactionalRoomConstructionFixtures.cs",
+    "SHA256": "FD66FEBE7561F68402117AD3D6446DF98459A36A6B63526C04923C071BF9644C",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Editor/DungeonSpatial/Tests/TransactionalRoomConstructionFixtures.cs.meta",
+    "SHA256": "29F3616D817FA034B247CA93B87E087B43D0B0489CB6EBA902C45FCDA2C22285",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs",
+    "SHA256": "08C1375542C5D836F28A6A7AE88B80EF12FFAA3EB18083A11ECE2F0F0093A226",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs.meta",
+    "SHA256": "703733A3BB35A2FCB5260E9AFDC0A7DFF4C6BFF13F41B3336BC142807E36E2F8",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Tests/EditMode/TransactionalRoomConstructionTests.cs",
+    "SHA256": "9D8C4BDE4B1801603783CA6DC88CC01C58ABCAF90DD3297513A6C12136E39D65",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Tests/EditMode/TransactionalRoomConstructionTests.cs.meta",
+    "SHA256": "FE05513B31F270469F78BF70B9F1477D9A2B64B42CDBF0C8E43339ECD40D064E",
+    "IsolatedCopyMatches": true
+  }
+]

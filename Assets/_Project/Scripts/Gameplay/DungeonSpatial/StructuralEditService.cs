@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
+    [Serializable]
     public sealed class StructuralConstructionRequest
     {
         public string FloorInstanceId;
@@ -96,6 +97,34 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string TargetRoomNotBuildableReason = "structural.edit.target_room_not_buildable";
         public const string RequiredRouteAmbiguousReason = "structural.edit.required_route_ambiguous";
         public const string ContentCapacityReason = "structural.edit.content_capacity_exceeded";
+
+        public static StructuralMovementGuidance GetConstructionGuidance(DetachedCanonicalSpatialSaveState current,
+            StructuralConstructionRequest configuration, DungeonDraftContext context,
+            SpatialContentValidationWorkloadLimits floorLimits)
+        {
+            var result = new StructuralMovementGuidance();
+            if (context?.Limits == null || configuration == null || !context.Validate(current))
+            { result.Reason = InvalidContextReason; return result; }
+            if (!CanonicalEditFloorTarget.TryResolve(current, configuration.FloorInstanceId, out var floor))
+            { result.Reason = CanonicalEditFloorTarget.InvalidReason; return result; }
+            var definition = context.Production.Catalog.Floors.SingleOrDefault(f => f.FloorDefinitionId == floor?.FloorDefinitionId);
+            var bounds = definition?.Bounds;
+            if (bounds == null || !bounds.IsValid || !floorLimits.IsValid || bounds.TileCount > floorLimits.MaximumMaterializedTiles)
+            { result.Reason = WorkloadReason; return result; }
+            var anchors = new List<TileCoordinate>();
+            var request = new StructuralConstructionRequest { FloorInstanceId = configuration.FloorInstanceId,
+                RoomDefinitionId = configuration.RoomDefinitionId, Orientation = configuration.Orientation,
+                TerminalConnectionPointId = configuration.TerminalConnectionPointId };
+            for (long x = bounds.Minimum.X; x < (long)bounds.Minimum.X + bounds.Width; x++)
+                for (long y = bounds.Minimum.Y; y < (long)bounds.Minimum.Y + bounds.Height; y++)
+                {
+                    request.Anchor = new TileCoordinate((int)x, (int)y); result.ExaminedAnchorCount++;
+                    var preview = Preview(current, request, context.Production, context.Compatibility,
+                        context.Configuration, context.Limits.Canonical);
+                    if (preview.IsValid && context.Validate(preview.DetachedCandidate)) anchors.Add(request.Anchor);
+                }
+            result.ValidAnchors = anchors.ToArray(); return result;
+        }
 
         public static StructuralEditPreview InvalidPreview(string reason,
             StructuralConstructionRequest request)

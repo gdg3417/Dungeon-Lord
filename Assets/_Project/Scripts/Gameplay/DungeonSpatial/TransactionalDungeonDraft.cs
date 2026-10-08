@@ -8,7 +8,21 @@ using UnityEngine;
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum DraftDurability { Acknowledged, Pending, Failed, Unknown }
-    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2 }
+    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3 }
+
+    [Serializable]
+    public sealed class DungeonDraftConstruction
+    {
+        public string IntentId;
+        public bool Cancel;
+        public StructuralConstructionRequest[] Placements = Array.Empty<StructuralConstructionRequest>();
+        internal StructuralConstructionRequest Placement => Placements?.Length == 1 ? Placements[0] : null;
+        internal bool HasExactPayload => Guid.TryParseExact(IntentId, "N", out _) &&
+            (Cancel ? Placements?.Length == 0 : Placement != null &&
+                !string.IsNullOrWhiteSpace(Placement.FloorInstanceId) &&
+                !string.IsNullOrWhiteSpace(Placement.RoomDefinitionId) &&
+                !string.IsNullOrWhiteSpace(Placement.TerminalConnectionPointId));
+    }
 
     [Serializable]
     public sealed class DungeonDraftContentReposition
@@ -26,12 +40,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DungeonDraftCommandKind Kind;
         public DungeonDraftContentReposition[] ContentRepositions = Array.Empty<DungeonDraftContentReposition>();
         public StructuralMovementRequest[] RoomMovements = Array.Empty<StructuralMovementRequest>();
+        public DungeonDraftConstruction[] RoomConstructions = Array.Empty<DungeonDraftConstruction>();
         internal DungeonDraftContentReposition ContentReposition => ContentRepositions?.Length == 1 ? ContentRepositions[0] : null;
         internal StructuralMovementRequest RoomMovement => RoomMovements?.Length == 1 ? RoomMovements[0] : null;
+        internal DungeonDraftConstruction RoomConstruction => RoomConstructions?.Length == 1 ? RoomConstructions[0] : null;
         internal DungeonDraftCommand Copy() => JsonUtility.FromJson<DungeonDraftCommand>(JsonUtility.ToJson(this));
         internal bool HasExactPayload => Kind == DungeonDraftCommandKind.ContentReposition
-            ? ContentReposition != null && RoomMovements?.Length == 0
-            : Kind == DungeonDraftCommandKind.RoomMovement && RoomMovement != null && ContentRepositions?.Length == 0;
+            ? ContentReposition != null && RoomMovements?.Length == 0 && RoomConstructions?.Length == 0
+            : Kind == DungeonDraftCommandKind.RoomMovement
+                ? RoomMovement != null && ContentRepositions?.Length == 0 && RoomConstructions?.Length == 0
+                : Kind == DungeonDraftCommandKind.RoomConstruction && RoomConstruction?.HasExactPayload == true &&
+                    ContentRepositions?.Length == 0 && RoomMovements?.Length == 0;
     }
 
     [Serializable]
@@ -100,7 +119,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     /// <summary>Whole-dungeon, non-authoritative command journal. Payloads describe a prefix; only the store can establish committed recovery evidence.</summary>
     public sealed class TransactionalDungeonDraft
     {
-        public const int CurrentFormatVersion = 3;
+        public const int CurrentFormatVersion = 4;
         public const string InvalidReason = "ui.dungeon.draft.invalid";
         public const string StaleReason = "ui.dungeon.draft.stale";
         public const string PendingReason = "ui.dungeon.draft.pending";
@@ -116,6 +135,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private DetachedCanonicalSpatialSaveState presented;
         private readonly List<DungeonDraftCommand> commands = new List<DungeonDraftCommand>();
         private readonly List<DungeonDraftInvalidMovement> invalid = new List<DungeonDraftInvalidMovement>();
+        private readonly List<DungeonDraftInvalidConstruction> invalidConstruction = new List<DungeonDraftInvalidConstruction>();
+        private readonly HashSet<string> completedConstruction = new HashSet<string>(StringComparer.Ordinal);
         private int formatVersion = 2;
         private string ruleIdentity;
         private byte[] durableBytes;
@@ -126,15 +147,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DraftDurability Durability { get; private set; }
         public string Reason { get; private set; }
         public bool IsClosed { get; private set; }
-        public bool HasChanges => invalid.Count != 0 || context.Fingerprint(presented) != BaselineFingerprint;
-        public bool IsStructurallyValid => invalid.Count == 0;
-        public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement);
+        public bool HasChanges => !IsStructurallyValid || context.Fingerprint(presented) != BaselineFingerprint;
+        public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0;
+        public bool HasStructuralIntent => commands.Any(c => c.Kind != DungeonDraftCommandKind.ContentReposition);
         public DungeonDraftInvalidMovement[] InvalidMovements => invalid.Select(value => value.Copy()).ToArray();
-        public string StructuralReason => invalid.FirstOrDefault()?.Reason;
+        public DungeonDraftInvalidConstruction[] InvalidConstructions => invalidConstruction.Select(value => value.Copy()).ToArray();
+        public string StructuralReason => invalid.FirstOrDefault()?.Reason ?? invalidConstruction.FirstOrDefault()?.Reason;
         public bool CanSave => !IsClosed && HasChanges && Durability == DraftDurability.Acknowledged &&
             AcknowledgedSequence == commands.Count && IsStructurallyValid && context.Validate(presented);
         public DetachedCanonicalSpatialSaveState ReadModel => context.Copy(presented);
-        internal bool MatchesRuleContext(DungeonDraftContext current) => formatVersion == 2 || ruleIdentity == current?.RuleIdentity();
+        internal bool MatchesRuleContext(DungeonDraftContext current) => formatVersion == 2 || ruleIdentity == current?.RuleIdentity(formatVersion);
 
         private TransactionalDungeonDraft(DetachedCanonicalSpatialSaveState state,
             DungeonDraftContext context, IDungeonDraftStore store)
@@ -168,7 +190,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     journal.Commands == null || journal.Commands.Length > context.Limits.Raw.MaximumArrayElements ||
                     journal.PrefixSequence != journal.Commands.Length ||
                     !bytes.SequenceEqual(DungeonDraftFormat.Encode(journal))) return null;
-                if (journal.FormatVersion == CurrentFormatVersion && journal.RuleIdentity != context.RuleIdentity())
+                if (journal.FormatVersion >= 3 && journal.RuleIdentity != context.RuleIdentity(journal.FormatVersion))
                 { reason = IncompatibleReason; return null; }
                 if (journal.BaselineFingerprint != context.Fingerprint(state)) { reason = StaleReason; return null; }
                 if (!context.Validate(state)) return null;
@@ -214,7 +236,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!Apply(command)) { Reason = InvalidReason; return false; }
             // A recovered v2 prefix is retained byte-for-byte on disk. Its first structural
             // command explicitly upgrades the vocabulary; predecessor records stay immutable.
-            formatVersion = CurrentFormatVersion; ruleIdentity = context.RuleIdentity();
+            formatVersion = Math.Max(formatVersion, 3); ruleIdentity = context.RuleIdentity(formatVersion);
             commands.Add(command);
             if (Durability != DraftDurability.Failed) Durability = DraftDurability.Pending;
             Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
@@ -229,6 +251,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!context.Move(presented, command, out var candidate)) return false;
                 presented = candidate; return true;
             }
+            if (command.Kind == DungeonDraftCommandKind.RoomConstruction) return ApplyConstruction(command.RoomConstruction);
             var intent = command.RoomMovement;
             var floor = presented.Floors.SingleOrDefault(f => f.FloorInstanceId == intent.FloorInstanceId);
             var room = floor?.Layout.Rooms.SingleOrDefault(r => r.RoomInstanceId == intent.RoomInstanceId);
@@ -243,6 +266,55 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Reason = preview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.LayoutInvalidReason });
             invalid.Sort((a, b) => { int floorOrder = string.CompareOrdinal(a.FloorInstanceId, b.FloorInstanceId);
                 return floorOrder != 0 ? floorOrder : string.CompareOrdinal(a.RoomInstanceId, b.RoomInstanceId); });
+            return true;
+        }
+
+        public bool ConstructRoom(string intentId, StructuralConstructionRequest request) => AppendConstruction(
+            new DungeonDraftConstruction { IntentId = intentId, Placements = new[] { request } });
+
+        public bool CancelConstruction(string intentId) => AppendConstruction(
+            new DungeonDraftConstruction { IntentId = intentId, Cancel = true });
+
+        private bool AppendConstruction(DungeonDraftConstruction intent)
+        {
+            if (IsClosed || Durability == DraftDurability.Unknown) return false;
+            if (commands.Count >= context.Limits.Raw.MaximumArrayElements) { Reason = LimitReason; return false; }
+            var command = new DungeonDraftCommand { Sequence = commands.Count + 1L,
+                Kind = DungeonDraftCommandKind.RoomConstruction, RoomConstructions = new[] { intent } };
+            // Own the request before applying it; caller mutation cannot rewrite history.
+            command = command.Copy();
+            if (!command.HasExactPayload || !Apply(command)) { Reason = InvalidReason; return false; }
+            formatVersion = CurrentFormatVersion; ruleIdentity = context.RuleIdentity(formatVersion);
+            commands.Add(command);
+            if (Durability != DraftDurability.Failed) Durability = DraftDurability.Pending;
+            Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
+            return true;
+        }
+
+        private bool ApplyConstruction(DungeonDraftConstruction intent)
+        {
+            if (intent?.HasExactPayload != true || completedConstruction.Contains(intent.IntentId)) return false;
+            var previous = invalidConstruction.SingleOrDefault(value => value.IntentId == intent.IntentId);
+            if (intent.Cancel)
+            {
+                if (previous == null) return false;
+                invalidConstruction.Remove(previous); completedConstruction.Add(intent.IntentId); return true;
+            }
+            var request = intent.Placement;
+            var floor = presented.Floors.SingleOrDefault(value => value.FloorInstanceId == request.FloorInstanceId);
+            var definition = context.Production.Catalog.Rooms.SingleOrDefault(value => value.RoomDefinitionId == request.RoomDefinitionId);
+            if (floor == null || definition == null || context.Compatibility == null ||
+                previous != null && previous.Request.FloorInstanceId != request.FloorInstanceId) return false;
+            var preview = StructuralEditService.Preview(presented, request, context.Production, context.Compatibility,
+                context.Configuration, context.Limits.Canonical);
+            if (previous != null) invalidConstruction.Remove(previous);
+            if (preview.IsValid && context.Validate(preview.DetachedCandidate))
+            { presented = preview.DetachedCandidate; completedConstruction.Add(intent.IntentId); }
+            else invalidConstruction.Add(new DungeonDraftInvalidConstruction { IntentId = intent.IntentId,
+                Request = JsonUtility.FromJson<StructuralConstructionRequest>(JsonUtility.ToJson(request)),
+                Reason = preview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.LayoutInvalidReason });
+            invalidConstruction.Sort((a, b) => { int floorOrder = string.CompareOrdinal(a.Request.FloorInstanceId, b.Request.FloorInstanceId);
+                return floorOrder != 0 ? floorOrder : string.CompareOrdinal(a.IntentId, b.IntentId); });
             return true;
         }
 
@@ -284,15 +356,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             reason = null; return true;
         }
 
-        internal string[] NormalizedMovementTargets() => StructuralRenovationService.NormalizeMovementTargets(
-            baseline, presented, commands.Where(c => c.Kind == DungeonDraftCommandKind.RoomMovement)
+        internal string[] NormalizedMovementTargets(DetachedCanonicalSpatialSaveState proposed = null) => StructuralRenovationService.NormalizeMovementTargets(
+            baseline, proposed ?? presented, commands.Where(c => c.Kind == DungeonDraftCommandKind.RoomMovement)
                 .Select(c => c.RoomMovement.RoomInstanceId));
 
         public bool FloorChanged(string floorId)
         {
             var before = baseline.Floors.SingleOrDefault(f => f.FloorInstanceId == floorId);
             var after = presented.Floors.SingleOrDefault(f => f.FloorInstanceId == floorId);
-            return invalid.Any(value => value.FloorInstanceId == floorId) || JsonUtility.ToJson(before) != JsonUtility.ToJson(after);
+            return invalid.Any(value => value.FloorInstanceId == floorId) ||
+                invalidConstruction.Any(value => value.Request.FloorInstanceId == floorId) || JsonUtility.ToJson(before) != JsonUtility.ToJson(after);
         }
 
         internal void Committed()
