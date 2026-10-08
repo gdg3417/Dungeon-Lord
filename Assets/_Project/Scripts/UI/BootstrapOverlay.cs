@@ -121,6 +121,12 @@ namespace DungeonBuilder.M0
         public string StructuralFeedback => _structuralFeedback;
         public string LifecycleFeedback => _lifecycleFeedback;
         public bool StructuralConstructionControlsAvailable => ResolveCanonicalStructuralRooms().Length != 0;
+        public bool StructuralConstructionControlsVisible => StructuralConstructionControlsAvailable &&
+            DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true);
+        public bool LegacyRoomPlacementControlsVisible => !CanonicalMvpRouteProjection.IsCanonical(_root?.Save) ||
+            DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true) ||
+            _root?.Save?.validatedCanonicalSpatialState?.Floors.Length == 0 ||
+            (_root?.SelectedCanonicalFloor?.FloorIndex == 0 && _root.SelectedCanonicalRooms.Length == 0);
         public bool StructuralRenovationControlsAvailable => ResolveRenovationRoomIds().Length != 0;
         public bool StructuralMovementControlsAvailable => StructuralRenovationControlsAvailable &&
             DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true);
@@ -1865,7 +1871,7 @@ namespace DungeonBuilder.M0
             {
                 AddMvpBasicRoomSlot();
             }
-            if (StructuralConstructionControlsAvailable)
+            if (StructuralConstructionControlsVisible)
                 DrawStructuralConstructionControls(compactLabel, compactButton, groupHeaderLabel,
                     labelHeight, buttonHeight);
             if (StructuralRenovationControlsAvailable)
@@ -1889,7 +1895,8 @@ namespace DungeonBuilder.M0
                 if (GUILayout.Button(GetLocalizedString("ui.returned_content.redeploy"), compactButton, buttonHeight))
                     RedeploySelectedReturnedContent();
             }
-            if (GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
+            if ((_selectedMvpPlacementCategoryId != MvpDungeonPlacementIds.RoomCategoryId || LegacyRoomPlacementControlsVisible) &&
+                GUILayout.Button(labels.PlacementButton, compactButton, buttonHeight))
             {
                 PlaceSelectedMvpStructure();
             }
@@ -1905,8 +1912,8 @@ namespace DungeonBuilder.M0
                 if (research.ActionClaimsResearch) ClaimPlayerResearch();
                 else StartPlayerResearch();
             }
-            GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
-            if (GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
+            if (LegacyRoomPlacementControlsVisible) GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
+            if (LegacyRoomPlacementControlsVisible && GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))
             {
                 SelectMvpPlacementCategory(MvpDungeonPlacementIds.RoomCategoryId);
                 SelectMvpPlacementOption(MvpDungeonPlacementIds.BasicRoomOptionId);

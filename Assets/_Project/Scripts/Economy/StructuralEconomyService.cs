@@ -28,6 +28,45 @@ namespace DungeonBuilder.M0.Economy
         public const string InsufficientReason = "structural.economy.insufficient_mana";
         public const string UndoUnavailableReason = "structural.economy.undo_unavailable";
 
+        internal static void RefreshBalance(StructuralEconomyPreview preview, double balance, StructuralEconomySnapshot config)
+        {
+            if (preview == null || config == null || preview.Reason != null && preview.Reason != InsufficientReason) return;
+            preview.CurrentMana = balance;
+            double afterSpend = balance - preview.Cost;
+            preview.ResultingMana = afterSpend < 0 || preview.Operation == StructuralEditOperation.Movement
+                ? afterSpend : config.AddWithinCapacity(afterSpend, preview.Refund);
+            preview.CreditedRefund = afterSpend < 0 ? 0 : preview.ResultingMana - afterSpend;
+            preview.Reason = !StructuralEconomySnapshot.Nonnegative(balance) ? InvalidReason :
+                balance < preview.Cost ? InsufficientReason : balance - afterSpend != preview.Cost ? InvalidReason : null;
+        }
+
+        internal static StructuralEconomyPreview PreviewFinalDraft(DetachedCanonicalSpatialSaveState current,
+            DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
+            string[] normalizedTargets, double balance, StructuralEconomySnapshot config,
+            IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            if (current == null || candidate == null) return new StructuralEconomyPreview { Reason = InvalidReason };
+            var oldRooms = new HashSet<string>(current.Floors.SelectMany(f => f.Layout.Rooms).Select(r => r.RoomInstanceId), StringComparer.Ordinal);
+            if (!candidate.Floors.SelectMany(f => f.Layout.Rooms).Any(r => !oldRooms.Contains(r.RoomInstanceId)))
+                return PreviewFinalMovement(current, candidate, investment, normalizedTargets, balance, config, modifiers);
+            var result = Prepare(current, candidate, investment, 0, config, StructuralEditOperation.Construction, null, modifiers, true);
+            result.CurrentMana = balance; result.ResultingMana = balance;
+            if (!result.IsAffordable || !StructuralEconomySnapshot.Nonnegative(balance) || normalizedTargets == null ||
+                !normalizedTargets.SequenceEqual(normalizedTargets.Distinct(StringComparer.Ordinal).OrderBy(value => value, StringComparer.Ordinal)))
+            { result.Reason = InvalidReason; return result; }
+            foreach (var target in normalizedTargets)
+            {
+                if (!oldRooms.Contains(target)) { result.Reason = InvalidReason; return result; }
+                var priced = Prepare(current, candidate, investment, 0, config, StructuralEditOperation.Movement, target, modifiers, true);
+                if (!priced.IsAffordable) { result.Reason = InvalidReason; return result; }
+                result.BaseCost += priced.BaseCost; result.Cost += priced.Cost;
+                result.Investment.Single(record => record.StructureId == target).RenovationMana += priced.Cost;
+            }
+            if (!StructuralEconomySnapshot.Nonnegative(result.Cost) || !StructuralInvestment.Valid(result.Investment, candidate, int.MaxValue))
+            { result.Reason = InvalidReason; return result; }
+            result.Reason = null; RefreshBalance(result, balance, config); return result;
+        }
+
         // Normalization owns geometry/intent only. All configured factors, formula rounding
         // and investment allocation remain in this existing economic authority.
         internal static StructuralEconomyPreview PreviewFinalMovement(DetachedCanonicalSpatialSaveState current,
@@ -169,13 +208,12 @@ namespace DungeonBuilder.M0.Economy
                     RoomSpatialInstance room;
                     double roomBase;
                     var corridorBases = new Dictionary<string, double>(StringComparer.Ordinal);
+                    Dictionary<string, double> constructionAllocations = null;
                     if (operation == StructuralEditOperation.Construction ||
                         operation == StructuralEditOperation.OptionalBranchConstruction)
                     {
-                        room = operation == StructuralEditOperation.Construction
-                            ? afterRooms.Single(r => !old.ContainsKey(r.RoomInstanceId)) : null;
+                        room = null;
                         roomBase = 0d;
-                        if (room != null && !config.TryRoom(room.RoomDefinitionId, out roomBase)) return result;
                         foreach (var edge in afterEdges.Where(e => !old.ContainsKey(e.EdgeId) &&
                             e.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor).OrderBy(e => e.EdgeId, StringComparer.Ordinal))
                         {
@@ -186,7 +224,13 @@ namespace DungeonBuilder.M0.Economy
                                 newlyMaterialized.ExceptWith(carried);
                             corridorBases.Add(edge.EdgeId, perTile * newlyMaterialized.Count);
                         }
-                        result.BaseCost = roomBase + corridorBases.Values.Sum();
+                        if (operation == StructuralEditOperation.Construction)
+                        {
+                            if (!PriceConstruction(candidate, old, corridorBases, config, modifiers,
+                                out double constructionBase, out double constructionCost, out constructionAllocations)) return result;
+                            result.BaseCost = constructionBase; result.Cost = constructionCost;
+                        }
+                        else result.BaseCost = corridorBases.Values.Sum();
                     }
                     else
                     {
@@ -202,28 +246,34 @@ namespace DungeonBuilder.M0.Economy
                         else return result;
                     }
                     if (!StructuralEconomySnapshot.Nonnegative(result.BaseCost)) return result;
-                    result.Cost = new FormulaEngine().Evaluate(new FormulaInput(result.BaseCost, modifiers)).Value;
+                    if (constructionAllocations == null)
+                        result.Cost = new FormulaEngine().Evaluate(new FormulaInput(result.BaseCost, modifiers)).Value;
                     if (!StructuralEconomySnapshot.Nonnegative(result.Cost)) return result;
-                    if (priceOnly) { result.Reason = null; return result; }
-                    result.ResultingMana = balance - result.Cost;
-                    if (balance < result.Cost) { result.Reason = InsufficientReason; return result; }
+                    if (priceOnly && constructionAllocations == null) { result.Reason = null; return result; }
+                    result.ResultingMana = priceOnly ? balance : balance - result.Cost;
+                    if (!priceOnly && balance < result.Cost) { result.Reason = InsufficientReason; return result; }
                     // Reject balances too large to represent the exact configured charge in the existing double wallet.
-                    if (balance - result.ResultingMana != result.Cost) return result;
+                    if (!priceOnly && balance - result.ResultingMana != result.Cost) return result;
                     if (operation == StructuralEditOperation.Construction ||
                         operation == StructuralEditOperation.OptionalBranchConstruction)
                     {
-                        double assigned = 0;
-                        foreach (var pair in corridorBases)
+                        if (constructionAllocations != null)
+                            foreach (var allocation in constructionAllocations) next[allocation.Key].ConstructionMana += allocation.Value;
+                        else
                         {
-                            double share = result.BaseCost == 0 ? 0 : Math.Floor(result.Cost * (pair.Value / result.BaseCost));
-                            next[pair.Key].ConstructionMana += share; assigned += share;
+                            double assigned = 0;
+                            foreach (var pair in corridorBases)
+                            {
+                                double share = result.BaseCost == 0 ? 0 : Math.Floor(result.Cost * (pair.Value / result.BaseCost));
+                                next[pair.Key].ConstructionMana += share; assigned += share;
+                            }
+                            if (room != null) next[room.RoomInstanceId].ConstructionMana += result.Cost - assigned;
+                            else if (assigned != result.Cost || corridorBases.Count == 0) return result;
                         }
-                        if (room != null) next[room.RoomInstanceId].ConstructionMana += result.Cost - assigned;
-                        else if (assigned != result.Cost || corridorBases.Count == 0) return result;
                     }
                     else next[room.RoomInstanceId].RenovationMana += result.Cost;
                     double afterSpend = result.ResultingMana;
-                    result.ResultingMana = config.AddWithinCapacity(afterSpend, result.Refund);
+                    result.ResultingMana = priceOnly ? afterSpend : config.AddWithinCapacity(afterSpend, result.Refund);
                     result.CreditedRefund = result.ResultingMana - afterSpend;
                 }
                 result.Investment = next.Values.OrderBy(r => r.StructureId, StringComparer.Ordinal).ToArray();
@@ -232,6 +282,45 @@ namespace DungeonBuilder.M0.Economy
                 result.Reason = null; return result;
             }
             catch { return result; }
+        }
+
+        private static bool PriceConstruction(DetachedCanonicalSpatialSaveState candidate,
+            Dictionary<string, StructuralInvestmentRecord> old, Dictionary<string, double> corridorBases,
+            StructuralEconomySnapshot config, IReadOnlyList<FormulaModifier> modifiers,
+            out double baseCost, out double cost, out Dictionary<string, double> allocations)
+        {
+            baseCost = cost = 0; allocations = new Dictionary<string, double>(StringComparer.Ordinal);
+            var units = candidate.Floors.SelectMany(f => f.Layout.Rooms).Where(r => !old.ContainsKey(r.RoomInstanceId))
+                .OrderBy(r => r.RoomInstanceId, StringComparer.Ordinal).ToArray();
+            if (units.Length == 0) return false;
+            var corridorsByRoom = units.ToDictionary(r => r.RoomInstanceId, r => new Dictionary<string, double>(StringComparer.Ordinal), StringComparer.Ordinal);
+            foreach (var floor in candidate.Floors)
+                foreach (var edge in floor.Layout.Edges.Where(e => corridorBases.ContainsKey(e.EdgeId)))
+                {
+                    var destination = floor.Layout.Nodes.Single(n => n.NodeId == edge.DestinationNodeId);
+                    var source = floor.Layout.Nodes.Single(n => n.NodeId == edge.SourceNodeId);
+                    string owner = destination.Kind == FloorRouteNodeKind.Room ? destination.RoomInstanceId :
+                        destination.Kind == FloorRouteNodeKind.Completion ? source.RoomInstanceId : null;
+                    if (owner == null || !corridorsByRoom.TryGetValue(owner, out var corridors)) return false;
+                    corridors.Add(edge.EdgeId, corridorBases[edge.EdgeId]);
+                }
+            foreach (var room in units)
+            {
+                if (!config.TryRoom(room.RoomDefinitionId, out double roomBase)) return false;
+                var corridors = corridorsByRoom[room.RoomInstanceId];
+                double unitBase = roomBase + corridors.Values.Sum();
+                double unitCost = new FormulaEngine().Evaluate(new FormulaInput(unitBase, modifiers)).Value;
+                if (!StructuralEconomySnapshot.Nonnegative(unitCost)) return false;
+                double assigned = 0;
+                foreach (var pair in corridors.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+                {
+                    double share = unitBase == 0 ? 0 : Math.Floor(unitCost * (pair.Value / unitBase));
+                    allocations.Add(pair.Key, share); assigned += share;
+                }
+                allocations.Add(room.RoomInstanceId, unitCost - assigned);
+                baseCost += unitBase; cost += unitCost;
+            }
+            return StructuralEconomySnapshot.Nonnegative(baseCost) && StructuralEconomySnapshot.Nonnegative(cost);
         }
 
         private static StructuralInvestmentRecord Share(StructuralInvestmentRecord source,

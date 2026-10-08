@@ -8,6 +8,13 @@
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); flex-shrink: 1; }
 .top-chrome { max-height: 40%; }
 .bottom-chrome { max-height: 45%; }
+.context-details { flex-shrink: 1; min-height: 0; overflow: hidden; }
+.context-details Label { flex-shrink: 0; }
+.bottom-chrome > .row { flex-shrink: 0; }
+#status { flex-shrink: 0; }
+.category-row { flex-direction: row; align-items: center; flex-shrink: 0; }
+.category-strip { flex-grow: 1; flex-shrink: 1; }
+.room-card { min-width: 150px; max-width: 210px; }
 .viewport { flex-grow: 1; flex-shrink: 1; }
 .hud { flex-direction: row; flex-wrap: wrap; }
 .metric { flex-basis: 45%; flex-grow: 1; }

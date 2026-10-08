@@ -2,7 +2,7 @@
 
 **Phase 7A2 merged and qualified baseline (2026-10-03):** PR #223 merged at `1a38bacb32b54fbd9152ac8121bb9a054a652b10`. Writable schema 13 owns exact canonical base-local content positions and configuration-owned occupancy. Automated EditMode, PlayMode, production build-gate, real Windows migration/reopen, Windows Development Build, and owner Editor/standalone UAT passed, including the external-review corrections. The detached coordinator, canonical session, and atomic persistence authorities remain the only publication path. See the [A2 owner qualification](../../Docs/testing/evidence/phase7a2-positional-canonical-state/manual-uat.md).
 
-**Current Phase 7 status (2026-10-04):** PR #224 / Phase 7A3 is merged and qualified. Positions and derived room geometry/occupancy participate in immutable run-start snapshots, with transient spatial evidence and the existing run coordinator/damage/settlement authorities. Schema remains 13. The current repository baseline includes PR #225 model-selection governance at `64d31257f06d1dafbf49593ade88f32b808bd556`. Phase 7A4 transactional editor authority and the production Dungeon foundation are the active implementation area; visual run presentation and Phase 7 closeout remain deferred.
+**Current Phase 7 status (2026-10-07):** PR #226 / A4 merged the whole-dungeon transactional editor and production Dungeon foundation. PR #227 / A5 merged graphical room movement, final movement economics, corrected full-floor guidance and disposable-scene save isolation. PR #228 merged the [production mobile UI vision](production-dungeon-mobile-ui-vision.md), including inspect-only Normal selection and room-first content-category boundaries. The verified main baseline is `72924bdf54d222332b256cab254a22126f3b4bfd`. Schema remains 13. Transactional graphical room construction is the approved next capability, reusing these authorities without assigning a new formal packet number. External review and owner comprehension qualification remain required for construction; downstream floor lifecycle sequencing, visual run presentation and Phase 7 closeout remain deferred.
 
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
@@ -21,12 +21,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 7A3 / PR #224 merged and qualified; Phase 7A4 transactional editor and production Dungeon active; schema 13** |
+| Status | **Phase 7A4 / #226 and A5 / #227 merged; mobile UI vision / #228 merged; graphical room construction in progress; schema 13** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | Phase 7A3 / PR #224 plus PR #225 governance / `64d31257f06d1dafbf49593ade88f32b808bd556` |
+| Current implementation baseline | PR #228 following #227 / `72924bdf54d222332b256cab254a22126f3b4bfd` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-10-03 |
+| Last reconciled | 2026-10-07 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -57,7 +57,7 @@ Merged history establishes the following at prototype scope:
 - **Construction:** Phase 3 spatial editing and Phase 4A configured mana prices, affordability, atomic spend/refund, historical investment and session renovation undo are merged and qualified through PR #201.
 - **Research:** a minimal bridge and completion flow exist. Production `ac_300` branching and Phase 6A2 `ac_100` floor permission consume validated completed-research state; a broader production Architecture progression interface remains deferred. Permission does not automatically construct a floor.
 - **Economy/offline:** structural spending/refunds, owned-content redeployment, paid acquisition/StartingMana, direct unassignment, canonical passive online mana, test portability, and canonical offline passive mana are merged through PRs #201–#207. PR #207 adds one deterministic offline grant for cold start and pause/resume using the #205 rate, a validated 15% base efficiency, fractional wallet precision, no duration cap, capacity clamping, atomic timestamp consumption, localized summary, and structured security evidence. Merged and qualified Phase 6A2 adds configured Floor 2 shell spending and historical investment; an Inactive floor contributes no passive floor-count mana. A4 activation changes the existing Active-floor contribution without granting or refunding mana.
-- **UI:** the simple screen is usable for validation, but Bootstrap remains a temporary control/diagnostic dependency and is not a production dungeon editor.
+- **UI:** A4 provides the production Dungeon viewport, safe-area chrome and transactional room-local content repositioning. A5 adds graphical room movement and full legal-floor guidance. Bootstrap remains necessary for capabilities that have not reached production graphical parity. The mobile UI vision guides incremental composition subject to the A0 lock.
 - **Saves:** The PR #202 baseline introduced schema 9 with the explicit zero-investment 8 → 9 migration, preserving the frozen 1–6 → 7 → 8 path. Merged PR #209 adds exactly one 9 → 10 transition and two explicit schema-10 complete-save owners for corridor content and shared branch knowledge; frozen schema 7/8/9 contracts remain version-specific. Phase 6A1 advances the writable target to schema 11 and adds one explicit per-floor activation state; schema 10 remains frozen and readable through the 10 → 11 upgrade. Canonical complete-save persistence and qualified Windows recovery remain the only write authority; unsupported platforms/filesystems still fail closed.
 
 ### Missing MVP capabilities

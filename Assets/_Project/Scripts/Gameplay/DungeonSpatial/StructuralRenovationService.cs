@@ -424,7 +424,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 var oldTerminal = floor.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
                 var finalTerminal = final.FixedStructures.Single(f => f.Kind == FixedSpatialStructureKind.CompletionTerminal);
-                if (!Delta(oldTerminal.Anchor, finalTerminal.Anchor).Equals(priorDelta)) return null;
+                // A newly appended required tail owns completion relocation. It has no
+                // canonical movement basis. Movement-only floors retain the A5 check.
+                if (final.Layout.Rooms.Length == floor.Layout.Rooms.Length &&
+                    !Delta(oldTerminal.Anchor, finalTerminal.Anchor).Equals(priorDelta)) return null;
             }
             // Pricing/investment order is canonical stable identity, independent of gesture order.
             return result.OrderBy(value => value, StringComparer.Ordinal).ToArray();

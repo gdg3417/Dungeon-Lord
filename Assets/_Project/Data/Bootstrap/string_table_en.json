@@ -3210,19 +3210,19 @@
     },
     {
       "key": "structural.edit.out_of_bounds",
-      "text": "The moved structures would extend outside the outlined floor grid. Press Move and choose a highlighted diamond anchor."
+      "text": "The proposed structures extend outside the outlined floor grid. Choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.room_overlap",
-      "text": "The moved room would overlap another room. Press Move and choose a highlighted diamond anchor."
+      "text": "The proposed room overlaps another room. Choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.fixed_structure_overlap",
-      "text": "The moved room would overlap a required structure. Press Move and choose a highlighted diamond anchor."
+      "text": "The proposed room overlaps a required structure. Choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.corridor_overlap",
-      "text": "The moved room would overlap an existing corridor. Press Move and choose a highlighted diamond anchor."
+      "text": "The proposed room overlaps an existing corridor. Choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.capacity_exceeded",
@@ -3230,7 +3230,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "This anchor cannot connect the room to the required route. Press Move and choose a highlighted diamond anchor."
+      "text": "This anchor cannot connect the room to the required route. Choose a highlighted diamond anchor or another terminal side."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3250,7 +3250,7 @@
     },
     {
       "key": "structural.edit.required_route_disconnected",
-      "text": "This placement would disconnect the required route. Press Move and choose a highlighted diamond anchor."
+      "text": "This placement would disconnect the required route. Choose a highlighted diamond anchor."
     },
     {
       "key": "structural.edit.completion_unreachable",
@@ -3675,6 +3675,27 @@
     {"key": "ui.room_content.position.x_previous", "text": "Position X -"},
     {"key": "ui.room_content.position.x_next", "text": "Position X +"},
     {"key": "ui.room_content.position.y_previous", "text": "Position Y -"},
-    {"key": "ui.room_content.position.y_next", "text": "Position Y +"}
+    {"key": "ui.room_content.position.y_next", "text": "Position Y +"},
+    {"key": "ui.dungeon.construction.rooms", "text": "Rooms"},
+    {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room to extend the end of this floor's required route."},
+    {"key": "ui.dungeon.construction.card", "text": "{0}\n{1} × {2} tiles\nRoom base: {3} mana"},
+    {"key": "ui.dungeon.construction.properties", "text": "{0} · {1} × {2} tiles\nCapacity: {3} monsters · {4} traps · {5} loot nodes"},
+    {"key": "ui.dungeon.construction.hint", "text": "Tap a diamond anchor to preview this room. Choose its orientation and the side connecting to the Completion Terminal below."},
+    {"key": "ui.dungeon.construction.none", "text": "No legal anchor is available for this configuration. Try another terminal side, orientation or room, or move the current route tail."},
+    {"key": "ui.dungeon.construction.starter_required", "text": "This floor needs its starter-room setup before its route can be extended. Use the existing setup controls first; starter setup is not available on this screen yet."},
+    {"key": "ui.dungeon.construction.preview", "text": "Placement preview. Confirm Placement adds this room to the draft; Save Changes publishes the complete dungeon."},
+    {"key": "ui.dungeon.construction.confirm", "text": "Confirm Placement"},
+    {"key": "ui.dungeon.construction.keep_invalid", "text": "Keep Invalid Attempt"},
+    {"key": "ui.dungeon.construction.cancel", "text": "Cancel Placement"},
+    {"key": "ui.dungeon.construction.confirmed", "text": "Room added to the draft. Mana is spent only when Save Changes succeeds."},
+    {"key": "ui.dungeon.construction.connection", "text": "Terminal side: {0}"},
+    {"key": "ui.dungeon.construction.consequences", "text": "Extends the required route via {1} ({0} corridor tiles). The highlighted Completion Terminal moves downstream."},
+    {"key": "ui.dungeon.construction.source", "text": "Connects from {0}."},
+    {"key": "ui.dungeon.construction.cost_scope", "text": "This quote covers the complete proposed draft."},
+    {"key": "ui.dungeon.construction.cost_blocked", "text": "Correct the other invalid draft intents before reviewing a complete final cost."},
+    {"key": "ui.dungeon.construction.correct", "text": "Correct placement: {0}"},
+    {"key": "ui.dungeon.construction.review", "text": "New rooms in the final draft: {0}."},
+    {"key": "ui.dungeon.details.expand", "text": "Expand Details"},
+    {"key": "ui.dungeon.details.collapse", "text": "Collapse Details"}
   ]
 }

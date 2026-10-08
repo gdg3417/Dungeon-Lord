@@ -35,6 +35,19 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator TransactionalRoomConstructionProductionParity()
+        { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionInvalidCorrection()
+        { yield return Invoke("TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible"); }
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionLocalizationLayoutsAndResume()
+        { yield return Invoke("TransactionalRoomConstructionLayoutsLocalizationAndResume"); }
+        [UnityTest]
+        public IEnumerator TransactionalRoomConstructionActualInput()
+        { yield return Invoke("InputSystemConstructionTapPreviewsWithoutAcknowledgingUntilConfirm"); }
+
+        [UnityTest]
         public IEnumerator ProductionShellRuntimeThemeAndVisibleLocalizedText()
         { yield return Invoke("RuntimeThemeAndLocalizedTextRenderInActualScene"); }
 

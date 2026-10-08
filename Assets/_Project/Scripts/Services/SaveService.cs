@@ -149,15 +149,23 @@ namespace DungeonBuilder.M0
         public DungeonDraftContext DungeonDraftContext => _canonicalConfigured && _limits != null
             ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits, _compatibility)
             : null;
-        public StructuralEconomyPreview PreviewDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
+        public bool TryRoomConstructionBaseCost(string definitionId, out double cost)
+        { cost = 0; return _economy != null && _economy.TryRoom(definitionId, out cost); }
+
+        public void RefreshDraftPreviewBalance(StructuralEconomyPreview preview, double balance)
+            => StructuralEconomyService.RefreshBalance(preview, balance, _economy);
+
+        public StructuralEconomyPreview PreviewDungeonDraft(SaveData current, TransactionalDungeonDraft draft,
+            DetachedCanonicalSpatialSaveState proposed = null)
         {
-            if (draft == null || !draft.HasStructuralIntent || !draft.IsStructurallyValid || _canonicalSession == null ||
+            if (draft == null || proposed == null && !draft.HasStructuralIntent || !draft.IsStructurallyValid || _canonicalSession == null ||
                 !draft.MatchesRuleContext(DungeonDraftContext) ||
                 draft.BaselineFingerprint != DungeonDraftContext?.Fingerprint(current?.validatedCanonicalSpatialState)) return null;
+            if (proposed != null && !DungeonDraftContext.Validate(proposed)) return null;
             var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
             if (!owned.IsValid) return null;
-            return StructuralEconomyService.PreviewFinalMovement(owned.State, draft.ReadModel, owned.Investment,
-                draft.NormalizedMovementTargets(), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
+            return StructuralEconomyService.PreviewFinalDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
+                draft.NormalizedMovementTargets(proposed), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
         }
         public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;

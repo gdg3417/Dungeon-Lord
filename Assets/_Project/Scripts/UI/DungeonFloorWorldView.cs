@@ -10,7 +10,7 @@ namespace DungeonBuilder.M0
     /// <summary>Presentation only. Tilemaps and sprite views never supply placement or simulation state.</summary>
     public sealed class DungeonFloorWorldView : MonoBehaviour
     {
-        private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom, moveAnchors;
+        private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom, moveAnchors, constructionPreview, invalidConstruction;
         private readonly SpriteRenderer[] floorBoundary = new SpriteRenderer[4];
         private Texture2D anchorTexture;
         private Sprite anchorSprite;
@@ -34,6 +34,7 @@ namespace DungeonBuilder.M0
         public int ActiveEntityCount => identities.Count;
         public bool GridVisible => grid != null && grid.gameObject.activeSelf;
         public bool PreviewVisible => highlight != null && highlight.gameObject.activeSelf;
+        public int ConstructionPreviewTileCount { get; private set; }
         public string FloorInstanceId => floor?.FloorInstanceId;
 
         public void Initialize(DungeonPresentationPolicy policy)
@@ -46,6 +47,7 @@ namespace DungeonBuilder.M0
             corridors = Layer("Corridors", 0); grid = Layer("EditorGrid", -1);
             invalidRooms = Layer("InvalidRoomIntents", 1); selectedRoom = Layer("RoomSelection", 1);
             moveAnchors = Layer("MoveAnchors", 3);
+            constructionPreview = Layer("ConstructionPreview", 2); invalidConstruction = Layer("InvalidConstructionIntents", 1);
             for (int i = 0; i < floorBoundary.Length; i++) floorBoundary[i] = Entity("FloorBoundary" + i, -1);
             // A hollow diamond carries target meaning independently of marker color.
             anchorTexture = new Texture2D(32, 32, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
@@ -230,7 +232,37 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
-        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); }
+        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; }
+
+        public void PresentConstructionPreview(StructuralEditPreview preview)
+        {
+            constructionPreview.ClearAllTiles(); ConstructionPreviewTileCount = 0;
+            if (preview == null) return;
+            var cells = new HashSet<TileCoordinate>(preview.OccupiedTiles);
+            if (preview.IsValid)
+            {
+                cells.UnionWith(preview.IncomingConnectionTiles);
+                foreach (var terminal in preview.DetachedCandidate.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId)
+                    .FixedStructures.Where(s => s.Kind == FixedSpatialStructureKind.CompletionTerminal))
+                {
+                    var definition = production.Catalog.FixedStructures.Single(d => d.StructureDefinitionId == terminal.FixedStructureDefinitionId);
+                    if (TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, terminal.Anchor, terminal.Orientation,
+                        new SpatialValidationWorkloadLimits(maximumTiles), out var footprint)) cells.UnionWith(footprint.OccupiedTiles);
+                }
+            }
+            var tile = preview.IsValid ? roomSelectionTile : invalidIntentTile;
+            foreach (var cell in cells) constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+            ConstructionPreviewTileCount = cells.Count;
+        }
+
+        public void PresentConstructionIntents(DungeonDraftInvalidConstruction[] values)
+        {
+            invalidConstruction.ClearAllTiles();
+            if (floor == null) return;
+            foreach (var value in (values ?? Array.Empty<DungeonDraftInvalidConstruction>()).Where(v => v.Request.FloorInstanceId == floor.FloorInstanceId))
+                foreach (var cell in Footprint(value.Request.RoomDefinitionId, value.Request.Anchor, value.Request.Orientation))
+                    invalidConstruction.SetTile(new Vector3Int(cell.X, cell.Y, 0), invalidIntentTile);
+        }
         private void DrawBoundary()
         {
             for (int i = 0; i < floorBoundary.Length; i++)
