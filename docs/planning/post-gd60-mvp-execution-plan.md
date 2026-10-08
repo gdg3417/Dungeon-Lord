@@ -21,7 +21,7 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 7 #226–#229 merged; production Dungeon composition and first visual treatment in qualification/external review; schema 13** |
+| Status | **Phase 7 #226–#229 merged; production Dungeon composition and first visual treatment automated-qualified; external review/owner UAT pending; schema 13** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
 | Current implementation baseline | Merged PR #229 / `7b5911e5482aa20851e8329c0bb311f9aa6e7206` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |

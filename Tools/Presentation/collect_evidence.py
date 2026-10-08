@@ -2,6 +2,7 @@
 from pathlib import Path
 import hashlib, json, re, zipfile
 import xml.etree.ElementTree as ET
+from PIL import Image
 
 root = Path(__file__).resolve().parents[2]
 evidence = root / 'Docs/testing/evidence/phase7-production-dungeon-ui-composition'
@@ -50,4 +51,13 @@ for filename in ('ui-composition-owner-save-before.json', 'ui-composition-owner-
                                  unchanged=current==item['Hash'].upper()))
 (evidence/'owner-preservation.json').write_text(json.dumps(preservation, indent=2), encoding='utf-8')
 assert all(item['unchanged'] for item in preservation), 'Owner file changed; investigate before delivery'
+art = []
+for path in sorted((root/'Assets/_Project/UI/ProductionDungeon/Art').glob('*.png')):
+    with Image.open(path) as source:
+        dimensions = source.size
+    metadata = path.with_suffix(path.suffix+'.meta').read_text(encoding='utf-8-sig')
+    art.append(dict(path=path.relative_to(root).as_posix(), dimensions=dimensions,
+                    source_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                    meta_guid=re.search(r'^guid: (\w+)', metadata, re.MULTILINE).group(1)))
+(evidence/'asset-inventory.json').write_text(json.dumps(art, indent=2), encoding='utf-8')
 print(len(reports), 'complete XML reports;', len(logs), 'redacted logs;', len(preservation), 'owner hashes unchanged')

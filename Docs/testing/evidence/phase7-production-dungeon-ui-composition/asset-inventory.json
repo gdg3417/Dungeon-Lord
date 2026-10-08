@@ -1,0 +1,479 @@
+[
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/action.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "f20462c68c74b39262316b2c8acddabca369d90e9c8efd78ee4d476f996b7b64",
+    "meta_guid": "49a456e09f6916e4c8cb4e3dc17a4a13"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/anchor.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "799db489e6c0671cb32251fc599506ee5bfeccce0271afb68517770f681a7a50",
+    "meta_guid": "ed25c75cb5d028643bb91a8b0673aff7"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-0.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "1594258d650464372a84556d099c6f0fad9551bbf0efe58e7403336fee183eee",
+    "meta_guid": "983bb5e4dace64942829fc9a7054e1f6"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-1.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "a2b6d8d40b6446a812a4889ba1958d1371f47e25b0059f68732d7a5e20930b06",
+    "meta_guid": "9078d64d4d77b614e8ec50e57e44f501"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-10.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "54740b7e62ed7b8adc45625de7c3d7d080718d5e513b70216fac05c35e57d049",
+    "meta_guid": "5b145095a2e0fc0499b097afc0dc3bbb"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-11.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "69a5e5cd42bff653abc378ca36abdf95e2af3d67155908b108cdc03a8e1784d1",
+    "meta_guid": "d0e9b5e79a7892349a29b58c67ae78a6"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-12.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "f0357b0d3165d95f0d92c6fca5789c432711acf0ebbf719ff8c3dd01f071e009",
+    "meta_guid": "438120771dff189428a328005cdacc65"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-13.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "98965a340d247e1be95907db79471f8f5b7e19f61126dd7fc88dde4d8373585e",
+    "meta_guid": "b4f5f1919a14dd848b895b59379b16c2"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-14.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "fc2f8bdab4feffa1fc926611de9b11fa22d669d2be1140069d39735884a4816b",
+    "meta_guid": "f5e609d25049fbd4ca5a59232e4a6c8a"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-15.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "925e725e39b5eac813b599b4ad7b62e247cbbfab05ef08d0ace4779a7478c0f8",
+    "meta_guid": "3891309fad89b5a4c9d7e16d57ed2979"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-2.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "b973f626ece550e95aa77e358e8feeaac9ed5f13245c593532b6bf0719eaa7ca",
+    "meta_guid": "7674e98107e5cb641b223571157a5200"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-3.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "29fcc995262d8ddc337695db7a0eb8fc5969432ea1d5b59915743fa24d735f95",
+    "meta_guid": "3aeef7053780ebe4480e503207d212b3"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-4.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "4989387ad9e81a5dbba1dccb0ae6da344ea7514a935757d7511383a4fbf2ce37",
+    "meta_guid": "7eb54fa16a237f049bca7f55ca0af6bf"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-5.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "90113799cd508ade6c2901e0617f18f663943473250f46874c714c69c6c9c162",
+    "meta_guid": "cd787b1105398f74dbba49c53214995f"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-6.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "6f7974dd0e5279a89a8d63eac0f3cd285422c082a82978fc1cb908b382ec654c",
+    "meta_guid": "d374211bf28785144861c11f76cb3d24"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-7.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "014d90f2ede5041e11273c0d77b99a86b23068dbc4c21a4b7f2bb49f48258681",
+    "meta_guid": "29cbecfe90a4de44da8624eadd9b2374"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-8.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "aea6b30634942fc583c3c3820d404d688e89e1e8b83fe9ce2a9fe0a53626c695",
+    "meta_guid": "4a29bfe930c5fb0489f98b26daf40fbd"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/boundary-9.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "4d41ab8c6bca9865a6dca7484a49fba4e08d37b0877a35659517d9c30f4247cd",
+    "meta_guid": "26e9efc550d02cf44a3bc5d43ba53af9"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/content-atlas.png",
+    "dimensions": [
+      1536,
+      1024
+    ],
+    "source_sha256": "31708d6608b54607b5bb9e0d65eb3036da073cb1f2dcb3b26ad05253c9b5e442",
+    "meta_guid": "8ae06e2fb537c1b4b9e2c31ea06160b8"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/corridor-stone.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "8b0c241f3a5ab6879fec67e85f81abcc34945845d752254281d44a28b1c04975",
+    "meta_guid": "aa0a7247a9a533f48a9f4fa4e2c1a185"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/grid.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "e3412ca611f0b6deed34ef29901c88c4f3165eca702bb53f18246502a6505fcf",
+    "meta_guid": "1fdeeeb93b0480049ae7acf445b7ed8d"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/invalid.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "408dba99e9cb38fd39141a960cca8a7931043cd93be79970ae2f8d36a1618f1a",
+    "meta_guid": "f8b52f31d57f2564e875221f1ad728b8"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/loot-fallback.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "0eacb06e76d619ca0ba7614aa8500732a14b58a8a7431d2960b53f499aa91c8d",
+    "meta_guid": "a24bf5309948cf5448e6f121e73612ad"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/panel.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "a9da4f4f33547e6228aa160601882e6ac76fd4dc39cab3fbb1ed2564687b0d58",
+    "meta_guid": "632dac5742325874d958bfadf1b50615"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/room-stone-a.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "fc5d6a40b8b1501ebbc481238c4caa56dff2505176bc846afc39a89a6f54b614",
+    "meta_guid": "d7cf4a91648269045bfc9187c6322d74"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/room-stone-b.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "5f088a01ecb5bd21343ead799fd966b95d8f4e35ee472980a244654bf870a4c5",
+    "meta_guid": "caee386028af023479b31812e99548b5"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/room-stone-c.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "d467395d9042d524ccf25736f2eca50bc0070e2a36cb9410b092269a5d52ef9e",
+    "meta_guid": "e05e0ac34665c134bb702d077ef56fb7"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-0.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "1594258d650464372a84556d099c6f0fad9551bbf0efe58e7403336fee183eee",
+    "meta_guid": "26a69403209e47a4b8d9314514737f15"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-1.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "604645e162579d9b8a1553a4ea61ddac33c4b8e6ccb9f1bdf6e965788e97ab7e",
+    "meta_guid": "33b6c3a1dab2ea04c869688e182a1b2d"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-10.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "c6660239e1cae4953833db4c2ee01a7711a54a1c16642ed373706ff3330af494",
+    "meta_guid": "680dcff9e6cba6c4d87e21db66a86983"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-11.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "86b561d50aa24e0d03180f2e89bd05095ffd0dfe43ed9c12b23ae9207a2b163d",
+    "meta_guid": "fb55396f30aeac24db6d408fd75bb7a8"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-12.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "209e333810c140bd3f178f4993db057732b271b22235120466ad46aed0e10a6b",
+    "meta_guid": "27f775552b234be45bc24b842ed175a3"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-13.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "7e647bd1bfd64a063d99ef45b12ffacd42dd93a4a1f880484699fc7d2edcd9de",
+    "meta_guid": "f553a32e475af3241a3e9ed0c907c66c"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-14.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "e9bb0bac3a2b9f122dddfba2dbd5eeeeac0e8c566e90ea5f5c393ffc0b42a3b1",
+    "meta_guid": "ef49582deeb627d44a40eb77d0d1802f"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-15.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "55a549460bd77960c69f08ed10cb8b2e5b5ee1dd707eab7c67a6ad00d1d1a65c",
+    "meta_guid": "4eca0a5315d8f804a9fbb3c158cbc268"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-2.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "485661c5678ff3b36c67aa40bd9679569249a01c92c7f2fa6d3977249a8c5599",
+    "meta_guid": "d28915ed61647204794fed203859de00"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-3.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "305b6bc1f2fd739db6645b4d7df4498365e36106fa922c2348628e33c4cfdc7e",
+    "meta_guid": "8d2158c0510a97849a748f8b6afb7c95"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-4.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "8214c342b6031d42880cc67dd69c8077292ff2c38091a5a00b112c4781d8492a",
+    "meta_guid": "d1ed0e3c257c9344c8359dbd26706d2d"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-5.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "2cb7303f13f13620febd11c1b875ce1e96303117448a7d42b0cecdc990292bc5",
+    "meta_guid": "7a7c012e4985c1d45a5915cc9453f2f1"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-6.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "d623cf6a46e5a39fb16ae67ebccc7bc6333f33dba7665ed4d49f7decfd3c0728",
+    "meta_guid": "8e8487774d2a5204384d18425907474f"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-7.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "2920f43eb54aa429ceb89a39c4a38516b77bf1460d655c9318c5fc3d219bee92",
+    "meta_guid": "fe08199553a2dd848ad96dc45fbb97d1"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-8.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "95fc91f5baf25b2bd413d511c5041d09d2aa58a1b07ee8e55ab20b00a7c0985d",
+    "meta_guid": "77ffd3bd32c0c6849b021ba0d03ec81e"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selected-edge-9.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "e5e56fc5b851d6fc675715076c3b5afeb4c5d216b738bb5d6218be8f0dd2b268",
+    "meta_guid": "6e3aad66f9871da49ae6d3f2b38e2279"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/selection.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "dccaec2c65c6dfa99b7d45d2e816e95f9f0a6be30263b337c216524b185ab2f0",
+    "meta_guid": "6814233f35079c8418a9349bb8835317"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/surrounding-rock.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "b003b8a1c1a4aa0c631c377df8a6aac0d90cfcfbfef2d2dac1b2b30ede13d1dd",
+    "meta_guid": "ebaf3f62e5638ab469be83abb140be91"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/trap-fallback.png",
+    "dimensions": [
+      128,
+      128
+    ],
+    "source_sha256": "1247401391b303d81c97f78d9e81346546988bec1c657c975687d0dd1ebcbc7b",
+    "meta_guid": "272a60af77ad16e4b98eeceafef1703c"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-collapse.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "218ee31854f3f07a493bd2ad92f473b32e36c795276f141e11d06b3e951f2be0",
+    "meta_guid": "e8f4de93a5fd25d438fd0478d1fde359"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-floor.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "80a20b9c01720c1ad780a48e131547ee002c10f7ef0a7735dcdfd77aca380c65",
+    "meta_guid": "4344bb562f3cd12448d8841fcbaa522b"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-focus.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "fd4c922a15c3a3aea8d7468d51cfce8fddfec414748dc0c943d397bef757461d",
+    "meta_guid": "7540b791bb7b0fb49bcb6ba59139ab06"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-heat.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "56d66c07cd424c29a5c260a997387a7d22bd68ab56edd35ba820498465e52c53",
+    "meta_guid": "7f1acbfc716fc484dbe5fba88ec0d20a"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-mana.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "e21cfaab59ac11f722a7ffee9d03a2a1f5a6d4799683cb9ef74aca54eaf0c9ff",
+    "meta_guid": "a8163974503690a4da3ff7738f181742"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-rate.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "33c6352859272f15ace20e7db48ba0983101524d7d3f8cbc0e49d5b2b8385a55",
+    "meta_guid": "556c7f86e61fa8441a2f067c0d8ba358"
+  },
+  {
+    "path": "Assets/_Project/UI/ProductionDungeon/Art/ui-usable.png",
+    "dimensions": [
+      96,
+      96
+    ],
+    "source_sha256": "28086adf389f29e1232f84a9220b5eb2b270c553d1dd275e78162401b0a8e947",
+    "meta_guid": "e7966ee279bc441449f6adde2cb39e62"
+  }
+]
