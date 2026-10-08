@@ -31,8 +31,9 @@
 .viewport { flex-grow: 1; min-width: 0; }
 .floor-rail { width: 128px; background-color: rgba(13,22,29,0.9); padding: 4px; }
 .large-text .floor-rail { width: 156px; }
-.rail-collapsed .floor-rail { width: 102px; }
-.large-text.rail-collapsed .floor-rail { width: 128px; }
+.rail-collapsed .floor-rail { width: 72px; }
+.large-text.rail-collapsed .floor-rail { width: 88px; }
+.rail-collapsed #collapseFloors { padding-left: 0; padding-right: 0; }
 .rail-collapsed .floor-list { display: none; }
 .floor-list { flex-shrink: 1; }
 .floor-button { min-height: 74px; border-left-width: 3px; }

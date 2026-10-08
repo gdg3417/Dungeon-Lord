@@ -31,7 +31,9 @@ namespace DungeonBuilder.M0
         {
             if(!initialized || !HasCanonicalRuntime()) return;
             railCollapsed=!railCollapsed; safe.EnableInClassList("rail-collapsed",railCollapsed);
-            document.rootVisualElement.Q<Button>("collapseFloors").text=Text(railCollapsed ? "ui.dungeon.floors.expand" : "ui.dungeon.floors.collapse");
+            var toggle=document.rootVisualElement.Q<Button>("collapseFloors");
+            toggle.text=Text(railCollapsed ? "ui.dungeon.floors.compact" : "ui.dungeon.floors.collapse");
+            toggle.tooltip=Text(railCollapsed ? "ui.dungeon.floors.expand" : "ui.dungeon.floors.collapse");
         }
         private string Lifecycle(SavedSpatialFloor floor) => Text(floor.ActivationState==FloorActivationState.Active ?
             "ui.dungeon.floor.active" : "ui.dungeon.floor.inactive");
@@ -96,7 +98,7 @@ namespace DungeonBuilder.M0
                 floor.FixedStructures,catalog.FixedStructures,FloorLayoutValidationMode.ActivationValid);
             ui.Q<Label>("floorName").text=Format("ui.dungeon.floor",floor.FloorIndex+1);
             ui.Q<Label>("floorInfo").text=floor.Layout.Rooms.Length==0 ? Lifecycle(floor)+"\n"+Text("ui.dungeon.construction.starter_required") :
-                Format("ui.dungeon.floor.info",Lifecycle(floor),floor.Layout.Rooms.Length,Text(result.IsValid ? "ui.dungeon.route.ready" : "ui.dungeon.route.incomplete"),
+                Format("ui.dungeon.floor.info",Lifecycle(floor),floor.Layout.Rooms.Length,Text(result.IsValid ? "ui.dungeon.layout.ready" : "ui.dungeon.layout.blocked"),
                     result.Capacity.UsedFloorSpaceCapacity,result.Capacity.RemainingFloorSpaceCapacity);
             if(!inspecting) return;
             if(selectedEdgeId!=null)

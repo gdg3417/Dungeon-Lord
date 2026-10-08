@@ -133,11 +133,52 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.DetailsCollapsed,Is.True); Assert.That(controller.Viewport.ScreenRect.height,Is.GreaterThan(expanded));
             Click(ui.Q<Button>("collapseDetails")); for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.Viewport.ScreenRect.height,Is.EqualTo(expanded));
+            float railExpandedWidth=controller.Viewport.ScreenRect.width;
+            yield return CompositionCapture("review-rail-expanded",new Vector2Int(720,1280));
             controller.ToggleFloorRail(); for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.True); Assert.That(ui.Q("floorList").resolvedStyle.display,Is.EqualTo(DisplayStyle.None));
+            Assert.That(controller.Viewport.ScreenRect.width-railExpandedWidth,Is.GreaterThanOrEqualTo(55));
+            TestContext.WriteLine("Floor rail viewport width: expanded="+railExpandedWidth+", collapsed="+controller.Viewport.ScreenRect.width);
+            yield return CompositionCapture("review-rail-collapsed",new Vector2Int(720,1280));
             controller.ToggleFloorRail(); yield return null;
             Assert.That(ui.Q("floorList").resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex));
             AssertCanonicalUnchanged(before,mana);
+        }
+        [UnityTest]
+        public IEnumerator CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute()
+        {
+            var root=GameRoot.Instance;
+            var floor=root.Save.validatedCanonicalSpatialState.Floors[0];
+            var contextField=typeof(ProductionDungeonController).GetField("draftContext",BindingFlags.Instance|BindingFlags.NonPublic);
+            var context=(DungeonDraftContext)contextField.GetValue(controller);
+            var catalog=context.Production.Catalog;
+            var definition=catalog.Floors.Single(f=>f.FloorDefinitionId==floor.FloorDefinitionId);
+            var limits=new SpatialValidationWorkloadLimits(context.Limits.Canonical.Spatial.MaximumMaterializedTiles);
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            var valid=FloorLayoutValidator.Validate(floor.Layout,definition,catalog.Rooms,catalog.Corridors,limits,
+                floor.FixedStructures,catalog.FixedStructures,FloorLayoutValidationMode.ActivationValid);
+            Assert.That(valid.IsValid,Is.True,"Seeded required route and layout are valid");
+            int capacity=definition.FinalFloorSpaceCapacity;
+            try
+            {
+                // Fixture-only config blocker: route nodes/edges/geometry are unchanged.
+                definition.FinalFloorSpaceCapacity=0;
+                var blocked=FloorLayoutValidator.Validate(floor.Layout,definition,catalog.Rooms,catalog.Corridors,limits,
+                    floor.FixedStructures,catalog.FixedStructures,FloorLayoutValidationMode.ActivationValid);
+                Assert.That(blocked.Issues.Select(i=>i.Reason),Is.Not.Empty.And.All.EqualTo(FloorLayoutValidationReason.CapacityExceeded));
+                // Snapshots clone their catalogs on read. Inject a fixture-only snapshot
+                // into the presentation context; never alter production/canonical authority.
+                var fixtureProduction=new ProductionSpatialContentSnapshot(context.Production.Manifest,catalog,context.Production.Languages);
+                contextField.SetValue(controller,new DungeonDraftContext(fixtureProduction,context.Configuration,context.Occupancy,context.Limits,context.Compatibility));
+                typeof(ProductionDungeonController).GetMethod("PresentComposition",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(controller,null);
+                var label=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("floorInfo").text;
+                Assert.That(label,Does.Contain("Floor layout: Blocked").And.Not.Contain("Required route:"));
+                AssertCanonicalUnchanged(before,mana);
+            }
+            finally { definition.FinalFloorSpaceCapacity=capacity; contextField.SetValue(controller,context); }
+            typeof(ProductionDungeonController).GetMethod("PresentComposition",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(controller,null);
+            Assert.That(controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("floorInfo").text,Does.Contain("Floor layout: Valid"));
+            yield return null;
         }
         [UnityTest]
         public IEnumerator CompositionLayoutsAndPresentationWorkRemainBounded()
@@ -153,6 +194,19 @@ namespace DungeonBuilder.M0.Tests
                 foreach(var text in new[] {DungeonTextSize.Small,DungeonTextSize.Default,DungeonTextSize.Large})
                 {
                     controller.SetTextSize(text); for(int i=0;i<8;i++) yield return null;
+                    float expandedWidth=controller.Viewport.ScreenRect.width;
+                    controller.ToggleFloorRail(); for(int i=0;i<8;i++) yield return null;
+                    float recovery=controller.Viewport.ScreenRect.width-expandedWidth;
+                    Assert.That(recovery,Is.GreaterThanOrEqualTo((text==DungeonTextSize.Large ? 67 : 55)*controller.GetComponent<UIDocument>().panelSettings.scale));
+                    var toggleRect=ui.Q<Button>("collapseFloors").worldBound;
+                    var toggleButton=ui.Q<Button>("collapseFloors");
+                    Assert.That(toggleButton.MeasureTextSize(toggleButton.text,0,TextElement.MeasureMode.Undefined,0,TextElement.MeasureMode.Undefined).x,
+                        Is.LessThanOrEqualTo(toggleButton.contentRect.width+1),"Compact localized expand label fits without splitting a word");
+                    Assert.That(Math.Round(toggleRect.width*controller.GetComponent<UIDocument>().panelSettings.scale,4),Is.GreaterThanOrEqualTo(48));
+                    Assert.That(toggleRect.xMin,Is.GreaterThanOrEqualTo(controller.SafeRoot.worldBound.xMin-1));
+                    TestContext.WriteLine("Rail "+resolution+" "+text+": viewport "+expandedWidth+" -> "+controller.Viewport.ScreenRect.width+", hit width="+toggleRect.width);
+                    if(text==DungeonTextSize.Large) yield return CompositionCapture("review-rail-collapsed-large",resolution);
+                    controller.ToggleFloorRail(); for(int i=0;i<8;i++) yield return null;
                     Assert.That(controller.SelectedRoomInstanceId,Is.EqualTo(room.RoomInstanceId));
                     Assert.That(ui.Q("bottomChrome").worldBound.xMin,Is.EqualTo(controller.SafeRoot.worldBound.xMin).Within(1));
                     Assert.That(ui.Q("bottomChrome").worldBound.width,Is.EqualTo(controller.SafeRoot.worldBound.width).Within(1));
@@ -239,6 +293,17 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(floors.Length,Is.EqualTo(2)); Assert.That(floors[0].worldBound.yMax,Is.LessThanOrEqualTo(floors[1].worldBound.yMin));
             simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
             yield return null; yield return null;
+            float expandedRailViewport=controller.Viewport.ScreenRect.width;
+            var railCamera=controller.Viewport.Center;
+            yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+            for(int i=0;i<8;i++) yield return null;
+            Assert.That(controller.FloorRailCollapsed,Is.True);
+            Assert.That(controller.Viewport.ScreenRect.width-expandedRailViewport,Is.GreaterThanOrEqualTo(55));
+            yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+            for(int i=0;i<8;i++) yield return null;
+            Assert.That(controller.FloorRailCollapsed,Is.False);
+            Assert.That(controller.Viewport.Center,Is.EqualTo(railCamera));
+            AssertCanonicalUnchanged(before,mana);
             yield return CompositionTap(CompositionButtonScreen(floors[1]));
             Assert.That(controller.SelectedFloorInstanceId,Is.EqualTo(state.Floors[1].FloorInstanceId));
             Assert.That(controller.World.FloorInstanceId,Is.EqualTo(state.Floors[1].FloorInstanceId));
@@ -247,6 +312,17 @@ namespace DungeonBuilder.M0.Tests
             var mouse=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
             try
             {
+                var toggle=ui.Q<Button>("collapseFloors");
+                foreach(bool collapsed in new[] {true,false})
+                {
+                    var point=CompositionButtonScreen(toggle);
+                    UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=point}.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                    yield return null; yield return null;
+                    UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=point});
+                    for(int i=0;i<8;i++) yield return null;
+                    Assert.That(controller.FloorRailCollapsed,Is.EqualTo(collapsed));
+                    Assert.That(controller.Draft.CommandCount,Is.Zero);
+                }
                 Vector2 center=controller.Viewport.ScreenRect.center;
                 float size=controller.Viewport.Size;
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=center,scroll=new Vector2(0,120)});

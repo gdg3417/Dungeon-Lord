@@ -47,6 +47,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator CompositionLayoutsAndBoundedPresentation()
         { yield return Invoke("CompositionLayoutsAndPresentationWorkRemainBounded"); }
         [UnityTest]
+        public IEnumerator CompositionFloorLayoutSummarySemantics()
+        { yield return Invoke("CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute"); }
+        [UnityTest]
         public IEnumerator CompositionGenuineInputInspectionFocusAndChrome()
         { yield return Invoke("CompositionInputSystemInspectionFocusFitAndChrome"); }
         [UnityTest]
