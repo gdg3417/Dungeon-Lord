@@ -24,7 +24,7 @@ The owner did not report manually exercising every negative/invalid state, every
 
 ## Visual scope and future assessment
 
-The production Dungeon screen remains visually provisional compared with [the production mobile UI vision](../../../planning/production-dungeon-mobile-ui-vision.md). The owner accepted this capability-specific construction UI for PR #229, not as the final visual design. Based on the owner screenshots, the next development assessment should prioritize a dedicated production Dungeon UI composition pass: dungeon visual dominance, portrait/landscape hierarchy, vertical floor navigation, collapsible contextual information, category presentation, room focus and recognizable authored object sprites. No such work is included here. Reassess the exact successor PR boundary after this PR merges, against the new `main` commit and dependency graph.
+The production Dungeon screen remains visually provisional compared with [the production mobile UI vision](../../../../docs/planning/production-dungeon-mobile-ui-vision.md). The owner accepted this capability-specific construction UI for PR #229, not as the final visual design. Based on the owner screenshots, the next development assessment should prioritize a dedicated production Dungeon UI composition pass: dungeon visual dominance, portrait/landscape hierarchy, vertical floor navigation, collapsible contextual information, category presentation, room focus and recognizable authored object sprites. No such work is included here. Reassess the exact successor PR boundary after this PR merges, against the new `main` commit and dependency graph.
 
 ## Retest reference
 
