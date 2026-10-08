@@ -2,40 +2,53 @@
     <Style src="Dungeon.uss" />
     <ui:VisualElement name="safeRoot" class="safe-root" picking-mode="Ignore">
         <ui:ScrollView name="topChrome" class="top-chrome" mode="Vertical">
-            <ui:Label name="mode" class="mode" />
+            <ui:VisualElement class="top-content">
             <ui:VisualElement name="hud" class="hud">
-                <ui:Label name="totalMana" class="metric" />
-                <ui:Label name="usableMana" class="metric" />
-                <ui:Label name="manaRate" class="metric" />
-                <ui:Label name="heat" class="metric" />
+                <ui:VisualElement class="metric-card"><ui:VisualElement class="metric-icon mana-icon" picking-mode="Ignore" /><ui:Label name="totalMana" class="metric" /></ui:VisualElement>
+                <ui:VisualElement class="metric-card"><ui:VisualElement class="metric-icon usable-icon" picking-mode="Ignore" /><ui:Label name="usableMana" class="metric" /></ui:VisualElement>
+                <ui:VisualElement class="metric-card"><ui:VisualElement class="metric-icon rate-icon" picking-mode="Ignore" /><ui:Label name="manaRate" class="metric" /></ui:VisualElement>
+                <ui:VisualElement class="metric-card"><ui:VisualElement class="metric-icon heat-icon" picking-mode="Ignore" /><ui:Label name="heat" class="metric" /></ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="navigation" class="row">
-                <ui:ScrollView mode="Horizontal" class="floor-scroll"><ui:VisualElement name="floors" class="row" /></ui:ScrollView>
+                <ui:Label name="mode" class="mode" />
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
             </ui:VisualElement>
-            <ui:VisualElement class="row text-controls">
-                <ui:Label tooltip="ui.dungeon.text_size" />
-                <ui:Button name="small" tooltip="ui.dungeon.text_small" />
-                <ui:Button name="default" tooltip="ui.dungeon.text_default" />
-                <ui:Button name="large" tooltip="ui.dungeon.text_large" />
             </ui:VisualElement>
         </ui:ScrollView>
         <ui:Label name="capacity" class="capacity-bar" />
-        <ui:VisualElement name="viewport" class="viewport" />
+        <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
+            <ui:VisualElement name="floorRail" class="floor-rail">
+                <ui:Button name="collapseFloors" tooltip="ui.dungeon.floors.collapse" />
+                <ui:ScrollView name="floorList" mode="Vertical" class="floor-list"><ui:VisualElement name="floors" /></ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="viewport" class="viewport" />
+        </ui:VisualElement>
         <ui:VisualElement name="bottomChrome" class="bottom-chrome">
+            <ui:VisualElement class="sheet-top">
+            <ui:VisualElement class="sheet-header row"><ui:Label name="sheetTitle" class="mode" /><ui:Button name="collapseDetails" tooltip="ui.dungeon.details.collapse" /></ui:VisualElement>
             <ui:VisualElement name="constructionCategories" class="category-row">
-                <ui:ScrollView mode="Horizontal" class="category-strip"><ui:Button name="roomsCategory" class="selected-floor" tooltip="ui.dungeon.construction.rooms" /></ui:ScrollView>
-                <ui:Button name="collapseDetails" tooltip="ui.dungeon.details.collapse" />
+                <ui:ScrollView mode="Horizontal" class="category-strip"><ui:VisualElement class="category-row">
+                    <ui:Button name="roomsCategory" class="selected-floor" tooltip="ui.dungeon.construction.rooms" />
+                    <ui:Button name="monstersCategory" tooltip="ui.dungeon.category.monsters" />
+                    <ui:Button name="trapsCategory" tooltip="ui.dungeon.category.traps" />
+                    <ui:Button name="lootCategory" tooltip="ui.dungeon.category.loot" />
+                </ui:VisualElement></ui:ScrollView>
+            </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="status" />
-            <ui:ScrollView mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
+            <ui:ScrollView name="blockerScroll" mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
             <ui:VisualElement name="placementContext" class="placement-context">
+                <ui:VisualElement class="placement-information">
                 <ui:Label name="constructionSummary" />
                 <ui:Label name="constructionAffordability" class="affordability" />
+                </ui:VisualElement>
+                <ui:VisualElement class="placement-controls">
                 <ui:ScrollView mode="Horizontal" class="placement-options"><ui:VisualElement name="constructionOptions" class="category-row" /></ui:ScrollView>
                 <ui:VisualElement name="placementActions" class="row placement-actions"><ui:Button name="cancelPlacement" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmPlacement" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
+            <ui:VisualElement name="floorSummary" class="summary-card"><ui:Label name="floorName" class="mode" /><ui:Label name="floorInfo" /></ui:VisualElement>
             <ui:Label name="economics" />
             <ui:VisualElement name="constructionSheet">
                 <ui:ScrollView name="roomChoicesScroll" mode="Horizontal"><ui:VisualElement name="roomChoices" class="category-row" /></ui:ScrollView>
@@ -44,10 +57,12 @@
             </ui:VisualElement>
             <ui:VisualElement name="contextSheet" class="sheet">
                 <ui:Label name="selectedName" class="mode" />
-                <ui:VisualElement class="row"><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.close" /></ui:VisualElement>
+                <ui:Label name="inspectionInfo" />
             </ui:VisualElement>
+            <ui:VisualElement class="row text-controls"><ui:Label tooltip="ui.dungeon.text_size" /><ui:Button name="small" tooltip="ui.dungeon.text_small" /><ui:Button name="default" tooltip="ui.dungeon.text_default" /><ui:Button name="large" tooltip="ui.dungeon.text_large" /></ui:VisualElement>
             </ui:ScrollView>
-            <ui:VisualElement class="row session-actions">
+            <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
+            <ui:VisualElement name="sessionActions" class="row session-actions">
                 <ui:Button name="edit" tooltip="ui.dungeon.edit" />
                 <ui:Label name="draftSummary" />
                 <ui:VisualElement name="editActions" class="row">
@@ -55,9 +70,9 @@
                     <ui:Button name="discard" tooltip="ui.dungeon.discard" />
                     <ui:Button name="retry" tooltip="ui.dungeon.retry" />
                 </ui:VisualElement>
+                <ui:Button name="legacy" class="legacy" tooltip="ui.dungeon.legacy" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Button name="legacy" class="legacy" tooltip="ui.dungeon.legacy" />
         <ui:VisualElement name="modal" class="modal">
             <ui:ScrollView mode="Vertical" class="modal-content">
                 <ui:Label name="modalText" />

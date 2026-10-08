@@ -186,7 +186,7 @@ namespace DungeonBuilder.M0
             summary.text += "\n" + (quoted ? Format("ui.dungeon.construction.proposed_quote",
                 StructuralEconomyPresenter.FormatTransactionAmount(price.Cost),
                 StructuralEconomyPresenter.FormatTransactionAmount(price.ResultingMana)) : Text("ui.dungeon.construction.cost_blocked"));
-            summary.text += "\n" + Format("ui.dungeon.construction.route_summary", sourceName,
+            information.text += "\n" + Format("ui.dungeon.construction.route_summary", sourceName,
                 Text(constructionPreview.ConnectionKind == FloorRouteConnectionKind.DirectDoorway ? "ui.structural.connection.direct" : "ui.structural.connection.corridor"),
                 constructionPreview.IncomingConnectionTiles.Length);
             if (quoted && !price.IsAffordable)
@@ -207,7 +207,7 @@ namespace DungeonBuilder.M0
             ui.Q("constructionCategories").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("collapseDetails").text = Text(detailsCollapsed ? "ui.dungeon.details.expand" : "ui.dungeon.details.collapse");
             ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
-            var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
+            var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && selectedEdgeId==null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
             var choices = ui.Q("roomChoices"); choices.Clear();
             ui.Q("roomChoicesScroll").style.display = constructionRequest == null ? DisplayStyle.Flex : DisplayStyle.None;
             if (IsEditing && constructionRequest == null)
@@ -249,6 +249,7 @@ namespace DungeonBuilder.M0
                     var button = new Button(() => CorrectConstruction(id)) { text = Format("ui.dungeon.construction.correct", Text(invalid.Reason)) };
                     blockers.Add(button);
                 }
+            ui.Q("blockerScroll").style.display = blockers.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             SetTextSize(textSize);
         }
     }

@@ -9,6 +9,9 @@ namespace DungeonBuilder.M0
     [CreateAssetMenu(menuName = "Dungeon Lord/Production Dungeon Presentation")]
     public sealed class DungeonPresentationPolicy : ScriptableObject
     {
+        public DungeonVisualCatalog Visuals;
+        public float ReferenceShortSide = 720;
+        public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;
         public float AndroidMinimumDp = 48, IOSMinimumPoints = 44, DesktopMinimumPixels = 48;
         public float AndroidBaselineDpi = 160, IOSPointsPerInch = 163;
@@ -84,6 +87,13 @@ namespace DungeonBuilder.M0
             Center += before - ScreenToWorld(anchor); Clamp();
         }
         public void Reset() { Center = bounds.center; Size = FitSize; Clamp(); }
+        public void Focus(Rect geometry)
+        {
+            float aspect = ScreenRect.width / Mathf.Max(ScreenRect.height, 1);
+            Center = geometry.center;
+            Size = Mathf.Max(geometry.height, geometry.width / aspect) * 0.5f * policy.FitMargin;
+            Clamp();
+        }
         private void Clamp()
         {
             Size = Mathf.Clamp(Size, Mathf.Max(policy.MinimumViewSize, FitSize / policy.MaximumZoomFactor), FitSize);
