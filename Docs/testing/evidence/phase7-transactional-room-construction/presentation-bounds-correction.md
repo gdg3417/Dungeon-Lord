@@ -48,4 +48,4 @@ The canonical `save_primary.json` and its recorded draft sidecars match the prio
 
 ## Scope
 
-Changed runtime/test files are limited to `DungeonFloorWorldView.cs`, `PhaseSevenA4ProductionSceneTests.cs`, and `PhaseSevenA4ProductionShellPlayModeTests.cs`. The earlier owner UAT and first-room/clipboard acceptances remain historical and unchanged. This additional correction has not received new manual owner UAT; the prior owner result is not presented as testing this post-approval fix.
+Changed runtime/test files for the correction were limited to `DungeonFloorWorldView.cs`, `PhaseSevenA4ProductionSceneTests.cs`, and `PhaseSevenA4ProductionShellPlayModeTests.cs`. At the time this evidence was first recorded, no owner UAT of the additional fix was claimed. The owner subsequently confirmed that the final bounds-fix recovery test passed in Windows standalone on October 8, 2026; the accepted result and temporary landscape-panel limitation are recorded in [owner-uat.md](owner-uat.md). The earlier first-room Bootstrap and clipboard acceptances remain unchanged.
