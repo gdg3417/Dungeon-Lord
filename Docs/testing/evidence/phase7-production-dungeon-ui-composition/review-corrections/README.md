@@ -50,6 +50,8 @@ Owner primary save, both draft records, root ProjectSettings and TMP settings re
 
 ## Measured rail recovery and captures
 
+All 13 full source-comparison manifests are retained byte-for-byte in [source inventories](source-inventories.zip), verified before compacting duplicate checkpoint JSON. Compact checkpoints retain counts, failures, mismatch rows and each archived entry's SHA256. The final qualified-source-manifest.json remains fully expanded with all 1,188 rows. Original historical reports/archives are untouched.
+
 Pixels below are actual production viewport measurements from final scene/Input System runs. The old recovery of 26/28 layout units is derived from the reviewed stylesheet (128−102 / 156−128), not claimed as a new runtime baseline capture.
 
 | Viewport | Text | Expanded map width | Collapsed map width | Recovered pixels |
