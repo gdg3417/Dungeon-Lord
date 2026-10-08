@@ -63,3 +63,11 @@ The owner subsequently completed the agreed Editor and Windows standalone gamepl
 The full PlayMode clipboard failures remain 2 failures, with the 10 established skips unchanged. The owner accepted the narrow exception for this PR. The fresh-game first-room Bootstrap dependency is also explicitly accepted for this PR and remains an outstanding onboarding capability. The corrected build warning remains one Unity Cloud symbol-upload warning; the build succeeded with zero errors.
 
 The capability-specific production UI is accepted for this PR, while visual convergence with the production UI vision is deferred to a dedicated future composition assessment. Implementation and agreed qualification are complete, the owner approved merge, and the PR is not yet merged.
+
+## Additional post-approval review correction — 2026-10-08
+
+A newly opened review finding identified that persisted invalid construction footprints did not expand rendered `Bounds`, which could make them inaccessible after draft recovery. The focused `PresentConstructionIntents()` bounds correction and the new recovery/camera-input production-scene regression are recorded in [presentation-bounds-correction.md](presentation-bounds-correction.md). Final affected EditMode runs passed 87 Phase 7A4, 52 Phase 7A5 and 57 construction cases; the genuine production-shell PlayMode/input run passed 23/23. The replacement Windows Development Build succeeded with 0 errors and 1 Unity Cloud symbol-upload warning. The artifact is `Builds/Phase7RoomConstruction-BoundsFix-186ba37-20261008-final/Windows/Dungeon Lord.exe`.
+
+This correction was required after the earlier October 8 merge approval. It does not alter the previously accepted first-room Bootstrap limitation, clipboard exception, or historical owner UAT. No new manual owner UAT is claimed for this correction.
+
+The fixture was tightened so the disposable wallet is set to the exact authoritative quote before draft creation. It now verifies that confirmation, restart recovery and correction preserve that balance until Save. The final reports and replacement build details are in [presentation-bounds-correction.md](presentation-bounds-correction.md).

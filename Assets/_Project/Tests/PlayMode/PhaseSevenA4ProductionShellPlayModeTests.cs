@@ -41,6 +41,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator TransactionalRoomConstructionInvalidCorrection()
         { yield return Invoke("TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible"); }
         [UnityTest]
+        public IEnumerator TransactionalRoomConstructionOutOfBoundsIntentRecoveryBoundsCameraInputAndSave()
+        { yield return Invoke("TransactionalRoomConstructionOutOfBoundsIntentBoundsRecoverCameraAndSave"); }
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionLocalizationLayoutsAndResume()
         { yield return Invoke("TransactionalRoomConstructionLayoutsLocalizationAndResume"); }
         [UnityTest]

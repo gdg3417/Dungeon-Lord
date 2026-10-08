@@ -259,9 +259,17 @@ namespace DungeonBuilder.M0
         {
             invalidConstruction.ClearAllTiles();
             if (floor == null) return;
-            foreach (var value in (values ?? Array.Empty<DungeonDraftInvalidConstruction>()).Where(v => v.Request.FloorInstanceId == floor.FloorInstanceId))
+            var cells = new HashSet<TileCoordinate>();
+            foreach (var value in (values ?? Array.Empty<DungeonDraftInvalidConstruction>())
+                .Where(v => v.Request.FloorInstanceId == floor.FloorInstanceId)
+                .OrderBy(v => v.IntentId, StringComparer.Ordinal))
                 foreach (var cell in Footprint(value.Request.RoomDefinitionId, value.Request.Anchor, value.Request.Orientation))
-                    invalidConstruction.SetTile(new Vector3Int(cell.X, cell.Y, 0), invalidIntentTile);
+                    if (cells.Add(cell))
+                    {
+                        invalidConstruction.SetTile(new Vector3Int(cell.X, cell.Y, 0), invalidIntentTile);
+                        float minX = Mathf.Min(Bounds.xMin, cell.X), minY = Mathf.Min(Bounds.yMin, cell.Y);
+                        Bounds = Rect.MinMaxRect(minX, minY, Mathf.Max(Bounds.xMax, cell.X + 1f), Mathf.Max(Bounds.yMax, cell.Y + 1f));
+                    }
         }
         private void DrawBoundary()
         {

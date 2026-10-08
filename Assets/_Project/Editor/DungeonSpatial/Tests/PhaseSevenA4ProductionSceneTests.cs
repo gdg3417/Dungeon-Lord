@@ -188,6 +188,107 @@ namespace DungeonBuilder.M0.Tests
         }
 
         [UnityTest]
+        public IEnumerator TransactionalRoomConstructionOutOfBoundsIntentBoundsRecoverCameraAndSave()
+        {
+            var root = GameRoot.Instance;
+            var legalBounds = controller.World.LegalBounds;
+            controller.EnterEdit();
+            int gridTileCount = controller.World.GridTileCount;
+            Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            Assert.That(controller.World.MoveGuidanceAnchors, Is.Not.Empty);
+            var validAnchor = controller.World.MoveGuidanceAnchors.First();
+            controller.TapWorld(validAnchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            var setupQuote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft,
+                controller.ConstructionPreview.DetachedCandidate);
+            Assert.That(setupQuote.Cost, Is.GreaterThan(0));
+            // Seed the disposable runtime before the draft starts so all draft actions preserve this exact balance.
+            root.Save.structureRuntime.ManaReserve = setupQuote.Cost;
+            var canonicalBefore = File.ReadAllBytes(root.SaveService.SavePath);
+            double manaBefore = root.Save.structureRuntime.ManaReserve;
+            var attemptedAnchor = default(TileCoordinate);
+            bool foundOutOfBoundsEdgePlacement = false;
+            int minX = Mathf.RoundToInt(legalBounds.xMin), minY = Mathf.RoundToInt(legalBounds.yMin);
+            int maxX = Mathf.RoundToInt(legalBounds.xMax), maxY = Mathf.RoundToInt(legalBounds.yMax);
+            for (int y = minY; y < maxY && !foundOutOfBoundsEdgePlacement; y++)
+                for (int x = minX; x < maxX; x++)
+                {
+                    if (x != minX && x != maxX - 1 && y != minY && y != maxY - 1) continue;
+                    var candidate = new TileCoordinate(x, y);
+                    controller.TapWorld(candidate);
+                    if (controller.ConstructionPreview?.ReasonCodes.Contains(StructuralEditService.OutOfBoundsReason) != true) continue;
+                    attemptedAnchor = candidate; foundOutOfBoundsEdgePlacement = true; break;
+                }
+            Assert.That(foundOutOfBoundsEdgePlacement, Is.True, "The existing preview authority identifies an out-of-bounds room placement from a legal floor-edge anchor");
+            Assert.That(controller.ConstructionPreview.IsValid, Is.False);
+            Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.OutOfBoundsReason));
+            Assert.That(legalBounds.Contains(new Vector2(attemptedAnchor.X + 0.5f, attemptedAnchor.Y + 0.5f)), Is.True);
+            var attemptedCells = controller.ConstructionPreview.OccupiedTiles.ToArray();
+            Assert.That(attemptedCells.Any(cell => cell.X < legalBounds.xMin || cell.Y < legalBounds.yMin ||
+                cell.X >= legalBounds.xMax || cell.Y >= legalBounds.yMax), Is.True);
+            Click(controller.GetComponent<UIDocument>().rootVisualElement.Q<Button>("confirmPlacement"));
+            yield return null;
+            Assert.That(controller.Draft.InvalidConstructions.Length, Is.EqualTo(1));
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            Assert.That(controller.Draft.CanSave, Is.False);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            yield return RestartShell();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Recovered draft offers Resume Draft");
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+
+            Assert.That(controller.Draft.InvalidConstructions.Length, Is.EqualTo(1));
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
+            var invalidMap = controller.World.transform.Find("InvalidConstructionIntents").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            foreach (var cell in attemptedCells)
+                Assert.That(invalidMap.GetTile(new Vector3Int(cell.X, cell.Y, 0)), Is.Not.Null);
+            Assert.That(attemptedCells.Any(cell => !legalBounds.Contains(new Vector2(cell.X + 0.5f, cell.Y + 0.5f))), Is.True);
+            Assert.That(controller.World.Bounds.Contains(attemptedCells
+                .Select(cell => new Vector2(cell.X + 0.5f, cell.Y + 0.5f)).First(point => !legalBounds.Contains(point))), Is.True);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            Assert.That(controller.World.transform.Find("EditorGrid").GetComponent<UnityEngine.Tilemaps.Tilemap>()
+                .GetTile(new Vector3Int((int)legalBounds.xMin, (int)legalBounds.yMin, 0)), Is.Not.Null);
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            simulatedTouch = InputSystem.AddDevice<Touchscreen>();
+            var camera = controller.GetComponentInChildren<Camera>();
+            var accessibleCell = attemptedCells.First(cell => !legalBounds.Contains(new Vector2(cell.X + 0.5f, cell.Y + 0.5f)));
+            Vector2 screenPoint = camera.WorldToScreenPoint(new Vector3(accessibleCell.X + 0.5f, accessibleCell.Y + 0.5f, 0));
+            Assert.That(camera.pixelRect.Contains(screenPoint), Is.True, "Recovered invalid footprint is inside the configured camera viewport");
+            Assert.That(controller.IsChrome(screenPoint, 1), Is.False, "Invalid footprint can be reached from the production viewport");
+            Touch(1, screenPoint, InputTouchPhase.Began); yield return null; yield return null;
+            Touch(1, screenPoint, InputTouchPhase.Ended); yield return null; yield return null;
+            Assert.That(controller.IsConstructing, Is.True, "Viewport input selects the recovered invalid intent for correction");
+            Assert.That(controller.ConstructionPreview.IsValid, Is.False);
+
+            Assert.That(controller.World.MoveGuidanceAnchors, Does.Contain(validAnchor));
+            controller.TapWorld(validAnchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            Click(ui.Q<Button>("confirmPlacement")); yield return null;
+            Assert.That(controller.Draft.InvalidConstructions, Is.Empty);
+            Assert.That(controller.Draft.IsStructurallyValid, Is.True);
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(controller.World.GridTileCount, Is.EqualTo(gridTileCount));
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+
+            var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft);
+            Assert.That(quote.Cost, Is.EqualTo(setupQuote.Cost));
+            Assert.That(quote.IsAffordable, Is.True);
+            AssertCanonicalUnchanged(canonicalBefore, manaBefore);
+            Click(ui.Q<Button>("save")); Click(ui.Q<Button>("confirm")); yield return null;
+            Assert.That(controller.IsEditing, Is.False);
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(0));
+            Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
+            Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+        }
+
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionLayoutsLocalizationAndResume()
         {
             var root = GameRoot.Instance;

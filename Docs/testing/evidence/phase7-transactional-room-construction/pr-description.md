@@ -32,3 +32,14 @@ Detailed reports, command lines, artifact paths and historical failure records a
 The production Dungeon screen remains visually provisional relative to [the production UI vision](https://github.com/gdg3417/Dungeon-Lord/blob/codex/phase-7-transactional-graphical-room-construction/docs/planning/production-dungeon-mobile-ui-vision.md). The owner accepted this capability-specific UI, not the final visual design. A dedicated production Dungeon UI composition pass should be prioritized for future assessment, including viewport hierarchy, floor navigation, contextual details, category presentation, room focus and authored object sprites. Its exact packet boundary remains provisional until after merge and reassessment of current `main` and dependencies.
 
 Bootstrap controls for still-unmigrated replacement, deletion, floor lifecycle, optional branches, content acquisition/custody, Research and Run/Observe remain available under the established diagnostics visibility policy. This PR does not implement those capabilities, fresh-game graphical setup, floor lifecycle, arbitrary route insertion, room content placement, full visual redesign, new content/tuning, or a canonical save migration.
+
+## Additional review correction after the earlier approval
+
+A newly opened review finding identified that confirmed invalid construction footprints outside the configured legal floor could become inaccessible after draft recovery. The presentation-only correction expands rendered `Bounds` to include persisted invalid construction footprint cells, following the existing invalid-room-movement behavior; `LegalBounds`, legal grid/boundary, committed geometry and all validation/economic/persistence authorities remain unchanged.
+
+- Focused Phase 7A4 EditMode regressions (including production scene): **87/87 passed**; Phase 7A5 room-movement regressions: **52/52 passed**; transactional construction regressions: **57/57 passed**.
+- Genuine production-shell PlayMode/input tests: **23/23 passed**.
+- Corrected Windows Development Build: succeeded, **0 errors / 1 Unity Cloud symbol-upload warning**.
+- Player artifact: `Builds/Phase7RoomConstruction-BoundsFix-186ba37-20261008-final/Windows/Dungeon Lord.exe`.
+
+The owner UAT above predates this new review correction; no owner manual test is claimed for the additional fix. The earlier approved first-room Bootstrap limitation and full PlayMode clipboard exception remain unchanged. Full PlayMode remains 3,032 passed / 2 existing clipboard failures / 10 established skips; clipboard tests were not rerun or modified. Detailed reports, build warning, artifact report and isolation evidence are in [presentation-bounds-correction.md](https://github.com/gdg3417/Dungeon-Lord/blob/codex/phase-7-transactional-graphical-room-construction/Docs/testing/evidence/phase7-transactional-room-construction/presentation-bounds-correction.md).
