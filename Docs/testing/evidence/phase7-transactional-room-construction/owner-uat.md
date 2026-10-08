@@ -4,6 +4,16 @@ Automated checks do not establish owner comprehension, usability or visual appro
 
 Use the production Dungeon screen on a disposable Editor validation save with an existing required-route room tail. The existing authority cannot seed an empty active Floor 1; its legacy starter setup remains available and is not retired by this packet. Do not use the owner's real save for automated tests or cleanup.
 
+## Exact isolated setup
+
+1. In Unity Hub open **`C:/Dev/Dungeon-Lord/Temp/room-construction-validation`**, using Unity 6000.3.2f1. Open `Assets/_Project/Scenes/Bootstrap.unity` and enter Play. Do not use the main owner project for this UAT.
+2. This copy and the preserved Windows player use `phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json` under the existing `LocalLow/gdg3417/Dungeon Lord` directory. Its drafts share this disposable prefix. Do not delete or change `save_primary.json` or its drafts.
+3. On a fresh disposable save, use retained Bootstrap starter controls: select **Basic Room** in the retained Rooms group → **Place or modify selected placement**. This one-time prerequisite is outside the production-construction comprehension gate. If it does not create the established route tail, stop and report the observed state.
+4. For affordable Save testing, press F1 to open the existing development panel and use **QA Mana: Fill to Capacity**, then close the panel with F1. Use **QA Mana: Clear** later for insufficient-mana testing. These actions affect only the disposable save; do not reset/delete the save or use these controls on the owner's primary save.
+5. For standalone testing, exit Editor Play first, then launch **`C:/Dev/Dungeon-Lord/Builds/Phase7RoomConstruction-2cd413b-20261008/Windows/Dungeon Lord.exe`** in place with all adjacent files. The player shares this disposable UAT namespace; do not run Editor and standalone concurrently. Repeat the comprehension gate and core tests below. Close/relaunch this exact executable to verify persistence.
+
+The build has not been manually tested. Its warning and validation-only namespace are documented in [windows-build.md](windows-build.md).
+
 ## Comprehension gate
 
 1. Enter the production Dungeon screen, then Edit Mode.

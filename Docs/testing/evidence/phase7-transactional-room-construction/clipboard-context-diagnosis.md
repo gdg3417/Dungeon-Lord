@@ -72,3 +72,8 @@ Only a successful two-case report permits the full PlayMode rerun. Only a succes
 Before any next test, the validation copy still has `room-construction-validation-fallback.json` in both build config and SaveService fallback. Production scene GUID overrides remain armed before scene boot and through shutdown. The owner primary save and both existing owner draft records still match the original SHA256 values. Root ProjectSettings hash remains `34DA6D701E4C4629CA7B1CECB638F801D9C5EA4F40D33B09FECA46777073B993`; TMP Settings blob remains `92a60536387caf4a8caaed785b4c07b48abdf201`. No unrelated owner files were changed.
 
 Remaining automated stages: successful full PlayMode qualification and Windows Development Build. External code review and disposable-save Editor comprehension testing can proceed while this diagnostic blocker remains explicit. Windows standalone UAT awaits a qualified build. PR #229 stays draft; no merge readiness or owner UAT approval is claimed. Its description continues to distinguish subsequent production construction from retained Bootstrap first-room onboarding.
+
+
+## Subsequent owner decision
+
+The owner authorized stopping clipboard investigation and proceeding to Windows build/manual qualification despite the unchanged failures. The historical next-action advice above is superseded. See [windows-build.md](windows-build.md): build succeeded under this sequencing exception; full PlayMode is still not qualified.
