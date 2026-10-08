@@ -16,6 +16,8 @@ Require current usable balance to cover gross spending before refunds, matching 
 
 ## Qualification status
 
+The focused owner comprehension correction is recorded in [ui-correction.md](ui-correction.md): fixed placement actions, distinct hypothetical/current-draft quotes, compact defaults, persistent capacity and responsive construction sheet. It changes only presentation/localization and scene tests. New affected scene/input checks and a replacement isolated Windows build passed; renewed owner UAT remains outstanding. Original full-suite results below are retained historical evidence.
+
 Focused construction/economy, legacy A4/A5, canonical-save/run/knowledge, interruption and production-scene checks passed. Full EditMode: 1,600 total / 1,599 passed / 0 failed / 1 unchanged skip. Production gates: 291 passed. Final genuine production PlayMode scene/input checks: 22 passed. Full PlayMode: 3,044 total / 3,032 passed / 2 existing clipboard readback failures / 10 unchanged skips. Native clipboard access is denied in the validation environment; the Windows Development Build succeeded under the explicit owner sequencing exception (0 errors, 1 warning; see windows-build.md). Exact reports, commands and remaining blockers are in qualification.md. No full qualification, owner UAT or merge-readiness success is claimed.
 
 ## Draft and interaction contract

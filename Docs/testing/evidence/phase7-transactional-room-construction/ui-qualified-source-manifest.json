@@ -1,0 +1,32 @@
+[
+  {
+    "File": "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "SHA256": "7366638DF7161151B868D114CE0895080D7CA6C7AB1E53E9A90CF8905BBFE71F",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+    "SHA256": "67F62844293BCC31C67C301611E77ABF9944DFF113177DC74954D987CB792F0F",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs",
+    "SHA256": "B7FD6BEDE5AC3D2C669CDF0E37BDFDEEC84B458BBE97BFA15B056A2315E1C5BA",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "SHA256": "F81DEB352A18CF71494C55682F2B338C6510E9C446B935B8D79E3D719AD44D07",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "SHA256": "F99EFF50A1C2D084164A6779AD6DEBF3949D599C7EFF7DB2D872A634C6C6AB19",
+    "IsolatedCopyMatches": true
+  },
+  {
+    "File": "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+    "SHA256": "D2F11CEC2387E1B3435EDD5C9FB41D57E062F0CE4F8EE832C3F4F1A2B318975C",
+    "IsolatedCopyMatches": true
+  }
+]

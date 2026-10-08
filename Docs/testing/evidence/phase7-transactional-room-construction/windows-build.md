@@ -1,5 +1,7 @@
 # Windows Development qualification — 2026-10-08
 
+This historical build is superseded for visual qualification by the corrected UI player in [ui-correction.md](ui-correction.md). Its artifact and report remain preserved.
+
 The owner explicitly authorized proceeding to the Windows build with the two unchanged Bootstrap clipboard failures still visible. This is a sequencing exception for build and manual qualification, not successful full PlayMode qualification or merge approval. No clipboard investigation, tests, security diagnostics, or implementation changes were made in this continuation.
 
 Built source HEAD: `2cd413b044495ab0437451796bc7b6670033b36e`, branch `codex/phase-7-transactional-graphical-room-construction`, base `72924bdf54d222332b256cab254a22126f3b4bfd`. Recommended configuration: GPT-6.1 Sol / Medium, Standard; narrowly scoped established build qualification; fallback GPT-6 Sol / Medium.

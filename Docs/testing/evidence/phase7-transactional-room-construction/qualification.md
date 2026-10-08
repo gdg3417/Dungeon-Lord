@@ -1,5 +1,7 @@
 # Qualification — 2026-10-08
 
+Current UI correction and replacement Windows artifact: [ui-correction.md](ui-correction.md). That record supersedes the earlier UI screenshots/build for renewed visual qualification. The historical full-suite and clipboard evidence below remains visible and is not a new full-suite pass claim.
+
 Recommended configuration: GPT-6.1 Sol / High, Complex. Continue the established implementation without changing its ownership boundaries. Fallback GPT-6 Sol / High; report availability before another substitution. Baseline/main remains `72924bdf54d222332b256cab254a22126f3b4bfd`; refreshed before delivery. Unity CLI `1.0.0-beta.10`, Editor `6000.3.2f1` (`a9779f353c9b`).
 
 ## Continuation boundary

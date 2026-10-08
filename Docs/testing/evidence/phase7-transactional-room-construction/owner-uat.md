@@ -9,17 +9,19 @@ Use the production Dungeon screen on a disposable Editor validation save with an
 1. In Unity Hub open **`C:/Dev/Dungeon-Lord/Temp/room-construction-validation`**, using Unity 6000.3.2f1. Open `Assets/_Project/Scenes/Bootstrap.unity` and enter Play. Do not use the main owner project for this UAT.
 2. This copy and the preserved Windows player use `phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json` under the existing `LocalLow/gdg3417/Dungeon Lord` directory. Its drafts share this disposable prefix. Do not delete or change `save_primary.json` or its drafts.
 3. On a fresh disposable save, use retained Bootstrap starter controls: select **Basic Room** in the retained Rooms group → **Place or modify selected placement**. This one-time prerequisite is outside the production-construction comprehension gate. If it does not create the established route tail, stop and report the observed state.
-4. For affordable Save testing, press F1 to open the existing development panel and use **QA Mana: Fill to Capacity**, then close the panel with F1. Use **QA Mana: Clear** later for insufficient-mana testing. These actions affect only the disposable save; do not reset/delete the save or use these controls on the owner's primary save.
-5. For standalone testing, exit Editor Play first, then launch **`C:/Dev/Dungeon-Lord/Builds/Phase7RoomConstruction-2cd413b-20261008/Windows/Dungeon Lord.exe`** in place with all adjacent files. The player shares this disposable UAT namespace; do not run Editor and standalone concurrently. Repeat the comprehension gate and core tests below. Close/relaunch this exact executable to verify persistence.
+4. If a recovery prompt appears for the existing UAT draft, choose Resume Draft to retain the owner's prior work. For affordable Save testing, press F1 to open the existing development panel and use **QA Mana: Fill to Capacity**, then close the panel with F1. Use **QA Mana: Clear** later for insufficient-mana testing. These actions affect only the disposable save; do not reset/delete the save or use these controls on the owner's primary save.
+5. For standalone testing, exit Editor Play first, then launch **`C:/Dev/Dungeon-Lord/Builds/Phase7RoomConstruction-UI-482632b-20261008/Windows/Dungeon Lord.exe`** in place with all adjacent files. The player shares this disposable UAT namespace; do not run Editor and standalone concurrently. Repeat the comprehension gate and core tests below. Close/relaunch this exact executable to verify persistence. The older player remains preserved but is superseded for visual testing.
 
-The build has not been manually tested. Its warning and validation-only namespace are documented in [windows-build.md](windows-build.md).
+Owner testing confirmed starter setup, Rooms selection, legal guidance, orientation changes, footprint preview and cost/consequences before this correction. It did not approve the revised interaction. The new build has not been manually tested. Its warning, actual screenshots, exact affected results and validation-only namespace are documented in [ui-correction.md](ui-correction.md).
 
 ## Comprehension gate
 
 1. Enter the production Dungeon screen, then Edit Mode.
 2. Find Rooms without opening Bootstrap. Select an authored room card.
 3. Identify a diamond anchor on the complete visible floor grid.
-4. Tap it. Explain which room is previewed, how it extends the required route, where the highlighted Completion Terminal moves, and the complete draft cost.
+4. Tap it. Explain which room is previewed, how it connects, where the highlighted terminal moves, the proposed complete draft cost and resulting mana. Distinguish that hypothetical quote from **Current draft**, which excludes the unconfirmed placement.
+5. Without scrolling, find **Confirm Placement** and **Cancel Placement** above the separate Save Changes / Discard Draft section. Collapse/expand details and verify both local actions stay reachable. Check 720×1280 portrait, landscape and Large text; orientation and terminal-side choices remain in the horizontal options strip.
+6. Try an invalid footprint: its reason and **Keep Invalid Attempt** / Cancel must stay visible with details collapsed. If unaffordable, read the warning and verify confirmation is allowed into the draft while final Save is still blocked.
 
 If any step is unclear, stop further UAT and correct the interaction. A screenshot of that specific state and the expected interaction would help the correction.
 
