@@ -1,5 +1,7 @@
 # Phase 7 production Dungeon composition review packet
 
+**PR #230 review correction:** the original verifier did not exclude target-only inputs. Reports below remain historical evidence. Use the [corrections and fresh exact-inventory qualification](review-corrections/README.md) for current results/source guarantees. Owner manual UAT remains pending.
+
 Starting main: `7b5911e5482aa20851e8329c0bb311f9aa6e7206`, merged PR #229. Branch: `codex/phase7-dungeon-ui-visual-composition`. Final qualified Unity/content input commit: `5d850dfe3f2befb4e708c02b6829fcdf1c7bf9b6`; subsequent commits contain evidence/tooling/planning only.
 
 This packet delivers the approved screen composition and first original dark-fantasy visual treatment. **External review and owner manual UAT remain pending. Do not merge or treat this as final art/release readiness.**

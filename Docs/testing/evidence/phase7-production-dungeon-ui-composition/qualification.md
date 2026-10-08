@@ -1,5 +1,7 @@
 # Automated and layout qualification
 
+**Historical qualification:** the original comparison did not reject target-only inputs. These reports and counts are retained; current qualification and strict inventory guarantees are in [PR #230 review corrections](review-corrections/README.md).
+
 Unity CLI `1.0.0-beta.10`; Unity Windows Editor `6000.3.2f1`. Starting main is `7b5911e5482aa20851e8329c0bb311f9aa6e7206` (merged #229). Tests use the disposable final project at `C:/Dev/Dungeon-Lord/Temp/ui-composition-final-validation`, with a new Library and clean asset import. `ContentAuthoring` and required repository documents are included alongside Assets, Packages and ProjectSettings.
 
 ## Results

@@ -1,0 +1,17 @@
+M	Assets/_Project/Data/Bootstrap/string_table_en.json
+M	Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonCompositionSceneTests.cs
+M	Assets/_Project/Scripts/UI/ProductionDungeonComposition.cs
+M	Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs
+M	Assets/_Project/UI/ProductionDungeon/Dungeon.uss
+A	Tools/Presentation/.gitignore
+A	Tools/Presentation/collect_review_evidence.py
+M	Tools/Presentation/prepare_validation.py
+A	Tools/Presentation/qualification_inputs.py
+A	Tools/Presentation/test_qualification_inputs.py
+M	Tools/Presentation/verify_qualified_source.py
+
+Evidence updates (including new files):
+ M Docs/testing/evidence/phase7-production-dungeon-ui-composition/README.md
+ M Docs/testing/evidence/phase7-production-dungeon-ui-composition/implementation.md
+ M Docs/testing/evidence/phase7-production-dungeon-ui-composition/qualification.md
+?? Docs/testing/evidence/phase7-production-dungeon-ui-composition/review-corrections/
