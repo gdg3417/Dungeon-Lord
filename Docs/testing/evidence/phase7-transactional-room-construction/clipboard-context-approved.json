@@ -1,0 +1,35 @@
+{
+  "UserInteractive": true,
+  "WindowStation": "WinSta0",
+  "WindowStationQueryStatus": 0,
+  "WindowStationGrantedAccess": 983935,
+  "AssignedStationHasClipboardAccess": true,
+  "ThreadDesktop": "Default",
+  "InputDesktop": "Default",
+  "InputDesktopError": 0,
+  "ClipboardAlreadyOpen": false,
+  "CanOpenClipboard": false,
+  "ClipboardError": 5,
+  "ClipboardContentsRead": false,
+  "ClipboardContentsChanged": false,
+  "CanOpenStationForClipboard": true,
+  "StationClipboardAccessError": 0,
+  "JobUIQuerySucceeded": true,
+  "JobUIQueryError": 0,
+  "JobUIRestrictions": 0,
+  "JobDisallowsClipboardRead": false,
+  "JobDisallowsClipboardWrite": false,
+  "Processes": [
+    {
+      "ProcessId": 47984,
+      "Session": 1,
+      "IntegritySID": "S-1-16-8192",
+      "IsAppContainer": 0,
+      "ElevationType": 3,
+      "RestrictedSIDCount": 0,
+      "IsRestricted": false
+    }
+  ],
+  "ThreadTokenQueryError": 1008,
+  "ThreadImpersonationToken": null
+}
