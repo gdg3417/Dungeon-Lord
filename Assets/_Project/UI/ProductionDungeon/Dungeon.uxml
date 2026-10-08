@@ -13,8 +13,14 @@
                 <ui:ScrollView mode="Horizontal" class="floor-scroll"><ui:VisualElement name="floors" class="row" /></ui:ScrollView>
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
             </ui:VisualElement>
-            <ui:Label name="capacity" />
+            <ui:VisualElement class="row text-controls">
+                <ui:Label tooltip="ui.dungeon.text_size" />
+                <ui:Button name="small" tooltip="ui.dungeon.text_small" />
+                <ui:Button name="default" tooltip="ui.dungeon.text_default" />
+                <ui:Button name="large" tooltip="ui.dungeon.text_large" />
+            </ui:VisualElement>
         </ui:ScrollView>
+        <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="viewport" class="viewport" />
         <ui:VisualElement name="bottomChrome" class="bottom-chrome">
             <ui:VisualElement name="constructionCategories" class="category-row">
@@ -23,32 +29,32 @@
             </ui:VisualElement>
             <ui:Label name="status" />
             <ui:ScrollView mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
+            <ui:VisualElement name="placementContext" class="placement-context">
+                <ui:Label name="constructionSummary" />
+                <ui:Label name="constructionAffordability" class="affordability" />
+                <ui:ScrollView mode="Horizontal" class="placement-options"><ui:VisualElement name="constructionOptions" class="category-row" /></ui:ScrollView>
+                <ui:VisualElement name="placementActions" class="row placement-actions"><ui:Button name="cancelPlacement" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmPlacement" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
+            </ui:VisualElement>
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
             <ui:Label name="economics" />
             <ui:VisualElement name="constructionSheet">
                 <ui:ScrollView name="roomChoicesScroll" mode="Horizontal"><ui:VisualElement name="roomChoices" class="category-row" /></ui:ScrollView>
                 <ui:Label name="constructionInfo" />
-                <ui:VisualElement name="constructionOptions" class="row" />
-                <ui:VisualElement class="row"><ui:Button name="cancelPlacement" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmPlacement" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
+                <ui:Label name="constructionFeedback" />
             </ui:VisualElement>
             <ui:VisualElement name="contextSheet" class="sheet">
                 <ui:Label name="selectedName" class="mode" />
                 <ui:VisualElement class="row"><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.close" /></ui:VisualElement>
             </ui:VisualElement>
             </ui:ScrollView>
-            <ui:VisualElement class="row">
+            <ui:VisualElement class="row session-actions">
                 <ui:Button name="edit" tooltip="ui.dungeon.edit" />
+                <ui:Label name="draftSummary" />
                 <ui:VisualElement name="editActions" class="row">
                     <ui:Button name="save" tooltip="ui.dungeon.save" />
                     <ui:Button name="discard" tooltip="ui.dungeon.discard" />
                     <ui:Button name="retry" tooltip="ui.dungeon.retry" />
                 </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement class="row text-controls">
-                <ui:Label tooltip="ui.dungeon.text_size" />
-                <ui:Button name="small" tooltip="ui.dungeon.text_small" />
-                <ui:Button name="default" tooltip="ui.dungeon.text_default" />
-                <ui:Button name="large" tooltip="ui.dungeon.text_large" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:Button name="legacy" class="legacy" tooltip="ui.dungeon.legacy" />

@@ -224,6 +224,7 @@ namespace DungeonBuilder.M0
         }
         private void OpenSheet()
         {
+            detailsCollapsed = false;
             sheet.style.display = DisplayStyle.Flex;
             if (selectedRoomId != null)
             {
@@ -414,8 +415,13 @@ namespace DungeonBuilder.M0
             root.SaveService.RefreshDraftPreviewBalance(economicPreview, root.Save.structureRuntime.ManaReserve);
             var economics = document.rootVisualElement.Q<Label>("economics");
             economics.style.display = IsEditing && economicPreview != null && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
-            economics.text = economicPreview == null ? string.Empty : StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
+            economics.text = economicPreview == null ? string.Empty : Text("ui.dungeon.construction.current_draft") + "\n" + StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
             if (movementConsequences != null) economics.text += "\n" + movementConsequences;
+            var summary = document.rootVisualElement.Q<Label>("draftSummary");
+            summary.style.display = IsEditing && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
+            summary.text = economicPreview == null ? Text("ui.dungeon.construction.draft_empty") : Format("ui.dungeon.construction.draft_quote",
+                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.Cost),
+                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.ResultingMana));
         }
         public void SetTextSize(DungeonTextSize size)
         {

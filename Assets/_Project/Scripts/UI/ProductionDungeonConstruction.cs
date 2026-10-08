@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0
             if (!HasCanonicalRuntime() || !IsEditing || draft.Durability == DraftDurability.Unknown) return false;
             var definition = ConstructionRooms().SingleOrDefault(r => r.RoomDefinitionId == definitionId);
             if (definition == null) return false;
-            CloseSheet(); detailsCollapsed = false;
+            CloseSheet(); detailsCollapsed = true;
             constructionIntentId = Guid.NewGuid().ToString("N");
             constructionRequest = new StructuralConstructionRequest { FloorInstanceId = selectedFloor, RoomDefinitionId = definitionId,
                 Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
@@ -94,7 +94,7 @@ namespace DungeonBuilder.M0
             constructionEconomy = constructionPreview.IsValid ? root.SaveService.PreviewDungeonDraft(root.Save, draft, constructionPreview.DetachedCandidate) : null;
             world.PresentConstructionPreview(constructionPreview);
             feedback = constructionPreview.ReasonCodes.FirstOrDefault() ?? "ui.dungeon.construction.preview";
-            detailsCollapsed = false; Present();
+            Present();
         }
 
         public bool ConfirmConstructionPlacement()
@@ -152,10 +152,17 @@ namespace DungeonBuilder.M0
 
         private void PresentConstructionInformation()
         {
-            var information = document.rootVisualElement.Q<Label>("constructionInfo");
+            var ui = document.rootVisualElement;
+            var information = ui.Q<Label>("constructionInfo");
+            var summary = ui.Q<Label>("constructionSummary");
+            var affordability = ui.Q<Label>("constructionAffordability");
+            summary.text = string.Empty;
+            affordability.text = string.Empty;
+            affordability.style.display = DisplayStyle.None;
             information.text = Text(NeedsStarterSetup ? "ui.dungeon.construction.starter_required" : "ui.dungeon.construction.choose_room");
             if (!IsConstructing) return;
             var definition = ConstructionRooms().Single(r => r.RoomDefinitionId == constructionRequest.RoomDefinitionId);
+            summary.text = RoomName(definition);
             information.text = Format("ui.dungeon.construction.properties", RoomName(definition), definition.GrossFootprint.Width,
                 definition.GrossFootprint.Height, definition.MonsterCapacity, definition.TrapCapacity, definition.LootCapacity);
             if (constructionPreview?.IsValid != true) return;
@@ -175,11 +182,28 @@ namespace DungeonBuilder.M0
                 Text(constructionPreview.ConnectionKind == FloorRouteConnectionKind.DirectDoorway ? "ui.structural.connection.direct" : "ui.structural.connection.corridor"));
             information.text += "\n" + (price != null ? Text("ui.dungeon.construction.cost_scope") + "\n" +
                 StructuralEconomyPresenter.Present(price, Text, root.PassiveManaPerHourForPresentation) : Text("ui.dungeon.construction.cost_blocked"));
+            bool quoted = price != null && (price.Reason == null || price.Reason == StructuralEconomyService.InsufficientReason);
+            summary.text += "\n" + (quoted ? Format("ui.dungeon.construction.proposed_quote",
+                StructuralEconomyPresenter.FormatTransactionAmount(price.Cost),
+                StructuralEconomyPresenter.FormatTransactionAmount(price.ResultingMana)) : Text("ui.dungeon.construction.cost_blocked"));
+            summary.text += "\n" + Format("ui.dungeon.construction.route_summary", sourceName,
+                Text(constructionPreview.ConnectionKind == FloorRouteConnectionKind.DirectDoorway ? "ui.structural.connection.direct" : "ui.structural.connection.corridor"),
+                constructionPreview.IncomingConnectionTiles.Length);
+            if (quoted && !price.IsAffordable)
+            {
+                affordability.text = Text("ui.dungeon.construction.unaffordable_draft");
+                affordability.style.display = DisplayStyle.Flex;
+            }
         }
 
         private void PresentConstruction()
         {
             var ui = document.rootVisualElement;
+            safe.EnableInClassList("constructing", IsConstructing);
+            ui.Q("placementContext").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
+            bool compactPreview = IsConstructing && constructionPreview?.IsValid == true && draft.Durability == DraftDurability.Acknowledged;
+            status.style.display = compactPreview ? DisplayStyle.None : DisplayStyle.Flex;
+            ui.Q<Label>("constructionFeedback").text = IsConstructing ? status.text : string.Empty;
             ui.Q("constructionCategories").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("collapseDetails").text = Text(detailsCollapsed ? "ui.dungeon.details.expand" : "ui.dungeon.details.collapse");
             ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;

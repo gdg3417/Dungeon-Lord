@@ -8,6 +8,25 @@
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); flex-shrink: 1; }
 .top-chrome { max-height: 40%; }
 .bottom-chrome { max-height: 45%; }
+.constructing .bottom-chrome { max-height: 58%; }
+.constructing .top-chrome { max-height: 22%; flex-grow: 0; }
+.constructing .metric { flex-basis: 22%; }
+.capacity-bar { background-color: var(--panel); padding-left: var(--space); padding-right: var(--space); flex-shrink: 0; }
+.landscape.constructing .capacity-bar { width: 54%; }
+.placement-context { flex-shrink: 0; }
+.placement-actions { flex-shrink: 0; padding-bottom: var(--space); }
+.placement-actions Button { flex-grow: 1; }
+#confirmPlacement { background-color: rgb(35, 89, 81); border-color: rgb(127, 213, 227); }
+.session-actions { border-top-width: 1px; border-top-color: rgb(105, 135, 159); padding-top: var(--space); }
+#draftSummary { flex-basis: 100%; }
+.affordability { color: rgb(255, 190, 139); }
+.placement-options { flex-shrink: 0; }
+#constructionOptions .row { flex-wrap: nowrap; flex-shrink: 0; }
+#constructionSummary { -unity-font-style: bold; }
+.landscape.constructing .top-chrome, .landscape.constructing .viewport { width: 54%; }
+.landscape.constructing .top-chrome { max-height: 48%; }
+.landscape.constructing .bottom-chrome { position: absolute; right: 0; top: 0; bottom: 0; width: 46%; max-height: 100%; }
+.landscape.constructing .legacy { align-self: flex-start; }
 .context-details { flex-shrink: 1; min-height: 0; overflow: hidden; }
 .context-details Label { flex-shrink: 0; }
 .bottom-chrome > .row { flex-shrink: 0; }
