@@ -1,5 +1,13 @@
 # Qualification — 2026-10-08
 
+## Final qualification and owner decision — 2026-10-08
+
+Implementation and the agreed qualification for PR #229 are complete. The owner completed the agreed Editor and Windows standalone UAT, accepted the retained first-room Bootstrap dependency and the clipboard test exception, and approved the PR for merge on October 8, 2026. External review is complete. PR #229 is approved for merge but is not yet merged; GitHub merge confirmation establishes the merged baseline.
+
+Final evidence includes the 162/162 A4/A5/construction/scene regression run, production EditMode scenes 20/20, genuine production PlayMode/input 22/22, the historical full EditMode result of 1,599 passed / 0 failed / 1 established skip, and the historical full PlayMode result of 3,032 passed / 2 existing clipboard failures / 10 established skips. The corrected Windows Development Build succeeded with 0 errors and 1 Unity Cloud symbol-upload warning. The two clipboard failures remain failures and are not waived from the report; the owner accepted only the qualification exception for this PR. Exact reports, commands and build output remain in the evidence below and linked records.
+
+The owner-reported manual results and their distinction from automated exact-value assertions are recorded in [owner-uat.md](owner-uat.md). The construction screen remains visually provisional relative to the UI vision; a dedicated composition pass is a future assessment, not part of this PR. The accepted fresh-game Bootstrap starter dependency remains an outstanding onboarding capability.
+
 Current UI correction and replacement Windows artifact: [ui-correction.md](ui-correction.md). That record supersedes the earlier UI screenshots/build for renewed visual qualification. The historical full-suite and clipboard evidence below remains visible and is not a new full-suite pass claim.
 
 Recommended configuration: GPT-6.1 Sol / High, Complex. Continue the established implementation without changing its ownership boundaries. Fallback GPT-6 Sol / High; report availability before another substitution. Baseline/main remains `72924bdf54d222332b256cab254a22126f3b4bfd`; refreshed before delivery. Unity CLI `1.0.0-beta.10`, Editor `6000.3.2f1` (`a9779f353c9b`).
@@ -27,7 +35,7 @@ All paths below are relative to `C:/Dev/Dungeon-Lord`. Counts are observed NUnit
 
 The full EditMode fixture contains 53 new construction-domain cases, all passing. Production gates comprise build 65, export 112, recovery 57, loading 37, actual scene 20. The EditMode one-skip and PlayMode ten-skip sets exactly match the qualified A5 guidance reports; no failing test was hidden, deleted or relaxed. Full report headers, hashes, durations, skip names and failed names/messages are preserved in `report-summary.json`.
 
-## Remaining qualification blocker
+## Historical clipboard qualification blocker and accepted exception
 
 Both full PlayMode failures are existing `DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests` assertions:
 
@@ -40,7 +48,7 @@ A native availability probe, executed outside the filesystem sandbox with approv
 
 The [follow-up execution-context diagnosis](clipboard-context-diagnosis.md) verifies an active console session and accessible `WinSta0/Default` input desktop. Clipboard denial persists in approved, non-AppContainer medium-integrity execution with station clipboard rights, no thread impersonation and immediate job UI mask 0. Unlocking alone is not a demonstrated fix. A NULL open-window query cannot exclude a NULL-window clipboard holder. The smallest safe next action is the documented probe from a separately owner-launched normal Windows terminal; no security setting change is requested. No tests were unnecessarily repeated during this diagnosis.
 
-**Owner-authorized sequencing exception:** the Windows Development Build now succeeded with 0 errors and 1 warning. Full PlayMode remains 3,044 total / 3,032 passed / 2 failed / 10 skipped. No tests were changed or rerun, and clipboard investigation stopped. See [Windows build evidence](windows-build.md) for the exact command, artifact, warnings and continued disposable-save isolation. The historical clipboard diagnosis above is retained; its proposed next investigation is superseded by the owner's decision to proceed to build/manual qualification.
+**Historical owner-authorized sequencing exception:** the Windows Development Build succeeded with 0 errors and 1 warning. Full PlayMode remains 3,044 total / 3,032 passed / 2 failed / 10 skipped. No tests were changed, skipped, weakened or represented as passing. Clipboard investigation stopped. See [Windows build evidence](windows-build.md) for the exact command, artifact, warnings and disposable-save isolation. The diagnosis and its proposed next investigation are historical; the owner's October 8 acceptance below supersedes any pending-action wording.
 
 ## Exact commands
 
@@ -73,4 +81,4 @@ Measured selected-configuration search on configured Floor 1: 144 previews, 100�
 
 Production tests verify transient preview versus durable confirmation versus Save, restart recovery, invalid blockers accessible while collapsed, actual touch input, retained option-button identity during wallet updates, Small/Default/Large text and safe area at 1080×1920 / 1920×1080. Long Japanese-ready text renders with existing fonts. Final representative [portrait](screenshots/construction-preview-large-1080x1920.png) and [landscape](screenshots/construction-preview-large-1920x1080.png) captures were visually inspected. Existing missing-key behavior and localization guards remain covered. These are evidence images, not imported game sprites.
 
-External review, owner acceptance of retained first-room Bootstrap setup, comprehension/UAT and equivalent Windows behavior remain outstanding. This branch is not merge-ready.
+The final owner UAT and decision are recorded at the top of this document and in [owner-uat.md](owner-uat.md). The owner accepted the first-room Bootstrap dependency and clipboard exception and approved PR #229 for merge on October 8, 2026. External review is complete. PR #229 is approved for merge and remains unmerged until GitHub confirms it.

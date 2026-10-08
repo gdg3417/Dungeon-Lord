@@ -2,7 +2,7 @@
 
 **Phase 7A2 merged and qualified baseline (2026-10-03):** PR #223 merged at `1a38bacb32b54fbd9152ac8121bb9a054a652b10`. Writable schema 13 owns exact canonical base-local content positions and configuration-owned occupancy. Automated EditMode, PlayMode, production build-gate, real Windows migration/reopen, Windows Development Build, and owner Editor/standalone UAT passed, including the external-review corrections. The detached coordinator, canonical session, and atomic persistence authorities remain the only publication path. See the [A2 owner qualification](../../Docs/testing/evidence/phase7a2-positional-canonical-state/manual-uat.md).
 
-**Current Phase 7 status (2026-10-07):** PR #226 / A4 merged the whole-dungeon transactional editor and production Dungeon foundation. PR #227 / A5 merged graphical room movement, final movement economics, corrected full-floor guidance and disposable-scene save isolation. PR #228 merged the [production mobile UI vision](production-dungeon-mobile-ui-vision.md), including inspect-only Normal selection and room-first content-category boundaries. The verified main baseline is `72924bdf54d222332b256cab254a22126f3b4bfd`. Schema remains 13. Transactional graphical room construction is the approved next capability, reusing these authorities without assigning a new formal packet number. External review and owner comprehension qualification remain required for construction; downstream floor lifecycle sequencing, visual run presentation and Phase 7 closeout remain deferred.
+**Current Phase 7 status (2026-10-08):** PR #226 / A4, PR #227 / A5 and PR #228 / production mobile UI vision are merged. Phase 7 transactional graphical room construction is implementation-complete and agreed qualification is complete in PR #229; the owner approved it for merge October 8, 2026. GitHub merge confirmation establishes the merged baseline. Schema remains 13. The owner accepted the fresh-game Bootstrap starter dependency for PR #229 only; this remains an outstanding production-onboarding capability for subsequent Phase 7 planning. Owner screenshots show the current production Dungeon screen remains visually provisional, so the next development assessment should prioritize a dedicated production Dungeon UI composition pass. Reassess the exact successor packet boundary after merge against the new `main` commit and dependency graph. Downstream floor lifecycle sequencing and visual run presentation remain unsettled/deferred.
 
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
@@ -21,12 +21,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 7A4 / #226 and A5 / #227 merged; mobile UI vision / #228 merged; graphical room construction in progress; schema 13** |
+| Status | **Phase 7A4 / #226, A5 / #227 and mobile UI vision / #228 merged; transactional graphical room construction implementation and agreed qualification complete in #229, approved for merge 2026-10-08; schema 13** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | PR #228 following #227 / `72924bdf54d222332b256cab254a22126f3b4bfd` |
+| Current implementation baseline | PR #229 branch based on #228 / `72924bdf54d222332b256cab254a22126f3b4bfd`; merge confirmation establishes the merged baseline |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-10-07 |
+| Last reconciled | 2026-10-08 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 

@@ -1,38 +1,38 @@
-# Owner comprehension and UAT
+# Owner UAT — final closeout, 2026-10-08
 
-Automated checks do not establish owner comprehension, usability or visual approval. Do not treat this branch as merge-ready until external review and this gate pass.
+**Current status:** Owner UAT passed for the agreed PR #229 scope. The implementation and agreed qualification are complete; the owner accepted the two limitations below and approved the PR for merge on October 8, 2026. External review is complete. PR #229 remains unmerged until GitHub confirms the merge.
 
-Use the production Dungeon screen on a disposable Editor validation save with an existing required-route room tail. The existing authority cannot seed an empty active Floor 1; its legacy starter setup remains available and is not retired by this packet. Do not use the owner's real save for automated tests or cleanup.
+## Owner-reported Editor and standalone results
 
-## Exact isolated setup
+The owner reported completing the following in Unity Editor and the corrected Windows Development player:
 
-1. In Unity Hub open **`C:/Dev/Dungeon-Lord/Temp/room-construction-validation`**, using Unity 6000.3.2f1. Open `Assets/_Project/Scenes/Bootstrap.unity` and enter Play. Do not use the main owner project for this UAT.
-2. This copy and the preserved Windows player use `phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json` under the existing `LocalLow/gdg3417/Dungeon Lord` directory. Its drafts share this disposable prefix. Do not delete or change `save_primary.json` or its drafts.
-3. On a fresh disposable save, use retained Bootstrap starter controls: select **Basic Room** in the retained Rooms group → **Place or modify selected placement**. This one-time prerequisite is outside the production-construction comprehension gate. If it does not create the established route tail, stop and report the observed state.
-4. If a recovery prompt appears for the existing UAT draft, choose Resume Draft to retain the owner's prior work. For affordable Save testing, press F1 to open the existing development panel and use **QA Mana: Fill to Capacity**, then close the panel with F1. Use **QA Mana: Clear** later for insufficient-mana testing. These actions affect only the disposable save; do not reset/delete the save or use these controls on the owner's primary save.
-5. For standalone testing, exit Editor Play first, then launch **`C:/Dev/Dungeon-Lord/Builds/Phase7RoomConstruction-UI-482632b-20261008/Windows/Dungeon Lord.exe`** in place with all adjacent files. The player shares this disposable UAT namespace; do not run Editor and standalone concurrently. Repeat the comprehension gate and core tests below. Close/relaunch this exact executable to verify persistence. The older player remains preserved but is superseded for visual testing.
+- Found the production Dungeon Rooms construction workflow, selected authored rooms and legal placement anchors, and previewed footprints, orientation, connectivity, terminal relocation and economic consequences.
+- Found the corrected Confirm Placement and Cancel Placement actions and distinguished placement confirmation from session-level Save Changes.
+- Confirmed construction into a durable draft without immediately spending mana; restarted the Editor, resumed the draft with the room and its cost preserved, and saved the complete dungeon.
+- Observed the quoted construction charge, consistent with passive mana generation. After restarting the Editor, the committed room, corridor and terminal changes remained, with no draft prompt or duplicate charge.
+- Ran the corrected Windows Development player, saw the saved construction, verified existing room movement, discarded an edit without publishing it, then closed and reopened the player. The committed layout remained and discarded changes did not return.
 
-Owner testing confirmed starter setup, Rooms selection, legal guidance, orientation changes, footprint preview and cost/consequences before this correction. It did not approve the revised interaction. The new build has not been manually tested. Its warning, actual screenshots, exact affected results and validation-only namespace are documented in [ui-correction.md](ui-correction.md).
+Screenshots support the visible production workflow, placement choices and previews, corrected controls, and rendered layout at the captured states. They do not independently prove exact wallet arithmetic. Exact-value accounting, no-spend-on-draft, one-time charge, discard, durability and atomic publication are supported by automated tests; the owner's charge observation is recorded as an observation, not an exact-value assertion.
 
-## Comprehension gate
+The owner did not report manually exercising every negative/invalid state, every localization key, every resolution/text-size combination or every persistence edge case. Those remain covered by the automated qualifications recorded in [qualification.md](qualification.md) and [ui-correction.md](ui-correction.md), not claimed as manual owner tests.
 
-1. Enter the production Dungeon screen, then Edit Mode.
-2. Find Rooms without opening Bootstrap. Select an authored room card.
-3. Identify a diamond anchor on the complete visible floor grid.
-4. Tap it. Explain which room is previewed, how it connects, where the highlighted terminal moves, the proposed complete draft cost and resulting mana. Distinguish that hypothetical quote from **Current draft**, which excludes the unconfirmed placement.
-5. Without scrolling, find **Confirm Placement** and **Cancel Placement** above the separate Save Changes / Discard Draft section. Collapse/expand details and verify both local actions stay reachable. Check 720×1280 portrait, landscape and Large text; orientation and terminal-side choices remain in the horizontal options strip.
-6. Try an invalid footprint: its reason and **Keep Invalid Attempt** / Cancel must stay visible with details collapsed. If unaffordable, read the warning and verify confirmation is allowed into the draft while final Save is still blocked.
+## Owner-accepted limitations
 
-If any step is unclear, stop further UAT and correct the interaction. A screenshot of that specific state and the expected interaction would help the correction.
+**First-room onboarding — accepted for PR #229 only.** Production Dungeon Edit Mode supports subsequent graphical construction once an established required-route tail exists. Fresh-game starter setup still requires the retained Bootstrap controls. This remains an outstanding production-onboarding capability and must be reconsidered during subsequent Phase 7 planning.
 
-## After comprehension passes
+**Clipboard qualification exception — accepted for PR #229.** The historical full PlayMode result remains 3,044 total: 3,032 passed, 2 existing clipboard failures and 10 established skips. The failures remain failures; no tests were deleted, skipped, weakened or represented as passing. The owner accepted the narrow qualification exception. Production-specific, regression and Windows qualifications, together with owner Editor/standalone UAT, support proceeding with this exception documented.
 
-1. Try an invalid anchor, then a valid one. Try the available orientations and terminal-side choices. Confirm Placement; verify the draft changes while committed mana does not.
-2. Review Save Changes, confirm, and verify exactly one quoted deduction. Close/reopen and inspect the committed room, route and room-local contents.
-3. Make another draft and Discard it. Verify geometry and mana remain unchanged.
-4. Confirm a placement, close/reopen, and Resume Draft. Also keep an invalid attempt, reopen, then correct or explicitly cancel it; Save must remain blocked until correction.
-5. Move a newly constructed room before Save and compare the final charge with direct placement at the same final geometry. Move an existing room and verify its contents retain their local arrangement.
-6. With insufficient mana, attempt Save; confirm the draft remains available. Correct the placement or wait for sufficient mana and retry.
-7. Check portrait/landscape, Small/Default/Large text, collapse/expand, floor navigation and viewport input. Repeat the same comprehension and core Save/Discard/reopen steps in the Windows Development player.
+## Visual scope and future assessment
 
-Focus Room was evaluated and deferred: inspect-only Normal room selection and camera focus require a coordinated selection/input lifetime change. This packet keeps the established A5 Edit selection and Focus Floor behavior. No successor packet or floor-lifecycle sequence is committed.
+The production Dungeon screen remains visually provisional compared with [the production mobile UI vision](../../../planning/production-dungeon-mobile-ui-vision.md). The owner accepted this capability-specific construction UI for PR #229, not as the final visual design. Based on the owner screenshots, the next development assessment should prioritize a dedicated production Dungeon UI composition pass: dungeon visual dominance, portrait/landscape hierarchy, vertical floor navigation, collapsible contextual information, category presentation, room focus and recognizable authored object sprites. No such work is included here. Reassess the exact successor PR boundary after this PR merges, against the new `main` commit and dependency graph.
+
+## Retest reference
+
+For any later repeat of the agreed comprehension flow, use the isolated setup and disposable-save instructions in the historical procedure below; never use or clean the owner's primary save. The completed UAT above supersedes that procedure's old pending status.
+
+1. In the production Dungeon screen, enter Edit Mode, open Rooms, select an authored room and identify a legal anchor.
+2. Preview its footprint, orientation, connection, terminal relocation, total proposed cost and resulting mana. Confirm Placement and Cancel Placement must remain visible with details collapsed and long text; Save Changes and Discard Draft must remain visibly separate.
+3. Confirm to the durable draft and verify there is no immediate mana spend. Restart, resume and save; verify the committed geometry and one charge.
+4. Discard a separate edit and verify it does not return after closing and reopening the Windows player.
+
+The detailed historical setup used Unity `6000.3.2f1`, the disposable project `C:/Dev/Dungeon-Lord/Temp/room-construction-validation`, and player `C:/Dev/Dungeon-Lord/Builds/Phase7RoomConstruction-UI-482632b-20261008/Windows/Dungeon Lord.exe`. These paths are retained as evidence, not a request for additional testing.
