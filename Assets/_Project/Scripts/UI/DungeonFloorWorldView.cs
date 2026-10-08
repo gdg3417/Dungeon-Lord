@@ -153,9 +153,9 @@ namespace DungeonBuilder.M0
             if (art != null)
             {
                 var rock=Tile(Color.white,1,art.Surrounding);
-                for(int x=configured.Minimum.X;x<(long)configured.Minimum.X+configured.Width;x++)
-                    for(int y=configured.Minimum.Y;y<(long)configured.Minimum.Y+configured.Height;y++)
-                        surrounding.SetTile(new Vector3Int(x,y,0),rock);
+                for(long x=configured.Minimum.X;x<(long)configured.Minimum.X+configured.Width;x++)
+                    for(long y=configured.Minimum.Y;y<(long)configured.Minimum.Y+configured.Height;y++)
+                        surrounding.SetTile(new Vector3Int((int)x,(int)y,0),rock);
                 // Low stone lips follow only exposed edges of existing constructed cells.
                 // Adjacent rooms, fixed structures and authored corridors retain open visual joins.
                 foreach(var cell in visible)
