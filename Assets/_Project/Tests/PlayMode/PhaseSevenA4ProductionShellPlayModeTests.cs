@@ -157,6 +157,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator ProductionShellFailedExplicitDeleteQuiescence()
         { yield return Invoke("FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites"); }
 
+        [UnityTest]
+        public IEnumerator FloorHudStatesAndInput()
+        { yield return Invoke("FloorHudStatesAndInputCapture"); }
+
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);
     }

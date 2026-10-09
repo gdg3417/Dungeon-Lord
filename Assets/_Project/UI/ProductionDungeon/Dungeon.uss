@@ -31,8 +31,16 @@
 .map-area { flex-grow: 1; flex-shrink: 1; min-height: 64px; }
 .viewport { flex-grow: 1; min-width: 0; }
 .floor-rail { position: absolute; left: 4px; top: 4px; max-height: 100%; width: 128px; padding: 4px; }
-.floor-rail Button { background-color: rgba(13,22,29,0.96); }
-.floor-rail .selected-floor { background-color: rgb(49,48,36); }
+.floor-rail Button { background-image: none; background-color: rgba(8,17,23,0.56); border-width: 0; border-left-width: 1px; border-left-color: rgba(157,175,177,0.35); border-radius: 3px; margin: 1px 0; padding-left: 10px; padding-right: 6px; }
+.floor-rail .selected-floor { background-color: rgba(32,36,28,0.68); border-left-width: 3px; border-left-color: var(--gold); color: rgb(250,222,155); -unity-font-style: bold; }
+.floor-rail .floor-blocked { border-bottom-width: 1px; border-bottom-color: rgb(230,144,116); }
+.floor-rail Button:hover, .floor-rail Button:focus { background-color: rgba(12,25,32,0.78); }
+.floor-rail Button:focus { border-top-width: 1px; border-top-color: var(--cool); }
+.floor-rail Button:active { background-color: rgba(12,25,32,0.85); }
+.floor-rail #collapseFloors { background-color: rgba(8,17,23,0.38); border-width: 0; color: rgb(190,212,216); }
+.floor-rail #collapseFloors:hover, .floor-rail #collapseFloors:focus { background-color: rgba(12,25,32,0.70); }
+.floor-rail #collapseFloors:focus { border-top-width: 1px; border-top-color: var(--cool); }
+.floor-rail #collapseFloors:active { background-color: rgba(12,25,32,0.80); }
 .large-text .floor-rail { width: 156px; }
 .rail-collapsed .floor-rail { width: 72px; }
 .large-text.rail-collapsed .floor-rail { width: 88px; }

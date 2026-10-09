@@ -17,6 +17,102 @@ namespace DungeonBuilder.M0.Tests
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
         [UnityTest]
+        public IEnumerator FloorHudStatesAndInputCapture()
+        {
+            var root=GameRoot.Instance;
+            root.Save.completedResearch=new CompletedResearchState {ProjectIds=new[] {"ac_100"}};
+            var quote=root.SaveService.PreviewFloorConstruction(root.Save);
+            root.Save.structureRuntime.ManaReserve+=quote.Profile.ConstructionMana;
+            quote=root.SaveService.PreviewFloorConstruction(root.Save);
+            Assert.That(root.SaveService.CommitFloorConstruction(root.Save,quote).IsSuccess,Is.True);
+            var state=root.Save.validatedCanonicalSpatialState;
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            simulatedTouch=InputSystem.AddDevice<Touchscreen>();
+            var mouse=InputSystem.AddDevice<Mouse>();
+            try
+            {
+                foreach(var resolution in new[] {new Vector2Int(720,1280),new Vector2Int(1920,1080)})
+                {
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(resolution.x,resolution.y);
+                    for(int i=0;i<18;i++) yield return null;
+                    foreach(var text in new[] {DungeonTextSize.Small,DungeonTextSize.Default,DungeonTextSize.Large})
+                    {
+                        controller.SetTextSize(text);
+                        controller.SelectFloor(state.Floors[0].FloorInstanceId); controller.FitFloor();
+                        controller.ApplySafeArea(new Rect(20,35,resolution.x-40,resolution.y-70),resolution);
+                        for(int i=0;i<10;i++) yield return null;
+                        var floors=ui.Q("floors").Children().Cast<Button>().ToArray();
+                        Assert.That(floors[0].worldBound.yMax,Is.LessThanOrEqualTo(floors[1].worldBound.yMin));
+                        Assert.That(floors[0].text,Does.Contain(root.Content.GetString("ui.dungeon.floor.active",null)));
+                        Assert.That(floors[1].text,Does.Contain(root.Content.GetString("ui.dungeon.floor.inactive",null)));
+                        Assert.That(floors[0].ClassListContains("selected-floor"),Is.True);
+                        foreach(var button in floors.Append(ui.Q<Button>("collapseFloors"))) UatSafeAction(button);
+                        foreach(var button in floors.Append(ui.Q<Button>("collapseFloors"))) AssertFloorHudSurface(button);
+                        Assert.That(floors[0].resolvedStyle.borderLeftWidth,Is.GreaterThan(floors[1].resolvedStyle.borderLeftWidth));
+                        Assert.That(floors[0].resolvedStyle.unityFontStyleAndWeight,Is.EqualTo(FontStyle.Bold));
+                        Assert.That(controller.Viewport.ScreenRect.width,Is.EqualTo(resolution.x-40).Within(1));
+                        var rail=ui.Q("floorRail").worldBound;
+                        var empty=new Vector2(rail.xMin+1,rail.yMax-1);
+                        Assert.That(ui.panel.Pick(empty),Is.EqualTo(ui.Q("viewport")));
+                        yield return CompositionCapture("floorhud-normal-"+text,resolution);
+                        var room=state.Floors[0].Layout.Rooms[0];
+                        controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2)); controller.FocusRoom();
+                        yield return CompositionCapture("floorhud-focused-"+text,resolution);
+                        var center=controller.Viewport.Center; var size=controller.Viewport.Size;
+                        yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+                        for(int i=0;i<8;i++) yield return null;
+                        Assert.That(controller.FloorRailCollapsed,Is.True);
+                        Assert.That(controller.Viewport.Center,Is.EqualTo(center)); Assert.That(controller.Viewport.Size,Is.EqualTo(size));
+                        UatSafeAction(ui.Q<Button>("collapseFloors"));
+                        yield return CompositionCapture("floorhud-collapsed-"+text,resolution);
+                        yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+                        for(int i=0;i<8;i++) yield return null;
+                        var point=CompositionButtonScreen(floors[1]);
+                        InputSystem.QueueStateEvent(mouse,new MouseState {position=point}.WithButton(MouseButton.Left));
+                        yield return null; yield return null;
+                        InputSystem.QueueStateEvent(mouse,new MouseState {position=point});
+                        for(int i=0;i<8;i++) yield return null;
+                        Assert.That(controller.SelectedFloorInstanceId,Is.EqualTo(state.Floors[1].FloorInstanceId));
+                        Assert.That(floors[1].ClassListContains("selected-floor"),Is.True);
+                        yield return CompositionCapture("floorhud-inactive-"+text,resolution);
+                        yield return CompositionTap(CompositionButtonScreen(floors[0]));
+                        Assert.That(controller.SelectedFloorInstanceId,Is.EqualTo(state.Floors[0].FloorInstanceId));
+                        AssertCanonicalUnchanged(before,mana);
+                        controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"),Is.True);
+                        controller.TapWorld(new TileCoordinate(-1,-1));
+                        Assert.That(controller.ConfirmConstructionPlacement(),Is.True);
+                        for(int i=0;i<8;i++) yield return null;
+                        Assert.That(floors[0].ClassListContains("floor-blocked"),Is.True);
+                        Assert.That(floors[0].text,Does.Contain(root.Content.GetString("ui.dungeon.floor_changed",null)));
+                        Assert.That(floors[0].text,Does.Contain(root.Content.GetString("ui.dungeon.floor.blocked",null)));
+                        Assert.That(floors[0].resolvedStyle.borderBottomWidth,Is.GreaterThan(0),"Blocked text keeps an additional non-color edge cue");
+                        foreach(var button in floors) UatSafeAction(button);
+                        yield return CompositionCapture("floorhud-blocked-"+text,resolution);
+                        int commands=controller.Draft.CommandCount;
+                        yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+                        yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
+                        Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands));
+                        AssertCanonicalUnchanged(before,mana);
+                        Assert.That(controller.Discard(),Is.True);
+                    }
+                }
+            }
+            finally { InputSystem.RemoveDevice(mouse); }
+        }
+
+        private static void AssertFloorHudSurface(Button button)
+        {
+            Assert.That(button.resolvedStyle.backgroundImage,Is.EqualTo(default(Background)),"No opaque action frame covers the translucent HUD");
+            Assert.That(button.resolvedStyle.backgroundColor.a,Is.InRange(.35f,.85f));
+            Assert.That(button.resolvedStyle.opacity,Is.EqualTo(1),"Text and the full control remain opaque");
+            Assert.That(button.resolvedStyle.color.a,Is.EqualTo(1));
+            Assert.That(button.resolvedStyle.borderRightWidth,Is.Zero,"HUD uses restrained edge accents, not a framed box");
+            TestContext.WriteLine("Floor HUD "+button.text.Replace('\n',' ')+": background alpha="+button.resolvedStyle.backgroundColor.a+
+                " opacity="+button.resolvedStyle.opacity+" hit="+button.worldBound);
+        }
+
+        [UnityTest]
         public IEnumerator OverlayFullWidthSafeAreasAndTransparentInput()
         {
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
