@@ -1,6 +1,6 @@
 # Automated and layout qualification
 
-**Latest qualification:** [owner UAT correction qualification](owner-uat-corrections/qualification.md). This section retains its original historical reports; the new packet qualifies implementation `691720b` and records the subsequent owner findings and retest limitations.
+**Latest qualification:** [floating floor overlay and room readability](overlay-room-readability/qualification.md), implementation `c88c076`: full EditMode 1,619 passed / 0 failed / 1 skipped, full PlayMode 3,046 passed / 0 failed / 10 skipped, Windows Development build succeeded with all 52 referenced PNGs packed. Earlier [owner corrections](owner-uat-corrections/qualification.md) and reports below remain historical. Owner retest is pending.
 
 **Historical qualification:** the original comparison did not reject target-only inputs. These reports and counts are retained; current qualification and strict inventory guarantees are in [PR #230 review corrections](review-corrections/README.md).
 
