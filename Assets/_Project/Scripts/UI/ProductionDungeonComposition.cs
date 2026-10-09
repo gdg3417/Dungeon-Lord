@@ -98,7 +98,7 @@ namespace DungeonBuilder.M0
                 floor.FixedStructures,catalog.FixedStructures,FloorLayoutValidationMode.ActivationValid);
             ui.Q<Label>("floorName").text=Format("ui.dungeon.floor",floor.FloorIndex+1);
             ui.Q<Label>("floorInfo").text=floor.Layout.Rooms.Length==0 ? Lifecycle(floor)+"\n"+Text("ui.dungeon.construction.starter_required") :
-                Format("ui.dungeon.floor.info",Lifecycle(floor),floor.Layout.Rooms.Length,Text(result.IsValid ? "ui.dungeon.layout.ready" : "ui.dungeon.layout.blocked"),
+                Format(Screen.width > Screen.height ? "ui.dungeon.floor.info_landscape" : "ui.dungeon.floor.info",Lifecycle(floor),floor.Layout.Rooms.Length,Text(result.IsValid ? "ui.dungeon.layout.ready" : "ui.dungeon.layout.blocked"),
                     result.Capacity.UsedFloorSpaceCapacity,result.Capacity.RemainingFloorSpaceCapacity);
             if(!inspecting) return;
             if(selectedEdgeId!=null)

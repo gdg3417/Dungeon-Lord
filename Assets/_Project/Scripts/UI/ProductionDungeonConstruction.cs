@@ -159,10 +159,10 @@ namespace DungeonBuilder.M0
             summary.text = string.Empty;
             affordability.text = string.Empty;
             affordability.style.display = DisplayStyle.None;
-            information.text = Text(NeedsStarterSetup ? "ui.dungeon.construction.starter_required" : "ui.dungeon.construction.choose_room");
+            information.text = NeedsStarterSetup ? Text("ui.dungeon.construction.starter_required") : string.Empty;
             if (!IsConstructing) return;
             var definition = ConstructionRooms().Single(r => r.RoomDefinitionId == constructionRequest.RoomDefinitionId);
-            summary.text = RoomName(definition);
+            summary.text = Format("ui.dungeon.construction.selected_room", RoomName(definition));
             information.text = Format("ui.dungeon.construction.properties", RoomName(definition), definition.GrossFootprint.Width,
                 definition.GrossFootprint.Height, definition.MonsterCapacity, definition.TrapCapacity, definition.LootCapacity);
             if (constructionPreview?.IsValid != true) return;
@@ -202,8 +202,11 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("constructing", IsConstructing);
             ui.Q("placementContext").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
             bool compactPreview = IsConstructing && constructionPreview?.IsValid == true && draft.Durability == DraftDurability.Acknowledged;
-            status.style.display = compactPreview ? DisplayStyle.None : DisplayStyle.Flex;
-            ui.Q<Label>("constructionFeedback").text = IsConstructing ? status.text : string.Empty;
+            bool redundantNormalStatus = !IsEditing && (feedback == null || feedback == "ui.dungeon.committed" || feedback == "ui.dungeon.discarded");
+            status.style.display = compactPreview || redundantNormalStatus ? DisplayStyle.None : DisplayStyle.Flex;
+            // Reasons remain visible once, above the optional details and local actions.
+            ui.Q<Label>("constructionFeedback").text = string.Empty;
+            ui.Q("constructionFeedback").style.display = DisplayStyle.None;
             ui.Q("constructionCategories").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("collapseDetails").text = Text(detailsCollapsed ? "ui.dungeon.details.expand" : "ui.dungeon.details.collapse");
             ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
@@ -214,9 +217,24 @@ namespace DungeonBuilder.M0
                 foreach (var room in ConstructionRooms())
                 {
                     string id = room.RoomDefinitionId;
-                    var button = new Button(() => SelectConstructionRoom(id)) { text = Format("ui.dungeon.construction.card", RoomName(room),
-                        room.GrossFootprint.Width, room.GrossFootprint.Height,
-                        root.SaveService.TryRoomConstructionBaseCost(id, out double cost) ? PlayerManaPresentationFormatter.FormatDiscreteAmount(cost, Culture) : Text("ui.dungeon.unavailable")) };
+                    var button = new Button(() => SelectConstructionRoom(id)) { text = string.Empty, userData = id };
+                    var preview = new VisualElement { name = "roomCardPreview", pickingMode = PickingMode.Ignore };
+                    preview.AddToClassList("room-card-preview"); button.Add(preview);
+                    var cardText = new VisualElement { pickingMode = PickingMode.Ignore };
+                    cardText.AddToClassList("room-card-text"); button.Add(cardText);
+                    var name = new Label(RoomName(room)) { name = "roomCardName", pickingMode = PickingMode.Ignore };
+                    name.AddToClassList("room-card-name"); cardText.Add(name);
+                    var stats = new VisualElement { pickingMode = PickingMode.Ignore };
+                    stats.AddToClassList("room-card-stats"); cardText.Add(stats);
+                    var size = new Label(Format("ui.dungeon.construction.card_size", room.GrossFootprint.Width, room.GrossFootprint.Height))
+                        { name = "roomCardSize", pickingMode = PickingMode.Ignore };
+                    size.AddToClassList("room-card-size"); stats.Add(size);
+                    var costLabel = new Label(Format("ui.dungeon.construction.card_cost",
+                        root.SaveService.TryRoomConstructionBaseCost(id, out double cost) ? PlayerManaPresentationFormatter.FormatDiscreteAmount(cost, Culture) : Text("ui.dungeon.unavailable")))
+                        { name = "roomCardCost", pickingMode = PickingMode.Ignore };
+                    costLabel.AddToClassList("room-card-cost"); stats.Add(costLabel);
+                    button.tooltip = Format("ui.dungeon.construction.card", RoomName(room), room.GrossFootprint.Width, room.GrossFootprint.Height,
+                        root.SaveService.TryRoomConstructionBaseCost(id, out double tooltipCost) ? PlayerManaPresentationFormatter.FormatDiscreteAmount(tooltipCost, Culture) : Text("ui.dungeon.unavailable"));
                     button.AddToClassList("room-card"); choices.Add(button);
                 }
             var options = ui.Q("constructionOptions"); options.Clear();
@@ -225,6 +243,7 @@ namespace DungeonBuilder.M0
             ui.Q<Button>("confirmPlacement").text = Text(constructionPreview?.IsValid == false ? "ui.dungeon.construction.keep_invalid" : "ui.dungeon.construction.confirm");
             ui.Q<Button>("cancelPlacement").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
             PresentConstructionInformation();
+            ui.Q("constructionInfo").style.display = string.IsNullOrEmpty(ui.Q<Label>("constructionInfo").text) ? DisplayStyle.None : DisplayStyle.Flex;
             if (IsConstructing)
             {
                 var definition = ConstructionRooms().Single(r => r.RoomDefinitionId == constructionRequest.RoomDefinitionId);

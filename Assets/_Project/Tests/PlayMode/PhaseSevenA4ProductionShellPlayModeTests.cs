@@ -41,6 +41,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator CompositionNormalInspectionFocusRailCollapse()
         { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
         [UnityTest]
+        public IEnumerator UatContentHeightCardsDisplaySafeActions()
+        { yield return Invoke("UatContentHeightCardsDisplayAndSafeActions"); }
+        [UnityTest]
+        public IEnumerator UatGenuineWheelDisplayZoomBounds()
+        { yield return Invoke("UatGenuineWheelDisplayAndZoomBounds"); }
+        [UnityTest]
+        public IEnumerator UatRoomBoundariesConnectionsRotation()
+        { yield return Invoke("UatRoomBoundariesRespectSavedConnectionsAndRotation"); }
+        [UnityTest]
         public IEnumerator CompositionCorridorInspection()
         { yield return Invoke("CompositionAuthoredCorridorInspectionAndOutlineAreReadOnly"); }
         [UnityTest]

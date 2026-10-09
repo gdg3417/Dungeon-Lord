@@ -3,20 +3,21 @@
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
 .bottom-chrome { flex-shrink: 1; max-height: 42%; border-top-width: 2px; border-top-color: var(--gold); }
-.normal-mode .bottom-chrome { height: 32%; }
+.normal-mode .bottom-chrome { height: auto; }
 .normal-mode.details-collapsed .bottom-chrome { height: auto; }
 .constructing .bottom-chrome { max-height: 54%; }
 .landscape .bottom-chrome { max-height: 44%; }
 .landscape .top-content { flex-direction: row; align-items: center; }
-.landscape .hud { flex-grow: 1; flex-basis: 70%; }
-.landscape #navigation { flex-basis: 30%; padding-left: 8px; flex-wrap: nowrap; }
+.landscape .hud { flex-grow: 1; flex-basis: 64%; }
+.landscape #navigation { flex-basis: 36%; padding-left: 8px; flex-wrap: nowrap; }
+.landscape #reset, .landscape #displaySettings { flex-shrink: 0; white-space: nowrap; }
 .landscape #mode { flex-grow: 1; min-width: 0; }
 .landscape .top-chrome, .landscape .bottom-chrome { padding: 4px; }
 .landscape .metric-card { padding: 4px; }
 .landscape .sheet-top { flex-direction: row; align-items: center; flex-shrink: 0; }
-.landscape .sheet-header { flex-basis: 40%; flex-grow: 1; }
+.landscape .sheet-header { flex-basis: 48%; flex-grow: 1; }
 .landscape .category-row { flex-shrink: 1; }
-.landscape #constructionCategories { flex-basis: 60%; }
+.landscape #constructionCategories { flex-basis: 52%; }
 .landscape.constructing .bottom-chrome { max-height: 58%; }
 .landscape .placement-context { flex-direction: row; }
 .landscape .placement-information { flex-basis: 60%; flex-grow: 1; }
@@ -60,13 +61,31 @@
 .category-row { flex-direction: row; align-items: center; flex-shrink: 0; }
 .category-strip { flex-grow: 1; flex-shrink: 1; }
 .category-row > Button { flex-shrink: 0; }
-.context-details { flex-shrink: 1; min-height: 0; overflow: hidden; }
+.context-details { flex-grow: 0; flex-shrink: 1; min-height: 0; overflow: hidden; }
+.bottom-chrome ScrollView { flex-grow: 0; }
 .context-details Label { flex-shrink: 0; }
 .sheet { display: none; padding: var(--space); background-color: rgba(31,43,48,0.8); }
 .summary-card { padding: var(--space); border-left-width: 2px; border-left-color: var(--cool); }
+.landscape .summary-card { flex-direction: row; align-items: center; }
+.landscape #floorName { width: 140px; flex-shrink: 0; }
+.landscape #floorInfo { flex-grow: 1; min-width: 0; }
 .text-controls { border-top-width: 1px; border-top-color: rgb(48,63,72); margin-top: 8px; }
 .text-controls > Label { margin-right: 8px; }
-.room-card { min-width: 175px; max-width: 220px; padding-top: 54px; background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/room-stone-a.png"); -unity-background-scale-mode: scale-to-fit; }
+.room-card { width: 320px; min-width: 320px; flex-shrink: 0; padding: 8px; align-items: stretch; }
+.large-text .room-card { width: 420px; min-width: 420px; }
+.room-card-preview { height: 62px; flex-shrink: 0; background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/room-stone-a.png"); -unity-background-scale-mode: scale-to-fit; margin-bottom: 6px; }
+.room-card Label { flex-shrink: 0; white-space: normal; }
+.room-card-name { -unity-font-style: bold; }
+.room-card-text { flex-grow: 1; min-width: 0; }
+.landscape .room-card { width: 500px; min-width: 500px; flex-direction: row; }
+.landscape.large-text .room-card { width: 640px; min-width: 640px; }
+.landscape .room-card-preview { width: 82px; height: 90px; margin-right: 8px; }
+.room-card-stats { flex-direction: row; align-items: flex-start; }
+.room-card-stats > Label { flex-shrink: 1; min-width: 0; }
+.room-card-size { flex-basis: 35%; flex-grow: 1; }
+.room-card-cost { flex-basis: 65%; flex-grow: 1; }
+.room-card-cost { color: var(--cool); }
+.display-popover { display: none; position: absolute; right: 8px; top: 8px; max-width: 95%; padding: 12px; background-color: rgb(17,26,34); border-width: 2px; border-color: var(--cool); }
 .placement-context, .placement-actions, .placement-options, .session-actions, #inspectionActions { flex-shrink: 0; }
 .placement-actions > Button { flex-grow: 1; }
 #constructionOptions .row { flex-wrap: nowrap; flex-shrink: 0; }

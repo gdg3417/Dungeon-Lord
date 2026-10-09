@@ -394,6 +394,8 @@ namespace DungeonBuilder.M0.Tests
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1080, 1920);
             controller.ApplySafeArea(new Rect(0, 0, 1080, 1920), new Vector2(1080, 1920));
             for (int i = 0; i < 8; i++) yield return null;
+            Click(document.rootVisualElement.Q<Button>("displaySettings"));
+            for (int i = 0; i < 8; i++) yield return null;
             foreach (var pair in expected)
             {
                 var text = document.rootVisualElement.Q<TextElement>(pair.Key);
@@ -413,6 +415,7 @@ namespace DungeonBuilder.M0.Tests
                 }
             }
             Assert.That(missingThemeWarning, Is.False);
+            Click(document.rootVisualElement.Q<Button>("closeDisplay"));
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-theme-normal-1080x1920.png");
             yield return null;
             LogAssert.NoUnexpectedReceived();

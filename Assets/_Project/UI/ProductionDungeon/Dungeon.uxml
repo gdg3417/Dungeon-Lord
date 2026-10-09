@@ -12,6 +12,7 @@
             <ui:VisualElement name="navigation" class="row">
                 <ui:Label name="mode" class="mode" />
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
+                <ui:Button name="displaySettings" tooltip="ui.dungeon.display" />
             </ui:VisualElement>
             </ui:VisualElement>
         </ui:ScrollView>
@@ -59,7 +60,6 @@
                 <ui:Label name="selectedName" class="mode" />
                 <ui:Label name="inspectionInfo" />
             </ui:VisualElement>
-            <ui:VisualElement class="row text-controls"><ui:Label tooltip="ui.dungeon.text_size" /><ui:Button name="small" tooltip="ui.dungeon.text_small" /><ui:Button name="default" tooltip="ui.dungeon.text_default" /><ui:Button name="large" tooltip="ui.dungeon.text_large" /></ui:VisualElement>
             </ui:ScrollView>
             <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
             <ui:VisualElement name="sessionActions" class="row session-actions">
@@ -72,6 +72,11 @@
                 </ui:VisualElement>
                 <ui:Button name="legacy" class="legacy" tooltip="ui.dungeon.legacy" />
             </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="displayPopover" class="display-popover">
+            <ui:Label tooltip="ui.dungeon.text_size" />
+            <ui:VisualElement class="row text-controls"><ui:Button name="small" tooltip="ui.dungeon.text_small" /><ui:Button name="default" tooltip="ui.dungeon.text_default" /><ui:Button name="large" tooltip="ui.dungeon.text_large" /></ui:VisualElement>
+            <ui:Button name="closeDisplay" tooltip="ui.dungeon.display.close" />
         </ui:VisualElement>
         <ui:VisualElement name="modal" class="modal">
             <ui:ScrollView mode="Vertical" class="modal-content">

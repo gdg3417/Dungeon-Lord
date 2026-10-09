@@ -3256,7 +3256,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "This anchor cannot connect the room to the required route. Choose a highlighted diamond anchor or another terminal side."
+      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. Bent corridors are not available yet."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3264,7 +3264,7 @@
     },
     {
       "key": "structural.edit.socket_incompatible",
-      "text": "The selected connection sockets are incompatible."
+      "text": "These connection socket types are incompatible. Choose another terminal side or room."
     },
     {
       "key": "structural.edit.connection_point_invalid",
@@ -3292,7 +3292,7 @@
     },
     {
       "key": "structural.edit.corridor_length_invalid",
-      "text": "The straight corridor length is not supported."
+      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. Bent corridors are not available yet."
     },
     {
       "key": "ui.structural.heading",
@@ -3709,7 +3709,13 @@
     {"key": "ui.dungeon.construction.draft_empty", "text": "Current draft: no confirmed changes."},
     {"key": "ui.dungeon.construction.draft_quote", "text": "Current draft: {0} mana cost · {1} mana after Save"},
     {"key": "ui.dungeon.construction.rooms", "text": "Rooms"},
-    {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room to extend the end of this floor's required route."},
+    {"key": "ui.dungeon.display", "text": "Display"},
+    {"key": "ui.dungeon.floor.info_landscape", "text": "{0} · Rooms: {1} · Floor layout: {2} · Floor space: {3} used · {4} remaining"},
+    {"key": "ui.dungeon.display.close", "text": "Close display settings"},
+    {"key": "ui.dungeon.construction.card_size", "text": "{0} × {1} tiles"},
+    {"key": "ui.dungeon.construction.card_cost", "text": "Room base: {0} mana"},
+    {"key": "ui.dungeon.construction.selected_room", "text": "✓ Selected: {0}"},
+    {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room. Diamonds mark supported anchors for aligned doorways or straight corridors."},
     {"key": "ui.dungeon.construction.card", "text": "{0}\n{1} × {2} tiles\nRoom base: {3} mana"},
     {"key": "ui.dungeon.construction.properties", "text": "{0} · {1} × {2} tiles\nCapacity: {3} monsters · {4} traps · {5} loot nodes"},
     {"key": "ui.dungeon.construction.hint", "text": "Tap a diamond to preview placement."},

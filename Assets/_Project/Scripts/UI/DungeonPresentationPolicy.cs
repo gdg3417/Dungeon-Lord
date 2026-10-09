@@ -17,7 +17,13 @@ namespace DungeonBuilder.M0
         public float AndroidBaselineDpi = 160, IOSPointsPerInch = 163;
         public float FallbackDpi = 160;
         public float Padding = 12, TapSlopPhysicalUnits = 8;
-        public float FitMargin = 1.15f, MinimumViewSize = 2, MaximumZoomFactor = 4;
+        public float FitMargin = 1.15f, MinimumViewSize = 2, MaximumZoomFactor = 8;
+        // Input System uniform wheel units are one per notch, independent of physical DPI.
+        public float WheelZoomExponentPerUnit = .22314355f;
+        public float NativeWindowsWheelUnitsPerNotch = 120;
+        public float WheelZoomRatio(float delta, bool nativeWindowsRange) =>
+            Mathf.Exp(Mathf.Clamp(delta / (nativeWindowsRange ? NativeWindowsWheelUnitsPerNotch : 1) *
+                WheelZoomExponentPerUnit, -Mathf.Log(MaximumZoomFactor), Mathf.Log(MaximumZoomFactor)));
         public float EntitySize = 0.65f, TileSize = 0.92f, PreviewSize = 0.98f;
         public float GridTileSize = 0.96f, FloorBoundaryWidth = 0.04f, MoveAnchorSize = 0.45f;
         public float CameraDepth = -10;

@@ -28,7 +28,9 @@ MonoBehaviour:
   TapSlopPhysicalUnits: 8
   FitMargin: 1.15
   MinimumViewSize: 2
-  MaximumZoomFactor: 4
+  MaximumZoomFactor: 8
+  WheelZoomExponentPerUnit: 0.22314355
+  NativeWindowsWheelUnitsPerNotch: 120
   EntitySize: 0.92
   TileSize: 1
   PreviewSize: 0.98

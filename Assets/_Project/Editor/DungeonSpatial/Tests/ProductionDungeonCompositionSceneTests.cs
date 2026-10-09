@@ -69,8 +69,255 @@ namespace DungeonBuilder.M0.Tests
         private IEnumerator CompositionCapture(string state, Vector2Int size)
         {
             for(int i=0;i<12;i++) yield return null;
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            TestContext.WriteLine("Capture "+state+" "+size+": sheet="+ui.Q("bottomChrome").worldBound+" viewport="+controller.Viewport.ScreenRect+" zoom="+controller.Viewport.Size);
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("composition-"+state+"-"+size.x+"x"+size.y+".png");
             yield return null; yield return null;
+        }
+        [UnityTest]
+        public IEnumerator UatContentHeightCardsDisplayAndSafeActions()
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
+            var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            foreach (var size in new[] {new Vector2Int(720,1280), new Vector2Int(1080,1920), new Vector2Int(1920,1080)})
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x,size.y);
+                for (int i=0;i<20;i++) yield return null;
+                foreach (var text in new[] {DungeonTextSize.Small,DungeonTextSize.Default,DungeonTextSize.Large})
+                {
+                    controller.SetTextSize(text); for(int i=0;i<10;i++) yield return null;
+                    Assert.That(ui.Q("displayPopover").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    Click(ui.Q<Button>("displaySettings")); for(int i=0;i<3;i++) yield return null;
+                    Assert.That(ui.Q("displayPopover").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                    foreach (string name in new[] {"small","default","large"})
+                        Assert.That(ui.Q<Button>(name).worldBound.height*controller.GetComponent<UIDocument>().panelSettings.scale,Is.GreaterThanOrEqualTo(47.99));
+                    Click(ui.Q<Button>("closeDisplay"));
+                    UatMeasureLayout("normal",size,text,ui);
+                    float normalHeight=ui.Q("bottomChrome").worldBound.height;
+                    Assert.That(normalHeight,Is.LessThan(controller.SafeRoot.worldBound.height*.32f),"Normal sheet must recover the former fixed 32% allocation");
+                    controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2));
+                    for(int i=0;i<8;i++) yield return null;
+                    UatMeasureLayout("inspection",size,text,ui);
+                    Click(ui.Q<Button>("collapseDetails")); for(int i=0;i<8;i++) yield return null;
+                    float collapsed=controller.Viewport.ScreenRect.height;
+                    UatMeasureLayout("collapsed",size,text,ui);
+                    if(text==DungeonTextSize.Large) yield return CompositionCapture("uat-collapsed-large",size);
+                    Click(ui.Q<Button>("collapseDetails")); for(int i=0;i<8;i++) yield return null;
+                    Assert.That(controller.Viewport.ScreenRect.height,Is.LessThan(collapsed));
+                    Click(ui.Q<Button>("closeSheet")); controller.EnterEdit(); controller.OpenRooms();
+                    for(int i=0;i<8;i++) yield return null;
+                    UatMeasureLayout("edit",size,text,ui);
+                    foreach(var card in ui.Q("roomChoices").Children().OfType<Button>())
+                    {
+                        var name=card.Q<Label>("roomCardName");
+                        name.text="A considerably longer localized authored chamber name for layout qualification";
+                    }
+                    for(int i=0;i<8;i++) yield return null;
+                    foreach(var card in ui.Q("roomChoices").Children().OfType<Button>())
+                    {
+                        var labels=card.Query<Label>().ToList();
+                        Assert.That(labels[1].worldBound.yMin,Is.GreaterThanOrEqualTo(labels[0].worldBound.yMax-.1f),"Name remains above size/cost");
+                        Assert.That(labels[2].worldBound.yMin,Is.GreaterThanOrEqualTo(labels[0].worldBound.yMax-.1f));
+                        Assert.That(labels[2].worldBound.xMin,Is.GreaterThanOrEqualTo(labels[1].worldBound.xMax-.1f),"Dedicated size and cost regions must not overlap");
+                        foreach(var label in labels)
+                        {
+                            Assert.That(label.worldBound.xMax,Is.LessThanOrEqualTo(card.worldBound.xMax+1));
+                            Assert.That(label.worldBound.yMax,Is.LessThanOrEqualTo(card.worldBound.yMax+1));
+                        }
+                        var artwork=card.Q("roomCardPreview").worldBound;
+                        Assert.That(artwork.Overlaps(labels[0].worldBound),Is.False,"Dedicated artwork must not overlap the name");
+                        TestContext.WriteLine("Card "+size+" "+text+" "+card.userData+": "+card.worldBound+" name="+labels[0].worldBound+" cost="+labels[2].worldBound);
+                    }
+                    if(text==DungeonTextSize.Large) yield return CompositionCapture("uat-long-cards",size);
+                    Assert.That(controller.SelectConstructionRoom("spatial.room.basic"),Is.True);
+                    Assert.That(controller.World.MoveGuidanceAnchors,Is.Not.Empty);
+                    controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+                    for(int i=0;i<8;i++) yield return null;
+                    UatMeasureLayout("placement",size,text,ui);
+                    Assert.That(controller.ConstructionPreview.IsValid,Is.True);
+                    foreach(string name in new[] {"confirmPlacement","cancelPlacement","save","discard"}) UatSafeAction(ui.Q<Button>(name));
+                    controller.TapWorld(new TileCoordinate(-1,-1)); for(int i=0;i<8;i++) yield return null;
+                    UatMeasureLayout("invalid",size,text,ui);
+                    foreach(string name in new[] {"confirmPlacement","cancelPlacement","save","discard"}) UatSafeAction(ui.Q<Button>(name));
+                    Assert.That(controller.Discard(),Is.True);
+                    for(int i=0;i<8;i++) yield return null;
+                }
+            }
+        }
+        private void UatSafeAction(Button button)
+        {
+            var safe=controller.SafeRoot.worldBound; var rect=button.worldBound;
+            Assert.That(rect.xMin,Is.GreaterThanOrEqualTo(safe.xMin-1),button.name);
+            Assert.That(rect.xMax,Is.LessThanOrEqualTo(safe.xMax+1),button.name);
+            Assert.That(rect.yMax,Is.LessThanOrEqualTo(safe.yMax+1),button.name);
+            Assert.That(rect.height*controller.GetComponent<UIDocument>().panelSettings.scale,Is.GreaterThanOrEqualTo(47.99),button.name);
+        }
+        private void UatMeasureLayout(string state,Vector2Int size,DungeonTextSize text,VisualElement ui)
+        {
+            var sheet=ui.Q("bottomChrome").worldBound;
+            Assert.That(sheet.yMax,Is.EqualTo(controller.SafeRoot.worldBound.yMax).Within(1),"Bottom anchored in every orientation/state");
+            var actions=ui.Q("sessionActions").worldBound;
+            Assert.That(sheet.yMax-actions.yMax,Is.LessThanOrEqualTo(9),"No empty tail beneath essential controls");
+            TestContext.WriteLine("Layout "+size+" "+text+" "+state+": sheet="+sheet+" viewport="+controller.Viewport.ScreenRect);
+        }
+        [UnityTest]
+        public IEnumerator UatGenuineWheelDisplayAndZoomBounds()
+        {
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920,1080);
+            for(int i=0;i<20;i++) yield return null;
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            var policy=controller.presentationPolicy;
+            Assert.That(policy.WheelZoomRatio(1,false),Is.EqualTo(1.25f).Within(.0001));
+            Assert.That(policy.WheelZoomRatio(120,true),Is.EqualTo(1.25f).Within(.0001));
+            Assert.That(policy.WheelZoomRatio(.1f,false),Is.EqualTo(Mathf.Pow(1.25f,.1f)).Within(.0001));
+            TestContext.WriteLine("Wheel unit 1: old ratio="+Mathf.Exp(1/policy.AndroidBaselineDpi)+" new="+policy.WheelZoomRatio(1,false)+"; .1="+policy.WheelZoomRatio(.1f,false)+"; native Windows120="+policy.WheelZoomRatio(120,true));
+            var mouse=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+            var settings=UnityEngine.InputSystem.InputSystem.settings;
+            var oldBehavior=settings.scrollDeltaBehavior;
+            settings.scrollDeltaBehavior=UnityEngine.InputSystem.InputSettings.ScrollDeltaBehavior.UniformAcrossAllPlatforms;
+            simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
+            yield return null; yield return null;
+            controller.EnterEdit(); for(int i=0;i<8;i++) yield return null;
+            int commands=controller.Draft.CommandCount;
+            try
+            {
+                yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("displaySettings")));
+                Assert.That(ui.Q("displayPopover").resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex));
+                yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("large")));
+                Assert.That(ui.Q<Label>("mode").resolvedStyle.fontSize,Is.EqualTo(policy.LargeText));
+                yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("closeDisplay")));
+                for(int i=0;i<8;i++) yield return null;
+                foreach(float delta in new[] {.1f,1f,-.1f,-1f,100f,-100f})
+                {
+                    controller.FitFloor();
+                    if(delta<0) controller.Viewport.Zoom(2,controller.Viewport.ScreenRect.center);
+                    float before=controller.Viewport.Size; var point=controller.Viewport.ScreenRect.center;
+                    UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=point,scroll=new Vector2(0,delta)});
+                    yield return null;
+                    float minimum=Mathf.Max(policy.MinimumViewSize,controller.Viewport.FitSize/policy.MaximumZoomFactor);
+                    Assert.That(controller.Viewport.Size,Is.EqualTo(Mathf.Clamp(before/policy.WheelZoomRatio(delta,false),minimum,controller.Viewport.FitSize)).Within(.001));
+                    TestContext.WriteLine("Input wheel "+delta+": size "+before+" -> "+controller.Viewport.Size+" min="+minimum+" fit="+controller.Viewport.FitSize);
+                    yield return null;
+                }
+                controller.FitFloor();
+                var chrome=CompositionButtonScreen(ui.Q<Button>("reset")); float fit=controller.Viewport.Size;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=chrome,scroll=new Vector2(0,1)});
+                yield return null; yield return null;
+                Assert.That(controller.Viewport.Size,Is.EqualTo(fit));
+                var touchPoint=controller.Viewport.ScreenRect.center;
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=touchPoint,scroll=new Vector2(0,1)});
+                yield return null;
+                Assert.That(controller.Viewport.Size,Is.EqualTo(fit),"Active touch excludes simultaneous mouse wheel input");
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Canceled); yield return null; yield return null;
+                var vp=new DungeonViewport(policy); vp.Configure(new Rect(0,0,100,100),new Rect(0,0,1000,1000),true);
+                vp.Zoom(2,vp.ScreenRect.center); var anchor=new Vector2(600,550); var world=vp.ScreenToWorld(anchor);
+                vp.Zoom(policy.WheelZoomRatio(1,false),anchor);
+                Assert.That(Vector2.Distance(world,vp.ScreenToWorld(anchor)),Is.LessThan(.001),"Mouse-centered anchor preserved away from camera clamps");
+                Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands));
+                controller.FitFloor(); Assert.That(controller.Viewport.Size,Is.EqualTo(controller.Viewport.FitSize));
+            }
+            finally { settings.scrollDeltaBehavior=oldBehavior; UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse); }
+        }
+        [UnityTest]
+        public IEnumerator UatCorridorVisualCheckpointAndDisplayPopover()
+        {
+            var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
+            controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.rectangle"),Is.True);
+            foreach(var anchor in controller.World.MoveGuidanceAnchors)
+            { controller.TapWorld(anchor); if(controller.ConstructionPreview.IsValid && controller.ConstructionPreview.ConnectionKind==FloorRouteConnectionKind.PhysicalCorridor) break; }
+            Assert.That(controller.ConstructionPreview.ConnectionKind,Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
+            Assert.That(controller.ConfirmConstructionPlacement(),Is.True); yield return null; yield return null;
+            Assert.That(controller.Commit(),Is.True);
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            var room=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            foreach(var size in new[] {new Vector2Int(720,1280),new Vector2Int(1920,1080)})
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x,size.y);
+                controller.SetTextSize(DungeonTextSize.Default); controller.FitFloor();
+                yield return CompositionCapture("uat-corridor-normal",size);
+                controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2));
+                controller.FocusRoom(); yield return CompositionCapture("uat-corridor-focused",size);
+                controller.SetTextSize(DungeonTextSize.Large);
+                Click(ui.Q<Button>("displaySettings")); yield return CompositionCapture("uat-display-large",size);
+                Click(ui.Q<Button>("closeDisplay")); Click(ui.Q<Button>("closeSheet")); controller.FitFloor();
+            }
+        }
+        [UnityTest]
+        public IEnumerator UatRoomBoundariesRespectSavedConnectionsAndRotation()
+        {
+            var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
+            var before=File.ReadAllBytes(root.SaveService.SavePath);
+            var catalog=root.ProductionSpatialContent.Catalog;
+            var limits=new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
+            foreach(var kind in new[] {FloorRouteConnectionKind.DirectDoorway,FloorRouteConnectionKind.PhysicalCorridor})
+            {
+                controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.rectangle"),Is.True);
+                foreach(var anchor in controller.World.MoveGuidanceAnchors)
+                { controller.TapWorld(anchor); if(controller.ConstructionPreview.IsValid && controller.ConstructionPreview.ConnectionKind==kind) break; }
+                Assert.That(controller.ConstructionPreview.ConnectionKind,Is.EqualTo(kind));
+                Assert.That(controller.ConfirmConstructionPlacement(),Is.True); yield return null; yield return null;
+                var floor=controller.Draft.ReadModel.Floors[0];
+                var map=controller.World.transform.Find("StonePerimeter").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                var edge=floor.Layout.Edges.Single(e=>floor.Layout.Nodes.Single(n=>n.NodeId==e.SourceNodeId).Kind==FloorRouteNodeKind.Room &&
+                    floor.Layout.Nodes.Single(n=>n.NodeId==e.DestinationNodeId).Kind==FloorRouteNodeKind.Room);
+                var connected=floor.Layout.Nodes.Where(n=>n.NodeId==edge.SourceNodeId || n.NodeId==edge.DestinationNodeId).Select(n=>n.RoomInstanceId).ToArray();
+                var cells=connected.SelectMany(id=> {
+                    var room=floor.Layout.Rooms.Single(r=>r.RoomInstanceId==id);
+                    catalog.Rooms.Single(d=>d.RoomDefinitionId==room.RoomDefinitionId).TryResolveGrossTiles(room.Anchor,room.Orientation,limits,out var f);
+                    return f.OccupiedTiles;
+                }).ToArray();
+                var sprites=cells.Select(c=>map.GetSprite(new Vector3Int(c.X,c.Y,0))).ToArray();
+                controller.World.SelectRoomFootprint(connected[0]);
+                var selectedMap=controller.World.transform.Find("RoomSelection").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                var selectedInstance=floor.Layout.Rooms.Single(r=>r.RoomInstanceId==connected[0]);
+                catalog.Rooms.Single(d=>d.RoomDefinitionId==selectedInstance.RoomDefinitionId).TryResolveGrossTiles(selectedInstance.Anchor,selectedInstance.Orientation,limits,out var selectedFootprint);
+                foreach(var cell in selectedFootprint.OccupiedTiles)
+                {
+                    var tile=new Vector3Int(cell.X,cell.Y,0); var lip=map.GetSprite(tile);
+                    int mask=Array.IndexOf(controller.presentationPolicy.Visuals.Boundaries,lip);
+                    Assert.That(selectedMap.GetSprite(tile),Is.EqualTo(lip==null ? null : controller.presentationPolicy.Visuals.SelectedEdges[mask]),"Selected outlines preserve the same doorway openings as stone lips");
+                }
+                floor.Layout.Edges=floor.Layout.Edges.Where(e=>e.EdgeId!=edge.EdgeId).ToArray();
+                controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,
+                    root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                int changed=cells.Where((c,i)=>sprites[i]!=map.GetSprite(new Vector3Int(c.X,c.Y,0))).Count();
+                Assert.That(changed,Is.EqualTo(2),"Only the two saved endpoint sockets open room boundaries");
+                TestContext.WriteLine("Boundary "+kind+": exactly two authorized endpoint openings; removed edge closes them");
+                controller.World.Render(controller.Draft.ReadModel.Floors[0],root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,
+                    root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1080,1920);
+                for(int i=0;i<12;i++) yield return null;
+                yield return CompositionCapture("uat-boundary-"+kind,new Vector2Int(1080,1920));
+                Assert.That(controller.Discard(),Is.True);
+            }
+            // Detached presentation fixtures deliberately omit graph edges: physical contact alone
+            // must never expose a doorway. No invalid fixture is published to the canonical save.
+            foreach(var orientation in new[] {CardinalOrientation.Zero,CardinalOrientation.Ninety,CardinalOrientation.OneEighty,CardinalOrientation.TwoSeventy})
+            {
+                var floor=JsonUtility.FromJson<SavedSpatialFloor>(JsonUtility.ToJson(root.Save.validatedCanonicalSpatialState.Floors[0]));
+                var original=floor.Layout.Rooms[0]; original.RoomDefinitionId="spatial.room.rectangle"; original.Anchor=new TileCoordinate(1,1); original.Orientation=orientation;
+                var definition=catalog.Rooms.Single(d=>d.RoomDefinitionId==original.RoomDefinitionId);
+                definition.TryResolveGrossTiles(original.Anchor,orientation,limits,out var footprint);
+                var other=JsonUtility.FromJson<RoomSpatialInstance>(JsonUtility.ToJson(original)); other.RoomInstanceId="test.detached.touching";
+                other.Anchor=new TileCoordinate(footprint.OccupiedTiles.Max(c=>c.X)+1,original.Anchor.Y);
+                floor.Layout.Rooms=new[] {original,other}; floor.Layout.Edges=Array.Empty<FloorRouteEdge>();
+                floor.Layout.Nodes=Array.Empty<FloorRouteNode>(); floor.FixedStructures=Array.Empty<SavedFixedSpatialStructure>();
+                floor.RoomContents.Assignments=Array.Empty<RoomContentAssignment>();
+                controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                var map=controller.World.transform.Find("StonePerimeter").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                var seam=new TileCoordinate(footprint.OccupiedTiles.Max(c=>c.X),original.Anchor.Y+1);
+                Assert.That(map.GetSprite(new Vector3Int(seam.X,seam.Y,0)),Is.EqualTo(controller.presentationPolicy.Visuals.Boundaries[2]),"Touching rooms retain a continuous east lip without a graph connection");
+                controller.World.SelectRoomFootprint(original.RoomInstanceId);
+                Assert.That(controller.World.transform.Find("RoomSelection").GetComponent<UnityEngine.Tilemaps.Tilemap>().GetTile(new Vector3Int(seam.X,seam.Y,0)),Is.Not.Null);
+                other.Anchor=new TileCoordinate(other.Anchor.X+2,other.Anchor.Y);
+                controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                Assert.That(map.GetSprite(new Vector3Int(seam.X,seam.Y,0)),Is.EqualTo(controller.presentationPolicy.Visuals.Boundaries[2]),"Separated rooms retain their own perimeter");
+                Assert.That(controller.World.transform.Find("Corridors").GetComponent<UnityEngine.Tilemaps.Tilemap>().GetTile(new Vector3Int(seam.X+1,seam.Y,0)),Is.Null,"No decorative corridor invented in the gap");
+            }
+            CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
+            yield return null;
         }
         [UnityTest]
         public IEnumerator CompositionAuthoredCorridorInspectionAndOutlineAreReadOnly()

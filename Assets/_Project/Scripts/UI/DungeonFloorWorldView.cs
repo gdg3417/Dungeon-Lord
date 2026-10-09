@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
     {
         private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom, moveAnchors, constructionPreview, invalidConstruction, perimeter, surrounding;
         private readonly List<SpriteRenderer> fixedPool = new List<SpriteRenderer>();
+        private Dictionary<(string, TileCoordinate), int> roomPassages = new Dictionary<(string, TileCoordinate), int>();
         private readonly Dictionary<(Sprite, Color, float), Tile> cachedTiles = new Dictionary<(Sprite, Color, float), Tile>();
         public int ReconstructionCount { get; private set; }
         public int PooledEntityCount => pool.Count + fixedPool.Count;
@@ -100,6 +101,7 @@ namespace DungeonBuilder.M0
             rooms.ClearAllTiles(); fixedStructures.ClearAllTiles(); corridors.ClearAllTiles(); grid.ClearAllTiles();
             ClearMoveGuidance(); GridTileCount = 0;
             perimeter.ClearAllTiles(); surrounding.ClearAllTiles(); identities.Clear();
+            roomPassages.Clear();
             ClearPreview();
             foreach (var view in pool) view.gameObject.SetActive(false);
             foreach (var view in fixedPool) view.gameObject.SetActive(false);
@@ -108,16 +110,21 @@ namespace DungeonBuilder.M0
             roomSelectionTile = Tile(policy.ValidColor, policy.TileSize,art?.Selection); invalidIntentTile = Tile(policy.InvalidColor, policy.TileSize,art?.Invalid);
             moveAnchorTile = Tile(policy.ValidColor, policy.MoveAnchorSize,art != null ? art.Anchor : anchorSprite);
             var limits = new SpatialValidationWorkloadLimits(maximumTiles);
+            var catalog = production.Catalog;
             var visible = new HashSet<TileCoordinate>();
+            var roomFootprints = new Dictionary<string, HashSet<TileCoordinate>>(StringComparer.Ordinal);
             foreach (RoomSpatialInstance room in selected.Layout.Rooms)
             {
-                var definition = production.Catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
+                var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
                 if (definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out var footprint))
+                {
+                    roomFootprints.Add(room.RoomInstanceId, new HashSet<TileCoordinate>(footprint.OccupiedTiles));
                     foreach (var cell in footprint.OccupiedTiles)
                     {
                         var surface = art != null ? art.RoomStone[(int)((Math.Abs((long)cell.X)+Math.Abs((long)cell.Y))%art.RoomStone.Length)] : null;
                         Draw(rooms,new[] {cell},Tile(art != null ? Color.white : policy.RoomColor,policy.TileSize,surface),visible);
                     }
+                }
             }
             Tile fixedTile = Tile(art != null ? Color.white : policy.FixedColor, policy.TileSize,art?.RoomStone[0]);
             int fixedIndex=0;
@@ -167,6 +174,16 @@ namespace DungeonBuilder.M0
                     if(!visible.Contains(new TileCoordinate(cell.X-1,cell.Y))) mask|=8;
                     if(mask!=0) perimeter.SetTile(new Vector3Int(cell.X,cell.Y,0),Tile(Color.white,1,art.Boundaries[mask]));
                 }
+                // Individual stone lips distinguish touching rooms. Only saved graph edges expose
+                // passages at authored, transformed sockets; this projection supplies no routing rules.
+                roomPassages = RoomPassages(selected, catalog);
+                foreach (var room in roomFootprints)
+                    foreach (var cell in room.Value)
+                    {
+                        int mask = ExposedEdges(cell, room.Value);
+                        if (roomPassages.TryGetValue((room.Key, cell), out int open)) mask &= ~open;
+                        perimeter.SetTile(new Vector3Int(cell.X, cell.Y, 0), mask == 0 ? null : Tile(Color.white, 1, art.Boundaries[mask]));
+                    }
             }
             if (edit)
             {
@@ -191,6 +208,75 @@ namespace DungeonBuilder.M0
                 view.color = art != null ? Color.white : trap ? policy.TrapColor : loot ? policy.LootColor : policy.MonsterColor;
             }
             SetEdit(edit);
+        }
+        private static readonly TileCoordinate[] BoundarySteps = {
+            new TileCoordinate(0,1), new TileCoordinate(1,0), new TileCoordinate(0,-1), new TileCoordinate(-1,0) };
+        private static int ExposedEdges(TileCoordinate cell, HashSet<TileCoordinate> footprint)
+        {
+            int mask = 0;
+            for (int i = 0; i < BoundarySteps.Length; i++)
+                if (!footprint.Contains(new TileCoordinate(cell.X + BoundarySteps[i].X, cell.Y + BoundarySteps[i].Y))) mask |= 1 << i;
+            return mask;
+        }
+        private static Dictionary<(string, TileCoordinate), int> RoomPassages(SavedSpatialFloor floor, SpatialContentCatalog catalog)
+        {
+            var result = new Dictionary<(string, TileCoordinate), int>();
+            var sockets = new Dictionary<string, (string room, TileCoordinate tile, int direction)[]>(StringComparer.Ordinal);
+            foreach (var node in floor.Layout.Nodes)
+            {
+                TileCoordinate anchor; CardinalOrientation orientation;
+                RectangularFootprintDefinition footprint; SpatialConnectionPointDefinition[] points;
+                string roomId = null;
+                if (node.Kind == FloorRouteNodeKind.Room)
+                {
+                    var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == node.RoomInstanceId);
+                    var definition = catalog.Rooms.Single(r => r.RoomDefinitionId == room.RoomDefinitionId);
+                    roomId = room.RoomInstanceId; anchor = room.Anchor; orientation = room.Orientation;
+                    footprint = definition.GrossFootprint; points = definition.ConnectionPoints;
+                }
+                else
+                {
+                    var kind = node.Kind == FloorRouteNodeKind.Entrance ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
+                    if (node.Kind != FloorRouteNodeKind.Entrance && node.Kind != FloorRouteNodeKind.Completion) continue;
+                    var value = floor.FixedStructures.SingleOrDefault(s => s.Kind == kind);
+                    if (value == null) continue;
+                    var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == value.FixedStructureDefinitionId);
+                    anchor = value.Anchor; orientation = value.Orientation; footprint = definition.GrossFootprint; points = definition.ConnectionPoints;
+                }
+                sockets[node.NodeId] = points.Select(point => {
+                    var offset = StructuralEditService.TransformConnectionPointOffset(point.Offset, orientation, footprint);
+                    return (roomId, new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y), (int)StructuralEditService.Rotate(point.Facing, orientation));
+                }).ToArray();
+            }
+            void Open((string room, TileCoordinate tile, int direction) socket)
+            {
+                if (socket.room == null) return;
+                var key = (socket.room, socket.tile); result.TryGetValue(key, out int mask); result[key] = mask | (1 << socket.direction);
+            }
+            TileCoordinate Next((string room, TileCoordinate tile, int direction) socket) =>
+                new TileCoordinate(socket.tile.X + BoundarySteps[socket.direction].X, socket.tile.Y + BoundarySteps[socket.direction].Y);
+            foreach (var edge in floor.Layout.Edges)
+            {
+                sockets.TryGetValue(edge.SourceNodeId, out var source); sockets.TryGetValue(edge.DestinationNodeId, out var destination);
+                // Reuse the gameplay's read-only saved-edge adapter, which rejects alternate paths
+                // and ambiguous endpoint sockets. Rendering cannot authorize a connection.
+                bool resolved = StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out _, out _);
+                bool branch = edge.Classification == RouteClassification.Optional &&
+                    OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog);
+                if (!resolved && !branch) continue;
+                if (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway && source != null && destination != null)
+                {
+                    foreach (var a in source) foreach (var b in destination)
+                        if (Next(a).Equals(b.tile) && Next(b).Equals(a.tile)) { Open(a); Open(b); }
+                }
+                else if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor && edge.Footprint?.OccupiedTiles != null)
+                {
+                    var path = new HashSet<TileCoordinate>(edge.Footprint.OccupiedTiles);
+                    foreach (var endpoint in new[] {source, destination})
+                        if (endpoint != null) foreach (var socket in endpoint) if (path.Contains(Next(socket))) Open(socket);
+                }
+            }
+            return result;
         }
         private static void Draw(Tilemap map, IEnumerable<TileCoordinate> tiles, Tile tile, HashSet<TileCoordinate> visible)
         { foreach (var cell in tiles) { map.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile); visible.Add(cell); } }
@@ -261,7 +347,7 @@ namespace DungeonBuilder.M0
             // paint its last valid projection over the invalid overlap being corrected.
             if (invalidIntents.Any(value => value.RoomInstanceId == roomId)) return;
             var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == roomId);
-            SelectFootprint(Footprint(room.RoomDefinitionId,room.Anchor,room.Orientation));
+            SelectFootprint(Footprint(room.RoomDefinitionId,room.Anchor,room.Orientation),roomId);
         }
         public void SelectCorridorFootprint(string edgeId)
         {
@@ -269,7 +355,7 @@ namespace DungeonBuilder.M0
             var edge=floor?.Layout.Edges.SingleOrDefault(e=>e.EdgeId==edgeId);
             if(edge?.Footprint?.OccupiedTiles!=null) SelectFootprint(edge.Footprint.OccupiedTiles);
         }
-        private void SelectFootprint(IEnumerable<TileCoordinate> footprint)
+        private void SelectFootprint(IEnumerable<TileCoordinate> footprint, string roomId = null)
         {
             var tile = roomSelectionTile;
             var cells=new HashSet<TileCoordinate>(footprint);
@@ -280,6 +366,7 @@ namespace DungeonBuilder.M0
                 if(!cells.Contains(new TileCoordinate(cell.X+1,cell.Y))) mask|=2;
                 if(!cells.Contains(new TileCoordinate(cell.X,cell.Y-1))) mask|=4;
                 if(!cells.Contains(new TileCoordinate(cell.X-1,cell.Y))) mask|=8;
+                if(roomId!=null && roomPassages.TryGetValue((roomId,cell),out int open)) mask &= ~open;
                 if(policy.Visuals?.SelectedEdges?.Length==16)
                 {
                     if(mask==0) continue;

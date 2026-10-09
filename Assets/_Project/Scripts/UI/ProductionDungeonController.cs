@@ -131,6 +131,9 @@ namespace DungeonBuilder.M0
             Button("move", BeginMove); Button("closeSheet", () => { CloseSheet(); Present(); }); Button("reset", FitFloor);
             Button("focusRoom", FocusRoom);
             Button("collapseFloors", ToggleFloorRail);
+            Button("displaySettings", () => ui.Q("displayPopover").style.display =
+                ui.Q("displayPopover").resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None);
+            Button("closeDisplay", () => ui.Q("displayPopover").style.display = DisplayStyle.None);
             InitializeConstruction();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
@@ -471,6 +474,7 @@ namespace DungeonBuilder.M0
             document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
         }
@@ -525,7 +529,11 @@ namespace DungeonBuilder.M0
                 point = Mouse.current.position.ReadValue(); pressed = Mouse.current.leftButton.isPressed; id = Mouse.current.deviceId;
                 float wheel = Mouse.current.scroll.ReadValue().y;
                 if (wheel != 0 && !IsChrome(point, id) && viewport.ScreenRect.Contains(point))
-                { autoFit = false; viewport.Zoom(Mathf.Exp(wheel / presentationPolicy.AndroidBaselineDpi), point); ApplyCamera(); }
+                {
+                    bool nativeWindowsRange = InputSystem.settings.scrollDeltaBehavior == InputSettings.ScrollDeltaBehavior.KeepPlatformSpecificInputRange &&
+                        (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor);
+                    autoFit = false; viewport.Zoom(presentationPolicy.WheelZoomRatio(wheel, nativeWindowsRange), point); ApplyCamera();
+                }
             }
             if (pressed && !pointerDown)
             { primaryTouchId = id; gesture.Begin(point, IsChrome(point, id) || !viewport.ScreenRect.Contains(point)); pointerDown = true; }
