@@ -1,6 +1,6 @@
 # Phase 7 production Dungeon composition review packet
 
-**Latest qualification:** [floating floor overlay and room readability corrections](overlay-room-readability/README.md), qualifying implementation `c88c076`. Earlier [owner UAT presentation corrections](owner-uat-corrections/README.md) and the reports below remain historical. External review and owner retest are pending.
+**Latest qualification:** [translucent floor HUD refinement](floor-hud-refinement/README.md), qualifying implementation `b85daa6`. Earlier [floating floor overlay and room readability corrections](overlay-room-readability/README.md), [owner UAT presentation corrections](owner-uat-corrections/README.md) and the reports below remain historical. External review and owner retest are pending.
 
 **PR #230 review correction:** the original verifier did not exclude target-only inputs. Reports below remain historical evidence. Use the [corrections and fresh exact-inventory qualification](review-corrections/README.md) for current results/source guarantees. Owner manual UAT remains pending.
 
