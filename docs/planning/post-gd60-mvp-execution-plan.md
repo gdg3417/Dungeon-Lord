@@ -2,7 +2,7 @@
 
 **Phase 7A2 merged and qualified baseline (2026-10-03):** PR #223 merged at `1a38bacb32b54fbd9152ac8121bb9a054a652b10`. Writable schema 13 owns exact canonical base-local content positions and configuration-owned occupancy. Automated EditMode, PlayMode, production build-gate, real Windows migration/reopen, Windows Development Build, and owner Editor/standalone UAT passed, including the external-review corrections. The detached coordinator, canonical session, and atomic persistence authorities remain the only publication path. See the [A2 owner qualification](../../Docs/testing/evidence/phase7a2-positional-canonical-state/manual-uat.md).
 
-**Current Phase 7 status (2026-10-08):** PR #226 / A4, PR #227 / A5 and PR #228 / production mobile UI vision are merged. Phase 7 transactional graphical room construction is implementation-complete and agreed qualification is complete in PR #229; the owner approved it for merge October 8, 2026. GitHub merge confirmation establishes the merged baseline. Schema remains 13. The owner accepted the fresh-game Bootstrap starter dependency for PR #229 only; this remains an outstanding production-onboarding capability for subsequent Phase 7 planning. Owner screenshots show the current production Dungeon screen remains visually provisional, so the next development assessment should prioritize a dedicated production Dungeon UI composition pass. Reassess the exact successor packet boundary after merge against the new `main` commit and dependency graph. Downstream floor lifecycle sequencing and visual run presentation remain unsettled/deferred.
+**Current Phase 7 status (2026-10-08):** PR #226 / A4, PR #227 / A5, PR #228 / production mobile UI vision and PR #229 / transactional graphical room construction are merged. Verified `main` baseline: `7b5911e5482aa20851e8329c0bb311f9aa6e7206`. Production Dungeon composition and first visual treatment are the current capability packet, with [implementation and qualification evidence](../../Docs/testing/evidence/phase7-production-dungeon-ui-composition/implementation.md); external review and owner manual UAT remain pending. Schema remains 13. Graphical first-room onboarding remains a high-priority successor with retained Bootstrap starter controls. Graphical room-context monster/trap/loot editing, floor lifecycle controls and visual run presentation remain subsequent work; Research, Analysis and More production destinations remain deferred.
 
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
@@ -21,12 +21,12 @@
 
 | Field | Decision |
 |---|---|
-| Status | **Phase 7A4 / #226, A5 / #227 and mobile UI vision / #228 merged; transactional graphical room construction implementation and agreed qualification complete in #229, approved for merge 2026-10-08; schema 13** |
+| Status | **Phase 7 #226–#229 merged; production Dungeon composition and first visual treatment automated-qualified; external review/owner UAT pending; schema 13** |
 | Historical approval baseline | Main through merged PR #179 / GD65B1 at `917b763dc0e5315fdd5d835da4b5f5de43f9ba59` |
-| Current implementation baseline | PR #229 branch based on #228 / `72924bdf54d222332b256cab254a22126f3b4bfd`; merge confirmation establishes the merged baseline |
+| Current implementation baseline | Merged PR #229 / `7b5911e5482aa20851e8329c0bb311f9aa6e7206` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-10-08 |
+| Last reconciled | 2026-10-09 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -185,6 +185,10 @@ The owner-design gate for branching and route choice is merged in PR #208 and ap
 ### Phase 7 — Graphical dungeon editor
 
 Phase 7 implementation is governed by the [Phase 7A0 graphical dungeon editor design lock](phase-7a0-graphical-dungeon-editor-design-lock.md). Its dependency sequence is: (1) canonical room-local positional state/save/migration using reviewed, versioned/frozen authored migration-placement profiles and migration/reopen/idempotence/max-envelope qualification; (2) deterministic intraroom traversal/interactions proving placement matters; (3) transactional draft editing with ordered durability acknowledgement plus production Dungeon/Normal/Edit presentation; and (4) capability-by-capability Bootstrap retirement and full build → run → inspect → revise → rerun qualification. Review evidence may split packets further, but may not combine save migration, deterministic simulation, and broad production UI into one unreviewable change.
+
+**Current presentation capability (2026-10-09):** PR #229 is merged. PR #230 provides production Dungeon composition and the first authored visual treatment; owner UAT corrections cover content-sized bottom sheets, Display text settings, wheel zoom, individual room boundaries and readable construction cards. It remains under review, with a further owner retest required. Graphical first-room onboarding and remaining content/lifecycle editing remain successors; Bootstrap is retained.
+
+**Open dependencies:** A0 Decisions 32–34 specify tap-to-connect and player segment/bend editing. The current construction service supplies aligned direct doorways and bounded straight corridors only. Presentation guidance must explain those constraints; corridor authoring/routing is a separate capability. Spec 01 defines Usable Mana as Total minus Reserved; Specs 03 and 21 describe upkeep reservations. There is no canonical live reservation owner yet. The four-metric HUD still reads the existing spendable wallet for both Total and Usable; reservation economy needs its own authority/design qualification before that seam changes. Neither dependency is implemented by PR #230.
 
 #### Phase 7A3 minimum navigation and engagement contract
 

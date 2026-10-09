@@ -1,0 +1,36 @@
+{
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation",
+  "input_roots": [
+    "Assets",
+    "Packages",
+    "ProjectSettings",
+    "ContentAuthoring"
+  ],
+  "files": [
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonCompositionSceneTests.cs",
+      "source_sha256": "436408213825df9b717d7c9ffbd6fc32232cc06cdbf28abc9f96efc893b70802",
+      "expected_qualified_sha256": "f5a2b4f1fef017f2470f95cac2d8a96205f86fdb646528a87df77e46819e183d",
+      "qualified_sha256": "924f328844683023f2975c2228363fedb891a56e189538e631bde8ed6e5a3b25",
+      "equal": false
+    }
+  ],
+  "expected_count": 1188,
+  "actual_count": 1188,
+  "unexpected": [],
+  "failures": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonCompositionSceneTests.cs: mismatch"
+  ],
+  "permitted_transformations": [
+    "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+    "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "eb552892122abf95b2c55360c1ef75328aff6e4c",
+  "full_inventory": {
+    "archive": "source-inventories.zip",
+    "entry": "after-initial-focused-source.json",
+    "sha256": "aca95df726b3286bcb88cac8f602b8392d16d8f9de7027ad34041fb3ba424125",
+    "rows": "All rows retained in verified archive; only mismatch rows shown here"
+  }
+}

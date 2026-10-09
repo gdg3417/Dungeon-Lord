@@ -14,6 +14,14 @@ namespace DungeonBuilder.M0.EditorTools
     {
         public const string DirectoryPath = "Assets/_Project/UI/ProductionDungeon/";
         public const string ThemePath = DirectoryPath + "DungeonTheme.tss";
+        public static void AuthorUatPresentation()
+        {
+            var policy = AssetDatabase.LoadAssetAtPath<DungeonPresentationPolicy>(DirectoryPath + "Presentation.asset");
+            policy.WheelZoomExponentPerUnit = Mathf.Log(1.25f);
+            policy.NativeWindowsWheelUnitsPerNotch = 120;
+            policy.MaximumZoomFactor = 8;
+            EditorUtility.SetDirty(policy); AssetDatabase.SaveAssets();
+        }
         public static void ValidateTheme(PanelSettings panel)
         {
             var theme = panel != null ? panel.themeStyleSheet : null;

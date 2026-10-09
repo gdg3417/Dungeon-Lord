@@ -1,0 +1,114 @@
+[
+  {
+    "path": "Temp/ui-floorhud-baseline-02-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-baseline-02.log",
+    "redactions": 1,
+    "shared_sha256": "918eb99d0645a48ce554bf35f8d6c1adcd00ba936b64fa51488f6a56a010a6ca",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-baseline-cli.log",
+    "redactions": 0,
+    "shared_sha256": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-baseline.log",
+    "redactions": 1,
+    "shared_sha256": "b6edc9b571ff95d013af7e6cd5a89f3b5092b692d26bc27d7d9689142a1eebdc",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-focused-editmode-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-focused-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "d85f6896e45f32bebf897c5acc369615ad0c9aba9c10e0cf17f6a5df79a4c2e9",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-focused-playmode-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-focused-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "9415f8d23e326228c05416c6b04922f1f3a04c6b3d8b1ac6cae5b81e958cf10c",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-full-editmode-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "28e8395b62be8a3c66f4747d379f20d4caab24c063609c43a2589432470a3f2b",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-full-playmode-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-full-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "b46a9f627ba6a95a0effb21d5686b0be570b195b5adfb0e125651496a2c12a8d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-helper-tests-unsandboxed.log",
+    "redactions": 0,
+    "shared_sha256": "a16c9a084431a3aa9289fb5c616b2527ffbf3030b53c38999c026b886e5c4edf",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-helper-tests.log",
+    "redactions": 0,
+    "shared_sha256": "9928823d551edb439d176c1786dc7c16c80f372a308fe067e10d50e20676d2c1",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-windows-build-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-floorhud-windows-build.log",
+    "redactions": 1,
+    "shared_sha256": "0722e298c4dc290fd040f0ffc2358bac6bb2b1f17ca16c264d255a784bfeae6e",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  }
+]

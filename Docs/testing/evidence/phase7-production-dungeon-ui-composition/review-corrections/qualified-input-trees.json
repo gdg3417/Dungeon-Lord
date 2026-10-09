@@ -1,0 +1,9 @@
+{
+  "qualified_commit": "6438af229ffc67f805827535e013317293af1560",
+  "git_tree_ids": {
+    "Assets": "23f6cc115f26a3cbcb1a09603d12dcaa4ed100aa",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  }
+}

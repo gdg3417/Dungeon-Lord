@@ -38,6 +38,39 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]
+        public IEnumerator CompositionNormalInspectionFocusRailCollapse()
+        { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
+        [UnityTest]
+        public IEnumerator UatContentHeightCardsDisplaySafeActions()
+        { yield return Invoke("UatContentHeightCardsDisplayAndSafeActions"); }
+        [UnityTest]
+        public IEnumerator UatGenuineWheelDisplayZoomBounds()
+        { yield return Invoke("UatGenuineWheelDisplayAndZoomBounds"); }
+        [UnityTest]
+        public IEnumerator UatRoomBoundariesConnectionsRotation()
+        { yield return Invoke("UatRoomBoundariesRespectSavedConnectionsAndRotation"); }
+        [UnityTest]
+        public IEnumerator OverlayFullWidthAndTransparentInput()
+        { yield return Invoke("OverlayFullWidthSafeAreasAndTransparentInput"); }
+        [UnityTest]
+        public IEnumerator OverlayCompactFootprintCards()
+        { yield return Invoke("OverlayCompactFootprintCardsAndRuntimeCaptures"); }
+        [UnityTest]
+        public IEnumerator CompositionCorridorInspection()
+        { yield return Invoke("CompositionAuthoredCorridorInspectionAndOutlineAreReadOnly"); }
+        [UnityTest]
+        public IEnumerator CompositionLayoutsAndBoundedPresentation()
+        { yield return Invoke("CompositionLayoutsAndPresentationWorkRemainBounded"); }
+        [UnityTest]
+        public IEnumerator CompositionFloorLayoutSummarySemantics()
+        { yield return Invoke("CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute"); }
+        [UnityTest]
+        public IEnumerator CompositionGenuineInputInspectionFocusAndChrome()
+        { yield return Invoke("CompositionInputSystemInspectionFocusFitAndChrome"); }
+        [UnityTest]
+        public IEnumerator CompositionGenuineInputFloorsMousePanZoom()
+        { yield return Invoke("CompositionInputSystemFloorNavigationMousePanAndZoom"); }
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionInvalidCorrection()
         { yield return Invoke("TransactionalRoomConstructionInvalidCorrectionAndCollapseKeepActionsVisible"); }
         [UnityTest]
@@ -123,6 +156,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest]
         public IEnumerator ProductionShellFailedExplicitDeleteQuiescence()
         { yield return Invoke("FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites"); }
+
+        [UnityTest]
+        public IEnumerator FloorHudStatesAndInput()
+        { yield return Invoke("FloorHudStatesAndInputCapture"); }
 
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);

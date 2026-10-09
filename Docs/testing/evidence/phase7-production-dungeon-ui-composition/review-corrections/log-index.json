@@ -1,0 +1,51 @@
+[
+  {
+    "path": "Temp/ui-review-corrected-focused-editmode.log",
+    "redactions": 0,
+    "shared_sha256": "85844b6ca9fc30b1ad893e45373814b3e3b275815c1e1c4f12625995b99196ab",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-focused-editmode.log",
+    "redactions": 0,
+    "shared_sha256": "060ee5c757a1f469804d328f50402a0a96855dfe1f4ca66c50a6c15726053ef9",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-focused-final-editmode.log",
+    "redactions": 0,
+    "shared_sha256": "85bdf5bbd8d2be6057aee6558155a2d14a514fd92c0c853390251deee387e42b",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-focused-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "8b697c57b2497c4edc04cce8f37f3ff67b5664bbef24277a6c689bc1dcbea2f0",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-full-editmode.log",
+    "redactions": 0,
+    "shared_sha256": "72a3816e932fb030d12e1cafb32a1882aaeaef0ffebb02b1bf9269db77949882",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-full-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "663b81a8ce1d5517b83b216d61efb183df5af85b5cfb68e3b9093cb7df030776",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-review-windows-build.log",
+    "redactions": 0,
+    "shared_sha256": "38b67f7b4d1745a316b14ac1dfc400f9e54e371284bf11e866ddfb50e7323665",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  }
+]

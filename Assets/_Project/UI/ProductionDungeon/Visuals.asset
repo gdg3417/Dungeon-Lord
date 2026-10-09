@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 000804450a6cb6f47bdca2f91956761a, type: 3}
+  m_Name: Visuals
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.M0.DungeonVisualCatalog
+  RoomStone:
+  - {fileID: 21300000, guid: d7cf4a91648269045bfc9187c6322d74, type: 3}
+  - {fileID: 21300000, guid: caee386028af023479b31812e99548b5, type: 3}
+  - {fileID: 21300000, guid: e05e0ac34665c134bb702d077ef56fb7, type: 3}
+  Boundaries:
+  - {fileID: 21300000, guid: 983bb5e4dace64942829fc9a7054e1f6, type: 3}
+  - {fileID: 21300000, guid: 9078d64d4d77b614e8ec50e57e44f501, type: 3}
+  - {fileID: 21300000, guid: 7674e98107e5cb641b223571157a5200, type: 3}
+  - {fileID: 21300000, guid: 3aeef7053780ebe4480e503207d212b3, type: 3}
+  - {fileID: 21300000, guid: 7eb54fa16a237f049bca7f55ca0af6bf, type: 3}
+  - {fileID: 21300000, guid: cd787b1105398f74dbba49c53214995f, type: 3}
+  - {fileID: 21300000, guid: d374211bf28785144861c11f76cb3d24, type: 3}
+  - {fileID: 21300000, guid: 29cbecfe90a4de44da8624eadd9b2374, type: 3}
+  - {fileID: 21300000, guid: 4a29bfe930c5fb0489f98b26daf40fbd, type: 3}
+  - {fileID: 21300000, guid: 26e9efc550d02cf44a3bc5d43ba53af9, type: 3}
+  - {fileID: 21300000, guid: 5b145095a2e0fc0499b097afc0dc3bbb, type: 3}
+  - {fileID: 21300000, guid: d0e9b5e79a7892349a29b58c67ae78a6, type: 3}
+  - {fileID: 21300000, guid: 438120771dff189428a328005cdacc65, type: 3}
+  - {fileID: 21300000, guid: b4f5f1919a14dd848b895b59379b16c2, type: 3}
+  - {fileID: 21300000, guid: f5e609d25049fbd4ca5a59232e4a6c8a, type: 3}
+  - {fileID: 21300000, guid: 3891309fad89b5a4c9d7e16d57ed2979, type: 3}
+  SelectedEdges:
+  - {fileID: 21300000, guid: 26a69403209e47a4b8d9314514737f15, type: 3}
+  - {fileID: 21300000, guid: 33b6c3a1dab2ea04c869688e182a1b2d, type: 3}
+  - {fileID: 21300000, guid: d28915ed61647204794fed203859de00, type: 3}
+  - {fileID: 21300000, guid: 8d2158c0510a97849a748f8b6afb7c95, type: 3}
+  - {fileID: 21300000, guid: d1ed0e3c257c9344c8359dbd26706d2d, type: 3}
+  - {fileID: 21300000, guid: 7a7c012e4985c1d45a5915cc9453f2f1, type: 3}
+  - {fileID: 21300000, guid: 8e8487774d2a5204384d18425907474f, type: 3}
+  - {fileID: 21300000, guid: fe08199553a2dd848ad96dc45fbb97d1, type: 3}
+  - {fileID: 21300000, guid: 77ffd3bd32c0c6849b021ba0d03ec81e, type: 3}
+  - {fileID: 21300000, guid: 6e3aad66f9871da49ae6d3f2b38e2279, type: 3}
+  - {fileID: 21300000, guid: 680dcff9e6cba6c4d87e21db66a86983, type: 3}
+  - {fileID: 21300000, guid: fb55396f30aeac24db6d408fd75bb7a8, type: 3}
+  - {fileID: 21300000, guid: 27f775552b234be45bc24b842ed175a3, type: 3}
+  - {fileID: 21300000, guid: f553a32e475af3241a3e9ed0c907c66c, type: 3}
+  - {fileID: 21300000, guid: ef49582deeb627d44a40eb77d0d1802f, type: 3}
+  - {fileID: 21300000, guid: 4eca0a5315d8f804a9fbb3c158cbc268, type: 3}
+  Corridor: {fileID: 21300000, guid: aa0a7247a9a533f48a9f4fa4e2c1a185, type: 3}
+  Surrounding: {fileID: 21300000, guid: ebaf3f62e5638ab469be83abb140be91, type: 3}
+  Entrance: {fileID: -8334105021618696007, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
+  Terminal: {fileID: 868221832246287368, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
+  Selection: {fileID: 21300000, guid: 6814233f35079c8418a9349bb8835317, type: 3}
+  Invalid: {fileID: 21300000, guid: f8b52f31d57f2564e875221f1ad728b8, type: 3}
+  Grid: {fileID: 21300000, guid: 1fdeeeb93b0480049ae7acf445b7ed8d, type: 3}
+  Anchor: {fileID: 21300000, guid: ed25c75cb5d028643bb91a8b0673aff7, type: 3}
+  DoorwayThreshold: {fileID: 21300000, guid: a206079dad4f48e9aad23c5e9cb9d718, type: 3}
+  CorridorThreshold: {fileID: 21300000, guid: a644c309b1664cfea718f36db228deef, type: 3}
+  MonsterFallback: {fileID: 969088348386297420, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
+  TrapFallback: {fileID: 21300000, guid: 272a60af77ad16e4b98eeceafef1703c, type: 3}
+  LootFallback: {fileID: 21300000, guid: a24bf5309948cf5448e6f121e73612ad, type: 3}
+  Contents:
+  - CategoryId: placement.category.monster
+    OptionId: placement.option.monster.skeleton
+    Sprite: {fileID: 9041215885573642433, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
+  - CategoryId: placement.category.trap
+    OptionId: placement.option.trap.spike
+    Sprite: {fileID: -2824769512332431091, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
+  - CategoryId: placement.category.loot_node
+    OptionId: placement.option.loot_node.glittering_hoard
+    Sprite: {fileID: -5196411299654786292, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}

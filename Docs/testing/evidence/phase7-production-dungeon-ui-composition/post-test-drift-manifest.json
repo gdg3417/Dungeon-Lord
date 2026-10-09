@@ -1,0 +1,34 @@
+{
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "5d850dfe3f2befb4e708c02b6829fcdf1c7bf9b6",
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-final-validation",
+  "failures": [
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+    "ProjectSettings/ProjectSettings.asset: mismatch"
+  ],
+  "permitted_transformations": [
+    "validation save filename only",
+    "text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "compared_file_count": 1188,
+  "matching_file_count": 1186,
+  "changed_files": [
+    {
+      "path": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+      "sha256": "e2d77876f2b90d98ba2424f6fc32b1403ea701de8fd24a8fe8e571ecc3cdc10a",
+      "qualified_sha256": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+      "equal": false,
+      "isolated_save_namespace": false
+    },
+    {
+      "path": "ProjectSettings/ProjectSettings.asset",
+      "sha256": "01689966f17db0d0fed6029474d15a1f72ae503973cea93065cd5f76473e5e89",
+      "qualified_sha256": "21e59ef415e94fbb6ac6f4afe8c38bb6e753414a79bf7516c6abdfdb26ece58e",
+      "equal": false,
+      "isolated_save_namespace": false
+    }
+  ],
+  "full_manifest_sha256": "8a9a20a4bb5e2551d75cb32cb4cb554ec315b342f5e0d509f2d71eda2e1ff222",
+  "full_manifest_archive": "validation-source-history.zip",
+  "full_manifest_entry": "post-test-drift-manifest.json"
+}

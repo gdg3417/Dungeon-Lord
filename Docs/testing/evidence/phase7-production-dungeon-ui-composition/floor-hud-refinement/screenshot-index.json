@@ -1,0 +1,152 @@
+[
+  {
+    "path": "after/composition-floorhud-blocked-Default-1920x1080.png",
+    "sha256": "6ad2cf2db0fe5859730d32486c73c0a1328eb264c0e76fc59325ef4b11a67066",
+    "captured_utc": "2026-10-09T21:29:12.249579+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-blocked-Default-720x1280.png",
+    "sha256": "1f352794fb5387f412c9ba88d8357f97e2a40da51c9eeb348376e607aff92e0f",
+    "captured_utc": "2026-10-09T21:29:09.693239+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-blocked-Large-1920x1080.png",
+    "sha256": "861d7f7894bb5f8fafaf120266eb7998f49d030a41f6ac1cb591e19e725cb168",
+    "captured_utc": "2026-10-09T21:29:13.059813+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-blocked-Large-720x1280.png",
+    "sha256": "48c581f253907647478dc3d206294ac8c811119d8f2636b8b9008497d0192f98",
+    "captured_utc": "2026-10-09T21:29:10.417340+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-blocked-Small-1920x1080.png",
+    "sha256": "6b5d2a537023761bf33ecce50915267bba2ba337ca5df96c60a98bc072da97c9",
+    "captured_utc": "2026-10-09T21:29:11.257735+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-blocked-Small-720x1280.png",
+    "sha256": "0694d21cd8596dada9f625e6972d475c56ec1af2559087134648b798d852526d",
+    "captured_utc": "2026-10-09T21:29:08.998495+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Default-1920x1080.png",
+    "sha256": "ac5d40efa21feb5b4075fc56ebe4e55bcce72c3906f8f05c702b1e34fec78446",
+    "captured_utc": "2026-10-09T21:29:11.590934+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Default-720x1280.png",
+    "sha256": "d77dc89513676df122084a07a948dbaca8fa4747db9f76e8e5a74131b9442429",
+    "captured_utc": "2026-10-09T21:29:09.267936+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Large-1920x1080.png",
+    "sha256": "f21b2d954fd10346b05bed686a8d4e71f41e3a74d6f5526475237a875bb688bc",
+    "captured_utc": "2026-10-09T21:29:12.596505+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Large-720x1280.png",
+    "sha256": "d7dc00ce666ccdde1a2f193628deaaa7741171e5930ac0e4fe31b8aa6129d8d3",
+    "captured_utc": "2026-10-09T21:29:09.962488+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Small-1920x1080.png",
+    "sha256": "1bc9ceacd99c56f27a52868ee20a1b87443079edb77fd77d660bcddb4b6c04fe",
+    "captured_utc": "2026-10-09T21:29:10.797481+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-collapsed-Small-720x1280.png",
+    "sha256": "59434c3faf469524d0b1e3214d97d617709826511f857d952954395f1a3d3c78",
+    "captured_utc": "2026-10-09T21:29:08.539884+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Default-1920x1080.png",
+    "sha256": "4add2056c8348f5083028ac5f79cd3764eb329c4a8d151ecae5e4df49e0a426a",
+    "captured_utc": "2026-10-09T21:29:11.485796+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Default-720x1280.png",
+    "sha256": "9ace50f3cc3f0a78c44560d923c2b05f4664cf7a65a7fa4092a89f4a62dddcbb",
+    "captured_utc": "2026-10-09T21:29:09.183052+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Large-1920x1080.png",
+    "sha256": "10c0b4550ed494ec43a9994bec4f6ef015d60504baa0ed5ed1fc995756b07530",
+    "captured_utc": "2026-10-09T21:29:12.494076+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Large-720x1280.png",
+    "sha256": "04f94816c4040bbc2a40bfa292e84e20d56ce5431c9288d83e7b5dd20319db32",
+    "captured_utc": "2026-10-09T21:29:09.879426+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Small-1920x1080.png",
+    "sha256": "b39251b125b230d397ed60edcb7b0a2d17fec82d1a7276117e4c6aee88754c9d",
+    "captured_utc": "2026-10-09T21:29:10.690569+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-focused-Small-720x1280.png",
+    "sha256": "7e2943213b9bb14db3c1ae242eb94348880002d5a60c022de35a2409cf080b45",
+    "captured_utc": "2026-10-09T21:29:08.453549+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Default-1920x1080.png",
+    "sha256": "28ef13a29cf4f2088635662b9e55117d463a40c46afcb6b43e395bc8a770faef",
+    "captured_utc": "2026-10-09T21:29:11.739481+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Default-720x1280.png",
+    "sha256": "07284b235828949c746ee2807d367dd350b5e3b95eda19f274bb1ea24e2d4f86",
+    "captured_utc": "2026-10-09T21:29:09.379117+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Large-1920x1080.png",
+    "sha256": "3229bfedb29bc6e28d895b3012fce8d0182e7621b8dd13ac3417d7eec7f3fde2",
+    "captured_utc": "2026-10-09T21:29:12.727028+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Large-720x1280.png",
+    "sha256": "896835e497b61ee4ca71656ff8362a68b294cfc9c587592b641d15042861f76d",
+    "captured_utc": "2026-10-09T21:29:10.070284+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Small-1920x1080.png",
+    "sha256": "1661911863755b2cdac457cd7b3edc5cfd77806b40d9f735ac0f74c8506fc21e",
+    "captured_utc": "2026-10-09T21:29:10.928334+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-inactive-Small-720x1280.png",
+    "sha256": "71072f8d9d3eb210f737e8e3c44ca1952cfd6d56ef1089319ee01f556621b1d0",
+    "captured_utc": "2026-10-09T21:29:08.651616+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Default-1920x1080.png",
+    "sha256": "be451ca0c88708e38459d6a386ac1e48bae04565f8c793b52bb6141f9fc8bf1c",
+    "captured_utc": "2026-10-09T21:29:11.400336+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Default-720x1280.png",
+    "sha256": "43b342ce43328c9873d35c6ad9a593ceac6ad78a1e9845eb780a437e7c73a822",
+    "captured_utc": "2026-10-09T21:29:09.117821+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Large-1920x1080.png",
+    "sha256": "0f62fdcae37d9b609ff796593a192d9440263129762fafd36295cc7629c8690a",
+    "captured_utc": "2026-10-09T21:29:12.411327+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Large-720x1280.png",
+    "sha256": "f57fc9e7133223479263c5f3c5d0e1d610e3611860be35b1a417e5b81d875cd0",
+    "captured_utc": "2026-10-09T21:29:09.813448+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Small-1920x1080.png",
+    "sha256": "e1771553763c4ca4bc99fb6336c2d01f90b270d6c94f96be20329e41f6973963",
+    "captured_utc": "2026-10-09T21:29:10.605005+00:00"
+  },
+  {
+    "path": "after/composition-floorhud-normal-Small-720x1280.png",
+    "sha256": "48680075373a7768b378abdcf0cc7346ae3ad9bc00fe0d0ed85ac50f37c24893",
+    "captured_utc": "2026-10-09T21:29:08.387667+00:00"
+  }
+]
