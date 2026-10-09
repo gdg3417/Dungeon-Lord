@@ -1,0 +1,150 @@
+[
+  {
+    "path": "after/composition-corridor-inspection-720x1280.png",
+    "sha256": "bab92cb410086c68f5228241ac4bee4defdf459e492e263bff86b9ca565a759c"
+  },
+  {
+    "path": "after/composition-edit-rooms-1080x1920.png",
+    "sha256": "5d641bf16c1b9d87138ff2e34809525191575ce676d71cdbb6eaf14d80ad477f"
+  },
+  {
+    "path": "after/composition-edit-rooms-1536x2048.png",
+    "sha256": "c7096850184a269fa217098df882ea819192b1e4d5487d50fac47a86b3b0c472"
+  },
+  {
+    "path": "after/composition-edit-rooms-1920x1080.png",
+    "sha256": "9c77ae49d1a9815be5c28b3b7468a3b2f677f12ca64580c6cb11a8f90d4f2325"
+  },
+  {
+    "path": "after/composition-edit-rooms-720x1280.png",
+    "sha256": "55fe526ebe508b2de161b3394cccc4a2d4ad159d8019070876cfa34ae8f3636a"
+  },
+  {
+    "path": "after/composition-focused-1080x1920.png",
+    "sha256": "236323b72e0aa4756d7c476466b9ee57aae19005e2b653c5968a4f7263a6e4be"
+  },
+  {
+    "path": "after/composition-focused-1536x2048.png",
+    "sha256": "c74895b8875a28e153860030a67e813984cf881bd18ec7aa7ff7b351356e1ca6"
+  },
+  {
+    "path": "after/composition-focused-1920x1080.png",
+    "sha256": "c2f352f584d2bcc059fcb662e79f09640eb2c0a9d3b5356c19b89ddb1add7d0d"
+  },
+  {
+    "path": "after/composition-focused-720x1280.png",
+    "sha256": "b84af00d5389137f8c9d8b4f9b873efa5ec81a0a201aada1796b674ff6aae249"
+  },
+  {
+    "path": "after/composition-inspection-1080x1920.png",
+    "sha256": "5448cf93d98d6f13462cccbec4830a8691b97d0e42084741e3a73fef6587babf"
+  },
+  {
+    "path": "after/composition-inspection-1536x2048.png",
+    "sha256": "3aa2adc5e30d3da156895366918a00b9d9955097678b13571fb21a52440c5a5e"
+  },
+  {
+    "path": "after/composition-inspection-1920x1080.png",
+    "sha256": "f9ebb227f22585432dd5e985df4710406f0cde7b067be16810b7289e487f3427"
+  },
+  {
+    "path": "after/composition-inspection-720x1280.png",
+    "sha256": "bbb0792f115f4eb4930ac4e6d167f259ae29e574fe0f19218729712b9d3c9be7"
+  },
+  {
+    "path": "after/composition-invalid-1080x1920.png",
+    "sha256": "ec1d55d99eeeace35b76a3ac9b0d912644b61077d4ef7df510e67766b4569d74"
+  },
+  {
+    "path": "after/composition-invalid-1536x2048.png",
+    "sha256": "5978030053271e9a595c046f402ec21492b2cc91d290b7ff43364f55d13585fe"
+  },
+  {
+    "path": "after/composition-invalid-1920x1080.png",
+    "sha256": "5642a997a5a120901d4d8587d888f1f0f20d85ff9f41be427a784d6bc1e5c34d"
+  },
+  {
+    "path": "after/composition-invalid-720x1280.png",
+    "sha256": "40cd13b8859953be094f003351654cba51a931660af54b6006728fcce3e73b64"
+  },
+  {
+    "path": "after/composition-normal-1080x1920.png",
+    "sha256": "5aaa2d970bab255287ec6fed825e8eb303b641876b7c122c04d66694988beb90"
+  },
+  {
+    "path": "after/composition-normal-1536x2048.png",
+    "sha256": "a65659577c864f60552493110b5e8ed39ca179b771b8b8dec4a61c331cc4888e"
+  },
+  {
+    "path": "after/composition-normal-1920x1080.png",
+    "sha256": "f4fdff5f7585d424e9bacbd1f2f7c0724abbacb515c96cf6c3e3f353482571f1"
+  },
+  {
+    "path": "after/composition-normal-720x1280.png",
+    "sha256": "def2b5dd7f526cd04ab8b5d688ca95acc0b4f0ccf6adb6e181a44c0962f575ad"
+  },
+  {
+    "path": "after/composition-placement-1080x1920.png",
+    "sha256": "3db2789094f7e1009622373ab7660b3aefbe0ec8b6b7fa61c39e7a20202cbe40"
+  },
+  {
+    "path": "after/composition-placement-1536x2048.png",
+    "sha256": "b262ad4404ea64a46971ca84c9a15255f4b53a5c6c8a647a142a07e390ee744c"
+  },
+  {
+    "path": "after/composition-placement-1920x1080.png",
+    "sha256": "62f0499860aaec22446a7b644d552ee7b0c6bdc246adf57d8f238b83f1c8a00e"
+  },
+  {
+    "path": "after/composition-placement-720x1280.png",
+    "sha256": "121b2ac7c445ac2cfa5b6a23aeece30ccbe64b2e4c79e7d1e05791e489cf177a"
+  },
+  {
+    "path": "after/composition-uat-collapsed-large-1080x1920.png",
+    "sha256": "c7f1a622dceaa91162f4d3172a5885fecbf48fb6157023c9af7078fa78d6f24e"
+  },
+  {
+    "path": "after/composition-uat-collapsed-large-1920x1080.png",
+    "sha256": "4fb8e47898eb33e89deac1844211bd35f6193157a049d03c34f00496d8893449"
+  },
+  {
+    "path": "after/composition-uat-collapsed-large-720x1280.png",
+    "sha256": "d4764a8103de98da917e3b06b6178536995cf3b53f05056e47c3840dd57deb16"
+  },
+  {
+    "path": "after/composition-uat-corridor-focused-1920x1080.png",
+    "sha256": "2365e827544635beb82cd4451ab7019785f24c09a60cdbf697925029e67d9130"
+  },
+  {
+    "path": "after/composition-uat-corridor-focused-720x1280.png",
+    "sha256": "2769510336153647c170255d6ab63eb4f87f7021c5957886288ffd93e11f4e6e"
+  },
+  {
+    "path": "after/composition-uat-corridor-normal-1920x1080.png",
+    "sha256": "855148f3393bc7d1638e05394ccde0fc892799ff5345de095a421a2ba8d7093e"
+  },
+  {
+    "path": "after/composition-uat-corridor-normal-720x1280.png",
+    "sha256": "2a1f7026607dd14fb33c0c985a9c7516ffd0de5c658f7c6cdf7adbe9243719ef"
+  },
+  {
+    "path": "after/composition-uat-display-large-1920x1080.png",
+    "sha256": "aa4e15774f0e41937c69f40c66d6bc87f8f17083eb2706464f8c9b58fa96d9e0"
+  },
+  {
+    "path": "after/composition-uat-display-large-720x1280.png",
+    "sha256": "7de7299346719f20a9072270a93509f352f2aa4c69dec926035d9ecce1669c67"
+  },
+  {
+    "path": "after/composition-uat-long-cards-1080x1920.png",
+    "sha256": "6dfdb42101f693f7053196f5787cde2bd66b1c1b8572f29b558d2b1bb8ee825e"
+  },
+  {
+    "path": "after/composition-uat-long-cards-1920x1080.png",
+    "sha256": "0087a3ce037471db064ec00ecd9500c2989ad901085a9dd38193b489f66da311"
+  },
+  {
+    "path": "after/composition-uat-long-cards-720x1280.png",
+    "sha256": "fc01839f78314672838b39f3bf58e728ad26b533bdfe2f80b2164810cfdf3c6d"
+  }
+]

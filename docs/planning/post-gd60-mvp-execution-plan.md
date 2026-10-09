@@ -26,7 +26,7 @@
 | Current implementation baseline | Merged PR #229 / `7b5911e5482aa20851e8329c0bb311f9aa6e7206` |
 | Supersedes | Sprint 2-4 execution order, post-GD9 sequence, and earlier vertical-slice forecasts |
 | Spatial authority | [System Spec 38](../../Docs/38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) |
-| Last reconciled | 2026-10-08 |
+| Last reconciled | 2026-10-09 |
 
 **Historical GD65B5 final status:** Implementation and required owner validation passed at `c5eefae61e9bf3b7bf0a200e343f383f0122743b` in PR #186. PR #186 is merged; GD65B is closed and GD66 was subsequently approved in merged PR #187. The production spatial catalog remains inactive, existing runtime/save authority is unchanged, and save schema remains 6.
 
@@ -185,6 +185,10 @@ The owner-design gate for branching and route choice is merged in PR #208 and ap
 ### Phase 7 — Graphical dungeon editor
 
 Phase 7 implementation is governed by the [Phase 7A0 graphical dungeon editor design lock](phase-7a0-graphical-dungeon-editor-design-lock.md). Its dependency sequence is: (1) canonical room-local positional state/save/migration using reviewed, versioned/frozen authored migration-placement profiles and migration/reopen/idempotence/max-envelope qualification; (2) deterministic intraroom traversal/interactions proving placement matters; (3) transactional draft editing with ordered durability acknowledgement plus production Dungeon/Normal/Edit presentation; and (4) capability-by-capability Bootstrap retirement and full build → run → inspect → revise → rerun qualification. Review evidence may split packets further, but may not combine save migration, deterministic simulation, and broad production UI into one unreviewable change.
+
+**Current presentation capability (2026-10-09):** PR #229 is merged. PR #230 provides production Dungeon composition and the first authored visual treatment; owner UAT corrections cover content-sized bottom sheets, Display text settings, wheel zoom, individual room boundaries and readable construction cards. It remains under review, with a further owner retest required. Graphical first-room onboarding and remaining content/lifecycle editing remain successors; Bootstrap is retained.
+
+**Open dependencies:** A0 Decisions 32–34 specify tap-to-connect and player segment/bend editing. The current construction service supplies aligned direct doorways and bounded straight corridors only. Presentation guidance must explain those constraints; corridor authoring/routing is a separate capability. Spec 01 defines Usable Mana as Total minus Reserved; Specs 03 and 21 describe upkeep reservations. There is no canonical live reservation owner yet. The four-metric HUD still reads the existing spendable wallet for both Total and Usable; reservation economy needs its own authority/design qualification before that seam changes. Neither dependency is implemented by PR #230.
 
 #### Phase 7A3 minimum navigation and engagement contract
 

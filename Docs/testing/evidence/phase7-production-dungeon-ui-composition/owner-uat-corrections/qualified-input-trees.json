@@ -1,0 +1,10 @@
+{
+  "qualified_implementation": "691720b20e8226da0f110e5b44442a9d41be8407",
+  "input_trees": {
+    "Assets": "c014f6095dc3c8beb58cf60ff1a25d26e336db91",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "final_evidence_commit_rule": "All later evidence commits must retain these four trees; final HEAD comparison is reported in the PR description."
+}
