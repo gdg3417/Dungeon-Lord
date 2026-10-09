@@ -33,20 +33,34 @@ for i in range(90):
     x,y=random.randrange(128),random.randrange(128); r=random.randrange(3,15)
     d.polygon([(x,y),(x+r,y-3),(x+r+3,y+r),(x+2,y+r+3)],fill=(random.randrange(19,29),random.randrange(28,38),random.randrange(34,43),255))
 save('surrounding-rock',im.filter(ImageFilter.GaussianBlur(.5)))
+# Strong continuous masonry seams: the dark inset and raised cap remain readable at overview.
 for mask in range(16):
     im=Image.new('RGBA',(128,128)); d=ImageDraw.Draw(im)
-    for bit,box in [(1,(0,0,127,10)),(2,(117,0,127,127)),(4,(0,117,127,127)),(8,(0,0,10,127))]:
-        if mask&bit:
-            d.rectangle(box,fill=(35,40,43,240),outline=(122,119,102,255),width=2)
-            if bit in (1,4):
-                for x in range(24,128,32): d.line((x,box[1],x+2,box[3]),fill=(10,18,23),width=2)
-            else:
-                for y in range(24,128,32): d.line((box[0],y,box[2],y+2),fill=(10,18,23),width=2)
+    for bit,box in [(1,(0,0,127,18)),(2,(109,0,127,127)),(4,(0,109,127,127)),(8,(0,0,18,127))]:
+        if not mask&bit: continue
+        d.rectangle(box,fill=(7,12,17,255),outline=(175,164,135,255),width=3)
+        inner=(box[0]+4,box[1]+4,box[2]-4,box[3]-4)
+        d.rectangle(inner,fill=(65,68,66,255))
+        if bit in (1,4):
+            for x in range(24,128,32): d.line((x,box[1]+3,x+2,box[3]-3),fill=(10,18,23),width=3)
+        else:
+            for y in range(24,128,32): d.line((box[0]+3,y,box[2]-3,y+2),fill=(10,18,23),width=3)
     save('boundary-'+str(mask),im)
     im=Image.new('RGBA',(128,128)); d=ImageDraw.Draw(im)
     for bit,line in [(1,(0,3,127,3)),(2,(124,0,124,127)),(4,(0,124,127,124)),(8,(3,0,3,127))]:
         if mask&bit: d.line(line,fill=(255,255,255,255),width=5)
     save('selected-edge-'+str(mask),im)
+# Open north-facing threshold, reused by rotation. Jambs/shadow frame a clear center;
+# no closed door, leaf, lock or baked player-facing text.
+for name,half in [('doorway-threshold',24),('corridor-threshold',15)]:
+    im=Image.new('RGBA',(128,128)); d=ImageDraw.Draw(im)
+    for x in [4,103]:
+        d.rounded_rectangle((x,64-half,x+21,64+half),3,fill=(6,12,17,240))
+        d.rectangle((x+3,67-half,x+17,61+half),fill=(112,109,94,255),outline=(223,201,155,255),width=2)
+        d.line((x+4,64,x+16,64),fill=(33,39,40,255),width=2)
+    # Three shallow paving marks communicate an open transition, not a barrier.
+    for x in [34,56,78]: d.line((x,65,x+15,65),fill=(190,177,143,180),width=2)
+    save(name,im)
 for name,invalid in [('selection',False),('invalid',True),('grid',False),('anchor',False)]:
     im=Image.new('RGBA',(128,128)); d=ImageDraw.Draw(im)
     if name=='anchor': d.polygon([(64,8),(120,64),(64,120),(8,64)],outline='white',width=9); d.ellipse((54,54,74,74),fill='white')

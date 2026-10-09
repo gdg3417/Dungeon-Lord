@@ -17,6 +17,7 @@ namespace DungeonBuilder.M0
     {
         public Sprite[] RoomStone, Boundaries, SelectedEdges;
         public Sprite Corridor, Surrounding, Entrance, Terminal, Selection, Invalid, Grid, Anchor;
+        public Sprite DoorwayThreshold, CorridorThreshold;
         public Sprite MonsterFallback, TrapFallback, LootFallback;
         public DungeonContentVisual[] Contents = Array.Empty<DungeonContentVisual>();
         public Sprite Resolve(string category, string option)
@@ -28,7 +29,7 @@ namespace DungeonBuilder.M0
         }
         public bool IsComplete => RoomStone?.Length > 0 && RoomStone.All(v=>v!=null) && Boundaries?.Length == 16 && Boundaries.All(v=>v!=null) &&
             SelectedEdges?.Length==16 && SelectedEdges.All(v=>v!=null) && Corridor != null && Surrounding != null &&
-            Entrance != null && Terminal != null && Selection != null && Invalid != null && Grid != null && Anchor != null &&
+            Entrance != null && Terminal != null && Selection != null && Invalid != null && Grid != null && Anchor != null && DoorwayThreshold != null && CorridorThreshold != null &&
             MonsterFallback != null && TrapFallback != null && LootFallback != null;
     }
 }

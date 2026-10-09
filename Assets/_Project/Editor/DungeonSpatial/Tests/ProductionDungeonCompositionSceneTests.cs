@@ -252,8 +252,12 @@ namespace DungeonBuilder.M0.Tests
             var catalog=root.ProductionSpatialContent.Catalog;
             var limits=new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
             foreach(var kind in new[] {FloorRouteConnectionKind.DirectDoorway,FloorRouteConnectionKind.PhysicalCorridor})
+            foreach(var savedOrientation in new[] {CardinalOrientation.Zero,CardinalOrientation.Ninety})
             {
                 controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.rectangle"),Is.True);
+                Assert.That(controller.SelectConstructionOrientation(savedOrientation),Is.True);
+                var authored=catalog.Rooms.Single(r=>r.RoomDefinitionId=="spatial.room.rectangle");
+                Assert.That(controller.SelectTerminalConnection(authored.ConnectionPoints.First(p=>StructuralEditService.Rotate(p.Facing,savedOrientation)==CardinalOrientation.Zero).ConnectionPointId),Is.True);
                 foreach(var anchor in controller.World.MoveGuidanceAnchors)
                 { controller.TapWorld(anchor); if(controller.ConstructionPreview.IsValid && controller.ConstructionPreview.ConnectionKind==kind) break; }
                 Assert.That(controller.ConstructionPreview.ConnectionKind,Is.EqualTo(kind));
@@ -263,6 +267,20 @@ namespace DungeonBuilder.M0.Tests
                 var edge=floor.Layout.Edges.Single(e=>floor.Layout.Nodes.Single(n=>n.NodeId==e.SourceNodeId).Kind==FloorRouteNodeKind.Room &&
                     floor.Layout.Nodes.Single(n=>n.NodeId==e.DestinationNodeId).Kind==FloorRouteNodeKind.Room);
                 var connected=floor.Layout.Nodes.Where(n=>n.NodeId==edge.SourceNodeId || n.NodeId==edge.DestinationNodeId).Select(n=>n.RoomInstanceId).ToArray();
+                var thresholds=controller.World.ConnectionVisuals.Where(v=>v.EdgeId==edge.EdgeId).ToArray();
+                Assert.That(thresholds.Length,Is.EqualTo(kind==FloorRouteConnectionKind.DirectDoorway ? 1 : 2));
+                foreach(var threshold in thresholds)
+                {
+                    Assert.That(threshold.Kind,Is.EqualTo(kind));
+                    Assert.That(Mathf.Abs(threshold.Center.x-threshold.Socket.X-.5f)+Mathf.Abs(threshold.Center.y-threshold.Socket.Y-.5f),Is.EqualTo(.5f));
+                    Assert.That(floor.Layout.Rooms.Any(r=>catalog.Rooms.Single(d=>d.RoomDefinitionId==r.RoomDefinitionId).ConnectionPoints.Any(p=> {
+                        var definition=catalog.Rooms.Single(d=>d.RoomDefinitionId==r.RoomDefinitionId);
+                        var local=StructuralEditService.TransformConnectionPointOffset(p.Offset,r.Orientation,definition.GrossFootprint);
+                        return threshold.Socket.Equals(new TileCoordinate(r.Anchor.X+local.X,r.Anchor.Y+local.Y)) && threshold.Facing==StructuralEditService.Rotate(p.Facing,r.Orientation);
+                    })),Is.True,"Threshold resolves an actual transformed authored room socket");
+                }
+                Assert.That(controller.World.ConnectionVisuals.Any(v=>floor.Layout.Edges.Any(e=>e.EdgeId==v.EdgeId &&
+                    floor.Layout.Nodes.Any(n=>n.NodeId==e.SourceNodeId && n.Kind==FloorRouteNodeKind.Entrance))),Is.True,"Verified entrance edge has an open threshold");
                 var cells=connected.SelectMany(id=> {
                     var room=floor.Layout.Rooms.Single(r=>r.RoomInstanceId==id);
                     catalog.Rooms.Single(d=>d.RoomDefinitionId==room.RoomDefinitionId).TryResolveGrossTiles(room.Anchor,room.Orientation,limits,out var f);
@@ -283,13 +301,21 @@ namespace DungeonBuilder.M0.Tests
                 controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,
                     root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
                 int changed=cells.Where((c,i)=>sprites[i]!=map.GetSprite(new Vector3Int(c.X,c.Y,0))).Count();
+                Assert.That(controller.World.ConnectionVisuals.Any(v=>v.EdgeId==edge.EdgeId),Is.False,"Removed saved connection removes its threshold");
+                var invalidFloor=JsonUtility.FromJson<SavedSpatialFloor>(JsonUtility.ToJson(controller.Draft.ReadModel.Floors[0]));
+                invalidFloor.Layout.Edges.Single(e=>e.EdgeId==edge.EdgeId).DestinationNodeId="test.invalid.endpoint";
+                controller.World.Render(invalidFloor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,
+                    root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                Assert.That(controller.World.ConnectionVisuals.Any(v=>v.EdgeId==edge.EdgeId),Is.False,"Invalid saved endpoint cannot project an opening");
                 Assert.That(changed,Is.EqualTo(2),"Only the two saved endpoint sockets open room boundaries");
                 TestContext.WriteLine("Boundary "+kind+": exactly two authorized endpoint openings; removed edge closes them");
                 controller.World.Render(controller.Draft.ReadModel.Floors[0],root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,
                     root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1080,1920);
                 for(int i=0;i<12;i++) yield return null;
-                yield return CompositionCapture("uat-boundary-"+kind,new Vector2Int(1080,1920));
+                controller.FitFloor(); yield return CompositionCapture("overlay-boundary-"+kind+"-"+savedOrientation,new Vector2Int(1080,1920));
+                controller.TapWorld(new TileCoordinate(selectedInstance.Anchor.X+1,selectedInstance.Anchor.Y+1)); controller.FocusRoom();
+                yield return CompositionCapture("overlay-boundary-focused-"+kind+"-"+savedOrientation,new Vector2Int(1080,1920));
                 Assert.That(controller.Discard(),Is.True);
             }
             // Detached presentation fixtures deliberately omit graph edges: physical contact alone
@@ -309,8 +335,19 @@ namespace DungeonBuilder.M0.Tests
                 var map=controller.World.transform.Find("StonePerimeter").GetComponent<UnityEngine.Tilemaps.Tilemap>();
                 var seam=new TileCoordinate(footprint.OccupiedTiles.Max(c=>c.X),original.Anchor.Y+1);
                 Assert.That(map.GetSprite(new Vector3Int(seam.X,seam.Y,0)),Is.EqualTo(controller.presentationPolicy.Visuals.Boundaries[2]),"Touching rooms retain a continuous east lip without a graph connection");
+                Assert.That(controller.World.ConnectionVisuals,Is.Empty,"Physical contact cannot create a threshold");
+                if(orientation==CardinalOrientation.Zero)
+                {
+                    controller.Viewport.Configure(controller.World.Bounds,controller.Viewport.ScreenRect,true);
+                    typeof(ProductionDungeonController).GetMethod("ApplyCamera",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(controller,null);
+                    yield return CompositionCapture("overlay-touching-no-edge",new Vector2Int(1080,1920));
+                }
                 controller.World.SelectRoomFootprint(original.RoomInstanceId);
                 Assert.That(controller.World.transform.Find("RoomSelection").GetComponent<UnityEngine.Tilemaps.Tilemap>().GetTile(new Vector3Int(seam.X,seam.Y,0)),Is.Not.Null);
+                other.Anchor=new TileCoordinate(other.Anchor.X,other.Anchor.Y+1);
+                controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
+                Assert.That(map.GetSprite(new Vector3Int(seam.X,seam.Y,0)),Is.EqualTo(controller.presentationPolicy.Visuals.Boundaries[2]),"Partial-edge adjacency also preserves the room seam");
+                Assert.That(controller.World.ConnectionVisuals,Is.Empty);
                 other.Anchor=new TileCoordinate(other.Anchor.X+2,other.Anchor.Y);
                 controller.World.Render(floor,root.ProductionSpatialContent,root.SaveService.DungeonDraftContext.Occupancy,root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles,1000,false);
                 Assert.That(map.GetSprite(new Vector3Int(seam.X,seam.Y,0)),Is.EqualTo(controller.presentationPolicy.Visuals.Boundaries[2]),"Separated rooms retain their own perimeter");
@@ -384,7 +421,8 @@ namespace DungeonBuilder.M0.Tests
             yield return CompositionCapture("review-rail-expanded",new Vector2Int(720,1280));
             controller.ToggleFloorRail(); for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.True); Assert.That(ui.Q("floorList").resolvedStyle.display,Is.EqualTo(DisplayStyle.None));
-            Assert.That(controller.Viewport.ScreenRect.width-railExpandedWidth,Is.GreaterThanOrEqualTo(55));
+            Assert.That(controller.Viewport.ScreenRect.width,Is.EqualTo(railExpandedWidth).Within(1),"Overlay collapse does not resize the full-width world");
+            Assert.That(ui.Q("floorRail").worldBound.width,Is.LessThan(100));
             TestContext.WriteLine("Floor rail viewport width: expanded="+railExpandedWidth+", collapsed="+controller.Viewport.ScreenRect.width);
             yield return CompositionCapture("review-rail-collapsed",new Vector2Int(720,1280));
             controller.ToggleFloorRail(); yield return null;
@@ -442,9 +480,12 @@ namespace DungeonBuilder.M0.Tests
                 {
                     controller.SetTextSize(text); for(int i=0;i<8;i++) yield return null;
                     float expandedWidth=controller.Viewport.ScreenRect.width;
+                    float expandedRail=ui.Q("floorRail").worldBound.width;
+                    Assert.That(expandedWidth,Is.EqualTo(controller.SafeRoot.worldBound.width*controller.GetComponent<UIDocument>().panelSettings.scale).Within(1));
                     controller.ToggleFloorRail(); for(int i=0;i<8;i++) yield return null;
                     float recovery=controller.Viewport.ScreenRect.width-expandedWidth;
-                    Assert.That(recovery,Is.GreaterThanOrEqualTo((text==DungeonTextSize.Large ? 67 : 55)*controller.GetComponent<UIDocument>().panelSettings.scale));
+                    Assert.That(recovery,Is.EqualTo(0).Within(1),"Floor overlay never reserves a viewport column");
+                    Assert.That(expandedRail-ui.Q("floorRail").worldBound.width,Is.GreaterThanOrEqualTo(text==DungeonTextSize.Large ? 67 : 55),"Collapse recovers unobscured overlay space");
                     var toggleRect=ui.Q<Button>("collapseFloors").worldBound;
                     var toggleButton=ui.Q<Button>("collapseFloors");
                     Assert.That(toggleButton.MeasureTextSize(toggleButton.text,0,TextElement.MeasureMode.Undefined,0,TextElement.MeasureMode.Undefined).x,
@@ -545,7 +586,8 @@ namespace DungeonBuilder.M0.Tests
             yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
             for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.True);
-            Assert.That(controller.Viewport.ScreenRect.width-expandedRailViewport,Is.GreaterThanOrEqualTo(55));
+            Assert.That(controller.Viewport.ScreenRect.width,Is.EqualTo(expandedRailViewport).Within(1));
+            Assert.That(ui.Q("floorRail").worldBound.width,Is.LessThan(100));
             yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("collapseFloors")));
             for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.False);

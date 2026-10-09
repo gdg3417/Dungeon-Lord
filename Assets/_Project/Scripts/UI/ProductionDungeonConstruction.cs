@@ -24,6 +24,15 @@ namespace DungeonBuilder.M0
             Button("confirmPlacement", () => ConfirmConstructionPlacement());
             Button("cancelPlacement", CancelConstructionSelection);
             Button("collapseDetails", () => { detailsCollapsed = !detailsCollapsed; Present(); });
+            document.rootVisualElement.Q("roomChoices").RegisterCallback<GeometryChangedEvent>(_ => PresentRoomBrowseHint());
+            document.rootVisualElement.Q<ScrollView>("roomChoicesScroll").contentViewport.RegisterCallback<GeometryChangedEvent>(_ => PresentRoomBrowseHint());
+        }
+        private void PresentRoomBrowseHint()
+        {
+            var ui=document.rootVisualElement;
+            var choices=ui.Q("roomChoices"); var viewport=ui.Q<ScrollView>("roomChoicesScroll").contentViewport;
+            ui.Q("roomChoicesHint").style.display=IsEditing && constructionRequest==null && choices.worldBound.width>viewport.worldBound.width+1
+                ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         public void OpenRooms()
@@ -213,19 +222,27 @@ namespace DungeonBuilder.M0
             var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && selectedEdgeId==null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
             var choices = ui.Q("roomChoices"); choices.Clear();
             ui.Q("roomChoicesScroll").style.display = constructionRequest == null ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q("roomChoicesHint").style.display = DisplayStyle.None;
+            var availableRooms = ConstructionRooms();
+            var previewLimits = new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
+            var footprints = availableRooms.Select(room => room.TryResolveGrossTiles(new TileCoordinate(0,0),room.AllowedOrientations.First(),previewLimits,out var footprint)
+                ? footprint.OccupiedTiles : Array.Empty<TileCoordinate>()).ToArray();
+            int previewSpan = footprints.Where(cells=>cells.Length>0).Select(cells=>Math.Max(cells.Max(c=>c.X)-cells.Min(c=>c.X)+1,cells.Max(c=>c.Y)-cells.Min(c=>c.Y)+1)).DefaultIfEmpty(1).Max();
             if (IsEditing && constructionRequest == null)
-                foreach (var room in ConstructionRooms())
+                for (int roomIndex=0; roomIndex<availableRooms.Length; roomIndex++)
                 {
+                    var room=availableRooms[roomIndex];
                     string id = room.RoomDefinitionId;
                     var button = new Button(() => SelectConstructionRoom(id)) { text = string.Empty, userData = id };
-                    var preview = new VisualElement { name = "roomCardPreview", pickingMode = PickingMode.Ignore };
-                    preview.AddToClassList("room-card-preview"); button.Add(preview);
+                    var top = new VisualElement { pickingMode = PickingMode.Ignore }; top.AddToClassList("room-card-top"); button.Add(top);
+                    var preview = new DungeonRoomFootprintPreview(footprints[roomIndex],previewSpan,presentationPolicy.Visuals.RoomStone[0]) { name = "roomCardPreview" };
+                    preview.AddToClassList("room-card-preview"); top.Add(preview);
                     var cardText = new VisualElement { pickingMode = PickingMode.Ignore };
-                    cardText.AddToClassList("room-card-text"); button.Add(cardText);
+                    cardText.AddToClassList("room-card-text"); top.Add(cardText);
                     var name = new Label(RoomName(room)) { name = "roomCardName", pickingMode = PickingMode.Ignore };
                     name.AddToClassList("room-card-name"); cardText.Add(name);
                     var stats = new VisualElement { pickingMode = PickingMode.Ignore };
-                    stats.AddToClassList("room-card-stats"); cardText.Add(stats);
+                    stats.AddToClassList("room-card-stats"); button.Add(stats);
                     var size = new Label(Format("ui.dungeon.construction.card_size", room.GrossFootprint.Width, room.GrossFootprint.Height))
                         { name = "roomCardSize", pickingMode = PickingMode.Ignore };
                     size.AddToClassList("room-card-size"); stats.Add(size);
@@ -270,6 +287,7 @@ namespace DungeonBuilder.M0
                 }
             ui.Q("blockerScroll").style.display = blockers.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             SetTextSize(textSize);
+            PresentRoomBrowseHint();
         }
     }
 }

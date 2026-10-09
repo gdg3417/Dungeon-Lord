@@ -3352,7 +3352,7 @@
     },
     {
       "key": "ui.structural.preview.valid.format",
-      "text": "Valid preview: {0}. Footprint {1} tiles; {2}; floor space {3} used, {4} remaining."
+      "text": "Valid preview: {0}. Footprint {1}; {2}; floor space {3} used, {4} remaining."
     },
     {
       "key": "ui.structural.preview.invalid.format",
@@ -3524,7 +3524,7 @@
     },
     {
       "key": "ui.structural.renovation.corridor.format",
-      "text": "{0}: {1} tiles {2}"
+      "text": "{0}: {1} {2}"
     },
     {
       "key": "ui.structural.renovation.contents.format",
@@ -3712,8 +3712,9 @@
     {"key": "ui.dungeon.display", "text": "Display"},
     {"key": "ui.dungeon.floor.info_landscape", "text": "{0} · Rooms: {1} · Floor layout: {2} · Floor space: {3} used · {4} remaining"},
     {"key": "ui.dungeon.display.close", "text": "Close display settings"},
-    {"key": "ui.dungeon.construction.card_size", "text": "{0} × {1} tiles"},
-    {"key": "ui.dungeon.construction.card_cost", "text": "Room base: {0} mana"},
+    {"key": "ui.dungeon.construction.browse", "text": "More rooms: swipe or scroll →"},
+    {"key": "ui.dungeon.construction.card_size", "text": "{0} × {1}"},
+    {"key": "ui.dungeon.construction.card_cost", "text": "Base {0} mana"},
     {"key": "ui.dungeon.construction.selected_room", "text": "✓ Selected: {0}"},
     {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room. Diamonds mark supported anchors for aligned doorways or straight corridors."},
     {"key": "ui.dungeon.construction.card", "text": "{0}\n{1} × {2} tiles\nRoom base: {3} mana"},

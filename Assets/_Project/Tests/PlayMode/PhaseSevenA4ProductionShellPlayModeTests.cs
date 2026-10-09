@@ -50,6 +50,12 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator UatRoomBoundariesConnectionsRotation()
         { yield return Invoke("UatRoomBoundariesRespectSavedConnectionsAndRotation"); }
         [UnityTest]
+        public IEnumerator OverlayFullWidthAndTransparentInput()
+        { yield return Invoke("OverlayFullWidthSafeAreasAndTransparentInput"); }
+        [UnityTest]
+        public IEnumerator OverlayCompactFootprintCards()
+        { yield return Invoke("OverlayCompactFootprintCardsAndRuntimeCaptures"); }
+        [UnityTest]
         public IEnumerator CompositionCorridorInspection()
         { yield return Invoke("CompositionAuthoredCorridorInspectionAndOutlineAreReadOnly"); }
         [UnityTest]

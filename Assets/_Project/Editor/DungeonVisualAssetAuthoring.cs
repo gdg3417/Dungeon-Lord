@@ -48,6 +48,7 @@ namespace DungeonBuilder.M0.EditorTools
             catalog.Boundaries = Enumerable.Range(0,16).Select(i=>Surface("boundary-"+i)).ToArray();
             catalog.SelectedEdges = Enumerable.Range(0,16).Select(i=>Surface("selected-edge-"+i)).ToArray();
             catalog.Corridor=Surface("corridor-stone"); catalog.Surrounding=Surface("surrounding-rock");
+            catalog.DoorwayThreshold=Surface("doorway-threshold"); catalog.CorridorThreshold=Surface("corridor-threshold");
             catalog.Entrance=atlas["entrance"]; catalog.Terminal=atlas["terminal"];
             catalog.Selection=Surface("selection"); catalog.Invalid=Surface("invalid"); catalog.Grid=Surface("grid"); catalog.Anchor=Surface("anchor");
             catalog.MonsterFallback=atlas["monster-fallback"]; catalog.TrapFallback=Surface("trap-fallback"); catalog.LootFallback=Surface("loot-fallback");

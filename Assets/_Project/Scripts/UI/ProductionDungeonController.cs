@@ -110,6 +110,13 @@ namespace DungeonBuilder.M0
             ui.pickingMode = PickingMode.Ignore;
             safe = ui.Q("safeRoot"); top = ui.Q("topChrome"); bottom = ui.Q("bottomChrome");
             viewportElement = ui.Q("viewport"); sheet = ui.Q("contextSheet"); modal = ui.Q("modal"); status = ui.Q<Label>("status");
+            // Overlay containers and empty ScrollView space are transparent to world input.
+            // Individual floor buttons (and a visible scroll bar) retain normal UI picking.
+            var rail = ui.Q("floorRail");
+            foreach (var element in rail.Query<VisualElement>().ToList()) element.pickingMode = PickingMode.Ignore;
+            ui.Q<Button>("collapseFloors").pickingMode = PickingMode.Position;
+            foreach (var scroller in rail.Query<Scroller>().ToList())
+                foreach (var element in scroller.Query<VisualElement>().ToList()) element.pickingMode = PickingMode.Position;
             draftContext = root.SaveService.DungeonDraftContext; store = root.SaveService.CreateDungeonDraftStore();
             viewport = new DungeonViewport(presentationPolicy);
             var worldObject = new GameObject("ProductionDungeonWorld"); worldObject.transform.SetParent(transform, false);

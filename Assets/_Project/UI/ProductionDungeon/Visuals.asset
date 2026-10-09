@@ -58,6 +58,8 @@ MonoBehaviour:
   Invalid: {fileID: 21300000, guid: f8b52f31d57f2564e875221f1ad728b8, type: 3}
   Grid: {fileID: 21300000, guid: 1fdeeeb93b0480049ae7acf445b7ed8d, type: 3}
   Anchor: {fileID: 21300000, guid: ed25c75cb5d028643bb91a8b0673aff7, type: 3}
+  DoorwayThreshold: {fileID: 21300000, guid: a206079dad4f48e9aad23c5e9cb9d718, type: 3}
+  CorridorThreshold: {fileID: 21300000, guid: a644c309b1664cfea718f36db228deef, type: 3}
   MonsterFallback: {fileID: 969088348386297420, guid: 8ae06e2fb537c1b4b9e2c31ea06160b8, type: 3}
   TrapFallback: {fileID: 21300000, guid: 272a60af77ad16e4b98eeceafef1703c, type: 3}
   LootFallback: {fileID: 21300000, guid: a24bf5309948cf5448e6f121e73612ad, type: 3}

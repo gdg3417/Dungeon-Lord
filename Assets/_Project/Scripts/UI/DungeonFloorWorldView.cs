@@ -7,15 +7,29 @@ using UnityEngine.Tilemaps;
 
 namespace DungeonBuilder.M0
 {
+    /// <summary>Read-only presentation projection; neither a saved edge nor a traversal rule.</summary>
+    public readonly struct DungeonConnectionVisual
+    {
+        public readonly string EdgeId;
+        public readonly FloorRouteConnectionKind Kind;
+        public readonly TileCoordinate Socket;
+        public readonly CardinalOrientation Facing;
+        public readonly Vector3 Center;
+        public DungeonConnectionVisual(string edgeId, FloorRouteConnectionKind kind, TileCoordinate socket, CardinalOrientation facing, Vector3 center)
+        { EdgeId=edgeId; Kind=kind; Socket=socket; Facing=facing; Center=center; }
+    }
     /// <summary>Presentation only. Tilemaps and sprite views never supply placement or simulation state.</summary>
     public sealed class DungeonFloorWorldView : MonoBehaviour
     {
         private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom, moveAnchors, constructionPreview, invalidConstruction, perimeter, surrounding;
         private readonly List<SpriteRenderer> fixedPool = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> connectionPool = new List<SpriteRenderer>();
+        private readonly List<DungeonConnectionVisual> connections = new List<DungeonConnectionVisual>();
+        public IReadOnlyList<DungeonConnectionVisual> ConnectionVisuals => connections;
         private Dictionary<(string, TileCoordinate), int> roomPassages = new Dictionary<(string, TileCoordinate), int>();
         private readonly Dictionary<(Sprite, Color, float), Tile> cachedTiles = new Dictionary<(Sprite, Color, float), Tile>();
         public int ReconstructionCount { get; private set; }
-        public int PooledEntityCount => pool.Count + fixedPool.Count;
+        public int PooledEntityCount => pool.Count + fixedPool.Count + connectionPool.Count;
         private readonly SpriteRenderer[] floorBoundary = new SpriteRenderer[4];
         private Texture2D anchorTexture;
         private Sprite anchorSprite;
@@ -105,6 +119,8 @@ namespace DungeonBuilder.M0
             ClearPreview();
             foreach (var view in pool) view.gameObject.SetActive(false);
             foreach (var view in fixedPool) view.gameObject.SetActive(false);
+            foreach (var view in connectionPool) view.gameObject.SetActive(false);
+            connections.Clear();
             if (selected == null) { Bounds = LegalBounds = new Rect(0, 0, 1, 1); SetEdit(false); return; }
             var art = policy.Visuals;
             roomSelectionTile = Tile(policy.ValidColor, policy.TileSize,art?.Selection); invalidIntentTile = Tile(policy.InvalidColor, policy.TileSize,art?.Invalid);
@@ -134,6 +150,7 @@ namespace DungeonBuilder.M0
                 if (TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, value.Anchor,
                     value.Orientation, limits, out var footprint))
                 {
+                    roomFootprints.Add(value.FixedStructureInstanceId, new HashSet<TileCoordinate>(footprint.OccupiedTiles));
                     Draw(fixedStructures, footprint.OccupiedTiles, fixedTile, visible);
                     if (art != null)
                     {
@@ -184,6 +201,15 @@ namespace DungeonBuilder.M0
                         if (roomPassages.TryGetValue((room.Key, cell), out int open)) mask &= ~open;
                         perimeter.SetTile(new Vector3Int(cell.X, cell.Y, 0), mask == 0 ? null : Tile(Color.white, 1, art.Boundaries[mask]));
                     }
+                for (int i=0;i<connections.Count;i++)
+                {
+                    if(i==connectionPool.Count) connectionPool.Add(Entity("SavedConnectionThreshold",4));
+                    var connection=connections[i]; var view=connectionPool[i]; view.gameObject.SetActive(true);
+                    view.sprite=connection.Kind==FloorRouteConnectionKind.DirectDoorway ? art.DoorwayThreshold : art.CorridorThreshold;
+                    view.transform.localPosition=connection.Center;
+                    view.transform.localRotation=Quaternion.Euler(0,0,-90*(int)connection.Facing);
+                    view.transform.localScale=Vector3.one; view.color=Color.white;
+                }
             }
             if (edit)
             {
@@ -218,10 +244,10 @@ namespace DungeonBuilder.M0
                 if (!footprint.Contains(new TileCoordinate(cell.X + BoundarySteps[i].X, cell.Y + BoundarySteps[i].Y))) mask |= 1 << i;
             return mask;
         }
-        private static Dictionary<(string, TileCoordinate), int> RoomPassages(SavedSpatialFloor floor, SpatialContentCatalog catalog)
+        private Dictionary<(string, TileCoordinate), int> RoomPassages(SavedSpatialFloor floor, SpatialContentCatalog catalog)
         {
             var result = new Dictionary<(string, TileCoordinate), int>();
-            var sockets = new Dictionary<string, (string room, TileCoordinate tile, int direction)[]>(StringComparer.Ordinal);
+            var sockets = new Dictionary<string, (string room, TileCoordinate tile, int direction, TileCoordinate local)[]>(StringComparer.Ordinal);
             foreach (var node in floor.Layout.Nodes)
             {
                 TileCoordinate anchor; CardinalOrientation orientation;
@@ -241,39 +267,51 @@ namespace DungeonBuilder.M0
                     var value = floor.FixedStructures.SingleOrDefault(s => s.Kind == kind);
                     if (value == null) continue;
                     var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == value.FixedStructureDefinitionId);
+                    roomId = value.FixedStructureInstanceId;
                     anchor = value.Anchor; orientation = value.Orientation; footprint = definition.GrossFootprint; points = definition.ConnectionPoints;
                 }
                 sockets[node.NodeId] = points.Select(point => {
                     var offset = StructuralEditService.TransformConnectionPointOffset(point.Offset, orientation, footprint);
-                    return (roomId, new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y), (int)StructuralEditService.Rotate(point.Facing, orientation));
+                    return (roomId, new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y), (int)StructuralEditService.Rotate(point.Facing, orientation), point.Offset);
                 }).ToArray();
             }
-            void Open((string room, TileCoordinate tile, int direction) socket)
+            void Open((string room, TileCoordinate tile, int direction, TileCoordinate local) socket)
             {
                 if (socket.room == null) return;
                 var key = (socket.room, socket.tile); result.TryGetValue(key, out int mask); result[key] = mask | (1 << socket.direction);
             }
-            TileCoordinate Next((string room, TileCoordinate tile, int direction) socket) =>
+            TileCoordinate Next((string room, TileCoordinate tile, int direction, TileCoordinate local) socket) =>
                 new TileCoordinate(socket.tile.X + BoundarySteps[socket.direction].X, socket.tile.Y + BoundarySteps[socket.direction].Y);
-            foreach (var edge in floor.Layout.Edges)
+            void Threshold(FloorRouteEdge edge,(string room, TileCoordinate tile, int direction, TileCoordinate local) socket)
+            {
+                var step=BoundarySteps[socket.direction];
+                connections.Add(new DungeonConnectionVisual(edge.EdgeId,edge.ConnectionKind,socket.tile,(CardinalOrientation)socket.direction,
+                    new Vector3(socket.tile.X+.5f+step.X*.5f,socket.tile.Y+.5f+step.Y*.5f,0)));
+            }
+            foreach (var edge in floor.Layout.Edges.OrderBy(e=>e.EdgeId,StringComparer.Ordinal))
             {
                 sockets.TryGetValue(edge.SourceNodeId, out var source); sockets.TryGetValue(edge.DestinationNodeId, out var destination);
                 // Reuse the gameplay's read-only saved-edge adapter, which rejects alternate paths
                 // and ambiguous endpoint sockets. Rendering cannot authorize a connection.
-                bool resolved = StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out _, out _);
+                bool resolved = StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out var sourceLocal, out var destinationLocal);
                 bool branch = edge.Classification == RouteClassification.Optional &&
                     OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog);
                 if (!resolved && !branch) continue;
+                if(resolved)
+                {
+                    source=source?.Where(s=>s.local.Equals(sourceLocal)).ToArray();
+                    destination=destination?.Where(s=>s.local.Equals(destinationLocal)).ToArray();
+                }
                 if (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway && source != null && destination != null)
                 {
                     foreach (var a in source) foreach (var b in destination)
-                        if (Next(a).Equals(b.tile) && Next(b).Equals(a.tile)) { Open(a); Open(b); }
+                        if (Next(a).Equals(b.tile) && Next(b).Equals(a.tile)) { Open(a); Open(b); Threshold(edge,a); }
                 }
                 else if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor && edge.Footprint?.OccupiedTiles != null)
                 {
                     var path = new HashSet<TileCoordinate>(edge.Footprint.OccupiedTiles);
                     foreach (var endpoint in new[] {source, destination})
-                        if (endpoint != null) foreach (var socket in endpoint) if (path.Contains(Next(socket))) Open(socket);
+                        if (endpoint != null) foreach (var socket in endpoint) if (path.Contains(Next(socket))) { Open(socket); Threshold(edge,socket); }
                 }
             }
             return result;

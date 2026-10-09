@@ -28,9 +28,11 @@
 .landscape .legacy { flex-basis: 24%; flex-shrink: 1; }
 .landscape .metric-icon { height: 24px; }
 .landscape Button { padding-top: 0; padding-bottom: 0; }
-.map-area { flex-grow: 1; flex-shrink: 1; min-height: 64px; flex-direction: row; }
+.map-area { flex-grow: 1; flex-shrink: 1; min-height: 64px; }
 .viewport { flex-grow: 1; min-width: 0; }
-.floor-rail { width: 128px; background-color: rgba(13,22,29,0.9); padding: 4px; }
+.floor-rail { position: absolute; left: 4px; top: 4px; max-height: 100%; width: 128px; padding: 4px; }
+.floor-rail Button { background-color: rgba(13,22,29,0.96); }
+.floor-rail .selected-floor { background-color: rgb(49,48,36); }
 .large-text .floor-rail { width: 156px; }
 .rail-collapsed .floor-rail { width: 72px; }
 .large-text.rail-collapsed .floor-rail { width: 88px; }
@@ -71,20 +73,22 @@
 .landscape #floorInfo { flex-grow: 1; min-width: 0; }
 .text-controls { border-top-width: 1px; border-top-color: rgb(48,63,72); margin-top: 8px; }
 .text-controls > Label { margin-right: 8px; }
-.room-card { width: 320px; min-width: 320px; flex-shrink: 0; padding: 8px; align-items: stretch; }
-.large-text .room-card { width: 420px; min-width: 420px; }
-.room-card-preview { height: 62px; flex-shrink: 0; background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/room-stone-a.png"); -unity-background-scale-mode: scale-to-fit; margin-bottom: 6px; }
-.room-card Label { flex-shrink: 0; white-space: normal; }
+.room-card { width: 228px; min-width: 228px; flex-shrink: 0; padding: 6px; align-items: stretch; }
+.large-text .room-card { width: 292px; min-width: 292px; }
+.room-card-top { flex-direction: row; align-items: center; }
+.room-card-preview { width: 56px; height: 52px; flex-shrink: 0; margin-right: 6px; }
+.large-text .room-card-preview { width: 64px; height: 64px; }
+.room-card Label { flex-shrink: 0; white-space: normal; margin: 0; padding: 0; }
 .room-card-name { -unity-font-style: bold; }
-.room-card-text { flex-grow: 1; min-width: 0; }
-.landscape .room-card { width: 500px; min-width: 500px; flex-direction: row; }
-.landscape.large-text .room-card { width: 640px; min-width: 640px; }
-.landscape .room-card-preview { width: 82px; height: 90px; margin-right: 8px; }
+.room-card-text { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.landscape .room-card { width: 260px; min-width: 260px; }
+.landscape.large-text .room-card { width: 340px; min-width: 340px; }
 .room-card-stats { flex-direction: row; align-items: flex-start; }
 .room-card-stats > Label { flex-shrink: 1; min-width: 0; }
-.room-card-size { flex-basis: 35%; flex-grow: 1; }
-.room-card-cost { flex-basis: 65%; flex-grow: 1; }
+.room-card-size { flex-basis: 25%; flex-grow: 1; }
+.room-card-cost { flex-basis: 75%; flex-grow: 1; }
 .room-card-cost { color: var(--cool); }
+.browse-hint { color: var(--cool); padding-left: 8px; }
 .display-popover { display: none; position: absolute; right: 8px; top: 8px; max-width: 95%; padding: 12px; background-color: rgb(17,26,34); border-width: 2px; border-color: var(--cool); }
 .placement-context, .placement-actions, .placement-options, .session-actions, #inspectionActions { flex-shrink: 0; }
 .placement-actions > Button { flex-grow: 1; }

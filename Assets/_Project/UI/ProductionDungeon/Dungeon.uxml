@@ -18,11 +18,11 @@
         </ui:ScrollView>
         <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
-            <ui:VisualElement name="floorRail" class="floor-rail">
+            <ui:VisualElement name="viewport" class="viewport" />
+            <ui:VisualElement name="floorRail" class="floor-rail" picking-mode="Ignore">
                 <ui:Button name="collapseFloors" tooltip="ui.dungeon.floors.collapse" />
                 <ui:ScrollView name="floorList" mode="Vertical" class="floor-list"><ui:VisualElement name="floors" /></ui:ScrollView>
             </ui:VisualElement>
-            <ui:VisualElement name="viewport" class="viewport" />
         </ui:VisualElement>
         <ui:VisualElement name="bottomChrome" class="bottom-chrome">
             <ui:VisualElement class="sheet-top">
@@ -53,6 +53,7 @@
             <ui:Label name="economics" />
             <ui:VisualElement name="constructionSheet">
                 <ui:ScrollView name="roomChoicesScroll" mode="Horizontal"><ui:VisualElement name="roomChoices" class="category-row" /></ui:ScrollView>
+                <ui:Label name="roomChoicesHint" class="browse-hint" tooltip="ui.dungeon.construction.browse" picking-mode="Ignore" />
                 <ui:Label name="constructionInfo" />
                 <ui:Label name="constructionFeedback" />
             </ui:VisualElement>

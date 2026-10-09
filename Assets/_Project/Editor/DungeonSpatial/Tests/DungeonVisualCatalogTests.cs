@@ -18,7 +18,7 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
             Assert.That(catalog,Is.Not.Null); Assert.That(catalog.IsComplete,Is.True);
             var mapped=catalog.RoomStone.Concat(catalog.Boundaries).Concat(catalog.SelectedEdges).Concat(catalog.Contents.Select(c=>c.Sprite)).Concat(new[] {
                 catalog.Entrance,catalog.Terminal,catalog.Selection,catalog.Invalid,catalog.Grid,catalog.Anchor,
-                catalog.Corridor,catalog.Surrounding,catalog.MonsterFallback,catalog.TrapFallback,catalog.LootFallback }).ToArray();
+                catalog.Corridor,catalog.Surrounding,catalog.MonsterFallback,catalog.TrapFallback,catalog.LootFallback,catalog.DoorwayThreshold,catalog.CorridorThreshold }).ToArray();
             var imported=AssetDatabase.FindAssets("t:Texture2D",new[] {"Assets/_Project/UI/ProductionDungeon/Art"})
                 .Select(AssetDatabase.GUIDToAssetPath).SelectMany(p=>AssetDatabase.LoadAllAssetsAtPath(p).OfType<Sprite>()).ToArray();
             Assert.That(imported.Length,Is.GreaterThanOrEqualTo(mapped.Distinct().Count()));
@@ -48,6 +48,20 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
             Assert.That(config,Is.Not.Null);
             Assert.That(AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/_Project/Data/Bootstrap/run_simulation_config.json").text,
                 Does.Contain(option),"Mapping must reference authored identity");
+        }
+        [Test]
+        public void ThresholdArtIsOpenAndMasonrySeamsHaveOpaqueContrast()
+        {
+            var catalog=AssetDatabase.LoadAssetAtPath<DungeonVisualCatalog>(Path);
+            foreach(var sprite in new[] {catalog.DoorwayThreshold,catalog.CorridorThreshold})
+            {
+                var texture=sprite.texture;
+                Assert.That(texture.GetPixel(14,64).a,Is.GreaterThan(.9f),"Raised stone jamb");
+                Assert.That(texture.GetPixel(64,80).a,Is.LessThan(.01f),"No closed leaf or barrier in the passage");
+            }
+            var lip=catalog.Boundaries[2].texture;
+            Assert.That(lip.GetPixel(112,64).a,Is.GreaterThan(.9f));
+            Assert.That(lip.GetPixel(127,64).grayscale-lip.GetPixel(112,64).grayscale,Is.GreaterThan(.25f),"Dark inset and bright cap survive overview reduction");
         }
         [Test]
         public void UnknownOptionsHaveDistinctSafeFallbacksIndependentOfMappingOrder()
